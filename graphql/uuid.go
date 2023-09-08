@@ -10,7 +10,7 @@ import (
 
 func MarshalUUID(id uuid.UUID) Marshaler {
 	return WriterFunc(func(w io.Writer) {
-		io.WriteString(w, strconv.Quote(id.String()))
+		_, _ = io.WriteString(w, strconv.Quote(id.String()))
 	})
 }
 

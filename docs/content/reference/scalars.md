@@ -7,7 +7,8 @@ menu: { main: { parent: "reference", weight: 10 } }
 
 ## Built-in helpers
 
-gqlgen ships with some built-in helpers for common custom scalar use-cases, `Time`, `Any`, `Upload` and `Map`. Adding any of these to a schema will automatically add the marshalling behaviour to Go types.
+gqlgen ships with some built-in helpers for common custom scalar use-cases, `Time`, `Any`, `Upload` and `Map`.
+Adding any of these to a schema will automatically add the marshalling behaviour to Go types.
 
 ### Time
 
@@ -15,7 +16,27 @@ gqlgen ships with some built-in helpers for common custom scalar use-cases, `Tim
 scalar Time
 ```
 
-Maps a `Time` GraphQL scalar to a Go `time.Time` struct. This scalar adheres to the [time.RFC3339Nano](https://pkg.go.dev/time#pkg-constants) format.
+Maps a `Time` GraphQL scalar to a Go `time.Time` struct.
+This scalar adheres to the [time.RFC3339Nano](https://pkg.go.dev/time#pkg-constants) format.
+
+### Universally Unique Identifier (UUID)
+
+```graphql
+scalar UUID
+```
+This maps a `UUID` scalar value to a `uuid.UUID` type.
+
+If you add to gqlgen.yml:
+```yaml
+models:
+  UUID:
+    model:
+      - github.com/99designs/gqlgen/graphql.UUID
+```
+
+And then add `scalar UUID` to `schema.graphql`
+
+See the _examples/uuid package for more examples.
 
 ### Map
 
@@ -131,7 +152,7 @@ func ParseLength(string) (Length, error)
 func (l Length) FormatContext(ctx context.Context) (string, error)
 ```
 
-and then wire up the type in .gqlgen.yml or via directives like normal:
+and then wire up the type in `.gqlgen.yml` or via directives like normal:
 
 ```yaml
 models:
@@ -141,8 +162,8 @@ models:
 
 ## Custom scalars with third party types
 
-Sometimes you are unable to add add methods to a type - perhaps you don't own the type, or it is part of the standard
-library (eg string or time.Time). To support this we can build an external marshaler:
+Sometimes you are unable to add add methods to a type — perhaps you don't own the type, or it is part of the standard
+library (eg `string` or `time.Time`). To support this we can build an external marshaler:
 
 ```go
 package mypkg
@@ -180,7 +201,7 @@ func UnmarshalMyCustomBooleanScalar(v interface{}) (bool, error) {
 }
 ```
 
-Then in .gqlgen.yml point to the name without the Marshal|Unmarshal in front:
+Then in `.gqlgen.yml` point to the name without the Marshal|Unmarshal in front:
 
 ```yaml
 models:
@@ -188,10 +209,10 @@ models:
     model: github.com/me/mypkg.MyCustomBooleanScalar
 ```
 
-**Note:** you also can un/marshal to pointer types via this approach, simply accept a pointer in your
+**Note:** You also can (un)marshal to pointer types via this approach, simply accept a pointer in your
 `Marshal...` func and return one in your `Unmarshal...` func.
 
-**Note:** you can also un/marshal with a context by having your custom marshal function return a
+**Note:** You can also (un)marshal with a context by having your custom marshal function return a
 `graphql.ContextMarshaler` _and_ your unmarshal function take a `context.Context` as the first argument.
 
 See the [_examples/scalars](https://github.com/99designs/gqlgen/tree/master/_examples/scalars) package for more examples.
@@ -199,7 +220,7 @@ See the [_examples/scalars](https://github.com/99designs/gqlgen/tree/master/_exa
 ## Marshaling/Unmarshaling Errors
 
 The errors that occur as part of custom scalar marshaling/unmarshaling will return a full path to the field.
-For example, given the following schema ...
+For example, given the following schema:
 
 ```graphql
 extend type Mutation{
@@ -213,6 +234,7 @@ input UserInput {
 }
 
 scalar Email
+
 input ContactDetailsInput {
     email: Email!
 }
@@ -221,7 +243,6 @@ input ContactDetailsInput {
 ... and the following variables:
 
 ```json
-
 {
   "userInput": {
     "name": "George",
@@ -235,7 +256,9 @@ input ContactDetailsInput {
 }
 ```
 
-... and an unmarshal function that returns an error if the email is invalid. The mutation will return an error containing the full path:
+... and an unmarshal function that returns an error if the email is invalid.
+The mutation will return an error containing the full path:
+
 ```json
 {
   "message": "email invalid",
@@ -249,21 +272,3 @@ input ContactDetailsInput {
 ```
 
 **Note:** Marshaling errors can only be returned when using the `graphql.ContextMarshaler` style interface.
-
-## UUID type
-
-add to gqlgen.yml
-
-```yaml
-models:
-  UUID:
-    model:
-      - github.com/99designs/gqlgen/graphql.UUID
-```
-
-add UUID scalar to schema.graphqls
-
-```graphql
-scalar UUID
-```
-See the _examples/uuid package for more examples.

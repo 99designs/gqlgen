@@ -165,6 +165,12 @@ type User @goModel(model: "github.com/my/app/models.User") {
 		@goTag(key: "xorm", value: "-")
 		@goTag(key: "yaml")
 }
+
+# This make sense when autobind activated.
+type Person @goModel(forceGenerate: true) {
+	id: ID!
+	name: String!
+}
 ```
 
 The builtin directives `goField`, `goModel` and `goTag` are automatically registered to `skip_runtime`. Any directives registered as `skip_runtime` will not exposed during introspection and are used during code generation only.

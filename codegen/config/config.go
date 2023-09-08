@@ -600,12 +600,7 @@ func (c *Config) autobind() error {
 	ps := c.Packages.LoadAll(c.AutoBind...)
 
 	for _, t := range c.Schema.Types {
-		if c.Models.UserDefined(t.Name) {
-			continue
-		}
-
-		if c.Models[t.Name].ForceGenerate {
-			delete(c.Models, t.Name)
+		if c.Models.UserDefined(t.Name) || c.Models[t.Name].ForceGenerate {
 			continue
 		}
 
@@ -621,6 +616,10 @@ func (c *Config) autobind() error {
 	}
 
 	for i, t := range c.Models {
+		if t.ForceGenerate {
+			continue
+		}
+
 		for j, m := range t.Model {
 			pkg, typename := code.PkgAndType(m)
 

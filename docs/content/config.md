@@ -118,6 +118,9 @@ models:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
+  UUID:
+    model:
+      - github.com/99designs/gqlgen/graphql.UUID
 ```
 
 Everything has defaults, so add things as you need.

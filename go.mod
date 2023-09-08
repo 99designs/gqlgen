@@ -3,6 +3,7 @@ module github.com/99designs/gqlgen
 go 1.18
 
 require (
+	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/hashicorp/golang-lru/v2 v2.0.3
 	github.com/kevinmbeaulieu/eq-go v1.0.0

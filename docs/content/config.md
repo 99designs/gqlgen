@@ -84,6 +84,11 @@ resolver:
 # Optional: set to skip running `go mod tidy` when generating server code
 # skip_mod_tidy: true
 
+# Optional: set build tags that will be used to load packages
+# go_build_tags:
+#  - private
+#  - enterprise
+
 # Optional: set to modify the initialisms regarded for Go names
 # go_initialisms:
 #   replace_defaults: false # if true, the default initialisms will get dropped in favor of the new ones instead of being added

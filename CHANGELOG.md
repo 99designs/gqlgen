@@ -5,10 +5,178 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.35...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.37...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.37"></a>
+## [v0.17.37](https://github.com/99designs/gqlgen/compare/v0.17.36...v0.17.37) - 2023-09-08
+- <a href="https://github.com/99designs/gqlgen/commit/ccae370e96cbca6ce5deaabf28a6d57e3b181b3b"><tt>ccae370e</tt></a> release v0.17.37
+
+- <a href="https://github.com/99designs/gqlgen/commit/6505f8be0d99593376d6c9a0dea00af5e3c018ea"><tt>6505f8be</tt></a> Update gqlparser (<a href="https://github.com/99designs/gqlgen/pull/2785">#2785</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/153ec470d993a39c1656fc45432740f1d3dd10ea"><tt>153ec470</tt></a> add uuid type (<a href="https://github.com/99designs/gqlgen/pull/2751">#2751</a>) (closes <a href="https://github.com/99designs/gqlgen/issues/2749"> #2749</a>)</summary>
+
+* add uuid type
+
+* add uuid example
+
+* add uuid scalar doc
+
+* strconv.Quote
+
+* Apply suggestions from code review
+
+* fix
+
+
+
+---------
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/fa4711801c59d27db887a50e1f8393006268194e"><tt>fa471180</tt></a> ForceGenerate parameter to [@goModel](https://github.com/goModel) added. (<a href="https://github.com/99designs/gqlgen/pull/2780">#2780</a>)</summary>
+
+* forceGenerate to docs added
+
+---------
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/11bb9b1890fd9e5909f06feba7b2985bf09785c9"><tt>11bb9b18</tt></a> codegen: add support for `go_build_tags` option in gqlgen.yaml (<a href="https://github.com/99designs/gqlgen/pull/2784">#2784</a>)</summary>
+
+* codegen: support go_build_tags option in gqlgen.yaml
+
+* chore: added test
+
+* docs/content: update config example
+
+* chore: more comment
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/bee47dcf1f3edb95e7a77e612ea27d85a417b12c"><tt>bee47dcf</tt></a> fix flaky test TestSubscriptions (<a href="https://github.com/99designs/gqlgen/pull/2779">#2779</a>)</summary>
+
+* fix flaky test TestSubscriptions
+
+* update other copy of the test
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/a41f4daad66cb0c102bfa09d7bff5a057d378197"><tt>a41f4daa</tt></a> docs: short-lived loader (<a href="https://github.com/99designs/gqlgen/pull/2778">#2778</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/cc4e0ba28375e0ec39c586485fa138c28e5bfcba"><tt>cc4e0ba2</tt></a> ensure HasOperationContext checks for nil (<a href="https://github.com/99designs/gqlgen/pull/2776">#2776</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/a1ca220477092398efc8e587dd653f5cb967d0e9"><tt>a1ca2204</tt></a> fix typo in TESTING.md server path (<a href="https://github.com/99designs/gqlgen/pull/2774">#2774</a>)</summary>
+
+following TESTING.md instructions, I got an error:
+"stat ./server/server.go: no such file or directory"
+
+server.go path is: integration/server/cmd/integration/server.go
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/1cde8c3fab65847a6e8d7f423215b786b47c19df"><tt>1cde8c3f</tt></a> return internal types in schema introspection (<a href="https://github.com/99designs/gqlgen/pull/2773">#2773</a>)</summary>
+
+according to graphql spec:
+```
+types: return the set of all named types contained within this schema.
+Any named type which can be found through a field of any introspection type must be included in this set.
+```
+source: https://github.com/graphql/graphql-spec/blob/main/spec/Section%204%20--%20Introspection.md#the-__schema-type
+
+some clients libs (like HotChocolate for C#) depends on this behavior.
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/065aea3efa27f0662eb2f62ef2dd131e153009ba"><tt>065aea3e</tt></a> Fix gqlgen truncates tag value with colon (<a href="https://github.com/99designs/gqlgen/pull/2759">#2759</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/d6270e4f4fd951c71ee2a2b997d7098b04e07976"><tt>d6270e4f</tt></a> Update subsciptions documentation to correctly close channel (<a href="https://github.com/99designs/gqlgen/pull/2753">#2753</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/2d8673a691deffe6ddd1f4d5f013a52dc91aef91"><tt>2d8673a6</tt></a> Add Model references to Interface (<a href="https://github.com/99designs/gqlgen/pull/2738">#2738</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/790d7a7571865b8b8324557e1a565f40c23217c8"><tt>790d7a75</tt></a> Allow GraphiQL headers to be set when creating the playground handler (<a href="https://github.com/99designs/gqlgen/pull/2740">#2740</a>) (closes <a href="https://github.com/99designs/gqlgen/issues/2739"> #2739</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/0eb95dc4315fc5f74431df03e008283cf9ec0c35"><tt>0eb95dc4</tt></a> v0.17.36 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
+<a name="v0.17.36"></a>
+## [v0.17.36](https://github.com/99designs/gqlgen/compare/v0.17.35...v0.17.36) - 2023-07-27
+- <a href="https://github.com/99designs/gqlgen/commit/bd6cfd3108818cd060a06491052c36fb6f5e4be3"><tt>bd6cfd31</tt></a> release v0.17.36
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/60ec0d86847c97cd45c6e431d49b7ccf50efeeb9"><tt>60ec0d86</tt></a> Fix plugin template resolution (<a href="https://github.com/99designs/gqlgen/pull/2733">#2733</a>) (closes <a href="https://github.com/99designs/gqlgen/issues/2262"> #2262</a>)</summary>
+
+- According to the documentation comment for [templates.Options], if the
+  `Template` and `TemplateFS` fields are empty, it `Render` should find
+  the `.gotpl` files from the calling plugin. However, it looks like
+  helper function. This results in broken behavior in consumers such as
+  [infiotinc/gqlgenc](https://github.com/infiotinc/gqlgenc) when they
+  use the latest version of `gqlgen` as instead of finding the template
+  from the plugin, the test template from this package is used which
+  outputs only: `this is my test package`.
+- The cause for this is that `runtime.Caller` was still only skipping
+  one stack level which means that it was finding the `Render` function
+  instead of its caller.
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/76d444c15fc1d98538648a229f41ed7b4573bad7"><tt>76d444c1</tt></a> Make models configurable via template (<a href="https://github.com/99designs/gqlgen/pull/2730">#2730</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/abe3ffde59d6a0d942a9ac2d1b657287f75efa67"><tt>abe3ffde</tt></a> Don't set the package variable for the new Resolver Template (<a href="https://github.com/99designs/gqlgen/pull/2725">#2725</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/febf9566224b3e3ad0e32903fd46d9005d6a7748"><tt>febf9566</tt></a> Make the resolver implementation configurable via a new template resolver.gotpl (<a href="https://github.com/99designs/gqlgen/pull/2720">#2720</a>)</summary>
+
+* Make an optional resolver.gotpl ResolverTemplate to implement a custom resolver
+
+* Add test
+
+* Add documetation for the new resolver option
+
+* Change the tab to spaces
+
+* remove unecessary test assertion :/
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/bda3026043f187bf00f039d1c3648d5b1a8e4998"><tt>bda30260</tt></a> Fixed Data Loader docs (<a href="https://github.com/99designs/gqlgen/pull/2723">#2723</a>)</summary>
+
+Also updated to v7
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/16c9eb64ed04218e927a74199a57f951bfb452b1"><tt>16c9eb64</tt></a> Fix docs (<a href="https://github.com/99designs/gqlgen/pull/2722">#2722</a>)</summary>
+
+* docs: fix variable names in dataloader sample
+
+* fix: request-scoped middleware
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/b233a01bf7eeb9f9ddc590a7dd72058da28d88df"><tt>b233a01b</tt></a> docs: update dataloader docs (<a href="https://github.com/99designs/gqlgen/pull/2719">#2719</a>)</summary>
+
+* docs: update example
+
+* docs: update example
+
+* fix: import
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/cccc7389c10cdd4ef4eb7b9541dedb0f9cf74a97"><tt>cccc7389</tt></a> Added go mod tidy to quick start guide (<a href="https://github.com/99designs/gqlgen/pull/2718">#2718</a>) (closes <a href="https://github.com/99designs/gqlgen/issues/2717"> #2717</a>, <a href="https://github.com/99designs/gqlgen/issues/2651"> #2651</a>, <a href="https://github.com/99designs/gqlgen/issues/2641"> #2641</a>, <a href="https://github.com/99designs/gqlgen/issues/2614"> #2614</a>, <a href="https://github.com/99designs/gqlgen/issues/2576"> #2576</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/9adc7b81ac27c157e597d369e4499353f0f6b0b0"><tt>9adc7b81</tt></a> Update gqlparser to v2.5.8 (<a href="https://github.com/99designs/gqlgen/pull/2716">#2716</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/b442fbf457498c8ad318578b570c5a6b64cab452"><tt>b442fbf4</tt></a> Post v0.17.35 changelog update
+
+- <a href="https://github.com/99designs/gqlgen/commit/57c121994b1f843f62f99ada71a707e4f263a9df"><tt>57c12199</tt></a> v0.17.35 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.35"></a>
 ## [v0.17.35](https://github.com/99designs/gqlgen/compare/v0.17.34...v0.17.35) - 2023-07-15
 - <a href="https://github.com/99designs/gqlgen/commit/05006bf1dcb9451b0960d07fd68370145c2697b4"><tt>05006bf1</tt></a> release v0.17.35

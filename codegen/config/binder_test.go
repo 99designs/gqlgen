@@ -187,7 +187,7 @@ func createBinder(cfg Config) (*Binder, *ast.Schema) {
 			Model: []string{"github.com/99designs/gqlgen/graphql.String"},
 		},
 	}
-	cfg.Packages = &code.Packages{}
+	cfg.Packages = code.NewPackages()
 
 	cfg.Schema = gqlparser.MustLoadSchema(&ast.Source{Name: "TestAutobinding.schema", Input: `
 		type Message { id: ID }

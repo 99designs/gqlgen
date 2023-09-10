@@ -26,6 +26,7 @@ type Config struct {
 	Models                        TypeMap                    `yaml:"models,omitempty"`
 	StructTag                     string                     `yaml:"struct_tag,omitempty"`
 	Directives                    map[string]DirectiveConfig `yaml:"directives,omitempty"`
+	GoBuildTags                   StringList                 `yaml:"go_build_tags,omitempty"`
 	GoInitialisms                 GoInitialismsConfig        `yaml:"go_initialisms,omitempty"`
 	OmitSliceElementPointers      bool                       `yaml:"omit_slice_element_pointers,omitempty"`
 	OmitGetters                   bool                       `yaml:"omit_getters,omitempty"`
@@ -211,7 +212,9 @@ func CompleteConfig(config *Config) error {
 
 func (c *Config) Init() error {
 	if c.Packages == nil {
-		c.Packages = &code.Packages{}
+		c.Packages = code.NewPackages(
+			code.WithBuildTags(c.GoBuildTags...),
+		)
 	}
 
 	if c.Schema == nil {
@@ -281,11 +284,18 @@ func (c *Config) injectTypesFromSchema() error {
 					c.Models.Add(schemaType.Name, mv.(string))
 				}
 			}
+
 			if ma := bd.Arguments.ForName("models"); ma != nil {
 				if mvs, err := ma.Value.Value(nil); err == nil {
 					for _, mv := range mvs.([]interface{}) {
 						c.Models.Add(schemaType.Name, mv.(string))
 					}
+				}
+			}
+
+			if fg := bd.Arguments.ForName("forceGenerate"); fg != nil {
+				if mv, err := fg.Value.Value(nil); err == nil {
+					c.Models.ForceGenerate(schemaType.Name, mv.(bool))
 				}
 			}
 		}
@@ -329,8 +339,9 @@ func (c *Config) injectTypesFromSchema() error {
 }
 
 type TypeMapEntry struct {
-	Model  StringList              `yaml:"model"`
-	Fields map[string]TypeMapField `yaml:"fields,omitempty"`
+	Model         StringList              `yaml:"model,omitempty"`
+	ForceGenerate bool                    `yaml:"forceGenerate,omitempty"`
+	Fields        map[string]TypeMapField `yaml:"fields,omitempty"`
 
 	// Key is the Go name of the field.
 	ExtraFields map[string]ModelExtraField `yaml:"extraFields,omitempty"`
@@ -529,6 +540,12 @@ func (tm TypeMap) Add(name string, goType string) {
 	tm[name] = modelCfg
 }
 
+func (tm TypeMap) ForceGenerate(name string, forceGenerate bool) {
+	modelCfg := tm[name]
+	modelCfg.ForceGenerate = forceGenerate
+	tm[name] = modelCfg
+}
+
 type DirectiveConfig struct {
 	SkipRuntime bool `yaml:"skip_runtime"`
 }
@@ -583,7 +600,7 @@ func (c *Config) autobind() error {
 	ps := c.Packages.LoadAll(c.AutoBind...)
 
 	for _, t := range c.Schema.Types {
-		if c.Models.UserDefined(t.Name) {
+		if c.Models.UserDefined(t.Name) || c.Models[t.Name].ForceGenerate {
 			continue
 		}
 
@@ -599,6 +616,10 @@ func (c *Config) autobind() error {
 	}
 
 	for i, t := range c.Models {
+		if t.ForceGenerate {
+			continue
+		}
+
 		for j, m := range t.Model {
 			pkg, typename := code.PkgAndType(m)
 
@@ -671,7 +692,9 @@ func (c *Config) injectBuiltins() {
 
 func (c *Config) LoadSchema() error {
 	if c.Packages != nil {
-		c.Packages = &code.Packages{}
+		c.Packages = code.NewPackages(
+			code.WithBuildTags(c.GoBuildTags...),
+		)
 	}
 
 	if err := c.check(); err != nil {

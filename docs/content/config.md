@@ -84,6 +84,11 @@ resolver:
 # Optional: set to skip running `go mod tidy` when generating server code
 # skip_mod_tidy: true
 
+# Optional: set build tags that will be used to load packages
+# go_build_tags:
+#  - private
+#  - enterprise
+
 # Optional: set to modify the initialisms regarded for Go names
 # go_initialisms:
 #   replace_defaults: false # if true, the default initialisms will get dropped in favor of the new ones instead of being added
@@ -130,12 +135,13 @@ To start using them you first need to define them:
 directive @goModel(
 	model: String
 	models: [String!]
+	forceGenerate: Boolean
 ) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
 
 directive @goField(
 	forceResolver: Boolean
 	name: String
-  omittable: Boolean
+	omittable: Boolean
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 directive @goTag(
@@ -158,6 +164,12 @@ type User @goModel(model: "github.com/my/app/models.User") {
 		@goField(forceResolver: true)
 		@goTag(key: "xorm", value: "-")
 		@goTag(key: "yaml")
+}
+
+# This make sense when autobind activated.
+type Person @goModel(forceGenerate: true) {
+	id: ID!
+	name: String!
 }
 ```
 

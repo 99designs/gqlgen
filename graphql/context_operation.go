@@ -73,8 +73,8 @@ func WithOperationContext(ctx context.Context, rc *OperationContext) context.Con
 //
 // Some errors can happen outside of an operation, eg json unmarshal errors.
 func HasOperationContext(ctx context.Context) bool {
-	_, ok := ctx.Value(operationCtx).(*OperationContext)
-	return ok
+	val, ok := ctx.Value(operationCtx).(*OperationContext)
+	return ok && val != nil
 }
 
 // This is just a convenient wrapper method for CollectFields

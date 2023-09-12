@@ -44,7 +44,7 @@ type (
 		initPayload InitPayload
 	}
 
-	WebsocketInitFunc  func(ctx context.Context, initPayload InitPayload) (context.Context, error)
+	WebsocketInitFunc  func(ctx context.Context, initPayload InitPayload) (context.Context, *InitPayload, error)
 	WebsocketErrorFunc func(ctx context.Context, err error)
 
 	// Callback called when websocket is closed.
@@ -179,8 +179,10 @@ func (c *wsConnection) init() bool {
 			}
 		}
 
+		var initAckPayload *InitPayload = nil
 		if c.InitFunc != nil {
-			ctx, err := c.InitFunc(c.ctx, c.initPayload)
+			var ctx context.Context
+			ctx, initAckPayload, err = c.InitFunc(c.ctx, c.initPayload)
 			if err != nil {
 				c.sendConnectionError(err.Error())
 				c.close(websocket.CloseNormalClosure, "terminated")
@@ -189,7 +191,15 @@ func (c *wsConnection) init() bool {
 			c.ctx = ctx
 		}
 
-		c.write(&message{t: connectionAckMessageType})
+		if initAckPayload != nil {
+			initJsonAckPayload, err := json.Marshal(*initAckPayload)
+			if err != nil {
+				panic(err)
+			}
+			c.write(&message{t: connectionAckMessageType, payload: initJsonAckPayload})
+		} else {
+			c.write(&message{t: connectionAckMessageType})
+		}
 		c.write(&message{t: keepAliveMessageType})
 	case connectionCloseMessageType:
 		c.close(websocket.CloseNormalClosure, "terminated")

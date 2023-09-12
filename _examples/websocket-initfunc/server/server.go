@@ -18,12 +18,12 @@ import (
 	"github.com/rs/cors"
 )
 
-func webSocketInit(ctx context.Context, initPayload transport.InitPayload) (context.Context, error) {
+func webSocketInit(ctx context.Context, initPayload transport.InitPayload) (context.Context, *transport.InitPayload, error) {
 	// Get the token from payload
 	payload := initPayload["authToken"]
 	token, ok := payload.(string)
 	if !ok || token == "" {
-		return nil, errors.New("authToken not found in transport payload")
+		return nil, nil, errors.New("authToken not found in transport payload")
 	}
 
 	// Perform token verification and authentication...
@@ -32,7 +32,7 @@ func webSocketInit(ctx context.Context, initPayload transport.InitPayload) (cont
 	// put it in context
 	ctxNew := context.WithValue(ctx, "username", userId)
 
-	return ctxNew, nil
+	return ctxNew, nil, nil
 }
 
 const defaultPort = "8080"
@@ -62,7 +62,7 @@ func main() {
 				return true
 			},
 		},
-		InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, error) {
+		InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (*transport.InitPayload, context.Context, error) {
 			return webSocketInit(ctx, initPayload)
 		},
 	})

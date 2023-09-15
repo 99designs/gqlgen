@@ -2,16 +2,15 @@ package graphql
 
 import (
 	"fmt"
-	"io"
-	"strconv"
 
 	"github.com/google/uuid"
 )
 
 func MarshalUUID(id uuid.UUID) Marshaler {
-	return WriterFunc(func(w io.Writer) {
-		_, _ = io.WriteString(w, strconv.Quote(id.String()))
-	})
+	if id == uuid.Nil {
+		return Null
+	}
+	return MarshalString(id.String())
 }
 
 func UnmarshalUUID(v any) (uuid.UUID, error) {

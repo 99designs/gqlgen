@@ -25,6 +25,7 @@ func (r *queryResolver) Todos(ctx context.Context) ([]*model.Todo, error) {
 	return []*model.Todo{
 		{ID: "1", Text: "hello", UID: uuid.New(), Pid: nil},
 		{ID: "2", Text: "world", UID: uuid.New(), Pid: &uuid.UUID{}},
+		{ID: "2", Text: "zero test"}, // UID is uuid zero value, pid is pointer zero value
 	}, nil
 }
 

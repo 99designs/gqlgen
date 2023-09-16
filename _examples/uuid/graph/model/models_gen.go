@@ -7,14 +7,15 @@ import (
 )
 
 type NewTodo struct {
-	Text   string    `json:"text"`
-	UserID string    `json:"userId"`
-	UID    uuid.UUID `json:"uid"`
+	Text   string     `json:"text"`
+	UserID string     `json:"userId"`
+	UID    uuid.UUID  `json:"uid"`
+	Pid    *uuid.UUID `json:"pid,omitempty"`
 }
 
 type Todo struct {
-	ID   string    `json:"id"`
-	Text string    `json:"text"`
-	Done bool      `json:"done"`
-	UID  uuid.UUID `json:"uid"`
+	ID   string     `json:"id"`
+	Text string     `json:"text"`
+	UID  uuid.UUID  `json:"uid"`
+	Pid  *uuid.UUID `json:"pid,omitempty"`
 }

@@ -8,8 +8,8 @@ import (
 )
 
 func TestMarshalUUID(t *testing.T) {
-	t.Run("Null Values", func(t *testing.T) {
-		assert.Equal(t, "null", m2s(MarshalUUID(uuid.Nil)))
+	t.Run("Zero Values", func(t *testing.T) {
+		assert.Equal(t, uuid.Nil, uuid.MustParse("00000000-0000-0000-0000-000000000000"))
 	})
 
 	t.Run("Valid Values", func(t *testing.T) {

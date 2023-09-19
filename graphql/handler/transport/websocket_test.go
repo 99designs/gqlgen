@@ -207,8 +207,8 @@ func TestWebsocketInitFunc(t *testing.T) {
 	t.Run("accept connection if WebsocketInitFunc is provided and is accepting connection", func(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.Websocket{
-			InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, error) {
-				return context.WithValue(ctx, ckey("newkey"), "newvalue"), nil
+			InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, *transport.InitPayload, error) {
+				return context.WithValue(ctx, ckey("newkey"), "newvalue"), nil, nil
 			},
 		})
 		srv := httptest.NewServer(h)
@@ -226,8 +226,8 @@ func TestWebsocketInitFunc(t *testing.T) {
 	t.Run("reject connection if WebsocketInitFunc is provided and is accepting connection", func(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.Websocket{
-			InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, error) {
-				return ctx, errors.New("invalid init payload")
+			InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, *transport.InitPayload, error) {
+				return ctx, nil, errors.New("invalid init payload")
 			},
 		})
 		srv := httptest.NewServer(h)
@@ -261,8 +261,8 @@ func TestWebsocketInitFunc(t *testing.T) {
 		h := handler.New(es)
 
 		h.AddTransport(transport.Websocket{
-			InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, error) {
-				return context.WithValue(ctx, ckey("newkey"), "newvalue"), nil
+			InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, *transport.InitPayload, error) {
+				return context.WithValue(ctx, ckey("newkey"), "newvalue"), nil, nil
 			},
 		})
 
@@ -282,7 +282,7 @@ func TestWebsocketInitFunc(t *testing.T) {
 		h := testserver.New()
 		var cancel func()
 		h.AddTransport(transport.Websocket{
-			InitFunc: func(ctx context.Context, _ transport.InitPayload) (newCtx context.Context, _ error) {
+			InitFunc: func(ctx context.Context, _ transport.InitPayload) (newCtx context.Context, _ *transport.InitPayload, _ error) {
 				newCtx, cancel = context.WithTimeout(transport.AppendCloseReason(ctx, "beep boop"), time.Millisecond*5)
 				return
 			},
@@ -302,6 +302,33 @@ func TestWebsocketInitFunc(t *testing.T) {
 		m := readOp(c)
 		assert.Equal(t, m.Type, connectionErrorMsg)
 		assert.Equal(t, string(m.Payload), `{"message":"beep boop"}`)
+	})
+	t.Run("accept connection if WebsocketInitFunc is provided and is accepting connection", func(t *testing.T) {
+		h := testserver.New()
+		h.AddTransport(transport.Websocket{
+			InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, *transport.InitPayload, error) {
+				initResponsePayload := transport.InitPayload{"trackingId": "123-456"}
+				return context.WithValue(ctx, ckey("newkey"), "newvalue"), &initResponsePayload, nil
+			},
+		})
+		srv := httptest.NewServer(h)
+		defer srv.Close()
+
+		c := wsConnect(srv.URL)
+		defer c.Close()
+
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
+
+		connAck := readOp(c)
+		assert.Equal(t, connectionAckMsg, connAck.Type)
+
+		var payload map[string]interface{}
+		err := json.Unmarshal(connAck.Payload, &payload)
+		if err != nil {
+			t.Fatal("Unexpected Error", err)
+		}
+		assert.EqualValues(t, "123-456", payload["trackingId"])
+		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
 	})
 }
 
@@ -382,8 +409,8 @@ func TestWebSocketErrorFunc(t *testing.T) {
 	t.Run("init func errors do not call the error handler", func(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.Websocket{
-			InitFunc: func(ctx context.Context, _ transport.InitPayload) (context.Context, error) {
-				return ctx, errors.New("this is not what we agreed upon")
+			InitFunc: func(ctx context.Context, _ transport.InitPayload) (context.Context, *transport.InitPayload, error) {
+				return ctx, nil, errors.New("this is not what we agreed upon")
 			},
 			ErrorFunc: func(_ context.Context, err error) {
 				assert.Fail(t, "the error handler got called when it shouldn't have", "error: "+err.Error())
@@ -400,10 +427,10 @@ func TestWebSocketErrorFunc(t *testing.T) {
 	t.Run("init func context closes do not call the error handler", func(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.Websocket{
-			InitFunc: func(ctx context.Context, _ transport.InitPayload) (context.Context, error) {
+			InitFunc: func(ctx context.Context, _ transport.InitPayload) (context.Context, *transport.InitPayload, error) {
 				newCtx, cancel := context.WithCancel(ctx)
 				time.AfterFunc(time.Millisecond*5, cancel)
-				return newCtx, nil
+				return newCtx, nil, nil
 			},
 			ErrorFunc: func(_ context.Context, err error) {
 				assert.Fail(t, "the error handler got called when it shouldn't have", "error: "+err.Error())
@@ -423,9 +450,9 @@ func TestWebSocketErrorFunc(t *testing.T) {
 		h := testserver.New()
 		var cancel func()
 		h.AddTransport(transport.Websocket{
-			InitFunc: func(ctx context.Context, _ transport.InitPayload) (newCtx context.Context, _ error) {
+			InitFunc: func(ctx context.Context, _ transport.InitPayload) (newCtx context.Context, _ *transport.InitPayload, _ error) {
 				newCtx, cancel = context.WithDeadline(ctx, time.Now().Add(time.Millisecond*5))
-				return newCtx, nil
+				return newCtx, nil, nil
 			},
 			ErrorFunc: func(_ context.Context, err error) {
 				assert.Fail(t, "the error handler got called when it shouldn't have", "error: "+err.Error())
@@ -477,8 +504,8 @@ func TestWebSocketCloseFunc(t *testing.T) {
 		h := testserver.New()
 		closeFuncCalled := make(chan bool, 1)
 		h.AddTransport(transport.Websocket{
-			InitFunc: func(ctx context.Context, _ transport.InitPayload) (context.Context, error) {
-				return ctx, errors.New("error during init")
+			InitFunc: func(ctx context.Context, _ transport.InitPayload) (context.Context, *transport.InitPayload, error) {
+				return ctx, nil, errors.New("error during init")
 			},
 			CloseFunc: func(_ context.Context, _closeCode int) {
 				closeFuncCalled <- true

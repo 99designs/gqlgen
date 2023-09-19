@@ -71,6 +71,23 @@ scalar Any
 
 Maps an arbitrary GraphQL value to a `interface{}` Go type.
 
+### Duration
+
+```graphql
+scalar Duration
+```
+This maps a `Duration` scalar value conforming to the `ISO8601` standard (ex.: `P1Y2D`)  to a `time.Duration` type.
+
+If you add to gqlgen.yml:
+```yaml
+models:
+  Duration:
+    model:
+      - github.com/99designs/gqlgen/graphql.Duration
+```
+
+And then add `scalar Duration` to `schema.graphql`
+
 ## Custom scalars with user defined types
 
 For user defined types you can implement the [graphql.Marshaler](https://pkg.go.dev/github.com/99designs/gqlgen/graphql#Marshaler) and [graphql.Unmarshaler](https://pkg.go.dev/github.com/99designs/gqlgen/graphql#Unmarshaler) or implement the [graphql.ContextMarshaler](https://pkg.go.dev/github.com/99designs/gqlgen/graphql#ContextMarshaler) and [graphql.ContextUnmarshaler](https://pkg.go.dev/github.com/99designs/gqlgen/graphql#ContextUnmarshaler) interfaces and they will be called.

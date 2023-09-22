@@ -526,7 +526,7 @@ func TestWebSocketCloseFunc(t *testing.T) {
 		}
 
 		select {
-		case _ = <-closeFuncCalled:
+		case <-closeFuncCalled:
 			assert.Fail(t, "The close handler was called more than once")
 		case <-time.NewTimer(time.Millisecond * 20).C:
 			// ok

@@ -144,9 +144,10 @@ func TestCodeGenerationFederation2(t *testing.T) {
 	require.NoError(t, f.GenerateCode(data))
 }
 
+// This test is to ensure that the input arguments are not
+// changed when cfg.OmitSliceElementPointers is false OR true
 func TestMultiWithOmitSliceElemPointersCfg(t *testing.T) {
-	//This test is to ensure that the input arguments are not
-	//  	changed when cfg.OmitSliceElementPointers is false OR true
+
 	staticRepsString := "reps: [HelloByNamesInput]!"
 	t.Run("OmitSliceElementPointers true", func(t *testing.T) {
 		f, cfg := load(t, "testdata/multi/multi.yml")

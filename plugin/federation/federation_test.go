@@ -144,31 +144,13 @@ func TestCodeGenerationFederation2(t *testing.T) {
 	require.NoError(t, f.GenerateCode(data))
 }
 
-func TestMultiWithOmitPointers(t *testing.T) {
-	f, cfg := load(t, "testdata/multi/key.yml")
-
-	require.True(t, cfg.OmitSliceElementPointers)
-	err := f.MutateConfig(cfg)
-	require.NoError(t, err)
-	require.Len(t, cfg.Schema.Types["_Entity"].Types, 1)
-	require.Len(t, f.Entities, 1)
-
-	entityGraphqlGenerated := false
-	for _, source := range cfg.Sources {
-		if source.Name != "federation/entity.graphql" {
-			continue
-		}
-		entityGraphqlGenerated = true
-		require.Contains(t, source.Input, "reps: [HelloByNamesInput]!")
-	}
-	require.True(t, entityGraphqlGenerated)
-}
-
-func TestMultiWithoutOmitPointers(t *testing.T) {
+func TestMultiWithOmitSliceElemPointersCfg(t *testing.T) {
+	//This test is to ensure that the input arguments are not
+	//  	changed when cfg.OmitSliceElementPointers is false OR true
 	staticRepsString := "reps: [HelloByNamesInput]!"
 	t.Run("OmitSliceElementPointers true", func(t *testing.T) {
-		f, cfg := load(t, "testdata/multi/key.yml")
-		cfg.OmitSliceElementPointers = false
+		f, cfg := load(t, "testdata/multi/multi.yml")
+		cfg.OmitSliceElementPointers = true
 		err := f.MutateConfig(cfg)
 		require.NoError(t, err)
 		require.Len(t, cfg.Schema.Types["_Entity"].Types, 1)
@@ -186,7 +168,7 @@ func TestMultiWithoutOmitPointers(t *testing.T) {
 	})
 
 	t.Run("OmitSliceElementPointers false", func(t *testing.T) {
-		f, cfg := load(t, "testdata/multi/key.yml")
+		f, cfg := load(t, "testdata/multi/multi.yml")
 		cfg.OmitSliceElementPointers = false
 		err := f.MutateConfig(cfg)
 		require.NoError(t, err)

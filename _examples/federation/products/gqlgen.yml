@@ -47,7 +47,7 @@ resolver:
 # gqlgen will search for any type names in the schema in these go packages
 # if they match it will use them, otherwise it will generate them.
 autobind:
-  - "github.com/99designs/gqlgen/_examples/federation/products/graph/model"
+  - "github.com/apito-cms/gqlgen/_examples/federation/products/graph/model"
 
 # This section declares type mapping between the GraphQL and go type systems
 #
@@ -57,12 +57,12 @@ autobind:
 models:
   ID:
     model:
-      - github.com/99designs/gqlgen/graphql.ID
-      - github.com/99designs/gqlgen/graphql.Int
-      - github.com/99designs/gqlgen/graphql.Int64
-      - github.com/99designs/gqlgen/graphql.Int32
+      - github.com/apito-cms/gqlgen/graphql.ID
+      - github.com/apito-cms/gqlgen/graphql.Int
+      - github.com/apito-cms/gqlgen/graphql.Int64
+      - github.com/apito-cms/gqlgen/graphql.Int32
   Int:
     model:
-      - github.com/99designs/gqlgen/graphql.Int
-      - github.com/99designs/gqlgen/graphql.Int64
-      - github.com/99designs/gqlgen/graphql.Int32
+      - github.com/apito-cms/gqlgen/graphql.Int
+      - github.com/apito-cms/gqlgen/graphql.Int64
+      - github.com/apito-cms/gqlgen/graphql.Int32

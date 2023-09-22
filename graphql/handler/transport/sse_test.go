@@ -12,8 +12,8 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/99designs/gqlgen/graphql/handler/testserver"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/apito-cms/gqlgen/graphql/handler/testserver"
+	"github.com/apito-cms/gqlgen/graphql/handler/transport"
 )
 
 func TestSSE(t *testing.T) {

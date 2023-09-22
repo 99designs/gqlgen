@@ -77,9 +77,9 @@ package main
 import (
 	"net/http"
 
-	"github.com/99designs/gqlgen/_examples/starwars"
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/apito-cms/gqlgen/_examples/starwars"
+	"github.com/apito-cms/gqlgen/graphql/handler"
+	"github.com/apito-cms/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
 )
 
@@ -116,8 +116,8 @@ func (r *queryResolver) Hero(ctx context.Context, episode Episode) (Character, e
 
 ### Websockets
 
-If you need access to the websocket init payload you can add your `InitFunc` in `AddTransport`.  
-Your InitFunc implementation could then attempt to extract items from the payload:  
+If you need access to the websocket init payload you can add your `InitFunc` in `AddTransport`.
+Your InitFunc implementation could then attempt to extract items from the payload:
 
 ```go
 package main
@@ -130,10 +130,10 @@ import (
 	"os"
 	"time"
 
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/handler/extension"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/apito-cms/gqlgen/graphql/handler"
+	"github.com/apito-cms/gqlgen/graphql/handler/extension"
+	"github.com/apito-cms/gqlgen/graphql/handler/transport"
+	"github.com/apito-cms/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
 	"github.com/gorilla/websocket"
 	"github.com/gqlgen/_examples/websocket-initfunc/server/graph"

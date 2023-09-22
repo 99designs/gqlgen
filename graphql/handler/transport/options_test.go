@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/99designs/gqlgen/graphql/handler/testserver"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/apito-cms/gqlgen/graphql/handler/testserver"
+	"github.com/apito-cms/gqlgen/graphql/handler/transport"
 )
 
 func TestOptions(t *testing.T) {

@@ -22,7 +22,7 @@ import (
 	"errors"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
-	"github.com/99designs/gqlgen/graphql"
+	"github.com/apito-cms/gqlgen/graphql"
 )
 
 // DoThings add errors to the stack.
@@ -72,7 +72,7 @@ import (
 	"errors"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
-	"github.com/99designs/gqlgen/graphql"
+	"github.com/apito-cms/gqlgen/graphql"
 )
 
 var errSomethingWrong = errors.New("some validation failed")
@@ -80,7 +80,7 @@ var errSomethingWrong = errors.New("some validation failed")
 // DoThingsReturnMultipleErrors collect errors and returns it if any.
 func (r Query) DoThingsReturnMultipleErrors(ctx context.Context) (bool, error) {
 	errList := gqlerror.List{}
-		
+
 	// Add existing error
 	errList = append(errList, gqlerror.Wrap(errSomethingWrong))
 
@@ -95,7 +95,7 @@ func (r Query) DoThingsReturnMultipleErrors(ctx context.Context) (bool, error) {
 			"code": "10-4",
 		},
 	})
-	
+
 	return false, errList
 }
 ```
@@ -132,8 +132,8 @@ import (
 	"errors"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/apito-cms/gqlgen/graphql"
+	"github.com/apito-cms/gqlgen/graphql/handler"
 )
 
 func main() {

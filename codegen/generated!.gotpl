@@ -11,8 +11,8 @@
 
 {{ reserveImport "github.com/vektah/gqlparser/v2" "gqlparser" }}
 {{ reserveImport "github.com/vektah/gqlparser/v2/ast" }}
-{{ reserveImport "github.com/99designs/gqlgen/graphql" }}
-{{ reserveImport "github.com/99designs/gqlgen/graphql/introspection" }}
+{{ reserveImport "github.com/apito-cms/gqlgen/graphql" }}
+{{ reserveImport "github.com/apito-cms/gqlgen/graphql/introspection" }}
 
 {{ if eq .Config.Exec.Layout "single-file" }}
 	// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.

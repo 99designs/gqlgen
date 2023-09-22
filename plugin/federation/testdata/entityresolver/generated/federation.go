@@ -9,8 +9,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
-	"github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/generated/model"
+	"github.com/apito-cms/gqlgen/plugin/federation/fedruntime"
+	"github.com/apito-cms/gqlgen/plugin/federation/testdata/entityresolver/generated/model"
 )
 
 var (

@@ -5,6 +5,7 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
+	"github.com/urfave/cli/v2"
 	"html/template"
 	"io"
 	"io/fs"
@@ -12,12 +13,10 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/99designs/gqlgen/api"
-	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/internal/code"
-	"github.com/99designs/gqlgen/plugin/servergen"
-	"github.com/urfave/cli/v2"
+	"github.com/apito-cms/gqlgen/api"
+	"github.com/apito-cms/gqlgen/codegen/config"
+	"github.com/apito-cms/gqlgen/graphql"
+	"github.com/apito-cms/gqlgen/internal/code"
 )
 
 //go:embed init-templates/schema.graphqls
@@ -149,7 +148,10 @@ var initCmd = &cli.Command{
 
 		fmt.Println("Creating", serverFilename)
 		fmt.Println("Generating...")
-		if err := api.Generate(cfg, api.AddPlugin(servergen.New(serverFilename))); err != nil {
+		/*if err := api.Generate(cfg, api.AddPlugin(servergen.New(serverFilename))); err != nil {
+			return err
+		}*/
+		if err := api.Generate(cfg); err != nil {
 			return err
 		}
 

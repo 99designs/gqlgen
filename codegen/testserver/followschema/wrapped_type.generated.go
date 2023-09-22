@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"sync/atomic"
 
-	"github.com/99designs/gqlgen/codegen/testserver/followschema/otherpkg"
-	"github.com/99designs/gqlgen/graphql"
+	"github.com/apito-cms/gqlgen/codegen/testserver/followschema/otherpkg"
+	"github.com/apito-cms/gqlgen/graphql"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 

@@ -9,7 +9,7 @@ import (
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
-	"github.com/99designs/gqlgen/graphql"
+	"github.com/apito-cms/gqlgen/graphql"
 )
 
 // POST implements the POST side of the default HTTP transport

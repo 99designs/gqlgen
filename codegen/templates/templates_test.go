@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/99designs/gqlgen/internal/code"
+	"github.com/apito-cms/gqlgen/internal/code"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

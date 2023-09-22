@@ -5,7 +5,7 @@ import (
 	"path"
 	"testing"
 
-	"github.com/99designs/gqlgen/codegen/config"
+	"github.com/apito-cms/gqlgen/codegen/config"
 	"github.com/stretchr/testify/require"
 )
 

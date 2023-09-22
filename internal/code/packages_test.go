@@ -10,40 +10,40 @@ import (
 func TestPackages(t *testing.T) {
 	t.Run("name for existing package does not load again", func(t *testing.T) {
 		p := initialState(t)
-		require.Equal(t, "a", p.NameForPackage("github.com/99designs/gqlgen/internal/code/testdata/a"))
+		require.Equal(t, "a", p.NameForPackage("github.com/apito-cms/gqlgen/internal/code/testdata/a"))
 		require.Equal(t, 1, p.numLoadCalls)
 	})
 
 	t.Run("name for unknown package makes name only load", func(t *testing.T) {
 		p := initialState(t)
-		require.Equal(t, "c", p.NameForPackage("github.com/99designs/gqlgen/internal/code/testdata/c"))
+		require.Equal(t, "c", p.NameForPackage("github.com/apito-cms/gqlgen/internal/code/testdata/c"))
 		require.Equal(t, 1, p.numLoadCalls)
 		require.Equal(t, 1, p.numNameCalls)
 	})
 
 	t.Run("evicting a package causes it to load again", func(t *testing.T) {
 		p := initialState(t)
-		p.Evict("github.com/99designs/gqlgen/internal/code/testdata/b")
-		require.Equal(t, "a", p.Load("github.com/99designs/gqlgen/internal/code/testdata/a").Name)
+		p.Evict("github.com/apito-cms/gqlgen/internal/code/testdata/b")
+		require.Equal(t, "a", p.Load("github.com/apito-cms/gqlgen/internal/code/testdata/a").Name)
 		require.Equal(t, 1, p.numLoadCalls)
-		require.Equal(t, "b", p.Load("github.com/99designs/gqlgen/internal/code/testdata/b").Name)
+		require.Equal(t, "b", p.Load("github.com/apito-cms/gqlgen/internal/code/testdata/b").Name)
 		require.Equal(t, 2, p.numLoadCalls)
 	})
 
 	t.Run("evicting a package also evicts its dependencies", func(t *testing.T) {
 		p := initialState(t)
-		p.Evict("github.com/99designs/gqlgen/internal/code/testdata/a")
-		require.Equal(t, "a", p.Load("github.com/99designs/gqlgen/internal/code/testdata/a").Name)
+		p.Evict("github.com/apito-cms/gqlgen/internal/code/testdata/a")
+		require.Equal(t, "a", p.Load("github.com/apito-cms/gqlgen/internal/code/testdata/a").Name)
 		require.Equal(t, 2, p.numLoadCalls)
-		require.Equal(t, "b", p.Load("github.com/99designs/gqlgen/internal/code/testdata/b").Name)
+		require.Equal(t, "b", p.Load("github.com/apito-cms/gqlgen/internal/code/testdata/b").Name)
 		require.Equal(t, 3, p.numLoadCalls)
 	})
 	t.Run("able to load private package with build tags", func(t *testing.T) {
 		p := initialState(t, WithBuildTags("private"))
-		p.Evict("github.com/99designs/gqlgen/internal/code/testdata/a")
-		require.Equal(t, "a", p.Load("github.com/99designs/gqlgen/internal/code/testdata/a").Name)
+		p.Evict("github.com/apito-cms/gqlgen/internal/code/testdata/a")
+		require.Equal(t, "a", p.Load("github.com/apito-cms/gqlgen/internal/code/testdata/a").Name)
 		require.Equal(t, 2, p.numLoadCalls)
-		require.Equal(t, "p", p.Load("github.com/99designs/gqlgen/internal/code/testdata/p").Name)
+		require.Equal(t, "p", p.Load("github.com/apito-cms/gqlgen/internal/code/testdata/p").Name)
 		require.Equal(t, 3, p.numLoadCalls)
 	})
 }
@@ -51,18 +51,18 @@ func TestPackages(t *testing.T) {
 func TestNameForPackage(t *testing.T) {
 	var p Packages
 
-	assert.Equal(t, "api", p.NameForPackage("github.com/99designs/gqlgen/api"))
+	assert.Equal(t, "api", p.NameForPackage("github.com/apito-cms/gqlgen/api"))
 
 	// does not contain go code, should still give a valid name
-	assert.Equal(t, "docs", p.NameForPackage("github.com/99designs/gqlgen/docs"))
+	assert.Equal(t, "docs", p.NameForPackage("github.com/apito-cms/gqlgen/docs"))
 	assert.Equal(t, "github_com", p.NameForPackage("github.com"))
 }
 
 func initialState(t *testing.T, opts ...Option) *Packages {
 	p := NewPackages(opts...)
 	pkgs := p.LoadAll(
-		"github.com/99designs/gqlgen/internal/code/testdata/a",
-		"github.com/99designs/gqlgen/internal/code/testdata/b",
+		"github.com/apito-cms/gqlgen/internal/code/testdata/a",
+		"github.com/apito-cms/gqlgen/internal/code/testdata/b",
 	)
 	require.Nil(t, p.Errors())
 

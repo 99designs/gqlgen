@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"sync/atomic"
 
-	"github.com/99designs/gqlgen/graphql"
+	"github.com/apito-cms/gqlgen/graphql"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
@@ -548,7 +548,7 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			} else if tmp == nil {
 				it.Inner = nil
 			} else {
-				err := fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/codegen/testserver/followschema.InnerDirectives`, tmp)
+				err := fmt.Errorf(`unexpected type %T from directive, should be *github.com/apito-cms/gqlgen/codegen/testserver/followschema.InnerDirectives`, tmp)
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
 		case "innerNullable":
@@ -574,7 +574,7 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			} else if tmp == nil {
 				it.InnerNullable = nil
 			} else {
-				err := fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/codegen/testserver/followschema.InnerDirectives`, tmp)
+				err := fmt.Errorf(`unexpected type %T from directive, should be *github.com/apito-cms/gqlgen/codegen/testserver/followschema.InnerDirectives`, tmp)
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
 		case "thirdParty":
@@ -614,7 +614,7 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			} else if tmp == nil {
 				it.ThirdParty = nil
 			} else {
-				err := fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/codegen/testserver/followschema.ThirdParty`, tmp)
+				err := fmt.Errorf(`unexpected type %T from directive, should be *github.com/apito-cms/gqlgen/codegen/testserver/followschema.ThirdParty`, tmp)
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
 		}

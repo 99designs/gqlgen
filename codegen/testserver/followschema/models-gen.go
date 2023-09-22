@@ -8,7 +8,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/99designs/gqlgen/graphql"
+	"github.com/apito-cms/gqlgen/graphql"
 )
 
 type Animal interface {

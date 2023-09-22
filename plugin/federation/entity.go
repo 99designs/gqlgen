@@ -3,9 +3,9 @@ package federation
 import (
 	"go/types"
 
-	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/99designs/gqlgen/codegen/templates"
-	"github.com/99designs/gqlgen/plugin/federation/fieldset"
+	"github.com/apito-cms/gqlgen/codegen/config"
+	"github.com/apito-cms/gqlgen/codegen/templates"
+	"github.com/apito-cms/gqlgen/plugin/federation/fieldset"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 

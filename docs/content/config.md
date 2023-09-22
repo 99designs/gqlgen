@@ -109,18 +109,18 @@ resolver:
 models:
   ID:
     model:
-      - github.com/99designs/gqlgen/graphql.ID
-      - github.com/99designs/gqlgen/graphql.Int
-      - github.com/99designs/gqlgen/graphql.Int64
-      - github.com/99designs/gqlgen/graphql.Int32
+      - github.com/apito-cms/gqlgen/graphql.ID
+      - github.com/apito-cms/gqlgen/graphql.Int
+      - github.com/apito-cms/gqlgen/graphql.Int64
+      - github.com/apito-cms/gqlgen/graphql.Int32
   Int:
     model:
-      - github.com/99designs/gqlgen/graphql.Int
-      - github.com/99designs/gqlgen/graphql.Int64
-      - github.com/99designs/gqlgen/graphql.Int32
+      - github.com/apito-cms/gqlgen/graphql.Int
+      - github.com/apito-cms/gqlgen/graphql.Int64
+      - github.com/apito-cms/gqlgen/graphql.Int32
   UUID:
     model:
-      - github.com/99designs/gqlgen/graphql.UUID
+      - github.com/apito-cms/gqlgen/graphql.UUID
 ```
 
 Everything has defaults, so add things as you need.
@@ -153,7 +153,7 @@ directive @goTag(
 > Here be dragons
 >
 > gqlgen doesnt currently support user-configurable directives for SCALAR, ENUM, INTERFACE or UNION. This only works
-> for internal directives. You can track the progress [here](https://github.com/99designs/gqlgen/issues/760)
+> for internal directives. You can track the progress [here](https://github.com/apito-cms/gqlgen/issues/760)
 
 Now you can use these directives when defining types in your schema:
 

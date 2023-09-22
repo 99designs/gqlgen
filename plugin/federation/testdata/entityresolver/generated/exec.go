@@ -11,10 +11,10 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
-	"github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/generated/model"
+	"github.com/apito-cms/gqlgen/graphql"
+	"github.com/apito-cms/gqlgen/graphql/introspection"
+	"github.com/apito-cms/gqlgen/plugin/federation/fedruntime"
+	"github.com/apito-cms/gqlgen/plugin/federation/testdata/entityresolver/generated/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -1422,7 +1422,7 @@ func (ec *executionContext) _Entity_findManyMultiHelloByNames(ctx context.Contex
 		if data, ok := tmp.([]*model.MultiHello); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/generated/model.MultiHello`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/apito-cms/gqlgen/plugin/federation/testdata/entityresolver/generated/model.MultiHello`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1502,7 +1502,7 @@ func (ec *executionContext) _Entity_findManyMultiHelloMultipleRequiresByNames(ct
 		if data, ok := tmp.([]*model.MultiHelloMultipleRequires); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/generated/model.MultiHelloMultipleRequires`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/apito-cms/gqlgen/plugin/federation/testdata/entityresolver/generated/model.MultiHelloMultipleRequires`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1588,7 +1588,7 @@ func (ec *executionContext) _Entity_findManyMultiHelloRequiresByNames(ctx contex
 		if data, ok := tmp.([]*model.MultiHelloRequires); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/generated/model.MultiHelloRequires`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/apito-cms/gqlgen/plugin/federation/testdata/entityresolver/generated/model.MultiHelloRequires`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1672,7 +1672,7 @@ func (ec *executionContext) _Entity_findManyMultiHelloWithErrorByNames(ctx conte
 		if data, ok := tmp.([]*model.MultiHelloWithError); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/generated/model.MultiHelloWithError`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/apito-cms/gqlgen/plugin/federation/testdata/entityresolver/generated/model.MultiHelloWithError`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1752,7 +1752,7 @@ func (ec *executionContext) _Entity_findManyMultiPlanetRequiresNestedByNames(ctx
 		if data, ok := tmp.([]*model.MultiPlanetRequiresNested); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/generated/model.MultiPlanetRequiresNested`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/apito-cms/gqlgen/plugin/federation/testdata/entityresolver/generated/model.MultiPlanetRequiresNested`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)

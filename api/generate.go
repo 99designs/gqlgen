@@ -5,10 +5,10 @@ import (
 	"regexp"
 	"syscall"
 
-	"github.com/99designs/gqlgen/codegen"
-	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/99designs/gqlgen/plugin"
-	"github.com/99designs/gqlgen/plugin/federation"
+	"github.com/apito-cms/gqlgen/codegen"
+	"github.com/apito-cms/gqlgen/codegen/config"
+	"github.com/apito-cms/gqlgen/plugin"
+	"github.com/apito-cms/gqlgen/plugin/federation"
 )
 
 func Generate(cfg *config.Config, option ...Option) error {

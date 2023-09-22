@@ -13,10 +13,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/99designs/gqlgen/_examples/scalars/external"
-	"github.com/99designs/gqlgen/_examples/scalars/model"
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/apito-cms/gqlgen/_examples/scalars/external"
+	"github.com/apito-cms/gqlgen/_examples/scalars/model"
+	"github.com/apito-cms/gqlgen/graphql"
+	"github.com/apito-cms/gqlgen/graphql/introspection"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )

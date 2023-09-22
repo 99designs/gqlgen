@@ -17,9 +17,9 @@ import (
 	"text/template"
 	"unicode"
 
-	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/99designs/gqlgen/internal/code"
-	"github.com/99designs/gqlgen/internal/imports"
+	"github.com/apito-cms/gqlgen/codegen/config"
+	"github.com/apito-cms/gqlgen/internal/code"
+	"github.com/apito-cms/gqlgen/internal/imports"
 )
 
 // CurrentImports keeps track of all the import declarations that are needed during the execution of a plugin.

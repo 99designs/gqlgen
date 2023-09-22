@@ -8,8 +8,8 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/generated"
-	"github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/generated/model"
+	"github.com/apito-cms/gqlgen/plugin/federation/testdata/entityresolver/generated"
+	"github.com/apito-cms/gqlgen/plugin/federation/testdata/entityresolver/generated/model"
 )
 
 // FindHelloByName is the resolver for the findHelloByName field.

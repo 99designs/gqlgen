@@ -25,16 +25,16 @@ func TestImportPathForDir(t *testing.T) {
 
 	require.NoError(t, err)
 
-	assert.Equal(t, "github.com/99designs/gqlgen/internal/code", ImportPathForDir(wd))
+	assert.Equal(t, "github.com/apito-cms/gqlgen/internal/code", ImportPathForDir(wd))
 
-	assert.Equal(t, "github.com/99designs/gqlgen/internal/code", ImportPathForDir(wd))
-	assert.Equal(t, "github.com/99designs/gqlgen/api", ImportPathForDir(filepath.Join(wd, "..", "..", "api")))
+	assert.Equal(t, "github.com/apito-cms/gqlgen/internal/code", ImportPathForDir(wd))
+	assert.Equal(t, "github.com/apito-cms/gqlgen/api", ImportPathForDir(filepath.Join(wd, "..", "..", "api")))
 
 	// doesnt contain go code, but should still give a valid import path
-	assert.Equal(t, "github.com/99designs/gqlgen/docs", ImportPathForDir(filepath.Join(wd, "..", "..", "docs")))
+	assert.Equal(t, "github.com/apito-cms/gqlgen/docs", ImportPathForDir(filepath.Join(wd, "..", "..", "docs")))
 
 	// directory does not exist
-	assert.Equal(t, "github.com/99designs/gqlgen/dos", ImportPathForDir(filepath.Join(wd, "..", "..", "dos")))
+	assert.Equal(t, "github.com/apito-cms/gqlgen/dos", ImportPathForDir(filepath.Join(wd, "..", "..", "dos")))
 
 	// out of module
 	assert.Equal(t, "", ImportPathForDir(filepath.Join(wd, "..", "..", "..")))

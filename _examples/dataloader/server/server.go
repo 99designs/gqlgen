@@ -4,9 +4,9 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/99designs/gqlgen/_examples/dataloader"
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/apito-cms/gqlgen/_examples/dataloader"
+	"github.com/apito-cms/gqlgen/graphql/handler"
+	"github.com/apito-cms/gqlgen/graphql/playground"
 )
 
 func main() {

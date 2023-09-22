@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/99designs/gqlgen/client"
+	"github.com/apito-cms/gqlgen/client"
 	"github.com/mitchellh/mapstructure"
 	"github.com/stretchr/testify/require"
 )

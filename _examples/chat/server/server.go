@@ -6,10 +6,10 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/99designs/gqlgen/graphql/handler/extension"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/apito-cms/gqlgen/graphql/handler/extension"
+	"github.com/apito-cms/gqlgen/graphql/handler/transport"
 
-	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/apito-cms/gqlgen/graphql/playground"
 
 	"github.com/gorilla/websocket"
 	"github.com/opentracing/opentracing-go"
@@ -18,8 +18,8 @@ import (
 	appdashtracer "sourcegraph.com/sourcegraph/appdash/opentracing"
 	"sourcegraph.com/sourcegraph/appdash/traceapp"
 
-	"github.com/99designs/gqlgen/_examples/chat"
-	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/apito-cms/gqlgen/_examples/chat"
+	"github.com/apito-cms/gqlgen/graphql/handler"
 )
 
 func main() {

@@ -213,15 +213,15 @@ And add `Todo` fields resolver config in `gqlgen.yml` to generate resolver for `
 models:
   ID:
     model:
-      - github.com/99designs/gqlgen/graphql.ID
-      - github.com/99designs/gqlgen/graphql.Int
-      - github.com/99designs/gqlgen/graphql.Int64
-      - github.com/99designs/gqlgen/graphql.Int32
+      - github.com/apito-cms/gqlgen/graphql.ID
+      - github.com/apito-cms/gqlgen/graphql.Int
+      - github.com/apito-cms/gqlgen/graphql.Int64
+      - github.com/apito-cms/gqlgen/graphql.Int32
   Int:
     model:
-      - github.com/99designs/gqlgen/graphql.Int
-      - github.com/99designs/gqlgen/graphql.Int64
-      - github.com/99designs/gqlgen/graphql.Int32
+      - github.com/apito-cms/gqlgen/graphql.Int
+      - github.com/apito-cms/gqlgen/graphql.Int64
+      - github.com/apito-cms/gqlgen/graphql.Int32
   Todo:
     fields:
       user:
@@ -245,7 +245,7 @@ type Todo struct {
 And run `go run github.com/99designs/gqlgen generate`.
 
 >
-> If you run into this error `package github.com/99designs/gqlgen: no Go files` while executing the `generate` command above, follow the instructions in [this](https://github.com/99designs/gqlgen/issues/800#issuecomment-888908950) comment for a possible solution.
+> If you run into this error `package github.com/99designs/gqlgen: no Go files` while executing the `generate` command above, follow the instructions in [this](https://github.com/apito-cms/gqlgen/issues/800#issuecomment-888908950) comment for a possible solution.
 
 Now if we look in `graph/schema.resolvers.go` we can see a new resolver, lets implement it and fix `CreateTodo`.
 ```go

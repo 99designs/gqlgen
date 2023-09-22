@@ -4,9 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/errcode"
-	"github.com/99designs/gqlgen/graphql/executor/testexecutor"
+	"github.com/apito-cms/gqlgen/graphql"
+	"github.com/apito-cms/gqlgen/graphql/errcode"
+	"github.com/apito-cms/gqlgen/graphql/executor/testexecutor"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2/ast"

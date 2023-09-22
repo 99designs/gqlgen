@@ -4,7 +4,7 @@ model:
   filename: models/generated.go
 
 autobind:
-  - github.com/99designs/gqlgen/_examples/starwars/models
+  - github.com/apito-cms/gqlgen/_examples/starwars/models
 
 models:
   ReviewInput:

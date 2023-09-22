@@ -12,10 +12,10 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/99designs/gqlgen/_examples/federation/products/graph/model"
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
+	"github.com/apito-cms/gqlgen/_examples/federation/products/graph/model"
+	"github.com/apito-cms/gqlgen/graphql"
+	"github.com/apito-cms/gqlgen/graphql/introspection"
+	"github.com/apito-cms/gqlgen/plugin/federation/fedruntime"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )

@@ -5,17 +5,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.37...HEAD)
+## [Unreleased](https://github.com/apito-cms/gqlgen/compare/v0.17.37...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
 <a name="v0.17.37"></a>
-## [v0.17.37](https://github.com/99designs/gqlgen/compare/v0.17.36...v0.17.37) - 2023-09-08
-- <a href="https://github.com/99designs/gqlgen/commit/ccae370e96cbca6ce5deaabf28a6d57e3b181b3b"><tt>ccae370e</tt></a> release v0.17.37
+## [v0.17.37](https://github.com/apito-cms/gqlgen/compare/v0.17.36...v0.17.37) - 2023-09-08
+- <a href="https://github.com/apito-cms/gqlgen/commit/ccae370e96cbca6ce5deaabf28a6d57e3b181b3b"><tt>ccae370e</tt></a> release v0.17.37
 
-- <a href="https://github.com/99designs/gqlgen/commit/6505f8be0d99593376d6c9a0dea00af5e3c018ea"><tt>6505f8be</tt></a> Update gqlparser (<a href="https://github.com/99designs/gqlgen/pull/2785">#2785</a>)
+- <a href="https://github.com/apito-cms/gqlgen/commit/6505f8be0d99593376d6c9a0dea00af5e3c018ea"><tt>6505f8be</tt></a> Update gqlparser (<a href="https://github.com/apito-cms/gqlgen/pull/2785">#2785</a>)
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/153ec470d993a39c1656fc45432740f1d3dd10ea"><tt>153ec470</tt></a> add uuid type (<a href="https://github.com/99designs/gqlgen/pull/2751">#2751</a>) (closes <a href="https://github.com/99designs/gqlgen/issues/2749"> #2749</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/153ec470d993a39c1656fc45432740f1d3dd10ea"><tt>153ec470</tt></a> add uuid type (<a href="https://github.com/apito-cms/gqlgen/pull/2751">#2751</a>) (closes <a href="https://github.com/apito-cms/gqlgen/issues/2749"> #2749</a>)</summary>
 
 * add uuid type
 
@@ -35,7 +35,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 </details></dd></dl>
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/fa4711801c59d27db887a50e1f8393006268194e"><tt>fa471180</tt></a> ForceGenerate parameter to [@goModel](https://github.com/goModel) added. (<a href="https://github.com/99designs/gqlgen/pull/2780">#2780</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/fa4711801c59d27db887a50e1f8393006268194e"><tt>fa471180</tt></a> ForceGenerate parameter to [@goModel](https://github.com/goModel) added. (<a href="https://github.com/apito-cms/gqlgen/pull/2780">#2780</a>)</summary>
 
 * forceGenerate to docs added
 
@@ -43,7 +43,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 </details></dd></dl>
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/11bb9b1890fd9e5909f06feba7b2985bf09785c9"><tt>11bb9b18</tt></a> codegen: add support for `go_build_tags` option in gqlgen.yaml (<a href="https://github.com/99designs/gqlgen/pull/2784">#2784</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/11bb9b1890fd9e5909f06feba7b2985bf09785c9"><tt>11bb9b18</tt></a> codegen: add support for `go_build_tags` option in gqlgen.yaml (<a href="https://github.com/apito-cms/gqlgen/pull/2784">#2784</a>)</summary>
 
 * codegen: support go_build_tags option in gqlgen.yaml
 
@@ -55,7 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 </details></dd></dl>
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/bee47dcf1f3edb95e7a77e612ea27d85a417b12c"><tt>bee47dcf</tt></a> fix flaky test TestSubscriptions (<a href="https://github.com/99designs/gqlgen/pull/2779">#2779</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/bee47dcf1f3edb95e7a77e612ea27d85a417b12c"><tt>bee47dcf</tt></a> fix flaky test TestSubscriptions (<a href="https://github.com/apito-cms/gqlgen/pull/2779">#2779</a>)</summary>
 
 * fix flaky test TestSubscriptions
 
@@ -63,11 +63,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 </details></dd></dl>
 
-- <a href="https://github.com/99designs/gqlgen/commit/a41f4daad66cb0c102bfa09d7bff5a057d378197"><tt>a41f4daa</tt></a> docs: short-lived loader (<a href="https://github.com/99designs/gqlgen/pull/2778">#2778</a>)
+- <a href="https://github.com/apito-cms/gqlgen/commit/a41f4daad66cb0c102bfa09d7bff5a057d378197"><tt>a41f4daa</tt></a> docs: short-lived loader (<a href="https://github.com/apito-cms/gqlgen/pull/2778">#2778</a>)
 
-- <a href="https://github.com/99designs/gqlgen/commit/cc4e0ba28375e0ec39c586485fa138c28e5bfcba"><tt>cc4e0ba2</tt></a> ensure HasOperationContext checks for nil (<a href="https://github.com/99designs/gqlgen/pull/2776">#2776</a>)
+- <a href="https://github.com/apito-cms/gqlgen/commit/cc4e0ba28375e0ec39c586485fa138c28e5bfcba"><tt>cc4e0ba2</tt></a> ensure HasOperationContext checks for nil (<a href="https://github.com/apito-cms/gqlgen/pull/2776">#2776</a>)
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/a1ca220477092398efc8e587dd653f5cb967d0e9"><tt>a1ca2204</tt></a> fix typo in TESTING.md server path (<a href="https://github.com/99designs/gqlgen/pull/2774">#2774</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/a1ca220477092398efc8e587dd653f5cb967d0e9"><tt>a1ca2204</tt></a> fix typo in TESTING.md server path (<a href="https://github.com/apito-cms/gqlgen/pull/2774">#2774</a>)</summary>
 
 following TESTING.md instructions, I got an error:
 "stat ./server/server.go: no such file or directory"
@@ -76,7 +76,7 @@ server.go path is: integration/server/cmd/integration/server.go
 
 </details></dd></dl>
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/1cde8c3fab65847a6e8d7f423215b786b47c19df"><tt>1cde8c3f</tt></a> return internal types in schema introspection (<a href="https://github.com/99designs/gqlgen/pull/2773">#2773</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/1cde8c3fab65847a6e8d7f423215b786b47c19df"><tt>1cde8c3f</tt></a> return internal types in schema introspection (<a href="https://github.com/apito-cms/gqlgen/pull/2773">#2773</a>)</summary>
 
 according to graphql spec:
 ```
@@ -89,25 +89,25 @@ some clients libs (like HotChocolate for C#) depends on this behavior.
 
 </details></dd></dl>
 
-- <a href="https://github.com/99designs/gqlgen/commit/065aea3efa27f0662eb2f62ef2dd131e153009ba"><tt>065aea3e</tt></a> Fix gqlgen truncates tag value with colon (<a href="https://github.com/99designs/gqlgen/pull/2759">#2759</a>)
+- <a href="https://github.com/apito-cms/gqlgen/commit/065aea3efa27f0662eb2f62ef2dd131e153009ba"><tt>065aea3e</tt></a> Fix gqlgen truncates tag value with colon (<a href="https://github.com/apito-cms/gqlgen/pull/2759">#2759</a>)
 
-- <a href="https://github.com/99designs/gqlgen/commit/d6270e4f4fd951c71ee2a2b997d7098b04e07976"><tt>d6270e4f</tt></a> Update subsciptions documentation to correctly close channel (<a href="https://github.com/99designs/gqlgen/pull/2753">#2753</a>)
+- <a href="https://github.com/apito-cms/gqlgen/commit/d6270e4f4fd951c71ee2a2b997d7098b04e07976"><tt>d6270e4f</tt></a> Update subsciptions documentation to correctly close channel (<a href="https://github.com/apito-cms/gqlgen/pull/2753">#2753</a>)
 
-- <a href="https://github.com/99designs/gqlgen/commit/2d8673a691deffe6ddd1f4d5f013a52dc91aef91"><tt>2d8673a6</tt></a> Add Model references to Interface (<a href="https://github.com/99designs/gqlgen/pull/2738">#2738</a>)
+- <a href="https://github.com/apito-cms/gqlgen/commit/2d8673a691deffe6ddd1f4d5f013a52dc91aef91"><tt>2d8673a6</tt></a> Add Model references to Interface (<a href="https://github.com/apito-cms/gqlgen/pull/2738">#2738</a>)
 
-- <a href="https://github.com/99designs/gqlgen/commit/790d7a7571865b8b8324557e1a565f40c23217c8"><tt>790d7a75</tt></a> Allow GraphiQL headers to be set when creating the playground handler (<a href="https://github.com/99designs/gqlgen/pull/2740">#2740</a>) (closes <a href="https://github.com/99designs/gqlgen/issues/2739"> #2739</a>)
+- <a href="https://github.com/apito-cms/gqlgen/commit/790d7a7571865b8b8324557e1a565f40c23217c8"><tt>790d7a75</tt></a> Allow GraphiQL headers to be set when creating the playground handler (<a href="https://github.com/apito-cms/gqlgen/pull/2740">#2740</a>) (closes <a href="https://github.com/apito-cms/gqlgen/issues/2739"> #2739</a>)
 
-- <a href="https://github.com/99designs/gqlgen/commit/0eb95dc4315fc5f74431df03e008283cf9ec0c35"><tt>0eb95dc4</tt></a> v0.17.36 postrelease bump
+- <a href="https://github.com/apito-cms/gqlgen/commit/0eb95dc4315fc5f74431df03e008283cf9ec0c35"><tt>0eb95dc4</tt></a> v0.17.36 postrelease bump
 
  <!-- end of Commits -->
 <!-- end of Else -->
 
 <!-- end of If NoteGroups -->
 <a name="v0.17.36"></a>
-## [v0.17.36](https://github.com/99designs/gqlgen/compare/v0.17.35...v0.17.36) - 2023-07-27
-- <a href="https://github.com/99designs/gqlgen/commit/bd6cfd3108818cd060a06491052c36fb6f5e4be3"><tt>bd6cfd31</tt></a> release v0.17.36
+## [v0.17.36](https://github.com/apito-cms/gqlgen/compare/v0.17.35...v0.17.36) - 2023-07-27
+- <a href="https://github.com/apito-cms/gqlgen/commit/bd6cfd3108818cd060a06491052c36fb6f5e4be3"><tt>bd6cfd31</tt></a> release v0.17.36
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/60ec0d86847c97cd45c6e431d49b7ccf50efeeb9"><tt>60ec0d86</tt></a> Fix plugin template resolution (<a href="https://github.com/99designs/gqlgen/pull/2733">#2733</a>) (closes <a href="https://github.com/99designs/gqlgen/issues/2262"> #2262</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/60ec0d86847c97cd45c6e431d49b7ccf50efeeb9"><tt>60ec0d86</tt></a> Fix plugin template resolution (<a href="https://github.com/apito-cms/gqlgen/pull/2733">#2733</a>) (closes <a href="https://github.com/apito-cms/gqlgen/issues/2262"> #2262</a>)</summary>
 
 - According to the documentation comment for [templates.Options], if the
   `Template` and `TemplateFS` fields are empty, it `Render` should find
@@ -123,11 +123,11 @@ some clients libs (like HotChocolate for C#) depends on this behavior.
 
 </details></dd></dl>
 
-- <a href="https://github.com/99designs/gqlgen/commit/76d444c15fc1d98538648a229f41ed7b4573bad7"><tt>76d444c1</tt></a> Make models configurable via template (<a href="https://github.com/99designs/gqlgen/pull/2730">#2730</a>)
+- <a href="https://github.com/apito-cms/gqlgen/commit/76d444c15fc1d98538648a229f41ed7b4573bad7"><tt>76d444c1</tt></a> Make models configurable via template (<a href="https://github.com/apito-cms/gqlgen/pull/2730">#2730</a>)
 
-- <a href="https://github.com/99designs/gqlgen/commit/abe3ffde59d6a0d942a9ac2d1b657287f75efa67"><tt>abe3ffde</tt></a> Don't set the package variable for the new Resolver Template (<a href="https://github.com/99designs/gqlgen/pull/2725">#2725</a>)
+- <a href="https://github.com/apito-cms/gqlgen/commit/abe3ffde59d6a0d942a9ac2d1b657287f75efa67"><tt>abe3ffde</tt></a> Don't set the package variable for the new Resolver Template (<a href="https://github.com/apito-cms/gqlgen/pull/2725">#2725</a>)
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/febf9566224b3e3ad0e32903fd46d9005d6a7748"><tt>febf9566</tt></a> Make the resolver implementation configurable via a new template resolver.gotpl (<a href="https://github.com/99designs/gqlgen/pull/2720">#2720</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/febf9566224b3e3ad0e32903fd46d9005d6a7748"><tt>febf9566</tt></a> Make the resolver implementation configurable via a new template resolver.gotpl (<a href="https://github.com/apito-cms/gqlgen/pull/2720">#2720</a>)</summary>
 
 * Make an optional resolver.gotpl ResolverTemplate to implement a custom resolver
 
@@ -141,13 +141,13 @@ some clients libs (like HotChocolate for C#) depends on this behavior.
 
 </details></dd></dl>
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/bda3026043f187bf00f039d1c3648d5b1a8e4998"><tt>bda30260</tt></a> Fixed Data Loader docs (<a href="https://github.com/99designs/gqlgen/pull/2723">#2723</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/bda3026043f187bf00f039d1c3648d5b1a8e4998"><tt>bda30260</tt></a> Fixed Data Loader docs (<a href="https://github.com/apito-cms/gqlgen/pull/2723">#2723</a>)</summary>
 
 Also updated to v7
 
 </details></dd></dl>
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/16c9eb64ed04218e927a74199a57f951bfb452b1"><tt>16c9eb64</tt></a> Fix docs (<a href="https://github.com/99designs/gqlgen/pull/2722">#2722</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/16c9eb64ed04218e927a74199a57f951bfb452b1"><tt>16c9eb64</tt></a> Fix docs (<a href="https://github.com/apito-cms/gqlgen/pull/2722">#2722</a>)</summary>
 
 * docs: fix variable names in dataloader sample
 
@@ -155,7 +155,7 @@ Also updated to v7
 
 </details></dd></dl>
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/b233a01bf7eeb9f9ddc590a7dd72058da28d88df"><tt>b233a01b</tt></a> docs: update dataloader docs (<a href="https://github.com/99designs/gqlgen/pull/2719">#2719</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/b233a01bf7eeb9f9ddc590a7dd72058da28d88df"><tt>b233a01b</tt></a> docs: update dataloader docs (<a href="https://github.com/apito-cms/gqlgen/pull/2719">#2719</a>)</summary>
 
 * docs: update example
 
@@ -165,52 +165,52 @@ Also updated to v7
 
 </details></dd></dl>
 
-- <a href="https://github.com/99designs/gqlgen/commit/cccc7389c10cdd4ef4eb7b9541dedb0f9cf74a97"><tt>cccc7389</tt></a> Added go mod tidy to quick start guide (<a href="https://github.com/99designs/gqlgen/pull/2718">#2718</a>) (closes <a href="https://github.com/99designs/gqlgen/issues/2717"> #2717</a>, <a href="https://github.com/99designs/gqlgen/issues/2651"> #2651</a>, <a href="https://github.com/99designs/gqlgen/issues/2641"> #2641</a>, <a href="https://github.com/99designs/gqlgen/issues/2614"> #2614</a>, <a href="https://github.com/99designs/gqlgen/issues/2576"> #2576</a>)
+- <a href="https://github.com/apito-cms/gqlgen/commit/cccc7389c10cdd4ef4eb7b9541dedb0f9cf74a97"><tt>cccc7389</tt></a> Added go mod tidy to quick start guide (<a href="https://github.com/apito-cms/gqlgen/pull/2718">#2718</a>) (closes <a href="https://github.com/apito-cms/gqlgen/issues/2717"> #2717</a>, <a href="https://github.com/apito-cms/gqlgen/issues/2651"> #2651</a>, <a href="https://github.com/apito-cms/gqlgen/issues/2641"> #2641</a>, <a href="https://github.com/apito-cms/gqlgen/issues/2614"> #2614</a>, <a href="https://github.com/apito-cms/gqlgen/issues/2576"> #2576</a>)
 
-- <a href="https://github.com/99designs/gqlgen/commit/9adc7b81ac27c157e597d369e4499353f0f6b0b0"><tt>9adc7b81</tt></a> Update gqlparser to v2.5.8 (<a href="https://github.com/99designs/gqlgen/pull/2716">#2716</a>)
+- <a href="https://github.com/apito-cms/gqlgen/commit/9adc7b81ac27c157e597d369e4499353f0f6b0b0"><tt>9adc7b81</tt></a> Update gqlparser to v2.5.8 (<a href="https://github.com/apito-cms/gqlgen/pull/2716">#2716</a>)
 
-- <a href="https://github.com/99designs/gqlgen/commit/b442fbf457498c8ad318578b570c5a6b64cab452"><tt>b442fbf4</tt></a> Post v0.17.35 changelog update
+- <a href="https://github.com/apito-cms/gqlgen/commit/b442fbf457498c8ad318578b570c5a6b64cab452"><tt>b442fbf4</tt></a> Post v0.17.35 changelog update
 
-- <a href="https://github.com/99designs/gqlgen/commit/57c121994b1f843f62f99ada71a707e4f263a9df"><tt>57c12199</tt></a> v0.17.35 postrelease bump
+- <a href="https://github.com/apito-cms/gqlgen/commit/57c121994b1f843f62f99ada71a707e4f263a9df"><tt>57c12199</tt></a> v0.17.35 postrelease bump
 
  <!-- end of Commits -->
 <!-- end of Else -->
 
 <!-- end of If NoteGroups -->
 <a name="v0.17.35"></a>
-## [v0.17.35](https://github.com/99designs/gqlgen/compare/v0.17.34...v0.17.35) - 2023-07-15
-- <a href="https://github.com/99designs/gqlgen/commit/05006bf1dcb9451b0960d07fd68370145c2697b4"><tt>05006bf1</tt></a> release v0.17.35
+## [v0.17.35](https://github.com/apito-cms/gqlgen/compare/v0.17.34...v0.17.35) - 2023-07-15
+- <a href="https://github.com/apito-cms/gqlgen/commit/05006bf1dcb9451b0960d07fd68370145c2697b4"><tt>05006bf1</tt></a> release v0.17.35
 
-- <a href="https://github.com/99designs/gqlgen/commit/d95d614f8fc2c5983390adf0507027a1efdd778a"><tt>d95d614f</tt></a> Update gqlparser to v2.5.7 (<a href="https://github.com/99designs/gqlgen/pull/2714">#2714</a>)
+- <a href="https://github.com/apito-cms/gqlgen/commit/d95d614f8fc2c5983390adf0507027a1efdd778a"><tt>d95d614f</tt></a> Update gqlparser to v2.5.7 (<a href="https://github.com/apito-cms/gqlgen/pull/2714">#2714</a>)
 
-- <a href="https://github.com/99designs/gqlgen/commit/8c378e6bdd1962822216053ae2c01e89ef35034a"><tt>8c378e6b</tt></a> Updated GraphiQL playground 2.0.7 -> 3.0.1 and react 17 -> 18 (<a href="https://github.com/99designs/gqlgen/pull/2713">#2713</a>)
+- <a href="https://github.com/apito-cms/gqlgen/commit/8c378e6bdd1962822216053ae2c01e89ef35034a"><tt>8c378e6b</tt></a> Updated GraphiQL playground 2.0.7 -> 3.0.1 and react 17 -> 18 (<a href="https://github.com/apito-cms/gqlgen/pull/2713">#2713</a>)
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/7880739d48a9aa2d6f4be87129cb361d2c2c0345"><tt>7880739d</tt></a> Add op ctx safety for apollo tracing (<a href="https://github.com/99designs/gqlgen/pull/2709">#2709</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/7880739d48a9aa2d6f4be87129cb361d2c2c0345"><tt>7880739d</tt></a> Add op ctx safety for apollo tracing (<a href="https://github.com/apito-cms/gqlgen/pull/2709">#2709</a>)</summary>
 
 * Add automated tests for both tracing and tracer to simulate a client disconnect
 * Check for existence of operation context before proceeding to avoid panic
 
 </details></dd></dl>
 
-- <a href="https://github.com/99designs/gqlgen/commit/6ed9337bce0daf05c1c3bda29fd86368768cdb68"><tt>6ed9337b</tt></a> fix function name in comment (<a href="https://github.com/99designs/gqlgen/pull/2707">#2707</a>)
+- <a href="https://github.com/apito-cms/gqlgen/commit/6ed9337bce0daf05c1c3bda29fd86368768cdb68"><tt>6ed9337b</tt></a> fix function name in comment (<a href="https://github.com/apito-cms/gqlgen/pull/2707">#2707</a>)
 
-- <a href="https://github.com/99designs/gqlgen/commit/2cfb9f98c4c2b090a6a65816ed28a67501303768"><tt>2cfb9f98</tt></a> Fix apollo integrity hash (<a href="https://github.com/99designs/gqlgen/pull/2706">#2706</a>)
+- <a href="https://github.com/apito-cms/gqlgen/commit/2cfb9f98c4c2b090a6a65816ed28a67501303768"><tt>2cfb9f98</tt></a> Fix apollo integrity hash (<a href="https://github.com/apito-cms/gqlgen/pull/2706">#2706</a>)
 
-- <a href="https://github.com/99designs/gqlgen/commit/470fca87d3002399fb02e14cf014c3c26755d87b"><tt>470fca87</tt></a> Update gqlparser again (<a href="https://github.com/99designs/gqlgen/pull/2697">#2697</a>)
+- <a href="https://github.com/apito-cms/gqlgen/commit/470fca87d3002399fb02e14cf014c3c26755d87b"><tt>470fca87</tt></a> Update gqlparser again (<a href="https://github.com/apito-cms/gqlgen/pull/2697">#2697</a>)
 
-- <a href="https://github.com/99designs/gqlgen/commit/280441b1a0c46652f3b16692839fbdbd024aa06d"><tt>280441b1</tt></a> Update changelog
+- <a href="https://github.com/apito-cms/gqlgen/commit/280441b1a0c46652f3b16692839fbdbd024aa06d"><tt>280441b1</tt></a> Update changelog
 
-- <a href="https://github.com/99designs/gqlgen/commit/5bc36e142dfffceb96ac8b23bb9c13b492504474"><tt>5bc36e14</tt></a> v0.17.34 postrelease bump
+- <a href="https://github.com/apito-cms/gqlgen/commit/5bc36e142dfffceb96ac8b23bb9c13b492504474"><tt>5bc36e14</tt></a> v0.17.34 postrelease bump
 
  <!-- end of Commits -->
 <!-- end of Else -->
 
 <!-- end of If NoteGroups -->
 <a name="v0.17.34"></a>
-## [v0.17.34](https://github.com/99designs/gqlgen/compare/v0.17.33...v0.17.34) - 2023-06-23
-- <a href="https://github.com/99designs/gqlgen/commit/5a70585758275a186b3e76e729644cb0c3e4bd37"><tt>5a705857</tt></a> release v0.17.34
+## [v0.17.34](https://github.com/apito-cms/gqlgen/compare/v0.17.33...v0.17.34) - 2023-06-23
+- <a href="https://github.com/apito-cms/gqlgen/commit/5a70585758275a186b3e76e729644cb0c3e4bd37"><tt>5a705857</tt></a> release v0.17.34
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/1a9dbadd3e1a803e89ff9c6103ba4d9bbcf38029"><tt>1a9dbadd</tt></a> Use  "No longer supported" as the default deprecationReason for deprecations without a reason specified (<a href="https://github.com/99designs/gqlgen/pull/2692">#2692</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/1a9dbadd3e1a803e89ff9c6103ba4d9bbcf38029"><tt>1a9dbadd</tt></a> Use  "No longer supported" as the default deprecationReason for deprecations without a reason specified (<a href="https://github.com/apito-cms/gqlgen/pull/2692">#2692</a>)</summary>
 
 * fix: use "No longer supported" as the default deprecationReason for deprecated fields with no reason specified
 
@@ -218,11 +218,11 @@ Also updated to v7
 
 </details></dd></dl>
 
-- <a href="https://github.com/99designs/gqlgen/commit/640f383651dee93b64a5cd72a70af4c5dce0831d"><tt>640f3836</tt></a> Update gqlparser dependency (<a href="https://github.com/99designs/gqlgen/pull/2694">#2694</a>)
+- <a href="https://github.com/apito-cms/gqlgen/commit/640f383651dee93b64a5cd72a70af4c5dce0831d"><tt>640f3836</tt></a> Update gqlparser dependency (<a href="https://github.com/apito-cms/gqlgen/pull/2694">#2694</a>)
 
-- <a href="https://github.com/99designs/gqlgen/commit/5ac9fe5945a59cf7ce6370da4dd5dbc6a8d098ff"><tt>5ac9fe59</tt></a> Added flag to omit interface checks (<a href="https://github.com/99designs/gqlgen/pull/2689">#2689</a>)
+- <a href="https://github.com/apito-cms/gqlgen/commit/5ac9fe5945a59cf7ce6370da4dd5dbc6a8d098ff"><tt>5ac9fe59</tt></a> Added flag to omit interface checks (<a href="https://github.com/apito-cms/gqlgen/pull/2689">#2689</a>)
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/abc3c627d6dfc9f70e22f40f2457b002310a84c7"><tt>abc3c627</tt></a> feat: always use latest apollo sandbox (<a href="https://github.com/99designs/gqlgen/pull/2686">#2686</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/abc3c627d6dfc9f70e22f40f2457b002310a84c7"><tt>abc3c627</tt></a> feat: always use latest apollo sandbox (<a href="https://github.com/apito-cms/gqlgen/pull/2686">#2686</a>)</summary>
 
 * feat: removeDuplicateTags() validates tags and panic with meaningful error message
 
@@ -234,7 +234,7 @@ Also updated to v7
 
 </details></dd></dl>
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/3b295bb4a70486a16e82877422a7b7c55d21f4f9"><tt>3b295bb4</tt></a> added GoInitialismsConfig which overrides the initialisms to be regarded (<a href="https://github.com/99designs/gqlgen/pull/2683">#2683</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/3b295bb4a70486a16e82877422a7b7c55d21f4f9"><tt>3b295bb4</tt></a> added GoInitialismsConfig which overrides the initialisms to be regarded (<a href="https://github.com/apito-cms/gqlgen/pull/2683">#2683</a>)</summary>
 
 * added GoInitialismsConfig which overrides the initialisms to be regarded
 
@@ -248,11 +248,11 @@ Also updated to v7
 
 </details></dd></dl>
 
-- <a href="https://github.com/99designs/gqlgen/commit/ee6add4bddd7ee05e31a37815f281c320eb44e26"><tt>ee6add4b</tt></a> Refactor TypeIdentifier to avoid circular imports (<a href="https://github.com/99designs/gqlgen/pull/2682">#2682</a>)
+- <a href="https://github.com/apito-cms/gqlgen/commit/ee6add4bddd7ee05e31a37815f281c320eb44e26"><tt>ee6add4b</tt></a> Refactor TypeIdentifier to avoid circular imports (<a href="https://github.com/apito-cms/gqlgen/pull/2682">#2682</a>)
 
-- <a href="https://github.com/99designs/gqlgen/commit/44376e52e7857a6b7e16d40088d57234c8eeaf64"><tt>44376e52</tt></a> fix subscription example in documentation (<a href="https://github.com/99designs/gqlgen/pull/2677">#2677</a>)
+- <a href="https://github.com/apito-cms/gqlgen/commit/44376e52e7857a6b7e16d40088d57234c8eeaf64"><tt>44376e52</tt></a> fix subscription example in documentation (<a href="https://github.com/apito-cms/gqlgen/pull/2677">#2677</a>)
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/d508082896d5ab6de6ea40b42478e54dc2feb74c"><tt>d5080828</tt></a> Reworked integration testing using vitest (<a href="https://github.com/99designs/gqlgen/pull/2675">#2675</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/d508082896d5ab6de6ea40b42478e54dc2feb74c"><tt>d5080828</tt></a> Reworked integration testing using vitest (<a href="https://github.com/apito-cms/gqlgen/pull/2675">#2675</a>)</summary>
 
 * Reworked integration using vitest
 Added SSE client testing
@@ -264,7 +264,7 @@ Fixed SSE Transport parse errors not being sent as event-stream
 
 </details></dd></dl>
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/d16f498f5b3659bfe23749ee78993b816df04322"><tt>d16f498f</tt></a> fix: issue with extraFields being thrown away (<a href="https://github.com/99designs/gqlgen/pull/2674">#2674</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/d16f498f5b3659bfe23749ee78993b816df04322"><tt>d16f498f</tt></a> fix: issue with extraFields being thrown away (<a href="https://github.com/apito-cms/gqlgen/pull/2674">#2674</a>)</summary>
 
 * fix: issue with extraFields being thrown away
 
@@ -275,17 +275,17 @@ Fixed SSE Transport parse errors not being sent as event-stream
 
 </details></dd></dl>
 
-- <a href="https://github.com/99designs/gqlgen/commit/71d16aa052167358d95a4dd2ae89806b636b9a1d"><tt>71d16aa0</tt></a> v0.17.33 postrelease bump
+- <a href="https://github.com/apito-cms/gqlgen/commit/71d16aa052167358d95a4dd2ae89806b636b9a1d"><tt>71d16aa0</tt></a> v0.17.33 postrelease bump
 
  <!-- end of Commits -->
 <!-- end of Else -->
 
 <!-- end of If NoteGroups -->
 <a name="v0.17.33"></a>
-## [v0.17.33](https://github.com/99designs/gqlgen/compare/v0.17.32...v0.17.33) - 2023-06-13
-- <a href="https://github.com/99designs/gqlgen/commit/a1e34ca0f6c1f4fdbb113485187eeef77fb8cc1f"><tt>a1e34ca0</tt></a> release v0.17.33
+## [v0.17.33](https://github.com/apito-cms/gqlgen/compare/v0.17.32...v0.17.33) - 2023-06-13
+- <a href="https://github.com/apito-cms/gqlgen/commit/a1e34ca0f6c1f4fdbb113485187eeef77fb8cc1f"><tt>a1e34ca0</tt></a> release v0.17.33
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/790a72c1642200c6530da34ae2c094a088ae1dfe"><tt>790a72c1</tt></a> issue-1372: add custom decode func (<a href="https://github.com/99designs/gqlgen/pull/2666">#2666</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/790a72c1642200c6530da34ae2c094a088ae1dfe"><tt>790a72c1</tt></a> issue-1372: add custom decode func (<a href="https://github.com/apito-cms/gqlgen/pull/2666">#2666</a>)</summary>
 
 * issue-1372: add custom decode func
 
@@ -307,7 +307,7 @@ Fixed SSE Transport parse errors not being sent as event-stream
 
 </details></dd></dl>
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/c63c60eb910b532c10677caac42b78c02735f4e2"><tt>c63c60eb</tt></a> Update all modules (<a href="https://github.com/99designs/gqlgen/pull/2667">#2667</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/c63c60eb910b532c10677caac42b78c02735f4e2"><tt>c63c60eb</tt></a> Update all modules (<a href="https://github.com/apito-cms/gqlgen/pull/2667">#2667</a>)</summary>
 
 * Update all modules
 
@@ -319,7 +319,7 @@ Fixed SSE Transport parse errors not being sent as event-stream
 
 </details></dd></dl>
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/4a78eb0c9be84793df821616b4ebfa4bfb42a49c"><tt>4a78eb0c</tt></a> minor cleaning: fix some stricter lint rule warnings (<a href="https://github.com/99designs/gqlgen/pull/2665">#2665</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/4a78eb0c9be84793df821616b4ebfa4bfb42a49c"><tt>4a78eb0c</tt></a> minor cleaning: fix some stricter lint rule warnings (<a href="https://github.com/apito-cms/gqlgen/pull/2665">#2665</a>)</summary>
 
 * Add Changelog notes
 
@@ -334,19 +334,19 @@ Fixed SSE Transport parse errors not being sent as event-stream
 
 </details></dd></dl>
 
-- <a href="https://github.com/99designs/gqlgen/commit/1e925f7e5b13566c9f7cdd115e59d39f0df0e4f3"><tt>1e925f7e</tt></a> v0.17.32 postrelease bump
+- <a href="https://github.com/apito-cms/gqlgen/commit/1e925f7e5b13566c9f7cdd115e59d39f0df0e4f3"><tt>1e925f7e</tt></a> v0.17.32 postrelease bump
 
  <!-- end of Commits -->
 <!-- end of Else -->
 
 <!-- end of If NoteGroups -->
 <a name="v0.17.32"></a>
-## [v0.17.32](https://github.com/99designs/gqlgen/compare/v0.17.31...v0.17.32) - 2023-06-06
-- <a href="https://github.com/99designs/gqlgen/commit/3a81a78bb7370f067c6bf4f3ce79de0e77f885a1"><tt>3a81a78b</tt></a> release v0.17.32
+## [v0.17.32](https://github.com/apito-cms/gqlgen/compare/v0.17.31...v0.17.32) - 2023-06-06
+- <a href="https://github.com/apito-cms/gqlgen/commit/3a81a78bb7370f067c6bf4f3ce79de0e77f885a1"><tt>3a81a78b</tt></a> release v0.17.32
 
-- <a href="https://github.com/99designs/gqlgen/commit/dbb61174f81ef5e30cb33e772f650abdc41da90a"><tt>dbb61174</tt></a> Added unit tests for defer (<a href="https://github.com/99designs/gqlgen/pull/2657">#2657</a>)
+- <a href="https://github.com/apito-cms/gqlgen/commit/dbb61174f81ef5e30cb33e772f650abdc41da90a"><tt>dbb61174</tt></a> Added unit tests for defer (<a href="https://github.com/apito-cms/gqlgen/pull/2657">#2657</a>)
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/5c19c84141c643fa8e3ef59a63d9788ebc966c43"><tt>5c19c841</tt></a> Addressing few issues in defer feature (<a href="https://github.com/99designs/gqlgen/pull/2656">#2656</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/5c19c84141c643fa8e3ef59a63d9788ebc966c43"><tt>5c19c841</tt></a> Addressing few issues in defer feature (<a href="https://github.com/apito-cms/gqlgen/pull/2656">#2656</a>)</summary>
 
 And fixed hasNext to only appear in the payload when there is deferred usage
 
@@ -358,7 +358,7 @@ And fixed hasNext to only appear in the payload when there is deferred usage
 
 </details></dd></dl>
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/8e295024ada297c219aa2e79754a9e4f601d0b56"><tt>8e295024</tt></a> Update extra fields type definition and plus docs about the feature (<a href="https://github.com/99designs/gqlgen/pull/2655">#2655</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/8e295024ada297c219aa2e79754a9e4f601d0b56"><tt>8e295024</tt></a> Update extra fields type definition and plus docs about the feature (<a href="https://github.com/apito-cms/gqlgen/pull/2655">#2655</a>)</summary>
 
 * Update extra fields type definition and plus docs about the feature
 
@@ -366,7 +366,7 @@ And fixed hasNext to only appear in the payload when there is deferred usage
 
 </details></dd></dl>
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/adf5da27cd1bec2ce81b9a3e8e705ed80714f47a"><tt>adf5da27</tt></a> Make usage of omitempty tag optional (<a href="https://github.com/99designs/gqlgen/pull/2649">#2649</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/adf5da27cd1bec2ce81b9a3e8e705ed80714f47a"><tt>adf5da27</tt></a> Make usage of omitempty tag optional (<a href="https://github.com/apito-cms/gqlgen/pull/2649">#2649</a>)</summary>
 
 * Make usage of omitempty tag optional
 
@@ -380,9 +380,9 @@ And fixed hasNext to only appear in the payload when there is deferred usage
 
 </details></dd></dl>
 
-- <a href="https://github.com/99designs/gqlgen/commit/7ab3317689c9ee85bcebb454a123ba8f70307058"><tt>7ab33176</tt></a> Extra fields (<a href="https://github.com/99designs/gqlgen/pull/2638">#2638</a>)
+- <a href="https://github.com/apito-cms/gqlgen/commit/7ab3317689c9ee85bcebb454a123ba8f70307058"><tt>7ab33176</tt></a> Extra fields (<a href="https://github.com/apito-cms/gqlgen/pull/2638">#2638</a>)
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/22deb8bd6c7662bb8eacc29c9a08df0b85444721"><tt>22deb8bd</tt></a> allow binding a GraphQL `Any` field to a struct method returning `*any` (<a href="https://github.com/99designs/gqlgen/pull/2644">#2644</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/22deb8bd6c7662bb8eacc29c9a08df0b85444721"><tt>22deb8bd</tt></a> allow binding a GraphQL `Any` field to a struct method returning `*any` (<a href="https://github.com/apito-cms/gqlgen/pull/2644">#2644</a>)</summary>
 
 * allow binding GQL `Any` field to struct method returning `*any`
 
@@ -394,7 +394,7 @@ And fixed hasNext to only appear in the payload when there is deferred usage
 
 </details></dd></dl>
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/c313bf3d289985768fdca4e26162d3c429431711"><tt>c313bf3d</tt></a> `[@defer](https://github.com/defer)` initial support (<a href="https://github.com/99designs/gqlgen/pull/2642">#2642</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/c313bf3d289985768fdca4e26162d3c429431711"><tt>c313bf3d</tt></a> `[@defer](https://github.com/defer)` initial support (<a href="https://github.com/apito-cms/gqlgen/pull/2642">#2642</a>)</summary>
 
 * support returning errors with deferred fragments.
 
@@ -425,7 +425,7 @@ And fixed hasNext to only appear in the payload when there is deferred usage
 
 </details></dd></dl>
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/4d945da283950a9cd66fb6df58abe2bb5f0cf836"><tt>4d945da2</tt></a> feat(federation): update Apollo Federation v2 definitions (<a href="https://github.com/99designs/gqlgen/pull/2635">#2635</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/4d945da283950a9cd66fb6df58abe2bb5f0cf836"><tt>4d945da2</tt></a> feat(federation): update Apollo Federation v2 definitions (<a href="https://github.com/apito-cms/gqlgen/pull/2635">#2635</a>)</summary>
 
 * feat(federation): update Apollo Federation v2 definitions
 
@@ -437,9 +437,9 @@ Fix Apollo Federation v2 directive definitions:
 
 </details></dd></dl>
 
-- <a href="https://github.com/99designs/gqlgen/commit/9796f91dba461051d70a9101c9113b99f7ee82df"><tt>9796f91d</tt></a> Generate entity resolvers for interfaces with [@key](https://github.com/key) defined (<a href="https://github.com/99designs/gqlgen/pull/2634">#2634</a>)
+- <a href="https://github.com/apito-cms/gqlgen/commit/9796f91dba461051d70a9101c9113b99f7ee82df"><tt>9796f91d</tt></a> Generate entity resolvers for interfaces with [@key](https://github.com/key) defined (<a href="https://github.com/apito-cms/gqlgen/pull/2634">#2634</a>)
 
-<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/33fdd1b5c0b4784c3aece793f1e5e315773dfb0d"><tt>33fdd1b5</tt></a> fix enum capitalization (<a href="https://github.com/99designs/gqlgen/pull/2630">#2630</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/apito-cms/gqlgen/commit/33fdd1b5c0b4784c3aece793f1e5e315773dfb0d"><tt>33fdd1b5</tt></a> fix enum capitalization (<a href="https://github.com/apito-cms/gqlgen/pull/2630">#2630</a>)</summary>
 
 * fix enum capitalization
 
@@ -2628,7 +2628,7 @@ While following the instructions in this getting started guide I run into this e
 - better checking for missing/incorrect parameters to entity resolver functions
 - better tests for generated entity resolvers
 
-Still missing: 
+Still missing:
 - suggested test for autobind vs non-autobind generation
 - could probably clean up generated code spacing, etc
 
@@ -4091,7 +4091,7 @@ Dont hold error lock when calling into error presenters
 Changed this:
 `In your router file, define the handlers for the GraphQL and Playground endpoints in two different methods and tie then together in the Gin router:
 `
-to: 
+to:
 `In your router file, define the handlers for the GraphQL and Playground endpoints in two different methods and tie them together in the Gin router:
 `
 

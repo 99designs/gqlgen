@@ -7,12 +7,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/99designs/gqlgen/client"
-	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/apito-cms/gqlgen/client"
+	"github.com/apito-cms/gqlgen/graphql/handler"
 	"github.com/stretchr/testify/require"
 
-	"github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver"
-	"github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/generated"
+	"github.com/apito-cms/gqlgen/plugin/federation/testdata/entityresolver"
+	"github.com/apito-cms/gqlgen/plugin/federation/testdata/entityresolver/generated"
 )
 
 func TestEntityResolver(t *testing.T) {

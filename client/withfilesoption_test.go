@@ -10,7 +10,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/99designs/gqlgen/client"
+	"github.com/apito-cms/gqlgen/client"
 	"github.com/stretchr/testify/require"
 )
 

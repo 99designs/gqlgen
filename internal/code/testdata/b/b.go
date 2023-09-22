@@ -1,5 +1,5 @@
 package b
 
-import "github.com/99designs/gqlgen/internal/code/testdata/a"
+import "github.com/apito-cms/gqlgen/internal/code/testdata/a"
 
 var B = a.A + " B"

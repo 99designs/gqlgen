@@ -25,9 +25,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/99designs/gqlgen/api"
-	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/99designs/gqlgen/plugin/stubgen"
+	"github.com/apito-cms/gqlgen/api"
+	"github.com/apito-cms/gqlgen/codegen/config"
+	"github.com/apito-cms/gqlgen/plugin/stubgen"
 )
 
 func main() {
@@ -57,9 +57,9 @@ There are currently only two hooks:
 
 - MutateConfig: Allows a plugin to mutate the config before codegen starts. This allows plugins to add
   custom directives, define types, and implement resolvers. see
-  [modelgen](https://github.com/99designs/gqlgen/tree/master/plugin/modelgen) for an example
+  [modelgen](https://github.com/apito-cms/gqlgen/tree/master/plugin/modelgen) for an example
 - GenerateCode: Allows a plugin to generate a new output file, see
-  [stubgen](https://github.com/99designs/gqlgen/tree/master/plugin/stubgen) for an example
+  [stubgen](https://github.com/apito-cms/gqlgen/tree/master/plugin/stubgen) for an example
 
-Take a look at [plugin.go](https://github.com/99designs/gqlgen/blob/master/plugin/plugin.go) for the full list of
+Take a look at [plugin.go](https://github.com/apito-cms/gqlgen/blob/master/plugin/plugin.go) for the full list of
 available hooks. These are likely to change with each release.

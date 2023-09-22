@@ -3,7 +3,7 @@ package codegen
 import (
 	"fmt"
 
-	"github.com/99designs/gqlgen/codegen/config"
+	"github.com/apito-cms/gqlgen/codegen/config"
 )
 
 func (b *builder) buildTypes() map[string]*config.TypeReference {

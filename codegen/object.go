@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/99designs/gqlgen/codegen/config"
+	"github.com/apito-cms/gqlgen/codegen/config"
 	"github.com/vektah/gqlparser/v2/ast"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"

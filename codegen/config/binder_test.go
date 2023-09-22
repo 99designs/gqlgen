@@ -4,7 +4,7 @@ import (
 	"go/types"
 	"testing"
 
-	"github.com/99designs/gqlgen/internal/code"
+	"github.com/apito-cms/gqlgen/internal/code"
 
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2"
@@ -28,7 +28,7 @@ func TestSlicePointerBinding(t *testing.T) {
 			panic(err)
 		}
 
-		require.Equal(t, ta.GO.String(), "[]*github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat.Message")
+		require.Equal(t, ta.GO.String(), "[]*github.com/apito-cms/gqlgen/codegen/config/testdata/autobinding/chat.Message")
 	})
 
 	t.Run("with OmitSliceElementPointers", func(t *testing.T) {
@@ -41,7 +41,7 @@ func TestSlicePointerBinding(t *testing.T) {
 			panic(err)
 		}
 
-		require.Equal(t, ta.GO.String(), "[]github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat.Message")
+		require.Equal(t, ta.GO.String(), "[]github.com/apito-cms/gqlgen/codegen/config/testdata/autobinding/chat.Message")
 	})
 }
 
@@ -49,7 +49,7 @@ func TestOmittableBinding(t *testing.T) {
 	t.Run("bind nullable string with Omittable[string]", func(t *testing.T) {
 		binder, schema := createBinder(Config{})
 
-		ot, err := binder.FindType("github.com/99designs/gqlgen/graphql", "Omittable")
+		ot, err := binder.FindType("github.com/apito-cms/gqlgen/graphql", "Omittable")
 		if err != nil {
 			panic(err)
 		}
@@ -70,7 +70,7 @@ func TestOmittableBinding(t *testing.T) {
 	t.Run("bind nullable string with Omittable[*string]", func(t *testing.T) {
 		binder, schema := createBinder(Config{})
 
-		ot, err := binder.FindType("github.com/99designs/gqlgen/graphql", "Omittable")
+		ot, err := binder.FindType("github.com/apito-cms/gqlgen/graphql", "Omittable")
 		if err != nil {
 			panic(err)
 		}
@@ -91,7 +91,7 @@ func TestOmittableBinding(t *testing.T) {
 	t.Run("fail binding non-nullable string with Omittable[string]", func(t *testing.T) {
 		binder, schema := createBinder(Config{})
 
-		ot, err := binder.FindType("github.com/99designs/gqlgen/graphql", "Omittable")
+		ot, err := binder.FindType("github.com/apito-cms/gqlgen/graphql", "Omittable")
 		if err != nil {
 			panic(err)
 		}
@@ -108,7 +108,7 @@ func TestOmittableBinding(t *testing.T) {
 	t.Run("fail binding non-nullable string with Omittable[*string]", func(t *testing.T) {
 		binder, schema := createBinder(Config{})
 
-		ot, err := binder.FindType("github.com/99designs/gqlgen/graphql", "Omittable")
+		ot, err := binder.FindType("github.com/apito-cms/gqlgen/graphql", "Omittable")
 		if err != nil {
 			panic(err)
 		}
@@ -125,12 +125,12 @@ func TestOmittableBinding(t *testing.T) {
 	t.Run("bind nullable object with Omittable[T]", func(t *testing.T) {
 		binder, schema := createBinder(Config{})
 
-		typ, err := binder.FindType("github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat", "Message")
+		typ, err := binder.FindType("github.com/apito-cms/gqlgen/codegen/config/testdata/autobinding/chat", "Message")
 		if err != nil {
 			panic(err)
 		}
 
-		ot, err := binder.FindType("github.com/99designs/gqlgen/graphql", "Omittable")
+		ot, err := binder.FindType("github.com/apito-cms/gqlgen/graphql", "Omittable")
 		if err != nil {
 			panic(err)
 		}
@@ -151,12 +151,12 @@ func TestOmittableBinding(t *testing.T) {
 	t.Run("bind nullable object with Omittable[*T]", func(t *testing.T) {
 		binder, schema := createBinder(Config{})
 
-		typ, err := binder.FindType("github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat", "Message")
+		typ, err := binder.FindType("github.com/apito-cms/gqlgen/codegen/config/testdata/autobinding/chat", "Message")
 		if err != nil {
 			panic(err)
 		}
 
-		ot, err := binder.FindType("github.com/99designs/gqlgen/graphql", "Omittable")
+		ot, err := binder.FindType("github.com/apito-cms/gqlgen/graphql", "Omittable")
 		if err != nil {
 			panic(err)
 		}
@@ -178,13 +178,13 @@ func TestOmittableBinding(t *testing.T) {
 func createBinder(cfg Config) (*Binder, *ast.Schema) {
 	cfg.Models = TypeMap{
 		"Message": TypeMapEntry{
-			Model: []string{"github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat.Message"},
+			Model: []string{"github.com/apito-cms/gqlgen/codegen/config/testdata/autobinding/chat.Message"},
 		},
 		"BarInput": TypeMapEntry{
-			Model: []string{"github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat.Message"},
+			Model: []string{"github.com/apito-cms/gqlgen/codegen/config/testdata/autobinding/chat.Message"},
 		},
 		"String": TypeMapEntry{
-			Model: []string{"github.com/99designs/gqlgen/graphql.String"},
+			Model: []string{"github.com/apito-cms/gqlgen/graphql.String"},
 		},
 	}
 	cfg.Packages = code.NewPackages()

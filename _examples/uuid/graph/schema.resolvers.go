@@ -7,7 +7,7 @@ package graph
 import (
 	"context"
 
-	"github.com/99designs/gqlgen/_examples/uuid/graph/model"
+	"github.com/apito-cms/gqlgen/_examples/uuid/graph/model"
 	"github.com/google/uuid"
 )
 

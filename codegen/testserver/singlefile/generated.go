@@ -14,11 +14,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	introspection1 "github.com/99designs/gqlgen/codegen/testserver/singlefile/introspection"
-	invalid_packagename "github.com/99designs/gqlgen/codegen/testserver/singlefile/invalid-packagename"
-	"github.com/99designs/gqlgen/codegen/testserver/singlefile/otherpkg"
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/introspection"
+	introspection1 "github.com/apito-cms/gqlgen/codegen/testserver/singlefile/introspection"
+	invalid_packagename "github.com/apito-cms/gqlgen/codegen/testserver/singlefile/invalid-packagename"
+	"github.com/apito-cms/gqlgen/codegen/testserver/singlefile/otherpkg"
+	"github.com/apito-cms/gqlgen/graphql"
+	"github.com/apito-cms/gqlgen/graphql/introspection"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -2791,7 +2791,7 @@ func (ec *executionContext) field_Query_directiveInputType_args(ctx context.Cont
 		if data, ok := tmp.(InnerInput); ok {
 			arg0 = data
 		} else {
-			return nil, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be github.com/99designs/gqlgen/codegen/testserver/singlefile.InnerInput`, tmp))
+			return nil, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be github.com/apito-cms/gqlgen/codegen/testserver/singlefile.InnerInput`, tmp))
 		}
 	}
 	args["arg"] = arg0
@@ -8974,7 +8974,7 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 		if data, ok := tmp.(*ObjectDirectives); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/codegen/testserver/singlefile.ObjectDirectives`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/apito-cms/gqlgen/codegen/testserver/singlefile.ObjectDirectives`, tmp)
 	})
 
 	if resTmp == nil {
@@ -9538,7 +9538,7 @@ func (ec *executionContext) _Query_noShape(ctx context.Context, field graphql.Co
 		if data, ok := tmp.(Shape); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be github.com/99designs/gqlgen/codegen/testserver/singlefile.Shape`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be github.com/apito-cms/gqlgen/codegen/testserver/singlefile.Shape`, tmp)
 	})
 
 	if resTmp == nil {
@@ -9637,7 +9637,7 @@ func (ec *executionContext) _Query_noShapeTypedNil(ctx context.Context, field gr
 		if data, ok := tmp.(Shape); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be github.com/99designs/gqlgen/codegen/testserver/singlefile.Shape`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be github.com/apito-cms/gqlgen/codegen/testserver/singlefile.Shape`, tmp)
 	})
 
 	if resTmp == nil {
@@ -9695,7 +9695,7 @@ func (ec *executionContext) _Query_animal(ctx context.Context, field graphql.Col
 		if data, ok := tmp.(Animal); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be github.com/99designs/gqlgen/codegen/testserver/singlefile.Animal`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be github.com/apito-cms/gqlgen/codegen/testserver/singlefile.Animal`, tmp)
 	})
 
 	if resTmp == nil {
@@ -15040,7 +15040,7 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			} else if tmp == nil {
 				it.Inner = nil
 			} else {
-				err := fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/codegen/testserver/singlefile.InnerDirectives`, tmp)
+				err := fmt.Errorf(`unexpected type %T from directive, should be *github.com/apito-cms/gqlgen/codegen/testserver/singlefile.InnerDirectives`, tmp)
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
 		case "innerNullable":
@@ -15066,7 +15066,7 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			} else if tmp == nil {
 				it.InnerNullable = nil
 			} else {
-				err := fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/codegen/testserver/singlefile.InnerDirectives`, tmp)
+				err := fmt.Errorf(`unexpected type %T from directive, should be *github.com/apito-cms/gqlgen/codegen/testserver/singlefile.InnerDirectives`, tmp)
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
 		case "thirdParty":
@@ -15106,7 +15106,7 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			} else if tmp == nil {
 				it.ThirdParty = nil
 			} else {
-				err := fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/codegen/testserver/singlefile.ThirdParty`, tmp)
+				err := fmt.Errorf(`unexpected type %T from directive, should be *github.com/apito-cms/gqlgen/codegen/testserver/singlefile.ThirdParty`, tmp)
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
 		}

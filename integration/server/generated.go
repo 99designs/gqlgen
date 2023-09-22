@@ -12,11 +12,11 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/introspection"
-	models "github.com/99designs/gqlgen/integration/server/models-go"
-	"github.com/99designs/gqlgen/integration/server/remote_api"
-	"github.com/99designs/gqlgen/integration/server/testomitempty"
+	"github.com/apito-cms/gqlgen/graphql"
+	"github.com/apito-cms/gqlgen/graphql/introspection"
+	models "github.com/apito-cms/gqlgen/integration/server/models-go"
+	"github.com/apito-cms/gqlgen/integration/server/remote_api"
+	"github.com/apito-cms/gqlgen/integration/server/testomitempty"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )

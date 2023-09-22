@@ -7,7 +7,7 @@ package graph
 import (
 	"context"
 
-	"github.com/99designs/gqlgen/_examples/federation/products/graph/model"
+	"github.com/apito-cms/gqlgen/_examples/federation/products/graph/model"
 )
 
 // FindManufacturerByID is the resolver for the findManufacturerByID field.

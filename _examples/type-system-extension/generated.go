@@ -12,8 +12,8 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/apito-cms/gqlgen/graphql"
+	"github.com/apito-cms/gqlgen/graphql/introspection"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -400,7 +400,7 @@ func (ec *executionContext) _MyMutation_createTodo(ctx context.Context, field gr
 		if data, ok := tmp.(*Todo); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/_examples/type-system-extension.Todo`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/apito-cms/gqlgen/_examples/type-system-extension.Todo`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -485,7 +485,7 @@ func (ec *executionContext) _MyQuery_todos(ctx context.Context, field graphql.Co
 		if data, ok := tmp.([]*Todo); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/_examples/type-system-extension.Todo`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/apito-cms/gqlgen/_examples/type-system-extension.Todo`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -559,7 +559,7 @@ func (ec *executionContext) _MyQuery_todo(ctx context.Context, field graphql.Col
 		if data, ok := tmp.(*Todo); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/_examples/type-system-extension.Todo`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/apito-cms/gqlgen/_examples/type-system-extension.Todo`, tmp)
 	})
 	if err != nil {
 		ec.Error(ctx, err)

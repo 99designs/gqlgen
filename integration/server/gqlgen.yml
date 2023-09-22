@@ -12,15 +12,15 @@ resolver:
 struct_tag: json
 
 autobind:
-  - "github.com/99designs/gqlgen/integration/server/testomitempty"
+  - "github.com/apito-cms/gqlgen/integration/server/testomitempty"
 
 models:
   Element:
-    model: github.com/99designs/gqlgen/integration/server/models-go.Element
+    model: github.com/apito-cms/gqlgen/integration/server/models-go.Element
   Viewer:
-    model: github.com/99designs/gqlgen/integration/server/models-go.Viewer
+    model: github.com/apito-cms/gqlgen/integration/server/models-go.Viewer
   User:
-    model: github.com/99designs/gqlgen/integration/server/remote_api.User
+    model: github.com/apito-cms/gqlgen/integration/server/remote_api.User
     fields:
       likes:
         resolver: true

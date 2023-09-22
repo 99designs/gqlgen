@@ -7,7 +7,7 @@ package graph
 import (
 	"context"
 
-	"github.com/99designs/gqlgen/_examples/federation/accounts/graph/model"
+	"github.com/apito-cms/gqlgen/_examples/federation/accounts/graph/model"
 )
 
 // Me is the resolver for the me field.

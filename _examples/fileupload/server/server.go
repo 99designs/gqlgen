@@ -7,15 +7,15 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/99designs/gqlgen/graphql/handler/extension"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/apito-cms/gqlgen/graphql/handler/extension"
+	"github.com/apito-cms/gqlgen/graphql/handler/transport"
 
-	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/apito-cms/gqlgen/graphql/playground"
 
-	"github.com/99designs/gqlgen/_examples/fileupload"
-	"github.com/99designs/gqlgen/_examples/fileupload/model"
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/apito-cms/gqlgen/_examples/fileupload"
+	"github.com/apito-cms/gqlgen/_examples/fileupload/model"
+	"github.com/apito-cms/gqlgen/graphql"
+	"github.com/apito-cms/gqlgen/graphql/handler"
 )
 
 func main() {

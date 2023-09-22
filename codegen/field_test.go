@@ -8,7 +8,7 @@ import (
 	"go/types"
 	"testing"
 
-	"github.com/99designs/gqlgen/codegen/config"
+	"github.com/apito-cms/gqlgen/codegen/config"
 	"github.com/stretchr/testify/require"
 	ast2 "github.com/vektah/gqlparser/v2/ast"
 )

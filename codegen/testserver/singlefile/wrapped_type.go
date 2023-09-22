@@ -1,6 +1,6 @@
 package singlefile
 
-import "github.com/99designs/gqlgen/codegen/testserver/singlefile/otherpkg"
+import "github.com/apito-cms/gqlgen/codegen/testserver/singlefile/otherpkg"
 
 type (
 	WrappedScalar = otherpkg.Scalar

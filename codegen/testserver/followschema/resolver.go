@@ -5,9 +5,9 @@ package followschema
 import (
 	"context"
 
-	introspection1 "github.com/99designs/gqlgen/codegen/testserver/followschema/introspection"
-	invalid_packagename "github.com/99designs/gqlgen/codegen/testserver/followschema/invalid-packagename"
-	"github.com/99designs/gqlgen/codegen/testserver/followschema/otherpkg"
+	introspection1 "github.com/apito-cms/gqlgen/codegen/testserver/followschema/introspection"
+	invalid_packagename "github.com/apito-cms/gqlgen/codegen/testserver/followschema/invalid-packagename"
+	"github.com/apito-cms/gqlgen/codegen/testserver/followschema/otherpkg"
 )
 
 type Resolver struct{}

@@ -3,9 +3,9 @@ package subdir
 import (
 	"testing"
 
-	"github.com/99designs/gqlgen/_examples/embedding/subdir/gendir"
-	"github.com/99designs/gqlgen/client"
-	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/apito-cms/gqlgen/_examples/embedding/subdir/gendir"
+	"github.com/apito-cms/gqlgen/client"
+	"github.com/apito-cms/gqlgen/graphql/handler"
 	"github.com/stretchr/testify/require"
 )
 

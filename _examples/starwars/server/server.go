@@ -6,11 +6,11 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/99designs/gqlgen/_examples/starwars"
-	"github.com/99designs/gqlgen/_examples/starwars/generated"
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/apito-cms/gqlgen/_examples/starwars"
+	"github.com/apito-cms/gqlgen/_examples/starwars/generated"
+	"github.com/apito-cms/gqlgen/graphql"
+	"github.com/apito-cms/gqlgen/graphql/handler"
+	"github.com/apito-cms/gqlgen/graphql/playground"
 )
 
 func main() {

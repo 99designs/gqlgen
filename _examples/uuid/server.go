@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/99designs/gqlgen/_examples/uuid/graph"
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/apito-cms/gqlgen/_examples/uuid/graph"
+	"github.com/apito-cms/gqlgen/graphql/handler"
+	"github.com/apito-cms/gqlgen/graphql/playground"
 )
 
 const defaultPort = "8080"

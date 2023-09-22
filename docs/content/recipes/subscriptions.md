@@ -39,9 +39,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/apito-cms/gqlgen/graphql/handler"
+	"github.com/apito-cms/gqlgen/graphql/handler/transport"
+	"github.com/apito-cms/gqlgen/graphql/playground"
 	"github.com/example/test/graph"
 	"github.com/example/test/graph/generated"
 )
@@ -144,9 +144,9 @@ func (r *subscriptionResolver) CurrentTime(ctx context.Context) (<-chan *model.T
 				fmt.Println("Subscription Closed")
 				// Handle deregistration of the channel here. `close(ch)`
 				return // Remember to return to end the routine.
-			
+
 			case ch <- t: // This is the actual send.
-				// Our message went through, do nothing	
+				// Our message went through, do nothing
 			}
 		}
 	}()
@@ -225,9 +225,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/apito-cms/gqlgen/graphql/handler"
+	"github.com/apito-cms/gqlgen/graphql/handler/transport"
+	"github.com/apito-cms/gqlgen/graphql/playground"
 	"github.com/example/test/graph"
 	"github.com/example/test/graph/generated"
 )
@@ -312,10 +312,10 @@ func (r *subscriptionResolver) CurrentTime(ctx context.Context) (<-chan *model.T
 
 			select {
 			case <-ctx.Done():
-				// Exit on cancellation 
+				// Exit on cancellation
 				fmt.Println("Subscription closed.")
 				return
-			
+
 			case ch <- t:
 				// Our message went through, do nothing
 			}

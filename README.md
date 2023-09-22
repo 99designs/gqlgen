@@ -1,7 +1,7 @@
 ![gqlgen](https://user-images.githubusercontent.com/980499/133180111-d064b38c-6eb9-444b-a60f-7005a6e68222.png)
 
 
-# gqlgen [![Integration](https://github.com/99designs/gqlgen/actions/workflows/integration.yml/badge.svg)](https://github.com/99designs/gqlgen/actions) [![Coverage Status](https://coveralls.io/repos/github/99designs/gqlgen/badge.svg?branch=master)](https://coveralls.io/github/99designs/gqlgen?branch=master) [![Go Report Card](https://goreportcard.com/badge/github.com/99designs/gqlgen)](https://goreportcard.com/report/github.com/99designs/gqlgen) [![Go Reference](https://pkg.go.dev/badge/github.com/99designs/gqlgen.svg)](https://pkg.go.dev/github.com/99designs/gqlgen) [![Read the Docs](https://badgen.net/badge/docs/available/green)](http://gqlgen.com/)
+# gqlgen [![Integration](https://github.com/apito-cms/gqlgen/actions/workflows/integration.yml/badge.svg)](https://github.com/apito-cms/gqlgen/actions) [![Coverage Status](https://coveralls.io/repos/github/99designs/gqlgen/badge.svg?branch=master)](https://coveralls.io/github/99designs/gqlgen?branch=master) [![Go Report Card](https://goreportcard.com/badge/github.com/99designs/gqlgen)](https://goreportcard.com/report/github.com/99designs/gqlgen) [![Go Reference](https://pkg.go.dev/badge/github.com/99designs/gqlgen.svg)](https://pkg.go.dev/github.com/99designs/gqlgen) [![Read the Docs](https://badgen.net/badge/docs/available/green)](http://gqlgen.com/)
 
 ## What is gqlgen?
 
@@ -22,7 +22,7 @@ Still not convinced enough to use **gqlgen**? Compare **gqlgen** with other Go g
 
 2. Add `github.com/99designs/gqlgen` to your [project's tools.go](https://github.com/golang/go/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module)
 
-       printf '// +build tools\npackage tools\nimport (_ "github.com/99designs/gqlgen"\n _ "github.com/99designs/gqlgen/graphql/introspection")' | gofmt > tools.go
+       printf '// +build tools\npackage tools\nimport (_ "github.com/99designs/gqlgen"\n _ "github.com/apito-cms/gqlgen/graphql/introspection")' | gofmt > tools.go
 
        go mod tidy
 
@@ -38,16 +38,16 @@ Still not convinced enough to use **gqlgen**? Compare **gqlgen** with other Go g
 
 More help to get started:
  - [Getting started tutorial](https://gqlgen.com/getting-started/) - a comprehensive guide to help you get started
- - [Real-world examples](https://github.com/99designs/gqlgen/tree/master/_examples) show how to create GraphQL applications
+ - [Real-world examples](https://github.com/apito-cms/gqlgen/tree/master/_examples) show how to create GraphQL applications
  - [Reference docs](https://pkg.go.dev/github.com/99designs/gqlgen) for the APIs
 
 ## Reporting Issues
 
-If you think you've found a bug, or something isn't behaving the way you think it should, please raise an [issue](https://github.com/99designs/gqlgen/issues) on GitHub.
+If you think you've found a bug, or something isn't behaving the way you think it should, please raise an [issue](https://github.com/apito-cms/gqlgen/issues) on GitHub.
 
 ## Contributing
 
-We welcome contributions, Read our [Contribution Guidelines](https://github.com/99designs/gqlgen/blob/master/CONTRIBUTING.md) to learn more about contributing to **gqlgen**
+We welcome contributions, Read our [Contribution Guidelines](https://github.com/apito-cms/gqlgen/blob/master/CONTRIBUTING.md) to learn more about contributing to **gqlgen**
 ## Frequently asked questions
 
 ### How do I prevent fetching child objects that might not be used?
@@ -133,8 +133,8 @@ Yes! You can by remapping it in config as seen below:
 models:
   ID: # The GraphQL type ID is backed by
     model:
-      - github.com/99designs/gqlgen/graphql.IntID # a go integer
-      - github.com/99designs/gqlgen/graphql.ID # or a go string
+      - github.com/apito-cms/gqlgen/graphql.IntID # a go integer
+      - github.com/apito-cms/gqlgen/graphql.ID # or a go string
 ```
 
 This means gqlgen will be able to automatically bind to strings or ints for models you have written yourself, but the

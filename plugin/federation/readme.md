@@ -37,3 +37,6 @@ func (r *entityResolver) FindManyMultiHellosByName(ctx context.Context, reps []*
   /// <Your code to resolve the list of items>
 }
 ```
+
+**Note:**
+If you are using `omit_slice_element_pointers: true` option in your config yaml, your `GetMany` resolver will still generate in the example above the same signature `FindManyMultiHellosByName(ctx context.Context, reps []*generated.ManyMultiHellosByNameInput) ([]*generated.MultiHello, error)`. But all other instances will continue to honor `omit_slice_element_pointers: true`

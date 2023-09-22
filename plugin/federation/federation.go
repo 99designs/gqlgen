@@ -173,7 +173,7 @@ func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
 					entityResolverInputDefinitions += fmt.Sprintf("\t%s: %s\n", keyField.Field.ToGo(), keyField.Definition.Type.String())
 				}
 				entityResolverInputDefinitions += "}"
-				resolvers += fmt.Sprintf("\t%s(reps: [%s!]!): [%s]\n", r.ResolverName, r.InputTypeName, e.Name)
+				resolvers += fmt.Sprintf("\t%s(reps: [%s]!): [%s]\n", r.ResolverName, r.InputTypeName, e.Name)
 			} else {
 				resolverArgs := ""
 				for _, keyField := range r.KeyFields {

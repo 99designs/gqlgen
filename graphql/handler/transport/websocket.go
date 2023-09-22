@@ -40,6 +40,7 @@ type (
 		keepAliveTicker *time.Ticker
 		pingPongTicker  *time.Ticker
 		exec            graphql.GraphExecutor
+		closed          bool
 
 		initPayload InitPayload
 	}
@@ -441,10 +442,15 @@ func (c *wsConnection) sendConnectionError(format string, args ...interface{}) {
 
 func (c *wsConnection) close(closeCode int, message string) {
 	c.mu.Lock()
+	if c.closed {
+		c.mu.Unlock()
+		return
+	}
 	_ = c.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(closeCode, message))
 	for _, closer := range c.active {
 		closer()
 	}
+	c.closed = true
 	c.mu.Unlock()
 	_ = c.conn.Close()
 

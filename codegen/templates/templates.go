@@ -3,11 +3,9 @@ package templates
 import (
 	"bytes"
 	"fmt"
-	"github.com/apito-cms/gqlgen/codegen"
 	"github.com/apito-cms/gqlgen/codegen/config"
 	"github.com/apito-cms/gqlgen/internal/code"
 	"github.com/apito-cms/gqlgen/internal/imports"
-	"github.com/jinzhu/inflection"
 	"go/types"
 	"io/fs"
 	"os"
@@ -218,50 +216,6 @@ func Funcs() template.FuncMap {
 		},
 		"render": func(filename string, tpldata interface{}) (*bytes.Buffer, error) {
 			return render(resolveName(filename, 0), tpldata)
-		},
-		"extract_directive_data": func(_fields []*codegen.Field, _fieldName string, _extraction string) interface{} {
-			for _, v := range _fields {
-				if len(v.Directives) > 0 && _fieldName == v.GoFieldName {
-					for _, d := range v.Directives {
-						if d.Name == "goField" {
-							for _, a := range d.Args {
-								fmt.Println(a.Name)
-								if a.VarName == _extraction {
-									return a.Value
-								}
-							}
-						}
-					}
-				}
-			}
-			return nil
-		},
-		"contains": func(_val string, _subStr string) bool {
-			return strings.Contains(_val, _subStr)
-		},
-		"has_prefix": func(_val string, _subStr string) bool {
-			return strings.HasPrefix(_val, _subStr)
-		},
-		"has_suffix": func(_val string, _subStr string) bool {
-			return strings.HasSuffix(_val, _subStr)
-		},
-		"trim_suffix": func(_val string, _subStr string) string {
-			return strings.TrimSuffix(_val, _subStr)
-		},
-		"trim_prefix": func(_val string, _subStr string) string {
-			return strings.TrimPrefix(_val, _subStr)
-		},
-		"singular": func(_val string) string {
-			return inflection.Singular(_val)
-		},
-		"plural": func(_val string) string {
-			return inflection.Plural(_val)
-		},
-		"singular_title": func(_val string) string {
-			return strings.Title(inflection.Singular(_val))
-		},
-		"plural_title": func(_val string) string {
-			return strings.Title(inflection.Plural(_val))
 		},
 	}
 }

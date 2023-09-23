@@ -3,6 +3,10 @@ package templates
 import (
 	"bytes"
 	"fmt"
+	"github.com/apito-cms/gqlgen/codegen/config"
+	"github.com/apito-cms/gqlgen/internal/code"
+	"github.com/apito-cms/gqlgen/internal/imports"
+	"github.com/jinzhu/inflection"
 	"go/types"
 	"io/fs"
 	"os"
@@ -16,10 +20,6 @@ import (
 	"sync"
 	"text/template"
 	"unicode"
-
-	"github.com/apito-cms/gqlgen/codegen/config"
-	"github.com/apito-cms/gqlgen/internal/code"
-	"github.com/apito-cms/gqlgen/internal/imports"
 )
 
 // CurrentImports keeps track of all the import declarations that are needed during the execution of a plugin.
@@ -217,6 +217,36 @@ func Funcs() template.FuncMap {
 		},
 		"render": func(filename string, tpldata interface{}) (*bytes.Buffer, error) {
 			return render(resolveName(filename, 0), tpldata)
+		},
+		"inspect": func(_var interface{}) interface{} {
+			return _var
+		},
+		"contains": func(_val string, _subStr string) bool {
+			return strings.Contains(_val, _subStr)
+		},
+		"has_prefix": func(_val string, _subStr string) bool {
+			return strings.HasPrefix(_val, _subStr)
+		},
+		"has_suffix": func(_val string, _subStr string) bool {
+			return strings.HasSuffix(_val, _subStr)
+		},
+		"trim_suffix": func(_val string, _subStr string) string {
+			return strings.TrimSuffix(_val, _subStr)
+		},
+		"trim_prefix": func(_val string, _subStr string) string {
+			return strings.TrimPrefix(_val, _subStr)
+		},
+		"singular": func(_val string) string {
+			return inflection.Singular(_val)
+		},
+		"plural": func(_val string) string {
+			return inflection.Plural(_val)
+		},
+		"singular_title": func(_val string) string {
+			return strings.Title(inflection.Singular(_val))
+		},
+		"plural_title": func(_val string) string {
+			return strings.Title(inflection.Plural(_val))
 		},
 	}
 }

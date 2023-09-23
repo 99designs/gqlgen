@@ -3,6 +3,7 @@ package templates
 import (
 	"bytes"
 	"fmt"
+	"github.com/apito-cms/gqlgen/codegen"
 	"github.com/apito-cms/gqlgen/codegen/config"
 	"github.com/apito-cms/gqlgen/internal/code"
 	"github.com/apito-cms/gqlgen/internal/imports"
@@ -218,8 +219,22 @@ func Funcs() template.FuncMap {
 		"render": func(filename string, tpldata interface{}) (*bytes.Buffer, error) {
 			return render(resolveName(filename, 0), tpldata)
 		},
-		"inspect": func(_var interface{}) interface{} {
-			return _var
+		"extract_directive_data": func(_fields []*codegen.Field, _fieldName string, _extraction string) interface{} {
+			for _, v := range _fields {
+				if len(v.Directives) > 0 && _fieldName == v.GoFieldName {
+					for _, d := range v.Directives {
+						if d.Name == "goField" {
+							for _, a := range d.Args {
+								fmt.Println(a.Name)
+								if a.VarName == _extraction {
+									return a.Value
+								}
+							}
+						}
+					}
+				}
+			}
+			return nil
 		},
 		"contains": func(_val string, _subStr string) bool {
 			return strings.Contains(_val, _subStr)

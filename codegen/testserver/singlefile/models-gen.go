@@ -239,7 +239,7 @@ type ValidInput struct {
 	Underscore  string `json:"_"`
 }
 
-//  These things are all valid, but without care generate invalid go code
+// These things are all valid, but without care generate invalid go code
 type ValidType struct {
 	DifferentCase      string `json:"differentCase"`
 	DifferentCaseOld   string `json:"different_case"`

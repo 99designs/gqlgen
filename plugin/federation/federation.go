@@ -128,7 +128,7 @@ func (f *federation) InjectSourceEarly() *ast.Source {
 	directive @provides(fields: FieldSet!) on FIELD_DEFINITION
 	directive @requires(fields: FieldSet!) on FIELD_DEFINITION
 	directive @requiresScopes(scopes: [[federation__Scope!]!]!) on 
-	  |	FIELD_DEFINITION
+		|	FIELD_DEFINITION
 		| OBJECT
 		| INTERFACE
 		| SCALAR

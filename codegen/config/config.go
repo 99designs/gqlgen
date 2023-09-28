@@ -3,6 +3,7 @@ package config
 import (
 	"bytes"
 	"fmt"
+	"go/types"
 	"io"
 	"os"
 	"path/filepath"
@@ -10,10 +11,13 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/99designs/gqlgen/internal/code"
 	"github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
+	"golang.org/x/tools/go/packages"
 	"gopkg.in/yaml.v3"
+
+	"github.com/99designs/gqlgen/codegen/templates"
+	"github.com/99designs/gqlgen/internal/code"
 )
 
 type Config struct {
@@ -608,8 +612,10 @@ func (c *Config) autobind() error {
 			if p == nil || p.Module == nil {
 				return fmt.Errorf("unable to load %s - make sure you're using an import path to a package that exists", c.AutoBind[i])
 			}
-			if t := p.Types.Scope().Lookup(t.Name); t != nil {
-				c.Models.Add(t.Name(), t.Pkg().Path()+"."+t.Name())
+
+			autobindType := c.lookupAutobindType(p, t)
+			if autobindType != nil {
+				c.Models.Add(t.Name, autobindType.Pkg().Path()+"."+autobindType.Name())
 				break
 			}
 		}
@@ -637,6 +643,17 @@ func (c *Config) autobind() error {
 					break
 				}
 			}
+		}
+	}
+
+	return nil
+}
+
+func (c *Config) lookupAutobindType(p *packages.Package, schemaType *ast.Definition) types.Object {
+	// Try binding to either the original schema type name, or the normalized go type name
+	for _, lookupName := range []string{schemaType.Name, templates.ToGo(schemaType.Name)} {
+		if t := p.Types.Scope().Lookup(lookupName); t != nil {
+			return t
 		}
 	}
 

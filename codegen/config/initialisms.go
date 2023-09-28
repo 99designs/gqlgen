@@ -1,62 +1,10 @@
 package config
 
-import "strings"
+import (
+	"strings"
 
-// commonInitialisms is a set of common initialisms.
-// Only add entries that are highly unlikely to be non-initialisms.
-// For instance, "ID" is fine (Freudian code is rare), but "AND" is not.
-var commonInitialisms = map[string]bool{
-	"ACL":   true,
-	"API":   true,
-	"ASCII": true,
-	"CPU":   true,
-	"CSS":   true,
-	"CSV":   true,
-	"DNS":   true,
-	"EOF":   true,
-	"GUID":  true,
-	"HTML":  true,
-	"HTTP":  true,
-	"HTTPS": true,
-	"ICMP":  true,
-	"ID":    true,
-	"IP":    true,
-	"JSON":  true,
-	"KVK":   true,
-	"LHS":   true,
-	"PDF":   true,
-	"PGP":   true,
-	"QPS":   true,
-	"QR":    true,
-	"RAM":   true,
-	"RHS":   true,
-	"RPC":   true,
-	"SLA":   true,
-	"SMTP":  true,
-	"SQL":   true,
-	"SSH":   true,
-	"SVG":   true,
-	"TCP":   true,
-	"TLS":   true,
-	"TTL":   true,
-	"UDP":   true,
-	"UI":    true,
-	"UID":   true,
-	"URI":   true,
-	"URL":   true,
-	"UTF8":  true,
-	"UUID":  true,
-	"VM":    true,
-	"XML":   true,
-	"XMPP":  true,
-	"XSRF":  true,
-	"XSS":   true,
-}
-
-// GetInitialisms returns the initialisms to capitalize in Go names. If unchanged, default initialisms will be returned
-var GetInitialisms = func() map[string]bool {
-	return commonInitialisms
-}
+	"github.com/99designs/gqlgen/codegen/templates"
+)
 
 // GoInitialismsConfig allows to modify the default behavior of naming Go methods, types and properties
 type GoInitialismsConfig struct {
@@ -69,7 +17,7 @@ type GoInitialismsConfig struct {
 // setInitialisms adjustes GetInitialisms based on its settings.
 func (i GoInitialismsConfig) setInitialisms() {
 	toUse := i.determineGoInitialisms()
-	GetInitialisms = func() map[string]bool {
+	templates.GetInitialisms = func() map[string]bool {
 		return toUse
 	}
 }
@@ -82,8 +30,8 @@ func (i GoInitialismsConfig) determineGoInitialisms() (initialismsToUse map[stri
 			initialismsToUse[strings.ToUpper(initialism)] = true
 		}
 	} else {
-		initialismsToUse = make(map[string]bool, len(commonInitialisms)+len(i.Initialisms))
-		for initialism, value := range commonInitialisms {
+		initialismsToUse = make(map[string]bool, len(templates.CommonInitialisms)+len(i.Initialisms))
+		for initialism, value := range templates.CommonInitialisms {
 			initialismsToUse[strings.ToUpper(initialism)] = value
 		}
 		for _, initialism := range i.Initialisms {

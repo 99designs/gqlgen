@@ -59,6 +59,9 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 		"_Any": {
 			Model: config.StringList{"github.com/99designs/gqlgen/graphql.Map"},
 		},
+		"federation__Scope": {
+			Model: config.StringList{"github.com/99designs/gqlgen/graphql.String"},
+		},
 	}
 
 	for typeName, entry := range builtins {
@@ -80,6 +83,8 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 		cfg.Directives["tag"] = config.DirectiveConfig{SkipRuntime: true}
 		cfg.Directives["override"] = config.DirectiveConfig{SkipRuntime: true}
 		cfg.Directives["inaccessible"] = config.DirectiveConfig{SkipRuntime: true}
+		cfg.Directives["authenticated"] = config.DirectiveConfig{SkipRuntime: true}
+		cfg.Directives["requiresScopes"] = config.DirectiveConfig{SkipRuntime: true}
 	}
 
 	return nil
@@ -101,26 +106,33 @@ func (f *federation) InjectSourceEarly() *ast.Source {
 `
 	} else if f.Version == 2 {
 		input += `
+	directive @authenticated on FIELD_DEFINITION | OBJECT | INTERFACE | SCALAR | ENUM
 	directive @composeDirective(name: String!) repeatable on SCHEMA
 	directive @extends on OBJECT | INTERFACE
 	directive @external on OBJECT | FIELD_DEFINITION
 	directive @key(fields: FieldSet!, resolvable: Boolean = true) repeatable on OBJECT | INTERFACE
 	directive @inaccessible on
-	  | ARGUMENT_DEFINITION
-	  | ENUM
-	  | ENUM_VALUE
-	  | FIELD_DEFINITION
-	  | INPUT_FIELD_DEFINITION
-	  | INPUT_OBJECT
-	  | INTERFACE
-	  | OBJECT
-	  | SCALAR
-	  | UNION
+		| ARGUMENT_DEFINITION
+		| ENUM
+		| ENUM_VALUE
+		| FIELD_DEFINITION
+		| INPUT_FIELD_DEFINITION
+		| INPUT_OBJECT
+		| INTERFACE
+		| OBJECT
+		| SCALAR
+		| UNION
 	directive @interfaceObject on OBJECT
 	directive @link(import: [String!], url: String!) repeatable on SCHEMA
 	directive @override(from: String!) on FIELD_DEFINITION
 	directive @provides(fields: FieldSet!) on FIELD_DEFINITION
 	directive @requires(fields: FieldSet!) on FIELD_DEFINITION
+	directive @requiresScopes(scopes: [[federation__Scope!]!]!) on 
+	  |	FIELD_DEFINITION
+		| OBJECT
+		| INTERFACE
+		| SCALAR
+		| ENUM
 	directive @shareable repeatable on FIELD_DEFINITION | OBJECT
 	directive @tag(name: String!) repeatable on
 	  | ARGUMENT_DEFINITION
@@ -135,6 +147,7 @@ func (f *federation) InjectSourceEarly() *ast.Source {
 	  | UNION
 	scalar _Any
 	scalar FieldSet
+	scalar federation__Scope
 `
 	}
 	return &ast.Source{

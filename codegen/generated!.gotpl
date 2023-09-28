@@ -274,14 +274,14 @@
 		if ec.DisableIntrospection {
 			return nil, errors.New("introspection disabled")
 		}
-		return introspection.WrapSchema(parsedSchema), nil
+		return introspection.WrapSchema(ec.Schema()), nil
 	}
 
 	func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
 		if ec.DisableIntrospection {
 			return nil, errors.New("introspection disabled")
 		}
-		return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
+		return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 	}
 
 	{{if .HasEmbeddableSources }}

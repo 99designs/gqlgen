@@ -112,27 +112,27 @@ func (f *federation) InjectSourceEarly() *ast.Source {
 	directive @external on OBJECT | FIELD_DEFINITION
 	directive @key(fields: FieldSet!, resolvable: Boolean = true) repeatable on OBJECT | INTERFACE
 	directive @inaccessible on
-		| ARGUMENT_DEFINITION
-		| ENUM
-		| ENUM_VALUE
-		| FIELD_DEFINITION
-		| INPUT_FIELD_DEFINITION
-		| INPUT_OBJECT
-		| INTERFACE
-		| OBJECT
-		| SCALAR
-		| UNION
+	  | ARGUMENT_DEFINITION
+	  | ENUM
+	  | ENUM_VALUE
+	  | FIELD_DEFINITION
+	  | INPUT_FIELD_DEFINITION
+	  | INPUT_OBJECT
+	  | INTERFACE
+	  | OBJECT
+	  | SCALAR
+	  | UNION
 	directive @interfaceObject on OBJECT
 	directive @link(import: [String!], url: String!) repeatable on SCHEMA
 	directive @override(from: String!) on FIELD_DEFINITION
 	directive @provides(fields: FieldSet!) on FIELD_DEFINITION
 	directive @requires(fields: FieldSet!) on FIELD_DEFINITION
 	directive @requiresScopes(scopes: [[federation__Scope!]!]!) on 
-		|	FIELD_DEFINITION
-		| OBJECT
-		| INTERFACE
-		| SCALAR
-		| ENUM
+	  | FIELD_DEFINITION
+	  | OBJECT
+	  | INTERFACE
+	  | SCALAR
+	  | ENUM
 	directive @shareable repeatable on FIELD_DEFINITION | OBJECT
 	directive @tag(name: String!) repeatable on
 	  | ARGUMENT_DEFINITION

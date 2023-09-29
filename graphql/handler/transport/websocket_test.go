@@ -692,6 +692,41 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
 		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
 	})
+	t.Run("pong only messages are sent when configured with graphql-transport-ws", func(t *testing.T) {
+
+		h, srv := initialize(transport.Websocket{PongOnlyInterval: 10 * time.Millisecond})
+		defer srv.Close()
+
+		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
+		defer c.Close()
+
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
+		assert.Equal(t, graphqltransportwsConnectionAckMsg, readOp(c).Type)
+
+		assert.Equal(t, graphqltransportwsPongMsg, readOp(c).Type)
+
+		require.NoError(t, c.WriteJSON(&operationMessage{
+			Type:    graphqltransportwsSubscribeMsg,
+			ID:      "test_1",
+			Payload: json.RawMessage(`{"query": "subscription { name }"}`),
+		}))
+
+		// pong
+		msg := readOp(c)
+		assert.Equal(t, graphqltransportwsPongMsg, msg.Type)
+
+		// server message
+		h.SendNextSubscriptionMessage()
+		msg = readOp(c)
+		require.Equal(t, graphqltransportwsNextMsg, msg.Type, string(msg.Payload))
+		require.Equal(t, "test_1", msg.ID, string(msg.Payload))
+		require.Equal(t, `{"data":{"name":"test"}}`, string(msg.Payload))
+
+		// keepalive
+		msg = readOp(c)
+		assert.Equal(t, graphqltransportwsPongMsg, msg.Type)
+	})
+
 }
 
 func wsConnect(url string) *websocket.Conn {

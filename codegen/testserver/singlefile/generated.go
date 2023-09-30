@@ -28,6 +28,7 @@ import (
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 	return &executableSchema{
+		schema:     cfg.Schema,
 		resolvers:  cfg.Resolvers,
 		directives: cfg.Directives,
 		complexity: cfg.Complexity,
@@ -35,6 +36,7 @@ func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 }
 
 type Config struct {
+	Schema     *ast.Schema
 	Resolvers  ResolverRoot
 	Directives DirectiveRoot
 	Complexity ComplexityRoot
@@ -618,12 +620,16 @@ type FieldsOrderInputResolver interface {
 }
 
 type executableSchema struct {
+	schema     *ast.Schema
 	resolvers  ResolverRoot
 	directives DirectiveRoot
 	complexity ComplexityRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {
+	if e.schema != nil {
+		return e.schema
+	}
 	return parsedSchema
 }
 
@@ -2354,14 +2360,14 @@ func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
 	if ec.DisableIntrospection {
 		return nil, errors.New("introspection disabled")
 	}
-	return introspection.WrapSchema(parsedSchema), nil
+	return introspection.WrapSchema(ec.Schema()), nil
 }
 
 func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
 	if ec.DisableIntrospection {
 		return nil, errors.New("introspection disabled")
 	}
-	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
+	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
 //go:embed "builtinscalar.graphql" "complexity.graphql" "defaults.graphql" "defer.graphql" "directive.graphql" "embedded.graphql" "enum.graphql" "fields_order.graphql" "interfaces.graphql" "issue896.graphql" "loops.graphql" "maps.graphql" "mutation_with_custom_scalar.graphql" "nulls.graphql" "panics.graphql" "primitive_objects.graphql" "ptr_to_any.graphql" "ptr_to_ptr_input.graphql" "ptr_to_slice.graphql" "scalar_context.graphql" "scalar_default.graphql" "schema.graphql" "slices.graphql" "typefallback.graphql" "useptr.graphql" "v-ok.graphql" "validtypes.graphql" "variadic.graphql" "weird_type_cases.graphql" "wrapped_type.graphql"

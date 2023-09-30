@@ -26,6 +26,7 @@ type (
 		ErrorFunc             WebsocketErrorFunc
 		CloseFunc             WebsocketCloseFunc
 		KeepAlivePingInterval time.Duration
+		PongOnlyInterval      time.Duration
 		PingPongInterval      time.Duration
 
 		didInjectSubprotocols bool
@@ -38,6 +39,7 @@ type (
 		active          map[string]context.CancelFunc
 		mu              sync.Mutex
 		keepAliveTicker *time.Ticker
+		pongOnlyTicker  *time.Ticker
 		pingPongTicker  *time.Ticker
 		exec            graphql.GraphExecutor
 		closed          bool
@@ -239,8 +241,18 @@ func (c *wsConnection) run() {
 		go c.keepAlive(ctx)
 	}
 
+	// If we're running in graphql-transport-ws mode, create a timer that will trigger a
+	// just a pong message every interval
+	if c.conn.Subprotocol() == graphqltransportwsSubprotocol && c.PongOnlyInterval != 0 {
+		c.mu.Lock()
+		c.pongOnlyTicker = time.NewTicker(c.PongOnlyInterval)
+		c.mu.Unlock()
+
+		go c.keepAlivePongOnly(ctx)
+	}
+
 	// If we're running in graphql-transport-ws mode, create a timer that will
-	// trigger a ping message every interval
+	// trigger a ping message every interval and expect a pong!
 	if c.conn.Subprotocol() == graphqltransportwsSubprotocol && c.PingPongInterval != 0 {
 		c.mu.Lock()
 		c.pingPongTicker = time.NewTicker(c.PingPongInterval)
@@ -288,6 +300,18 @@ func (c *wsConnection) run() {
 			c.sendConnectionError("unexpected message %s", m.t)
 			c.close(websocket.CloseProtocolError, "unexpected message")
 			return
+		}
+	}
+}
+
+func (c *wsConnection) keepAlivePongOnly(ctx context.Context) {
+	for {
+		select {
+		case <-ctx.Done():
+			c.pongOnlyTicker.Stop()
+			return
+		case <-c.pongOnlyTicker.C:
+			c.write(&message{t: pongMessageType, payload: json.RawMessage{}})
 		}
 	}
 }

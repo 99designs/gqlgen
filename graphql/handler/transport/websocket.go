@@ -28,6 +28,15 @@ type (
 		KeepAlivePingInterval time.Duration
 		PongOnlyInterval      time.Duration
 		PingPongInterval      time.Duration
+		/* If PingPongInterval has a non-0 duration, then when the server sends a ping
+		 * it sets a ReadDeadline of PingPongInterval*2 and if the client doesn't respond
+		 * with pong before that deadline is reached then the connection will die with a
+		 * 1006 error code.
+		 *
+		 * MissingPongOk if true, tells the server to not use a ReadDeadline such that a
+		 * missing/slow pong response from the client doesn't kill the connection.
+		 */
+		MissingPongOk bool
 
 		didInjectSubprotocols bool
 	}
@@ -41,6 +50,7 @@ type (
 		keepAliveTicker *time.Ticker
 		pongOnlyTicker  *time.Ticker
 		pingPongTicker  *time.Ticker
+		receivedPong    bool
 		exec            graphql.GraphExecutor
 		closed          bool
 
@@ -258,9 +268,11 @@ func (c *wsConnection) run() {
 		c.pingPongTicker = time.NewTicker(c.PingPongInterval)
 		c.mu.Unlock()
 
-		// Note: when the connection is closed by this deadline, the client
-		// will receive an "invalid close code"
-		c.conn.SetReadDeadline(time.Now().UTC().Add(2 * c.PingPongInterval))
+		if !c.MissingPongOk {
+			// Note: when the connection is closed by this deadline, the client
+			// will receive an "invalid close code"
+			c.conn.SetReadDeadline(time.Now().UTC().Add(2 * c.PingPongInterval))
+		}
 		go c.ping(ctx)
 	}
 
@@ -295,7 +307,11 @@ func (c *wsConnection) run() {
 		case pingMessageType:
 			c.write(&message{t: pongMessageType, payload: m.payload})
 		case pongMessageType:
-			c.conn.SetReadDeadline(time.Now().UTC().Add(2 * c.PingPongInterval))
+			c.mu.Lock()
+			c.receivedPong = true
+			c.mu.Unlock()
+			// Clear ReadTimeout -- 0 time val clears.
+			c.conn.SetReadDeadline(time.Time{})
 		default:
 			c.sendConnectionError("unexpected message %s", m.t)
 			c.close(websocket.CloseProtocolError, "unexpected message")
@@ -336,6 +352,14 @@ func (c *wsConnection) ping(ctx context.Context) {
 			return
 		case <-c.pingPongTicker.C:
 			c.write(&message{t: pingMessageType, payload: json.RawMessage{}})
+			// The initial deadline for this method is set in run()
+			// if we have not yet received a pong, don't reset the deadline.
+			c.mu.Lock()
+			if !c.MissingPongOk && c.receivedPong {
+				c.conn.SetReadDeadline(time.Now().UTC().Add(2 * c.PingPongInterval))
+			}
+			c.receivedPong = false
+			c.mu.Unlock()
 		}
 	}
 }

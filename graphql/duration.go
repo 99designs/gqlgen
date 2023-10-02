@@ -2,7 +2,6 @@ package graphql
 
 import (
 	"fmt"
-	"io"
 	"time"
 
 	dur "github.com/sosodev/duration"
@@ -24,7 +23,5 @@ func UnmarshalDuration(v interface{}) (time.Duration, error) {
 
 // MarshalDuration returns the duration on ISO8601 format
 func MarshalDuration(d time.Duration) Marshaler {
-	return WriterFunc(func(w io.Writer) {
-		_, _ = w.Write([]byte(dur.Format(d)))
-	})
+	return MarshalString(dur.Format(d))
 }

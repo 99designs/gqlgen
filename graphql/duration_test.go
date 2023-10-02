@@ -20,6 +20,6 @@ func TestDurationMarshaling(t *testing.T) {
 		buf := new(bytes.Buffer)
 		m.MarshalGQL(buf)
 
-		assert.Equal(t, "P2Y", buf.String())
+		assert.Equal(t, "\"P2Y\"", buf.String())
 	})
 }

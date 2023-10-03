@@ -7,10 +7,11 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/vektah/gqlparser/v2/ast"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
+
+	"github.com/99designs/gqlgen/codegen/config"
 )
 
 type GoFieldType int

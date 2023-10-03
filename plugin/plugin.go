@@ -3,9 +3,10 @@
 package plugin
 
 import (
+	"github.com/vektah/gqlparser/v2/ast"
+
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/vektah/gqlparser/v2/ast"
 )
 
 type Plugin interface {

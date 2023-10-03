@@ -3,9 +3,10 @@ package federation
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/stretchr/testify/require"
 )
 
 func TestWithEntities(t *testing.T) {

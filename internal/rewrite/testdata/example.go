@@ -1,9 +1,8 @@
 package testdata
 
 import (
-	"fmt"
-
 	lol "bytes"
+	"fmt"
 )
 
 type Foo struct {

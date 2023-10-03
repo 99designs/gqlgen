@@ -10,8 +10,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/99designs/gqlgen/client"
 	"github.com/stretchr/testify/require"
+
+	"github.com/99designs/gqlgen/client"
 )
 
 func TestWithFiles(t *testing.T) {

@@ -1,0 +1,10 @@
+extend schema
+  @link(url: "https://specs.apollo.dev/federation/v2.3",
+        import: ["@key"])
+
+directive @entityResolver(multi: Boolean) on OBJECT
+
+type Hello @key(fields: "name") @entityResolver(multi: true) {
+    name: String!
+    secondary: String!
+}

@@ -501,6 +501,39 @@ func TestWebSocketCloseFunc(t *testing.T) {
 		}
 	})
 
+	t.Run("the on close handler gets called only once when the websocket is closed", func(t *testing.T) {
+		closeFuncCalled := make(chan bool, 1)
+		h := testserver.New()
+		h.AddTransport(transport.Websocket{
+			CloseFunc: func(_ context.Context, _closeCode int) {
+				closeFuncCalled <- true
+			},
+		})
+
+		srv := httptest.NewServer(h)
+		defer srv.Close()
+
+		c := wsConnect(srv.URL)
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
+		assert.Equal(t, connectionAckMsg, readOp(c).Type)
+		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionTerminateMsg}))
+
+		select {
+		case res := <-closeFuncCalled:
+			assert.True(t, res)
+		case <-time.NewTimer(time.Millisecond * 20).C:
+			assert.Fail(t, "The close handler was not called in time")
+		}
+
+		select {
+		case <-closeFuncCalled:
+			assert.Fail(t, "The close handler was called more than once")
+		case <-time.NewTimer(time.Millisecond * 20).C:
+			// ok
+		}
+	})
+
 	t.Run("init func errors call the close handler", func(t *testing.T) {
 		h := testserver.New()
 		closeFuncCalled := make(chan bool, 1)
@@ -606,7 +639,7 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 	}
 
 	t.Run("client receives ping and responds with pong", func(t *testing.T) {
-		_, srv := initialize(transport.Websocket{PingPongInterval: 10 * time.Millisecond})
+		_, srv := initialize(transport.Websocket{PingPongInterval: 20 * time.Millisecond})
 		defer srv.Close()
 
 		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
@@ -623,6 +656,11 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 	t.Run("client sends ping and expects pong", func(t *testing.T) {
 		_, srv := initialize(transport.Websocket{PingPongInterval: 10 * time.Millisecond})
 		defer srv.Close()
+	})
+
+	t.Run("client sends ping and expects pong", func(t *testing.T) {
+		_, srv := initialize(transport.Websocket{PingPongInterval: 10 * time.Millisecond})
+		defer srv.Close()
 
 		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
 		defer c.Close()
@@ -632,6 +670,67 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsPingMsg}))
 		assert.Equal(t, graphqltransportwsPongMsg, readOp(c).Type)
+	})
+
+	t.Run("server closes with error if client does not pong and !MissingPongOk", func(t *testing.T) {
+		h := testserver.New()
+		closeFuncCalled := make(chan bool, 1)
+		h.AddTransport(transport.Websocket{
+			MissingPongOk:    false, // default value but beign explicit for test clarity.
+			PingPongInterval: 5 * time.Millisecond,
+			CloseFunc: func(_ context.Context, _closeCode int) {
+				closeFuncCalled <- true
+			},
+		})
+
+		srv := httptest.NewServer(h)
+		defer srv.Close()
+
+		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
+		defer c.Close()
+
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
+		assert.Equal(t, graphqltransportwsConnectionAckMsg, readOp(c).Type)
+
+		assert.Equal(t, graphqltransportwsPingMsg, readOp(c).Type)
+
+		select {
+		case res := <-closeFuncCalled:
+			assert.True(t, res)
+		case <-time.NewTimer(time.Millisecond * 20).C:
+			// with a 5ms interval 10ms should be the timeout, double that to make the test less likely to flake under load
+			assert.Fail(t, "The close handler was not called in time")
+		}
+	})
+
+	t.Run("server does not close with error if client does not pong and MissingPongOk", func(t *testing.T) {
+		h := testserver.New()
+		closeFuncCalled := make(chan bool, 1)
+		h.AddTransport(transport.Websocket{
+			MissingPongOk:    true,
+			PingPongInterval: 10 * time.Millisecond,
+			CloseFunc: func(_ context.Context, _closeCode int) {
+				closeFuncCalled <- true
+			},
+		})
+
+		srv := httptest.NewServer(h)
+		defer srv.Close()
+
+		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
+		defer c.Close()
+
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
+		assert.Equal(t, graphqltransportwsConnectionAckMsg, readOp(c).Type)
+
+		assert.Equal(t, graphqltransportwsPingMsg, readOp(c).Type)
+
+		select {
+		case <-closeFuncCalled:
+			assert.Fail(t, "The close handler was called even with MissingPongOk = true")
+		case _, ok := <-time.NewTimer(time.Millisecond * 20).C:
+			assert.True(t, ok)
+		}
 	})
 
 	t.Run("ping-pongs are not sent when the graphql-ws sub protocol is used", func(t *testing.T) {
@@ -660,6 +759,41 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
 		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
 	})
+	t.Run("pong only messages are sent when configured with graphql-transport-ws", func(t *testing.T) {
+
+		h, srv := initialize(transport.Websocket{PongOnlyInterval: 10 * time.Millisecond})
+		defer srv.Close()
+
+		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
+		defer c.Close()
+
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
+		assert.Equal(t, graphqltransportwsConnectionAckMsg, readOp(c).Type)
+
+		assert.Equal(t, graphqltransportwsPongMsg, readOp(c).Type)
+
+		require.NoError(t, c.WriteJSON(&operationMessage{
+			Type:    graphqltransportwsSubscribeMsg,
+			ID:      "test_1",
+			Payload: json.RawMessage(`{"query": "subscription { name }"}`),
+		}))
+
+		// pong
+		msg := readOp(c)
+		assert.Equal(t, graphqltransportwsPongMsg, msg.Type)
+
+		// server message
+		h.SendNextSubscriptionMessage()
+		msg = readOp(c)
+		require.Equal(t, graphqltransportwsNextMsg, msg.Type, string(msg.Payload))
+		require.Equal(t, "test_1", msg.ID, string(msg.Payload))
+		require.Equal(t, `{"data":{"name":"test"}}`, string(msg.Payload))
+
+		// keepalive
+		msg = readOp(c)
+		assert.Equal(t, graphqltransportwsPongMsg, msg.Type)
+	})
+
 }
 
 func wsConnect(url string) *websocket.Conn {

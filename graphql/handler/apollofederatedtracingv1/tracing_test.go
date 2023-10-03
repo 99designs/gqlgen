@@ -12,6 +12,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlparser/v2/gqlerror"
+	"google.golang.org/protobuf/proto"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler/apollofederatedtracingv1"
 	"github.com/99designs/gqlgen/graphql/handler/apollofederatedtracingv1/generated"
@@ -19,10 +24,6 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/testserver"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"github.com/vektah/gqlparser/v2/gqlerror"
-	"google.golang.org/protobuf/proto"
 )
 
 type alwaysError struct{}

@@ -5,8 +5,9 @@ import (
 	"path"
 	"testing"
 
-	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/stretchr/testify/require"
+
+	"github.com/99designs/gqlgen/codegen/config"
 )
 
 func cleanup(workDir string) {

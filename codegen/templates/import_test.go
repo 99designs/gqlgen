@@ -6,9 +6,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/99designs/gqlgen/internal/code"
-
 	"github.com/stretchr/testify/require"
+
+	"github.com/99designs/gqlgen/internal/code"
 )
 
 func TestImports(t *testing.T) {

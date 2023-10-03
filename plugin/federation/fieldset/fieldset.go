@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/vektah/gqlparser/v2/ast"
+
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/templates"
-	"github.com/vektah/gqlparser/v2/ast"
 )
 
 // Set represents a FieldSet that is used in federation directives @key and @requires.

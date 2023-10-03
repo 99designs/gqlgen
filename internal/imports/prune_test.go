@@ -5,8 +5,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/99designs/gqlgen/internal/code"
 	"github.com/stretchr/testify/require"
+
+	"github.com/99designs/gqlgen/internal/code"
 )
 
 func TestPrune(t *testing.T) {

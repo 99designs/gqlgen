@@ -2,9 +2,10 @@ package graphql
 
 import (
 	"bytes"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestDurationMarshaling(t *testing.T) {

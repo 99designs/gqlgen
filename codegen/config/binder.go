@@ -7,10 +7,10 @@ import (
 	"go/types"
 	"strings"
 
+	"github.com/vektah/gqlparser/v2/ast"
 	"golang.org/x/tools/go/packages"
 
 	"github.com/99designs/gqlgen/internal/code"
-	"github.com/vektah/gqlparser/v2/ast"
 )
 
 var ErrTypeNotFound = errors.New("unable to find type")

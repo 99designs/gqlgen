@@ -10,10 +10,11 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/99designs/gqlgen/internal/code"
 	"github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 	"gopkg.in/yaml.v3"
+
+	"github.com/99designs/gqlgen/internal/code"
 )
 
 type Config struct {

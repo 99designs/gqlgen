@@ -8,6 +8,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/vektah/gqlparser/v2/gqlerror"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
@@ -15,7 +17,6 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/99designs/gqlgen/integration/server"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 const defaultPort = "8080"

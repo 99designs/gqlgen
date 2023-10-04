@@ -85,6 +85,8 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 		cfg.Directives["inaccessible"] = config.DirectiveConfig{SkipRuntime: true}
 		cfg.Directives["authenticated"] = config.DirectiveConfig{SkipRuntime: true}
 		cfg.Directives["requiresScopes"] = config.DirectiveConfig{SkipRuntime: true}
+		cfg.Directives["interfaceObject"] = config.DirectiveConfig{SkipRuntime: true}
+		cfg.Directives["composeDirective"] = config.DirectiveConfig{SkipRuntime: true}
 	}
 
 	return nil
@@ -183,7 +185,11 @@ func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
 				}
 				entityResolverInputDefinitions += "input " + r.InputTypeName + " {\n"
 				for _, keyField := range r.KeyFields {
-					entityResolverInputDefinitions += fmt.Sprintf("\t%s: %s\n", keyField.Field.ToGo(), keyField.Definition.Type.String())
+					entityResolverInputDefinitions += fmt.Sprintf(
+						"\t%s: %s\n",
+						keyField.Field.ToGo(),
+						keyField.Definition.Type.String(),
+					)
 				}
 				entityResolverInputDefinitions += "}"
 				resolvers += fmt.Sprintf("\t%s(reps: [%s]!): [%s]\n", r.ResolverName, r.InputTypeName, e.Name)

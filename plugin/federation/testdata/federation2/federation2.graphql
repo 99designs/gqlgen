@@ -1,6 +1,6 @@
 extend schema
   @link(url: "https://specs.apollo.dev/federation/v2.3",
-        import: ["@key", "@shareable", "@provides", "@external", "@tag", "@extends", "@override", "@inaccessible"])
+        import: ["@key", "@shareable", "@provides", "@external", "@tag", "@extends", "@override", "@inaccessible", "@interfaceObject"])
 
 schema {
     query: CustomQuery
@@ -23,4 +23,3 @@ extend type ExternalExtension @key(fields: "  upc    ") {
 type CustomQuery {
   hello: Hello!
 }
-

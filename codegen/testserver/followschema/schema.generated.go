@@ -3610,6 +3610,8 @@ func (ec *executionContext) fieldContext_Query_mapStringInterface(ctx context.Co
 				return ec.fieldContext_MapStringInterfaceType_a(ctx, field)
 			case "b":
 				return ec.fieldContext_MapStringInterfaceType_b(ctx, field)
+			case "c":
+				return ec.fieldContext_MapStringInterfaceType_c(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type MapStringInterfaceType", field.Name)
 		},
@@ -3665,6 +3667,8 @@ func (ec *executionContext) fieldContext_Query_mapNestedStringInterface(ctx cont
 				return ec.fieldContext_MapStringInterfaceType_a(ctx, field)
 			case "b":
 				return ec.fieldContext_MapStringInterfaceType_b(ctx, field)
+			case "c":
+				return ec.fieldContext_MapStringInterfaceType_c(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type MapStringInterfaceType", field.Name)
 		},

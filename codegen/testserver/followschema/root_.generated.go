@@ -229,6 +229,7 @@ type ComplexityRoot struct {
 	MapStringInterfaceType struct {
 		A func(childComplexity int) int
 		B func(childComplexity int) int
+		C func(childComplexity int) int
 	}
 
 	ModelMethods struct {
@@ -912,6 +913,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.MapStringInterfaceType.B(childComplexity), true
+
+	case "MapStringInterfaceType.c":
+		if e.complexity.MapStringInterfaceType.C == nil {
+			break
+		}
+
+		return e.complexity.MapStringInterfaceType.C(childComplexity), true
 
 	case "ModelMethods.noContext":
 		if e.complexity.ModelMethods.NoContext == nil {

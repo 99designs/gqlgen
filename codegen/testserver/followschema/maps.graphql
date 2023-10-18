@@ -6,12 +6,16 @@ extend type Query {
 type MapStringInterfaceType @goModel(model: "map[string]interface{}") {
     a: String
     b: Int
+    c: CustomScalar
 }
 
 input MapStringInterfaceInput @goModel(model: "map[string]interface{}") {
     a: String
     b: Int
+    c: CustomScalar
 }
+
+scalar CustomScalar @goModel(model: "followschema.CustomScalar")
 
 input NestedMapInput {
     map: MapStringInterfaceInput

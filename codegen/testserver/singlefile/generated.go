@@ -238,6 +238,7 @@ type ComplexityRoot struct {
 	MapStringInterfaceType struct {
 		A func(childComplexity int) int
 		B func(childComplexity int) int
+		C func(childComplexity int) int
 	}
 
 	ModelMethods struct {
@@ -1064,6 +1065,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.MapStringInterfaceType.B(childComplexity), true
+
+	case "MapStringInterfaceType.c":
+		if e.complexity.MapStringInterfaceType.C == nil {
+			break
+		}
+
+		return e.complexity.MapStringInterfaceType.C(childComplexity), true
 
 	case "ModelMethods.noContext":
 		if e.complexity.ModelMethods.NoContext == nil {
@@ -6149,6 +6157,53 @@ func (ec *executionContext) fieldContext_MapStringInterfaceType_b(ctx context.Co
 	return fc, nil
 }
 
+func (ec *executionContext) _MapStringInterfaceType_c(ctx context.Context, field graphql.CollectedField, obj map[string]interface{}) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_MapStringInterfaceType_c(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		switch v := obj["c"].(type) {
+		case *CustomScalar:
+			return v, nil
+		case CustomScalar:
+			return &v, nil
+		case nil:
+			return (*CustomScalar)(nil), nil
+		default:
+			return nil, fmt.Errorf("unexpected type %T for field %s", v, "c")
+		}
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*CustomScalar)
+	fc.Result = res
+	return ec.marshalOCustomScalar2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐCustomScalar(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_MapStringInterfaceType_c(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MapStringInterfaceType",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type CustomScalar does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _ModelMethods_resolverField(ctx context.Context, field graphql.CollectedField, obj *ModelMethods) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_ModelMethods_resolverField(ctx, field)
 	if err != nil {
@@ -9898,6 +9953,8 @@ func (ec *executionContext) fieldContext_Query_mapStringInterface(ctx context.Co
 				return ec.fieldContext_MapStringInterfaceType_a(ctx, field)
 			case "b":
 				return ec.fieldContext_MapStringInterfaceType_b(ctx, field)
+			case "c":
+				return ec.fieldContext_MapStringInterfaceType_c(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type MapStringInterfaceType", field.Name)
 		},
@@ -9953,6 +10010,8 @@ func (ec *executionContext) fieldContext_Query_mapNestedStringInterface(ctx cont
 				return ec.fieldContext_MapStringInterfaceType_a(ctx, field)
 			case "b":
 				return ec.fieldContext_MapStringInterfaceType_b(ctx, field)
+			case "c":
+				return ec.fieldContext_MapStringInterfaceType_c(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type MapStringInterfaceType", field.Name)
 		},
@@ -15197,7 +15256,7 @@ func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Co
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"a", "b"}
+	fieldsInOrder := [...]string{"a", "b", "c"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -15222,6 +15281,15 @@ func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Co
 				return it, err
 			}
 			it["b"] = data
+		case "c":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("c"))
+			data, err := ec.unmarshalOCustomScalar2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐCustomScalar(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it["c"] = data
 		}
 	}
 
@@ -17542,6 +17610,8 @@ func (ec *executionContext) _MapStringInterfaceType(ctx context.Context, sel ast
 			out.Values[i] = ec._MapStringInterfaceType_a(ctx, field, obj)
 		case "b":
 			out.Values[i] = ec._MapStringInterfaceType_b(ctx, field, obj)
+		case "c":
+			out.Values[i] = ec._MapStringInterfaceType_c(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -22391,6 +22461,22 @@ func (ec *executionContext) marshalOCircle2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 
 func (ec *executionContext) marshalOCoordinates2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐCoordinates(ctx context.Context, sel ast.SelectionSet, v Coordinates) graphql.Marshaler {
 	return ec._Coordinates(ctx, sel, &v)
+}
+
+func (ec *executionContext) unmarshalOCustomScalar2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐCustomScalar(ctx context.Context, v interface{}) (*CustomScalar, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(CustomScalar)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOCustomScalar2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐCustomScalar(ctx context.Context, sel ast.SelectionSet, v *CustomScalar) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
 }
 
 func (ec *executionContext) unmarshalODefaultScalarImplementation2ᚖstring(ctx context.Context, v interface{}) (*string, error) {

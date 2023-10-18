@@ -81,7 +81,7 @@ func validateMapItemsType(t *testing.T, in map[string]interface{}) {
 	for k, v := range in {
 		switch k {
 		case "a":
-			require.IsType(t, new(string), v)
+			require.IsType(t, "", v)
 		case "b":
 			require.IsType(t, new(int), v)
 		case "c":

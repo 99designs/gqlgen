@@ -10,7 +10,7 @@ type MapStringInterfaceType @goModel(model: "map[string]interface{}") {
 }
 
 input MapStringInterfaceInput @goModel(model: "map[string]interface{}") {
-    a: String
+    a: String!
     b: Int
     c: CustomScalar
 }

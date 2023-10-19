@@ -274,6 +274,10 @@ func (ref *TypeReference) IsScalar() bool {
 	return ref.Definition.Kind == ast.Scalar
 }
 
+func (ref *TypeReference) IsMap() bool {
+	return ref.GO == MapType
+}
+
 func (ref *TypeReference) UniquenessKey() string {
 	nullability := "O"
 	if ref.GQL.NonNull {

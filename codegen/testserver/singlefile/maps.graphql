@@ -6,12 +6,26 @@ extend type Query {
 type MapStringInterfaceType @goModel(model: "map[string]interface{}") {
     a: String
     b: Int
+    c: CustomScalar
+    nested: MapNested
+}
+
+type MapNested @goModel(model: "singlefile.MapNested") {
+    value: CustomScalar!
 }
 
 input MapStringInterfaceInput @goModel(model: "map[string]interface{}") {
-    a: String
+    a: String!
     b: Int
+    c: CustomScalar
+    nested: MapNestedInput
 }
+
+input MapNestedInput @goModel(model: "singlefile.MapNested") {
+    value: CustomScalar!
+}
+
+scalar CustomScalar @goModel(model: "singlefile.CustomScalar")
 
 input NestedMapInput {
     map: MapStringInterfaceInput

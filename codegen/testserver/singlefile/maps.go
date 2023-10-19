@@ -5,6 +5,10 @@ import (
 	"strconv"
 )
 
+type MapNested struct {
+	Value CustomScalar
+}
+
 type CustomScalar struct {
 	value int64
 }

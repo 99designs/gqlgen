@@ -235,10 +235,15 @@ type ComplexityRoot struct {
 		ID func(childComplexity int) int
 	}
 
+	MapNested struct {
+		Value func(childComplexity int) int
+	}
+
 	MapStringInterfaceType struct {
-		A func(childComplexity int) int
-		B func(childComplexity int) int
-		C func(childComplexity int) int
+		A      func(childComplexity int) int
+		B      func(childComplexity int) int
+		C      func(childComplexity int) int
+		Nested func(childComplexity int) int
 	}
 
 	ModelMethods struct {
@@ -1052,6 +1057,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Map.ID(childComplexity), true
 
+	case "MapNested.value":
+		if e.complexity.MapNested.Value == nil {
+			break
+		}
+
+		return e.complexity.MapNested.Value(childComplexity), true
+
 	case "MapStringInterfaceType.a":
 		if e.complexity.MapStringInterfaceType.A == nil {
 			break
@@ -1072,6 +1084,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.MapStringInterfaceType.C(childComplexity), true
+
+	case "MapStringInterfaceType.nested":
+		if e.complexity.MapStringInterfaceType.Nested == nil {
+			break
+		}
+
+		return e.complexity.MapStringInterfaceType.Nested(childComplexity), true
 
 	case "ModelMethods.noContext":
 		if e.complexity.ModelMethods.NoContext == nil {
@@ -2257,6 +2276,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputInnerInput,
 		ec.unmarshalInputInputDirectives,
 		ec.unmarshalInputInputWithEnumValue,
+		ec.unmarshalInputMapNestedInput,
 		ec.unmarshalInputMapStringInterfaceInput,
 		ec.unmarshalInputNestedInput,
 		ec.unmarshalInputNestedMapInput,
@@ -6063,6 +6083,47 @@ func (ec *executionContext) fieldContext_Map_id(ctx context.Context, field graph
 	return fc, nil
 }
 
+func (ec *executionContext) _MapNested_value(ctx context.Context, field graphql.CollectedField, obj *MapNested) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_MapNested_value(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(CustomScalar)
+	fc.Result = res
+	return ec.marshalNCustomScalar2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐCustomScalar(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_MapNested_value(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MapNested",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type CustomScalar does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _MapStringInterfaceType_a(ctx context.Context, field graphql.CollectedField, obj map[string]interface{}) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_MapStringInterfaceType_a(ctx, field)
 	if err != nil {
@@ -6199,6 +6260,57 @@ func (ec *executionContext) fieldContext_MapStringInterfaceType_c(ctx context.Co
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type CustomScalar does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MapStringInterfaceType_nested(ctx context.Context, field graphql.CollectedField, obj map[string]interface{}) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_MapStringInterfaceType_nested(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		switch v := obj["nested"].(type) {
+		case *MapNested:
+			return v, nil
+		case MapNested:
+			return &v, nil
+		case nil:
+			return (*MapNested)(nil), nil
+		default:
+			return nil, fmt.Errorf("unexpected type %T for field %s", v, "nested")
+		}
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*MapNested)
+	fc.Result = res
+	return ec.marshalOMapNested2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐMapNested(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_MapStringInterfaceType_nested(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MapStringInterfaceType",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "value":
+				return ec.fieldContext_MapNested_value(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type MapNested", field.Name)
 		},
 	}
 	return fc, nil
@@ -9955,6 +10067,8 @@ func (ec *executionContext) fieldContext_Query_mapStringInterface(ctx context.Co
 				return ec.fieldContext_MapStringInterfaceType_b(ctx, field)
 			case "c":
 				return ec.fieldContext_MapStringInterfaceType_c(ctx, field)
+			case "nested":
+				return ec.fieldContext_MapStringInterfaceType_nested(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type MapStringInterfaceType", field.Name)
 		},
@@ -10012,6 +10126,8 @@ func (ec *executionContext) fieldContext_Query_mapNestedStringInterface(ctx cont
 				return ec.fieldContext_MapStringInterfaceType_b(ctx, field)
 			case "c":
 				return ec.fieldContext_MapStringInterfaceType_c(ctx, field)
+			case "nested":
+				return ec.fieldContext_MapStringInterfaceType_nested(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type MapStringInterfaceType", field.Name)
 		},
@@ -15249,6 +15365,35 @@ func (ec *executionContext) unmarshalInputInputWithEnumValue(ctx context.Context
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputMapNestedInput(ctx context.Context, obj interface{}) (MapNested, error) {
+	var it MapNested
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"value"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "value":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
+			data, err := ec.unmarshalNCustomScalar2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐCustomScalar(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Value = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Context, obj interface{}) (map[string]interface{}, error) {
 	it := make(map[string]interface{}, len(obj.(map[string]interface{})))
 	asMap := map[string]interface{}{}
@@ -15256,7 +15401,7 @@ func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Co
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"a", "b", "c"}
+	fieldsInOrder := [...]string{"a", "b", "c", "nested"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -15290,6 +15435,15 @@ func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Co
 				return it, err
 			}
 			it["c"] = data
+		case "nested":
+			var err error
+
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nested"))
+			data, err := ec.unmarshalOMapNestedInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐMapNested(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it["nested"] = data
 		}
 	}
 
@@ -17595,6 +17749,45 @@ func (ec *executionContext) _Map(ctx context.Context, sel ast.SelectionSet, obj 
 	return out
 }
 
+var mapNestedImplementors = []string{"MapNested"}
+
+func (ec *executionContext) _MapNested(ctx context.Context, sel ast.SelectionSet, obj *MapNested) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, mapNestedImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MapNested")
+		case "value":
+			out.Values[i] = ec._MapNested_value(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var mapStringInterfaceTypeImplementors = []string{"MapStringInterfaceType"}
 
 func (ec *executionContext) _MapStringInterfaceType(ctx context.Context, sel ast.SelectionSet, obj map[string]interface{}) graphql.Marshaler {
@@ -17612,6 +17805,8 @@ func (ec *executionContext) _MapStringInterfaceType(ctx context.Context, sel ast
 			out.Values[i] = ec._MapStringInterfaceType_b(ctx, field, obj)
 		case "c":
 			out.Values[i] = ec._MapStringInterfaceType_c(ctx, field, obj)
+		case "nested":
+			out.Values[i] = ec._MapStringInterfaceType_nested(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -21250,6 +21445,16 @@ func (ec *executionContext) marshalNCheckIssue8962ᚖgithubᚗcomᚋ99designsᚋ
 	return ec._CheckIssue896(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNCustomScalar2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐCustomScalar(ctx context.Context, v interface{}) (CustomScalar, error) {
+	var res CustomScalar
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNCustomScalar2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐCustomScalar(ctx context.Context, sel ast.SelectionSet, v CustomScalar) graphql.Marshaler {
+	return v
+}
+
 func (ec *executionContext) unmarshalNDefaultInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐDefaultInput(ctx context.Context, v interface{}) (DefaultInput, error) {
 	res, err := ec.unmarshalInputDefaultInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -22757,6 +22962,21 @@ func (ec *executionContext) marshalOIt2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋco
 		return graphql.Null
 	}
 	return ec._It(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOMapNested2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐMapNested(ctx context.Context, sel ast.SelectionSet, v *MapNested) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._MapNested(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOMapNestedInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐMapNested(ctx context.Context, v interface{}) (*MapNested, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputMapNestedInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOMapStringInterfaceInput2map(ctx context.Context, v interface{}) (map[string]interface{}, error) {

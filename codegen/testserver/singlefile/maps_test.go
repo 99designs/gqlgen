@@ -31,7 +31,7 @@ func TestMaps(t *testing.T) {
 		var resp struct {
 			MapStringInterface map[string]interface{}
 		}
-		err := c.Post(`query { mapStringInterface { a, b, c } }`, &resp)
+		err := c.Post(`query { mapStringInterface { a, b, c, nested { value } } }`, &resp)
 		require.NoError(t, err)
 		require.Nil(t, resp.MapStringInterface)
 	})
@@ -40,7 +40,7 @@ func TestMaps(t *testing.T) {
 		var resp struct {
 			MapStringInterface map[string]interface{}
 		}
-		err := c.Post(`query { mapStringInterface(in: null) { a, b, c } }`, &resp)
+		err := c.Post(`query { mapStringInterface(in: null) { a, b, c, nested { value } } }`, &resp)
 		require.NoError(t, err)
 		require.Nil(t, resp.MapStringInterface)
 	})
@@ -49,29 +49,35 @@ func TestMaps(t *testing.T) {
 		var resp struct {
 			MapStringInterface map[string]interface{}
 		}
-		err := c.Post(`query { mapStringInterface(in: { a: "a", b: null, c: 42 }) { a, b, c } }`, &resp)
+		err := c.Post(`query($value: CustomScalar!) { mapStringInterface(in: { a: "a", b: null, c: 42, nested: { value: $value } }) { a, b, c, nested { value } } }`, &resp, client.Var("value", "17"))
 		require.NoError(t, err)
 		require.Equal(t, "a", resp.MapStringInterface["a"])
 		require.Nil(t, resp.MapStringInterface["b"])
 		require.Equal(t, "42", resp.MapStringInterface["c"])
+		require.NotNil(t, resp.MapStringInterface["nested"])
+		require.IsType(t, map[string]interface{}{}, resp.MapStringInterface["nested"])
+		require.Equal(t, "17", (resp.MapStringInterface["nested"].(map[string]interface{}))["value"])
 	})
 
 	t.Run("nested", func(t *testing.T) {
 		var resp struct {
 			MapNestedStringInterface map[string]interface{}
 		}
-		err := c.Post(`query { mapNestedStringInterface(in: { map: { a: "a", c: "42" } }) { a, b, c } }`, &resp)
+		err := c.Post(`query { mapNestedStringInterface(in: { map: { a: "a", c: "42", nested: { value: 31 } } }) { a, b, c, nested { value } } }`, &resp)
 		require.NoError(t, err)
 		require.Equal(t, "a", resp.MapNestedStringInterface["a"])
 		require.Nil(t, resp.MapNestedStringInterface["b"])
 		require.Equal(t, "42", resp.MapNestedStringInterface["c"])
+		require.NotNil(t, resp.MapNestedStringInterface["nested"])
+		require.IsType(t, map[string]interface{}{}, resp.MapNestedStringInterface["nested"])
+		require.Equal(t, "31", (resp.MapNestedStringInterface["nested"].(map[string]interface{}))["value"])
 	})
 
 	t.Run("nested nil", func(t *testing.T) {
 		var resp struct {
 			MapNestedStringInterface map[string]interface{}
 		}
-		err := c.Post(`query { mapNestedStringInterface(in: { map: null }) { a, b, c } }`, &resp)
+		err := c.Post(`query { mapNestedStringInterface(in: { map: null }) { a, b, c, nested { value } } }`, &resp)
 		require.NoError(t, err)
 		require.Nil(t, resp.MapNestedStringInterface)
 	})
@@ -86,6 +92,8 @@ func validateMapItemsType(t *testing.T, in map[string]interface{}) {
 			require.IsType(t, new(int), v)
 		case "c":
 			require.IsType(t, new(CustomScalar), v)
+		case "nested":
+			require.IsType(t, new(MapNested), v)
 		default:
 			require.Failf(t, "unexpected key in map", "key %q was not expected in map", k)
 		}

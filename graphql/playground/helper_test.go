@@ -62,6 +62,7 @@ func assertNodesIntegrity(t *testing.T, baseUrl string, doc *goquery.Document, s
 			hasher := sha256.New()
 			_, err = io.Copy(hasher, resp.Body)
 			assert.NoError(t, err)
+			assert.NoError(t, resp.Body.Close())
 			actual := "sha256-" + base64.StdEncoding.EncodeToString(hasher.Sum(nil))
 			assert.Equal(t, integrity, actual)
 		}

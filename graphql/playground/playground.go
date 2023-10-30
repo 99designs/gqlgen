@@ -102,9 +102,9 @@ func HandlerWithHeaders(title string, endpoint string, fetcherHeaders map[string
 			"uiHeaders":            uiHeaders,
 			"endpointIsAbsolute":   endpointHasScheme(endpoint),
 			"subscriptionEndpoint": getSubscriptionEndpoint(endpoint),
-			"version":              "3.0.1",
+			"version":              "3.0.6",
 			"cssSRI":               "sha256-wTzfn13a+pLMB5rMeysPPR1hO7x0SwSeQI+cnw7VdbE=",
-			"jsSRI":                "sha256-dLnxjV+d2rFUCtYKjbPy413/8O+Ahy7QqAhaPNlL8fk=",
+			"jsSRI":                "sha256-eNxH+Ah7Z9up9aJYTQycgyNuy953zYZwE9Rqf5rH+r4=",
 			"reactSRI":             "sha256-S0lp+k7zWUMk2ixteM6HZvu8L9Eh//OVrt+ZfbCpmgY=",
 			"reactDOMSRI":          "sha256-IXWO0ITNDjfnNXIu5POVfqlgYoop36bDzhodR6LW5Pc=",
 		})

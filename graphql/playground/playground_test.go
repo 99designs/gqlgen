@@ -71,3 +71,7 @@ func TestHandler_createsRelativeURLs(t *testing.T) {
 		t.Errorf("no match for %s in response body", wantSubURL.String())
 	}
 }
+
+func TestHandler_Integrity(t *testing.T) {
+	testResourceIntegrity(t, Handler)
+}

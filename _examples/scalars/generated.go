@@ -3156,8 +3156,6 @@ func (ec *executionContext) unmarshalInputSearchArgs(ctx context.Context, obj in
 		}
 		switch k {
 		case "location":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("location"))
 			data, err := ec.unmarshalOPoint2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐPoint(ctx, v)
 			if err != nil {
@@ -3165,8 +3163,6 @@ func (ec *executionContext) unmarshalInputSearchArgs(ctx context.Context, obj in
 			}
 			it.Location = data
 		case "createdAfter":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("createdAfter"))
 			data, err := ec.unmarshalOTimestamp2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
@@ -3174,8 +3170,6 @@ func (ec *executionContext) unmarshalInputSearchArgs(ctx context.Context, obj in
 			}
 			it.CreatedAfter = data
 		case "isBanned":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isBanned"))
 			data, err := ec.unmarshalOBanned2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐBanned(ctx, v)
 			if err != nil {

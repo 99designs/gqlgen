@@ -42,8 +42,6 @@ func (ec *executionContext) unmarshalInputNestedInput(ctx context.Context, obj i
 		}
 		switch k {
 		case "field":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
 			data, err := ec.unmarshalNEmail2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐEmail(ctx, v)
 			if err != nil {
@@ -71,8 +69,6 @@ func (ec *executionContext) unmarshalInputSpecialInput(ctx context.Context, obj 
 		}
 		switch k {
 		case "nesting":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nesting"))
 			data, err := ec.unmarshalNNestedInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐNestedInput(ctx, v)
 			if err != nil {

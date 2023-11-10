@@ -2748,8 +2748,6 @@ func (ec *executionContext) unmarshalInputTodoInput(ctx context.Context, obj int
 		}
 		switch k {
 		case "text":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("text"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -2757,8 +2755,6 @@ func (ec *executionContext) unmarshalInputTodoInput(ctx context.Context, obj int
 			}
 			it.Text = data
 		case "done":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("done"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {

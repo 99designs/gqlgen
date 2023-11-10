@@ -563,8 +563,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 		}
 		switch k {
 		case "break":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("break"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -572,8 +570,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Break = data
 		case "default":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("default"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -581,8 +577,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Default = data
 		case "func":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("func"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -590,8 +584,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Func = data
 		case "interface":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("interface"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -599,8 +591,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Interface = data
 		case "select":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("select"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -608,8 +598,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Select = data
 		case "case":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("case"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -617,8 +605,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Case = data
 		case "defer":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("defer"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -626,8 +612,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Defer = data
 		case "go":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("go"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -635,8 +619,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Go = data
 		case "map":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("map"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -644,8 +626,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Map = data
 		case "struct":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("struct"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -653,8 +633,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Struct = data
 		case "chan":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("chan"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -662,8 +640,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Chan = data
 		case "else":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("else"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -671,8 +647,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Else = data
 		case "goto":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("goto"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -680,8 +654,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Goto = data
 		case "package":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("package"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -689,8 +661,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Package = data
 		case "switch":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("switch"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -698,8 +668,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Switch = data
 		case "const":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("const"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -707,8 +675,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Const = data
 		case "fallthrough":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fallthrough"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -716,8 +682,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Fallthrough = data
 		case "if":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("if"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -725,8 +689,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.If = data
 		case "range":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("range"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -734,8 +696,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Range = data
 		case "type":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -743,8 +703,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Type = data
 		case "continue":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("continue"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -752,8 +710,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Continue = data
 		case "for":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("for"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -761,8 +717,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.For = data
 		case "import":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("import"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -770,8 +724,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Import = data
 		case "return":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("return"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -779,8 +731,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Return = data
 		case "var":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("var"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -788,8 +738,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Var = data
 		case "_":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("_"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {

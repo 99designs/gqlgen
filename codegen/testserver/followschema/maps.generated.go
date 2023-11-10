@@ -279,8 +279,6 @@ func (ec *executionContext) unmarshalInputMapNestedInput(ctx context.Context, ob
 		}
 		switch k {
 		case "value":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
 			data, err := ec.unmarshalNCustomScalar2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCustomScalar(ctx, v)
 			if err != nil {
@@ -308,8 +306,6 @@ func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Co
 		}
 		switch k {
 		case "a":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("a"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -317,8 +313,6 @@ func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Co
 			}
 			it["a"] = data
 		case "b":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("b"))
 			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
 			if err != nil {
@@ -326,8 +320,6 @@ func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Co
 			}
 			it["b"] = data
 		case "c":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("c"))
 			data, err := ec.unmarshalOCustomScalar2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCustomScalar(ctx, v)
 			if err != nil {
@@ -335,8 +327,6 @@ func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Co
 			}
 			it["c"] = data
 		case "nested":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nested"))
 			data, err := ec.unmarshalOMapNestedInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐMapNested(ctx, v)
 			if err != nil {
@@ -364,8 +354,6 @@ func (ec *executionContext) unmarshalInputNestedMapInput(ctx context.Context, ob
 		}
 		switch k {
 		case "map":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("map"))
 			data, err := ec.unmarshalOMapStringInterfaceInput2map(ctx, v)
 			if err != nil {

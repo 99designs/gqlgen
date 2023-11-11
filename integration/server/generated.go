@@ -3123,8 +3123,6 @@ func (ec *executionContext) unmarshalInputDateFilter(ctx context.Context, obj in
 		}
 		switch k {
 		case "value":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -3132,8 +3130,6 @@ func (ec *executionContext) unmarshalInputDateFilter(ctx context.Context, obj in
 			}
 			it.Value = data
 		case "timezone":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("timezone"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -3141,8 +3137,6 @@ func (ec *executionContext) unmarshalInputDateFilter(ctx context.Context, obj in
 			}
 			it.Timezone = data
 		case "op":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("op"))
 			data, err := ec.unmarshalODATE_FILTER_OP2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋserverᚋmodelsᚑgoᚐDateFilterOp(ctx, v)
 			if err != nil {
@@ -3170,8 +3164,6 @@ func (ec *executionContext) unmarshalInputListCoercion(ctx context.Context, obj 
 		}
 		switch k {
 		case "enumVal":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("enumVal"))
 			data, err := ec.unmarshalOErrorType2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋserverᚋmodelsᚑgoᚐErrorType(ctx, v)
 			if err != nil {
@@ -3179,8 +3171,6 @@ func (ec *executionContext) unmarshalInputListCoercion(ctx context.Context, obj 
 			}
 			it.EnumVal = data
 		case "strVal":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("strVal"))
 			data, err := ec.unmarshalOString2ᚕᚖstring(ctx, v)
 			if err != nil {
@@ -3188,8 +3178,6 @@ func (ec *executionContext) unmarshalInputListCoercion(ctx context.Context, obj 
 			}
 			it.StrVal = data
 		case "intVal":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("intVal"))
 			data, err := ec.unmarshalOInt2ᚕᚖint(ctx, v)
 			if err != nil {
@@ -3197,8 +3185,6 @@ func (ec *executionContext) unmarshalInputListCoercion(ctx context.Context, obj 
 			}
 			it.IntVal = data
 		case "scalarVal":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scalarVal"))
 			data, err := ec.unmarshalOMap2ᚕmap(ctx, v)
 			if err != nil {

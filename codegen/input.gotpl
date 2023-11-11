@@ -31,13 +31,10 @@
 			switch k {
 			{{- range $field := .Fields }}
 			case {{$field.Name|quote}}:
-				var err error
-
 				{{- $lhs := (printf "it.%s" $field.GoFieldName) }}
 				{{- if $input.IsMap }}
 					{{- $lhs = (printf "it[%q]" $field.Name) }}
 				{{- end }}
-
 				ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField({{$field.Name|quote}}))
 				{{- if $field.ImplDirectives }}
 					directive0 := func(ctx context.Context) (interface{}, error) { return ec.{{ $field.TypeReference.UnmarshalFunc }}(ctx, v) }

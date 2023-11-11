@@ -87,8 +87,6 @@ func (ec *executionContext) unmarshalInputFieldsOrderInput(ctx context.Context, 
 		}
 		switch k {
 		case "firstField":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("firstField"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -96,8 +94,6 @@ func (ec *executionContext) unmarshalInputFieldsOrderInput(ctx context.Context, 
 			}
 			it.FirstField = data
 		case "overrideFirstField":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("overrideFirstField"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {

@@ -14967,8 +14967,6 @@ func (ec *executionContext) unmarshalInputChanges(ctx context.Context, obj inter
 		}
 		switch k {
 		case "a":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("a"))
 			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
 			if err != nil {
@@ -14976,8 +14974,6 @@ func (ec *executionContext) unmarshalInputChanges(ctx context.Context, obj inter
 			}
 			it["a"] = data
 		case "b":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("b"))
 			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
 			if err != nil {
@@ -15012,8 +15008,6 @@ func (ec *executionContext) unmarshalInputDefaultInput(ctx context.Context, obj 
 		}
 		switch k {
 		case "falsyBoolean":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("falsyBoolean"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
@@ -15021,8 +15015,6 @@ func (ec *executionContext) unmarshalInputDefaultInput(ctx context.Context, obj 
 			}
 			it.FalsyBoolean = data
 		case "truthyBoolean":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("truthyBoolean"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
@@ -15050,8 +15042,6 @@ func (ec *executionContext) unmarshalInputFieldsOrderInput(ctx context.Context, 
 		}
 		switch k {
 		case "firstField":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("firstField"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -15059,8 +15049,6 @@ func (ec *executionContext) unmarshalInputFieldsOrderInput(ctx context.Context, 
 			}
 			it.FirstField = data
 		case "overrideFirstField":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("overrideFirstField"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -15090,8 +15078,6 @@ func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, o
 		}
 		switch k {
 		case "message":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("message"))
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
@@ -15140,8 +15126,6 @@ func (ec *executionContext) unmarshalInputInnerInput(ctx context.Context, obj in
 		}
 		switch k {
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
@@ -15169,8 +15153,6 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 		}
 		switch k {
 		case "text":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("text"))
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
@@ -15209,8 +15191,6 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
 		case "nullableText":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nullableText"))
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOString2ᚖstring(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
@@ -15239,8 +15219,6 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
 		case "inner":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("inner"))
 			directive0 := func(ctx context.Context) (interface{}, error) {
 				return ec.unmarshalNInnerDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐInnerDirectives(ctx, v)
@@ -15265,8 +15243,6 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
 		case "innerNullable":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("innerNullable"))
 			directive0 := func(ctx context.Context) (interface{}, error) {
 				return ec.unmarshalOInnerDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐInnerDirectives(ctx, v)
@@ -15291,8 +15267,6 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
 		case "thirdParty":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("thirdParty"))
 			directive0 := func(ctx context.Context) (interface{}, error) {
 				return ec.unmarshalOThirdParty2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐThirdParty(ctx, v)
@@ -15351,8 +15325,6 @@ func (ec *executionContext) unmarshalInputInputWithEnumValue(ctx context.Context
 		}
 		switch k {
 		case "enum":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("enum"))
 			data, err := ec.unmarshalNEnumTest2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐEnumTest(ctx, v)
 			if err != nil {
@@ -15380,8 +15352,6 @@ func (ec *executionContext) unmarshalInputMapNestedInput(ctx context.Context, ob
 		}
 		switch k {
 		case "value":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
 			data, err := ec.unmarshalNCustomScalar2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐCustomScalar(ctx, v)
 			if err != nil {
@@ -15409,8 +15379,6 @@ func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Co
 		}
 		switch k {
 		case "a":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("a"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15418,8 +15386,6 @@ func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Co
 			}
 			it["a"] = data
 		case "b":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("b"))
 			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
 			if err != nil {
@@ -15427,8 +15393,6 @@ func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Co
 			}
 			it["b"] = data
 		case "c":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("c"))
 			data, err := ec.unmarshalOCustomScalar2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐCustomScalar(ctx, v)
 			if err != nil {
@@ -15436,8 +15400,6 @@ func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Co
 			}
 			it["c"] = data
 		case "nested":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nested"))
 			data, err := ec.unmarshalOMapNestedInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐMapNested(ctx, v)
 			if err != nil {
@@ -15465,8 +15427,6 @@ func (ec *executionContext) unmarshalInputNestedInput(ctx context.Context, obj i
 		}
 		switch k {
 		case "field":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
 			data, err := ec.unmarshalNEmail2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐEmail(ctx, v)
 			if err != nil {
@@ -15494,8 +15454,6 @@ func (ec *executionContext) unmarshalInputNestedMapInput(ctx context.Context, ob
 		}
 		switch k {
 		case "map":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("map"))
 			data, err := ec.unmarshalOMapStringInterfaceInput2map(ctx, v)
 			if err != nil {
@@ -15523,8 +15481,6 @@ func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, ob
 		}
 		switch k {
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
@@ -15532,8 +15488,6 @@ func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, ob
 			}
 			it.ID = graphql.OmittableOf(data)
 		case "bool":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bool"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
@@ -15541,8 +15495,6 @@ func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, ob
 			}
 			it.Bool = graphql.OmittableOf(data)
 		case "str":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("str"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -15550,8 +15502,6 @@ func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, ob
 			}
 			it.Str = graphql.OmittableOf(data)
 		case "int":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("int"))
 			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
 			if err != nil {
@@ -15559,8 +15509,6 @@ func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, ob
 			}
 			it.Int = graphql.OmittableOf(data)
 		case "time":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("time"))
 			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
@@ -15568,8 +15516,6 @@ func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, ob
 			}
 			it.Time = graphql.OmittableOf(data)
 		case "enum":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("enum"))
 			data, err := ec.unmarshalOStatus2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐStatus(ctx, v)
 			if err != nil {
@@ -15577,8 +15523,6 @@ func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, ob
 			}
 			it.Enum = graphql.OmittableOf(data)
 		case "scalar":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scalar"))
 			data, err := ec.unmarshalOThirdParty2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐThirdParty(ctx, v)
 			if err != nil {
@@ -15586,8 +15530,6 @@ func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, ob
 			}
 			it.Scalar = graphql.OmittableOf(data)
 		case "object":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("object"))
 			data, err := ec.unmarshalOOuterInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐOuterInput(ctx, v)
 			if err != nil {
@@ -15615,8 +15557,6 @@ func (ec *executionContext) unmarshalInputOuterInput(ctx context.Context, obj in
 		}
 		switch k {
 		case "inner":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("inner"))
 			data, err := ec.unmarshalNInnerInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐInnerInput(ctx, v)
 			if err != nil {
@@ -15644,8 +15584,6 @@ func (ec *executionContext) unmarshalInputRecursiveInputSlice(ctx context.Contex
 		}
 		switch k {
 		case "self":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("self"))
 			data, err := ec.unmarshalORecursiveInputSlice2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐRecursiveInputSliceᚄ(ctx, v)
 			if err != nil {
@@ -15673,8 +15611,6 @@ func (ec *executionContext) unmarshalInputSpecialInput(ctx context.Context, obj 
 		}
 		switch k {
 		case "nesting":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nesting"))
 			data, err := ec.unmarshalNNestedInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐNestedInput(ctx, v)
 			if err != nil {
@@ -15702,8 +15638,6 @@ func (ec *executionContext) unmarshalInputUpdatePtrToPtrInner(ctx context.Contex
 		}
 		switch k {
 		case "key":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("key"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -15711,8 +15645,6 @@ func (ec *executionContext) unmarshalInputUpdatePtrToPtrInner(ctx context.Contex
 			}
 			it.Key = data
 		case "value":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -15740,8 +15672,6 @@ func (ec *executionContext) unmarshalInputUpdatePtrToPtrOuter(ctx context.Contex
 		}
 		switch k {
 		case "name":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -15749,8 +15679,6 @@ func (ec *executionContext) unmarshalInputUpdatePtrToPtrOuter(ctx context.Contex
 			}
 			it.Name = data
 		case "inner":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("inner"))
 			data, err := ec.unmarshalOUpdatePtrToPtrInner2ᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐUpdatePtrToPtrInner(ctx, v)
 			if err != nil {
@@ -15758,8 +15686,6 @@ func (ec *executionContext) unmarshalInputUpdatePtrToPtrOuter(ctx context.Contex
 			}
 			it.Inner = data
 		case "stupidInner":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("stupidInner"))
 			data, err := ec.unmarshalOUpdatePtrToPtrInner2ᚖᚖᚖᚖᚖᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐUpdatePtrToPtrInner(ctx, v)
 			if err != nil {
@@ -15787,8 +15713,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 		}
 		switch k {
 		case "break":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("break"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15796,8 +15720,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Break = data
 		case "default":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("default"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15805,8 +15727,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Default = data
 		case "func":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("func"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15814,8 +15734,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Func = data
 		case "interface":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("interface"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15823,8 +15741,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Interface = data
 		case "select":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("select"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15832,8 +15748,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Select = data
 		case "case":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("case"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15841,8 +15755,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Case = data
 		case "defer":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("defer"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15850,8 +15762,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Defer = data
 		case "go":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("go"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15859,8 +15769,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Go = data
 		case "map":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("map"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15868,8 +15776,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Map = data
 		case "struct":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("struct"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15877,8 +15783,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Struct = data
 		case "chan":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("chan"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15886,8 +15790,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Chan = data
 		case "else":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("else"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15895,8 +15797,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Else = data
 		case "goto":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("goto"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15904,8 +15804,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Goto = data
 		case "package":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("package"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15913,8 +15811,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Package = data
 		case "switch":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("switch"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15922,8 +15818,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Switch = data
 		case "const":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("const"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15931,8 +15825,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Const = data
 		case "fallthrough":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fallthrough"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15940,8 +15832,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Fallthrough = data
 		case "if":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("if"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15949,8 +15839,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.If = data
 		case "range":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("range"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15958,8 +15846,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Range = data
 		case "type":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15967,8 +15853,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Type = data
 		case "continue":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("continue"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15976,8 +15860,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Continue = data
 		case "for":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("for"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15985,8 +15867,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.For = data
 		case "import":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("import"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -15994,8 +15874,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Import = data
 		case "return":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("return"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -16003,8 +15881,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Return = data
 		case "var":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("var"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -16012,8 +15888,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj in
 			}
 			it.Var = data
 		case "_":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("_"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {

@@ -4781,8 +4781,6 @@ func (ec *executionContext) unmarshalInputReviewInput(ctx context.Context, obj i
 		}
 		switch k {
 		case "stars":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("stars"))
 			data, err := ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
@@ -4790,8 +4788,6 @@ func (ec *executionContext) unmarshalInputReviewInput(ctx context.Context, obj i
 			}
 			it.Stars = data
 		case "commentary":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("commentary"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -4799,8 +4795,6 @@ func (ec *executionContext) unmarshalInputReviewInput(ctx context.Context, obj i
 			}
 			it.Commentary = data
 		case "time":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("time"))
 			data, err := ec.unmarshalOTime2timeᚐTime(ctx, v)
 			if err != nil {

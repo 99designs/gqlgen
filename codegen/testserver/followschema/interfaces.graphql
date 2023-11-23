@@ -77,3 +77,12 @@ type ConcreteNodeInterface implements Node {
     id: ID!
     child: Node!
 }
+
+# Types with multiple interfaces are evaluated first in the case statement
+type Bird implements Animal & Node {
+    id: ID!
+    child: Node!
+    species: String!
+    size: Size!
+    birdType: String!
+}

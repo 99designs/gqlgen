@@ -109,19 +109,7 @@ func BuildData(cfg *config.Config, plugins ...interface{}) (*Data, error) {
 		Plugins:       plugins,
 	}
 
-	var keys []string
-	for k := range b.Schema.Types {
-    keys = append(keys, k)
-	}
-
-	sort.Slice(keys, func(i, j int) bool {
-		typeA := b.Schema.Types[keys[i]]
-		typeB := b.Schema.Types[keys[j]]
-		return len(typeA.Types) > len(typeB.Types)
-	})
-
-	for _, k := range keys {
-		schemaType := b.Schema.Types[k]
+	for _, schemaType := range b.Schema.Types {
 		switch schemaType.Kind {
 		case ast.Object:
 			obj, err := b.buildObject(schemaType)

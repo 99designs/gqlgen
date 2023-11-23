@@ -211,6 +211,12 @@ type ComplexityRoot struct {
 		Field func(childComplexity int) int
 	}
 
+	Horse struct {
+		HorseBreed func(childComplexity int) int
+		Size       func(childComplexity int) int
+		Species    func(childComplexity int) int
+	}
+
 	InnerObject struct {
 		ID func(childComplexity int) int
 	}
@@ -1014,6 +1020,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ForcedResolver.Field(childComplexity), true
+
+	case "Horse.horseBreed":
+		if e.complexity.Horse.HorseBreed == nil {
+			break
+		}
+
+		return e.complexity.Horse.HorseBreed(childComplexity), true
+
+	case "Horse.size":
+		if e.complexity.Horse.Size == nil {
+			break
+		}
+
+		return e.complexity.Horse.Size(childComplexity), true
+
+	case "Horse.species":
+		if e.complexity.Horse.Species == nil {
+			break
+		}
+
+		return e.complexity.Horse.Species(childComplexity), true
 
 	case "InnerObject.id":
 		if e.complexity.InnerObject.ID == nil {

@@ -15908,6 +15908,13 @@ func (ec *executionContext) _Animal(ctx context.Context, sel ast.SelectionSet, o
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
+	case Horse:
+		return ec._Horse(ctx, sel, &obj)
+	case *Horse:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Horse(ctx, sel, obj)
 	case Dog:
 		return ec._Dog(ctx, sel, &obj)
 	case *Dog:
@@ -15922,6 +15929,22 @@ func (ec *executionContext) _Animal(ctx context.Context, sel ast.SelectionSet, o
 			return graphql.Null
 		}
 		return ec._Cat(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
+func (ec *executionContext) _Mammalian(ctx context.Context, sel ast.SelectionSet, obj Mammalian) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case House:
+		return ec._House(ctx, sel, &obj)
+	case *House:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._House(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}

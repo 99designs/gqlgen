@@ -84,8 +84,8 @@ interface Mammalian implements Animal {
 }
 
 # Types with multiple interfaces are evaluated first in the case statement
-type House implements Mammalian & Animal {
+type Horse implements Mammalian & Animal {
     species: String!
     size: Size!
-    houseBreed: String!
+    horseBreed: String!
 }

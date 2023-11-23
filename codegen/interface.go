@@ -40,13 +40,13 @@ func (b *builder) buildInterface(typ *ast.Definition) (*Interface, error) {
 	if interfaceType == nil || err != nil {
 		return nil, fmt.Errorf("%s is not an interface", i.Type)
 	}
- 
+
 	// Sort so that more specific types are evaluated first.
 	implementors := b.Schema.GetPossibleTypes(typ)
 	sort.Slice(implementors, func(i, j int) bool {
 		return len(implementors[i].Interfaces) > len(implementors[j].Interfaces)
 	})
-	
+
 	for _, implementor := range implementors {
 		obj, err := b.Binder.DefaultUserObject(implementor.Name)
 		if err != nil {

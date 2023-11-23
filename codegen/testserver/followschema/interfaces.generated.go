@@ -1678,17 +1678,17 @@ func (ec *executionContext) _Horse(ctx context.Context, sel ast.SelectionSet, ob
 		case "species":
 			out.Values[i] = ec._Horse_species(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids
+				out.Invalids++
 			}
 		case "size":
 			out.Values[i] = ec._Horse_size(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids
+				out.Invalids++
 			}
 		case "horseBreed":
 			out.Values[i] = ec._Horse_horseBreed(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids
+				out.Invalids++
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))

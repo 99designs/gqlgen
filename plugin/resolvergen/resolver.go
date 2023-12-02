@@ -136,11 +136,16 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 				implementation = fmt.Sprintf("panic(fmt.Errorf(\"not implemented: %v - %v\"))", f.GoFieldName, f.Name)
 			}
 			resolver := Resolver{o, f, rewriter.GetPrevDecl(structName, f.GoFieldName), comment, implementation, nil}
+			var implExists bool
 			for _, p := range data.Plugins {
 				rImpl, ok := p.(plugin.ResolverImplementer)
 				if !ok {
 					continue
 				}
+				if implExists {
+					return fmt.Errorf("multiple plugins implement ResolverImplementer")
+				}
+				implExists = true
 				resolver.ImplementationRender = rImpl.Implement
 			}
 			fnCase := gqlToResolverName(data.Config.Resolver.Dir(), f.Position.Src.Name, data.Config.Resolver.FilenameTemplate)

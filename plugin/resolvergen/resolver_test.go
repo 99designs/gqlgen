@@ -84,6 +84,24 @@ func TestOmitTemplateComment(t *testing.T) {
 	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/testdata/omit_template_comment/out")
 }
 
+func TestResolver_Implementation(t *testing.T) {
+	_ = syscall.Unlink("testdata/resolver_implementor/resolver.go")
+
+	cfg, err := config.LoadConfig("testdata/resolver_implementor/gqlgen.yml")
+	require.NoError(t, err)
+	p := Plugin{}
+
+	require.NoError(t, cfg.Init())
+
+	data, err := codegen.BuildData(cfg, &implementorTest{})
+	if err != nil {
+		panic(err)
+	}
+
+	require.NoError(t, p.GenerateCode(data))
+	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/testdata/resolver_implementor/out")
+}
+
 func TestCustomResolverTemplate(t *testing.T) {
 	_ = syscall.Unlink("testdata/resolvertemplate/out/resolver.go")
 	cfg, err := config.LoadConfig("testdata/resolvertemplate/gqlgen.yml")
@@ -141,4 +159,10 @@ func assertNoErrors(t *testing.T, pkg string) {
 	if hasErrors {
 		t.Fatal("see compilation errors above")
 	}
+}
+
+type implementorTest struct{}
+
+func (i *implementorTest) Implement(field *codegen.Field) string {
+	return "panic(\"implementor implemented me\")"
 }

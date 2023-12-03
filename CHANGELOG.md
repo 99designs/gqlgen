@@ -5,10 +5,316 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.37...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.41...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.41"></a>
+## [v0.17.41](https://github.com/99designs/gqlgen/compare/v0.17.40...v0.17.41) - 2023-12-03
+- <a href="https://github.com/99designs/gqlgen/commit/fe60938c55308b1cd5562556cdb976771cfcc6cc"><tt>fe60938c</tt></a> release v0.17.41
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/5e98a16a3a5a5678f1b6481275d81f52f9462f90"><tt>5e98a16a</tt></a> fix fieldset.New bug when prefix slice has len < cap (<a href="https://github.com/99designs/gqlgen/pull/2851">#2851</a>)</summary>
+
+* fix fieldset.New bug when prefix slice has len < cap
+
+* ignore gocritic warning
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/bd9657f3e50b7b9642c05039a5364ce2262faaf4"><tt>bd9657f3</tt></a> Improve ResolverImplementer.Implment  (<a href="https://github.com/99designs/gqlgen/pull/2850">#2850</a>)</summary>
+
+* improve resolver implement render
+
+* add error when multiple implementors
+
+* add initial test
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/cb3c1c890e5a255776df9577c80b0c15218cf254"><tt>cb3c1c89</tt></a> Updated apollo sandbox (<a href="https://github.com/99designs/gqlgen/pull/2849">#2849</a>)</summary>
+
+Added all supported options to new window.EmbeddedSandbox object
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/eb5cea7206767bda3582040fd9e4c98174aaa6b1"><tt>eb5cea72</tt></a> Small template fix to save space in the generated file (<a href="https://github.com/99designs/gqlgen/pull/2841">#2841</a>)</summary>
+
+* Small template fix to save space in the generated file
+
+* Re-generate
+
+
+---------
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/c0ca5091a10417c34192da4d3c064a0fed2a7fdb"><tt>c0ca5091</tt></a> Omittable can now be serialized as json (<a href="https://github.com/99designs/gqlgen/pull/2839">#2839</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/dcb7619111642cc82a21b8e80ce1300213af1368"><tt>dcb76191</tt></a> fix: sample program indentation (<a href="https://github.com/99designs/gqlgen/pull/2840">#2840</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/132ec1ce579e9ce3dc772afebf9703c1403d588e"><tt>132ec1ce</tt></a> Updated GraphiQL 3.0.1 => 3.0.6 (<a href="https://github.com/99designs/gqlgen/pull/2837">#2837</a>)</summary>
+
+* Updated GraphiQL 3.0.1 => 3.0.6
+
+* Added unit tests to cover integrity of playgrounds
+
+* Updated vulnerable dependency
+
+* Close response body
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/917407005eb4198aa43875984fb77caeaa7fca36"><tt>91740700</tt></a> v0.17.40 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
+<a name="v0.17.40"></a>
+## [v0.17.40](https://github.com/99designs/gqlgen/compare/v0.17.39...v0.17.40) - 2023-10-24
+- <a href="https://github.com/99designs/gqlgen/commit/c5ad14bf6c4203cefee7888e35e1f07e3a46e77a"><tt>c5ad14bf</tt></a> release v0.17.40
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/74e918f9271dbd045a0425e1f6ddb4804e30404b"><tt>74e918f9</tt></a> Map based input types fields are now coerced to the right type (<a href="https://github.com/99designs/gqlgen/pull/2830">#2830</a>)</summary>
+
+* Input maps now unmarshals and checks nested fields
+
+* Added unit tests
+
+* Tested required fields in input maps
+
+* Docs updated with disclaimer
+
+* Added test for nested inputs
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/1e5fa72a260d2313cf2d2f3315c5f885aa209acd"><tt>1e5fa72a</tt></a> Bump [@babel](https://github.com/babel)/traverse from 7.22.5 to 7.23.2 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2831">#2831</a>)</summary>
+
+- [Release notes](https://github.com/babel/babel/releases)
+- [Changelog](https://github.com/babel/babel/blob/main/CHANGELOG.md)
+- [Commits](https://github.com/babel/babel/commits/v7.23.2/packages/babel-traverse)
+
+---
+updated-dependencies:
+  dependency-type: indirect
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/e5c17d63948dd20879e4a9db68863689842ab49a"><tt>e5c17d63</tt></a> resolver: fix case-insensitive file name collision (<a href="https://github.com/99designs/gqlgen/pull/2829">#2829</a>)</summary>
+
+for compatibility with Windows/Mac OS X, Go does not allow files with
+identical case-insensitive names.
+this commit changes the key of the 'files' map to use the lower case
+file name, keeping the original file name as a property on the File
+object.
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/9c5fc3024574d0b954962d2e6453fa7489ba6327"><tt>9c5fc302</tt></a> v0.17.39 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
+<a name="v0.17.39"></a>
+## [v0.17.39](https://github.com/99designs/gqlgen/compare/v0.17.38...v0.17.39) - 2023-10-05
+- <a href="https://github.com/99designs/gqlgen/commit/eed94e8caddb251cc6c180062b26708b8b06dd35"><tt>eed94e8c</tt></a> release v0.17.39
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/a863d6451eb1bb54673a86de79004f2182501ac1"><tt>a863d645</tt></a> Add [@interfaceObject](https://github.com/interfaceObject) and [@composeDirective](https://github.com/composeDirective) at Federation 2 directive lists. (<a href="https://github.com/99designs/gqlgen/pull/2821">#2821</a>)</summary>
+
+This commit just adding those directives into the list.
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/3ff523ba5f4564432f7c8c0631ccc3d25754a407"><tt>3ff523ba</tt></a> Bump postcss from 8.4.24 to 8.4.31 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2819">#2819</a>)</summary>
+
+Bumps [postcss](https://github.com/postcss/postcss) from 8.4.24 to 8.4.31.
+- [Release notes](https://github.com/postcss/postcss/releases)
+- [Changelog](https://github.com/postcss/postcss/blob/main/CHANGELOG.md)
+- [Commits](https://github.com/postcss/postcss/compare/8.4.24...8.4.31)
+
+---
+updated-dependencies:
+- dependency-name: postcss
+  dependency-type: indirect
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/5925864212bb286e22a3027c3900aa99874cc7ad"><tt>59258642</tt></a> Adding duration scalar conforming to ISO8601 standard (<a href="https://github.com/99designs/gqlgen/pull/2800">#2800</a>)</summary>
+
+* Adding duration scalar
+
+* simple Duration scalar docs
+
+* using MarshalString, to add proper double quotes
+
+* adding deps and running go mod tidy on _examples
+
+* Re-organize imports
+
+
+* Fix test now that imports are sorted
+
+
+---------
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/37f8e4ebb45d5a7edac5e8f6a241d842b4b9cfb1"><tt>37f8e4eb</tt></a> Add ability to not fail when pong is not received. (<a href="https://github.com/99designs/gqlgen/pull/2815">#2815</a>)</summary>
+
+I also changed how the read deadline set works a little, the reason for
+this is that the protocol allows for pong to be sent without a ping.
+
+So setting a read deadline on receiving pong isn't great. Instead we
+should always set the read deadline on sending ping. Though to do this
+we need to know whether we have received a pong or not. Because if we
+set the read deadline when the previous ping still hasn't received the
+pong. Then it will never hit the deadline.
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/89ac736ffe346e9ee95b12b4db467d1a802fe0ac"><tt>89ac736f</tt></a> Store parsed Schema on ExecutableSchema rather than use global variable (<a href="https://github.com/99designs/gqlgen/pull/2811">#2811</a>)</summary>
+
+* codegen: executableSchema schema configurable
+
+* feat
+
+* feat
+
+* codegen: add schema property on Config and executableSchema
+
+* fix: fmt
+
+* regenerate
+
+
+---------
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/919aded6be6cd722c202214e7a8183ed56762501"><tt>919aded6</tt></a> Add a pong only keep alive for the new protcol (<a href="https://github.com/99designs/gqlgen/pull/2814">#2814</a>)</summary>
+
+The protocol allows for this and this eliminates the potential for
+over-agressive triggers of the read deadline set for using the ping/pong
+flow.
+
+https://github.com/enisdenjo/graphql-ws/blob/50d5a512d0d7252d41c079e6716b884a191b1ddc/PROTOCOL.md#pong
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/001c296a39ee981d415f5079ce0a8827e5d65874"><tt>001c296a</tt></a> Update auto-generated files with latest results. (<a href="https://github.com/99designs/gqlgen/pull/2813">#2813</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/f6fa3aae778926668b0787605c0eab125a800c1e"><tt>f6fa3aae</tt></a> Consider go type name when autobinding (<a href="https://github.com/99designs/gqlgen/pull/2812">#2812</a>)</summary>
+
+Currently, generated schema type names are normalized, for instance - SomeTYPE in the schema will be generated as SomeType in the model.
+
+When autobinding, however, we only consider the schema type name when searching for it in the relevant package(s),
+thus type names that differ post normalizations aren't auto-bound properly and are instead re-generated.
+
+This commit suggests a fix where we'd try to autobind for both the schema type name (first, to maintain back compat), or the go type name if the former isn't found.
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/4e8d8c70ce216824e506ad3d77b005f56c3ed144"><tt>4e8d8c70</tt></a> Feature: Support Apollo Federation Auth Directives (<a href="https://github.com/99designs/gqlgen/pull/2809">#2809</a>)</summary>
+
+* local version working
+
+* gofmt
+
+* tabs
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/66709d89f0fd45eca823382d3a95020ef5c7485c"><tt>66709d89</tt></a> feat: update getting-started CreateTodo mutationResolver (<a href="https://github.com/99designs/gqlgen/pull/2810">#2810</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/2c9f9c5f828bdda8aa03c4be7adf1d0c9abaa8f6"><tt>2c9f9c5f</tt></a> fix: CodeGen for omit_slice_element_pointers and GetMany Entity Resolvers (<a href="https://github.com/99designs/gqlgen/pull/2802">#2802</a>)</summary>
+
+* remove ! from reps definition
+
+* adding tests
+
+* fixing tests
+
+* adding documentation
+
+* addressing lint
+
+* commit after go gonerate
+
+* gofmt
+
+
+---------
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/3e2393f3afe1f3f530c34f4dbbece47bde6e736b"><tt>3e2393f3</tt></a> add close flag into wsConnection to avoid duplicate calls of CloseFunc (<a href="https://github.com/99designs/gqlgen/pull/2803">#2803</a>)</summary>
+
+* add close flag into wsConnection to avoid duplicate calls of CloseFunc
+
+* add test
+
+* Fix linter error
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/af4d3943308b7a84464771e5ed6b578ba40ee0c3"><tt>af4d3943</tt></a> Allow WebsocketInitFunc to add payload to Ack (<a href="https://github.com/99designs/gqlgen/pull/4">#4</a>) (<a href="https://github.com/99designs/gqlgen/pull/2791">#2791</a>)</summary>
+
+* Allow WebsocketInitFunc to add payload to Ack
+
+The connection ACK message in the protocol for both
+graphql-ws and graphql-transport-ws allows for a payload in the
+connection ack message.
+
+We really wanted to use this to establish better telemetry in our use of
+websockets in graphql.
+
+* Fix lint error in test
+
+* Switch argument ordering.
+
+---------
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/f3b860336bfcc7307713420e703ee5badec029a4"><tt>f3b86033</tt></a> v0.17.38 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
+<a name="v0.17.38"></a>
+## [v0.17.38](https://github.com/99designs/gqlgen/compare/v0.17.37...v0.17.38) - 2023-09-19
+- <a href="https://github.com/99designs/gqlgen/commit/d9077fac9c2320b28744fb43ab1d00c4d50f0af8"><tt>d9077fac</tt></a> release v0.17.38
+
+- <a href="https://github.com/99designs/gqlgen/commit/5f452ce2dbfc4171fc021c10de11b435a60c8955"><tt>5f452ce2</tt></a> Update gqlparser to 2.5.10 (<a href="https://github.com/99designs/gqlgen/pull/2798">#2798</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/c89860bdd01827ad0f7a3f2020935e2ae115ecb7"><tt>c89860bd</tt></a> refactor: return `null` instead of zero value uuid (<a href="https://github.com/99designs/gqlgen/pull/2794">#2794</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/625ca2e58aba47cd540f0fb47e048a743a896906"><tt>625ca2e5</tt></a> Make it possible to pass UI headers (<a href="https://github.com/99designs/gqlgen/pull/2793">#2793</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/fceb33111bef2bbbf14468d78888098ac8968351"><tt>fceb3311</tt></a> Fix rand int docs link in Getting Started (<a href="https://github.com/99designs/gqlgen/pull/2789">#2789</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/f01d580501ddca4cf20b6fbf7f937be8509466bf"><tt>f01d5805</tt></a> Add new changelog (<a href="https://github.com/99designs/gqlgen/pull/2787">#2787</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/9930e5740e0670a69bfd4397d87222b49cf7f0e6"><tt>9930e574</tt></a> Ability to use forceGenerate and extraFields together (<a href="https://github.com/99designs/gqlgen/pull/2788">#2788</a>)</summary>
+
+* Ability to user forceGenerate and extraFields together
+
+* Some docs for forceGenerate added
+
+---------
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/f90ac05e42fcc97addda2d32e3cc16565f55ed98"><tt>f90ac05e</tt></a> v0.17.37 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.37"></a>
 ## [v0.17.37](https://github.com/99designs/gqlgen/compare/v0.17.36...v0.17.37) - 2023-09-08
 - <a href="https://github.com/99designs/gqlgen/commit/ccae370e96cbca6ce5deaabf28a6d57e3b181b3b"><tt>ccae370e</tt></a> release v0.17.37

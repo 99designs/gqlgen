@@ -43,18 +43,37 @@ func TestNestedWithoutPrefix(t *testing.T) {
 }
 
 func TestWithPrefix(t *testing.T) {
-	fieldSet := New("foo bar{id}", []string{"prefix"})
+	t.Run("prefix with len=capacity", func(t *testing.T) {
+		fieldSet := New("foo bar{id}", []string{"prefix"})
 
-	require.Len(t, fieldSet, 2)
+		require.Len(t, fieldSet, 2)
 
-	require.Len(t, fieldSet[0], 2)
-	require.Equal(t, "prefix", fieldSet[0][0])
-	require.Equal(t, "foo", fieldSet[0][1])
+		require.Len(t, fieldSet[0], 2)
+		require.Equal(t, "prefix", fieldSet[0][0])
+		require.Equal(t, "foo", fieldSet[0][1])
 
-	require.Len(t, fieldSet[1], 3)
-	require.Equal(t, "prefix", fieldSet[1][0])
-	require.Equal(t, "bar", fieldSet[1][1])
-	require.Equal(t, "id", fieldSet[1][2])
+		require.Len(t, fieldSet[1], 3)
+		require.Equal(t, "prefix", fieldSet[1][0])
+		require.Equal(t, "bar", fieldSet[1][1])
+		require.Equal(t, "id", fieldSet[1][2])
+	})
+	t.Run("prefix with len<capacity", func(t *testing.T) {
+		prefix := make([]string, 0, 2)
+		prefix = append(prefix, "prefix")
+		fieldSet := New("foo bar{id}", prefix)
+
+		require.Len(t, fieldSet, 2)
+		t.Log(fieldSet)
+
+		require.Len(t, fieldSet[0], 2)
+		require.Equal(t, "prefix", fieldSet[0][0])
+		require.Equal(t, "foo", fieldSet[0][1])
+
+		require.Len(t, fieldSet[1], 3)
+		require.Equal(t, "prefix", fieldSet[1][0])
+		require.Equal(t, "bar", fieldSet[1][1])
+		require.Equal(t, "id", fieldSet[1][2])
+	})
 }
 
 func TestInvalid(t *testing.T) {

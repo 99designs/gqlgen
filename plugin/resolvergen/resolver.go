@@ -68,7 +68,7 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 				continue
 			}
 
-			resolver := Resolver{o, f, nil, "", `panic("not implemented")`}
+			resolver := Resolver{o, f, nil, "", `panic("not implemented")`, nil}
 			file.Resolvers = append(file.Resolvers, &resolver)
 		}
 	}
@@ -130,29 +130,24 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 
 			structName := templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type)
 			comment := strings.TrimSpace(strings.TrimLeft(rewriter.GetMethodComment(structName, f.GoFieldName), `\`))
-
 			implementation := strings.TrimSpace(rewriter.GetMethodBody(structName, f.GoFieldName))
 			if implementation == "" {
-				// Check for Implementer Plugin
-				var resolver_implementer plugin.ResolverImplementer
-				var exists bool
-				for _, p := range data.Plugins {
-					if p_cast, ok := p.(plugin.ResolverImplementer); ok {
-						resolver_implementer = p_cast
-						exists = true
-						break
-					}
-				}
-
-				if exists {
-					implementation = resolver_implementer.Implement(f)
-				} else {
-					implementation = fmt.Sprintf("panic(fmt.Errorf(\"not implemented: %v - %v\"))", f.GoFieldName, f.Name)
-				}
-
+				// use default implementation, if no implementation was previously used
+				implementation = fmt.Sprintf("panic(fmt.Errorf(\"not implemented: %v - %v\"))", f.GoFieldName, f.Name)
 			}
-
-			resolver := Resolver{o, f, rewriter.GetPrevDecl(structName, f.GoFieldName), comment, implementation}
+			resolver := Resolver{o, f, rewriter.GetPrevDecl(structName, f.GoFieldName), comment, implementation, nil}
+			var implExists bool
+			for _, p := range data.Plugins {
+				rImpl, ok := p.(plugin.ResolverImplementer)
+				if !ok {
+					continue
+				}
+				if implExists {
+					return fmt.Errorf("multiple plugins implement ResolverImplementer")
+				}
+				implExists = true
+				resolver.ImplementationRender = rImpl.Implement
+			}
 			fnCase := gqlToResolverName(data.Config.Resolver.Dir(), f.Position.Src.Name, data.Config.Resolver.FilenameTemplate)
 			fn := strings.ToLower(fnCase)
 			if files[fn] == nil {
@@ -257,11 +252,19 @@ func (f *File) Imports() string {
 }
 
 type Resolver struct {
-	Object         *codegen.Object
-	Field          *codegen.Field
-	PrevDecl       *ast.FuncDecl
-	Comment        string
-	Implementation string
+	Object               *codegen.Object
+	Field                *codegen.Field
+	PrevDecl             *ast.FuncDecl
+	Comment              string
+	ImplementationStr    string
+	ImplementationRender func(r *codegen.Field) string
+}
+
+func (r *Resolver) Implementation() string {
+	if r.ImplementationRender != nil {
+		return r.ImplementationRender(r.Field)
+	}
+	return r.ImplementationStr
 }
 
 func gqlToResolverName(base string, gqlname, filenameTmpl string) string {

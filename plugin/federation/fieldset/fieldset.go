@@ -134,7 +134,7 @@ func parseUnnestedKeyFieldSet(raw string, prefix []string) Set {
 	ret := Set{}
 
 	for _, s := range strings.Fields(raw) {
-		next := append(prefix[0:len(prefix):len(prefix)], s) // set cap=len in order to force slice reallocation
+		next := append(prefix[0:len(prefix):len(prefix)], s) //nolint:gocritic // set cap=len in order to force slice reallocation
 		ret = append(ret, next)
 	}
 	return ret

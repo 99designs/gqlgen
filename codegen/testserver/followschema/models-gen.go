@@ -21,6 +21,13 @@ type ContentChild interface {
 	IsContentChild()
 }
 
+type Mammalian interface {
+	IsAnimal()
+	IsMammalian()
+	GetSpecies() string
+	GetSize() *Size
+}
+
 type TestUnion interface {
 	IsTestUnion()
 }
@@ -109,6 +116,18 @@ type EmbeddedDefaultScalar struct {
 type FieldsOrderPayload struct {
 	FirstFieldValue *string `json:"firstFieldValue,omitempty"`
 }
+
+type Horse struct {
+	Species    string `json:"species"`
+	Size       *Size  `json:"size"`
+	HorseBreed string `json:"horseBreed"`
+}
+
+func (Horse) IsMammalian()            {}
+func (this Horse) GetSpecies() string { return this.Species }
+func (this Horse) GetSize() *Size     { return this.Size }
+
+func (Horse) IsAnimal() {}
 
 type InnerDirectives struct {
 	Message string `json:"message"`

@@ -77,3 +77,15 @@ type ConcreteNodeInterface implements Node {
     id: ID!
     child: Node!
 }
+
+interface Mammalian implements Animal {
+    species: String!
+    size: Size!
+}
+
+# Types with multiple interfaces are evaluated first in the case statement
+type Horse implements Mammalian & Animal {
+    species: String!
+    size: Size!
+    horseBreed: String!
+}

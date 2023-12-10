@@ -1299,7 +1299,6 @@ func (ec *executionContext) _User_query(ctx context.Context, field graphql.Colle
 			ret = graphql.Null
 		}
 	}()
-	// is root
 	res := models.Query{}
 	fc.Result = res
 	return ec.marshalNQuery2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋserverᚋmodelsᚑgoᚐQuery(ctx, field.Selections, res)

@@ -620,7 +620,6 @@ func (ec *executionContext) _Chatroom_subscription(ctx context.Context, field gr
 			ret = graphql.Null
 		}
 	}()
-	// is root
 	res := Subscription{}
 	fc.Result = res
 	return ec.marshalNSubscription2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋchatᚐSubscription(ctx, field.Selections, res)
@@ -831,7 +830,6 @@ func (ec *executionContext) _Message_subscription(ctx context.Context, field gra
 			ret = graphql.Null
 		}
 	}()
-	// is root
 	res := &Subscription{}
 	fc.Result = res
 	return ec.marshalNSubscription2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋchatᚐSubscription(ctx, field.Selections, res)

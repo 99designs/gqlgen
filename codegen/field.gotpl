@@ -17,7 +17,6 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 		}
 	}()
 	{{- if $field.TypeReference.IsRoot }}
-		// is root
 		{{- if $field.TypeReference.IsPtr }}
 			res := &{{ $field.TypeReference.Elem.GO | ref }}{}
 		{{- else }}

@@ -61,6 +61,8 @@ type ComplexityRoot struct {
 		Description func(childComplexity int) int
 		Done        func(childComplexity int) int
 		ID          func(childComplexity int) int
+		Mutation    func(childComplexity int) int
+		Query       func(childComplexity int) int
 		User        func(childComplexity int) int
 	}
 
@@ -153,6 +155,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Todo.ID(childComplexity), true
+
+	case "Todo.mutation":
+		if e.complexity.Todo.Mutation == nil {
+			break
+		}
+
+		return e.complexity.Todo.Mutation(childComplexity), true
+
+	case "Todo.query":
+		if e.complexity.Todo.Query == nil {
+			break
+		}
+
+		return e.complexity.Todo.Query(childComplexity), true
 
 	case "Todo.user":
 		if e.complexity.Todo.User == nil {
@@ -433,6 +449,10 @@ func (ec *executionContext) fieldContext_Mutation_createTodo(ctx context.Context
 				return ec.fieldContext_Todo_done(ctx, field)
 			case "user":
 				return ec.fieldContext_Todo_user(ctx, field)
+			case "query":
+				return ec.fieldContext_Todo_query(ctx, field)
+			case "mutation":
+				return ec.fieldContext_Todo_mutation(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Todo", field.Name)
 		},
@@ -500,6 +520,10 @@ func (ec *executionContext) fieldContext_Query_todos(ctx context.Context, field 
 				return ec.fieldContext_Todo_done(ctx, field)
 			case "user":
 				return ec.fieldContext_Todo_user(ctx, field)
+			case "query":
+				return ec.fieldContext_Todo_query(ctx, field)
+			case "mutation":
+				return ec.fieldContext_Todo_mutation(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Todo", field.Name)
 		},
@@ -859,6 +883,78 @@ func (ec *executionContext) fieldContext_Todo_user(ctx context.Context, field gr
 				return ec.fieldContext_User_role(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Todo_query(ctx context.Context, field graphql.CollectedField, obj *Todo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Todo_query(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	res := &Query{}
+	fc.Result = res
+	return ec.marshalNQuery2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋconfigᚐQuery(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Todo_query(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Todo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "todos":
+				return ec.fieldContext_Query_todos(ctx, field)
+			case "__schema":
+				return ec.fieldContext_Query___schema(ctx, field)
+			case "__type":
+				return ec.fieldContext_Query___type(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Query", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Todo_mutation(ctx context.Context, field graphql.CollectedField, obj *Todo) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Todo_mutation(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	res := &Mutation{}
+	fc.Result = res
+	return ec.marshalNMutation2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋconfigᚐMutation(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Todo_mutation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Todo",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "createTodo":
+				return ec.fieldContext_Mutation_createTodo(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Mutation", field.Name)
 		},
 	}
 	return fc, nil
@@ -3047,6 +3143,16 @@ func (ec *executionContext) _Todo(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "query":
+			out.Values[i] = ec._Todo_query(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "mutation":
+			out.Values[i] = ec._Todo_mutation(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3560,9 +3666,29 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
+func (ec *executionContext) marshalNMutation2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋconfigᚐMutation(ctx context.Context, sel ast.SelectionSet, v *Mutation) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Mutation(ctx, sel)
+}
+
 func (ec *executionContext) unmarshalNNewTodo2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋconfigᚐNewTodo(ctx context.Context, v interface{}) (NewTodo, error) {
 	res, err := ec.unmarshalInputNewTodo(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNQuery2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋconfigᚐQuery(ctx context.Context, sel ast.SelectionSet, v *Query) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._Query(ctx, sel)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

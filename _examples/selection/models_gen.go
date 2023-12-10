@@ -69,3 +69,6 @@ func (this Post) GetCollected() []string {
 	}
 	return interfaceSlice
 }
+
+type Query struct {
+}

@@ -1,6 +1,7 @@
 type Chatroom {
     name: String!
     messages: [Message!]!
+    subscription: Subscription!
 }
 
 type Message {
@@ -8,10 +9,11 @@ type Message {
     text: String!
     createdBy: String!
     createdAt: Time!
+    subscription: Subscription!
 }
 
 type Query {
-    room(name:String!): Chatroom
+    room(name: String!): Chatroom
 }
 
 type Mutation {

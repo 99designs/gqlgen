@@ -21,6 +21,9 @@ type ListCoercion struct {
 	ScalarVal []map[string]interface{} `json:"scalarVal,omitempty"`
 }
 
+type Query struct {
+}
+
 type DateFilterOp string
 
 const (

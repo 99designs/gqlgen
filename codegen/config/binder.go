@@ -203,6 +203,7 @@ type TypeReference struct {
 	IsOmittable             bool        // Is the type wrapped with Omittable
 	IsContext               bool        // Is the Marshaler/Unmarshaller the context version; applies to either the method or interface variety.
 	PointersInUmarshalInput bool        // Inverse values and pointers in return.
+	IsRoot                  bool        // Is the type a root level definition such as Query, Mutation or Subscription
 }
 
 func (ref *TypeReference) Elem() *TypeReference {
@@ -395,6 +396,7 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 				Definition: def,
 				GQL:        schemaType,
 				GO:         MapType,
+				IsRoot:     b.cfg.IsRoot(def),
 			}, nil
 		}
 
@@ -406,6 +408,7 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 				Definition: def,
 				GQL:        schemaType,
 				GO:         InterfaceType,
+				IsRoot:     b.cfg.IsRoot(def),
 			}, nil
 		}
 
@@ -417,6 +420,7 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 		ref := &TypeReference{
 			Definition: def,
 			GQL:        schemaType,
+			IsRoot:     b.cfg.IsRoot(def),
 		}
 
 		obj, err := b.FindObject(pkgName, typeName)

@@ -1,5 +1,7 @@
 package main
 
+//go:generate go generate ./_examples/...
+
 import (
 	"bytes"
 	_ "embed"

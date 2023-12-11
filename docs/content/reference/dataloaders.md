@@ -63,10 +63,10 @@ Whats even worse? most of those todos are all owned by the same user! We can do 
 
 Dataloaders allow us to consolidate the fetching of `todo.user` across all resolvers for a given GraphQL request into a single database query and even cache the results for subsequent requests.
 
-We're going to use [graph-gophers/dataloader](https://github.com/graph-gophers/dataloader) to implement a dataloader for bulk-fetching users.
+We're going to use [vikstrous/dataloadgen](https://github.com/vikstrous/dataloadgen) to implement a dataloader for bulk-fetching users.
 
 ```bash
-go get -u github.com/graph-gophers/dataloader/v7
+go get github.com/vikstrous/dataloadgen
 ```
 
 Next, we implement a data loader and a middleware for injecting the data loader on a request context.
@@ -74,7 +74,7 @@ Next, we implement a data loader and a middleware for injecting the data loader 
 ```go
 package loaders
 
-// import graph gophers with your other imports
+// import vikstrous/dataloadgen with your other imports
 import (
 	"context"
 	"database/sql"
@@ -82,7 +82,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/graph-gophers/dataloader/v7"
+	"github.com/vikstrous/dataloadgen"
 )
 
 type ctxKey string
@@ -98,43 +98,35 @@ type userReader struct {
 
 // getUsers implements a batch function that can retrieve many users by ID,
 // for use in a dataloader
-func (u *userReader) getUsers(ctx context.Context, userIds []string) []*dataloader.Result[*model.User] {
-	stmt, err := u.db.PrepareContext(ctx, `SELECT id, name FROM users WHERE id IN (?`+strings.Repeat(",?", len(userIds)-1)+`)`)
+func (u *userReader) getUsers(ctx context.Context, userIDs []string) ([]*model.User, []error) {
+	stmt, err := u.db.PrepareContext(ctx, `SELECT id, name FROM users WHERE id IN (?`+strings.Repeat(",?", len(userIDs)-1)+`)`)
 	if err != nil {
-		return handleError[*model.User](len(userIds), err)
+		return nil, []error{err}
 	}
 	defer stmt.Close()
 
-	rows, err := stmt.QueryContext(ctx, userIds)
+	rows, err := stmt.QueryContext(ctx, userIDs)
 	if err != nil {
-		return handleError[*model.User](len(userIds), err)
+		return nil, []error{err}
 	}
 	defer rows.Close()
 
-	result := make([]*dataloader.Result[*model.User], 0, len(userIds))
+	users := make([]*model.User, 0, len(userIDs))
+	errs := make([]error, 0, len(userIDs))
 	for rows.Next() {
 		var user model.User
 		if err := rows.Scan(&user.ID, &user.Name); err != nil {
-			result = append(result, &dataloader.Result[*model.User]{Error: err})
+			errs = append(errs, err)
 			continue
 		}
-		result = append(result, &dataloader.Result[*model.User]{Data: &user})
+		users = append(users, &user)
 	}
-	return result
-}
-
-// handleError creates array of result with the same error repeated for as many items requested
-func handleError[T any](itemsLength int, err error) []*dataloader.Result[T] {
-	result := make([]*dataloader.Result[T], itemsLength)
-	for i := 0; i < itemsLength; i++ {
-		result[i] = &dataloader.Result[T]{Error: err}
-	}
-	return result
+	return users, errs
 }
 
 // Loaders wrap your data loaders to inject via middleware
 type Loaders struct {
-	UserLoader *dataloader.Loader[string, *model.User]
+	UserLoader *dataloadgen.Loader[string, *model.User]
 }
 
 // NewLoaders instantiates data loaders for the middleware
@@ -142,7 +134,7 @@ func NewLoaders(conn *sql.DB) *Loaders {
 	// define the data loader
 	ur := &userReader{db: conn}
 	return &Loaders{
-		UserLoader: dataloader.NewBatchedLoader(ur.getUsers, dataloader.WithWait[string, *model.User](time.Millisecond)),
+		UserLoader: dataloadgen.NewLoader(ur.getUsers, dataloadgen.WithWait(time.Millisecond)),
 	}
 }
 
@@ -164,13 +156,13 @@ func For(ctx context.Context) *Loaders {
 // GetUser returns single user by id efficiently
 func GetUser(ctx context.Context, userID string) (*model.User, error) {
 	loaders := For(ctx)
-	return loaders.UserLoader.Load(ctx, userID)()
+	return loaders.UserLoader.Load(ctx, userID)
 }
 
 // GetUsers returns many users by ids efficiently
-func GetUsers(ctx context.Context, userIDs []string) ([]*model.User, []error) {
+func GetUsers(ctx context.Context, userIDs []string) ([]*model.User, error) {
 	loaders := For(ctx)
-	return loaders.UserLoader.LoadMany(ctx, userIDs)()
+	return loaders.UserLoader.LoadAll(ctx, userIDs)
 }
 
 ```
@@ -199,4 +191,4 @@ SELECT id, todo, user_id FROM todo
 SELECT id, name from user WHERE id IN (?,?,?,?,?)
 ```
 
-You can see an end-to-end example [here](https://github.com/zenyui/gqlgen-dataloader).
+You can see an end-to-end example [here](https://github.com/vikstrous/dataloadgen-example).

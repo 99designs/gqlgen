@@ -45,7 +45,7 @@ func (b *builder) buildObject(typ *ast.Definition) (*Object, error) {
 	caser := cases.Title(language.English, cases.NoLower)
 	obj := &Object{
 		Definition:              typ,
-		Root:                    b.Schema.Query == typ || b.Schema.Mutation == typ || b.Schema.Subscription == typ,
+		Root:                    b.Config.IsRoot(typ),
 		DisableConcurrency:      typ == b.Schema.Mutation,
 		Stream:                  typ == b.Schema.Subscription,
 		Directives:              dirs,

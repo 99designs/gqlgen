@@ -75,6 +75,7 @@ type ComplexityRoot struct {
 		Likes       func(childComplexity int) int
 		Name        func(childComplexity int) int
 		PhoneNumber func(childComplexity int) int
+		Query       func(childComplexity int) int
 	}
 
 	Viewer struct {
@@ -236,6 +237,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.User.PhoneNumber(childComplexity), true
+
+	case "User.query":
+		if e.complexity.User.Query == nil {
+			break
+		}
+
+		return e.complexity.User.Query(childComplexity), true
 
 	case "Viewer.user":
 		if e.complexity.Viewer.User == nil {
@@ -1279,6 +1287,56 @@ func (ec *executionContext) fieldContext_User_phoneNumber(ctx context.Context, f
 	return fc, nil
 }
 
+func (ec *executionContext) _User_query(ctx context.Context, field graphql.CollectedField, obj *remote_api.User) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_User_query(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	res := models.Query{}
+	fc.Result = res
+	return ec.marshalNQuery2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋserverᚋmodelsᚑgoᚐQuery(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_User_query(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "path":
+				return ec.fieldContext_Query_path(ctx, field)
+			case "date":
+				return ec.fieldContext_Query_date(ctx, field)
+			case "viewer":
+				return ec.fieldContext_Query_viewer(ctx, field)
+			case "jsonEncoding":
+				return ec.fieldContext_Query_jsonEncoding(ctx, field)
+			case "error":
+				return ec.fieldContext_Query_error(ctx, field)
+			case "complexity":
+				return ec.fieldContext_Query_complexity(ctx, field)
+			case "coercion":
+				return ec.fieldContext_Query_coercion(ctx, field)
+			case "__schema":
+				return ec.fieldContext_Query___schema(ctx, field)
+			case "__type":
+				return ec.fieldContext_Query___type(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Query", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Viewer_user(ctx context.Context, field graphql.CollectedField, obj *models.Viewer) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Viewer_user(ctx, field)
 	if err != nil {
@@ -1321,6 +1379,8 @@ func (ec *executionContext) fieldContext_Viewer_user(ctx context.Context, field 
 				return ec.fieldContext_User_likes(ctx, field)
 			case "phoneNumber":
 				return ec.fieldContext_User_phoneNumber(ctx, field)
+			case "query":
+				return ec.fieldContext_User_query(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -3632,6 +3692,11 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "phoneNumber":
 			out.Values[i] = ec._User_phoneNumber(ctx, field, obj)
+		case "query":
+			out.Values[i] = ec._User_query(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4069,6 +4134,10 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 func (ec *executionContext) unmarshalNListCoercion2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋserverᚋmodelsᚑgoᚐListCoercion(ctx context.Context, v interface{}) (*models.ListCoercion, error) {
 	res, err := ec.unmarshalInputListCoercion(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNQuery2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋserverᚋmodelsᚑgoᚐQuery(ctx context.Context, sel ast.SelectionSet, v models.Query) graphql.Marshaler {
+	return ec._Query(ctx, sel)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

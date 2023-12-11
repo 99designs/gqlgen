@@ -59,6 +59,7 @@ type User {
   likes: [String!]!
   name: String!
   phoneNumber: String @deprecated
+  query: Query!
 }
 
 type Viewer {

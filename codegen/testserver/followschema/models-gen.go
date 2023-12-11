@@ -167,6 +167,9 @@ type Map struct {
 	ID string `json:"id"`
 }
 
+type Mutation struct {
+}
+
 type NestedInput struct {
 	Field Email `json:"field"`
 }
@@ -205,6 +208,9 @@ type Pet struct {
 	Friends []*Pet `json:"friends,omitempty"`
 }
 
+type Query struct {
+}
+
 type Size struct {
 	Height int `json:"height"`
 	Weight int `json:"weight"`
@@ -219,6 +225,9 @@ type Slices struct {
 
 type SpecialInput struct {
 	Nesting *NestedInput `json:"nesting"`
+}
+
+type Subscription struct {
 }
 
 type User struct {

@@ -79,7 +79,9 @@ type ComplexityRoot struct {
 		Height            func(childComplexity int, unit models.LengthUnit) int
 		ID                func(childComplexity int) int
 		Mass              func(childComplexity int) int
+		Mutation          func(childComplexity int) int
 		Name              func(childComplexity int) int
+		Query             func(childComplexity int) int
 		Starships         func(childComplexity int) int
 	}
 
@@ -307,12 +309,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Human.Mass(childComplexity), true
 
+	case "Human.mutation":
+		if e.complexity.Human.Mutation == nil {
+			break
+		}
+
+		return e.complexity.Human.Mutation(childComplexity), true
+
 	case "Human.name":
 		if e.complexity.Human.Name == nil {
 			break
 		}
 
 		return e.complexity.Human.Name(childComplexity), true
+
+	case "Human.query":
+		if e.complexity.Human.Query == nil {
+			break
+		}
+
+		return e.complexity.Human.Query(childComplexity), true
 
 	case "Human.starships":
 		if e.complexity.Human.Starships == nil {
@@ -659,6 +675,10 @@ type Human implements Character {
     appearsIn: [Episode!]!
     # A list of starships this person has piloted, or an empty list if none
     starships: [Starship!]
+    # Root level query
+    query: Query!
+    # Root level mutation
+    mutation: Mutation!
 }
 # An autonomous mechanical character in the Star Wars universe
 type Droid implements Character {
@@ -1939,6 +1959,90 @@ func (ec *executionContext) fieldContext_Human_starships(ctx context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _Human_query(ctx context.Context, field graphql.CollectedField, obj *models.Human) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Human_query(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	res := models.Query{}
+	fc.Result = res
+	return ec.marshalNQuery2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐQuery(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Human_query(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Human",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "hero":
+				return ec.fieldContext_Query_hero(ctx, field)
+			case "reviews":
+				return ec.fieldContext_Query_reviews(ctx, field)
+			case "search":
+				return ec.fieldContext_Query_search(ctx, field)
+			case "character":
+				return ec.fieldContext_Query_character(ctx, field)
+			case "droid":
+				return ec.fieldContext_Query_droid(ctx, field)
+			case "human":
+				return ec.fieldContext_Query_human(ctx, field)
+			case "starship":
+				return ec.fieldContext_Query_starship(ctx, field)
+			case "__schema":
+				return ec.fieldContext_Query___schema(ctx, field)
+			case "__type":
+				return ec.fieldContext_Query___type(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Query", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Human_mutation(ctx context.Context, field graphql.CollectedField, obj *models.Human) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Human_mutation(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	res := models.Mutation{}
+	fc.Result = res
+	return ec.marshalNMutation2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐMutation(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Human_mutation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Human",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "createReview":
+				return ec.fieldContext_Mutation_createReview(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Mutation", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_createReview(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_createReview(ctx, field)
 	if err != nil {
@@ -2471,6 +2575,10 @@ func (ec *executionContext) fieldContext_Query_human(ctx context.Context, field 
 				return ec.fieldContext_Human_appearsIn(ctx, field)
 			case "starships":
 				return ec.fieldContext_Human_starships(ctx, field)
+			case "query":
+				return ec.fieldContext_Human_query(ctx, field)
+			case "mutation":
+				return ec.fieldContext_Human_mutation(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Human", field.Name)
 		},
@@ -5274,6 +5382,16 @@ func (ec *executionContext) _Human(ctx context.Context, sel ast.SelectionSet, ob
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "query":
+			out.Values[i] = ec._Human_query(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "mutation":
+			out.Values[i] = ec._Human_mutation(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -6264,8 +6382,16 @@ func (ec *executionContext) marshalNInt2ᚕᚕintᚄ(ctx context.Context, sel as
 	return ret
 }
 
+func (ec *executionContext) marshalNMutation2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐMutation(ctx context.Context, sel ast.SelectionSet, v models.Mutation) graphql.Marshaler {
+	return ec._Mutation(ctx, sel)
+}
+
 func (ec *executionContext) marshalNPageInfo2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v models.PageInfo) graphql.Marshaler {
 	return ec._PageInfo(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNQuery2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐQuery(ctx context.Context, sel ast.SelectionSet, v models.Query) graphql.Marshaler {
+	return ec._Query(ctx, sel)
 }
 
 func (ec *executionContext) marshalNReview2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐReviewᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Review) graphql.Marshaler {

@@ -133,7 +133,11 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 
 			b.Interfaces = append(b.Interfaces, it)
 		case ast.Object, ast.InputObject:
-			if schemaType == cfg.Schema.Query || schemaType == cfg.Schema.Mutation || schemaType == cfg.Schema.Subscription {
+			if cfg.IsRoot(schemaType) {
+				b.Models = append(b.Models, &Object{
+					Description: schemaType.Description,
+					Name:        schemaType.Name,
+				})
 				continue
 			}
 

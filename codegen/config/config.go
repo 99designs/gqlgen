@@ -264,6 +264,10 @@ func (c *Config) ReloadAllPackages() {
 	c.Packages.ReloadAll(c.packageList()...)
 }
 
+func (c *Config) IsRoot(def *ast.Definition) bool {
+	return def == c.Schema.Query || def == c.Schema.Mutation || def == c.Schema.Subscription
+}
+
 func (c *Config) injectTypesFromSchema() error {
 	c.Directives["goModel"] = DirectiveConfig{
 		SkipRuntime: true,
@@ -278,7 +282,7 @@ func (c *Config) injectTypesFromSchema() error {
 	}
 
 	for _, schemaType := range c.Schema.Types {
-		if schemaType == c.Schema.Query || schemaType == c.Schema.Mutation || schemaType == c.Schema.Subscription {
+		if c.IsRoot(schemaType) {
 			continue
 		}
 

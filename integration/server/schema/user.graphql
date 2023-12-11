@@ -2,4 +2,5 @@ type User {
     name: String!
     likes: [String!]!
     phoneNumber: String @deprecated
+    query: Query!
 }

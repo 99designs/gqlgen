@@ -51,15 +51,17 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Chatroom struct {
-		Messages func(childComplexity int) int
-		Name     func(childComplexity int) int
+		Messages     func(childComplexity int) int
+		Name         func(childComplexity int) int
+		Subscription func(childComplexity int) int
 	}
 
 	Message struct {
-		CreatedAt func(childComplexity int) int
-		CreatedBy func(childComplexity int) int
-		ID        func(childComplexity int) int
-		Text      func(childComplexity int) int
+		CreatedAt    func(childComplexity int) int
+		CreatedBy    func(childComplexity int) int
+		ID           func(childComplexity int) int
+		Subscription func(childComplexity int) int
+		Text         func(childComplexity int) int
 	}
 
 	Mutation struct {
@@ -118,6 +120,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Chatroom.Name(childComplexity), true
 
+	case "Chatroom.subscription":
+		if e.complexity.Chatroom.Subscription == nil {
+			break
+		}
+
+		return e.complexity.Chatroom.Subscription(childComplexity), true
+
 	case "Message.createdAt":
 		if e.complexity.Message.CreatedAt == nil {
 			break
@@ -138,6 +147,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Message.ID(childComplexity), true
+
+	case "Message.subscription":
+		if e.complexity.Message.Subscription == nil {
+			break
+		}
+
+		return e.complexity.Message.Subscription(childComplexity), true
 
 	case "Message.text":
 		if e.complexity.Message.Text == nil {
@@ -583,8 +599,44 @@ func (ec *executionContext) fieldContext_Chatroom_messages(ctx context.Context, 
 				return ec.fieldContext_Message_createdBy(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Message_createdAt(ctx, field)
+			case "subscription":
+				return ec.fieldContext_Message_subscription(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Message", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Chatroom_subscription(ctx context.Context, field graphql.CollectedField, obj *Chatroom) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Chatroom_subscription(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	res := Subscription{}
+	fc.Result = res
+	return ec.marshalNSubscription2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋchatᚐSubscription(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Chatroom_subscription(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Chatroom",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "messageAdded":
+				return ec.fieldContext_Subscription_messageAdded(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Subscription", field.Name)
 		},
 	}
 	return fc, nil
@@ -766,6 +818,40 @@ func (ec *executionContext) fieldContext_Message_createdAt(ctx context.Context, 
 	return fc, nil
 }
 
+func (ec *executionContext) _Message_subscription(ctx context.Context, field graphql.CollectedField, obj *Message) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Message_subscription(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	res := &Subscription{}
+	fc.Result = res
+	return ec.marshalNSubscription2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋchatᚐSubscription(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Message_subscription(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Message",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "messageAdded":
+				return ec.fieldContext_Subscription_messageAdded(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Subscription", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Mutation_post(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Mutation_post(ctx, field)
 	if err != nil {
@@ -813,6 +899,8 @@ func (ec *executionContext) fieldContext_Mutation_post(ctx context.Context, fiel
 				return ec.fieldContext_Message_createdBy(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Message_createdAt(ctx, field)
+			case "subscription":
+				return ec.fieldContext_Message_subscription(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Message", field.Name)
 		},
@@ -871,6 +959,8 @@ func (ec *executionContext) fieldContext_Query_room(ctx context.Context, field g
 				return ec.fieldContext_Chatroom_name(ctx, field)
 			case "messages":
 				return ec.fieldContext_Chatroom_messages(ctx, field)
+			case "subscription":
+				return ec.fieldContext_Chatroom_subscription(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Chatroom", field.Name)
 		},
@@ -1079,6 +1169,8 @@ func (ec *executionContext) fieldContext_Subscription_messageAdded(ctx context.C
 				return ec.fieldContext_Message_createdBy(ctx, field)
 			case "createdAt":
 				return ec.fieldContext_Message_createdAt(ctx, field)
+			case "subscription":
+				return ec.fieldContext_Message_subscription(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Message", field.Name)
 		},
@@ -2899,6 +2991,11 @@ func (ec *executionContext) _Chatroom(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "subscription":
+			out.Values[i] = ec._Chatroom_subscription(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2950,6 +3047,11 @@ func (ec *executionContext) _Message(ctx context.Context, sel ast.SelectionSet, 
 			}
 		case "createdAt":
 			out.Values[i] = ec._Message_createdAt(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "subscription":
+			out.Values[i] = ec._Message_subscription(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -3541,6 +3643,22 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNSubscription2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋchatᚐSubscription(ctx context.Context, sel ast.SelectionSet, v Subscription) graphql.Marshaler {
+	res := ec._Subscription(ctx, sel)
+	return res(ctx)
+}
+
+func (ec *executionContext) marshalNSubscription2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋchatᚐSubscription(ctx context.Context, sel ast.SelectionSet, v *Subscription) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	res := ec._Subscription(ctx, sel)
+	return res(ctx)
 }
 
 func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v interface{}) (time.Time, error) {

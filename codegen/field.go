@@ -153,6 +153,11 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 
 	switch target := target.(type) {
 	case nil:
+		// Skips creating a resolver for any root types
+		if b.Config.IsRoot(b.Schema.Types[f.Type.Name()]) {
+			return nil
+		}
+
 		objPos := b.Binder.TypePosition(obj.Type)
 		return fmt.Errorf(
 			"%s:%d adding resolver method for %s.%s, nothing matched",

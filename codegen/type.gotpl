@@ -183,6 +183,13 @@
 					{{- else }}
 						return res
 					{{- end }}
+				{{- else if $type.IsRoot }}
+					{{- if eq $type.Definition.Name "Subscription" }}
+						res := ec._{{$type.Definition.Name}}(ctx, sel)
+						return res(ctx)
+					{{- else }}
+						return ec._{{$type.Definition.Name}}(ctx, sel)
+					{{- end }}
 				{{- else }}
 					return ec._{{$type.Definition.Name}}(ctx, sel, {{ if not $type.IsNilable}}&{{end}} v)
 				{{- end }}

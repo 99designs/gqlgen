@@ -104,6 +104,9 @@ type PlanetRequiresNested struct {
 
 func (PlanetRequiresNested) IsEntity() {}
 
+type Query struct {
+}
+
 type World struct {
 	Foo   string `json:"foo"`
 	Bar   int    `json:"bar"`

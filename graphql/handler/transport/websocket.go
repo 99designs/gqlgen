@@ -217,7 +217,6 @@ func (c *wsConnection) run() {
 	// this function.
 	ctx, cancel := context.WithCancel(c.ctx)
 	defer func() {
-		log.Printf("Stop treating ws connection")
 		cancel()
 		c.close(websocket.CloseAbnormalClosure, "unexpected closure")
 	}()
@@ -253,11 +252,11 @@ func (c *wsConnection) run() {
 		start := graphql.Now()
 		m, err := c.me.NextMessage()
 		if err != nil {
-			log.Printf("Bad reading %v. Ping: %v", err, c.PingPongInterval)
 			// If the connection got closed by us, don't report the error
 			if !errors.Is(err, net.ErrClosed) {
 				c.handlePossibleError(err, true)
 			}
+
 			return
 		}
 
@@ -267,7 +266,6 @@ func (c *wsConnection) run() {
 			_, ok := c.active[m.id]
 			c.mu.RUnlock()
 			if ok {
-				log.Printf("Bad message start")
 				c.sendConnectionError("Subscriber for %s already exists", m.id)
 				c.close(4409, fmt.Sprintf("Subscriber for %s already exists", m.id))
 				return

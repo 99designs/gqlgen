@@ -172,8 +172,8 @@ func (c *wsConnection) init() bool {
 	switch m.t {
 	case initMessageType:
 		if len(m.payload) > 0 {
-			c.initPayload = make(InitPayload)
-			err := json.Unmarshal(m.payload, &c.initPayload)
+			var tmp interface{}
+			err := json.Unmarshal(m.payload, &tmp)
 			if err != nil {
 				return false
 			}
@@ -217,6 +217,7 @@ func (c *wsConnection) run() {
 	// this function.
 	ctx, cancel := context.WithCancel(c.ctx)
 	defer func() {
+		log.Printf("Stop treating ws connection")
 		cancel()
 		c.close(websocket.CloseAbnormalClosure, "unexpected closure")
 	}()
@@ -252,6 +253,7 @@ func (c *wsConnection) run() {
 		start := graphql.Now()
 		m, err := c.me.NextMessage()
 		if err != nil {
+			log.Printf("Bad reading %v. Ping: %v", err, c.PingPongInterval)
 			// If the connection got closed by us, don't report the error
 			if !errors.Is(err, net.ErrClosed) {
 				c.handlePossibleError(err, true)
@@ -265,6 +267,7 @@ func (c *wsConnection) run() {
 			_, ok := c.active[m.id]
 			c.mu.RUnlock()
 			if ok {
+				log.Printf("Bad message start")
 				c.sendConnectionError("Subscriber for %s already exists", m.id)
 				c.close(4409, fmt.Sprintf("Subscriber for %s already exists", m.id))
 				return
@@ -314,7 +317,7 @@ func (c *wsConnection) ping(ctx context.Context) {
 			c.pingPongTicker.Stop()
 			return
 		case <-c.pingPongTicker.C:
-			c.write(&message{t: pingMessageType, payload: json.RawMessage{}})
+			c.write(&message{t: pingMessageType})
 		}
 	}
 }

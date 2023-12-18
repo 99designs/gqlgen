@@ -4,6 +4,10 @@ go 1.18
 
 replace github.com/99designs/gqlgen => ../
 
+replace sourcegraph.com/sourcegraph/appdash => github.com/sourcegraph/appdash v0.0.0-20211028080628-e2786a622600
+
+replace sourcegraph.com/sourcegraph/appdash-data => github.com/sourcegraph/appdash-data v0.0.0-20151005221446-73f23eafcf67
+
 require (
 	github.com/99designs/gqlgen v0.17.36
 	github.com/google/uuid v1.3.0

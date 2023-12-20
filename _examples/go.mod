@@ -4,21 +4,15 @@ go 1.18
 
 replace github.com/99designs/gqlgen => ../
 
-replace sourcegraph.com/sourcegraph/appdash => github.com/sourcegraph/appdash v0.0.0-20211028080628-e2786a622600
-
-replace sourcegraph.com/sourcegraph/appdash-data => github.com/sourcegraph/appdash-data v0.0.0-20151005221446-73f23eafcf67
-
 require (
 	github.com/99designs/gqlgen v0.17.36
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/websocket v1.5.0
 	github.com/mitchellh/mapstructure v1.5.0
-	github.com/opentracing/opentracing-go v1.2.0
 	github.com/rs/cors v1.9.0
 	github.com/stretchr/testify v1.8.2
 	github.com/vektah/dataloaden v0.3.0
 	github.com/vektah/gqlparser/v2 v2.5.10
-	sourcegraph.com/sourcegraph/appdash v0.0.0-20211028080628-e2786a622600
 )
 
 require (
@@ -37,12 +31,6 @@ require (
 )
 
 require (
-	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/gorilla/mux v1.8.0 // indirect
-	github.com/opentracing/basictracer-go v1.1.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/shurcooL/httpfs v0.0.0-20190707220628-8d4bc4ba7749 // indirect
-	github.com/shurcooL/vfsgen v0.0.0-20200824052919-0d455de96546 // indirect
 	golang.org/x/text v0.13.0
-	sourcegraph.com/sourcegraph/appdash-data v0.0.0-20151005221446-73f23eafcf67 // indirect
 )

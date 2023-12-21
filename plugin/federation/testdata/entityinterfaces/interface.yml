@@ -1,0 +1,9 @@
+schema:
+  - "testdata/entityinterfaces/interface.graphql"
+exec:
+  filename: testdata/entityinterfaces/generated/exec.go
+federation:
+  filename: testdata/entityinterfaces/generated/federation.go
+  version: 2
+model:
+  filename: testdata/entityinterfaces/generated/models_gen.go

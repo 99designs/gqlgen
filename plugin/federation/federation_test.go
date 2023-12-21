@@ -111,6 +111,16 @@ func TestInterfaceExtendsDirective(t *testing.T) {
 	})
 }
 
+func TestEntityInterfaces(t *testing.T) {
+	f, cfg := load(t, "testdata/entityinterfaces/interface.yml")
+	err := f.MutateConfig(cfg)
+
+	require.NoError(t, err)
+	require.Len(t, f.Entities[0].Resolvers, 1)
+	require.Equal(t, "Hello", f.Entities[0].Name)
+	require.NotEmpty(t, f.Entities[1].Resolvers)
+}
+
 func TestCodeGeneration(t *testing.T) {
 	f, cfg := load(t, "testdata/allthethings/gqlgen.yml")
 

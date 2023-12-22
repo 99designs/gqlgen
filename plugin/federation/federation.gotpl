@@ -132,7 +132,13 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			{{ range $_, $entity := .Entities }}
 				{{ if and .Resolvers .Multi -}}
 				case "{{.Def.Name}}":
-					{{range $i, $_ := .Resolvers -}}
+					resolverName, err := entityResolverNameFor{{.Def.Name}}(ctx, reps[0])
+					if err != nil {
+						return fmt.Errorf(`finding resolver for Entity "{{.Def.Name}}": %w`, err)
+					}
+					switch resolverName {
+					{{ range $i, $resolver := .Resolvers }}
+					case "{{.ResolverName}}":
 						_reps := make([]*{{.LookupInputType}}, len(reps))
 
 						for i, rep := range reps {
@@ -166,6 +172,9 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 						}
 						return nil
 					{{ end }}
+					default:
+                    	return fmt.Errorf("unknown resolver: %s", resolverName)
+					}
 				{{ end }}
 			{{- end }}
 		default:

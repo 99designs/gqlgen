@@ -131,6 +131,11 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 				OmitCheck:   cfg.OmitInterfaceChecks,
 			}
 
+			// if the interface has a key directive as an entity interface, allow it to implement _Entity
+			if schemaType.Directives.ForName("key") != nil {
+				it.Implements = append(it.Implements, "_Entity")
+			}
+
 			b.Interfaces = append(b.Interfaces, it)
 		case ast.Object, ast.InputObject:
 			if cfg.IsRoot(schemaType) {
@@ -168,6 +173,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 						uniqueMap[iface] = true
 					}
 				}
+
 			}
 
 			b.Models = append(b.Models, it)
@@ -210,8 +216,11 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		for _, model := range b.Models {
 			for _, impl := range model.Implements {
 				if impl == it.Name {
-					// If it does, add it to the Interface's Models
-					it.Models = append(it.Models, model)
+					// check if this isn't an implementation of an entity interface
+					if impl != "_Entity" {
+						// If this model has an implementation, add it to the Interface's Models
+						it.Models = append(it.Models, model)
+					}
 				}
 			}
 		}

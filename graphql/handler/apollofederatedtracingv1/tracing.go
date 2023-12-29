@@ -85,9 +85,11 @@ func (t *Tracer) InterceptResponse(ctx context.Context, next graphql.ResponseHan
 		return next(ctx)
 	}
 	tb := t.getTreeBuilder(ctx)
-	if tb != nil {
-		tb.StartTimer(ctx)
+	if tb == nil {
+		return next(ctx)
 	}
+
+	tb.StartTimer(ctx)
 
 	val := new(string)
 	graphql.RegisterExtension(ctx, "ftv1", val)

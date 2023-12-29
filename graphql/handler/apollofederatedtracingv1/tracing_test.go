@@ -110,6 +110,29 @@ func TestApolloTracing_withFail(t *testing.T) {
 	require.Equal(t, "PersistedQueryNotFound", respData.Errors[0].Message)
 }
 
+// This tests that the tracing extension does not panic when the request
+// can't be processed for some reason. The specific cause is not
+// important, the scenario being tested is the response interceptor
+// being run to process the error response when no other interceptor
+// has been run, due to (for example) a problem creating the OperationContext.
+func TestApolloTracing_withMissingOp(t *testing.T) {
+	h := testserver.New()
+	h.AddTransport(transport.POST{})
+	h.Use(extension.AutomaticPersistedQuery{Cache: lru.New(100)})
+	h.Use(&apollofederatedtracingv1.Tracer{})
+
+	resp := doRequest(h, http.MethodPost, "/graphql", `{}`)
+	assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
+	b := resp.Body.Bytes()
+	t.Log(string(b))
+	var respData struct {
+		Errors gqlerror.List
+	}
+	require.NoError(t, json.Unmarshal(b, &respData))
+	require.Len(t, respData.Errors, 1)
+	require.Equal(t, "no operation provided", respData.Errors[0].Message)
+}
+
 func TestApolloTracing_withUnexpectedEOF(t *testing.T) {
 	h := testserver.New()
 	h.AddTransport(transport.POST{})

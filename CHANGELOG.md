@@ -5,10 +5,81 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.41...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.42...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.42"></a>
+## [v0.17.42](https://github.com/99designs/gqlgen/compare/v0.17.41...v0.17.42) - 2023-12-29
+- <a href="https://github.com/99designs/gqlgen/commit/7bf0c223aec642d086793698bc2a0d1a6fdb09b4"><tt>7bf0c223</tt></a> release v0.17.42
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/c811d47ec498bdd50591f163e7d23a7524e98280"><tt>c811d47e</tt></a> fix: avoid panic from tracing on bad request (<a href="https://github.com/99designs/gqlgen/pull/2871">#2871</a>)</summary>
+
+This fixes a panic which arises from the tracing components when a request has some defect which results in an error when creating the operation context. The transports consistently handle this by calling `DispatchError(graphql.WithOperationContext(ctx, rc), err)` where `rc` is the OperationContext which was not correctly constructed. This seems dangerous, because middleware may assume that if there in an `OperationContext` in the `context.Context` than they are being invoked on a normal codepath and can assume their other interceptors have been invoked in the normal order. Also, using a value returned by a function which also returned a non-nil error is very unusual. However, I have no idea what the impact of changing that dangerous behavior in the transports would be, so I opted to make the tracing component more resilient instead.
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/13bb415268dda837690835e65e331746c8df892b"><tt>13bb4152</tt></a> fix for entity interfce code gen with related test (<a href="https://github.com/99designs/gqlgen/pull/2868">#2868</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/0354649c0309af6acfe089d12d103060d55a5805"><tt>0354649c</tt></a> Remove archived dependency appdash (<a href="https://github.com/99designs/gqlgen/pull/2866">#2866</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/0d43599cdab22912d4ddd061c3b3ffd5d8da3845"><tt>0d43599c</tt></a> Update examples go.mod with appdash replacements (<a href="https://github.com/99designs/gqlgen/pull/2863">#2863</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/7dd971c871c0b0159ad26c9bf3095a8ba3780402"><tt>7dd971c8</tt></a> Use defer wg.Done() in FieldSet Dispatch (<a href="https://github.com/99designs/gqlgen/pull/2861">#2861</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/24ea195cebea095035caf4d23af7f3d75fd0a041"><tt>24ea195c</tt></a> vikstrous/dataloadgen replaces recommended dataloader package in example docs (<a href="https://github.com/99designs/gqlgen/pull/2770">#2770</a>)</summary>
+
+* update example for dataloadgen
+
+* improved example with link to example repo
+
+* undo unnecessary changes
+
+* fix wrong signature
+
+* fix creation of loader
+
+* Update docs/content/reference/dataloaders.md
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/42f6e39d48e3a301bf39cd4e8fd180250bc25f2c"><tt>42f6e39d</tt></a> Allow fields that return root level definitions (<a href="https://github.com/99designs/gqlgen/pull/2858">#2858</a>)</summary>
+
+* generate structs for root level definitions to support fields that return Query, Mutation or Subscription
+
+* removed unnecessary comment
+
+* re-ran go generate
+
+---------
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/682a58dd6af5fda53509fbf4cfa45d23b5bb1c86"><tt>682a58dd</tt></a> Add go generate for examples so contributors never forget (<a href="https://github.com/99designs/gqlgen/pull/2859">#2859</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/e080a96de178520fcfaf5a8d68836981ec4df9a9"><tt>e080a96d</tt></a> Modify to prevent unreachable code from occurring (<a href="https://github.com/99designs/gqlgen/pull/2846">#2846</a>)</summary>
+
+* fix: 型の数でソートする処理を追加
+
+* 戻し
+
+* fix: case文の最初にスーパークラスが来ないようにする
+
+* testdata追加
+
+* fix: Added sorting by number of types.
+* fix: Prevent superclass from appearing at the beginning of case statement
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/68744ad2a1e9d5869ab6a00b49814c6ae9583186"><tt>68744ad2</tt></a> Bump changelog
+
+- <a href="https://github.com/99designs/gqlgen/commit/e4cf21d24518deb99af6d4c0ea86de11d6889349"><tt>e4cf21d2</tt></a> v0.17.41 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.41"></a>
 ## [v0.17.41](https://github.com/99designs/gqlgen/compare/v0.17.40...v0.17.41) - 2023-12-03
 - <a href="https://github.com/99designs/gqlgen/commit/fe60938c55308b1cd5562556cdb976771cfcc6cc"><tt>fe60938c</tt></a> release v0.17.41

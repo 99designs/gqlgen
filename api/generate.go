@@ -32,7 +32,7 @@ func Generate(cfg *config.Config, option ...Option) error {
 			for _, v := range cfg.Sources {
 				cfg.Federation.Version = 1
 				urlString := urlRegex.FindStringSubmatch(v.Input)
-				if urlString != nil && urlString[1] == "https://specs.apollo.dev/federation/v2.0" {
+				if urlString != nil && urlString[1] == "https://specs.apollo.dev/federation/v2.7" {
 					cfg.Federation.Version = 2
 					break
 				}

@@ -298,6 +298,23 @@ func TestModelGeneration(t *testing.T) {
 	})
 }
 
+func TestModelGenerationOmitRootModels(t *testing.T) {
+	cfg, err := config.LoadConfig("testdata/gqlgen_omit_root_models.yml")
+	require.NoError(t, err)
+	require.NoError(t, cfg.Init())
+	p := Plugin{
+		MutateHook: mutateHook,
+		FieldHook:  DefaultFieldMutateHook,
+	}
+	require.NoError(t, p.MutateConfig(cfg))
+	require.NoError(t, goBuild(t, "./out/"))
+	generated, err := os.ReadFile("./out/generated_omit_root_models.go")
+	require.NoError(t, err)
+	require.NotContains(t, string(generated), "type Mutation struct")
+	require.NotContains(t, string(generated), "type Query struct")
+	require.NotContains(t, string(generated), "type Subscription struct")
+}
+
 func TestModelGenerationStructFieldPointers(t *testing.T) {
 	cfg, err := config.LoadConfig("testdata/gqlgen_struct_field_pointers.yml")
 	require.NoError(t, err)

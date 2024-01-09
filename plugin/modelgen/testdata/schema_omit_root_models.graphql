@@ -1,0 +1,18 @@
+type Query {
+    thisShoudlntGetGenerated: Boolean
+}
+
+type Mutation {
+    thisShoudlntGetGenerated: Boolean
+}
+
+type Subscription {
+    thisShoudlntGetGenerated: Boolean
+}
+
+enum SomeContent {
+    This
+    Is
+    A
+    Test
+}

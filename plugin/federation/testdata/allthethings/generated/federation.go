@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
+	"github.com/99designs/gqlgen/plugin/federation/testdata/allthethings/model"
 )
 
 var (
@@ -65,6 +66,8 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 
 	isMulti := func(typeName string) bool {
 		switch typeName {
+		case "MultiHelloMultiKey":
+			return true
 		default:
 			return false
 		}
@@ -236,6 +239,65 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 
 		switch typeName {
 
+		case "MultiHelloMultiKey":
+			resolverName, err := entityResolverNameForMultiHelloMultiKey(ctx, reps[0])
+			if err != nil {
+				return fmt.Errorf(`finding resolver for Entity "MultiHelloMultiKey": %w`, err)
+			}
+			switch resolverName {
+
+			case "findManyMultiHelloMultiKeyByNames":
+				_reps := make([]*model.MultiHelloMultiKeyByNamesInput, len(reps))
+
+				for i, rep := range reps {
+					id0, err := ec.unmarshalNString2string(ctx, rep["name"])
+					if err != nil {
+						return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
+					}
+
+					_reps[i] = &model.MultiHelloMultiKeyByNamesInput{
+						Name: id0,
+					}
+				}
+
+				entities, err := ec.resolvers.Entity().FindManyMultiHelloMultiKeyByNames(ctx, _reps)
+				if err != nil {
+					return err
+				}
+
+				for i, entity := range entities {
+					list[idx[i]] = entity
+				}
+				return nil
+
+			case "findManyMultiHelloMultiKeyByKey2s":
+				_reps := make([]*model.MultiHelloMultiKeyByKey2sInput, len(reps))
+
+				for i, rep := range reps {
+					id0, err := ec.unmarshalNString2string(ctx, rep["key2"])
+					if err != nil {
+						return errors.New(fmt.Sprintf("Field %s undefined in schema.", "key2"))
+					}
+
+					_reps[i] = &model.MultiHelloMultiKeyByKey2sInput{
+						Key2: id0,
+					}
+				}
+
+				entities, err := ec.resolvers.Entity().FindManyMultiHelloMultiKeyByKey2s(ctx, _reps)
+				if err != nil {
+					return err
+				}
+
+				for i, entity := range entities {
+					list[idx[i]] = entity
+				}
+				return nil
+
+			default:
+				return fmt.Errorf("unknown resolver: %s", resolverName)
+			}
+
 		default:
 			return errors.New("unknown type: " + typeName)
 		}
@@ -321,6 +383,36 @@ func entityResolverNameForHello(ctx context.Context, rep map[string]interface{})
 		return "findHelloByName", nil
 	}
 	return "", fmt.Errorf("%w for Hello", ErrTypeNotFound)
+}
+
+func entityResolverNameForMultiHelloMultiKey(ctx context.Context, rep map[string]interface{}) (string, error) {
+	for {
+		var (
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
+		)
+		_ = val
+		m = rep
+		if _, ok = m["name"]; !ok {
+			break
+		}
+		return "findManyMultiHelloMultiKeyByNames", nil
+	}
+	for {
+		var (
+			m   map[string]interface{}
+			val interface{}
+			ok  bool
+		)
+		_ = val
+		m = rep
+		if _, ok = m["key2"]; !ok {
+			break
+		}
+		return "findManyMultiHelloMultiKeyByKey2s", nil
+	}
+	return "", fmt.Errorf("%w for MultiHelloMultiKey", ErrTypeNotFound)
 }
 
 func entityResolverNameForNestedKey(ctx context.Context, rep map[string]interface{}) (string, error) {

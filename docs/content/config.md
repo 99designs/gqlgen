@@ -62,6 +62,9 @@ resolver:
 # Optional: turn on to exclude the gqlgen version in the generated file notice. No effect if `omit_gqlgen_file_notice` is true.
 # omit_gqlgen_version_in_file_notice: false
 
+# Optional: turn on to exclude root models such as Query and Mutation from the generated models file.
+# omit_root_models: false
+
 # Optional: turn off to make struct-type struct fields not use pointers
 # e.g. type Thing struct { FieldA OtherThing } instead of { FieldA *OtherThing }
 # struct_fields_always_pointers: true

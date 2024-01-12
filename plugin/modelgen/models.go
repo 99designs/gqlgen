@@ -139,10 +139,12 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 			b.Interfaces = append(b.Interfaces, it)
 		case ast.Object, ast.InputObject:
 			if cfg.IsRoot(schemaType) {
-				b.Models = append(b.Models, &Object{
-					Description: schemaType.Description,
-					Name:        schemaType.Name,
-				})
+				if !cfg.OmitRootModels {
+					b.Models = append(b.Models, &Object{
+						Description: schemaType.Description,
+						Name:        schemaType.Name,
+					})
+				}
 				continue
 			}
 

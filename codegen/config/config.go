@@ -38,6 +38,7 @@ type Config struct {
 	OmitComplexity                bool                       `yaml:"omit_complexity,omitempty"`
 	OmitGQLGenFileNotice          bool                       `yaml:"omit_gqlgen_file_notice,omitempty"`
 	OmitGQLGenVersionInFileNotice bool                       `yaml:"omit_gqlgen_version_in_file_notice,omitempty"`
+	OmitRootModels                bool                       `yaml:"omit_root_models,omitempty"`
 	StructFieldsAlwaysPointers    bool                       `yaml:"struct_fields_always_pointers,omitempty"`
 	ReturnPointersInUmarshalInput bool                       `yaml:"return_pointers_in_unmarshalinput,omitempty"`
 	ResolversAlwaysReturnPointers bool                       `yaml:"resolvers_always_return_pointers,omitempty"`

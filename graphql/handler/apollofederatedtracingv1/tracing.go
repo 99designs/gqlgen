@@ -5,8 +5,9 @@ import (
 	"encoding/base64"
 	"fmt"
 
-	"github.com/99designs/gqlgen/graphql"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type (
@@ -41,7 +42,8 @@ func (Tracer) Validate(graphql.ExecutableSchema) error {
 }
 
 func (t *Tracer) shouldTrace(ctx context.Context) bool {
-	return graphql.GetOperationContext(ctx).Headers.Get("apollo-federation-include-trace") == "ftv1"
+	return graphql.HasOperationContext(ctx) &&
+		graphql.GetOperationContext(ctx).Headers.Get("apollo-federation-include-trace") == "ftv1"
 }
 
 func (t *Tracer) getTreeBuilder(ctx context.Context) *TreeBuilder {
@@ -83,9 +85,11 @@ func (t *Tracer) InterceptResponse(ctx context.Context, next graphql.ResponseHan
 		return next(ctx)
 	}
 	tb := t.getTreeBuilder(ctx)
-	if tb != nil {
-		tb.StartTimer(ctx)
+	if tb == nil {
+		return next(ctx)
 	}
+
+	tb.StartTimer(ctx)
 
 	val := new(string)
 	graphql.RegisterExtension(ctx, "ftv1", val)

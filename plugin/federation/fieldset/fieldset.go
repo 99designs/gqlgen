@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/vektah/gqlparser/v2/ast"
+
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/templates"
-	"github.com/vektah/gqlparser/v2/ast"
 )
 
 // Set represents a FieldSet that is used in federation directives @key and @requires.
@@ -133,7 +134,7 @@ func parseUnnestedKeyFieldSet(raw string, prefix []string) Set {
 	ret := Set{}
 
 	for _, s := range strings.Fields(raw) {
-		next := append(prefix[:], s) //nolint:gocritic // slicing out on purpose
+		next := append(prefix[0:len(prefix):len(prefix)], s) //nolint:gocritic // set cap=len in order to force slice reallocation
 		ret = append(ret, next)
 	}
 	return ret

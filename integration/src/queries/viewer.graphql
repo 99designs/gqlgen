@@ -1,0 +1,16 @@
+query viewer {
+    viewer {
+        user {
+            name
+            phoneNumber
+            query {
+                jsonEncoding
+            }
+            ...userFragment @defer
+        }
+    }
+}
+
+fragment userFragment on User {
+    likes
+}

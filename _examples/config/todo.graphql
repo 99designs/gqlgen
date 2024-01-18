@@ -1,12 +1,14 @@
 type Todo {
-  id: ID! @goField(forceResolver: true)
-  databaseId: Int!
-  text: String!
-  done: Boolean!
-  user: User!
+    id: ID! @goField(forceResolver: true)
+    databaseId: Int!
+    text: String!
+    done: Boolean!
+    user: User!
+    query: Query!
+    mutation: Mutation!
 }
 
 input NewTodo {
-  text: String!
-  userId: String!
+    text: String!
+    userId: String!
 }

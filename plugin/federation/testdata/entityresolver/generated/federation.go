@@ -328,140 +328,195 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		switch typeName {
 
 		case "MultiHello":
-			_reps := make([]*model.MultiHelloByNamesInput, len(reps))
-
-			for i, rep := range reps {
-				id0, err := ec.unmarshalNString2string(ctx, rep["name"])
-				if err != nil {
-					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
-				}
-
-				_reps[i] = &model.MultiHelloByNamesInput{
-					Name: id0,
-				}
-			}
-
-			entities, err := ec.resolvers.Entity().FindManyMultiHelloByNames(ctx, _reps)
+			resolverName, err := entityResolverNameForMultiHello(ctx, reps[0])
 			if err != nil {
-				return err
+				return fmt.Errorf(`finding resolver for Entity "MultiHello": %w`, err)
 			}
+			switch resolverName {
 
-			for i, entity := range entities {
-				list[idx[i]] = entity
+			case "findManyMultiHelloByNames":
+				_reps := make([]*model.MultiHelloByNamesInput, len(reps))
+
+				for i, rep := range reps {
+					id0, err := ec.unmarshalNString2string(ctx, rep["name"])
+					if err != nil {
+						return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
+					}
+
+					_reps[i] = &model.MultiHelloByNamesInput{
+						Name: id0,
+					}
+				}
+
+				entities, err := ec.resolvers.Entity().FindManyMultiHelloByNames(ctx, _reps)
+				if err != nil {
+					return err
+				}
+
+				for i, entity := range entities {
+					list[idx[i]] = entity
+				}
+				return nil
+
+			default:
+				return fmt.Errorf("unknown resolver: %s", resolverName)
 			}
-			return nil
 
 		case "MultiHelloMultipleRequires":
-			_reps := make([]*model.MultiHelloMultipleRequiresByNamesInput, len(reps))
-
-			for i, rep := range reps {
-				id0, err := ec.unmarshalNString2string(ctx, rep["name"])
-				if err != nil {
-					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
-				}
-
-				_reps[i] = &model.MultiHelloMultipleRequiresByNamesInput{
-					Name: id0,
-				}
-			}
-
-			entities, err := ec.resolvers.Entity().FindManyMultiHelloMultipleRequiresByNames(ctx, _reps)
+			resolverName, err := entityResolverNameForMultiHelloMultipleRequires(ctx, reps[0])
 			if err != nil {
-				return err
+				return fmt.Errorf(`finding resolver for Entity "MultiHelloMultipleRequires": %w`, err)
 			}
+			switch resolverName {
 
-			for i, entity := range entities {
-				entity.Key1, err = ec.unmarshalNString2string(ctx, reps[i]["key1"])
+			case "findManyMultiHelloMultipleRequiresByNames":
+				_reps := make([]*model.MultiHelloMultipleRequiresByNamesInput, len(reps))
+
+				for i, rep := range reps {
+					id0, err := ec.unmarshalNString2string(ctx, rep["name"])
+					if err != nil {
+						return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
+					}
+
+					_reps[i] = &model.MultiHelloMultipleRequiresByNamesInput{
+						Name: id0,
+					}
+				}
+
+				entities, err := ec.resolvers.Entity().FindManyMultiHelloMultipleRequiresByNames(ctx, _reps)
 				if err != nil {
 					return err
 				}
-				entity.Key2, err = ec.unmarshalNString2string(ctx, reps[i]["key2"])
-				if err != nil {
-					return err
+
+				for i, entity := range entities {
+					entity.Key1, err = ec.unmarshalNString2string(ctx, reps[i]["key1"])
+					if err != nil {
+						return err
+					}
+					entity.Key2, err = ec.unmarshalNString2string(ctx, reps[i]["key2"])
+					if err != nil {
+						return err
+					}
+					list[idx[i]] = entity
 				}
-				list[idx[i]] = entity
+				return nil
+
+			default:
+				return fmt.Errorf("unknown resolver: %s", resolverName)
 			}
-			return nil
 
 		case "MultiHelloRequires":
-			_reps := make([]*model.MultiHelloRequiresByNamesInput, len(reps))
-
-			for i, rep := range reps {
-				id0, err := ec.unmarshalNString2string(ctx, rep["name"])
-				if err != nil {
-					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
-				}
-
-				_reps[i] = &model.MultiHelloRequiresByNamesInput{
-					Name: id0,
-				}
-			}
-
-			entities, err := ec.resolvers.Entity().FindManyMultiHelloRequiresByNames(ctx, _reps)
+			resolverName, err := entityResolverNameForMultiHelloRequires(ctx, reps[0])
 			if err != nil {
-				return err
+				return fmt.Errorf(`finding resolver for Entity "MultiHelloRequires": %w`, err)
 			}
+			switch resolverName {
 
-			for i, entity := range entities {
-				entity.Key1, err = ec.unmarshalNString2string(ctx, reps[i]["key1"])
+			case "findManyMultiHelloRequiresByNames":
+				_reps := make([]*model.MultiHelloRequiresByNamesInput, len(reps))
+
+				for i, rep := range reps {
+					id0, err := ec.unmarshalNString2string(ctx, rep["name"])
+					if err != nil {
+						return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
+					}
+
+					_reps[i] = &model.MultiHelloRequiresByNamesInput{
+						Name: id0,
+					}
+				}
+
+				entities, err := ec.resolvers.Entity().FindManyMultiHelloRequiresByNames(ctx, _reps)
 				if err != nil {
 					return err
 				}
-				list[idx[i]] = entity
+
+				for i, entity := range entities {
+					entity.Key1, err = ec.unmarshalNString2string(ctx, reps[i]["key1"])
+					if err != nil {
+						return err
+					}
+					list[idx[i]] = entity
+				}
+				return nil
+
+			default:
+				return fmt.Errorf("unknown resolver: %s", resolverName)
 			}
-			return nil
 
 		case "MultiHelloWithError":
-			_reps := make([]*model.MultiHelloWithErrorByNamesInput, len(reps))
-
-			for i, rep := range reps {
-				id0, err := ec.unmarshalNString2string(ctx, rep["name"])
-				if err != nil {
-					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
-				}
-
-				_reps[i] = &model.MultiHelloWithErrorByNamesInput{
-					Name: id0,
-				}
-			}
-
-			entities, err := ec.resolvers.Entity().FindManyMultiHelloWithErrorByNames(ctx, _reps)
+			resolverName, err := entityResolverNameForMultiHelloWithError(ctx, reps[0])
 			if err != nil {
-				return err
+				return fmt.Errorf(`finding resolver for Entity "MultiHelloWithError": %w`, err)
 			}
+			switch resolverName {
 
-			for i, entity := range entities {
-				list[idx[i]] = entity
-			}
-			return nil
+			case "findManyMultiHelloWithErrorByNames":
+				_reps := make([]*model.MultiHelloWithErrorByNamesInput, len(reps))
 
-		case "MultiPlanetRequiresNested":
-			_reps := make([]*model.MultiPlanetRequiresNestedByNamesInput, len(reps))
+				for i, rep := range reps {
+					id0, err := ec.unmarshalNString2string(ctx, rep["name"])
+					if err != nil {
+						return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
+					}
 
-			for i, rep := range reps {
-				id0, err := ec.unmarshalNString2string(ctx, rep["name"])
-				if err != nil {
-					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
+					_reps[i] = &model.MultiHelloWithErrorByNamesInput{
+						Name: id0,
+					}
 				}
 
-				_reps[i] = &model.MultiPlanetRequiresNestedByNamesInput{
-					Name: id0,
-				}
-			}
-
-			entities, err := ec.resolvers.Entity().FindManyMultiPlanetRequiresNestedByNames(ctx, _reps)
-			if err != nil {
-				return err
-			}
-
-			for i, entity := range entities {
-				entity.World.Foo, err = ec.unmarshalNString2string(ctx, reps[i]["world"].(map[string]interface{})["foo"])
+				entities, err := ec.resolvers.Entity().FindManyMultiHelloWithErrorByNames(ctx, _reps)
 				if err != nil {
 					return err
 				}
-				list[idx[i]] = entity
+
+				for i, entity := range entities {
+					list[idx[i]] = entity
+				}
+				return nil
+
+			default:
+				return fmt.Errorf("unknown resolver: %s", resolverName)
 			}
-			return nil
+
+		case "MultiPlanetRequiresNested":
+			resolverName, err := entityResolverNameForMultiPlanetRequiresNested(ctx, reps[0])
+			if err != nil {
+				return fmt.Errorf(`finding resolver for Entity "MultiPlanetRequiresNested": %w`, err)
+			}
+			switch resolverName {
+
+			case "findManyMultiPlanetRequiresNestedByNames":
+				_reps := make([]*model.MultiPlanetRequiresNestedByNamesInput, len(reps))
+
+				for i, rep := range reps {
+					id0, err := ec.unmarshalNString2string(ctx, rep["name"])
+					if err != nil {
+						return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
+					}
+
+					_reps[i] = &model.MultiPlanetRequiresNestedByNamesInput{
+						Name: id0,
+					}
+				}
+
+				entities, err := ec.resolvers.Entity().FindManyMultiPlanetRequiresNestedByNames(ctx, _reps)
+				if err != nil {
+					return err
+				}
+
+				for i, entity := range entities {
+					entity.World.Foo, err = ec.unmarshalNString2string(ctx, reps[i]["world"].(map[string]interface{})["foo"])
+					if err != nil {
+						return err
+					}
+					list[idx[i]] = entity
+				}
+				return nil
+
+			default:
+				return fmt.Errorf("unknown resolver: %s", resolverName)
+			}
 
 		default:
 			return errors.New("unknown type: " + typeName)

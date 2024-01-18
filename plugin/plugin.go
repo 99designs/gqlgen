@@ -3,9 +3,10 @@
 package plugin
 
 import (
+	"github.com/vektah/gqlparser/v2/ast"
+
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/vektah/gqlparser/v2/ast"
 )
 
 type Plugin interface {
@@ -30,7 +31,7 @@ type LateSourceInjector interface {
 	InjectSourceLate(schema *ast.Schema) *ast.Source
 }
 
-// Implementer is used to generate code inside resolvers
+// ResolverImplementer is used to generate code inside resolvers
 type ResolverImplementer interface {
 	Implement(field *codegen.Field) string
 }

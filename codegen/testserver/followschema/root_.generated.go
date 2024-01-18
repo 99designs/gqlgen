@@ -19,6 +19,7 @@ import (
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 	return &executableSchema{
+		schema:     cfg.Schema,
 		resolvers:  cfg.Resolvers,
 		directives: cfg.Directives,
 		complexity: cfg.Complexity,
@@ -26,6 +27,7 @@ func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 }
 
 type Config struct {
+	Schema     *ast.Schema
 	Resolvers  ResolverRoot
 	Directives DirectiveRoot
 	Complexity ComplexityRoot
@@ -200,6 +202,12 @@ type ComplexityRoot struct {
 		Field func(childComplexity int) int
 	}
 
+	Horse struct {
+		HorseBreed func(childComplexity int) int
+		Size       func(childComplexity int) int
+		Species    func(childComplexity int) int
+	}
+
 	InnerObject struct {
 		ID func(childComplexity int) int
 	}
@@ -224,9 +232,15 @@ type ComplexityRoot struct {
 		ID func(childComplexity int) int
 	}
 
+	MapNested struct {
+		Value func(childComplexity int) int
+	}
+
 	MapStringInterfaceType struct {
-		A func(childComplexity int) int
-		B func(childComplexity int) int
+		A      func(childComplexity int) int
+		B      func(childComplexity int) int
+		C      func(childComplexity int) int
+		Nested func(childComplexity int) int
 	}
 
 	ModelMethods struct {
@@ -466,12 +480,16 @@ type ComplexityRoot struct {
 }
 
 type executableSchema struct {
+	schema     *ast.Schema
 	resolvers  ResolverRoot
 	directives DirectiveRoot
 	complexity ComplexityRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {
+	if e.schema != nil {
+		return e.schema
+	}
 	return parsedSchema
 }
 
@@ -851,6 +869,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ForcedResolver.Field(childComplexity), true
 
+	case "Horse.horseBreed":
+		if e.complexity.Horse.HorseBreed == nil {
+			break
+		}
+
+		return e.complexity.Horse.HorseBreed(childComplexity), true
+
+	case "Horse.size":
+		if e.complexity.Horse.Size == nil {
+			break
+		}
+
+		return e.complexity.Horse.Size(childComplexity), true
+
+	case "Horse.species":
+		if e.complexity.Horse.Species == nil {
+			break
+		}
+
+		return e.complexity.Horse.Species(childComplexity), true
+
 	case "InnerObject.id":
 		if e.complexity.InnerObject.ID == nil {
 			break
@@ -893,6 +932,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Map.ID(childComplexity), true
 
+	case "MapNested.value":
+		if e.complexity.MapNested.Value == nil {
+			break
+		}
+
+		return e.complexity.MapNested.Value(childComplexity), true
+
 	case "MapStringInterfaceType.a":
 		if e.complexity.MapStringInterfaceType.A == nil {
 			break
@@ -906,6 +952,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.MapStringInterfaceType.B(childComplexity), true
+
+	case "MapStringInterfaceType.c":
+		if e.complexity.MapStringInterfaceType.C == nil {
+			break
+		}
+
+		return e.complexity.MapStringInterfaceType.C(childComplexity), true
+
+	case "MapStringInterfaceType.nested":
+		if e.complexity.MapStringInterfaceType.Nested == nil {
+			break
+		}
+
+		return e.complexity.MapStringInterfaceType.Nested(childComplexity), true
 
 	case "ModelMethods.noContext":
 		if e.complexity.ModelMethods.NoContext == nil {
@@ -2084,12 +2144,15 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	rc := graphql.GetOperationContext(ctx)
 	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputChanges,
 		ec.unmarshalInputDefaultInput,
 		ec.unmarshalInputFieldsOrderInput,
 		ec.unmarshalInputInnerDirectives,
 		ec.unmarshalInputInnerInput,
 		ec.unmarshalInputInputDirectives,
 		ec.unmarshalInputInputWithEnumValue,
+		ec.unmarshalInputMapNestedInput,
+		ec.unmarshalInputMapStringInterfaceInput,
 		ec.unmarshalInputNestedInput,
 		ec.unmarshalInputNestedMapInput,
 		ec.unmarshalInputOmittableInput,
@@ -2202,14 +2265,14 @@ func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
 	if ec.DisableIntrospection {
 		return nil, errors.New("introspection disabled")
 	}
-	return introspection.WrapSchema(parsedSchema), nil
+	return introspection.WrapSchema(ec.Schema()), nil
 }
 
 func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
 	if ec.DisableIntrospection {
 		return nil, errors.New("introspection disabled")
 	}
-	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
+	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
 //go:embed "builtinscalar.graphql" "complexity.graphql" "defaults.graphql" "defer.graphql" "directive.graphql" "embedded.graphql" "enum.graphql" "fields_order.graphql" "interfaces.graphql" "issue896.graphql" "loops.graphql" "maps.graphql" "mutation_with_custom_scalar.graphql" "nulls.graphql" "panics.graphql" "primitive_objects.graphql" "ptr_to_any.graphql" "ptr_to_ptr_input.graphql" "ptr_to_slice.graphql" "scalar_context.graphql" "scalar_default.graphql" "schema.graphql" "slices.graphql" "typefallback.graphql" "useptr.graphql" "v-ok.graphql" "validtypes.graphql" "variadic.graphql" "weird_type_cases.graphql" "wrapped_type.graphql"

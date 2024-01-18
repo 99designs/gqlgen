@@ -25,7 +25,7 @@ Setting up the integration environment is a little tricky:
 ```bash
 cd integration
 go generate ./...
-go run ./server/server.go
+go run ./server/cmd/integration/server.go
 ```
 in another terminal
 ```bash

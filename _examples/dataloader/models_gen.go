@@ -11,3 +11,6 @@ type Address struct {
 type Item struct {
 	Name string `json:"name"`
 }
+
+type Query struct {
+}

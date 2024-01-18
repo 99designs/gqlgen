@@ -406,8 +406,6 @@ func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, o
 		}
 		switch k {
 		case "message":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("message"))
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
@@ -456,8 +454,6 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 		}
 		switch k {
 		case "text":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("text"))
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
@@ -496,8 +492,6 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
 		case "nullableText":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nullableText"))
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalOString2ᚖstring(ctx, v) }
 			directive1 := func(ctx context.Context) (interface{}, error) {
@@ -526,8 +520,6 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
 		case "inner":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("inner"))
 			directive0 := func(ctx context.Context) (interface{}, error) {
 				return ec.unmarshalNInnerDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInnerDirectives(ctx, v)
@@ -552,8 +544,6 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
 		case "innerNullable":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("innerNullable"))
 			directive0 := func(ctx context.Context) (interface{}, error) {
 				return ec.unmarshalOInnerDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInnerDirectives(ctx, v)
@@ -578,8 +568,6 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
 		case "thirdParty":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("thirdParty"))
 			directive0 := func(ctx context.Context) (interface{}, error) {
 				return ec.unmarshalOThirdParty2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐThirdParty(ctx, v)

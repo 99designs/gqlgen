@@ -3610,6 +3610,10 @@ func (ec *executionContext) fieldContext_Query_mapStringInterface(ctx context.Co
 				return ec.fieldContext_MapStringInterfaceType_a(ctx, field)
 			case "b":
 				return ec.fieldContext_MapStringInterfaceType_b(ctx, field)
+			case "c":
+				return ec.fieldContext_MapStringInterfaceType_c(ctx, field)
+			case "nested":
+				return ec.fieldContext_MapStringInterfaceType_nested(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type MapStringInterfaceType", field.Name)
 		},
@@ -3665,6 +3669,10 @@ func (ec *executionContext) fieldContext_Query_mapNestedStringInterface(ctx cont
 				return ec.fieldContext_MapStringInterfaceType_a(ctx, field)
 			case "b":
 				return ec.fieldContext_MapStringInterfaceType_b(ctx, field)
+			case "c":
+				return ec.fieldContext_MapStringInterfaceType_c(ctx, field)
+			case "nested":
+				return ec.fieldContext_MapStringInterfaceType_nested(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type MapStringInterfaceType", field.Name)
 		},
@@ -5761,6 +5769,40 @@ func (ec *executionContext) fieldContext_User_pets(ctx context.Context, field gr
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputChanges(ctx context.Context, obj interface{}) (map[string]interface{}, error) {
+	it := make(map[string]interface{}, len(obj.(map[string]interface{})))
+	asMap := map[string]interface{}{}
+	for k, v := range obj.(map[string]interface{}) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"a", "b"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "a":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("a"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it["a"] = data
+		case "b":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("b"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it["b"] = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputInnerInput(ctx context.Context, obj interface{}) (InnerInput, error) {
 	var it InnerInput
 	asMap := map[string]interface{}{}
@@ -5776,8 +5818,6 @@ func (ec *executionContext) unmarshalInputInnerInput(ctx context.Context, obj in
 		}
 		switch k {
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalNInt2int(ctx, v)
 			if err != nil {
@@ -5805,8 +5845,6 @@ func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, ob
 		}
 		switch k {
 		case "id":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
 			if err != nil {
@@ -5814,8 +5852,6 @@ func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, ob
 			}
 			it.ID = graphql.OmittableOf(data)
 		case "bool":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("bool"))
 			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
 			if err != nil {
@@ -5823,8 +5859,6 @@ func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, ob
 			}
 			it.Bool = graphql.OmittableOf(data)
 		case "str":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("str"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -5832,8 +5866,6 @@ func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, ob
 			}
 			it.Str = graphql.OmittableOf(data)
 		case "int":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("int"))
 			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
 			if err != nil {
@@ -5841,8 +5873,6 @@ func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, ob
 			}
 			it.Int = graphql.OmittableOf(data)
 		case "time":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("time"))
 			data, err := ec.unmarshalOTime2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
@@ -5850,8 +5880,6 @@ func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, ob
 			}
 			it.Time = graphql.OmittableOf(data)
 		case "enum":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("enum"))
 			data, err := ec.unmarshalOStatus2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐStatus(ctx, v)
 			if err != nil {
@@ -5859,8 +5887,6 @@ func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, ob
 			}
 			it.Enum = graphql.OmittableOf(data)
 		case "scalar":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("scalar"))
 			data, err := ec.unmarshalOThirdParty2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐThirdParty(ctx, v)
 			if err != nil {
@@ -5868,8 +5894,6 @@ func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, ob
 			}
 			it.Scalar = graphql.OmittableOf(data)
 		case "object":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("object"))
 			data, err := ec.unmarshalOOuterInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐOuterInput(ctx, v)
 			if err != nil {
@@ -5897,8 +5921,6 @@ func (ec *executionContext) unmarshalInputOuterInput(ctx context.Context, obj in
 		}
 		switch k {
 		case "inner":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("inner"))
 			data, err := ec.unmarshalNInnerInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInnerInput(ctx, v)
 			if err != nil {
@@ -5926,8 +5948,6 @@ func (ec *executionContext) unmarshalInputRecursiveInputSlice(ctx context.Contex
 		}
 		switch k {
 		case "self":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("self"))
 			data, err := ec.unmarshalORecursiveInputSlice2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐRecursiveInputSliceᚄ(ctx, v)
 			if err != nil {
@@ -8220,7 +8240,8 @@ func (ec *executionContext) unmarshalOChanges2map(ctx context.Context, v interfa
 	if v == nil {
 		return nil, nil
 	}
-	return v.(map[string]interface{}), nil
+	res, err := ec.unmarshalInputChanges(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOInvalidIdentifier2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚋinvalidᚑpackagenameᚐInvalidIdentifier(ctx context.Context, sel ast.SelectionSet, v *invalid_packagename.InvalidIdentifier) graphql.Marshaler {

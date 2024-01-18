@@ -121,6 +121,9 @@ func (r *subscriptionResolver) CurrentTime(ctx context.Context) (<-chan *model.T
 	// You can (and probably should) handle your channels in a central place outside of `schema.resolvers.go`.
 	// For this example we'll simply use a Goroutine with a simple loop.
 	go func() {
+		// Handle deregistration of the channel here. Note the `defer`
+    defer close(ch)
+
 		for {
 			// In our example we'll send the current time every second.
 			time.Sleep(1 * time.Second)
@@ -133,16 +136,17 @@ func (r *subscriptionResolver) CurrentTime(ctx context.Context) (<-chan *model.T
 				TimeStamp: currentTime.Format(time.RFC3339),
 			}
 
-			// The channel may have gotten closed due to the client disconnecting.
-			// To not have our Goroutine block or panic, we do the send in a select block.
-			// This will jump to the default case if the channel is closed.
+			// The subscription may have got closed due to the client disconnecting.
+			// Hence we do send in a select block with a check for context cancellation.
+			// This avoids goroutine getting blocked forever or panicking,
 			select {
+			case <-ctx.Done(): // This runs when context gets cancelled. Subscription closes.
+				fmt.Println("Subscription Closed")
+				// Handle deregistration of the channel here. `close(ch)`
+				return // Remember to return to end the routine.
+			
 			case ch <- t: // This is the actual send.
-				// Our message went through, do nothing
-			default: // This is run when our send does not work.
-				fmt.Println("Channel closed.")
-				// You can handle any deregistration of the channel here.
-				return // We'll just return ending the routine.
+				// Our message went through, do nothing	
 			}
 		}
 	}()
@@ -293,6 +297,8 @@ func (r *subscriptionResolver) CurrentTime(ctx context.Context) (<-chan *model.T
 	ch := make(chan *model.Time)
 
 	go func() {
+		defer close(ch)
+
 		for {
 			time.Sleep(1 * time.Second)
 			fmt.Println("Tick")
@@ -305,11 +311,13 @@ func (r *subscriptionResolver) CurrentTime(ctx context.Context) (<-chan *model.T
 			}
 
 			select {
+			case <-ctx.Done():
+				// Exit on cancellation 
+				fmt.Println("Subscription closed.")
+				return
+			
 			case ch <- t:
 				// Our message went through, do nothing
-			default:
-				fmt.Println("Channel closed.")
-				return
 			}
 
 		}

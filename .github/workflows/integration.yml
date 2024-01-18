@@ -10,7 +10,7 @@ jobs:
     strategy:
       matrix:
         go: ["1.18", "1.20"]
-        node: [14]
+        node: [18]
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: ${{ matrix.node }}
       - run: go mod download
-      - run: cd integration ; npm install
+      - run: cd integration ; npm ci
       - run: .github/workflows/check-integration
 
   federation:

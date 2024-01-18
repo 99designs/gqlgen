@@ -5,7 +5,11 @@
 	  {{- $it = "&it" }}
 	{{- end }}
 	func (ec *executionContext) unmarshalInput{{ .Name }}(ctx context.Context, obj interface{}) ({{ if .PointersInUmarshalInput }}*{{ end }}{{.Type | ref}}, error) {
-		var it {{.Type | ref}}
+		{{- if $input.IsMap }}
+			it := make(map[string]interface{}, len(obj.(map[string]interface{})))
+		{{- else }}
+			var it {{.Type | ref}}
+		{{- end }}
 		asMap := map[string]interface{}{}
 		for k, v := range obj.(map[string]interface{}) {
 			asMap[k] = v
@@ -27,8 +31,10 @@
 			switch k {
 			{{- range $field := .Fields }}
 			case {{$field.Name|quote}}:
-				var err error
-
+				{{- $lhs := (printf "it.%s" $field.GoFieldName) }}
+				{{- if $input.IsMap }}
+					{{- $lhs = (printf "it[%q]" $field.Name) }}
+				{{- end }}
 				ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField({{$field.Name|quote}}))
 				{{- if $field.ImplDirectives }}
 					directive0 := func(ctx context.Context) (interface{}, error) { return ec.{{ $field.TypeReference.UnmarshalFunc }}(ctx, v) }
@@ -44,18 +50,18 @@
 							}
 						{{- else }}
 							{{- if $field.TypeReference.IsOmittable }}
-								it.{{$field.GoFieldName}} = graphql.OmittableOf(data)
+								{{ $lhs }} = graphql.OmittableOf(data)
 							{{- else }}
-								it.{{$field.GoFieldName}} = data
+								{{ $lhs }} = data
 							{{- end }}
 						{{- end }}
 					{{- if $field.TypeReference.IsNilable }}
 						{{- if not $field.IsResolver }}
 						} else if tmp == nil {
 							{{- if $field.TypeReference.IsOmittable }}
-								it.{{$field.GoFieldName}} = graphql.OmittableOf[{{ $field.TypeReference.GO | ref }}](nil)
+								{{ $lhs }} = graphql.OmittableOf[{{ $field.TypeReference.GO | ref }}](nil)
 							{{- else }}
-								it.{{$field.GoFieldName}} = nil
+								{{ $lhs }} = nil
 							{{- end }}
 						{{- end }}
 					{{- end }}
@@ -78,9 +84,9 @@
 							return {{$it}}, err
 						}
 						{{- if $field.TypeReference.IsOmittable }}
-							it.{{$field.GoFieldName}} = graphql.OmittableOf(data)
+							{{ $lhs }} = graphql.OmittableOf(data)
 						{{- else }}
-							it.{{$field.GoFieldName}} = data
+							{{ $lhs }} = data
 						{{- end }}
 					{{- end }}
 				{{- end }}

@@ -5,25 +5,32 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
 
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/handler/apollofederatedtracingv1"
-	"github.com/99designs/gqlgen/graphql/handler/apollofederatedtracingv1/generated"
-	"github.com/99designs/gqlgen/graphql/handler/apollotracing"
-	"github.com/99designs/gqlgen/graphql/handler/extension"
-	"github.com/99designs/gqlgen/graphql/handler/lru"
-	"github.com/99designs/gqlgen/graphql/handler/testserver"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"google.golang.org/protobuf/proto"
+
+	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/handler/apollofederatedtracingv1"
+	"github.com/99designs/gqlgen/graphql/handler/apollofederatedtracingv1/generated"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/lru"
+	"github.com/99designs/gqlgen/graphql/handler/testserver"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
+
+type alwaysError struct{}
+
+func (a *alwaysError) Read(p []byte) (int, error) {
+	return 0, io.ErrUnexpectedEOF
+}
 
 func TestApolloTracing(t *testing.T) {
 	h := testserver.New()
@@ -89,7 +96,7 @@ func TestApolloTracing_withFail(t *testing.T) {
 	h := testserver.New()
 	h.AddTransport(transport.POST{})
 	h.Use(extension.AutomaticPersistedQuery{Cache: lru.New(100)})
-	h.Use(apollotracing.Tracer{})
+	h.Use(&apollofederatedtracingv1.Tracer{})
 
 	resp := doRequest(h, http.MethodPost, "/graphql", `{"operationName":"A","extensions":{"persistedQuery":{"version":1,"sha256Hash":"338bbc16ac780daf81845339fbf0342061c1e9d2b702c96d3958a13a557083a6"}}}`)
 	assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
@@ -103,8 +110,44 @@ func TestApolloTracing_withFail(t *testing.T) {
 	require.Equal(t, "PersistedQueryNotFound", respData.Errors[0].Message)
 }
 
+// This tests that the tracing extension does not panic when the request
+// can't be processed for some reason. The specific cause is not
+// important, the scenario being tested is the response interceptor
+// being run to process the error response when no other interceptor
+// has been run, due to (for example) a problem creating the OperationContext.
+func TestApolloTracing_withMissingOp(t *testing.T) {
+	h := testserver.New()
+	h.AddTransport(transport.POST{})
+	h.Use(extension.AutomaticPersistedQuery{Cache: lru.New(100)})
+	h.Use(&apollofederatedtracingv1.Tracer{})
+
+	resp := doRequest(h, http.MethodPost, "/graphql", `{}`)
+	assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
+	b := resp.Body.Bytes()
+	t.Log(string(b))
+	var respData struct {
+		Errors gqlerror.List
+	}
+	require.NoError(t, json.Unmarshal(b, &respData))
+	require.Len(t, respData.Errors, 1)
+	require.Equal(t, "no operation provided", respData.Errors[0].Message)
+}
+
+func TestApolloTracing_withUnexpectedEOF(t *testing.T) {
+	h := testserver.New()
+	h.AddTransport(transport.POST{})
+	h.Use(&apollofederatedtracingv1.Tracer{})
+
+	resp := doRequestWithReader(h, http.MethodPost, "/graphql", &alwaysError{})
+	assert.Equal(t, http.StatusOK, resp.Code)
+}
 func doRequest(handler http.Handler, method, target, body string) *httptest.ResponseRecorder {
-	r := httptest.NewRequest(method, target, strings.NewReader(body))
+	return doRequestWithReader(handler, method, target, strings.NewReader(body))
+}
+
+func doRequestWithReader(handler http.Handler, method string, target string,
+	reader io.Reader) *httptest.ResponseRecorder {
+	r := httptest.NewRequest(method, target, reader)
 	r.Header.Set("Content-Type", "application/json")
 	r.Header.Set("apollo-federation-include-trace", "ftv1")
 	w := httptest.NewRecorder()

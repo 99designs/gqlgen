@@ -46,8 +46,8 @@ func (m *FieldSet) Dispatch(ctx context.Context) {
 		for _, d := range m.delayed[1:] {
 			wg.Add(1)
 			go func(d delayedResult) {
+				defer wg.Done()
 				m.Values[d.i] = d.f(ctx)
-				wg.Done()
 			}(d)
 		}
 

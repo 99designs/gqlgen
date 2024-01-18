@@ -24,6 +24,7 @@ import (
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 	return &executableSchema{
+		schema:     cfg.Schema,
 		resolvers:  cfg.Resolvers,
 		directives: cfg.Directives,
 		complexity: cfg.Complexity,
@@ -31,6 +32,7 @@ func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 }
 
 type Config struct {
+	Schema     *ast.Schema
 	Resolvers  ResolverRoot
 	Directives DirectiveRoot
 	Complexity ComplexityRoot
@@ -168,12 +170,16 @@ type EntityResolver interface {
 }
 
 type executableSchema struct {
+	schema     *ast.Schema
 	resolvers  ResolverRoot
 	directives DirectiveRoot
 	complexity ComplexityRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {
+	if e.schema != nil {
+		return e.schema
+	}
 	return parsedSchema
 }
 
@@ -710,14 +716,14 @@ func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
 	if ec.DisableIntrospection {
 		return nil, errors.New("introspection disabled")
 	}
-	return introspection.WrapSchema(parsedSchema), nil
+	return introspection.WrapSchema(ec.Schema()), nil
 }
 
 func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
 	if ec.DisableIntrospection {
 		return nil, errors.New("introspection disabled")
 	}
-	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
+	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
 var sources = []*ast.Source{
@@ -837,11 +843,11 @@ type Entity {
 		findHelloByName(name: String!,): Hello!
 	findHelloMultiSingleKeysByKey1AndKey2(key1: String!,key2: String!,): HelloMultiSingleKeys!
 	findHelloWithErrorsByName(name: String!,): HelloWithErrors!
-	findManyMultiHelloByNames(reps: [MultiHelloByNamesInput!]!): [MultiHello]
-	findManyMultiHelloMultipleRequiresByNames(reps: [MultiHelloMultipleRequiresByNamesInput!]!): [MultiHelloMultipleRequires]
-	findManyMultiHelloRequiresByNames(reps: [MultiHelloRequiresByNamesInput!]!): [MultiHelloRequires]
-	findManyMultiHelloWithErrorByNames(reps: [MultiHelloWithErrorByNamesInput!]!): [MultiHelloWithError]
-	findManyMultiPlanetRequiresNestedByNames(reps: [MultiPlanetRequiresNestedByNamesInput!]!): [MultiPlanetRequiresNested]
+	findManyMultiHelloByNames(reps: [MultiHelloByNamesInput]!): [MultiHello]
+	findManyMultiHelloMultipleRequiresByNames(reps: [MultiHelloMultipleRequiresByNamesInput]!): [MultiHelloMultipleRequires]
+	findManyMultiHelloRequiresByNames(reps: [MultiHelloRequiresByNamesInput]!): [MultiHelloRequires]
+	findManyMultiHelloWithErrorByNames(reps: [MultiHelloWithErrorByNamesInput]!): [MultiHelloWithError]
+	findManyMultiPlanetRequiresNestedByNames(reps: [MultiPlanetRequiresNestedByNamesInput]!): [MultiPlanetRequiresNested]
 	findPlanetMultipleRequiresByName(name: String!,): PlanetMultipleRequires!
 	findPlanetRequiresByName(name: String!,): PlanetRequires!
 	findPlanetRequiresNestedByName(name: String!,): PlanetRequiresNested!
@@ -943,7 +949,7 @@ func (ec *executionContext) field_Entity_findManyMultiHelloByNames_args(ctx cont
 	var arg0 []*model.MultiHelloByNamesInput
 	if tmp, ok := rawArgs["reps"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("reps"))
-		arg0, err = ec.unmarshalNMultiHelloByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloByNamesInputᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNMultiHelloByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloByNamesInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -958,7 +964,7 @@ func (ec *executionContext) field_Entity_findManyMultiHelloMultipleRequiresByNam
 	var arg0 []*model.MultiHelloMultipleRequiresByNamesInput
 	if tmp, ok := rawArgs["reps"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("reps"))
-		arg0, err = ec.unmarshalNMultiHelloMultipleRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloMultipleRequiresByNamesInputᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNMultiHelloMultipleRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloMultipleRequiresByNamesInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -973,7 +979,7 @@ func (ec *executionContext) field_Entity_findManyMultiHelloRequiresByNames_args(
 	var arg0 []*model.MultiHelloRequiresByNamesInput
 	if tmp, ok := rawArgs["reps"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("reps"))
-		arg0, err = ec.unmarshalNMultiHelloRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloRequiresByNamesInputᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNMultiHelloRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloRequiresByNamesInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -988,7 +994,7 @@ func (ec *executionContext) field_Entity_findManyMultiHelloWithErrorByNames_args
 	var arg0 []*model.MultiHelloWithErrorByNamesInput
 	if tmp, ok := rawArgs["reps"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("reps"))
-		arg0, err = ec.unmarshalNMultiHelloWithErrorByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloWithErrorByNamesInputᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNMultiHelloWithErrorByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloWithErrorByNamesInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -1003,7 +1009,7 @@ func (ec *executionContext) field_Entity_findManyMultiPlanetRequiresNestedByName
 	var arg0 []*model.MultiPlanetRequiresNestedByNamesInput
 	if tmp, ok := rawArgs["reps"]; ok {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("reps"))
-		arg0, err = ec.unmarshalNMultiPlanetRequiresNestedByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiPlanetRequiresNestedByNamesInputᚄ(ctx, tmp)
+		arg0, err = ec.unmarshalNMultiPlanetRequiresNestedByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiPlanetRequiresNestedByNamesInput(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
@@ -5816,8 +5822,6 @@ func (ec *executionContext) unmarshalInputMultiHelloByNamesInput(ctx context.Con
 		}
 		switch k {
 		case "Name":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -5845,8 +5849,6 @@ func (ec *executionContext) unmarshalInputMultiHelloMultipleRequiresByNamesInput
 		}
 		switch k {
 		case "Name":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -5874,8 +5876,6 @@ func (ec *executionContext) unmarshalInputMultiHelloRequiresByNamesInput(ctx con
 		}
 		switch k {
 		case "Name":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -5903,8 +5903,6 @@ func (ec *executionContext) unmarshalInputMultiHelloWithErrorByNamesInput(ctx co
 		}
 		switch k {
 		case "Name":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -5932,8 +5930,6 @@ func (ec *executionContext) unmarshalInputMultiPlanetRequiresNestedByNamesInput(
 		}
 		switch k {
 		case "Name":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
 			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
@@ -7586,7 +7582,7 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) unmarshalNMultiHelloByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloByNamesInputᚄ(ctx context.Context, v interface{}) ([]*model.MultiHelloByNamesInput, error) {
+func (ec *executionContext) unmarshalNMultiHelloByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloByNamesInput(ctx context.Context, v interface{}) ([]*model.MultiHelloByNamesInput, error) {
 	var vSlice []interface{}
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
@@ -7595,7 +7591,7 @@ func (ec *executionContext) unmarshalNMultiHelloByNamesInput2ᚕᚖgithubᚗcom�
 	res := make([]*model.MultiHelloByNamesInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNMultiHelloByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloByNamesInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalOMultiHelloByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloByNamesInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -7603,12 +7599,7 @@ func (ec *executionContext) unmarshalNMultiHelloByNamesInput2ᚕᚖgithubᚗcom�
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNMultiHelloByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloByNamesInput(ctx context.Context, v interface{}) (*model.MultiHelloByNamesInput, error) {
-	res, err := ec.unmarshalInputMultiHelloByNamesInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNMultiHelloMultipleRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloMultipleRequiresByNamesInputᚄ(ctx context.Context, v interface{}) ([]*model.MultiHelloMultipleRequiresByNamesInput, error) {
+func (ec *executionContext) unmarshalNMultiHelloMultipleRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloMultipleRequiresByNamesInput(ctx context.Context, v interface{}) ([]*model.MultiHelloMultipleRequiresByNamesInput, error) {
 	var vSlice []interface{}
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
@@ -7617,7 +7608,7 @@ func (ec *executionContext) unmarshalNMultiHelloMultipleRequiresByNamesInput2ᚕ
 	res := make([]*model.MultiHelloMultipleRequiresByNamesInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNMultiHelloMultipleRequiresByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloMultipleRequiresByNamesInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalOMultiHelloMultipleRequiresByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloMultipleRequiresByNamesInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -7625,12 +7616,7 @@ func (ec *executionContext) unmarshalNMultiHelloMultipleRequiresByNamesInput2ᚕ
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNMultiHelloMultipleRequiresByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloMultipleRequiresByNamesInput(ctx context.Context, v interface{}) (*model.MultiHelloMultipleRequiresByNamesInput, error) {
-	res, err := ec.unmarshalInputMultiHelloMultipleRequiresByNamesInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNMultiHelloRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloRequiresByNamesInputᚄ(ctx context.Context, v interface{}) ([]*model.MultiHelloRequiresByNamesInput, error) {
+func (ec *executionContext) unmarshalNMultiHelloRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloRequiresByNamesInput(ctx context.Context, v interface{}) ([]*model.MultiHelloRequiresByNamesInput, error) {
 	var vSlice []interface{}
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
@@ -7639,7 +7625,7 @@ func (ec *executionContext) unmarshalNMultiHelloRequiresByNamesInput2ᚕᚖgithu
 	res := make([]*model.MultiHelloRequiresByNamesInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNMultiHelloRequiresByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloRequiresByNamesInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalOMultiHelloRequiresByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloRequiresByNamesInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -7647,12 +7633,7 @@ func (ec *executionContext) unmarshalNMultiHelloRequiresByNamesInput2ᚕᚖgithu
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNMultiHelloRequiresByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloRequiresByNamesInput(ctx context.Context, v interface{}) (*model.MultiHelloRequiresByNamesInput, error) {
-	res, err := ec.unmarshalInputMultiHelloRequiresByNamesInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNMultiHelloWithErrorByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloWithErrorByNamesInputᚄ(ctx context.Context, v interface{}) ([]*model.MultiHelloWithErrorByNamesInput, error) {
+func (ec *executionContext) unmarshalNMultiHelloWithErrorByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloWithErrorByNamesInput(ctx context.Context, v interface{}) ([]*model.MultiHelloWithErrorByNamesInput, error) {
 	var vSlice []interface{}
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
@@ -7661,7 +7642,7 @@ func (ec *executionContext) unmarshalNMultiHelloWithErrorByNamesInput2ᚕᚖgith
 	res := make([]*model.MultiHelloWithErrorByNamesInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNMultiHelloWithErrorByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloWithErrorByNamesInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalOMultiHelloWithErrorByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloWithErrorByNamesInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -7669,12 +7650,7 @@ func (ec *executionContext) unmarshalNMultiHelloWithErrorByNamesInput2ᚕᚖgith
 	return res, nil
 }
 
-func (ec *executionContext) unmarshalNMultiHelloWithErrorByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloWithErrorByNamesInput(ctx context.Context, v interface{}) (*model.MultiHelloWithErrorByNamesInput, error) {
-	res, err := ec.unmarshalInputMultiHelloWithErrorByNamesInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) unmarshalNMultiPlanetRequiresNestedByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiPlanetRequiresNestedByNamesInputᚄ(ctx context.Context, v interface{}) ([]*model.MultiPlanetRequiresNestedByNamesInput, error) {
+func (ec *executionContext) unmarshalNMultiPlanetRequiresNestedByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiPlanetRequiresNestedByNamesInput(ctx context.Context, v interface{}) ([]*model.MultiPlanetRequiresNestedByNamesInput, error) {
 	var vSlice []interface{}
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
@@ -7683,17 +7659,12 @@ func (ec *executionContext) unmarshalNMultiPlanetRequiresNestedByNamesInput2ᚕ�
 	res := make([]*model.MultiPlanetRequiresNestedByNamesInput, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNMultiPlanetRequiresNestedByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiPlanetRequiresNestedByNamesInput(ctx, vSlice[i])
+		res[i], err = ec.unmarshalOMultiPlanetRequiresNestedByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiPlanetRequiresNestedByNamesInput(ctx, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
 	}
 	return res, nil
-}
-
-func (ec *executionContext) unmarshalNMultiPlanetRequiresNestedByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiPlanetRequiresNestedByNamesInput(ctx context.Context, v interface{}) (*model.MultiPlanetRequiresNestedByNamesInput, error) {
-	res, err := ec.unmarshalInputMultiPlanetRequiresNestedByNamesInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalNPlanetMultipleRequires2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐPlanetMultipleRequires(ctx context.Context, sel ast.SelectionSet, v model.PlanetMultipleRequires) graphql.Marshaler {
@@ -8239,6 +8210,14 @@ func (ec *executionContext) marshalOMultiHello2ᚖgithubᚗcomᚋ99designsᚋgql
 	return ec._MultiHello(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalOMultiHelloByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloByNamesInput(ctx context.Context, v interface{}) (*model.MultiHelloByNamesInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputMultiHelloByNamesInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalOMultiHelloMultipleRequires2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloMultipleRequires(ctx context.Context, sel ast.SelectionSet, v []*model.MultiHelloMultipleRequires) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -8285,6 +8264,14 @@ func (ec *executionContext) marshalOMultiHelloMultipleRequires2ᚖgithubᚗcom�
 		return graphql.Null
 	}
 	return ec._MultiHelloMultipleRequires(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOMultiHelloMultipleRequiresByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloMultipleRequiresByNamesInput(ctx context.Context, v interface{}) (*model.MultiHelloMultipleRequiresByNamesInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputMultiHelloMultipleRequiresByNamesInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOMultiHelloRequires2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloRequires(ctx context.Context, sel ast.SelectionSet, v []*model.MultiHelloRequires) graphql.Marshaler {
@@ -8335,6 +8322,14 @@ func (ec *executionContext) marshalOMultiHelloRequires2ᚖgithubᚗcomᚋ99desig
 	return ec._MultiHelloRequires(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalOMultiHelloRequiresByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloRequiresByNamesInput(ctx context.Context, v interface{}) (*model.MultiHelloRequiresByNamesInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputMultiHelloRequiresByNamesInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalOMultiHelloWithError2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloWithError(ctx context.Context, sel ast.SelectionSet, v []*model.MultiHelloWithError) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -8383,6 +8378,14 @@ func (ec *executionContext) marshalOMultiHelloWithError2ᚖgithubᚗcomᚋ99desi
 	return ec._MultiHelloWithError(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalOMultiHelloWithErrorByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloWithErrorByNamesInput(ctx context.Context, v interface{}) (*model.MultiHelloWithErrorByNamesInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputMultiHelloWithErrorByNamesInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalOMultiPlanetRequiresNested2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiPlanetRequiresNested(ctx context.Context, sel ast.SelectionSet, v []*model.MultiPlanetRequiresNested) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -8429,6 +8432,14 @@ func (ec *executionContext) marshalOMultiPlanetRequiresNested2ᚖgithubᚗcomᚋ
 		return graphql.Null
 	}
 	return ec._MultiPlanetRequiresNested(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOMultiPlanetRequiresNestedByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiPlanetRequiresNestedByNamesInput(ctx context.Context, v interface{}) (*model.MultiPlanetRequiresNestedByNamesInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputMultiPlanetRequiresNestedByNamesInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v interface{}) (string, error) {

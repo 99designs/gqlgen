@@ -6,11 +6,11 @@ import (
 	"go/token"
 	"go/types"
 
+	"github.com/vektah/gqlparser/v2/ast"
 	"golang.org/x/tools/go/packages"
 
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/99designs/gqlgen/internal/code"
-	"github.com/vektah/gqlparser/v2/ast"
 )
 
 var ErrTypeNotFound = errors.New("unable to find type")
@@ -203,6 +203,7 @@ type TypeReference struct {
 	IsOmittable             bool        // Is the type wrapped with Omittable
 	IsContext               bool        // Is the Marshaler/Unmarshaller the context version; applies to either the method or interface variety.
 	PointersInUmarshalInput bool        // Inverse values and pointers in return.
+	IsRoot                  bool        // Is the type a root level definition such as Query, Mutation or Subscription
 }
 
 func (ref *TypeReference) Elem() *TypeReference {
@@ -272,6 +273,10 @@ func (ref *TypeReference) IsStruct() bool {
 
 func (ref *TypeReference) IsScalar() bool {
 	return ref.Definition.Kind == ast.Scalar
+}
+
+func (ref *TypeReference) IsMap() bool {
+	return ref.GO == MapType
 }
 
 func (ref *TypeReference) UniquenessKey() string {
@@ -391,6 +396,7 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 				Definition: def,
 				GQL:        schemaType,
 				GO:         MapType,
+				IsRoot:     b.cfg.IsRoot(def),
 			}, nil
 		}
 
@@ -402,6 +408,7 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 				Definition: def,
 				GQL:        schemaType,
 				GO:         InterfaceType,
+				IsRoot:     b.cfg.IsRoot(def),
 			}, nil
 		}
 
@@ -413,6 +420,7 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 		ref := &TypeReference{
 			Definition: def,
 			GQL:        schemaType,
+			IsRoot:     b.cfg.IsRoot(def),
 		}
 
 		obj, err := b.FindObject(pkgName, typeName)

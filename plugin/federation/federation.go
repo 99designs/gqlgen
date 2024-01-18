@@ -63,6 +63,9 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 		"_Any": {
 			Model: config.StringList{"github.com/99designs/gqlgen/graphql.Map"},
 		},
+		"federation__Scope": {
+			Model: config.StringList{"github.com/99designs/gqlgen/graphql.String"},
+		},
 	}
 
 	for typeName, entry := range builtins {
@@ -84,6 +87,10 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 		cfg.Directives["tag"] = config.DirectiveConfig{SkipRuntime: true}
 		cfg.Directives["override"] = config.DirectiveConfig{SkipRuntime: true}
 		cfg.Directives["inaccessible"] = config.DirectiveConfig{SkipRuntime: true}
+		cfg.Directives["authenticated"] = config.DirectiveConfig{SkipRuntime: true}
+		cfg.Directives["requiresScopes"] = config.DirectiveConfig{SkipRuntime: true}
+		cfg.Directives["interfaceObject"] = config.DirectiveConfig{SkipRuntime: true}
+		cfg.Directives["composeDirective"] = config.DirectiveConfig{SkipRuntime: true}
 	}
 
 	return nil
@@ -105,6 +112,7 @@ func (f *federation) InjectSourceEarly() *ast.Source {
 `
 	} else if f.Version == 2 {
 		input += `
+	directive @authenticated on FIELD_DEFINITION | OBJECT | INTERFACE | SCALAR | ENUM
 	directive @composeDirective(name: String!) repeatable on SCHEMA
 	directive @extends on OBJECT | INTERFACE
 	directive @external on OBJECT | FIELD_DEFINITION
@@ -125,6 +133,12 @@ func (f *federation) InjectSourceEarly() *ast.Source {
 	directive @override(from: String!) on FIELD_DEFINITION
 	directive @provides(fields: FieldSet!) on FIELD_DEFINITION
 	directive @requires(fields: FieldSet!) on FIELD_DEFINITION
+	directive @requiresScopes(scopes: [[federation__Scope!]!]!) on 
+	  | FIELD_DEFINITION
+	  | OBJECT
+	  | INTERFACE
+	  | SCALAR
+	  | ENUM
 	directive @shareable repeatable on FIELD_DEFINITION | OBJECT
 	directive @tag(name: String!) repeatable on
 	  | ARGUMENT_DEFINITION
@@ -139,6 +153,7 @@ func (f *federation) InjectSourceEarly() *ast.Source {
 	  | UNION
 	scalar _Any
 	scalar FieldSet
+	scalar federation__Scope
 `
 	}
 	return &ast.Source{
@@ -148,7 +163,7 @@ func (f *federation) InjectSourceEarly() *ast.Source {
 	}
 }
 
-// InjectSources creates a GraphQL Entity type with all
+// InjectSourceLate creates a GraphQL Entity type with all
 // the fields that had the @key directive
 func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
 	f.setEntities(schema)
@@ -174,10 +189,14 @@ func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
 				}
 				entityResolverInputDefinitions += "input " + r.InputTypeName + " {\n"
 				for _, keyField := range r.KeyFields {
-					entityResolverInputDefinitions += fmt.Sprintf("\t%s: %s\n", keyField.Field.ToGo(), keyField.Definition.Type.String())
+					entityResolverInputDefinitions += fmt.Sprintf(
+						"\t%s: %s\n",
+						keyField.Field.ToGo(),
+						keyField.Definition.Type.String(),
+					)
 				}
 				entityResolverInputDefinitions += "}"
-				resolvers += fmt.Sprintf("\t%s(reps: [%s!]!): [%s]\n", r.ResolverName, r.InputTypeName, e.Name)
+				resolvers += fmt.Sprintf("\t%s(reps: [%s]!): [%s]\n", r.ResolverName, r.InputTypeName, e.Name)
 			} else {
 				resolverArgs := ""
 				for _, keyField := range r.KeyFields {

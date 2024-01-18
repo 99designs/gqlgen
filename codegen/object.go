@@ -7,10 +7,11 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/vektah/gqlparser/v2/ast"
 	"golang.org/x/text/cases"
 	"golang.org/x/text/language"
+
+	"github.com/99designs/gqlgen/codegen/config"
 )
 
 type GoFieldType int
@@ -44,7 +45,7 @@ func (b *builder) buildObject(typ *ast.Definition) (*Object, error) {
 	caser := cases.Title(language.English, cases.NoLower)
 	obj := &Object{
 		Definition:              typ,
-		Root:                    b.Schema.Query == typ || b.Schema.Mutation == typ || b.Schema.Subscription == typ,
+		Root:                    b.Config.IsRoot(typ),
 		DisableConcurrency:      typ == b.Schema.Mutation,
 		Stream:                  typ == b.Schema.Subscription,
 		Directives:              dirs,
@@ -112,8 +113,8 @@ func (o *Object) HasResolvers() bool {
 }
 
 func (o *Object) HasUnmarshal() bool {
-	if o.Type == config.MapType {
-		return true
+	if o.IsMap() {
+		return false
 	}
 	for i := 0; i < o.Type.(*types.Named).NumMethods(); i++ {
 		if o.Type.(*types.Named).Method(i).Name() == "UnmarshalGQL" {
@@ -147,6 +148,10 @@ func (o *Object) IsConcurrent() bool {
 
 func (o *Object) IsReserved() bool {
 	return strings.HasPrefix(o.Definition.Name, "__")
+}
+
+func (o *Object) IsMap() bool {
+	return o.Type == config.MapType
 }
 
 func (o *Object) Description() string {

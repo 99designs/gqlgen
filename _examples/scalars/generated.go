@@ -26,6 +26,7 @@ import (
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 	return &executableSchema{
+		schema:     cfg.Schema,
 		resolvers:  cfg.Resolvers,
 		directives: cfg.Directives,
 		complexity: cfg.Complexity,
@@ -33,6 +34,7 @@ func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 }
 
 type Config struct {
+	Schema     *ast.Schema
 	Resolvers  ResolverRoot
 	Directives DirectiveRoot
 	Complexity ComplexityRoot
@@ -84,12 +86,16 @@ type UserResolver interface {
 }
 
 type executableSchema struct {
+	schema     *ast.Schema
 	resolvers  ResolverRoot
 	directives DirectiveRoot
 	complexity ComplexityRoot
 }
 
 func (e *executableSchema) Schema() *ast.Schema {
+	if e.schema != nil {
+		return e.schema
+	}
 	return parsedSchema
 }
 
@@ -305,14 +311,14 @@ func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
 	if ec.DisableIntrospection {
 		return nil, errors.New("introspection disabled")
 	}
-	return introspection.WrapSchema(parsedSchema), nil
+	return introspection.WrapSchema(ec.Schema()), nil
 }
 
 func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
 	if ec.DisableIntrospection {
 		return nil, errors.New("introspection disabled")
 	}
-	return introspection.WrapTypeFromDef(parsedSchema, parsedSchema.Types[name]), nil
+	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
 //go:embed "schema.graphql"
@@ -3150,8 +3156,6 @@ func (ec *executionContext) unmarshalInputSearchArgs(ctx context.Context, obj in
 		}
 		switch k {
 		case "location":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("location"))
 			data, err := ec.unmarshalOPoint2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐPoint(ctx, v)
 			if err != nil {
@@ -3159,8 +3163,6 @@ func (ec *executionContext) unmarshalInputSearchArgs(ctx context.Context, obj in
 			}
 			it.Location = data
 		case "createdAfter":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("createdAfter"))
 			data, err := ec.unmarshalOTimestamp2ᚖtimeᚐTime(ctx, v)
 			if err != nil {
@@ -3168,8 +3170,6 @@ func (ec *executionContext) unmarshalInputSearchArgs(ctx context.Context, obj in
 			}
 			it.CreatedAfter = data
 		case "isBanned":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("isBanned"))
 			data, err := ec.unmarshalOBanned2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐBanned(ctx, v)
 			if err != nil {

@@ -5,8 +5,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/99designs/gqlgen/graphql"
 	"github.com/vektah/gqlparser/v2/ast"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type (
@@ -85,6 +86,10 @@ func (Tracer) InterceptField(ctx context.Context, next graphql.Resolver) (interf
 }
 
 func (Tracer) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+	if !graphql.HasOperationContext(ctx) {
+		return next(ctx)
+	}
+
 	rc := graphql.GetOperationContext(ctx)
 
 	start := rc.Stats.OperationStart

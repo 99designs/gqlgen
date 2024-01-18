@@ -257,8 +257,6 @@ func (ec *executionContext) unmarshalInputUpdatePtrToPtrInner(ctx context.Contex
 		}
 		switch k {
 		case "key":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("key"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -266,8 +264,6 @@ func (ec *executionContext) unmarshalInputUpdatePtrToPtrInner(ctx context.Contex
 			}
 			it.Key = data
 		case "value":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -295,8 +291,6 @@ func (ec *executionContext) unmarshalInputUpdatePtrToPtrOuter(ctx context.Contex
 		}
 		switch k {
 		case "name":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
 			if err != nil {
@@ -304,8 +298,6 @@ func (ec *executionContext) unmarshalInputUpdatePtrToPtrOuter(ctx context.Contex
 			}
 			it.Name = data
 		case "inner":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("inner"))
 			data, err := ec.unmarshalOUpdatePtrToPtrInner2ᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐUpdatePtrToPtrInner(ctx, v)
 			if err != nil {
@@ -313,8 +305,6 @@ func (ec *executionContext) unmarshalInputUpdatePtrToPtrOuter(ctx context.Contex
 			}
 			it.Inner = data
 		case "stupidInner":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("stupidInner"))
 			data, err := ec.unmarshalOUpdatePtrToPtrInner2ᚖᚖᚖᚖᚖᚖᚖᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐUpdatePtrToPtrInner(ctx, v)
 			if err != nil {

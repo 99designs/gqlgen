@@ -38,6 +38,14 @@ func TestPackages(t *testing.T) {
 		require.Equal(t, "b", p.Load("github.com/99designs/gqlgen/internal/code/testdata/b").Name)
 		require.Equal(t, 3, p.numLoadCalls)
 	})
+	t.Run("able to load private package with build tags", func(t *testing.T) {
+		p := initialState(t, WithBuildTags("private"))
+		p.Evict("github.com/99designs/gqlgen/internal/code/testdata/a")
+		require.Equal(t, "a", p.Load("github.com/99designs/gqlgen/internal/code/testdata/a").Name)
+		require.Equal(t, 2, p.numLoadCalls)
+		require.Equal(t, "p", p.Load("github.com/99designs/gqlgen/internal/code/testdata/p").Name)
+		require.Equal(t, 3, p.numLoadCalls)
+	})
 }
 
 func TestNameForPackage(t *testing.T) {
@@ -50,8 +58,8 @@ func TestNameForPackage(t *testing.T) {
 	assert.Equal(t, "github_com", p.NameForPackage("github.com"))
 }
 
-func initialState(t *testing.T) *Packages {
-	p := &Packages{}
+func initialState(t *testing.T, opts ...Option) *Packages {
+	p := NewPackages(opts...)
 	pkgs := p.LoadAll(
 		"github.com/99designs/gqlgen/internal/code/testdata/a",
 		"github.com/99designs/gqlgen/internal/code/testdata/b",

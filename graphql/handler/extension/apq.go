@@ -6,12 +6,11 @@ import (
 	"encoding/hex"
 	"fmt"
 
-	"github.com/99designs/gqlgen/graphql/errcode"
-
+	"github.com/mitchellh/mapstructure"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/mitchellh/mapstructure"
+	"github.com/99designs/gqlgen/graphql/errcode"
 )
 
 const (

@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/99designs/gqlgen/internal/code"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/99designs/gqlgen/internal/code"
 )
 
 //go:embed *.gotpl
@@ -326,7 +326,7 @@ func TestTemplateOverride(t *testing.T) {
 	}
 	defer f.Close()
 	defer os.RemoveAll(f.Name())
-	err = Render(Options{Template: "hello", Filename: f.Name(), Packages: &code.Packages{}})
+	err = Render(Options{Template: "hello", Filename: f.Name(), Packages: code.NewPackages()})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -346,7 +346,7 @@ func TestRenderFS(t *testing.T) {
 	}
 	defer f.Close()
 	defer os.RemoveAll(f.Name())
-	err = Render(Options{TemplateFS: templateFS, Filename: f.Name(), Packages: &code.Packages{}})
+	err = Render(Options{TemplateFS: templateFS, Filename: f.Name(), Packages: code.NewPackages()})
 	if err != nil {
 		t.Fatal(err)
 	}

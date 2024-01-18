@@ -2,11 +2,17 @@ package apollotracing_test
 
 import (
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlparser/v2/ast"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler/apollotracing"
@@ -14,11 +20,13 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/testserver"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
-	"github.com/vektah/gqlparser/v2/ast"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
+
+type alwaysError struct{}
+
+func (a *alwaysError) Read(p []byte) (int, error) {
+	return 0, io.ErrUnexpectedEOF
+}
 
 func TestApolloTracing(t *testing.T) {
 	now := time.Unix(0, 0)
@@ -92,8 +100,22 @@ func TestApolloTracing_withFail(t *testing.T) {
 	require.Equal(t, "PersistedQueryNotFound", respData.Errors[0].Message)
 }
 
+func TestApolloTracing_withUnexpectedEOF(t *testing.T) {
+	h := testserver.New()
+	h.AddTransport(transport.POST{})
+	h.Use(apollotracing.Tracer{})
+
+	resp := doRequestWithReader(h, http.MethodPost, "/graphql", &alwaysError{})
+	assert.Equal(t, http.StatusOK, resp.Code)
+}
+
 func doRequest(handler http.Handler, method, target, body string) *httptest.ResponseRecorder {
-	r := httptest.NewRequest(method, target, strings.NewReader(body))
+	return doRequestWithReader(handler, method, target, strings.NewReader(body))
+}
+
+func doRequestWithReader(handler http.Handler, method string, target string,
+	reader io.Reader) *httptest.ResponseRecorder {
+	r := httptest.NewRequest(method, target, reader)
 	r.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()
 

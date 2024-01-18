@@ -42,8 +42,6 @@ func (ec *executionContext) unmarshalInputInputWithEnumValue(ctx context.Context
 		}
 		switch k {
 		case "enum":
-			var err error
-
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("enum"))
 			data, err := ec.unmarshalNEnumTest2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐEnumTest(ctx, v)
 			if err != nil {

@@ -14,6 +14,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/plugin/modelgen/internal/extrafields"
@@ -23,8 +26,6 @@ import (
 	"github.com/99designs/gqlgen/plugin/modelgen/out_enable_model_json_omitempty_tag_true"
 	"github.com/99designs/gqlgen/plugin/modelgen/out_nullable_input_omittable"
 	"github.com/99designs/gqlgen/plugin/modelgen/out_struct_pointers"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestModelGeneration(t *testing.T) {
@@ -297,6 +298,23 @@ func TestModelGeneration(t *testing.T) {
 	})
 }
 
+func TestModelGenerationOmitRootModels(t *testing.T) {
+	cfg, err := config.LoadConfig("testdata/gqlgen_omit_root_models.yml")
+	require.NoError(t, err)
+	require.NoError(t, cfg.Init())
+	p := Plugin{
+		MutateHook: mutateHook,
+		FieldHook:  DefaultFieldMutateHook,
+	}
+	require.NoError(t, p.MutateConfig(cfg))
+	require.NoError(t, goBuild(t, "./out/"))
+	generated, err := os.ReadFile("./out/generated_omit_root_models.go")
+	require.NoError(t, err)
+	require.NotContains(t, string(generated), "type Mutation struct")
+	require.NotContains(t, string(generated), "type Query struct")
+	require.NotContains(t, string(generated), "type Subscription struct")
+}
+
 func TestModelGenerationStructFieldPointers(t *testing.T) {
 	cfg, err := config.LoadConfig("testdata/gqlgen_struct_field_pointers.yml")
 	require.NoError(t, err)
@@ -534,6 +552,22 @@ func TestRemoveDuplicate(t *testing.T) {
 			want:      "gorm:\"unique;not null\" json:\"name,name2\"",
 			wantPanic: false,
 		},
+		{
+			name: "Test gorm tag with colon",
+			args: args{
+				t: "gorm:\"type:varchar(63);unique_index\"",
+			},
+			want:      "gorm:\"type:varchar(63);unique_index\"",
+			wantPanic: false,
+		},
+		{
+			name: "Test mix use of gorm and duplicate json tags with colon",
+			args: args{
+				t: "json:\"name0\" gorm:\"type:varchar(63);unique_index\" json:\"name,name2\"",
+			},
+			want:      "gorm:\"type:varchar(63);unique_index\" json:\"name,name2\"",
+			wantPanic: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -636,4 +670,15 @@ func Test_splitTagsBySpace(t *testing.T) {
 			assert.Equalf(t, tt.want, splitTagsBySpace(tt.args.tagsString), "splitTagsBySpace(%v)", tt.args.tagsString)
 		})
 	}
+}
+
+func TestCustomTemplate(t *testing.T) {
+	cfg, err := config.LoadConfig("testdata/gqlgen_custom_model_template.yml")
+	require.NoError(t, err)
+	require.NoError(t, cfg.Init())
+	p := Plugin{
+		MutateHook: mutateHook,
+		FieldHook:  DefaultFieldMutateHook,
+	}
+	require.NoError(t, p.MutateConfig(cfg))
 }

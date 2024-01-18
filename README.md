@@ -30,6 +30,8 @@ Still not convinced enough to use **gqlgen**? Compare **gqlgen** with other Go g
 
        go run github.com/99designs/gqlgen init
 
+       go mod tidy
+
 4. Start the graphql server
 
        go run server.go

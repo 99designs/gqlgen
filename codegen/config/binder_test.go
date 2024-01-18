@@ -4,11 +4,11 @@ import (
 	"go/types"
 	"testing"
 
-	"github.com/99designs/gqlgen/internal/code"
-
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
+
+	"github.com/99designs/gqlgen/internal/code"
 )
 
 func TestBindingToInvalid(t *testing.T) {
@@ -187,7 +187,7 @@ func createBinder(cfg Config) (*Binder, *ast.Schema) {
 			Model: []string{"github.com/99designs/gqlgen/graphql.String"},
 		},
 	}
-	cfg.Packages = &code.Packages{}
+	cfg.Packages = code.NewPackages()
 
 	cfg.Schema = gqlparser.MustLoadSchema(&ast.Source{Name: "TestAutobinding.schema", Input: `
 		type Message { id: ID }

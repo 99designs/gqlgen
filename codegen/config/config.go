@@ -3,6 +3,7 @@ package config
 import (
 	"bytes"
 	"fmt"
+	"go/types"
 	"io"
 	"os"
 	"path/filepath"
@@ -10,10 +11,13 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/99designs/gqlgen/internal/code"
 	"github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
+	"golang.org/x/tools/go/packages"
 	"gopkg.in/yaml.v3"
+
+	"github.com/99designs/gqlgen/codegen/templates"
+	"github.com/99designs/gqlgen/internal/code"
 )
 
 type Config struct {
@@ -26,11 +30,15 @@ type Config struct {
 	Models                        TypeMap                    `yaml:"models,omitempty"`
 	StructTag                     string                     `yaml:"struct_tag,omitempty"`
 	Directives                    map[string]DirectiveConfig `yaml:"directives,omitempty"`
+	GoBuildTags                   StringList                 `yaml:"go_build_tags,omitempty"`
+	GoInitialisms                 GoInitialismsConfig        `yaml:"go_initialisms,omitempty"`
 	OmitSliceElementPointers      bool                       `yaml:"omit_slice_element_pointers,omitempty"`
 	OmitGetters                   bool                       `yaml:"omit_getters,omitempty"`
+	OmitInterfaceChecks           bool                       `yaml:"omit_interface_checks,omitempty"`
 	OmitComplexity                bool                       `yaml:"omit_complexity,omitempty"`
 	OmitGQLGenFileNotice          bool                       `yaml:"omit_gqlgen_file_notice,omitempty"`
 	OmitGQLGenVersionInFileNotice bool                       `yaml:"omit_gqlgen_version_in_file_notice,omitempty"`
+	OmitRootModels                bool                       `yaml:"omit_root_models,omitempty"`
 	StructFieldsAlwaysPointers    bool                       `yaml:"struct_fields_always_pointers,omitempty"`
 	ReturnPointersInUmarshalInput bool                       `yaml:"return_pointers_in_unmarshalinput,omitempty"`
 	ResolversAlwaysReturnPointers bool                       `yaml:"resolvers_always_return_pointers,omitempty"`
@@ -201,12 +209,17 @@ func CompleteConfig(config *Config) error {
 
 		config.Sources = append(config.Sources, &ast.Source{Name: filename, Input: string(schemaRaw)})
 	}
+
+	config.GoInitialisms.setInitialisms()
+
 	return nil
 }
 
 func (c *Config) Init() error {
 	if c.Packages == nil {
-		c.Packages = &code.Packages{}
+		c.Packages = code.NewPackages(
+			code.WithBuildTags(c.GoBuildTags...),
+		)
 	}
 
 	if c.Schema == nil {
@@ -252,6 +265,10 @@ func (c *Config) ReloadAllPackages() {
 	c.Packages.ReloadAll(c.packageList()...)
 }
 
+func (c *Config) IsRoot(def *ast.Definition) bool {
+	return def == c.Schema.Query || def == c.Schema.Mutation || def == c.Schema.Subscription
+}
+
 func (c *Config) injectTypesFromSchema() error {
 	c.Directives["goModel"] = DirectiveConfig{
 		SkipRuntime: true,
@@ -266,7 +283,7 @@ func (c *Config) injectTypesFromSchema() error {
 	}
 
 	for _, schemaType := range c.Schema.Types {
-		if schemaType == c.Schema.Query || schemaType == c.Schema.Mutation || schemaType == c.Schema.Subscription {
+		if c.IsRoot(schemaType) {
 			continue
 		}
 
@@ -276,11 +293,18 @@ func (c *Config) injectTypesFromSchema() error {
 					c.Models.Add(schemaType.Name, mv.(string))
 				}
 			}
+
 			if ma := bd.Arguments.ForName("models"); ma != nil {
 				if mvs, err := ma.Value.Value(nil); err == nil {
 					for _, mv := range mvs.([]interface{}) {
 						c.Models.Add(schemaType.Name, mv.(string))
 					}
+				}
+			}
+
+			if fg := bd.Arguments.ForName("forceGenerate"); fg != nil {
+				if mv, err := fg.Value.Value(nil); err == nil {
+					c.Models.ForceGenerate(schemaType.Name, mv.(bool))
 				}
 			}
 		}
@@ -324,8 +348,9 @@ func (c *Config) injectTypesFromSchema() error {
 }
 
 type TypeMapEntry struct {
-	Model  StringList              `yaml:"model"`
-	Fields map[string]TypeMapField `yaml:"fields,omitempty"`
+	Model         StringList              `yaml:"model,omitempty"`
+	ForceGenerate bool                    `yaml:"forceGenerate,omitempty"`
+	Fields        map[string]TypeMapField `yaml:"fields,omitempty"`
 
 	// Key is the Go name of the field.
 	ExtraFields map[string]ModelExtraField `yaml:"extraFields,omitempty"`
@@ -524,6 +549,12 @@ func (tm TypeMap) Add(name string, goType string) {
 	tm[name] = modelCfg
 }
 
+func (tm TypeMap) ForceGenerate(name string, forceGenerate bool) {
+	modelCfg := tm[name]
+	modelCfg.ForceGenerate = forceGenerate
+	tm[name] = modelCfg
+}
+
 type DirectiveConfig struct {
 	SkipRuntime bool `yaml:"skip_runtime"`
 }
@@ -578,7 +609,7 @@ func (c *Config) autobind() error {
 	ps := c.Packages.LoadAll(c.AutoBind...)
 
 	for _, t := range c.Schema.Types {
-		if c.Models.UserDefined(t.Name) {
+		if c.Models.UserDefined(t.Name) || c.Models[t.Name].ForceGenerate {
 			continue
 		}
 
@@ -586,14 +617,20 @@ func (c *Config) autobind() error {
 			if p == nil || p.Module == nil {
 				return fmt.Errorf("unable to load %s - make sure you're using an import path to a package that exists", c.AutoBind[i])
 			}
-			if t := p.Types.Scope().Lookup(t.Name); t != nil {
-				c.Models.Add(t.Name(), t.Pkg().Path()+"."+t.Name())
+
+			autobindType := c.lookupAutobindType(p, t)
+			if autobindType != nil {
+				c.Models.Add(t.Name, autobindType.Pkg().Path()+"."+autobindType.Name())
 				break
 			}
 		}
 	}
 
 	for i, t := range c.Models {
+		if t.ForceGenerate {
+			continue
+		}
+
 		for j, m := range t.Model {
 			pkg, typename := code.PkgAndType(m)
 
@@ -611,6 +648,17 @@ func (c *Config) autobind() error {
 					break
 				}
 			}
+		}
+	}
+
+	return nil
+}
+
+func (c *Config) lookupAutobindType(p *packages.Package, schemaType *ast.Definition) types.Object {
+	// Try binding to either the original schema type name, or the normalized go type name
+	for _, lookupName := range []string{schemaType.Name, templates.ToGo(schemaType.Name)} {
+		if t := p.Types.Scope().Lookup(lookupName); t != nil {
+			return t
 		}
 	}
 
@@ -666,7 +714,9 @@ func (c *Config) injectBuiltins() {
 
 func (c *Config) LoadSchema() error {
 	if c.Packages != nil {
-		c.Packages = &code.Packages{}
+		c.Packages = code.NewPackages(
+			code.WithBuildTags(c.GoBuildTags...),
+		)
 	}
 
 	if err := c.check(); err != nil {

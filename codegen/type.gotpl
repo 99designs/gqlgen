@@ -59,8 +59,6 @@
 					{{- else}}
 						return res, graphql.ErrorOnPath(ctx, err)
 					{{- end }}
-				{{- else if eq ($type.GO | ref) "map[string]interface{}" }}
-					return v.(map[string]interface{}), nil
 				{{- else if $type.IsMarshaler }}
 					{{- if and $type.IsNilable $type.Elem }}
 						var res = new({{ $type.Elem.GO | ref }})
@@ -75,7 +73,7 @@
 					return res, graphql.ErrorOnPath(ctx, err)
 				{{- else }}
 					res, err := ec.unmarshalInput{{ $type.GQL.Name }}(ctx, v)
-					{{- if and $type.IsNilable (not $type.PointersInUmarshalInput) }}
+					{{- if and $type.IsNilable (not $type.IsMap) (not $type.PointersInUmarshalInput) }}
 						return &res, graphql.ErrorOnPath(ctx, err)
 					{{- else if and (not $type.IsNilable) $type.PointersInUmarshalInput }}
 						return *res, graphql.ErrorOnPath(ctx, err)
@@ -184,6 +182,13 @@
 						return graphql.WrapContextMarshaler(ctx, res)
 					{{- else }}
 						return res
+					{{- end }}
+				{{- else if $type.IsRoot }}
+					{{- if eq $type.Definition.Name "Subscription" }}
+						res := ec._{{$type.Definition.Name}}(ctx, sel)
+						return res(ctx)
+					{{- else }}
+						return ec._{{$type.Definition.Name}}(ctx, sel)
 					{{- end }}
 				{{- else }}
 					return ec._{{$type.Definition.Name}}(ctx, sel, {{ if not $type.IsNilable}}&{{end}} v)

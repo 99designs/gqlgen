@@ -21,6 +21,13 @@ type ContentChild interface {
 	IsContentChild()
 }
 
+type Mammalian interface {
+	IsAnimal()
+	IsMammalian()
+	GetSpecies() string
+	GetSize() *Size
+}
+
 type TestUnion interface {
 	IsTestUnion()
 }
@@ -110,6 +117,18 @@ type FieldsOrderPayload struct {
 	FirstFieldValue *string `json:"firstFieldValue,omitempty"`
 }
 
+type Horse struct {
+	Species    string `json:"species"`
+	Size       *Size  `json:"size"`
+	HorseBreed string `json:"horseBreed"`
+}
+
+func (Horse) IsMammalian()            {}
+func (this Horse) GetSpecies() string { return this.Species }
+func (this Horse) GetSize() *Size     { return this.Size }
+
+func (Horse) IsAnimal() {}
+
 type InnerDirectives struct {
 	Message string `json:"message"`
 }
@@ -146,6 +165,9 @@ type LoopB struct {
 // added to the TypeMap
 type Map struct {
 	ID string `json:"id"`
+}
+
+type Mutation struct {
 }
 
 type NestedInput struct {
@@ -186,6 +208,9 @@ type Pet struct {
 	Friends []*Pet `json:"friends,omitempty"`
 }
 
+type Query struct {
+}
+
 type Size struct {
 	Height int `json:"height"`
 	Weight int `json:"weight"`
@@ -200,6 +225,9 @@ type Slices struct {
 
 type SpecialInput struct {
 	Nesting *NestedInput `json:"nesting"`
+}
+
+type Subscription struct {
 }
 
 type User struct {

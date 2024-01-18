@@ -30,6 +30,8 @@ federation:
 model:
   filename: graph/model/models_gen.go
   package: model
+  # Optional: Pass in a path to a new gotpl template to use for generating the models
+  # model_template: [your/path/model.gotpl]
 
 # Where should the resolver implementations go?
 resolver:
@@ -39,12 +41,17 @@ resolver:
   filename_template: "{name}.resolvers.go"
   # Optional: turn on to not generate template comments above resolvers
   # omit_template_comment: false
+  # Optional: Pass in a path to a new gotpl template to use for generating resolvers
+  # resolver_template: [your/path/resolver.gotpl]
 
 # Optional: turn on use ` + "`" + `gqlgen:"fieldName"` + "`" + ` tags in your models
 # struct_tag: json
 
 # Optional: turn on to use []Thing instead of []*Thing
 # omit_slice_element_pointers: false
+
+# Optional: turn on to omit Is<Name>() methods to interface and unions
+# omit_interface_checks : true
 
 # Optional: turn on to skip generation of ComplexityRoot struct content and Complexity function
 # omit_complexity: false
@@ -54,6 +61,9 @@ resolver:
 
 # Optional: turn on to exclude the gqlgen version in the generated file notice. No effect if `omit_gqlgen_file_notice` is true.
 # omit_gqlgen_version_in_file_notice: false
+
+# Optional: turn on to exclude root models such as Query and Mutation from the generated models file.
+# omit_root_models: false
 
 # Optional: turn off to make struct-type struct fields not use pointers
 # e.g. type Thing struct { FieldA OtherThing } instead of { FieldA *OtherThing }
@@ -77,6 +87,18 @@ resolver:
 # Optional: set to skip running `go mod tidy` when generating server code
 # skip_mod_tidy: true
 
+# Optional: set build tags that will be used to load packages
+# go_build_tags:
+#  - private
+#  - enterprise
+
+# Optional: set to modify the initialisms regarded for Go names
+# go_initialisms:
+#   replace_defaults: false # if true, the default initialisms will get dropped in favor of the new ones instead of being added
+#   initialisms: # List of initialisms to for Go names
+#     - 'CC'
+#     - 'BCC'
+
 # gqlgen will search for any type names in the schema in these go packages
 # if they match it will use them, otherwise it will generate them.
 # autobind:
@@ -99,6 +121,9 @@ models:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
+  UUID:
+    model:
+      - github.com/99designs/gqlgen/graphql.UUID
 ```
 
 Everything has defaults, so add things as you need.
@@ -113,12 +138,13 @@ To start using them you first need to define them:
 directive @goModel(
 	model: String
 	models: [String!]
+	forceGenerate: Boolean
 ) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
 
 directive @goField(
 	forceResolver: Boolean
 	name: String
-  omittable: Boolean
+	omittable: Boolean
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 directive @goTag(
@@ -141,6 +167,12 @@ type User @goModel(model: "github.com/my/app/models.User") {
 		@goField(forceResolver: true)
 		@goTag(key: "xorm", value: "-")
 		@goTag(key: "yaml")
+}
+
+# This make sense when autobind activated.
+type Person @goModel(forceGenerate: true) {
+	id: ID!
+	name: String!
 }
 ```
 

@@ -9,6 +9,9 @@ type EmailHost struct {
 
 func (EmailHost) IsEntity() {}
 
+type Query struct {
+}
+
 type User struct {
 	ID       string     `json:"id"`
 	Host     *EmailHost `json:"host"`

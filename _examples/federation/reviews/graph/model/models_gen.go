@@ -13,3 +13,6 @@ type Manufacturer struct {
 }
 
 func (Manufacturer) IsEntity() {}
+
+type Query struct {
+}

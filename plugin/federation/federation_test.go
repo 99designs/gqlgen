@@ -3,30 +3,33 @@ package federation
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/stretchr/testify/require"
 )
 
 func TestWithEntities(t *testing.T) {
 	f, cfg := load(t, "testdata/allthethings/gqlgen.yml")
 
-	require.Equal(t, []string{"ExternalExtension", "Hello", "MoreNesting", "NestedKey", "VeryNestedKey", "World"}, cfg.Schema.Types["_Entity"].Types)
+	require.Equal(t, []string{"ExternalExtension", "Hello", "MoreNesting", "MultiHelloMultiKey", "NestedKey", "VeryNestedKey", "World"}, cfg.Schema.Types["_Entity"].Types)
 
-	require.Len(t, cfg.Schema.Types["Entity"].Fields, 6)
+	require.Len(t, cfg.Schema.Types["Entity"].Fields, 8)
 
 	require.Equal(t, "findExternalExtensionByUpc", cfg.Schema.Types["Entity"].Fields[0].Name)
 	require.Equal(t, "findHelloByName", cfg.Schema.Types["Entity"].Fields[1].Name)
 	// missing on purpose: all @external fields:
 	// require.Equal(t, "findMoreNestingByID", cfg.Schema.Types["Entity"].Fields[2].Name)
-	require.Equal(t, "findNestedKeyByIDAndHelloName", cfg.Schema.Types["Entity"].Fields[2].Name)
-	require.Equal(t, "findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo", cfg.Schema.Types["Entity"].Fields[3].Name)
-	require.Equal(t, "findWorldByFoo", cfg.Schema.Types["Entity"].Fields[4].Name)
-	require.Equal(t, "findWorldByBar", cfg.Schema.Types["Entity"].Fields[5].Name)
+	require.Equal(t, "findManyMultiHelloMultiKeyByNames", cfg.Schema.Types["Entity"].Fields[2].Name)
+	require.Equal(t, "findManyMultiHelloMultiKeyByKey2s", cfg.Schema.Types["Entity"].Fields[3].Name)
+	require.Equal(t, "findNestedKeyByIDAndHelloName", cfg.Schema.Types["Entity"].Fields[4].Name)
+	require.Equal(t, "findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo", cfg.Schema.Types["Entity"].Fields[5].Name)
+	require.Equal(t, "findWorldByFoo", cfg.Schema.Types["Entity"].Fields[6].Name)
+	require.Equal(t, "findWorldByBar", cfg.Schema.Types["Entity"].Fields[7].Name)
 
 	require.NoError(t, f.MutateConfig(cfg))
 
-	require.Len(t, f.Entities, 6)
+	require.Len(t, f.Entities, 7)
 
 	require.Equal(t, "ExternalExtension", f.Entities[0].Name)
 	require.Len(t, f.Entities[0].Resolvers, 1)
@@ -43,40 +46,49 @@ func TestWithEntities(t *testing.T) {
 	require.Equal(t, "MoreNesting", f.Entities[2].Name)
 	require.Len(t, f.Entities[2].Resolvers, 0)
 
-	require.Equal(t, "NestedKey", f.Entities[3].Name)
-	require.Len(t, f.Entities[3].Resolvers, 1)
-	require.Len(t, f.Entities[3].Resolvers[0].KeyFields, 2)
-	require.Equal(t, "id", f.Entities[3].Resolvers[0].KeyFields[0].Definition.Name)
+	require.Equal(t, "MultiHelloMultiKey", f.Entities[3].Name)
+	require.Len(t, f.Entities[3].Resolvers, 2)
+	require.Len(t, f.Entities[3].Resolvers[0].KeyFields, 1)
+	require.Len(t, f.Entities[3].Resolvers[1].KeyFields, 1)
+	require.Equal(t, "name", f.Entities[3].Resolvers[0].KeyFields[0].Definition.Name)
 	require.Equal(t, "String", f.Entities[3].Resolvers[0].KeyFields[0].Definition.Type.Name())
-	require.Equal(t, "helloName", f.Entities[3].Resolvers[0].KeyFields[1].Definition.Name)
-	require.Equal(t, "String", f.Entities[3].Resolvers[0].KeyFields[1].Definition.Type.Name())
+	require.Equal(t, "key2", f.Entities[3].Resolvers[1].KeyFields[0].Definition.Name)
+	require.Equal(t, "String", f.Entities[3].Resolvers[1].KeyFields[0].Definition.Type.Name())
 
-	require.Equal(t, "VeryNestedKey", f.Entities[4].Name)
+	require.Equal(t, "NestedKey", f.Entities[4].Name)
 	require.Len(t, f.Entities[4].Resolvers, 1)
-	require.Len(t, f.Entities[4].Resolvers[0].KeyFields, 5)
+	require.Len(t, f.Entities[4].Resolvers[0].KeyFields, 2)
 	require.Equal(t, "id", f.Entities[4].Resolvers[0].KeyFields[0].Definition.Name)
 	require.Equal(t, "String", f.Entities[4].Resolvers[0].KeyFields[0].Definition.Type.Name())
 	require.Equal(t, "helloName", f.Entities[4].Resolvers[0].KeyFields[1].Definition.Name)
 	require.Equal(t, "String", f.Entities[4].Resolvers[0].KeyFields[1].Definition.Type.Name())
-	require.Equal(t, "worldFoo", f.Entities[4].Resolvers[0].KeyFields[2].Definition.Name)
-	require.Equal(t, "String", f.Entities[4].Resolvers[0].KeyFields[2].Definition.Type.Name())
-	require.Equal(t, "worldBar", f.Entities[4].Resolvers[0].KeyFields[3].Definition.Name)
-	require.Equal(t, "Int", f.Entities[4].Resolvers[0].KeyFields[3].Definition.Type.Name())
-	require.Equal(t, "moreWorldFoo", f.Entities[4].Resolvers[0].KeyFields[4].Definition.Name)
-	require.Equal(t, "String", f.Entities[4].Resolvers[0].KeyFields[4].Definition.Type.Name())
 
-	require.Len(t, f.Entities[4].Requires, 2)
-	require.Equal(t, f.Entities[4].Requires[0].Name, "id")
-	require.Equal(t, f.Entities[4].Requires[1].Name, "helloSecondary")
-
-	require.Equal(t, "World", f.Entities[5].Name)
-	require.Len(t, f.Entities[5].Resolvers, 2)
-	require.Len(t, f.Entities[5].Resolvers[0].KeyFields, 1)
-	require.Equal(t, "foo", f.Entities[5].Resolvers[0].KeyFields[0].Definition.Name)
+	require.Equal(t, "VeryNestedKey", f.Entities[5].Name)
+	require.Len(t, f.Entities[5].Resolvers, 1)
+	require.Len(t, f.Entities[5].Resolvers[0].KeyFields, 5)
+	require.Equal(t, "id", f.Entities[5].Resolvers[0].KeyFields[0].Definition.Name)
 	require.Equal(t, "String", f.Entities[5].Resolvers[0].KeyFields[0].Definition.Type.Name())
-	require.Len(t, f.Entities[5].Resolvers[1].KeyFields, 1)
-	require.Equal(t, "bar", f.Entities[5].Resolvers[1].KeyFields[0].Definition.Name)
-	require.Equal(t, "Int", f.Entities[5].Resolvers[1].KeyFields[0].Definition.Type.Name())
+	require.Equal(t, "helloName", f.Entities[5].Resolvers[0].KeyFields[1].Definition.Name)
+	require.Equal(t, "String", f.Entities[5].Resolvers[0].KeyFields[1].Definition.Type.Name())
+	require.Equal(t, "worldFoo", f.Entities[5].Resolvers[0].KeyFields[2].Definition.Name)
+	require.Equal(t, "String", f.Entities[5].Resolvers[0].KeyFields[2].Definition.Type.Name())
+	require.Equal(t, "worldBar", f.Entities[5].Resolvers[0].KeyFields[3].Definition.Name)
+	require.Equal(t, "Int", f.Entities[5].Resolvers[0].KeyFields[3].Definition.Type.Name())
+	require.Equal(t, "moreWorldFoo", f.Entities[5].Resolvers[0].KeyFields[4].Definition.Name)
+	require.Equal(t, "String", f.Entities[5].Resolvers[0].KeyFields[4].Definition.Type.Name())
+
+	require.Len(t, f.Entities[5].Requires, 2)
+	require.Equal(t, f.Entities[5].Requires[0].Name, "id")
+	require.Equal(t, f.Entities[5].Requires[1].Name, "helloSecondary")
+
+	require.Equal(t, "World", f.Entities[6].Name)
+	require.Len(t, f.Entities[6].Resolvers, 2)
+	require.Len(t, f.Entities[6].Resolvers[0].KeyFields, 1)
+	require.Equal(t, "foo", f.Entities[6].Resolvers[0].KeyFields[0].Definition.Name)
+	require.Equal(t, "String", f.Entities[6].Resolvers[0].KeyFields[0].Definition.Type.Name())
+	require.Len(t, f.Entities[6].Resolvers[1].KeyFields, 1)
+	require.Equal(t, "bar", f.Entities[6].Resolvers[1].KeyFields[0].Definition.Name)
+	require.Equal(t, "Int", f.Entities[6].Resolvers[1].KeyFields[0].Definition.Type.Name())
 }
 
 func TestNoEntities(t *testing.T) {
@@ -110,11 +122,21 @@ func TestInterfaceExtendsDirective(t *testing.T) {
 	})
 }
 
+func TestEntityInterfaces(t *testing.T) {
+	f, cfg := load(t, "testdata/entityinterfaces/interface.yml")
+	err := f.MutateConfig(cfg)
+
+	require.NoError(t, err)
+	require.Len(t, f.Entities[0].Resolvers, 1)
+	require.Equal(t, "Hello", f.Entities[0].Name)
+	require.NotEmpty(t, f.Entities[1].Resolvers)
+}
+
 func TestCodeGeneration(t *testing.T) {
 	f, cfg := load(t, "testdata/allthethings/gqlgen.yml")
 
-	require.Len(t, cfg.Schema.Types["_Entity"].Types, 6)
-	require.Len(t, f.Entities, 6)
+	require.Len(t, cfg.Schema.Types["_Entity"].Types, 7)
+	require.Len(t, f.Entities, 7)
 
 	require.NoError(t, f.MutateConfig(cfg))
 
@@ -142,6 +164,50 @@ func TestCodeGenerationFederation2(t *testing.T) {
 		panic(err)
 	}
 	require.NoError(t, f.GenerateCode(data))
+}
+
+// This test is to ensure that the input arguments are not
+// changed when cfg.OmitSliceElementPointers is false OR true
+func TestMultiWithOmitSliceElemPointersCfg(t *testing.T) {
+
+	staticRepsString := "reps: [HelloByNamesInput]!"
+	t.Run("OmitSliceElementPointers true", func(t *testing.T) {
+		f, cfg := load(t, "testdata/multi/multi.yml")
+		cfg.OmitSliceElementPointers = true
+		err := f.MutateConfig(cfg)
+		require.NoError(t, err)
+		require.Len(t, cfg.Schema.Types["_Entity"].Types, 1)
+		require.Len(t, f.Entities, 1)
+
+		entityGraphqlGenerated := false
+		for _, source := range cfg.Sources {
+			if source.Name != "federation/entity.graphql" {
+				continue
+			}
+			entityGraphqlGenerated = true
+			require.Contains(t, source.Input, staticRepsString)
+		}
+		require.True(t, entityGraphqlGenerated)
+	})
+
+	t.Run("OmitSliceElementPointers false", func(t *testing.T) {
+		f, cfg := load(t, "testdata/multi/multi.yml")
+		cfg.OmitSliceElementPointers = false
+		err := f.MutateConfig(cfg)
+		require.NoError(t, err)
+		require.Len(t, cfg.Schema.Types["_Entity"].Types, 1)
+		require.Len(t, f.Entities, 1)
+
+		entityGraphqlGenerated := false
+		for _, source := range cfg.Sources {
+			if source.Name != "federation/entity.graphql" {
+				continue
+			}
+			entityGraphqlGenerated = true
+			require.Contains(t, source.Input, staticRepsString)
+		}
+		require.True(t, entityGraphqlGenerated)
+	})
 }
 
 func TestInjectSourceLate(t *testing.T) {

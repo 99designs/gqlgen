@@ -135,14 +135,14 @@ type Resolver struct{
 }
 ```
 
-Returning to `graph/schema.resolvers.go`, let's implement the bodies of those automatically generated resolver functions.  For `CreateTodo`, we'll use the [`math.rand` package](https://pkg.go.dev/math/rand#Rand.Int) to simply return a todo with a randomly generated ID and store that in the in-memory todos list --- in a real app, you're likely to use a database or some other backend service.
+Returning to `graph/schema.resolvers.go`, let's implement the bodies of those automatically generated resolver functions.  For `CreateTodo`, we'll use the [`crypto.rand` package](https://pkg.go.dev/crypto/rand#Int) to simply return a todo with a randomly generated ID and store that in the in-memory todos list --- in a real app, you're likely to use a database or some other backend service.
 
 ```go
 func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
-	rand, _ := rand.Int(rand.Reader, big.NewInt(100))
+	randNumber, _ := rand.Int(rand.Reader, big.NewInt(100))
 	todo := &model.Todo{
 		Text: input.Text,
-		ID:   fmt.Sprintf("T%d", rand),
+		ID:   fmt.Sprintf("T%d", randNumber),
 		User: &model.User{ID: input.UserID, Name: "user " + input.UserID},
 	}
 	r.todos = append(r.todos, todo)
@@ -250,10 +250,10 @@ And run `go run github.com/99designs/gqlgen generate`.
 Now if we look in `graph/schema.resolvers.go` we can see a new resolver, lets implement it and fix `CreateTodo`.
 ```go
 func (r *mutationResolver) CreateTodo(ctx context.Context, input model.NewTodo) (*model.Todo, error) {
+	randNumber, _ := rand.Int(rand.Reader, big.NewInt(100))
 	todo := &model.Todo{
 		Text:   input.Text,
-		ID:     fmt.Sprintf("T%d", rand.Int()),
-		User:   &model.User{ID: input.UserID, Name: "user " + input.UserID},
+		ID:     fmt.Sprintf("T%d", randNumber),
 		UserID: input.UserID,
 	}
 	r.todos = append(r.todos, todo)

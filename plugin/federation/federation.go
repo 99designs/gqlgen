@@ -350,7 +350,7 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 		}
 		populators := make([]Populator, 0)
 
-		rewriter, err := rewrite.New(data.Config.Federation.Dir())
+		rewriter, err := rewrite.New(data.Config.Resolver.Dir())
 		if err != nil {
 			return err
 		}
@@ -382,7 +382,7 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 				return err
 			}
 
-			requiresFile := data.Config.Federation.Dir() + "/federation.requires.go"
+			requiresFile := data.Config.Resolver.Dir() + "/federation.requires.go"
 			existingImports := rewriter.ExistingImports(requiresFile)
 			for _, imp := range existingImports {
 				if imp.Alias == "" {

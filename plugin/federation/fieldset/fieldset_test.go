@@ -3,7 +3,9 @@ package fieldset
 import (
 	"testing"
 
+	"github.com/99designs/gqlgen/codegen"
 	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlparser/v2/ast"
 )
 
 func TestUnnestedWithoutPrefix(t *testing.T) {
@@ -74,6 +76,34 @@ func TestWithPrefix(t *testing.T) {
 		require.Equal(t, "bar", fieldSet[1][1])
 		require.Equal(t, "id", fieldSet[1][2])
 	})
+}
+
+func TestHandlesRequiresFieldWithArgument(t *testing.T) {
+	obj := &codegen.Object{
+		Fields: []*codegen.Field{
+			{
+				FieldDefinition: &ast.FieldDefinition{
+					Name: "foo(limit:4) { bar }",
+				},
+				TypeReference:    nil,
+				GoFieldType:      0,
+				GoReceiverName:   "",
+				GoFieldName:      "",
+				IsResolver:       false,
+				Args:             nil,
+				MethodHasContext: false,
+				NoErr:            false,
+				VOkFunc:          false,
+				Object:           nil,
+				Default:          nil,
+				Stream:           false,
+				Directives:       nil,
+			},
+		},
+		Implements: nil,
+	}
+
+	require.NotNil(t, fieldByName(obj, "foo"))
 }
 
 func TestInvalid(t *testing.T) {

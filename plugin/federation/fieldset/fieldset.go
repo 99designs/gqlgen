@@ -100,6 +100,7 @@ func (f Field) ToGoPrivate() string {
 
 	for i, field := range f {
 		if i == 0 {
+			field = trimArgumentFromFieldName(field)
 			ret += templates.ToGoPrivate(field)
 			continue
 		}
@@ -148,7 +149,7 @@ func extractSubs(str string) (string, string, string) {
 	if start < 0 || end < 0 {
 		panic("invalid key fieldSet: " + str)
 	}
-	return strings.TrimSpace(str[:start]), strings.TrimSpace(str[start+1 : end]), strings.TrimSpace(str[end+1:])
+	return trimArgumentFromFieldName(strings.TrimSpace(str[:start])), strings.TrimSpace(str[start+1 : end]), strings.TrimSpace(str[end+1:])
 }
 
 // matchingBracketIndex returns the index of the closing bracket, assuming an open bracket at start.
@@ -174,9 +175,16 @@ func matchingBracketIndex(str string, start int) int {
 
 func fieldByName(obj *codegen.Object, name string) *codegen.Field {
 	for _, field := range obj.Fields {
+		field.Name = trimArgumentFromFieldName(field.Name)
 		if field.Name == name {
 			return field
 		}
 	}
 	return nil
+}
+
+// trimArgumentFromFieldName removes any arguments from the field name.
+// It removes any suffixes from the raw string, starting from the argument-open character `(`
+func trimArgumentFromFieldName(raw string) string {
+	return strings.Split(raw, "(")[0]
 }

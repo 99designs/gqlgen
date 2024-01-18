@@ -23,8 +23,9 @@ import (
 var federationTemplate string
 
 type federation struct {
-	Entities []*Entity
-	Version  int
+	Entities       []*Entity
+	Version        int
+	PackageOptions map[string]bool
 }
 
 // New returns a federation plugin that injects
@@ -263,6 +264,9 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 
 	requiresEntities := make(map[string]*Entity, 0)
 
+	// Save package options on f for template use
+	f.PackageOptions = data.Config.Federation.Options
+
 	if len(f.Entities) > 0 {
 		if data.Objects.ByName("Entity") != nil {
 			data.Objects.ByName("Entity").Root = true
@@ -367,46 +371,47 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 			populators = append(populators, populator)
 		}
 
-		// find and read requires template
-		_, callerFile, _, _ := runtime.Caller(0)
-		currentDir := filepath.Dir(callerFile)
-		requiresTemplate, err := os.ReadFile(currentDir + "/requires.gotpl")
+		if data.Config.Federation.Options["explicit_requires"] {
 
-		if err != nil {
-			return err
-		}
+			// find and read requires template
+			_, callerFile, _, _ := runtime.Caller(0)
+			currentDir := filepath.Dir(callerFile)
+			requiresTemplate, err := os.ReadFile(currentDir + "/requires.gotpl")
 
-		requiresFile := data.Config.Federation.Dir() + "/federation.requires.go"
-		existingImports := rewriter.ExistingImports(requiresFile)
-		for _, imp := range existingImports {
-			if imp.Alias == "" {
-				if _, ok := requiresImports[imp.ImportPath]; ok {
+			if err != nil {
+				return err
+			}
+
+			requiresFile := data.Config.Federation.Dir() + "/federation.requires.go"
+			existingImports := rewriter.ExistingImports(requiresFile)
+			for _, imp := range existingImports {
+				if imp.Alias == "" {
 					// import exists in both places, remove
 					delete(requiresImports, imp.ImportPath)
 				}
 			}
-		}
 
-		for k := range requiresImports {
-			existingImports = append(existingImports, rewrite.Import{ImportPath: k})
-		}
+			for k := range requiresImports {
+				existingImports = append(existingImports, rewrite.Import{ImportPath: k})
+			}
 
-		// render requires populators
-		err = templates.Render(templates.Options{
-			PackageName: data.Config.Federation.Package,
-			Filename:    requiresFile,
-			Data: struct {
-				federation
-				ExistingImports []rewrite.Import
-				Populators      []Populator
-				OriginalSource  string
-			}{*f, existingImports, populators, ""},
-			GeneratedHeader: false,
-			Packages:        data.Config.Packages,
-			Template:        string(requiresTemplate),
-		})
-		if err != nil {
-			return err
+			// render requires populators
+			err = templates.Render(templates.Options{
+				PackageName: data.Config.Federation.Package,
+				Filename:    requiresFile,
+				Data: struct {
+					federation
+					ExistingImports []rewrite.Import
+					Populators      []Populator
+					OriginalSource  string
+				}{*f, existingImports, populators, ""},
+				GeneratedHeader: false,
+				Packages:        data.Config.Packages,
+				Template:        string(requiresTemplate),
+			})
+			if err != nil {
+				return err
+			}
 		}
 	}
 

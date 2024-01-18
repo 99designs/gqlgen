@@ -5,6 +5,7 @@
 {{ reserveImport "sync"  }}
 
 {{ reserveImport "github.com/99designs/gqlgen/plugin/federation/fedruntime" }}
+{{ $options := .PackageOptions }}
 
 var (
 	ErrUnknownType = errors.New("unknown type")
@@ -103,11 +104,18 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 						if err != nil {
 							return fmt.Errorf(`resolving Entity "{{$entity.Def.Name}}": %w`, err)
 						}
-						{{ if $entity.Requires }}
+						{{ if and (index $options "explicit_requires") $entity.Requires }}
 							err = ec.Populate{{$entity.Def.Name}}Requires(ctx, entity, rep)
 							if err != nil {
 								return fmt.Errorf(`populating requires for Entity "{{$entity.Def.Name}}": %w`, err)
 							}
+						{{- else }}
+							{{ range $entity.Requires }}
+								entity.{{.Field.JoinGo `.`}}, err = ec.{{.Type.UnmarshalFunc}}(ctx, rep["{{.Field.Join `"].(map[string]interface{})["`}}"])
+								if err != nil {
+									return err
+								}
+							{{- end }}
 						{{- end }}
 						list[idx[i]] = entity
 						return nil

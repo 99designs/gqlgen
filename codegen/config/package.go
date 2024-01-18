@@ -10,10 +10,11 @@ import (
 )
 
 type PackageConfig struct {
-	Filename      string `yaml:"filename,omitempty"`
-	Package       string `yaml:"package,omitempty"`
-	Version       int    `yaml:"version,omitempty"`
-	ModelTemplate string `yaml:"model_template,omitempty"`
+	Filename      string          `yaml:"filename,omitempty"`
+	Package       string          `yaml:"package,omitempty"`
+	Version       int             `yaml:"version,omitempty"`
+	ModelTemplate string          `yaml:"model_template,omitempty"`
+	Options       map[string]bool `yaml:"options,omitempty"`
 }
 
 func (c *PackageConfig) ImportPath() string {

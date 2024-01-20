@@ -257,12 +257,12 @@ type Resolver struct {
 	PrevDecl             *ast.FuncDecl
 	Comment              string
 	ImplementationStr    string
-	ImplementationRender func(r *codegen.Field) string
+	ImplementationRender func(prevImplementation string, r *codegen.Field) string
 }
 
 func (r *Resolver) Implementation() string {
 	if r.ImplementationRender != nil {
-		return r.ImplementationRender(r.Field)
+		return r.ImplementationRender(r.ImplementationStr, r.Field)
 	}
 	return r.ImplementationStr
 }

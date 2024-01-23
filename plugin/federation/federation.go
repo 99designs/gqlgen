@@ -3,9 +3,6 @@ package federation
 import (
 	_ "embed"
 	"fmt"
-	"os"
-	"path/filepath"
-	"runtime"
 	"sort"
 	"strings"
 
@@ -21,6 +18,9 @@ import (
 
 //go:embed federation.gotpl
 var federationTemplate string
+
+//go:embed requires.gotpl
+var explicitRequiresTemplate string
 
 type federation struct {
 	Entities       []*Entity
@@ -350,7 +350,7 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 		}
 		populators := make([]Populator, 0)
 
-		rewriter, err := rewrite.New(data.Config.Resolver.Dir())
+		rewriter, err := rewrite.New(data.Config.Federation.Dir())
 		if err != nil {
 			return err
 		}
@@ -369,15 +369,6 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 				populator.Implementation = fmt.Sprintf("panic(fmt.Errorf(\"not implemented: %v\"))", populator.FuncName)
 			}
 			populators = append(populators, populator)
-		}
-
-		// find and read requires template
-		_, callerFile, _, _ := runtime.Caller(0)
-		currentDir := filepath.Dir(callerFile)
-		requiresTemplate, err := os.ReadFile(currentDir + "/requires.gotpl")
-
-		if err != nil {
-			return err
 		}
 
 		requiresFile := data.Config.Federation.Dir() + "/federation.requires.go"
@@ -405,7 +396,7 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 			}{*f, existingImports, populators, ""},
 			GeneratedHeader: false,
 			Packages:        data.Config.Packages,
-			Template:        string(requiresTemplate),
+			Template:        explicitRequiresTemplate,
 		})
 		if err != nil {
 			return err

@@ -339,7 +339,7 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 		}
 	}
 
-	if len(requiresEntities) > 0 {
+	if data.Config.Federation.Options["explicit_requires"] && len(requiresEntities) > 0 {
 		// check for existing requires functions
 		type Populator struct {
 			FuncName       string
@@ -371,48 +371,46 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 			populators = append(populators, populator)
 		}
 
-		if data.Config.Federation.Options["explicit_requires"] {
+		// find and read requires template
+		_, callerFile, _, _ := runtime.Caller(0)
+		currentDir := filepath.Dir(callerFile)
+		requiresTemplate, err := os.ReadFile(currentDir + "/requires.gotpl")
 
-			// find and read requires template
-			_, callerFile, _, _ := runtime.Caller(0)
-			currentDir := filepath.Dir(callerFile)
-			requiresTemplate, err := os.ReadFile(currentDir + "/requires.gotpl")
+		if err != nil {
+			return err
+		}
 
-			if err != nil {
-				return err
-			}
-
-			requiresFile := data.Config.Federation.Dir() + "/federation.requires.go"
-			existingImports := rewriter.ExistingImports(requiresFile)
-			for _, imp := range existingImports {
-				if imp.Alias == "" {
-					// import exists in both places, remove
-					delete(requiresImports, imp.ImportPath)
-				}
-			}
-
-			for k := range requiresImports {
-				existingImports = append(existingImports, rewrite.Import{ImportPath: k})
-			}
-
-			// render requires populators
-			err = templates.Render(templates.Options{
-				PackageName: data.Config.Federation.Package,
-				Filename:    requiresFile,
-				Data: struct {
-					federation
-					ExistingImports []rewrite.Import
-					Populators      []Populator
-					OriginalSource  string
-				}{*f, existingImports, populators, ""},
-				GeneratedHeader: false,
-				Packages:        data.Config.Packages,
-				Template:        string(requiresTemplate),
-			})
-			if err != nil {
-				return err
+		requiresFile := data.Config.Federation.Dir() + "/federation.requires.go"
+		existingImports := rewriter.ExistingImports(requiresFile)
+		for _, imp := range existingImports {
+			if imp.Alias == "" {
+				// import exists in both places, remove
+				delete(requiresImports, imp.ImportPath)
 			}
 		}
+
+		for k := range requiresImports {
+			existingImports = append(existingImports, rewrite.Import{ImportPath: k})
+		}
+
+		// render requires populators
+		err = templates.Render(templates.Options{
+			PackageName: data.Config.Federation.Package,
+			Filename:    requiresFile,
+			Data: struct {
+				federation
+				ExistingImports []rewrite.Import
+				Populators      []Populator
+				OriginalSource  string
+			}{*f, existingImports, populators, ""},
+			GeneratedHeader: false,
+			Packages:        data.Config.Packages,
+			Template:        string(requiresTemplate),
+		})
+		if err != nil {
+			return err
+		}
+
 	}
 
 	return templates.Render(templates.Options{

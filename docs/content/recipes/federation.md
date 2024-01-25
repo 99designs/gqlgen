@@ -203,7 +203,7 @@ should return
 ```
 
 ## Explicit `@requires` Directive
-If you need to support nested or array fields in the `@requires` directive, this can be enabled in the configuration by setting `federation.options.explicit_requires` to true.
+If you need to support **nested** or **array** fields in the `@requires` directive, this can be enabled in the configuration by setting `federation.options.explicit_requires` to true.
 
 ```yml
 federation:
@@ -214,5 +214,35 @@ federation:
     explicit_requires: true
 ```
 
-Enabling this will generate corresponding functions with the entity representations received in the request. This allows for the entity model to be populated accordingly with required data provided.
+Enabling this will generate corresponding functions with the entity representations received in the request. This allows for the entity model to be explicitly populated with the required data provided.
 
+### Example
+Take a simple todo app schema that needs to provide a formatted status text to be used across all clients by referencing the assignee's name.
+
+```graphql
+type Todo @key(fields:"id") {
+  id: ID!
+  text: String!
+  statusText: String! @requires(fields: "assignee { name }")
+  status: String!
+  owner: User!
+  assignee: User!
+}
+
+type User @key(fields:"id") {
+  id: ID!
+  name: String! @external
+}
+```
+
+A `PopulateTodoRequires` function is generated, and can be modified accordingly to use the todo representation with the assignee name.
+
+```golang
+// PopulateTodoRequires is the requires populator for the Todo entity.
+func (ec *executionContext) PopulateTodoRequires(ctx context.Context, entity *model.Todo, reps map[string]interface{}) error {
+	if reps["assignee"] != nil {
+		entity.StatusText = entity.Status + " by " + reps["assignee"].(map[string]interface{})["name"].(string)
+	}
+	return nil
+}
+```

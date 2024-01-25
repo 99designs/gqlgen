@@ -201,3 +201,18 @@ should return
   }
 }
 ```
+
+## Explicit `@requires` Directive
+If you need to support nested or array fields in the `@requires` directive, this can be enabled in the configuration by setting `federation.options.explicit_requires` to true.
+
+```yml
+federation:
+  filename: graph/federation.go
+  package: graph
+  version: 2
+  options:
+    explicit_requires: true
+```
+
+Enabling this will generate corresponding functions with the entity representations received in the request. This allows for the entity model to be populated accordingly with required data provided.
+

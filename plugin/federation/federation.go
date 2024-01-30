@@ -62,6 +62,9 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 		"federation__Scope": {
 			Model: config.StringList{"github.com/99designs/gqlgen/graphql.String"},
 		},
+		"federation__Policy": {
+			Model: config.StringList{"github.com/99designs/gqlgen/graphql.String"},
+		},
 	}
 
 	for typeName, entry := range builtins {
@@ -85,6 +88,7 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 		cfg.Directives["inaccessible"] = config.DirectiveConfig{SkipRuntime: true}
 		cfg.Directives["authenticated"] = config.DirectiveConfig{SkipRuntime: true}
 		cfg.Directives["requiresScopes"] = config.DirectiveConfig{SkipRuntime: true}
+		cfg.Directives["policy"] = config.DirectiveConfig{SkipRuntime: true}
 		cfg.Directives["interfaceObject"] = config.DirectiveConfig{SkipRuntime: true}
 		cfg.Directives["composeDirective"] = config.DirectiveConfig{SkipRuntime: true}
 	}
@@ -126,7 +130,13 @@ func (f *federation) InjectSourceEarly() *ast.Source {
 	  | UNION
 	directive @interfaceObject on OBJECT
 	directive @link(import: [String!], url: String!) repeatable on SCHEMA
-	directive @override(from: String!) on FIELD_DEFINITION
+	directive @override(from: String!, label: String) on FIELD_DEFINITION
+	directive @policy(policies: [[federation__Policy!]!]!) on 
+	  | FIELD_DEFINITION
+	  | OBJECT
+	  | INTERFACE
+	  | SCALAR
+	  | ENUM
 	directive @provides(fields: FieldSet!) on FIELD_DEFINITION
 	directive @requires(fields: FieldSet!) on FIELD_DEFINITION
 	directive @requiresScopes(scopes: [[federation__Scope!]!]!) on 
@@ -149,6 +159,7 @@ func (f *federation) InjectSourceEarly() *ast.Source {
 	  | UNION
 	scalar _Any
 	scalar FieldSet
+	scalar federation__Policy
 	scalar federation__Scope
 `
 	}

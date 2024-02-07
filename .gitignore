@@ -16,3 +16,5 @@
 *.out
 gqlgen
 *.exe
+
+node_modules

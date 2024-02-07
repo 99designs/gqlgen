@@ -16,6 +16,7 @@ extend type User @key(fields: "id") {
     id: ID! @external
     host: EmailHost! @external
     email: String! @external
+    username: String! @external
     reviews: [Review] @requires(fields: "host {id} email")
 }
 

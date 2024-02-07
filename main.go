@@ -1,6 +1,6 @@
 package main
 
-//go:generate go generate ./_examples/...
+//go:generate cd _examples; go generate ./...
 
 import (
 	"bytes"

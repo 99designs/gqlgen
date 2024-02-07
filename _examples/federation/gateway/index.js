@@ -1,4 +1,4 @@
-const { ApolloServer } = import('apollo-server');
+const { ApolloServer } = import('@apollo/server');
 const { ApolloGateway } = import("@apollo/gateway");
 
 const gateway = new ApolloGateway({

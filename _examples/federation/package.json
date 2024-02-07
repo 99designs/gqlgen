@@ -15,6 +15,7 @@
   },
   "devDependencies": {
     "@apollo/client": "^3.9.4",
+    "cross-fetch": "^4.0.0",
     "jest": "^29.7.0",
     "node-fetch": "^3.3.2"
   }

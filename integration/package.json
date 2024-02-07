@@ -21,5 +21,8 @@
         "urql": "^4.0.3",
         "vite": "^4.5.2",
         "vitest": "^1.2.2"
+    },
+    "dependencies": {
+        "cross-fetch": "^4.0.0"
     }
 }

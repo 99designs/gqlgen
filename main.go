@@ -1,6 +1,6 @@
 package main
 
-//go:generate env CWD="./_examples" go generate ./...
+//go:generate go generate ./_examples/... || return 0
 
 import (
 	"bytes"

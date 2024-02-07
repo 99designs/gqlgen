@@ -7,7 +7,7 @@ const gql = import('graphql-tag');
 var uri = process.env.SERVER_URL || 'http://localhost:4000/';
 
 const client = new ApolloClient({
-    link: new HttpLink({uri, fetch}),
+    uri: new HttpLink({uri, fetch}),
     cache: new InMemoryCache(),
 });
 

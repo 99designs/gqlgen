@@ -11,7 +11,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 jobs:
-  lint:
+  fmt-and-lint:
     strategy:
       matrix:
         go: ["1.21", "1.22"]

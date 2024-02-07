@@ -2,6 +2,7 @@
 export GO111MODULE=on
 set -exuo pipefail
 echo Generating in root
+which cd
 go generate ./...
 echo Swithcing to _examples and generating again
 cd _examples && go generate ./...

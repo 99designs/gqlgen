@@ -1,6 +1,6 @@
 module github.com/99designs/gqlgen/_examples
 
-go 1.18
+go 1.20
 
 replace github.com/99designs/gqlgen => ../
 

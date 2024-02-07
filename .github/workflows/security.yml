@@ -9,7 +9,7 @@ jobs:
   nancy:
     strategy:
       matrix:
-        go: ["1.20"] # nancy is a little flaky
+        go: ["1.21"] # nancy is a little flaky
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

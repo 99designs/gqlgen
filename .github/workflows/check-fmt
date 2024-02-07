@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -euo pipefail
-
+export GO111MODULE=on
 go fmt ./...
 cd _examples && go fmt ./...
 if [[ $(git --no-pager diff) ]] ; then

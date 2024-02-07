@@ -1,5 +1,5 @@
 #!/bin/bash
-
+export GO111MODULE=on
 set -euo pipefail
 
 go generate ./...

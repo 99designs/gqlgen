@@ -1,13 +1,10 @@
-const {InMemoryCache} = import("apollo-cache-inmemory");
-import { HttpLink } from '@apollo/client';
-const {ApolloClient} = import("apollo-client");
-const fetch = import("node-fetch");
+import { HttpLink, InMemoryCache, ApolloClient} from '@apollo/client';
 const gql = import('graphql-tag');
 
 var uri = process.env.SERVER_URL || 'http://localhost:4000/';
 
 const client = new ApolloClient({
-    uri: new HttpLink({uri, fetch}),
+    uri: new HttpLink({uri}),
     cache: new InMemoryCache(),
 });
 

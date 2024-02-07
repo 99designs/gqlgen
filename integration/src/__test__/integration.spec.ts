@@ -10,7 +10,7 @@ import {
     Observable,
     Operation,
 } from '@apollo/client/core';
-import {HttpLink} from '@apollo/client';
+import {HttpLink} from '@apollo/client/link/http';
 import { print } from "graphql";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { WebSocket } from "ws";

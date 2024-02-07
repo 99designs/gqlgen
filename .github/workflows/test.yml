@@ -24,7 +24,7 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
       - name: Core tests
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v3
         with:
           max_attempts: 3
           timeout_minutes: 20
@@ -32,7 +32,7 @@ jobs:
             go mod download
             go test -race ./...
       - name: Example tests
-        uses: nick-fields/retry@v2
+        uses: nick-fields/retry@v3
         with:
           max_attempts: 3
           timeout_minutes: 20

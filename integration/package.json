@@ -12,7 +12,7 @@
         "@graphql-codegen/cli": "^4.0.0",
         "@graphql-codegen/client-preset": "^4.0.0",
         "@graphql-codegen/introspection": "^4.0.0",
-        "@graphql-codegen/schema-ast": "^4.0.0",
+        "@graphql-codegen/schema-ast": "^4.0.2",
         "cross-fetch": "^4.0.0",
         "graphql": "^16.6.0",
         "graphql-codegen": "^0.4.0",

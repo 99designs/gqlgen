@@ -1,5 +1,5 @@
 const {InMemoryCache} = import("apollo-cache-inmemory");
-const {HttpLink} = import("apollo-link-http");
+import { HttpLink } from '@apollo/client';
 const {ApolloClient} = import("apollo-client");
 const fetch = import("node-fetch");
 const gql = import('graphql-tag');

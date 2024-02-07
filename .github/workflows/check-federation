@@ -18,5 +18,5 @@ curl -s --connect-timeout 5 \
 sleep 1
 
 echo "### running jest integration spec"
-./node_modules/.bin/jest --color
+NODE_OPTIONS=--experimental-vm-modules ./node_modules/.bin/jest --color
 

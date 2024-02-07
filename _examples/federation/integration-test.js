@@ -2,7 +2,7 @@ import {jest} from '@jest/globals';
 import { InMemoryCache, ApolloClient} from '@apollo/client/core';
 import {HttpLink} from '@apollo/client/link/http';
 import fetch from 'cross-fetch';
-const gql = import('graphql-tag');
+import { gql } from '@apollo/client/core';
 
 var uri = process.env.SERVER_URL || 'http://localhost:4000/';
 

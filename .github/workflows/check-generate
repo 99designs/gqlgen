@@ -1,8 +1,9 @@
 #!/bin/bash
 export GO111MODULE=on
 set -exuo pipefail
-
+echo Generating in root
 go generate ./...
+echo Swithcing to _examples and generating again
 cd _examples && go generate ./...
 if [[ $(git --no-pager diff) ]] ; then
     echo "you need to run "go generate ./..." and commit the changes"

@@ -13,8 +13,9 @@ const client = new ApolloClient({
 
 describe('Json', () => {
     it('can join across services', async () => {
+        console.log(uri)
         let res = await client.query({
-            query: gql`query {
+            query: gql(`query {
                 me {
                     username
                     reviews {
@@ -25,7 +26,7 @@ describe('Json', () => {
                         }
                     }
                 }
-            }`,
+            }`),
         });
 
         expect(res.data).toEqual({

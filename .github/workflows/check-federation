@@ -19,5 +19,5 @@ sleep 1
 
 echo "### running jest integration spec"
 export NODE_OPTIONS="--experimental-vm-modules"
-./node_modules/.bin/jest --color
+npx jest --color
 

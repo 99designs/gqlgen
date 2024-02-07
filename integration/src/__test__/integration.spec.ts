@@ -11,6 +11,8 @@ import {
     Operation,
 } from '@apollo/client/core';
 import {HttpLink} from '@apollo/client/link/http';
+import {createHttpLink} from '@apollo/client/link';
+
 import { print } from "graphql";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { WebSocket } from "ws";
@@ -238,9 +240,8 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
 
 describe("HTTP client", () => {
     const client = new ApolloClient({
-        link: new HttpLink({
+        uri: createHttpLink({
             uri,
-            fetch,
         }),
         cache: new InMemoryCache(),
         defaultOptions: {

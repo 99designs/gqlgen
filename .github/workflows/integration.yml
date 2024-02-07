@@ -34,7 +34,7 @@ jobs:
     strategy:
       matrix:
         go: ["1.21", "1.22"]
-        node: [20]
+        node: [16]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

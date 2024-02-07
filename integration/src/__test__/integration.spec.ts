@@ -238,7 +238,6 @@ describe("HTTP client", () => {
     const client = new ApolloClient({
         link: new HttpLink({
             uri,
-            fetch,
         }),
         cache: new InMemoryCache(),
         defaultOptions: {

@@ -1,3 +1,4 @@
+import {jest} from '@jest/globals';
 import { HttpLink, InMemoryCache, ApolloClient} from '@apollo/client';
 import fetch from 'cross-fetch';
 const gql = import('graphql-tag');

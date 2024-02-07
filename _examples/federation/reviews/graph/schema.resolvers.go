@@ -6,9 +6,15 @@ package graph
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/99designs/gqlgen/_examples/federation/reviews/graph/model"
 )
+
+// Username is the resolver for the username field.
+func (r *userResolver) Username(ctx context.Context, obj *model.User) (string, error) {
+	panic(fmt.Errorf("not implemented: Username - username"))
+}
 
 // Reviews is the resolver for the reviews field.
 func (r *userResolver) Reviews(ctx context.Context, obj *model.User) ([]*model.Review, error) {

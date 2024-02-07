@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euo pipefail
+set -exuo pipefail
 export GO111MODULE=on
 go fmt ./...
 cd _examples && go fmt ./...

@@ -1,6 +1,6 @@
 #!/bin/bash
 export GO111MODULE=on
-set -euo pipefail
+set -exuo pipefail
 
 go generate ./...
 cd _examples && go generate ./...

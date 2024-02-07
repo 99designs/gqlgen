@@ -10,7 +10,7 @@ import {
     NormalizedCacheObject,
     Observable,
     Operation,
-} from '@apollo/client';
+} from '@apollo/client/core';
 import { print } from "graphql";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { WebSocket } from "ws";

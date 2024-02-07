@@ -1,6 +1,6 @@
 package main
 
-//go:generate CWD="./_examples" go generate ./...
+//go:generate export CWD="./_examples"; go generate ./...
 
 import (
 	"bytes"

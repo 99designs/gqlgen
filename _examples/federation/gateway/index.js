@@ -1,5 +1,5 @@
-const { ApolloServer } = require('apollo-server');
-const { ApolloGateway } = require("@apollo/gateway");
+const { ApolloServer } = import('apollo-server');
+const { ApolloGateway } = import("@apollo/gateway");
 
 const gateway = new ApolloGateway({
     serviceList: [

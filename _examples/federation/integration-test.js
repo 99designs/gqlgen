@@ -1,8 +1,8 @@
-const {InMemoryCache} = require("apollo-cache-inmemory");
-const {HttpLink} = require("apollo-link-http");
-const {ApolloClient} = require("apollo-client");
-const fetch = require("node-fetch");
-const gql = require('graphql-tag');
+const {InMemoryCache} = import("apollo-cache-inmemory");
+const {HttpLink} = import("apollo-link-http");
+const {ApolloClient} = import("apollo-client");
+const fetch = import("node-fetch");
+const gql = import('graphql-tag');
 
 var uri = process.env.SERVER_URL || 'http://localhost:4000/';
 

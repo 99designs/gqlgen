@@ -17,7 +17,7 @@
     "apollo-cache-inmemory": "^1.6.5",
     "apollo-client": "^2.6.8",
     "apollo-link-http": "^1.5.16",
-    "jest": "^25.1.0",
+    "jest": "^29.7.0",
     "node-fetch": "^2.6.0"
   }
 }

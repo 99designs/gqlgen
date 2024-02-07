@@ -10,8 +10,8 @@
   "license": "ISC",
   "dependencies": {
     "@apollo/gateway": "^0.42.0",
-    "apollo-server": "^3.3.0",
-    "graphql": "^15.6.1"
+    "@apollo/server": "^4.10.0",
+    "graphql": "^16.8.1"
   },
   "devDependencies": {
     "apollo-cache-inmemory": "^1.6.5",

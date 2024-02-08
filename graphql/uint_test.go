@@ -19,6 +19,11 @@ func TestUint(t *testing.T) {
 		assert.Equal(t, uint(123), mustUnmarshalUint(json.Number("123")))
 		assert.Equal(t, uint(123), mustUnmarshalUint("123"))
 	})
+
+	t.Run("can't unmarshal negative numbers", func(t *testing.T) {
+		_, err := UnmarshalUint(-123)
+		assert.EqualError(t, err, "cannot convert negative numbers to uint")
+	})
 }
 
 func mustUnmarshalUint(v interface{}) uint {
@@ -42,6 +47,11 @@ func TestUint32(t *testing.T) {
 		assert.Equal(t, uint32(123), mustUnmarshalUint32("123"))
 		assert.Equal(t, uint32(4294967295), mustUnmarshalUint32("4294967295"))
 	})
+
+	t.Run("can't unmarshal negative numbers", func(t *testing.T) {
+		_, err := UnmarshalUint32(-123)
+		assert.EqualError(t, err, "cannot convert negative numbers to uint32")
+	})
 }
 
 func mustUnmarshalUint32(v interface{}) uint32 {
@@ -62,6 +72,11 @@ func TestUint64(t *testing.T) {
 		assert.Equal(t, uint64(123), mustUnmarshalUint64(int64(123)))
 		assert.Equal(t, uint64(123), mustUnmarshalUint64(json.Number("123")))
 		assert.Equal(t, uint64(123), mustUnmarshalUint64("123"))
+	})
+
+	t.Run("can't unmarshal negative numbers", func(t *testing.T) {
+		_, err := UnmarshalUint64(-123)
+		assert.EqualError(t, err, "cannot convert negative numbers to uint64")
 	})
 }
 

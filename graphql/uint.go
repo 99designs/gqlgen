@@ -2,6 +2,7 @@ package graphql
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"strconv"
@@ -19,8 +20,16 @@ func UnmarshalUint(v interface{}) (uint, error) {
 		u64, err := strconv.ParseUint(v, 10, 64)
 		return uint(u64), err
 	case int:
+		if v < 0 {
+			return 0, errors.New("cannot convert negative numbers to uint")
+		}
+
 		return uint(v), nil
 	case int64:
+		if v < 0 {
+			return 0, errors.New("cannot convert negative numbers to uint")
+		}
+
 		return uint(v), nil
 	case json.Number:
 		u64, err := strconv.ParseUint(string(v), 10, 64)
@@ -41,8 +50,16 @@ func UnmarshalUint64(v interface{}) (uint64, error) {
 	case string:
 		return strconv.ParseUint(v, 10, 64)
 	case int:
+		if v < 0 {
+			return 0, errors.New("cannot convert negative numbers to uint64")
+		}
+
 		return uint64(v), nil
 	case int64:
+		if v < 0 {
+			return 0, errors.New("cannot convert negative numbers to uint64")
+		}
+
 		return uint64(v), nil
 	case json.Number:
 		return strconv.ParseUint(string(v), 10, 64)
@@ -66,8 +83,16 @@ func UnmarshalUint32(v interface{}) (uint32, error) {
 		}
 		return uint32(iv), nil
 	case int:
+		if v < 0 {
+			return 0, errors.New("cannot convert negative numbers to uint32")
+		}
+
 		return uint32(v), nil
 	case int64:
+		if v < 0 {
+			return 0, errors.New("cannot convert negative numbers to uint32")
+		}
+
 		return uint32(v), nil
 	case json.Number:
 		iv, err := strconv.ParseUint(string(v), 10, 32)

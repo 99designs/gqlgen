@@ -10,7 +10,7 @@
     "graphql-tag": "^2.10.0",
     "graphql-ws": "^5.8.1",
     "react": "^18.2.0",
-    "react-dom": "^16.6.3",
+    "react-dom": "^18.2.0",
     "react-scripts": "^5.0.1",
     "styled-components": "^6.1.8",
     "subscriptions-transport-ws": "^0.11.0",

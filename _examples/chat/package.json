@@ -9,7 +9,7 @@
     "graphql-sse": "^2.0.0",
     "graphql-tag": "^2.10.0",
     "graphql-ws": "^5.8.1",
-    "react": "^16.6.3",
+    "react": "^18.2.0",
     "react-dom": "^16.6.3",
     "react-scripts": "^5.0.1",
     "styled-components": "^6.1.8",

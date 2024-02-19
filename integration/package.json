@@ -17,7 +17,7 @@
         "graphql": "^16.6.0",
         "graphql-codegen": "^0.4.0",
         "graphql-sse": "^2.5.2",
-        "graphql-ws": "^5.13.1",
+        "graphql-ws": "^5.15.0",
         "typescript": "^5.3.3",
         "urql": "^4.0.6",
         "vite": "^5.1.1",

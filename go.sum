@@ -24,8 +24,8 @@ github.com/kevinmbeaulieu/eq-go v1.0.0 h1:AQgYHURDOmnVJ62jnEk0W/7yFKEn+Lv8RHN6t7
 github.com/kevinmbeaulieu/eq-go v1.0.0/go.mod h1:G3S8ajA56gKBZm4UB9AOyoOS37JO3roToPzKNM8dtdM=
 github.com/logrusorgru/aurora/v3 v3.0.0 h1:R6zcoZZbvVcGMvDCKo45A9U/lzYyzl5NfYIvznmDfE4=
 github.com/logrusorgru/aurora/v3 v3.0.0/go.mod h1:vsR12bk5grlLvLXAYrBsb5Oc/N+LxAlxggSjiwMnCUc=
-github.com/matryer/moq v0.3.3 h1:pScMH9VyrdT4S93yiLpVyU8rCDqGQr24uOyBxmktG5Q=
-github.com/matryer/moq v0.3.3/go.mod h1:RJ75ZZZD71hejp39j4crZLsEDszGk6iH4v4YsWFKH4s=
+github.com/matryer/moq v0.3.4 h1:czCFIos9rI2tyOehN9ktc/6bQ76N9J4xQ2n3dk063ac=
+github.com/matryer/moq v0.3.4/go.mod h1:wqm9QObyoMuUtH81zFfs3EK6mXEcByy+TjvSROOXJ2U=
 github.com/mattn/go-colorable v0.1.13 h1:fFA4WZxdEF4tXPZVKMLwD8oUnCTTo08duU7wxecdEvA=
 github.com/mattn/go-colorable v0.1.13/go.mod h1:7S9/ev0klgBDR4GtXTXX8a3vIGJpMovkB8vQcUbaXHg=
 github.com/mattn/go-isatty v0.0.16/go.mod h1:kYGgaQfpe5nmfYZH+SKPsOc2e4SrIfOl2e/yFXSvRLM=

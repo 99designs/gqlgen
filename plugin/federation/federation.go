@@ -371,6 +371,10 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 			populators = append(populators, populator)
 		}
 
+		sort.Slice(populators, func(i, j int) bool {
+			return populators[i].FuncName < populators[j].FuncName
+		})
+
 		requiresFile := data.Config.Federation.Dir() + "/federation.requires.go"
 		existingImports := rewriter.ExistingImports(requiresFile)
 		for _, imp := range existingImports {

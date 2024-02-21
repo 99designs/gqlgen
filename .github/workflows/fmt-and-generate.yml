@@ -1,4 +1,4 @@
-name: Security
+name: Format and Generate
 on:
   push:
     branches:
@@ -11,15 +11,16 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 jobs:
-  nancy:
+  fmt-and-lint:
     strategy:
       matrix:
-        go: ["1.21"] # nancy is a little flaky
+        go: ["1.21", "1.22"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go }}
-      - run: go mod download && go list -json -deps all > go.list
-      - uses: sonatype-nexus-community/nancy-github-action@main
+      - run: go mod download
+      - run: .github/workflows/check-fmt
+      - run: .github/workflows/check-generate

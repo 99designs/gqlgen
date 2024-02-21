@@ -1,14 +1,17 @@
 import { afterAll, describe, expect, it } from "vitest";
+
+import fetch from 'cross-fetch';
 import {
     ApolloClient,
     ApolloLink,
     FetchResult,
-    HttpLink,
     InMemoryCache,
     NormalizedCacheObject,
     Observable,
     Operation,
-} from "@apollo/client/core";
+} from '@apollo/client/core';
+import {HttpLink} from '@apollo/client/link/http';
+
 import { print } from "graphql";
 import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
 import { WebSocket } from "ws";
@@ -236,10 +239,7 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
 
 describe("HTTP client", () => {
     const client = new ApolloClient({
-        link: new HttpLink({
-            uri,
-            fetch,
-        }),
+        uri: uri,
         cache: new InMemoryCache(),
         defaultOptions: {
             watchQuery: {

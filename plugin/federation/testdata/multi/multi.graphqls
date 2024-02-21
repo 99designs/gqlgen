@@ -1,5 +1,5 @@
 extend schema
-  @link(url: "https://specs.apollo.dev/federation/v2.3",
+  @link(url: "https://specs.apollo.dev/federation/v2.7",
         import: ["@key"])
 
 directive @entityResolver(multi: Boolean) on OBJECT

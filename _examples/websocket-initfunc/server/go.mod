@@ -1,13 +1,13 @@
 module github.com/gqlgen/_examples/websocket-initfunc/server
 
-go 1.18
+go 1.20
 
 require (
 	github.com/99designs/gqlgen v0.17.34
 	github.com/go-chi/chi v1.5.4
 	github.com/gorilla/websocket v1.5.0
 	github.com/rs/cors v1.9.0
-	github.com/vektah/gqlparser/v2 v2.5.10
+	github.com/vektah/gqlparser/v2 v2.5.11
 )
 
 require (

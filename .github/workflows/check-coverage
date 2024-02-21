@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -euo pipefail
-GO111MODULE=off go get github.com/mattn/goveralls
+go install github.com/mattn/goveralls@latest
 
 go test -covermode atomic -coverprofile=/tmp/coverage.out.tmp -coverpkg=./... $(go list github.com/99designs/gqlgen/... | grep -v _examples)
 # ignore protobuf files

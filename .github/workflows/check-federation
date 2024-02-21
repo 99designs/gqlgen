@@ -1,7 +1,7 @@
 #!/bin/bash
 
 set -euo pipefail
-
+export GO111MODULE=on
 cd _examples/federation
 
 ./start.sh &
@@ -18,5 +18,6 @@ curl -s --connect-timeout 5 \
 sleep 1
 
 echo "### running jest integration spec"
-./node_modules/.bin/jest --color
+export NODE_OPTIONS="--experimental-vm-modules"
+npx jest --color
 

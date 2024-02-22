@@ -8,15 +8,6 @@ import (
 	"github.com/99designs/gqlgen/plugin/federation/testdata/explicitrequires/generated/model"
 )
 
-// PopulatePlanetRequiresNestedRequires is the requires populator for the PlanetRequiresNested entity.
-func (ec *executionContext) PopulatePlanetRequiresNestedRequires(ctx context.Context, entity *model.PlanetRequiresNested, reps map[string]interface{}) error {
-	entity.Name = reps["name"].(string)
-	entity.World = &model.World{
-		Foo: reps["world"].(map[string]interface{})["foo"].(string),
-	}
-	return nil
-}
-
 // PopulateMultiHelloMultipleRequiresRequires is the requires populator for the MultiHelloMultipleRequires entity.
 func (ec *executionContext) PopulateMultiHelloMultipleRequiresRequires(ctx context.Context, entity *model.MultiHelloMultipleRequires, reps map[string]interface{}) error {
 	panic(fmt.Errorf("not implemented: PopulateMultiHelloMultipleRequiresRequires"))
@@ -39,6 +30,15 @@ func (ec *executionContext) PopulatePlanetMultipleRequiresRequires(ctx context.C
 	entity.Name = reps["name"].(string)
 	entity.Diameter = int(diameter)
 	entity.Density = int(density)
+	return nil
+}
+
+// PopulatePlanetRequiresNestedRequires is the requires populator for the PlanetRequiresNested entity.
+func (ec *executionContext) PopulatePlanetRequiresNestedRequires(ctx context.Context, entity *model.PlanetRequiresNested, reps map[string]interface{}) error {
+	entity.Name = reps["name"].(string)
+	entity.World = &model.World{
+		Foo: reps["world"].(map[string]interface{})["foo"].(string),
+	}
 	return nil
 }
 

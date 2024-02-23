@@ -11,6 +11,8 @@ import (
 	"github.com/99designs/gqlgen/plugin/modelgen/internal/extrafields"
 )
 
+// Add any new functions or any additional code/template functionality here
+
 type A interface {
 	IsA()
 	GetA() string
@@ -194,6 +196,9 @@ func (MissingTypeNullable) IsMissingUnion() {}
 
 func (MissingTypeNullable) IsExistingUnion() {}
 
+type Mutation struct {
+}
+
 type NotCyclicalA struct {
 	FieldOne string `json:"FieldOne" database:"NotCyclicalAFieldOne"`
 	FieldTwo int    `json:"FieldTwo" database:"NotCyclicalAFieldTwo"`
@@ -209,6 +214,9 @@ type OmitEmptyJSONTagTest struct {
 	Value       *string `json:"Value,omitempty" database:"OmitEmptyJsonTagTestValue"`
 }
 
+type Query struct {
+}
+
 type Recursive struct {
 	FieldOne   *Recursive `json:"FieldOne" database:"RecursiveFieldOne"`
 	FieldTwo   *Recursive `json:"FieldTwo" database:"RecursiveFieldTwo"`
@@ -219,6 +227,9 @@ type Recursive struct {
 type RenameFieldTest struct {
 	GOODnaME   string `json:"badName" database:"RenameFieldTestbadName"`
 	OtherField string `json:"otherField" database:"RenameFieldTestotherField"`
+}
+
+type Subscription struct {
 }
 
 // TypeWithDescription is a type with a description

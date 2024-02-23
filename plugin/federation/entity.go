@@ -2,6 +2,7 @@ package federation
 
 import (
 	"go/types"
+	"strings"
 
 	"github.com/vektah/gqlparser/v2/ast"
 
@@ -18,6 +19,7 @@ type Entity struct {
 	Resolvers []*EntityResolver
 	Requires  []*Requires
 	Multi     bool
+	Type      types.Type
 }
 
 type EntityResolver struct {
@@ -115,4 +117,10 @@ func (e *Entity) keyFields() []string {
 		keyFields[i] = field[0]
 	}
 	return keyFields
+}
+
+// GetTypeInfo - get the imported package & type name combo.  package.TypeName
+func (e Entity) GetTypeInfo() string {
+	typeParts := strings.Split(e.Type.String(), "/")
+	return typeParts[len(typeParts)-1]
 }

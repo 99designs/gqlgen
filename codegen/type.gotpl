@@ -1,4 +1,18 @@
 {{- range $type := .ReferencedTypes }}
+	{{- if $type.EnumValues }}
+	var (
+		{{ $type.Definition.Name }}Model = map[string]{{ $type.GO | ref }}{
+		{{- range $value := $type.EnumValues }}
+			"{{ $value.Definition.Name }}": model.{{ $value.Type.Name }},
+		{{- end }}
+		}
+		{{ $type.Definition.Name }}Enum = map[{{ $type.GO | ref }}]string{
+		{{- range $value := $type.EnumValues }}
+			model.{{ $value.Type.Name }}: "{{ $value.Definition.Name }}",
+		{{- end }}
+		}
+	)
+	{{- end }}
 	{{ with $type.UnmarshalFunc }}
 		func (ec *executionContext) {{ . }}(ctx context.Context, v interface{}) ({{ $type.GO | ref }}, error) {
 			{{- if and $type.IsNilable (not $type.GQL.NonNull) (not $type.IsPtrToPtr) }}
@@ -42,6 +56,8 @@
 						{{- end }}
 						{{- if and $type.IsNilable $type.Elem }}
 							res := {{ $type.Elem.GO | ref }}(tmp)
+						{{- else if $type.EnumValues }}
+							res := {{ $type.Definition.Name }}Model[tmp]
 						{{- else}}
 							res := {{ $type.GO | ref }}(tmp)
 						{{- end }}
@@ -170,7 +186,7 @@
 					{{- else if and (not $type.IsTargetNilable) $type.IsNilable }}
 						{{- $v = "*v" }}
 					{{- end }}
-					res := {{ $type.Marshaler | call }}({{- if $type.CastType }}{{ $type.CastType | ref }}({{ $v }}){{else}}{{ $v }}{{- end }})
+					res := {{ $type.Marshaler | call }}({{- if $type.EnumValues}}{{ $type.Definition.Name }}Enum[v]{{- else if $type.CastType }}{{ $type.CastType | ref }}({{ $v }}){{else}}{{ $v }}{{- end }})
 					{{- if $type.GQL.NonNull }}
 						if res == graphql.Null {
 							if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {

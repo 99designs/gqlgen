@@ -1,0 +1,40 @@
+directive @goModel(
+    model: String
+    models: [String!]
+) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | ENUM_VALUE | INTERFACE | UNION
+
+type Query {
+    int(typedN: IntTyped, untypedN: IntUntyped, typed: IntTyped!, untyped: IntUntyped!): [IntTyped!]
+    string(typedN: StringTyped, untypedN: StringUntyped, typed: StringTyped!, untyped: StringUntyped!): [StringTyped!]
+    bool(typedN: BoolTyped, untypedN: BoolUntyped, typed: BoolTyped!, untyped: BoolUntyped!): [BoolTyped!]
+}
+
+enum IntTyped @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.IntTyped") {
+    ONE @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.IntTypedOne")
+    TWO @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.IntTypedTwo")
+}
+
+enum IntUntyped @goModel(model: "github.com/99designs/gqlgen/graphql.Int") {
+    ONE @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.IntUntypedOne")
+    TWO @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.IntUntypedTwo")
+}
+
+enum StringTyped @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.StringTyped")  {
+    ONE @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.StringTypedOne")
+    TWO @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.StringTypedTwo")
+}
+
+enum StringUntyped @goModel(model: "github.com/99designs/gqlgen/graphql.String") {
+    ONE @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.StringUntypedOne")
+    TWO @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.StringUntypedTwo")
+}
+
+enum BoolTyped {
+    TRUE
+    FALSE
+}
+
+enum BoolUntyped {
+    TRUE
+    FALSE
+}

@@ -7,8 +7,7 @@ federation:
   options:
     explicit_requires: true
 model:
-  filename: testdata/explicitrequires/generated/model/models.go
-  package: model
+  filename: testdata/explicitrequires/generated/models.go
 resolver:
   filename: testdata/explicitrequires/resolver.go
   layout: follow-schema

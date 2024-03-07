@@ -68,10 +68,11 @@ type Field struct {
 	// Name is the field's name as it appears in the schema
 	Name string
 	// GoName is the field's name as it appears in the generated Go code
-	GoName    string
-	Type      types.Type
-	Tag       string
-	Omittable bool
+	GoName     string
+	Type       types.Type
+	Tag        string
+	IsResolver bool
+	Omittable  bool
 }
 
 type Enum struct {
@@ -419,6 +420,10 @@ func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition) 
 			f = mf
 		}
 
+		if f.IsResolver && cfg.OmitResolverFields {
+			continue
+		}
+
 		if f.Omittable {
 			if schemaType.Kind != ast.InputObject || field.Type.NonNull {
 				return nil, fmt.Errorf("generror: field %v.%v: omittable is only applicable to nullable input fields", schemaType.Name, field.Name)
@@ -610,6 +615,12 @@ func GoFieldHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field,
 		if arg := goField.Arguments.ForName("name"); arg != nil {
 			if k, err := arg.Value.Value(nil); err == nil {
 				f.GoName = k.(string)
+			}
+		}
+
+		if arg := goField.Arguments.ForName("forceResolver"); arg != nil {
+			if k, err := arg.Value.Value(nil); err == nil {
+				f.IsResolver = k.(bool)
 			}
 		}
 

@@ -86,7 +86,7 @@ models:
 
 - #### Using Explicit Resolvers
 
-If you want to Keep using the generated model, mark the field as requiring a resolver explicitly in `gqlgen.yml` like this:
+If you want to keep using the generated model, mark the field as requiring a resolver explicitly in `gqlgen.yml` like this:
 
 ```yaml
 # gqlgen.yml

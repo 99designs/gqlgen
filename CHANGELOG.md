@@ -5,10 +5,1149 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 <a name="unreleased"></a>
-## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.42...HEAD)
+## [Unreleased](https://github.com/99designs/gqlgen/compare/v0.17.45...HEAD)
 
 <!-- end of if -->
 <!-- end of CommitGroups -->
+<a name="v0.17.45"></a>
+## [v0.17.45](https://github.com/99designs/gqlgen/compare/v0.17.44...v0.17.45) - 2024-03-11
+- <a href="https://github.com/99designs/gqlgen/commit/b6d1a8b986a3c14f2c945967ee087a19c6cdf4fc"><tt>b6d1a8b9</tt></a> release v0.17.45
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/a854eb650ecbb1a5a2ab4db65bd85eb8124d2cc8"><tt>a854eb65</tt></a> Bump golang.org/x/tools from 0.18.0 to 0.19.0 (<a href="https://github.com/99designs/gqlgen/pull/2963">#2963</a>)</summary>
+
+* Bump golang.org/x/tools from 0.18.0 to 0.19.0
+
+Bumps [golang.org/x/tools](https://github.com/golang/tools) from 0.18.0 to 0.19.0.
+- [Release notes](https://github.com/golang/tools/releases)
+- [Commits](https://github.com/golang/tools/compare/v0.18.0...v0.19.0)
+
+---
+updated-dependencies:
+- dependency-name: golang.org/x/tools
+  dependency-type: direct:production
+  update-type: version-update:semver-minor
+...
+
+
+* Go mod tidy examples and websocket
+
+
+---------
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/908498e3b188a3d913bfcb2e6be331339260e893"><tt>908498e3</tt></a> Bump typescript from 5.3.3 to 5.4.2 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2960">#2960</a>)</summary>
+
+Bumps [typescript](https://github.com/Microsoft/TypeScript) from 5.3.3 to 5.4.2.
+- [Release notes](https://github.com/Microsoft/TypeScript/releases)
+- [Changelog](https://github.com/microsoft/TypeScript/blob/main/azure-pipelines.release.yml)
+- [Commits](https://github.com/Microsoft/TypeScript/compare/v5.3.3...v5.4.2)
+
+---
+updated-dependencies:
+- dependency-name: typescript
+  dependency-type: direct:development
+  update-type: version-update:semver-minor
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/6e77359b9bec77c1a5082cb2731c039c18e3fa1a"><tt>6e77359b</tt></a> Bump vite from 5.1.4 to 5.1.5 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2961">#2961</a>)</summary>
+
+Bumps [vite](https://github.com/vitejs/vite/tree/HEAD/packages/vite) from 5.1.4 to 5.1.5.
+- [Release notes](https://github.com/vitejs/vite/releases)
+- [Changelog](https://github.com/vitejs/vite/blob/main/packages/vite/CHANGELOG.md)
+- [Commits](https://github.com/vitejs/vite/commits/v5.1.5/packages/vite)
+
+---
+updated-dependencies:
+- dependency-name: vite
+  dependency-type: direct:development
+  update-type: version-update:semver-patch
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/361cb189f6a992d1c6fd1116cb236f5f440a1e4c"><tt>361cb189</tt></a> Bump [@apollo](https://github.com/apollo)/client from 3.9.5 to 3.9.6 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2962">#2962</a>)</summary>
+
+- [Release notes](https://github.com/apollographql/apollo-client/releases)
+- [Changelog](https://github.com/apollographql/apollo-client/blob/main/CHANGELOG.md)
+- [Commits](https://github.com/apollographql/apollo-client/compare/v3.9.5...v3.9.6)
+
+---
+updated-dependencies:
+  dependency-type: direct:development
+  update-type: version-update:semver-patch
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/d2271d8fb56a489728149a1ad5f51a9adc884a14"><tt>d2271d8f</tt></a> Bump google.golang.org/protobuf from 1.32.0 to 1.33.0 (<a href="https://github.com/99designs/gqlgen/pull/2964">#2964</a>)</summary>
+
+Bumps google.golang.org/protobuf from 1.32.0 to 1.33.0.
+
+---
+updated-dependencies:
+- dependency-name: google.golang.org/protobuf
+  dependency-type: direct:production
+  update-type: version-update:semver-minor
+...
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/caf1faa70345272a581f4d8d77d3d41cab8ec035"><tt>caf1faa7</tt></a> Add case for resolvers_always_return_pointers:false (<a href="https://github.com/99designs/gqlgen/pull/2966">#2966</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/0d24aa9b8c4435f83de5c298440d533f6b13f36f"><tt>0d24aa9b</tt></a> handle models in federation pkg (<a href="https://github.com/99designs/gqlgen/pull/2965">#2965</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/2aa9bbb4cd1b6f8c1a9e62afe4a191a5c086f878"><tt>2aa9bbb4</tt></a> fix(docs): convert an unnecessarily capitalized word in the middle of sentences to lowercase (<a href="https://github.com/99designs/gqlgen/pull/2959">#2959</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/bc72cd8c6679838bd316313a371563d087ad103d"><tt>bc72cd8c</tt></a> Add option to omit resolver fields from models (<a href="https://github.com/99designs/gqlgen/pull/2957">#2957</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/95f9dc79ac69c88f44e42ab06f660914f9ba16a2"><tt>95f9dc79</tt></a> Bump github.com/stretchr/testify from 1.8.4 to 1.9.0 (<a href="https://github.com/99designs/gqlgen/pull/2953">#2953</a>)</summary>
+
+Bumps [github.com/stretchr/testify](https://github.com/stretchr/testify) from 1.8.4 to 1.9.0.
+- [Release notes](https://github.com/stretchr/testify/releases)
+- [Commits](https://github.com/stretchr/testify/compare/v1.8.4...v1.9.0)
+
+---
+updated-dependencies:
+- dependency-name: github.com/stretchr/testify
+  dependency-type: direct:production
+  update-type: version-update:semver-minor
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/fbcceec2451c85c64f81ca783c98b684089ed3f7"><tt>fbcceec2</tt></a> Bump github.com/PuerkitoBio/goquery from 1.9.0 to 1.9.1 (<a href="https://github.com/99designs/gqlgen/pull/2954">#2954</a>)</summary>
+
+* Bump github.com/PuerkitoBio/goquery from 1.9.0 to 1.9.1
+
+Bumps [github.com/PuerkitoBio/goquery](https://github.com/PuerkitoBio/goquery) from 1.9.0 to 1.9.1.
+- [Release notes](https://github.com/PuerkitoBio/goquery/releases)
+- [Commits](https://github.com/PuerkitoBio/goquery/compare/v1.9.0...v1.9.1)
+
+---
+updated-dependencies:
+- dependency-name: github.com/PuerkitoBio/goquery
+  dependency-type: direct:production
+  update-type: version-update:semver-patch
+...
+
+
+* mod tidy examples
+
+
+---------
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/c15af8ce70e4dec85281d1f73fb68938beea8b83"><tt>c15af8ce</tt></a> Bump github.com/stretchr/testify from 1.8.4 to 1.9.0 in /_examples (<a href="https://github.com/99designs/gqlgen/pull/2955">#2955</a>)</summary>
+
+Bumps [github.com/stretchr/testify](https://github.com/stretchr/testify) from 1.8.4 to 1.9.0.
+- [Release notes](https://github.com/stretchr/testify/releases)
+- [Commits](https://github.com/stretchr/testify/compare/v1.8.4...v1.9.0)
+
+---
+updated-dependencies:
+- dependency-name: github.com/stretchr/testify
+  dependency-type: direct:production
+  update-type: version-update:semver-minor
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/1993b3aa692ce7e6e0b912ac2124cb88b3fa0e05"><tt>1993b3aa</tt></a> Bump vitest from 1.3.0 to 1.3.1 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2946">#2946</a>)</summary>
+
+Bumps [vitest](https://github.com/vitest-dev/vitest/tree/HEAD/packages/vitest) from 1.3.0 to 1.3.1.
+- [Release notes](https://github.com/vitest-dev/vitest/releases)
+- [Commits](https://github.com/vitest-dev/vitest/commits/v1.3.1/packages/vitest)
+
+---
+updated-dependencies:
+- dependency-name: vitest
+  dependency-type: direct:development
+  update-type: version-update:semver-patch
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/d16c6adc295bec42ea6b020ed7a617e978484a98"><tt>d16c6adc</tt></a> Bump github.com/PuerkitoBio/goquery from 1.8.1 to 1.9.0 (<a href="https://github.com/99designs/gqlgen/pull/2943">#2943</a>)</summary>
+
+* Bump github.com/PuerkitoBio/goquery from 1.8.1 to 1.9.0
+
+Bumps [github.com/PuerkitoBio/goquery](https://github.com/PuerkitoBio/goquery) from 1.8.1 to 1.9.0.
+- [Release notes](https://github.com/PuerkitoBio/goquery/releases)
+- [Commits](https://github.com/PuerkitoBio/goquery/compare/v1.8.1...v1.9.0)
+
+---
+updated-dependencies:
+- dependency-name: github.com/PuerkitoBio/goquery
+  dependency-type: direct:production
+  update-type: version-update:semver-minor
+...
+
+
+* Tidy examples
+
+
+---------
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/be74b6a06d534d4d1ea6f4640c628312731c8816"><tt>be74b6a0</tt></a> Bump [@graphql](https://github.com/graphql)-codegen/client-preset from 4.2.2 to 4.2.4 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2945">#2945</a>)</summary>
+
+- [Release notes](https://github.com/dotansimha/graphql-code-generator/releases)
+- [Changelog](https://github.com/dotansimha/graphql-code-generator/blob/master/packages/presets/client/CHANGELOG.md)
+
+---
+updated-dependencies:
+  dependency-type: direct:development
+  update-type: version-update:semver-patch
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/90aa9243119b6be85cfb040479738ed38d9af74e"><tt>90aa9243</tt></a> Bump [@graphql](https://github.com/graphql)-codegen/introspection from 4.0.2 to 4.0.3 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2944">#2944</a>)</summary>
+
+- [Release notes](https://github.com/dotansimha/graphql-code-generator/releases)
+- [Changelog](https://github.com/dotansimha/graphql-code-generator/blob/master/packages/plugins/other/introspection/CHANGELOG.md)
+
+---
+updated-dependencies:
+  dependency-type: direct:development
+  update-type: version-update:semver-patch
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/137ddbd30a078cfaefa118c8c796bc6c1149abf6"><tt>137ddbd3</tt></a> Bump vite from 5.1.3 to 5.1.4 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2947">#2947</a>)</summary>
+
+Bumps [vite](https://github.com/vitejs/vite/tree/HEAD/packages/vite) from 5.1.3 to 5.1.4.
+- [Release notes](https://github.com/vitejs/vite/releases)
+- [Changelog](https://github.com/vitejs/vite/blob/main/packages/vite/CHANGELOG.md)
+- [Commits](https://github.com/vitejs/vite/commits/v5.1.4/packages/vite)
+
+---
+updated-dependencies:
+- dependency-name: vite
+  dependency-type: direct:development
+  update-type: version-update:semver-patch
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/15cef76f18afec4c5352911360e33f4042500697"><tt>15cef76f</tt></a> Optionally render entity requires populator function for advanced [@requires](https://github.com/requires) use cases (<a href="https://github.com/99designs/gqlgen/pull/2884">#2884</a>) (closes <a href="https://github.com/99designs/gqlgen/issues/1"> #1</a>)</summary>
+
+* Adding generation of new functions to populate requires representations. WIP.
+
+* Something.
+
+* Adding config option for Package to allow for enabling flags.  Added flag to render explicit requires function.
+
+
+* Adding explicit requires testsing and make requires follow federation package.
+
+* Fix test failure.
+
+* Using embeded template like federation gotpl.  Fix rewriter not using correct dir.
+
+* Update generated code.
+
+
+* Adding initial docs for explicit requires
+
+* Add example docs for explicit requires
+
+* Adding ordering fix.
+
+* Regenerate.
+
+---------
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/e186813e8852a1904d7778d2efd6cd745fced355"><tt>e186813e</tt></a> Bump golang.org/x/tools from 0.17.0 to 0.18.0 (<a href="https://github.com/99designs/gqlgen/pull/2940">#2940</a>)</summary>
+
+* Bump golang.org/x/tools from 0.17.0 to 0.18.0
+
+Bumps [golang.org/x/tools](https://github.com/golang/tools) from 0.17.0 to 0.18.0.
+- [Release notes](https://github.com/golang/tools/releases)
+- [Commits](https://github.com/golang/tools/compare/v0.17.0...v0.18.0)
+
+---
+updated-dependencies:
+- dependency-name: golang.org/x/tools
+  dependency-type: direct:production
+  update-type: version-update:semver-minor
+...
+
+
+* Update example module
+
+
+---------
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/e1fb6c03037ae6d0f9177abc643e52b92beeb1f7"><tt>e1fb6c03</tt></a> Bump vite from 5.1.1 to 5.1.3 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2936">#2936</a>)</summary>
+
+Bumps [vite](https://github.com/vitejs/vite/tree/HEAD/packages/vite) from 5.1.1 to 5.1.3.
+- [Release notes](https://github.com/vitejs/vite/releases)
+- [Changelog](https://github.com/vitejs/vite/blob/main/packages/vite/CHANGELOG.md)
+- [Commits](https://github.com/vitejs/vite/commits/v5.1.3/packages/vite)
+
+---
+updated-dependencies:
+- dependency-name: vite
+  dependency-type: direct:development
+  update-type: version-update:semver-patch
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/1ff1107ed5766afa1b0328b4b55dbb9580aa25ba"><tt>1ff1107e</tt></a> Bump graphql-ws from 5.14.3 to 5.15.0 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2935">#2935</a>)</summary>
+
+Bumps [graphql-ws](https://github.com/enisdenjo/graphql-ws) from 5.14.3 to 5.15.0.
+- [Release notes](https://github.com/enisdenjo/graphql-ws/releases)
+- [Changelog](https://github.com/enisdenjo/graphql-ws/blob/master/CHANGELOG.md)
+- [Commits](https://github.com/enisdenjo/graphql-ws/compare/v5.14.3...v5.15.0)
+
+---
+updated-dependencies:
+- dependency-name: graphql-ws
+  dependency-type: direct:development
+  update-type: version-update:semver-minor
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/d4696f8868cae9db66b9a4f066b441ff5d5dc2ca"><tt>d4696f88</tt></a> Bump vitest from 1.2.2 to 1.3.0 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2937">#2937</a>)</summary>
+
+Bumps [vitest](https://github.com/vitest-dev/vitest/tree/HEAD/packages/vitest) from 1.2.2 to 1.3.0.
+- [Release notes](https://github.com/vitest-dev/vitest/releases)
+- [Commits](https://github.com/vitest-dev/vitest/commits/v1.3.0/packages/vitest)
+
+---
+updated-dependencies:
+- dependency-name: vitest
+  dependency-type: direct:development
+  update-type: version-update:semver-minor
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/4808f0dba4dc5dbeb84f8e4b93b61c4465674c9e"><tt>4808f0db</tt></a> Bump [@apollo](https://github.com/apollo)/client from 3.9.4 to 3.9.5 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2938">#2938</a>)</summary>
+
+- [Release notes](https://github.com/apollographql/apollo-client/releases)
+- [Changelog](https://github.com/apollographql/apollo-client/blob/main/CHANGELOG.md)
+- [Commits](https://github.com/apollographql/apollo-client/compare/v3.9.4...v3.9.5)
+
+---
+updated-dependencies:
+  dependency-type: direct:development
+  update-type: version-update:semver-patch
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/a96e33959847486ffda1fea0c6776cd5d0787e8d"><tt>a96e3395</tt></a> Bump github.com/matryer/moq from 0.3.3 to 0.3.4 (<a href="https://github.com/99designs/gqlgen/pull/2939">#2939</a>)</summary>
+
+Bumps [github.com/matryer/moq](https://github.com/matryer/moq) from 0.3.3 to 0.3.4.
+- [Release notes](https://github.com/matryer/moq/releases)
+- [Changelog](https://github.com/matryer/moq/blob/main/.goreleaser.yml)
+- [Commits](https://github.com/matryer/moq/compare/v0.3.3...v0.3.4)
+
+---
+updated-dependencies:
+- dependency-name: github.com/matryer/moq
+  dependency-type: direct:production
+  update-type: version-update:semver-patch
+...
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/7ca35b117c0667f388a0fa2ec9c4dce379c8fb5f"><tt>7ca35b11</tt></a> v0.17.44 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
+<a name="v0.17.44"></a>
+## [v0.17.44](https://github.com/99designs/gqlgen/compare/v0.17.43...v0.17.44) - 2024-02-15
+- <a href="https://github.com/99designs/gqlgen/commit/296b3c49071be2dbb5303b46f3f4a4861e19a5a8"><tt>296b3c49</tt></a> release v0.17.44
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/e85ce95b9630b0ae6ef4ab77f38a1ba9d9b76d2a"><tt>e85ce95b</tt></a> Bump react-dom from 16.14.0 to 18.2.0 in /_examples/chat (<a href="https://github.com/99designs/gqlgen/pull/2930">#2930</a>)</summary>
+
+Bumps [react-dom](https://github.com/facebook/react/tree/HEAD/packages/react-dom) from 16.14.0 to 18.2.0.
+- [Release notes](https://github.com/facebook/react/releases)
+- [Changelog](https://github.com/facebook/react/blob/main/CHANGELOG.md)
+- [Commits](https://github.com/facebook/react/commits/v18.2.0/packages/react-dom)
+
+---
+updated-dependencies:
+- dependency-name: react-dom
+  dependency-type: direct:production
+  update-type: version-update:semver-major
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/c88cf024e0117fa2ee36709ba0a64d6077825b48"><tt>c88cf024</tt></a> Bump github.com/sosodev/duration from 1.1.0 to 1.2.0 (<a href="https://github.com/99designs/gqlgen/pull/2927">#2927</a>)</summary>
+
+* Bump github.com/sosodev/duration from 1.1.0 to 1.2.0
+
+Bumps [github.com/sosodev/duration](https://github.com/sosodev/duration) from 1.1.0 to 1.2.0.
+- [Release notes](https://github.com/sosodev/duration/releases)
+- [Commits](https://github.com/sosodev/duration/compare/v1.1.0...v1.2.0)
+
+---
+updated-dependencies:
+- dependency-name: github.com/sosodev/duration
+  dependency-type: direct:production
+  update-type: version-update:semver-minor
+...
+
+
+* Tidy example go mod
+
+
+---------
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/848fd8352a2d3f6900c6d8e8f47bcc67027883d0"><tt>848fd835</tt></a> Bump [@graphql](https://github.com/graphql)-codegen/cli from 4.0.1 to 5.0.2 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2932">#2932</a>)</summary>
+
+- [Release notes](https://github.com/dotansimha/graphql-code-generator/releases)
+- [Changelog](https://github.com/dotansimha/graphql-code-generator/blob/master/packages/graphql-codegen-cli/CHANGELOG.md)
+
+---
+updated-dependencies:
+  dependency-type: direct:development
+  update-type: version-update:semver-major
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/900040c4f1e21f4ec823e5f869e2a12dfe9b3e6c"><tt>900040c4</tt></a> Bump vite from 4.5.2 to 5.1.1 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2931">#2931</a>)</summary>
+
+Bumps [vite](https://github.com/vitejs/vite/tree/HEAD/packages/vite) from 4.5.2 to 5.1.1.
+- [Release notes](https://github.com/vitejs/vite/releases)
+- [Changelog](https://github.com/vitejs/vite/blob/main/packages/vite/CHANGELOG.md)
+- [Commits](https://github.com/vitejs/vite/commits/v5.1.1/packages/vite)
+
+---
+updated-dependencies:
+- dependency-name: vite
+  dependency-type: direct:development
+  update-type: version-update:semver-major
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/e329cf83e1a3a768b06f463266bdcbc493a4adc2"><tt>e329cf83</tt></a> Bump react from 16.14.0 to 18.2.0 in /_examples/chat (<a href="https://github.com/99designs/gqlgen/pull/2929">#2929</a>)</summary>
+
+Bumps [react](https://github.com/facebook/react/tree/HEAD/packages/react) from 16.14.0 to 18.2.0.
+- [Release notes](https://github.com/facebook/react/releases)
+- [Changelog](https://github.com/facebook/react/blob/main/CHANGELOG.md)
+- [Commits](https://github.com/facebook/react/commits/v18.2.0/packages/react)
+
+---
+updated-dependencies:
+- dependency-name: react
+  dependency-type: direct:production
+  update-type: version-update:semver-major
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/9faad5884f879212ba44ca6a5e73b998c46426c2"><tt>9faad588</tt></a> Bump google.golang.org/protobuf from 1.30.0 to 1.32.0 (<a href="https://github.com/99designs/gqlgen/pull/2926">#2926</a>)</summary>
+
+Bumps google.golang.org/protobuf from 1.30.0 to 1.32.0.
+
+---
+updated-dependencies:
+- dependency-name: google.golang.org/protobuf
+  dependency-type: direct:production
+  update-type: version-update:semver-minor
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/92b3871bac51f8285bd81e4257ad6298b22e840f"><tt>92b3871b</tt></a> Bump github.com/stretchr/testify from 1.8.2 to 1.8.4 (<a href="https://github.com/99designs/gqlgen/pull/2925">#2925</a>)</summary>
+
+Bumps [github.com/stretchr/testify](https://github.com/stretchr/testify) from 1.8.2 to 1.8.4.
+- [Release notes](https://github.com/stretchr/testify/releases)
+- [Commits](https://github.com/stretchr/testify/compare/v1.8.2...v1.8.4)
+
+---
+updated-dependencies:
+- dependency-name: github.com/stretchr/testify
+  dependency-type: direct:production
+  update-type: version-update:semver-patch
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/3f5e1f2813573b659efdc1a054464f4381368d71"><tt>3f5e1f28</tt></a> Bump github.com/google/uuid from 1.3.0 to 1.6.0 (<a href="https://github.com/99designs/gqlgen/pull/2924">#2924</a>)</summary>
+
+Bumps [github.com/google/uuid](https://github.com/google/uuid) from 1.3.0 to 1.6.0.
+- [Release notes](https://github.com/google/uuid/releases)
+- [Changelog](https://github.com/google/uuid/blob/master/CHANGELOG.md)
+- [Commits](https://github.com/google/uuid/compare/v1.3.0...v1.6.0)
+
+---
+updated-dependencies:
+- dependency-name: github.com/google/uuid
+  dependency-type: direct:production
+  update-type: version-update:semver-minor
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/fd97abcda9fbdf74028098a57cac57e4a98c9bcb"><tt>fd97abcd</tt></a> Bump golangci/golangci-lint-action from 3.7.0 to 4.0.0 (<a href="https://github.com/99designs/gqlgen/pull/2928">#2928</a>)</summary>
+
+Bumps [golangci/golangci-lint-action](https://github.com/golangci/golangci-lint-action) from 3.7.0 to 4.0.0.
+- [Release notes](https://github.com/golangci/golangci-lint-action/releases)
+- [Commits](https://github.com/golangci/golangci-lint-action/compare/v3.7.0...v4.0.0)
+
+---
+updated-dependencies:
+- dependency-name: golangci/golangci-lint-action
+  dependency-type: direct:production
+  update-type: version-update:semver-major
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/64d0f07c27896af3f621bd2ed5bee60913da65ef"><tt>64d0f07c</tt></a> graphql/uint: Fix unmarshalling of negative numbers (<a href="https://github.com/99designs/gqlgen/pull/2922">#2922</a>)</summary>
+
+Converting a negative number to uint directly returns a really big number. For
+example,
+
+	v := -5
+	fmt.Println(uint(v)) // 18446744073709551611
+
+So we should handle this cases explicitly and return an error.
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/e223f1d2927545cb6f8722ac6cf77ff3fb4e1d3c"><tt>e223f1d2</tt></a> Bump node-fetch from 2.7.0 to 3.3.2 in /_examples/federation (<a href="https://github.com/99designs/gqlgen/pull/2916">#2916</a>)</summary>
+
+* Bump node-fetch from 2.7.0 to 3.3.2 in /_examples/federation
+
+Bumps [node-fetch](https://github.com/node-fetch/node-fetch) from 2.7.0 to 3.3.2.
+- [Release notes](https://github.com/node-fetch/node-fetch/releases)
+- [Commits](https://github.com/node-fetch/node-fetch/compare/v2.7.0...v3.3.2)
+
+---
+updated-dependencies:
+- dependency-name: node-fetch
+  dependency-type: direct:development
+  update-type: version-update:semver-major
+...
+
+
+* Try updating require to import
+
+
+* Try updating Apollo server and gateway
+
+
+
+
+* Change versions of everything in npm
+
+
+* Rever to node 16
+
+
+* Switch to apollo Link
+
+
+* Use more better newer thingy
+
+
+* Change federation node version back to 16
+
+
+* Apollo Link uses uri now instead of link
+
+
+* Change inmemory cache import
+
+
+* Remove node fetch from integration test
+
+
+* Add cross fetch
+
+
+* Adjust cross fetch to dev dependency
+
+
+* Fixup package-lock
+
+
+* Try again
+
+
+* Switch to node 18 to get fetch
+
+
+* Add type module to package.json
+
+
+* export default
+
+
+* Re-order?
+
+
+* Add external
+
+
+* add experimental vm modules to jest
+
+
+* Update git ignore for node_modules
+
+
+* Add some more jest stuff
+
+
+* refmt and regenerate
+
+
+* Add rehackt to dev dependencies
+
+
+* Change to core import
+
+
+* Aaaand do it over here too
+
+
+* Some of each
+
+
+* Move to different HTTP Link
+
+
+* Try again
+
+
+* add gql from apollo core
+
+
+* Change link to uri
+
+
+* Try just passing a string
+
+
+---------
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/9a3694e5af9b360c6271a1eb6002ea58f3f55ec8"><tt>9a3694e5</tt></a> Bump github.com/hashicorp/golang-lru/v2 from 2.0.3 to 2.0.7 (<a href="https://github.com/99designs/gqlgen/pull/2915">#2915</a>)</summary>
+
+* Bump github.com/hashicorp/golang-lru/v2 from 2.0.3 to 2.0.7
+
+Bumps [github.com/hashicorp/golang-lru/v2](https://github.com/hashicorp/golang-lru) from 2.0.3 to 2.0.7.
+- [Release notes](https://github.com/hashicorp/golang-lru/releases)
+- [Commits](https://github.com/hashicorp/golang-lru/compare/v2.0.3...v2.0.7)
+
+---
+updated-dependencies:
+- dependency-name: github.com/hashicorp/golang-lru/v2
+  dependency-type: direct:production
+  update-type: version-update:semver-patch
+...
+
+
+* mod tidy for examples
+
+
+---------
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/4b7eec411c1e3361671e7996fa2298c9afe6166a"><tt>4b7eec41</tt></a> Bump urql from 4.0.4 to 4.0.6 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2906">#2906</a>)</summary>
+
+Bumps [urql](https://github.com/urql-graphql/urql/tree/HEAD/packages/react-urql) from 4.0.4 to 4.0.6.
+- [Release notes](https://github.com/urql-graphql/urql/releases)
+- [Changelog](https://github.com/urql-graphql/urql/blob/main/packages/react-urql/CHANGELOG.md)
+
+---
+updated-dependencies:
+- dependency-name: urql
+  dependency-type: direct:development
+  update-type: version-update:semver-patch
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/8874254ada6ef4bfffa463f161584c36cb247d8c"><tt>8874254a</tt></a> Bump github.com/mattn/go-isatty from 0.0.19 to 0.0.20 (<a href="https://github.com/99designs/gqlgen/pull/2908">#2908</a>)</summary>
+
+* Bump github.com/mattn/go-isatty from 0.0.19 to 0.0.20
+
+Bumps [github.com/mattn/go-isatty](https://github.com/mattn/go-isatty) from 0.0.19 to 0.0.20.
+- [Commits](https://github.com/mattn/go-isatty/compare/v0.0.19...v0.0.20)
+
+---
+updated-dependencies:
+- dependency-name: github.com/mattn/go-isatty
+  dependency-type: direct:production
+  update-type: version-update:semver-patch
+...
+
+
+* Go mod tidy
+
+
+---------
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/9a6b5655690d97399c7c4c61e714c8525c14c926"><tt>9a6b5655</tt></a> Bump [@graphql](https://github.com/graphql)-codegen/schema-ast from 4.0.0 to 4.0.2 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2918">#2918</a>)</summary>
+
+- [Release notes](https://github.com/dotansimha/graphql-code-generator/releases)
+- [Changelog](https://github.com/dotansimha/graphql-code-generator/blob/master/packages/plugins/other/schema-ast/CHANGELOG.md)
+
+---
+updated-dependencies:
+  dependency-type: direct:development
+  update-type: version-update:semver-patch
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/76c02143471b8e46b40b23a96ca81ac10e054acf"><tt>76c02143</tt></a> Bump typescript from 5.1.3 to 5.3.3 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2921">#2921</a>)</summary>
+
+Bumps [typescript](https://github.com/Microsoft/TypeScript) from 5.1.3 to 5.3.3.
+- [Release notes](https://github.com/Microsoft/TypeScript/releases)
+- [Commits](https://github.com/Microsoft/TypeScript/compare/v5.1.3...v5.3.3)
+
+---
+updated-dependencies:
+- dependency-name: typescript
+  dependency-type: direct:development
+  update-type: version-update:semver-minor
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/dca5109c0c11612a8cbfd82c3d3928b35f96e7b2"><tt>dca5109c</tt></a> Bump jest from 25.5.4 to 29.7.0 in /_examples/federation (<a href="https://github.com/99designs/gqlgen/pull/2920">#2920</a>)</summary>
+
+Bumps [jest](https://github.com/jestjs/jest/tree/HEAD/packages/jest) from 25.5.4 to 29.7.0.
+- [Release notes](https://github.com/jestjs/jest/releases)
+- [Changelog](https://github.com/jestjs/jest/blob/main/CHANGELOG.md)
+- [Commits](https://github.com/jestjs/jest/commits/v29.7.0/packages/jest)
+
+---
+updated-dependencies:
+- dependency-name: jest
+  dependency-type: direct:development
+  update-type: version-update:semver-major
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/4d77a4f0396c68fa3ea271013633acb0a30b305d"><tt>4d77a4f0</tt></a> Bump graphql from 14.7.0 to 16.8.1 in /_examples/chat (<a href="https://github.com/99designs/gqlgen/pull/2899">#2899</a>)</summary>
+
+Bumps [graphql](https://github.com/graphql/graphql-js) from 14.7.0 to 16.8.1.
+- [Release notes](https://github.com/graphql/graphql-js/releases)
+- [Commits](https://github.com/graphql/graphql-js/compare/v14.7.0...v16.8.1)
+
+---
+updated-dependencies:
+- dependency-name: graphql
+  dependency-type: direct:production
+  update-type: version-update:semver-major
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/76f1a55b9cd78cb4f60d97a695fd217253c53db7"><tt>76f1a55b</tt></a> Bump github.com/rs/cors from 1.9.0 to 1.10.1 in /_examples (<a href="https://github.com/99designs/gqlgen/pull/2904">#2904</a>)</summary>
+
+Bumps [github.com/rs/cors](https://github.com/rs/cors) from 1.9.0 to 1.10.1.
+- [Release notes](https://github.com/rs/cors/releases)
+- [Commits](https://github.com/rs/cors/compare/v1.9.0...v1.10.1)
+
+---
+updated-dependencies:
+- dependency-name: github.com/rs/cors
+  dependency-type: direct:production
+  update-type: version-update:semver-minor
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/bfa9ed8b83282f6a310663645035913bae7621db"><tt>bfa9ed8b</tt></a> Bump github.com/google/uuid from 1.3.0 to 1.6.0 in /_examples (<a href="https://github.com/99designs/gqlgen/pull/2909">#2909</a>)</summary>
+
+Bumps [github.com/google/uuid](https://github.com/google/uuid) from 1.3.0 to 1.6.0.
+- [Release notes](https://github.com/google/uuid/releases)
+- [Changelog](https://github.com/google/uuid/blob/master/CHANGELOG.md)
+- [Commits](https://github.com/google/uuid/compare/v1.3.0...v1.6.0)
+
+---
+updated-dependencies:
+- dependency-name: github.com/google/uuid
+  dependency-type: direct:production
+  update-type: version-update:semver-minor
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/524fdf78810bc38c44d68aac6d7ded0d0d62f40d"><tt>524fdf78</tt></a> Bump subscriptions-transport-ws from 0.9.19 to 0.11.0 in /_examples/chat (<a href="https://github.com/99designs/gqlgen/pull/2911">#2911</a>)</summary>
+
+Bumps [subscriptions-transport-ws](https://github.com/apollostack/subscriptions-transport-ws) from 0.9.19 to 0.11.0.
+- [Release notes](https://github.com/apollostack/subscriptions-transport-ws/releases)
+- [Changelog](https://github.com/apollographql/subscriptions-transport-ws/blob/master/CHANGELOG.md)
+- [Commits](https://github.com/apollostack/subscriptions-transport-ws/compare/v0.9.19...v0.11.0)
+
+---
+updated-dependencies:
+- dependency-name: subscriptions-transport-ws
+  dependency-type: direct:production
+  update-type: version-update:semver-minor
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/ed5f0bc2690d7da498e78147f834348ab17fbc1a"><tt>ed5f0bc2</tt></a> Bump github.com/urfave/cli/v2 from 2.25.5 to 2.27.1 (<a href="https://github.com/99designs/gqlgen/pull/2912">#2912</a>)</summary>
+
+Bumps [github.com/urfave/cli/v2](https://github.com/urfave/cli) from 2.25.5 to 2.27.1.
+- [Release notes](https://github.com/urfave/cli/releases)
+- [Changelog](https://github.com/urfave/cli/blob/main/docs/CHANGELOG.md)
+- [Commits](https://github.com/urfave/cli/compare/v2.25.5...v2.27.1)
+
+---
+updated-dependencies:
+- dependency-name: github.com/urfave/cli/v2
+  dependency-type: direct:production
+  update-type: version-update:semver-minor
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/5346a37cbaa33919ba7874e49325f585b10cd85d"><tt>5346a37c</tt></a> Bump react-scripts from 2.1.8 to 5.0.1 in /_examples/chat (<a href="https://github.com/99designs/gqlgen/pull/2914">#2914</a>)</summary>
+
+Bumps [react-scripts](https://github.com/facebook/create-react-app/tree/HEAD/packages/react-scripts) from 2.1.8 to 5.0.1.
+- [Release notes](https://github.com/facebook/create-react-app/releases)
+- [Changelog](https://github.com/facebook/create-react-app/blob/main/CHANGELOG-2.x.md)
+
+---
+updated-dependencies:
+- dependency-name: react-scripts
+  dependency-type: direct:production
+  update-type: version-update:semver-major
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/8f8c38db9cfe66fda6ee6e85e6e5c7ad2dd99f23"><tt>8f8c38db</tt></a> Bump typescript from 4.9.5 to 5.3.3 in /_examples/chat (<a href="https://github.com/99designs/gqlgen/pull/2917">#2917</a>)</summary>
+
+Bumps [typescript](https://github.com/Microsoft/TypeScript) from 4.9.5 to 5.3.3.
+- [Release notes](https://github.com/Microsoft/TypeScript/releases)
+- [Commits](https://github.com/Microsoft/TypeScript/compare/v4.9.5...v5.3.3)
+
+---
+updated-dependencies:
+- dependency-name: typescript
+  dependency-type: direct:production
+  update-type: version-update:semver-major
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/6d8479693fcee6e534477d017b3bc740fde38d74"><tt>6d847969</tt></a> Bump graphql-sse from 2.1.4 to 2.5.2 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2913">#2913</a>)</summary>
+
+Bumps [graphql-sse](https://github.com/enisdenjo/graphql-sse) from 2.1.4 to 2.5.2.
+- [Release notes](https://github.com/enisdenjo/graphql-sse/releases)
+- [Changelog](https://github.com/enisdenjo/graphql-sse/blob/master/CHANGELOG.md)
+- [Commits](https://github.com/enisdenjo/graphql-sse/compare/v2.1.4...v2.5.2)
+
+---
+updated-dependencies:
+- dependency-name: graphql-sse
+  dependency-type: direct:development
+  update-type: version-update:semver-minor
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/14e321ad636aa6f873ba507a6d500a692dea6f6d"><tt>14e321ad</tt></a> Bump styled-components from 5.3.11 to 6.1.8 in /_examples/chat (<a href="https://github.com/99designs/gqlgen/pull/2905">#2905</a>)</summary>
+
+Bumps [styled-components](https://github.com/styled-components/styled-components) from 5.3.11 to 6.1.8.
+- [Release notes](https://github.com/styled-components/styled-components/releases)
+- [Commits](https://github.com/styled-components/styled-components/compare/v5.3.11...v6.1.8)
+
+---
+updated-dependencies:
+- dependency-name: styled-components
+  dependency-type: direct:production
+  update-type: version-update:semver-major
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/76312bc6deeb744f0c6719e9375bcc6be86663d8"><tt>76312bc6</tt></a> Bump vitest from 0.32.0 to 1.2.2 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2919">#2919</a>)</summary>
+
+Bumps [vitest](https://github.com/vitest-dev/vitest/tree/HEAD/packages/vitest) from 0.32.0 to 1.2.2.
+- [Release notes](https://github.com/vitest-dev/vitest/releases)
+- [Commits](https://github.com/vitest-dev/vitest/commits/v1.2.2/packages/vitest)
+
+---
+updated-dependencies:
+- dependency-name: vitest
+  dependency-type: direct:development
+  update-type: version-update:semver-major
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/7b67b2e4413349f729c1dc0ea4c5a5cdf7428b88"><tt>7b67b2e4</tt></a> Bump github.com/matryer/moq from 0.2.7 to 0.3.3 (<a href="https://github.com/99designs/gqlgen/pull/2902">#2902</a>)</summary>
+
+Bumps [github.com/matryer/moq](https://github.com/matryer/moq) from 0.2.7 to 0.3.3.
+- [Release notes](https://github.com/matryer/moq/releases)
+- [Changelog](https://github.com/matryer/moq/blob/main/.goreleaser.yml)
+- [Commits](https://github.com/matryer/moq/compare/v0.2.7...v0.3.3)
+
+---
+updated-dependencies:
+- dependency-name: github.com/matryer/moq
+  dependency-type: direct:production
+  update-type: version-update:semver-minor
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/96c064c46d4e998563835cf9ea40a81d348a86cf"><tt>96c064c4</tt></a> Bump github.com/gorilla/websocket from 1.5.0 to 1.5.1 in /_examples (<a href="https://github.com/99designs/gqlgen/pull/2901">#2901</a>)</summary>
+
+Bumps [github.com/gorilla/websocket](https://github.com/gorilla/websocket) from 1.5.0 to 1.5.1.
+- [Release notes](https://github.com/gorilla/websocket/releases)
+- [Commits](https://github.com/gorilla/websocket/compare/v1.5.0...v1.5.1)
+
+---
+updated-dependencies:
+- dependency-name: github.com/gorilla/websocket
+  dependency-type: direct:production
+  update-type: version-update:semver-patch
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/8719860b16ca73fd97d46f0c9a62ef63a0582466"><tt>8719860b</tt></a> Bump github.com/stretchr/testify from 1.8.2 to 1.8.4 in /_examples (<a href="https://github.com/99designs/gqlgen/pull/2897">#2897</a>)</summary>
+
+Bumps [github.com/stretchr/testify](https://github.com/stretchr/testify) from 1.8.2 to 1.8.4.
+- [Release notes](https://github.com/stretchr/testify/releases)
+- [Commits](https://github.com/stretchr/testify/compare/v1.8.2...v1.8.4)
+
+---
+updated-dependencies:
+- dependency-name: github.com/stretchr/testify
+  dependency-type: direct:production
+  update-type: version-update:semver-patch
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/6d3c5a82626ce91e373068ae0a07fff589f02aba"><tt>6d3c5a82</tt></a> Bump golangci/golangci-lint-action from 3.5.0 to 3.7.0 (<a href="https://github.com/99designs/gqlgen/pull/2896">#2896</a>)</summary>
+
+Bumps [golangci/golangci-lint-action](https://github.com/golangci/golangci-lint-action) from 3.5.0 to 3.7.0.
+- [Release notes](https://github.com/golangci/golangci-lint-action/releases)
+- [Commits](https://github.com/golangci/golangci-lint-action/compare/v3.5.0...v3.7.0)
+
+---
+updated-dependencies:
+- dependency-name: golangci/golangci-lint-action
+  dependency-type: direct:production
+  update-type: version-update:semver-minor
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/ad4d7f259118e21463e19bd73d816774d6708f6f"><tt>ad4d7f25</tt></a> Bump nick-fields/retry from 2 to 3 (<a href="https://github.com/99designs/gqlgen/pull/2907">#2907</a>)</summary>
+
+Bumps [nick-fields/retry](https://github.com/nick-fields/retry) from 2 to 3.
+- [Release notes](https://github.com/nick-fields/retry/releases)
+- [Changelog](https://github.com/nick-fields/retry/blob/master/.releaserc.js)
+- [Commits](https://github.com/nick-fields/retry/compare/v2...v3)
+
+---
+updated-dependencies:
+- dependency-name: nick-fields/retry
+  dependency-type: direct:production
+  update-type: version-update:semver-major
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/912cc8da9b185f4a51d5c4b25530fc3d1dcefc14"><tt>912cc8da</tt></a> Bump actions/setup-node from 3 to 4 (<a href="https://github.com/99designs/gqlgen/pull/2910">#2910</a>)</summary>
+
+Bumps [actions/setup-node](https://github.com/actions/setup-node) from 3 to 4.
+- [Release notes](https://github.com/actions/setup-node/releases)
+- [Commits](https://github.com/actions/setup-node/compare/v3...v4)
+
+---
+updated-dependencies:
+- dependency-name: actions/setup-node
+  dependency-type: direct:production
+  update-type: version-update:semver-major
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/2f3d96abd2f0539cdad3b14ab21b5766ebe945a0"><tt>2f3d96ab</tt></a> Bump actions/checkout from 3 to 4 (<a href="https://github.com/99designs/gqlgen/pull/2903">#2903</a>)</summary>
+
+Bumps [actions/checkout](https://github.com/actions/checkout) from 3 to 4.
+- [Release notes](https://github.com/actions/checkout/releases)
+- [Changelog](https://github.com/actions/checkout/blob/main/CHANGELOG.md)
+- [Commits](https://github.com/actions/checkout/compare/v3...v4)
+
+---
+updated-dependencies:
+- dependency-name: actions/checkout
+  dependency-type: direct:production
+  update-type: version-update:semver-major
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/34f8d084d25640d49abb5b3c7fcd5cc2bd2bfaae"><tt>34f8d084</tt></a> Bump actions/setup-go from 3 to 5 (<a href="https://github.com/99designs/gqlgen/pull/2900">#2900</a>)</summary>
+
+Bumps [actions/setup-go](https://github.com/actions/setup-go) from 3 to 5.
+- [Release notes](https://github.com/actions/setup-go/releases)
+- [Commits](https://github.com/actions/setup-go/compare/v3...v5)
+
+---
+updated-dependencies:
+- dependency-name: actions/setup-go
+  dependency-type: direct:production
+  update-type: version-update:semver-major
+...
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/143edebe57af9834c56d7ae6c484eb0fb4005bf2"><tt>143edebe</tt></a> Update x/tools and add go v1.21,v1.22 in CI workflows (<a href="https://github.com/99designs/gqlgen/pull/2894">#2894</a>)</summary>
+
+* Update golang.org/x/tools
+
+* Update Go versions to 1.21 and 1.22 in CI workflows
+
+* Run go mod tidy on submodule _examples
+
+
+* Update to Go 1.20
+
+
+* go modules on for all checks
+
+
+* reduce redundant invocations
+
+
+* add echo to non-sensitive checks
+
+
+* More comments
+
+
+* Make submodule go generate chain differently
+
+
+* Add which cd
+
+
+* Try to figure out why cd is not in path
+
+
+* set CWD to examples in go generate instead
+
+
+* Try export
+
+
+* Use env in go generate comment
+
+
+* make go generate comment always successful
+
+
+* Try shelling out
+
+
+* Update our github actions, npm, and go modules via dependabot
+
+
+---------
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/e174d59ed2da4e94557ba477b3f1fe8a9d268700"><tt>e174d59e</tt></a> Work with https://specs.apollo.dev/federation/v2.x (<a href="https://github.com/99designs/gqlgen/pull/2891">#2891</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/4d8b6edb6d2a8d61c981dd22f045af5c39d1499c"><tt>4d8b6edb</tt></a> Update federation plugin (<a href="https://github.com/99designs/gqlgen/pull/2876">#2876</a>)</summary>
+
+* update 2.7 impl, add missing 2.6 support
+
+* address feedback
+
+* go fmt
+
+</details></dd></dl>
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/5524a399d35ce6429e3aa6938ea8c64125f093e8"><tt>5524a399</tt></a> Bump vite from 4.3.9 to 4.5.2 in /integration (<a href="https://github.com/99designs/gqlgen/pull/2885">#2885</a>)</summary>
+
+Bumps [vite](https://github.com/vitejs/vite/tree/HEAD/packages/vite) from 4.3.9 to 4.5.2.
+- [Release notes](https://github.com/vitejs/vite/releases)
+- [Changelog](https://github.com/vitejs/vite/blob/v4.5.2/packages/vite/CHANGELOG.md)
+- [Commits](https://github.com/vitejs/vite/commits/v4.5.2/packages/vite)
+
+---
+updated-dependencies:
+- dependency-name: vite
+  dependency-type: direct:development
+...
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/41b14fcf9a7d84b814cf86ed3fb6b2ff3dd2fab8"><tt>41b14fcf</tt></a> v0.17.43 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
+<a name="v0.17.43"></a>
+## [v0.17.43](https://github.com/99designs/gqlgen/compare/v0.17.42...v0.17.43) - 2024-01-18
+- <a href="https://github.com/99designs/gqlgen/commit/0d5519cfe07019dc29090735f477cf6bc5329c9b"><tt>0d5519cf</tt></a> release v0.17.43
+
+- <a href="https://github.com/99designs/gqlgen/commit/5779ac2148185a7b9268715a01bcc5ca763f524d"><tt>5779ac21</tt></a> Update gqlparser to v2.5.11 (<a href="https://github.com/99designs/gqlgen/pull/2882">#2882</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/f06f58b03ed04044ae2e85a4966267623011302a"><tt>f06f58b0</tt></a> add omitempty config to example gqlgen.yml (<a href="https://github.com/99designs/gqlgen/pull/2880">#2880</a>)
+
+- <a href="https://github.com/99designs/gqlgen/commit/32bdbdd18c1afb496158525490bce0cb1629d5e2"><tt>32bdbdd1</tt></a> Add config option to omit root objects from models (<a href="https://github.com/99designs/gqlgen/pull/2878">#2878</a>)
+
+<dl><dd><details><summary><a href="https://github.com/99designs/gqlgen/commit/5b65689140e4a688f4b49827785bc94044ac6693"><tt>5b656891</tt></a> Fix code generation for federated multi-key, multi-entity types (<a href="https://github.com/99designs/gqlgen/pull/2877">#2877</a>)</summary>
+
+* fix codegen for multi-key, multi-entity type
+
+* adding tests
+
+* updated generated code
+
+---------
+
+</details></dd></dl>
+
+- <a href="https://github.com/99designs/gqlgen/commit/15c05a78f8590f5bc8ca193e4a82e410c6f4b8d5"><tt>15c05a78</tt></a> Update changelog
+
+- <a href="https://github.com/99designs/gqlgen/commit/87a7517aa2300a4e6608686eb5b0bd49210b6f11"><tt>87a7517a</tt></a> v0.17.42 postrelease bump
+
+ <!-- end of Commits -->
+<!-- end of Else -->
+
+<!-- end of If NoteGroups -->
 <a name="v0.17.42"></a>
 ## [v0.17.42](https://github.com/99designs/gqlgen/compare/v0.17.41...v0.17.42) - 2023-12-29
 - <a href="https://github.com/99designs/gqlgen/commit/7bf0c223aec642d086793698bc2a0d1a6fdb09b4"><tt>7bf0c223</tt></a> release v0.17.42

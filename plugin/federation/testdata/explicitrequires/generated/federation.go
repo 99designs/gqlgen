@@ -10,7 +10,6 @@ import (
 	"sync"
 
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
-	"github.com/99designs/gqlgen/plugin/federation/testdata/explicitrequires/generated/model"
 )
 
 var (
@@ -331,7 +330,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			switch resolverName {
 
 			case "findManyMultiHelloByNames":
-				_reps := make([]*model.MultiHelloByNamesInput, len(reps))
+				_reps := make([]*MultiHelloByNamesInput, len(reps))
 
 				for i, rep := range reps {
 					id0, err := ec.unmarshalNString2string(ctx, rep["name"])
@@ -339,7 +338,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 						return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
 					}
 
-					_reps[i] = &model.MultiHelloByNamesInput{
+					_reps[i] = &MultiHelloByNamesInput{
 						Name: id0,
 					}
 				}
@@ -366,7 +365,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			switch resolverName {
 
 			case "findManyMultiHelloMultipleRequiresByNames":
-				_reps := make([]*model.MultiHelloMultipleRequiresByNamesInput, len(reps))
+				_reps := make([]*MultiHelloMultipleRequiresByNamesInput, len(reps))
 
 				for i, rep := range reps {
 					id0, err := ec.unmarshalNString2string(ctx, rep["name"])
@@ -374,7 +373,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 						return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
 					}
 
-					_reps[i] = &model.MultiHelloMultipleRequiresByNamesInput{
+					_reps[i] = &MultiHelloMultipleRequiresByNamesInput{
 						Name: id0,
 					}
 				}
@@ -409,7 +408,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			switch resolverName {
 
 			case "findManyMultiHelloRequiresByNames":
-				_reps := make([]*model.MultiHelloRequiresByNamesInput, len(reps))
+				_reps := make([]*MultiHelloRequiresByNamesInput, len(reps))
 
 				for i, rep := range reps {
 					id0, err := ec.unmarshalNString2string(ctx, rep["name"])
@@ -417,7 +416,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 						return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
 					}
 
-					_reps[i] = &model.MultiHelloRequiresByNamesInput{
+					_reps[i] = &MultiHelloRequiresByNamesInput{
 						Name: id0,
 					}
 				}
@@ -448,7 +447,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			switch resolverName {
 
 			case "findManyMultiHelloWithErrorByNames":
-				_reps := make([]*model.MultiHelloWithErrorByNamesInput, len(reps))
+				_reps := make([]*MultiHelloWithErrorByNamesInput, len(reps))
 
 				for i, rep := range reps {
 					id0, err := ec.unmarshalNString2string(ctx, rep["name"])
@@ -456,7 +455,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 						return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
 					}
 
-					_reps[i] = &model.MultiHelloWithErrorByNamesInput{
+					_reps[i] = &MultiHelloWithErrorByNamesInput{
 						Name: id0,
 					}
 				}
@@ -483,7 +482,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			switch resolverName {
 
 			case "findManyMultiPlanetRequiresNestedByNames":
-				_reps := make([]*model.MultiPlanetRequiresNestedByNamesInput, len(reps))
+				_reps := make([]*MultiPlanetRequiresNestedByNamesInput, len(reps))
 
 				for i, rep := range reps {
 					id0, err := ec.unmarshalNString2string(ctx, rep["name"])
@@ -491,7 +490,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 						return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
 					}
 
-					_reps[i] = &model.MultiPlanetRequiresNestedByNamesInput{
+					_reps[i] = &MultiPlanetRequiresNestedByNamesInput{
 						Name: id0,
 					}
 				}

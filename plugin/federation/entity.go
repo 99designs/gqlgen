@@ -2,7 +2,6 @@ package federation
 
 import (
 	"go/types"
-	"strings"
 
 	"github.com/vektah/gqlparser/v2/ast"
 
@@ -121,6 +120,5 @@ func (e *Entity) keyFields() []string {
 
 // GetTypeInfo - get the imported package & type name combo.  package.TypeName
 func (e Entity) GetTypeInfo() string {
-	typeParts := strings.Split(e.Type.String(), "/")
-	return typeParts[len(typeParts)-1]
+	return templates.CurrentImports.LookupType(e.Type)
 }

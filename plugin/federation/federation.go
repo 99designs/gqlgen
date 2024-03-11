@@ -420,9 +420,12 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 	}
 
 	return templates.Render(templates.Options{
-		PackageName:     data.Config.Federation.Package,
-		Filename:        data.Config.Federation.Filename,
-		Data:            f,
+		PackageName: data.Config.Federation.Package,
+		Filename:    data.Config.Federation.Filename,
+		Data: struct {
+			federation
+			UsePointers bool
+		}{*f, data.Config.ResolversAlwaysReturnPointers},
 		GeneratedHeader: true,
 		Packages:        data.Config.Packages,
 		Template:        federationTemplate,

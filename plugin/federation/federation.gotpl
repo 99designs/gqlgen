@@ -6,6 +6,7 @@
 
 {{ reserveImport "github.com/99designs/gqlgen/plugin/federation/fedruntime" }}
 {{ $options := .PackageOptions }}
+{{ $usePointers := .UsePointers }}
 
 var (
 	ErrUnknownType = errors.New("unknown type")
@@ -105,7 +106,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 							return fmt.Errorf(`resolving Entity "{{$entity.Def.Name}}": %w`, err)
 						}
 						{{ if and (index $options "explicit_requires") $entity.Requires }}
-							err = ec.Populate{{$entity.Def.Name}}Requires(ctx, entity, rep)
+							err = ec.Populate{{$entity.Def.Name}}Requires(ctx, {{- if (not $usePointers) -}}&{{- end -}}entity, rep)
 							if err != nil {
 								return fmt.Errorf(`populating requires for Entity "{{$entity.Def.Name}}": %w`, err)
 							}

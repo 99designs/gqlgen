@@ -65,3 +65,38 @@ func TestUnmarshalID(t *testing.T) {
 		})
 	}
 }
+
+func TestMarshalUintID(t *testing.T) {
+	assert.Equal(t, `"12"`, m2s(MarshalUintID(12)))
+}
+
+func TestUnMarshalUintID(t *testing.T) {
+
+	result, err := UnmarshalUintID("12")
+	assert.Equal(t, uint(12), result)
+	assert.NoError(t, err)
+
+	result, err = UnmarshalUintID(12)
+	assert.Equal(t, uint(12), result)
+	assert.NoError(t, err)
+
+	result, err = UnmarshalUintID(int64(12))
+	assert.Equal(t, uint(12), result)
+	assert.NoError(t, err)
+
+	result, err = UnmarshalUintID(int32(12))
+	assert.Equal(t, uint(12), result)
+	assert.NoError(t, err)
+
+	result, err = UnmarshalUintID(int(12))
+	assert.Equal(t, uint(12), result)
+	assert.NoError(t, err)
+
+	result, err = UnmarshalUintID(uint32(12))
+	assert.Equal(t, uint(12), result)
+	assert.NoError(t, err)
+
+	result, err = UnmarshalUintID(uint64(12))
+	assert.Equal(t, uint(12), result)
+	assert.NoError(t, err)
+}

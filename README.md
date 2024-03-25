@@ -135,6 +135,7 @@ models:
     model:
       - github.com/99designs/gqlgen/graphql.IntID # a go integer
       - github.com/99designs/gqlgen/graphql.ID # or a go string
+      - github.com/99designs/gqlgen/graphql.UintID # or a go uint
 ```
 
 This means gqlgen will be able to automatically bind to strings or ints for models you have written yourself, but the

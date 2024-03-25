@@ -56,3 +56,32 @@ func UnmarshalIntID(v interface{}) (int, error) {
 		return 0, fmt.Errorf("%T is not an int", v)
 	}
 }
+
+func MarshalUintID(i uint) Marshaler {
+	return WriterFunc(func(w io.Writer) {
+		writeQuotedString(w, strconv.FormatUint(uint64(i), 10))
+	})
+}
+
+func UnmarshalUintID(v interface{}) (uint, error) {
+	switch v := v.(type) {
+	case string:
+		result, err := strconv.ParseUint(v, 10, 64)
+		return uint(result), err
+	case int:
+		return uint(v), nil
+	case int64:
+		return uint(v), nil
+	case int32:
+		return uint(v), nil
+	case uint32:
+		return uint(v), nil
+	case uint64:
+		return uint(v), nil
+	case json.Number:
+		result, err := strconv.ParseUint(string(v), 10, 64)
+		return uint(result), err
+	default:
+		return 0, fmt.Errorf("%T is not an uint", v)
+	}
+}

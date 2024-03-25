@@ -163,6 +163,6 @@ func assertNoErrors(t *testing.T, pkg string) {
 
 type implementorTest struct{}
 
-func (i *implementorTest) Implement(field *codegen.Field) string {
+func (i *implementorTest) Implement(_ string, _ *codegen.Field) string {
 	return "panic(\"implementor implemented me\")"
 }

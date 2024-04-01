@@ -343,6 +343,26 @@ func (c *Config) injectTypesFromSchema() error {
 				}
 			}
 		}
+
+		if schemaType.Kind == ast.Enum && !strings.HasPrefix(schemaType.Name, "__") {
+			if model, ok := c.Models[schemaType.Name]; ok {
+				if model.EnumValues == nil {
+					model.EnumValues = make(map[string]string)
+				}
+
+				for _, value := range schemaType.EnumValues {
+					if directive := value.Directives.ForName("goModel"); directive != nil {
+						if arg := directive.Arguments.ForName("model"); arg != nil {
+							if v, err := arg.Value.Value(nil); err == nil {
+								model.EnumValues[value.Name] = v.(string)
+							}
+						}
+					}
+				}
+
+				c.Models[schemaType.Name] = model
+			}
+		}
 	}
 
 	return nil
@@ -352,6 +372,7 @@ type TypeMapEntry struct {
 	Model         StringList              `yaml:"model,omitempty"`
 	ForceGenerate bool                    `yaml:"forceGenerate,omitempty"`
 	Fields        map[string]TypeMapField `yaml:"fields,omitempty"`
+	EnumValues    map[string]string       `yaml:"enum_values,omitempty"`
 
 	// Key is the Go name of the field.
 	ExtraFields map[string]ModelExtraField `yaml:"extraFields,omitempty"`

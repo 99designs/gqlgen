@@ -34,7 +34,10 @@
 				return &pres, nil
 			{{- else }}
 				{{- if $type.Unmarshaler }}
-					{{- if $type.CastType }}
+					{{- if $type.HasEnumValues }}
+						tmp, err := {{ $type.Unmarshaler | call }}(v)
+						res := {{ $type.UnmarshalFunc }}[tmp]
+					{{- else if $type.CastType }}
 						{{- if $type.IsContext }}
 							tmp, err := {{ $type.Unmarshaler | call }}(ctx, v)
 						{{- else }}
@@ -170,7 +173,12 @@
 					{{- else if and (not $type.IsTargetNilable) $type.IsNilable }}
 						{{- $v = "*v" }}
 					{{- end }}
-					res := {{ $type.Marshaler | call }}({{- if $type.CastType }}{{ $type.CastType | ref }}({{ $v }}){{else}}{{ $v }}{{- end }})
+					{{- if $type.HasEnumValues }}
+						{{- $v = printf "%v[%v]" $type.MarshalFunc $v }}
+					{{- else if $type.CastType }}
+						{{- $v = printf "%v(%v)" ($type.CastType | ref) $v}}
+					{{- end }}
+					res := {{ $type.Marshaler | call }}({{ $v }})
 					{{- if $type.GQL.NonNull }}
 						if res == graphql.Null {
 							if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -195,5 +203,24 @@
 				{{- end }}
 			{{- end }}
 		}
+	{{- end }}
+
+	{{- if $type.HasEnumValues }}
+	{{- $enum := $type.GO }}
+	{{- if $type.IsNilable }}
+		{{- $enum = $type.GO.Elem }}
+	{{- end }}
+	var (
+		{{ $type.UnmarshalFunc }} = map[string]{{ $enum | ref }}{
+		{{- range $value := $type.EnumValues }}
+			"{{ $value.Definition.Name }}": model.{{ $value.Type.Name }},
+		{{- end }}
+		}
+		{{ $type.MarshalFunc }} = map[{{ $enum | ref }}]string{
+		{{- range $value := $type.EnumValues }}
+			 model.{{ $value.Type.Name }}: "{{ $value.Definition.Name }}",
+		{{- end }}
+		}
+	 )
 	{{- end }}
 {{- end }}

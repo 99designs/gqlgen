@@ -16,7 +16,7 @@
         "cross-fetch": "^4.0.0",
         "graphql": "^16.6.0",
         "graphql-codegen": "^0.4.0",
-        "graphql-sse": "^2.5.2",
+        "graphql-sse": "^2.5.3",
         "graphql-ws": "^5.15.0",
         "typescript": "^5.4.3",
         "urql": "^4.0.6",

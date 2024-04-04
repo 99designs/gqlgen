@@ -24,7 +24,7 @@ cd gqlgen-todos
 go mod init github.com/[username]/gqlgen-todos
 ```
 
-Next, create a `tools.go` file and add gqlgen as a [tool dependency for your module](https://github.com/golang/go/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module).
+Next, create a `tools.go` file and add gqlgen as a [tool dependency for your module](https://go.dev/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module).
 
 ```go
 //go:build tools

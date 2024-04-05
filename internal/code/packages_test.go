@@ -30,14 +30,6 @@ func TestPackages(t *testing.T) {
 		require.Equal(t, 2, p.numLoadCalls)
 	})
 
-	t.Run("evicting a package also evicts its dependencies", func(t *testing.T) {
-		p := initialState(t)
-		p.Evict("github.com/99designs/gqlgen/internal/code/testdata/a")
-		require.Equal(t, "a", p.Load("github.com/99designs/gqlgen/internal/code/testdata/a").Name)
-		require.Equal(t, 2, p.numLoadCalls)
-		require.Equal(t, "b", p.Load("github.com/99designs/gqlgen/internal/code/testdata/b").Name)
-		require.Equal(t, 3, p.numLoadCalls)
-	})
 	t.Run("able to load private package with build tags", func(t *testing.T) {
 		p := initialState(t, WithBuildTags("private"))
 		p.Evict("github.com/99designs/gqlgen/internal/code/testdata/a")

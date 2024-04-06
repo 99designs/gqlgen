@@ -21,12 +21,10 @@ var (
 
 var mode = packages.NeedName |
 	packages.NeedFiles |
-	packages.NeedImports |
 	packages.NeedTypes |
 	packages.NeedSyntax |
 	packages.NeedTypesInfo |
-	packages.NeedModule |
-	packages.NeedDeps
+	packages.NeedModule
 
 type (
 	// Packages is a wrapper around x/tools/go/packages that maintains a (hopefully prewarmed) cache of packages
@@ -135,11 +133,6 @@ func (p *Packages) LoadAll(importPaths ...string) []*packages.Package {
 func (p *Packages) addToCache(pkg *packages.Package) {
 	imp := NormalizeVendor(pkg.PkgPath)
 	p.packages[imp] = pkg
-	for _, imp := range pkg.Imports {
-		if _, found := p.packages[NormalizeVendor(imp.PkgPath)]; !found {
-			p.addToCache(imp)
-		}
-	}
 }
 
 // Load works the same as LoadAll, except a single package at a time.
@@ -220,18 +213,9 @@ func (p *Packages) NameForPackage(importPath string) string {
 	return pkg.Name
 }
 
-// Evict removes a given package import path from the cache, along with any packages that depend on it. Further calls
-// to Load will fetch it from disk.
+// Evict removes a given package import path from the cache. Further calls to Load will fetch it from disk.
 func (p *Packages) Evict(importPath string) {
 	delete(p.packages, importPath)
-
-	for _, pkg := range p.packages {
-		for _, imported := range pkg.Imports {
-			if imported.PkgPath == importPath {
-				p.Evict(pkg.PkgPath)
-			}
-		}
-	}
 }
 
 func (p *Packages) ModTidy() error {

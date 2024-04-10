@@ -49,6 +49,7 @@ func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.Selec
 				field := field
 
 				innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+					var _ = fs
 					defer func() {
 						if r := recover(); r != nil {
 							ec.Error(ctx, ec.Recover(ctx, r))

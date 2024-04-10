@@ -82,6 +82,7 @@ func (ec *executionContext) _Query_inSchemadir(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) fieldContext_Query_inSchemadir(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -126,6 +127,7 @@ func (ec *executionContext) _Query_parentdir(ctx context.Context, field graphql.
 }
 
 func (ec *executionContext) fieldContext_Query_parentdir(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -170,6 +172,7 @@ func (ec *executionContext) _Query_subdir(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) fieldContext_Query_subdir(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -214,6 +217,7 @@ func (ec *executionContext) _Query__service(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) fieldContext_Query__service(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -259,6 +263,7 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) fieldContext_Query___type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -333,6 +338,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -394,6 +400,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				var _ = fs
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -416,6 +423,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				var _ = fs
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -438,6 +446,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				var _ = fs
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -460,6 +469,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				var _ = fs
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))

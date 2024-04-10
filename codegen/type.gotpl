@@ -90,6 +90,8 @@
 
 	{{ with $type.MarshalFunc }}
 		func (ec *executionContext) {{ . }}(ctx context.Context, sel ast.SelectionSet, v {{ $type.GO | ref }}) graphql.Marshaler {
+			var _ = ctx
+			var _ = sel
 			{{- if or $type.IsPtrToSlice $type.IsPtrToIntf }}
 				return ec.{{ $type.Elem.MarshalFunc }}(ctx, sel, *v)
 			{{- else if $type.IsSlice }}

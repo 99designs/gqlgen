@@ -344,6 +344,7 @@ func (ec *executionContext) _Like_reaction(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) fieldContext_Like_reaction(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Like",
 		Field:      field,
@@ -388,6 +389,7 @@ func (ec *executionContext) _Like_sent(ctx context.Context, field graphql.Collec
 }
 
 func (ec *executionContext) fieldContext_Like_sent(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Like",
 		Field:      field,
@@ -429,6 +431,7 @@ func (ec *executionContext) _Like_selection(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) fieldContext_Like_selection(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Like",
 		Field:      field,
@@ -470,6 +473,7 @@ func (ec *executionContext) _Like_collected(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) fieldContext_Like_collected(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Like",
 		Field:      field,
@@ -514,6 +518,7 @@ func (ec *executionContext) _Post_message(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) fieldContext_Post_message(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Post",
 		Field:      field,
@@ -558,6 +563,7 @@ func (ec *executionContext) _Post_sent(ctx context.Context, field graphql.Collec
 }
 
 func (ec *executionContext) fieldContext_Post_sent(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Post",
 		Field:      field,
@@ -599,6 +605,7 @@ func (ec *executionContext) _Post_selection(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) fieldContext_Post_selection(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Post",
 		Field:      field,
@@ -640,6 +647,7 @@ func (ec *executionContext) _Post_collected(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) fieldContext_Post_collected(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Post",
 		Field:      field,
@@ -681,6 +689,7 @@ func (ec *executionContext) _Query_events(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) fieldContext_Query_events(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -722,6 +731,7 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) fieldContext_Query___type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -796,6 +806,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -854,6 +865,7 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) fieldContext___Directive_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Directive",
 		Field:      field,
@@ -895,6 +907,7 @@ func (ec *executionContext) ___Directive_description(ctx context.Context, field 
 }
 
 func (ec *executionContext) fieldContext___Directive_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Directive",
 		Field:      field,
@@ -939,6 +952,7 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 }
 
 func (ec *executionContext) fieldContext___Directive_locations(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Directive",
 		Field:      field,
@@ -983,6 +997,7 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) fieldContext___Directive_args(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Directive",
 		Field:      field,
@@ -1037,6 +1052,7 @@ func (ec *executionContext) ___Directive_isRepeatable(ctx context.Context, field
 }
 
 func (ec *executionContext) fieldContext___Directive_isRepeatable(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Directive",
 		Field:      field,
@@ -1081,6 +1097,7 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) fieldContext___EnumValue_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__EnumValue",
 		Field:      field,
@@ -1122,6 +1139,7 @@ func (ec *executionContext) ___EnumValue_description(ctx context.Context, field 
 }
 
 func (ec *executionContext) fieldContext___EnumValue_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__EnumValue",
 		Field:      field,
@@ -1166,6 +1184,7 @@ func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field
 }
 
 func (ec *executionContext) fieldContext___EnumValue_isDeprecated(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__EnumValue",
 		Field:      field,
@@ -1207,6 +1226,7 @@ func (ec *executionContext) ___EnumValue_deprecationReason(ctx context.Context, 
 }
 
 func (ec *executionContext) fieldContext___EnumValue_deprecationReason(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__EnumValue",
 		Field:      field,
@@ -1251,6 +1271,7 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) fieldContext___Field_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Field",
 		Field:      field,
@@ -1292,6 +1313,7 @@ func (ec *executionContext) ___Field_description(ctx context.Context, field grap
 }
 
 func (ec *executionContext) fieldContext___Field_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Field",
 		Field:      field,
@@ -1336,6 +1358,7 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) fieldContext___Field_args(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Field",
 		Field:      field,
@@ -1390,6 +1413,7 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) fieldContext___Field_type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Field",
 		Field:      field,
@@ -1456,6 +1480,7 @@ func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field gra
 }
 
 func (ec *executionContext) fieldContext___Field_isDeprecated(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Field",
 		Field:      field,
@@ -1497,6 +1522,7 @@ func (ec *executionContext) ___Field_deprecationReason(ctx context.Context, fiel
 }
 
 func (ec *executionContext) fieldContext___Field_deprecationReason(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Field",
 		Field:      field,
@@ -1541,6 +1567,7 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) fieldContext___InputValue_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__InputValue",
 		Field:      field,
@@ -1582,6 +1609,7 @@ func (ec *executionContext) ___InputValue_description(ctx context.Context, field
 }
 
 func (ec *executionContext) fieldContext___InputValue_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__InputValue",
 		Field:      field,
@@ -1626,6 +1654,7 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) fieldContext___InputValue_type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__InputValue",
 		Field:      field,
@@ -1689,6 +1718,7 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 }
 
 func (ec *executionContext) fieldContext___InputValue_defaultValue(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__InputValue",
 		Field:      field,
@@ -1730,6 +1760,7 @@ func (ec *executionContext) ___Schema_description(ctx context.Context, field gra
 }
 
 func (ec *executionContext) fieldContext___Schema_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Schema",
 		Field:      field,
@@ -1774,6 +1805,7 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) fieldContext___Schema_types(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Schema",
 		Field:      field,
@@ -1840,6 +1872,7 @@ func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graph
 }
 
 func (ec *executionContext) fieldContext___Schema_queryType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Schema",
 		Field:      field,
@@ -1903,6 +1936,7 @@ func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field gr
 }
 
 func (ec *executionContext) fieldContext___Schema_mutationType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Schema",
 		Field:      field,
@@ -1966,6 +2000,7 @@ func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, fiel
 }
 
 func (ec *executionContext) fieldContext___Schema_subscriptionType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Schema",
 		Field:      field,
@@ -2032,6 +2067,7 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 }
 
 func (ec *executionContext) fieldContext___Schema_directives(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Schema",
 		Field:      field,
@@ -2088,6 +2124,7 @@ func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.Coll
 }
 
 func (ec *executionContext) fieldContext___Type_kind(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -2129,6 +2166,7 @@ func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.Coll
 }
 
 func (ec *executionContext) fieldContext___Type_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -2170,6 +2208,7 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 }
 
 func (ec *executionContext) fieldContext___Type_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -2211,6 +2250,7 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) fieldContext___Type_fields(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -2277,6 +2317,7 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) fieldContext___Type_interfaces(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -2340,6 +2381,7 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 }
 
 func (ec *executionContext) fieldContext___Type_possibleTypes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -2403,6 +2445,7 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) fieldContext___Type_enumValues(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -2465,6 +2508,7 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 }
 
 func (ec *executionContext) fieldContext___Type_inputFields(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -2516,6 +2560,7 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) fieldContext___Type_ofType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -2579,6 +2624,7 @@ func (ec *executionContext) ___Type_specifiedByURL(ctx context.Context, field gr
 }
 
 func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -2600,6 +2646,8 @@ func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Conte
 // region    ************************** interface.gotpl ***************************
 
 func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, obj Event) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
@@ -2745,6 +2793,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				var _ = fs
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -3123,6 +3172,8 @@ func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interf
 }
 
 func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	res := graphql.MarshalBoolean(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -3133,6 +3184,8 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 }
 
 func (ec *executionContext) marshalNEvent2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋselectionᚐEvent(ctx context.Context, sel ast.SelectionSet, v Event) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -3148,6 +3201,8 @@ func (ec *executionContext) unmarshalNString2string(ctx context.Context, v inter
 }
 
 func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -3163,6 +3218,8 @@ func (ec *executionContext) unmarshalNTime2timeᚐTime(ctx context.Context, v in
 }
 
 func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	res := graphql.MarshalTime(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -3173,10 +3230,14 @@ func (ec *executionContext) marshalNTime2timeᚐTime(ctx context.Context, sel as
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	return ec.___Directive(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Directive) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -3226,6 +3287,8 @@ func (ec *executionContext) unmarshalN__DirectiveLocation2string(ctx context.Con
 }
 
 func (ec *executionContext) marshalN__DirectiveLocation2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -3253,6 +3316,8 @@ func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx conte
 }
 
 func (ec *executionContext) marshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -3297,18 +3362,26 @@ func (ec *executionContext) marshalN__DirectiveLocation2ᚕstringᚄ(ctx context
 }
 
 func (ec *executionContext) marshalN__EnumValue2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValue(ctx context.Context, sel ast.SelectionSet, v introspection.EnumValue) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	return ec.___EnumValue(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalN__Field2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐField(ctx context.Context, sel ast.SelectionSet, v introspection.Field) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	return ec.___Field(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalN__InputValue2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValue(ctx context.Context, sel ast.SelectionSet, v introspection.InputValue) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	return ec.___InputValue(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -3353,10 +3426,14 @@ func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 }
 
 func (ec *executionContext) marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, sel ast.SelectionSet, v introspection.Type) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	return ec.___Type(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -3401,6 +3478,8 @@ func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 }
 
 func (ec *executionContext) marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, sel ast.SelectionSet, v *introspection.Type) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -3416,6 +3495,8 @@ func (ec *executionContext) unmarshalN__TypeKind2string(ctx context.Context, v i
 }
 
 func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -3431,6 +3512,8 @@ func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interf
 }
 
 func (ec *executionContext) marshalOBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	res := graphql.MarshalBoolean(v)
 	return res
 }
@@ -3444,6 +3527,8 @@ func (ec *executionContext) unmarshalOBoolean2ᚖbool(ctx context.Context, v int
 }
 
 func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast.SelectionSet, v *bool) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -3452,6 +3537,8 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 }
 
 func (ec *executionContext) marshalOEvent2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋselectionᚐEventᚄ(ctx context.Context, sel ast.SelectionSet, v []Event) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -3519,6 +3606,8 @@ func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v
 }
 
 func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -3545,6 +3634,8 @@ func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v in
 }
 
 func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -3553,6 +3644,8 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -3600,6 +3693,8 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 }
 
 func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐFieldᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Field) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -3647,6 +3742,8 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 }
 
 func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -3694,6 +3791,8 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 }
 
 func (ec *executionContext) marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx context.Context, sel ast.SelectionSet, v *introspection.Schema) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -3701,6 +3800,8 @@ func (ec *executionContext) marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlge
 }
 
 func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -3748,6 +3849,8 @@ func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 }
 
 func (ec *executionContext) marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, sel ast.SelectionSet, v *introspection.Type) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}

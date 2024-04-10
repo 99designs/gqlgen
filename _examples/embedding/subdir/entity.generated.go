@@ -56,6 +56,7 @@ func (ec *executionContext) __Service_sdl(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) fieldContext__Service_sdl(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "_Service",
 		Field:      field,
@@ -121,6 +122,8 @@ func (ec *executionContext) __Service(ctx context.Context, sel ast.SelectionSet,
 // region    ***************************** type.gotpl *****************************
 
 func (ec *executionContext) marshalN_Service2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfedruntimeᚐService(ctx context.Context, sel ast.SelectionSet, v fedruntime.Service) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	return ec.__Service(ctx, sel, &v)
 }
 

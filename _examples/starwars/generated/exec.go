@@ -1058,6 +1058,7 @@ func (ec *executionContext) _Droid_id(ctx context.Context, field graphql.Collect
 }
 
 func (ec *executionContext) fieldContext_Droid_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Droid",
 		Field:      field,
@@ -1102,6 +1103,7 @@ func (ec *executionContext) _Droid_name(ctx context.Context, field graphql.Colle
 }
 
 func (ec *executionContext) fieldContext_Droid_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Droid",
 		Field:      field,
@@ -1143,6 +1145,7 @@ func (ec *executionContext) _Droid_friends(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) fieldContext_Droid_friends(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Droid",
 		Field:      field,
@@ -1187,6 +1190,7 @@ func (ec *executionContext) _Droid_friendsConnection(ctx context.Context, field 
 }
 
 func (ec *executionContext) fieldContext_Droid_friendsConnection(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Droid",
 		Field:      field,
@@ -1252,6 +1256,7 @@ func (ec *executionContext) _Droid_appearsIn(ctx context.Context, field graphql.
 }
 
 func (ec *executionContext) fieldContext_Droid_appearsIn(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Droid",
 		Field:      field,
@@ -1293,6 +1298,7 @@ func (ec *executionContext) _Droid_primaryFunction(ctx context.Context, field gr
 }
 
 func (ec *executionContext) fieldContext_Droid_primaryFunction(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Droid",
 		Field:      field,
@@ -1337,6 +1343,7 @@ func (ec *executionContext) _FriendsConnection_totalCount(ctx context.Context, f
 }
 
 func (ec *executionContext) fieldContext_FriendsConnection_totalCount(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "FriendsConnection",
 		Field:      field,
@@ -1378,6 +1385,7 @@ func (ec *executionContext) _FriendsConnection_edges(ctx context.Context, field 
 }
 
 func (ec *executionContext) fieldContext_FriendsConnection_edges(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "FriendsConnection",
 		Field:      field,
@@ -1425,6 +1433,7 @@ func (ec *executionContext) _FriendsConnection_friends(ctx context.Context, fiel
 }
 
 func (ec *executionContext) fieldContext_FriendsConnection_friends(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "FriendsConnection",
 		Field:      field,
@@ -1469,6 +1478,7 @@ func (ec *executionContext) _FriendsConnection_pageInfo(ctx context.Context, fie
 }
 
 func (ec *executionContext) fieldContext_FriendsConnection_pageInfo(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "FriendsConnection",
 		Field:      field,
@@ -1521,6 +1531,7 @@ func (ec *executionContext) _FriendsEdge_cursor(ctx context.Context, field graph
 }
 
 func (ec *executionContext) fieldContext_FriendsEdge_cursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "FriendsEdge",
 		Field:      field,
@@ -1562,6 +1573,7 @@ func (ec *executionContext) _FriendsEdge_node(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) fieldContext_FriendsEdge_node(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "FriendsEdge",
 		Field:      field,
@@ -1606,6 +1618,7 @@ func (ec *executionContext) _Human_id(ctx context.Context, field graphql.Collect
 }
 
 func (ec *executionContext) fieldContext_Human_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Human",
 		Field:      field,
@@ -1650,6 +1663,7 @@ func (ec *executionContext) _Human_name(ctx context.Context, field graphql.Colle
 }
 
 func (ec *executionContext) fieldContext_Human_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Human",
 		Field:      field,
@@ -1694,6 +1708,7 @@ func (ec *executionContext) _Human_height(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) fieldContext_Human_height(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Human",
 		Field:      field,
@@ -1746,6 +1761,7 @@ func (ec *executionContext) _Human_mass(ctx context.Context, field graphql.Colle
 }
 
 func (ec *executionContext) fieldContext_Human_mass(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Human",
 		Field:      field,
@@ -1787,6 +1803,7 @@ func (ec *executionContext) _Human_friends(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) fieldContext_Human_friends(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Human",
 		Field:      field,
@@ -1831,6 +1848,7 @@ func (ec *executionContext) _Human_friendsConnection(ctx context.Context, field 
 }
 
 func (ec *executionContext) fieldContext_Human_friendsConnection(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Human",
 		Field:      field,
@@ -1896,6 +1914,7 @@ func (ec *executionContext) _Human_appearsIn(ctx context.Context, field graphql.
 }
 
 func (ec *executionContext) fieldContext_Human_appearsIn(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Human",
 		Field:      field,
@@ -1937,6 +1956,7 @@ func (ec *executionContext) _Human_starships(ctx context.Context, field graphql.
 }
 
 func (ec *executionContext) fieldContext_Human_starships(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Human",
 		Field:      field,
@@ -1977,6 +1997,7 @@ func (ec *executionContext) _Human_query(ctx context.Context, field graphql.Coll
 }
 
 func (ec *executionContext) fieldContext_Human_query(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Human",
 		Field:      field,
@@ -2027,6 +2048,7 @@ func (ec *executionContext) _Human_mutation(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) fieldContext_Human_mutation(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Human",
 		Field:      field,
@@ -2072,6 +2094,7 @@ func (ec *executionContext) _Mutation_createReview(ctx context.Context, field gr
 }
 
 func (ec *executionContext) fieldContext_Mutation_createReview(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
 		Field:      field,
@@ -2135,6 +2158,7 @@ func (ec *executionContext) _PageInfo_startCursor(ctx context.Context, field gra
 }
 
 func (ec *executionContext) fieldContext_PageInfo_startCursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "PageInfo",
 		Field:      field,
@@ -2179,6 +2203,7 @@ func (ec *executionContext) _PageInfo_endCursor(ctx context.Context, field graph
 }
 
 func (ec *executionContext) fieldContext_PageInfo_endCursor(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "PageInfo",
 		Field:      field,
@@ -2223,6 +2248,7 @@ func (ec *executionContext) _PageInfo_hasNextPage(ctx context.Context, field gra
 }
 
 func (ec *executionContext) fieldContext_PageInfo_hasNextPage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "PageInfo",
 		Field:      field,
@@ -2264,6 +2290,7 @@ func (ec *executionContext) _Query_hero(ctx context.Context, field graphql.Colle
 }
 
 func (ec *executionContext) fieldContext_Query_hero(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -2319,6 +2346,7 @@ func (ec *executionContext) _Query_reviews(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) fieldContext_Query_reviews(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -2382,6 +2410,7 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) fieldContext_Query_search(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -2434,6 +2463,7 @@ func (ec *executionContext) _Query_character(ctx context.Context, field graphql.
 }
 
 func (ec *executionContext) fieldContext_Query_character(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -2486,6 +2516,7 @@ func (ec *executionContext) _Query_droid(ctx context.Context, field graphql.Coll
 }
 
 func (ec *executionContext) fieldContext_Query_droid(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -2552,6 +2583,7 @@ func (ec *executionContext) _Query_human(ctx context.Context, field graphql.Coll
 }
 
 func (ec *executionContext) fieldContext_Query_human(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -2626,6 +2658,7 @@ func (ec *executionContext) _Query_starship(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) fieldContext_Query_starship(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -2688,6 +2721,7 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) fieldContext_Query___type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -2762,6 +2796,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) fieldContext_Query___schema(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -2820,6 +2855,7 @@ func (ec *executionContext) _Review_stars(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) fieldContext_Review_stars(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Review",
 		Field:      field,
@@ -2861,6 +2897,7 @@ func (ec *executionContext) _Review_commentary(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) fieldContext_Review_commentary(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Review",
 		Field:      field,
@@ -2902,6 +2939,7 @@ func (ec *executionContext) _Review_time(ctx context.Context, field graphql.Coll
 }
 
 func (ec *executionContext) fieldContext_Review_time(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Review",
 		Field:      field,
@@ -2946,6 +2984,7 @@ func (ec *executionContext) _Starship_id(ctx context.Context, field graphql.Coll
 }
 
 func (ec *executionContext) fieldContext_Starship_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Starship",
 		Field:      field,
@@ -2990,6 +3029,7 @@ func (ec *executionContext) _Starship_name(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) fieldContext_Starship_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Starship",
 		Field:      field,
@@ -3034,6 +3074,7 @@ func (ec *executionContext) _Starship_length(ctx context.Context, field graphql.
 }
 
 func (ec *executionContext) fieldContext_Starship_length(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Starship",
 		Field:      field,
@@ -3089,6 +3130,7 @@ func (ec *executionContext) _Starship_history(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) fieldContext_Starship_history(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "Starship",
 		Field:      field,
@@ -3133,6 +3175,7 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) fieldContext___Directive_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Directive",
 		Field:      field,
@@ -3174,6 +3217,7 @@ func (ec *executionContext) ___Directive_description(ctx context.Context, field 
 }
 
 func (ec *executionContext) fieldContext___Directive_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Directive",
 		Field:      field,
@@ -3218,6 +3262,7 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 }
 
 func (ec *executionContext) fieldContext___Directive_locations(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Directive",
 		Field:      field,
@@ -3262,6 +3307,7 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) fieldContext___Directive_args(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Directive",
 		Field:      field,
@@ -3316,6 +3362,7 @@ func (ec *executionContext) ___Directive_isRepeatable(ctx context.Context, field
 }
 
 func (ec *executionContext) fieldContext___Directive_isRepeatable(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Directive",
 		Field:      field,
@@ -3360,6 +3407,7 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 }
 
 func (ec *executionContext) fieldContext___EnumValue_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__EnumValue",
 		Field:      field,
@@ -3401,6 +3449,7 @@ func (ec *executionContext) ___EnumValue_description(ctx context.Context, field 
 }
 
 func (ec *executionContext) fieldContext___EnumValue_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__EnumValue",
 		Field:      field,
@@ -3445,6 +3494,7 @@ func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field
 }
 
 func (ec *executionContext) fieldContext___EnumValue_isDeprecated(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__EnumValue",
 		Field:      field,
@@ -3486,6 +3536,7 @@ func (ec *executionContext) ___EnumValue_deprecationReason(ctx context.Context, 
 }
 
 func (ec *executionContext) fieldContext___EnumValue_deprecationReason(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__EnumValue",
 		Field:      field,
@@ -3530,6 +3581,7 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) fieldContext___Field_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Field",
 		Field:      field,
@@ -3571,6 +3623,7 @@ func (ec *executionContext) ___Field_description(ctx context.Context, field grap
 }
 
 func (ec *executionContext) fieldContext___Field_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Field",
 		Field:      field,
@@ -3615,6 +3668,7 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) fieldContext___Field_args(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Field",
 		Field:      field,
@@ -3669,6 +3723,7 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 }
 
 func (ec *executionContext) fieldContext___Field_type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Field",
 		Field:      field,
@@ -3735,6 +3790,7 @@ func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field gra
 }
 
 func (ec *executionContext) fieldContext___Field_isDeprecated(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Field",
 		Field:      field,
@@ -3776,6 +3832,7 @@ func (ec *executionContext) ___Field_deprecationReason(ctx context.Context, fiel
 }
 
 func (ec *executionContext) fieldContext___Field_deprecationReason(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Field",
 		Field:      field,
@@ -3820,6 +3877,7 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) fieldContext___InputValue_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__InputValue",
 		Field:      field,
@@ -3861,6 +3919,7 @@ func (ec *executionContext) ___InputValue_description(ctx context.Context, field
 }
 
 func (ec *executionContext) fieldContext___InputValue_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__InputValue",
 		Field:      field,
@@ -3905,6 +3964,7 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) fieldContext___InputValue_type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__InputValue",
 		Field:      field,
@@ -3968,6 +4028,7 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 }
 
 func (ec *executionContext) fieldContext___InputValue_defaultValue(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__InputValue",
 		Field:      field,
@@ -4009,6 +4070,7 @@ func (ec *executionContext) ___Schema_description(ctx context.Context, field gra
 }
 
 func (ec *executionContext) fieldContext___Schema_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Schema",
 		Field:      field,
@@ -4053,6 +4115,7 @@ func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.C
 }
 
 func (ec *executionContext) fieldContext___Schema_types(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Schema",
 		Field:      field,
@@ -4119,6 +4182,7 @@ func (ec *executionContext) ___Schema_queryType(ctx context.Context, field graph
 }
 
 func (ec *executionContext) fieldContext___Schema_queryType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Schema",
 		Field:      field,
@@ -4182,6 +4246,7 @@ func (ec *executionContext) ___Schema_mutationType(ctx context.Context, field gr
 }
 
 func (ec *executionContext) fieldContext___Schema_mutationType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Schema",
 		Field:      field,
@@ -4245,6 +4310,7 @@ func (ec *executionContext) ___Schema_subscriptionType(ctx context.Context, fiel
 }
 
 func (ec *executionContext) fieldContext___Schema_subscriptionType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Schema",
 		Field:      field,
@@ -4311,6 +4377,7 @@ func (ec *executionContext) ___Schema_directives(ctx context.Context, field grap
 }
 
 func (ec *executionContext) fieldContext___Schema_directives(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Schema",
 		Field:      field,
@@ -4367,6 +4434,7 @@ func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.Coll
 }
 
 func (ec *executionContext) fieldContext___Type_kind(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -4408,6 +4476,7 @@ func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.Coll
 }
 
 func (ec *executionContext) fieldContext___Type_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -4449,6 +4518,7 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 }
 
 func (ec *executionContext) fieldContext___Type_description(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -4490,6 +4560,7 @@ func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) fieldContext___Type_fields(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -4556,6 +4627,7 @@ func (ec *executionContext) ___Type_interfaces(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) fieldContext___Type_interfaces(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -4619,6 +4691,7 @@ func (ec *executionContext) ___Type_possibleTypes(ctx context.Context, field gra
 }
 
 func (ec *executionContext) fieldContext___Type_possibleTypes(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -4682,6 +4755,7 @@ func (ec *executionContext) ___Type_enumValues(ctx context.Context, field graphq
 }
 
 func (ec *executionContext) fieldContext___Type_enumValues(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -4744,6 +4818,7 @@ func (ec *executionContext) ___Type_inputFields(ctx context.Context, field graph
 }
 
 func (ec *executionContext) fieldContext___Type_inputFields(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -4795,6 +4870,7 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 }
 
 func (ec *executionContext) fieldContext___Type_ofType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -4858,6 +4934,7 @@ func (ec *executionContext) ___Type_specifiedByURL(ctx context.Context, field gr
 }
 
 func (ec *executionContext) fieldContext___Type_specifiedByURL(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	var _ = ctx
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -4920,6 +4997,8 @@ func (ec *executionContext) unmarshalInputReviewInput(ctx context.Context, obj i
 // region    ************************** interface.gotpl ***************************
 
 func (ec *executionContext) _Character(ctx context.Context, sel ast.SelectionSet, obj models.Character) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
@@ -4943,6 +5022,8 @@ func (ec *executionContext) _Character(ctx context.Context, sel ast.SelectionSet
 }
 
 func (ec *executionContext) _SearchResult(ctx context.Context, sel ast.SelectionSet, obj models.SearchResult) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
@@ -5001,6 +5082,7 @@ func (ec *executionContext) _Droid(ctx context.Context, sel ast.SelectionSet, ob
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				var _ = fs
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -5034,6 +5116,7 @@ func (ec *executionContext) _Droid(ctx context.Context, sel ast.SelectionSet, ob
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				var _ = fs
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -5116,6 +5199,7 @@ func (ec *executionContext) _FriendsConnection(ctx context.Context, sel ast.Sele
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				var _ = fs
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -5149,6 +5233,7 @@ func (ec *executionContext) _FriendsConnection(ctx context.Context, sel ast.Sele
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				var _ = fs
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -5279,6 +5364,7 @@ func (ec *executionContext) _Human(ctx context.Context, sel ast.SelectionSet, ob
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				var _ = fs
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -5312,6 +5398,7 @@ func (ec *executionContext) _Human(ctx context.Context, sel ast.SelectionSet, ob
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				var _ = fs
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -5353,6 +5440,7 @@ func (ec *executionContext) _Human(ctx context.Context, sel ast.SelectionSet, ob
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				var _ = fs
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -5533,6 +5621,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				var _ = fs
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -5552,6 +5641,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				var _ = fs
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -5574,6 +5664,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				var _ = fs
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -5596,6 +5687,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				var _ = fs
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -5615,6 +5707,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				var _ = fs
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -5634,6 +5727,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				var _ = fs
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -5653,6 +5747,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				var _ = fs
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -5767,6 +5862,7 @@ func (ec *executionContext) _Starship(ctx context.Context, sel ast.SelectionSet,
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				var _ = fs
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
@@ -6159,6 +6255,8 @@ func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v interf
 }
 
 func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	res := graphql.MarshalBoolean(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -6169,6 +6267,8 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 }
 
 func (ec *executionContext) marshalNCharacter2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐCharacter(ctx context.Context, sel ast.SelectionSet, v models.Character) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -6185,6 +6285,8 @@ func (ec *executionContext) unmarshalNEpisode2githubᚗcomᚋ99designsᚋgqlgen�
 }
 
 func (ec *executionContext) marshalNEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐEpisode(ctx context.Context, sel ast.SelectionSet, v models.Episode) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	return v
 }
 
@@ -6206,6 +6308,8 @@ func (ec *executionContext) unmarshalNEpisode2ᚕgithubᚗcomᚋ99designsᚋgqlg
 }
 
 func (ec *executionContext) marshalNEpisode2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐEpisodeᚄ(ctx context.Context, sel ast.SelectionSet, v []models.Episode) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6255,6 +6359,8 @@ func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v inter
 }
 
 func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	res := graphql.MarshalFloatContext(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -6265,10 +6371,14 @@ func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.S
 }
 
 func (ec *executionContext) marshalNFriendsConnection2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐFriendsConnection(ctx context.Context, sel ast.SelectionSet, v models.FriendsConnection) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	return ec._FriendsConnection(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNFriendsConnection2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐFriendsConnection(ctx context.Context, sel ast.SelectionSet, v *models.FriendsConnection) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -6279,6 +6389,8 @@ func (ec *executionContext) marshalNFriendsConnection2ᚖgithubᚗcomᚋ99design
 }
 
 func (ec *executionContext) marshalNFriendsEdge2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐFriendsEdge(ctx context.Context, sel ast.SelectionSet, v *models.FriendsEdge) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -6294,6 +6406,8 @@ func (ec *executionContext) unmarshalNID2string(ctx context.Context, v interface
 }
 
 func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	res := graphql.MarshalID(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -6309,6 +6423,8 @@ func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v interface{}
 }
 
 func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	res := graphql.MarshalInt(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -6336,6 +6452,8 @@ func (ec *executionContext) unmarshalNInt2ᚕintᚄ(ctx context.Context, v inter
 }
 
 func (ec *executionContext) marshalNInt2ᚕintᚄ(ctx context.Context, sel ast.SelectionSet, v []int) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	ret := make(graphql.Array, len(v))
 	for i := range v {
 		ret[i] = ec.marshalNInt2int(ctx, sel, v[i])
@@ -6368,6 +6486,8 @@ func (ec *executionContext) unmarshalNInt2ᚕᚕintᚄ(ctx context.Context, v in
 }
 
 func (ec *executionContext) marshalNInt2ᚕᚕintᚄ(ctx context.Context, sel ast.SelectionSet, v [][]int) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	ret := make(graphql.Array, len(v))
 	for i := range v {
 		ret[i] = ec.marshalNInt2ᚕintᚄ(ctx, sel, v[i])
@@ -6383,18 +6503,26 @@ func (ec *executionContext) marshalNInt2ᚕᚕintᚄ(ctx context.Context, sel as
 }
 
 func (ec *executionContext) marshalNMutation2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐMutation(ctx context.Context, sel ast.SelectionSet, v models.Mutation) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	return ec._Mutation(ctx, sel)
 }
 
 func (ec *executionContext) marshalNPageInfo2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐPageInfo(ctx context.Context, sel ast.SelectionSet, v models.PageInfo) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	return ec._PageInfo(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNQuery2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐQuery(ctx context.Context, sel ast.SelectionSet, v models.Query) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	return ec._Query(ctx, sel)
 }
 
 func (ec *executionContext) marshalNReview2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐReviewᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Review) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6439,6 +6567,8 @@ func (ec *executionContext) marshalNReview2ᚕᚖgithubᚗcomᚋ99designsᚋgqlg
 }
 
 func (ec *executionContext) marshalNReview2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐReview(ctx context.Context, sel ast.SelectionSet, v *models.Review) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -6454,6 +6584,8 @@ func (ec *executionContext) unmarshalNReviewInput2githubᚗcomᚋ99designsᚋgql
 }
 
 func (ec *executionContext) marshalNSearchResult2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐSearchResult(ctx context.Context, sel ast.SelectionSet, v models.SearchResult) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -6464,6 +6596,8 @@ func (ec *executionContext) marshalNSearchResult2githubᚗcomᚋ99designsᚋgqlg
 }
 
 func (ec *executionContext) marshalNSearchResult2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐSearchResultᚄ(ctx context.Context, sel ast.SelectionSet, v []models.SearchResult) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6508,6 +6642,8 @@ func (ec *executionContext) marshalNSearchResult2ᚕgithubᚗcomᚋ99designsᚋg
 }
 
 func (ec *executionContext) marshalNStarship2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐStarship(ctx context.Context, sel ast.SelectionSet, v *models.Starship) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -6523,6 +6659,8 @@ func (ec *executionContext) unmarshalNString2string(ctx context.Context, v inter
 }
 
 func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -6533,10 +6671,14 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 }
 
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	return ec.___Directive(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Directive) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6586,6 +6728,8 @@ func (ec *executionContext) unmarshalN__DirectiveLocation2string(ctx context.Con
 }
 
 func (ec *executionContext) marshalN__DirectiveLocation2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -6613,6 +6757,8 @@ func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx conte
 }
 
 func (ec *executionContext) marshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6657,18 +6803,26 @@ func (ec *executionContext) marshalN__DirectiveLocation2ᚕstringᚄ(ctx context
 }
 
 func (ec *executionContext) marshalN__EnumValue2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValue(ctx context.Context, sel ast.SelectionSet, v introspection.EnumValue) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	return ec.___EnumValue(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalN__Field2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐField(ctx context.Context, sel ast.SelectionSet, v introspection.Field) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	return ec.___Field(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalN__InputValue2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValue(ctx context.Context, sel ast.SelectionSet, v introspection.InputValue) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	return ec.___InputValue(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6713,10 +6867,14 @@ func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 }
 
 func (ec *executionContext) marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, sel ast.SelectionSet, v introspection.Type) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	return ec.___Type(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -6761,6 +6919,8 @@ func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 }
 
 func (ec *executionContext) marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, sel ast.SelectionSet, v *introspection.Type) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -6776,6 +6936,8 @@ func (ec *executionContext) unmarshalN__TypeKind2string(ctx context.Context, v i
 }
 
 func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -6791,6 +6953,8 @@ func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v interf
 }
 
 func (ec *executionContext) marshalOBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	res := graphql.MarshalBoolean(v)
 	return res
 }
@@ -6804,6 +6968,8 @@ func (ec *executionContext) unmarshalOBoolean2ᚖbool(ctx context.Context, v int
 }
 
 func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast.SelectionSet, v *bool) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -6812,6 +6978,8 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 }
 
 func (ec *executionContext) marshalOCharacter2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐCharacter(ctx context.Context, sel ast.SelectionSet, v models.Character) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -6819,6 +6987,8 @@ func (ec *executionContext) marshalOCharacter2githubᚗcomᚋ99designsᚋgqlgen�
 }
 
 func (ec *executionContext) marshalOCharacter2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐCharacterᚄ(ctx context.Context, sel ast.SelectionSet, v []models.Character) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -6866,6 +7036,8 @@ func (ec *executionContext) marshalOCharacter2ᚕgithubᚗcomᚋ99designsᚋgqlg
 }
 
 func (ec *executionContext) marshalODroid2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐDroid(ctx context.Context, sel ast.SelectionSet, v *models.Droid) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -6882,6 +7054,8 @@ func (ec *executionContext) unmarshalOEpisode2ᚖgithubᚗcomᚋ99designsᚋgqlg
 }
 
 func (ec *executionContext) marshalOEpisode2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐEpisode(ctx context.Context, sel ast.SelectionSet, v *models.Episode) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -6894,11 +7068,15 @@ func (ec *executionContext) unmarshalOFloat2float64(ctx context.Context, v inter
 }
 
 func (ec *executionContext) marshalOFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	res := graphql.MarshalFloatContext(v)
 	return graphql.WrapContextMarshaler(ctx, res)
 }
 
 func (ec *executionContext) marshalOFriendsEdge2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐFriendsEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.FriendsEdge) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -6946,6 +7124,8 @@ func (ec *executionContext) marshalOFriendsEdge2ᚕᚖgithubᚗcomᚋ99designs�
 }
 
 func (ec *executionContext) marshalOHuman2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐHuman(ctx context.Context, sel ast.SelectionSet, v *models.Human) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -6961,6 +7141,8 @@ func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v interf
 }
 
 func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -6977,6 +7159,8 @@ func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v interfac
 }
 
 func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.SelectionSet, v *int) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -6991,6 +7175,8 @@ func (ec *executionContext) unmarshalOLengthUnit2githubᚗcomᚋ99designsᚋgqlg
 }
 
 func (ec *executionContext) marshalOLengthUnit2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐLengthUnit(ctx context.Context, sel ast.SelectionSet, v models.LengthUnit) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	return v
 }
 
@@ -7004,6 +7190,8 @@ func (ec *executionContext) unmarshalOLengthUnit2ᚖgithubᚗcomᚋ99designsᚋg
 }
 
 func (ec *executionContext) marshalOLengthUnit2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐLengthUnit(ctx context.Context, sel ast.SelectionSet, v *models.LengthUnit) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -7011,6 +7199,8 @@ func (ec *executionContext) marshalOLengthUnit2ᚖgithubᚗcomᚋ99designsᚋgql
 }
 
 func (ec *executionContext) marshalOReview2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐReview(ctx context.Context, sel ast.SelectionSet, v *models.Review) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -7018,6 +7208,8 @@ func (ec *executionContext) marshalOReview2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 }
 
 func (ec *executionContext) marshalOStarship2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐStarshipᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Starship) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -7065,6 +7257,8 @@ func (ec *executionContext) marshalOStarship2ᚕᚖgithubᚗcomᚋ99designsᚋgq
 }
 
 func (ec *executionContext) marshalOStarship2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐStarship(ctx context.Context, sel ast.SelectionSet, v *models.Starship) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -7077,6 +7271,8 @@ func (ec *executionContext) unmarshalOString2string(ctx context.Context, v inter
 }
 
 func (ec *executionContext) marshalOString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	res := graphql.MarshalString(v)
 	return res
 }
@@ -7090,6 +7286,8 @@ func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v in
 }
 
 func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -7103,6 +7301,8 @@ func (ec *executionContext) unmarshalOTime2timeᚐTime(ctx context.Context, v in
 }
 
 func (ec *executionContext) marshalOTime2timeᚐTime(ctx context.Context, sel ast.SelectionSet, v time.Time) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	res := graphql.MarshalTime(v)
 	return res
 }
@@ -7116,6 +7316,8 @@ func (ec *executionContext) unmarshalOTime2ᚖtimeᚐTime(ctx context.Context, v
 }
 
 func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel ast.SelectionSet, v *time.Time) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -7124,6 +7326,8 @@ func (ec *executionContext) marshalOTime2ᚖtimeᚐTime(ctx context.Context, sel
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -7171,6 +7375,8 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 }
 
 func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐFieldᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Field) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -7218,6 +7424,8 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 }
 
 func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -7265,6 +7473,8 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 }
 
 func (ec *executionContext) marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx context.Context, sel ast.SelectionSet, v *introspection.Schema) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -7272,6 +7482,8 @@ func (ec *executionContext) marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlge
 }
 
 func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}
@@ -7319,6 +7531,8 @@ func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 }
 
 func (ec *executionContext) marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, sel ast.SelectionSet, v *introspection.Type) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	if v == nil {
 		return graphql.Null
 	}

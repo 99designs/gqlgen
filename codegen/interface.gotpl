@@ -1,6 +1,8 @@
 {{- range $interface := .Interfaces }}
 
 func (ec *executionContext) _{{$interface.Name}}(ctx context.Context, sel ast.SelectionSet, obj {{$interface.Type | ref}}) graphql.Marshaler {
+	var _ = ctx
+	var _ = sel
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null

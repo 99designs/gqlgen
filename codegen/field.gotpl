@@ -21,7 +21,7 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 			res := &{{ $field.TypeReference.Elem.GO | ref }}{}
 		{{- else }}
 			res := {{ $field.TypeReference.GO | ref }}{}
-		{{- end }} 
+		{{- end }}
 		fc.Result = res
 		return ec.{{ $field.TypeReference.MarshalFunc }}(ctx, field.Selections, res)
 	{{- else}}
@@ -72,7 +72,7 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 	{{- end }}
 }
 
-func (ec *executionContext) {{ $field.FieldContextFunc }}(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) {{ $field.FieldContextFunc }}({{ if not $field.Args }}_{{ else }}ctx{{ end }} context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object: {{quote $field.Object.Name}},
 		Field: field,

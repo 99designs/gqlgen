@@ -55,7 +55,7 @@ func (ec *executionContext) _FieldsOrderPayload_firstFieldValue(ctx context.Cont
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_FieldsOrderPayload_firstFieldValue(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_FieldsOrderPayload_firstFieldValue(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "FieldsOrderPayload",
 		Field:      field,

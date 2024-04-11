@@ -90,7 +90,7 @@ func (ec *executionContext) _Panics_fieldScalarMarshal(ctx context.Context, fiel
 	return ec.marshalNMarshalPanic2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐMarshalPanicᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Panics_fieldScalarMarshal(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Panics_fieldScalarMarshal(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Panics",
 		Field:      field,

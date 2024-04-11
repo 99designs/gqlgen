@@ -51,7 +51,7 @@ func (ec *executionContext) _PtrToSliceContainer_ptrToSlice(ctx context.Context,
 	return ec.marshalOString2ᚖᚕstringᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_PtrToSliceContainer_ptrToSlice(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_PtrToSliceContainer_ptrToSlice(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "PtrToSliceContainer",
 		Field:      field,

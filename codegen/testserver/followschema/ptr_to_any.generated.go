@@ -51,7 +51,7 @@ func (ec *executionContext) _PtrToAnyContainer_ptrToAny(ctx context.Context, fie
 	return ec.marshalOAny2ᚖinterface(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_PtrToAnyContainer_ptrToAny(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_PtrToAnyContainer_ptrToAny(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "PtrToAnyContainer",
 		Field:      field,
@@ -89,7 +89,7 @@ func (ec *executionContext) _PtrToAnyContainer_binding(ctx context.Context, fiel
 	return ec.marshalOAny2ᚖinterface(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_PtrToAnyContainer_binding(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_PtrToAnyContainer_binding(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "PtrToAnyContainer",
 		Field:      field,

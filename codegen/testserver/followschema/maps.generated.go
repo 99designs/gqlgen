@@ -55,7 +55,7 @@ func (ec *executionContext) _MapNested_value(ctx context.Context, field graphql.
 	return ec.marshalNCustomScalar2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCustomScalar(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_MapNested_value(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_MapNested_value(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "MapNested",
 		Field:      field,
@@ -102,7 +102,7 @@ func (ec *executionContext) _MapStringInterfaceType_a(ctx context.Context, field
 	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_MapStringInterfaceType_a(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_MapStringInterfaceType_a(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "MapStringInterfaceType",
 		Field:      field,
@@ -149,7 +149,7 @@ func (ec *executionContext) _MapStringInterfaceType_b(ctx context.Context, field
 	return ec.marshalOInt2ᚖint(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_MapStringInterfaceType_b(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_MapStringInterfaceType_b(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "MapStringInterfaceType",
 		Field:      field,
@@ -196,7 +196,7 @@ func (ec *executionContext) _MapStringInterfaceType_c(ctx context.Context, field
 	return ec.marshalOCustomScalar2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCustomScalar(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_MapStringInterfaceType_c(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_MapStringInterfaceType_c(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "MapStringInterfaceType",
 		Field:      field,
@@ -243,7 +243,7 @@ func (ec *executionContext) _MapStringInterfaceType_nested(ctx context.Context, 
 	return ec.marshalOMapNested2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐMapNested(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_MapStringInterfaceType_nested(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_MapStringInterfaceType_nested(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "MapStringInterfaceType",
 		Field:      field,

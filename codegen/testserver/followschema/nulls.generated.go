@@ -64,7 +64,7 @@ func (ec *executionContext) _Error_id(ctx context.Context, field graphql.Collect
 	return ec.marshalNID2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Error_id(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Error_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Error",
 		Field:      field,
@@ -102,7 +102,7 @@ func (ec *executionContext) _Error_errorOnNonRequiredField(ctx context.Context, 
 	return ec.marshalOString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Error_errorOnNonRequiredField(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Error_errorOnNonRequiredField(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Error",
 		Field:      field,
@@ -143,7 +143,7 @@ func (ec *executionContext) _Error_errorOnRequiredField(ctx context.Context, fie
 	return ec.marshalNString2string(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Error_errorOnRequiredField(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Error_errorOnRequiredField(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Error",
 		Field:      field,
@@ -184,7 +184,7 @@ func (ec *executionContext) _Error_nilOnRequiredField(ctx context.Context, field
 	return ec.marshalNString2ᚖstring(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Error_nilOnRequiredField(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Error_nilOnRequiredField(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Error",
 		Field:      field,
@@ -225,7 +225,7 @@ func (ec *executionContext) _Errors_a(ctx context.Context, field graphql.Collect
 	return ec.marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Errors_a(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Errors_a(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Errors",
 		Field:      field,
@@ -276,7 +276,7 @@ func (ec *executionContext) _Errors_b(ctx context.Context, field graphql.Collect
 	return ec.marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Errors_b(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Errors_b(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Errors",
 		Field:      field,
@@ -327,7 +327,7 @@ func (ec *executionContext) _Errors_c(ctx context.Context, field graphql.Collect
 	return ec.marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Errors_c(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Errors_c(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Errors",
 		Field:      field,
@@ -378,7 +378,7 @@ func (ec *executionContext) _Errors_d(ctx context.Context, field graphql.Collect
 	return ec.marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Errors_d(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Errors_d(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Errors",
 		Field:      field,
@@ -429,7 +429,7 @@ func (ec *executionContext) _Errors_e(ctx context.Context, field graphql.Collect
 	return ec.marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Errors_e(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Errors_e(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Errors",
 		Field:      field,

@@ -48,7 +48,7 @@ func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.Selec
 			{{- if $field.IsConcurrent }}
 				field := field
 
-				innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				innerFunc := func(ctx context.Context, {{ if $field.TypeReference.GQL.NonNull }}fs{{ else }}_{{ end }} *graphql.FieldSet) (res graphql.Marshaler) {
 					defer func() {
 						if r := recover(); r != nil {
 							ec.Error(ctx, ec.Recover(ctx, r))

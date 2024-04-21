@@ -46,16 +46,40 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Query struct {
-		Bool   func(childComplexity int, typedN *model.BoolTyped, untypedN *bool, typed model.BoolTyped, untyped bool) int
-		Int    func(childComplexity int, typedN *model.IntTyped, untypedN *int, typed model.IntTyped, untyped int) int
-		String func(childComplexity int, typedN *model.StringTyped, untypedN *string, typed model.StringTyped, untyped string) int
+		BoolTyped      func(childComplexity int, arg model.BoolTyped) int
+		BoolTypedN     func(childComplexity int, arg *model.BoolTyped) int
+		BoolUntyped    func(childComplexity int, arg bool) int
+		BoolUntypedN   func(childComplexity int, arg *bool) int
+		InPackage      func(childComplexity int, arg InPackage) int
+		IntTyped       func(childComplexity int, arg model.IntTyped) int
+		IntTypedN      func(childComplexity int, arg *model.IntTyped) int
+		IntUntyped     func(childComplexity int, arg int) int
+		IntUntypedN    func(childComplexity int, arg *int) int
+		StringTyped    func(childComplexity int, arg model.StringTyped) int
+		StringTypedN   func(childComplexity int, arg *model.StringTyped) int
+		StringUntyped  func(childComplexity int, arg string) int
+		StringUntypedN func(childComplexity int, arg *string) int
+		VarTyped       func(childComplexity int, arg model.VarTyped) int
+		VarUntyped     func(childComplexity int, arg bool) int
 	}
 }
 
 type QueryResolver interface {
-	Int(ctx context.Context, typedN *model.IntTyped, untypedN *int, typed model.IntTyped, untyped int) ([]model.IntTyped, error)
-	String(ctx context.Context, typedN *model.StringTyped, untypedN *string, typed model.StringTyped, untyped string) ([]model.StringTyped, error)
-	Bool(ctx context.Context, typedN *model.BoolTyped, untypedN *bool, typed model.BoolTyped, untyped bool) ([]model.BoolTyped, error)
+	IntTyped(ctx context.Context, arg model.IntTyped) (model.IntTyped, error)
+	IntUntyped(ctx context.Context, arg int) (int, error)
+	IntTypedN(ctx context.Context, arg *model.IntTyped) (*model.IntTyped, error)
+	IntUntypedN(ctx context.Context, arg *int) (*int, error)
+	StringTyped(ctx context.Context, arg model.StringTyped) (model.StringTyped, error)
+	StringUntyped(ctx context.Context, arg string) (string, error)
+	StringTypedN(ctx context.Context, arg *model.StringTyped) (*model.StringTyped, error)
+	StringUntypedN(ctx context.Context, arg *string) (*string, error)
+	BoolTyped(ctx context.Context, arg model.BoolTyped) (model.BoolTyped, error)
+	BoolUntyped(ctx context.Context, arg bool) (bool, error)
+	BoolTypedN(ctx context.Context, arg *model.BoolTyped) (*model.BoolTyped, error)
+	BoolUntypedN(ctx context.Context, arg *bool) (*bool, error)
+	VarTyped(ctx context.Context, arg model.VarTyped) (model.VarTyped, error)
+	VarUntyped(ctx context.Context, arg bool) (bool, error)
+	InPackage(ctx context.Context, arg InPackage) (InPackage, error)
 }
 
 type executableSchema struct {
@@ -77,41 +101,185 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Query.bool":
-		if e.complexity.Query.Bool == nil {
+	case "Query.boolTyped":
+		if e.complexity.Query.BoolTyped == nil {
 			break
 		}
 
-		args, err := ec.field_Query_bool_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_boolTyped_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.Bool(childComplexity, args["typedN"].(*model.BoolTyped), args["untypedN"].(*bool), args["typed"].(model.BoolTyped), args["untyped"].(bool)), true
+		return e.complexity.Query.BoolTyped(childComplexity, args["arg"].(model.BoolTyped)), true
 
-	case "Query.int":
-		if e.complexity.Query.Int == nil {
+	case "Query.boolTypedN":
+		if e.complexity.Query.BoolTypedN == nil {
 			break
 		}
 
-		args, err := ec.field_Query_int_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_boolTypedN_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.Int(childComplexity, args["typedN"].(*model.IntTyped), args["untypedN"].(*int), args["typed"].(model.IntTyped), args["untyped"].(int)), true
+		return e.complexity.Query.BoolTypedN(childComplexity, args["arg"].(*model.BoolTyped)), true
 
-	case "Query.string":
-		if e.complexity.Query.String == nil {
+	case "Query.boolUntyped":
+		if e.complexity.Query.BoolUntyped == nil {
 			break
 		}
 
-		args, err := ec.field_Query_string_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_boolUntyped_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.String(childComplexity, args["typedN"].(*model.StringTyped), args["untypedN"].(*string), args["typed"].(model.StringTyped), args["untyped"].(string)), true
+		return e.complexity.Query.BoolUntyped(childComplexity, args["arg"].(bool)), true
+
+	case "Query.boolUntypedN":
+		if e.complexity.Query.BoolUntypedN == nil {
+			break
+		}
+
+		args, err := ec.field_Query_boolUntypedN_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.BoolUntypedN(childComplexity, args["arg"].(*bool)), true
+
+	case "Query.inPackage":
+		if e.complexity.Query.InPackage == nil {
+			break
+		}
+
+		args, err := ec.field_Query_inPackage_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.InPackage(childComplexity, args["arg"].(InPackage)), true
+
+	case "Query.intTyped":
+		if e.complexity.Query.IntTyped == nil {
+			break
+		}
+
+		args, err := ec.field_Query_intTyped_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.IntTyped(childComplexity, args["arg"].(model.IntTyped)), true
+
+	case "Query.intTypedN":
+		if e.complexity.Query.IntTypedN == nil {
+			break
+		}
+
+		args, err := ec.field_Query_intTypedN_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.IntTypedN(childComplexity, args["arg"].(*model.IntTyped)), true
+
+	case "Query.intUntyped":
+		if e.complexity.Query.IntUntyped == nil {
+			break
+		}
+
+		args, err := ec.field_Query_intUntyped_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.IntUntyped(childComplexity, args["arg"].(int)), true
+
+	case "Query.intUntypedN":
+		if e.complexity.Query.IntUntypedN == nil {
+			break
+		}
+
+		args, err := ec.field_Query_intUntypedN_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.IntUntypedN(childComplexity, args["arg"].(*int)), true
+
+	case "Query.stringTyped":
+		if e.complexity.Query.StringTyped == nil {
+			break
+		}
+
+		args, err := ec.field_Query_stringTyped_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.StringTyped(childComplexity, args["arg"].(model.StringTyped)), true
+
+	case "Query.stringTypedN":
+		if e.complexity.Query.StringTypedN == nil {
+			break
+		}
+
+		args, err := ec.field_Query_stringTypedN_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.StringTypedN(childComplexity, args["arg"].(*model.StringTyped)), true
+
+	case "Query.stringUntyped":
+		if e.complexity.Query.StringUntyped == nil {
+			break
+		}
+
+		args, err := ec.field_Query_stringUntyped_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.StringUntyped(childComplexity, args["arg"].(string)), true
+
+	case "Query.stringUntypedN":
+		if e.complexity.Query.StringUntypedN == nil {
+			break
+		}
+
+		args, err := ec.field_Query_stringUntypedN_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.StringUntypedN(childComplexity, args["arg"].(*string)), true
+
+	case "Query.varTyped":
+		if e.complexity.Query.VarTyped == nil {
+			break
+		}
+
+		args, err := ec.field_Query_varTyped_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.VarTyped(childComplexity, args["arg"].(model.VarTyped)), true
+
+	case "Query.varUntyped":
+		if e.complexity.Query.VarUntyped == nil {
+			break
+		}
+
+		args, err := ec.field_Query_varUntyped_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.VarUntyped(childComplexity, args["arg"].(bool)), true
 
 	}
 	return 0, false
@@ -205,32 +373,52 @@ var sources = []*ast.Source{
 	{Name: "../enum.graphqls", Input: `directive @goModel(
     model: String
     models: [String!]
-) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | ENUM_VALUE | INTERFACE | UNION
+) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+
+directive @goEnum(
+    value: String
+) on ENUM_VALUE
 
 type Query {
-    int(typedN: IntTyped, untypedN: IntUntyped, typed: IntTyped!, untyped: IntUntyped!): [IntTyped!]
-    string(typedN: StringTyped, untypedN: StringUntyped, typed: StringTyped!, untyped: StringUntyped!): [StringTyped!]
-    bool(typedN: BoolTyped, untypedN: BoolUntyped, typed: BoolTyped!, untyped: BoolUntyped!): [BoolTyped!]
+    intTyped(arg: IntTyped!): IntTyped!
+    intUntyped(arg: IntUntyped!): IntUntyped!
+    intTypedN(arg: IntTyped): IntTyped
+    intUntypedN(arg: IntUntyped): IntUntyped
+
+    stringTyped(arg: StringTyped!): StringTyped!
+    stringUntyped(arg: StringUntyped!): StringUntyped!
+    stringTypedN(arg: StringTyped): StringTyped
+    stringUntypedN(arg: StringUntyped): StringUntyped
+
+    boolTyped(arg: BoolTyped!): BoolTyped!
+    boolUntyped(arg: BoolUntyped!): BoolUntyped!
+    boolTypedN(arg: BoolTyped): BoolTyped
+    boolUntypedN(arg: BoolUntyped): BoolUntyped
+
+    varTyped(arg: VarTyped!): VarTyped!
+    varUntyped(arg: VarUntyped!): VarUntyped!
+
+    inPackage(arg: InPackage!): InPackage!
 }
 
 enum IntTyped @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.IntTyped") {
-    ONE @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.IntTypedOne")
-    TWO @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.IntTypedTwo")
+    ONE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.IntTypedOne")
+    TWO @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.IntTypedTwo")
 }
 
 enum IntUntyped @goModel(model: "github.com/99designs/gqlgen/graphql.Int") {
-    ONE @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.IntUntypedOne")
-    TWO @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.IntUntypedTwo")
+    ONE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.IntUntypedOne")
+    TWO @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.IntUntypedTwo")
 }
 
-enum StringTyped @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.StringTyped")  {
-    ONE @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.StringTypedOne")
-    TWO @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.StringTypedTwo")
+enum StringTyped @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.StringTyped") {
+    ONE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.StringTypedOne")
+    TWO @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.StringTypedTwo")
 }
 
 enum StringUntyped @goModel(model: "github.com/99designs/gqlgen/graphql.String") {
-    ONE @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.StringUntypedOne")
-    TWO @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.StringUntypedTwo")
+    ONE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.StringUntypedOne")
+    TWO @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.StringUntypedTwo")
 }
 
 enum BoolTyped {
@@ -239,6 +427,21 @@ enum BoolTyped {
 }
 
 enum BoolUntyped {
+    TRUE
+    FALSE
+}
+
+enum VarTyped @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.VarTyped") {
+    TRUE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.VarTypedTrue")
+    FALSE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.VarTypedFalse")
+}
+
+enum VarUntyped @goModel(model: "github.com/99designs/gqlgen/graphql.Boolean") {
+    TRUE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.VarUntypedTrue")
+    FALSE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.VarUntypedFalse")
+}
+
+enum InPackage {
     TRUE
     FALSE
 }
@@ -265,129 +468,228 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_bool_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_boolTypedN_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *model.BoolTyped
-	if tmp, ok := rawArgs["typedN"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typedN"))
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
 		arg0, err = ec.unmarshalOBoolTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTyped(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["typedN"] = arg0
-	var arg1 *bool
-	if tmp, ok := rawArgs["untypedN"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("untypedN"))
-		arg1, err = ec.unmarshalOBoolUntyped2ᚖbool(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["untypedN"] = arg1
-	var arg2 model.BoolTyped
-	if tmp, ok := rawArgs["typed"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typed"))
-		arg2, err = ec.unmarshalNBoolTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTyped(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["typed"] = arg2
-	var arg3 bool
-	if tmp, ok := rawArgs["untyped"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("untyped"))
-		arg3, err = ec.unmarshalNBoolUntyped2bool(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["untyped"] = arg3
+	args["arg"] = arg0
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_int_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_boolTyped_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.BoolTyped
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalNBoolTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTyped(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["arg"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_boolUntypedN_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *bool
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalOBoolUntyped2ᚖbool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["arg"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_boolUntyped_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 bool
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalNBoolUntyped2bool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["arg"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_inPackage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 InPackage
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalNInPackage2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋapiᚐInPackage(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["arg"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_intTypedN_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *model.IntTyped
-	if tmp, ok := rawArgs["typedN"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typedN"))
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
 		arg0, err = ec.unmarshalOIntTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["typedN"] = arg0
-	var arg1 *int
-	if tmp, ok := rawArgs["untypedN"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("untypedN"))
-		arg1, err = ec.unmarshalOIntUntyped2ᚖint(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["untypedN"] = arg1
-	var arg2 model.IntTyped
-	if tmp, ok := rawArgs["typed"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typed"))
-		arg2, err = ec.unmarshalNIntTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["typed"] = arg2
-	var arg3 int
-	if tmp, ok := rawArgs["untyped"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("untyped"))
-		arg3, err = ec.unmarshalNIntUntyped2int(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["untyped"] = arg3
+	args["arg"] = arg0
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_string_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_intTyped_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.IntTyped
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalNIntTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["arg"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_intUntypedN_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *int
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalOIntUntyped2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["arg"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_intUntyped_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 int
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalNIntUntyped2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["arg"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_stringTypedN_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
 	var arg0 *model.StringTyped
-	if tmp, ok := rawArgs["typedN"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typedN"))
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
 		arg0, err = ec.unmarshalOStringTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTyped(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["typedN"] = arg0
-	var arg1 *string
-	if tmp, ok := rawArgs["untypedN"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("untypedN"))
-		arg1, err = ec.unmarshalOStringUntyped2ᚖstring(ctx, tmp)
+	args["arg"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_stringTyped_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.StringTyped
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalNStringTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTyped(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["untypedN"] = arg1
-	var arg2 model.StringTyped
-	if tmp, ok := rawArgs["typed"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("typed"))
-		arg2, err = ec.unmarshalNStringTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTyped(ctx, tmp)
+	args["arg"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_stringUntypedN_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalOStringUntyped2ᚖstring(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["typed"] = arg2
-	var arg3 string
-	if tmp, ok := rawArgs["untyped"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("untyped"))
-		arg3, err = ec.unmarshalNStringUntyped2string(ctx, tmp)
+	args["arg"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_stringUntyped_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalNStringUntyped2string(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["untyped"] = arg3
+	args["arg"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_varTyped_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 model.VarTyped
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalNVarTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐVarTyped(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["arg"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_varUntyped_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	var arg0 bool
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalNVarUntyped2bool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["arg"] = arg0
 	return args, nil
 }
 
@@ -429,8 +731,8 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Query_int(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_int(ctx, field)
+func (ec *executionContext) _Query_intTyped(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_intTyped(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -443,21 +745,24 @@ func (ec *executionContext) _Query_int(ctx context.Context, field graphql.Collec
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Int(rctx, fc.Args["typedN"].(*model.IntTyped), fc.Args["untypedN"].(*int), fc.Args["typed"].(model.IntTyped), fc.Args["untyped"].(int))
+		return ec.resolvers.Query().IntTyped(rctx, fc.Args["arg"].(model.IntTyped))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.([]model.IntTyped)
+	res := resTmp.(model.IntTyped)
 	fc.Result = res
-	return ec.marshalOIntTyped2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTypedᚄ(ctx, field.Selections, res)
+	return ec.marshalNIntTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_int(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_intTyped(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -474,15 +779,15 @@ func (ec *executionContext) fieldContext_Query_int(ctx context.Context, field gr
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_int_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_intTyped_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_string(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_string(ctx, field)
+func (ec *executionContext) _Query_intUntyped(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_intUntyped(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -495,7 +800,62 @@ func (ec *executionContext) _Query_string(ctx context.Context, field graphql.Col
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().String(rctx, fc.Args["typedN"].(*model.StringTyped), fc.Args["untypedN"].(*string), fc.Args["typed"].(model.StringTyped), fc.Args["untyped"].(string))
+		return ec.resolvers.Query().IntUntyped(rctx, fc.Args["arg"].(int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNIntUntyped2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_intUntyped(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type IntUntyped does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_intUntyped_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_intTypedN(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_intTypedN(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().IntTypedN(rctx, fc.Args["arg"].(*model.IntTyped))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -504,12 +864,119 @@ func (ec *executionContext) _Query_string(ctx context.Context, field graphql.Col
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]model.StringTyped)
+	res := resTmp.(*model.IntTyped)
 	fc.Result = res
-	return ec.marshalOStringTyped2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTypedᚄ(ctx, field.Selections, res)
+	return ec.marshalOIntTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_string(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_intTypedN(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type IntTyped does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_intTypedN_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_intUntypedN(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_intUntypedN(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().IntUntypedN(rctx, fc.Args["arg"].(*int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*int)
+	fc.Result = res
+	return ec.marshalOIntUntyped2ᚖint(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_intUntypedN(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type IntUntyped does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_intUntypedN_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_stringTyped(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_stringTyped(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().StringTyped(rctx, fc.Args["arg"].(model.StringTyped))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.StringTyped)
+	fc.Result = res
+	return ec.marshalNStringTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTyped(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_stringTyped(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -526,15 +993,15 @@ func (ec *executionContext) fieldContext_Query_string(ctx context.Context, field
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_string_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_stringTyped_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_bool(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_bool(ctx, field)
+func (ec *executionContext) _Query_stringUntyped(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_stringUntyped(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -547,7 +1014,62 @@ func (ec *executionContext) _Query_bool(ctx context.Context, field graphql.Colle
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Bool(rctx, fc.Args["typedN"].(*model.BoolTyped), fc.Args["untypedN"].(*bool), fc.Args["typed"].(model.BoolTyped), fc.Args["untyped"].(bool))
+		return ec.resolvers.Query().StringUntyped(rctx, fc.Args["arg"].(string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNStringUntyped2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_stringUntyped(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type StringUntyped does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_stringUntyped_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_stringTypedN(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_stringTypedN(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().StringTypedN(rctx, fc.Args["arg"].(*model.StringTyped))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -556,12 +1078,119 @@ func (ec *executionContext) _Query_bool(ctx context.Context, field graphql.Colle
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]model.BoolTyped)
+	res := resTmp.(*model.StringTyped)
 	fc.Result = res
-	return ec.marshalOBoolTyped2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTypedᚄ(ctx, field.Selections, res)
+	return ec.marshalOStringTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTyped(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_bool(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_stringTypedN(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type StringTyped does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_stringTypedN_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_stringUntypedN(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_stringUntypedN(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().StringUntypedN(rctx, fc.Args["arg"].(*string))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOStringUntyped2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_stringUntypedN(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type StringUntyped does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_stringUntypedN_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_boolTyped(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_boolTyped(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().BoolTyped(rctx, fc.Args["arg"].(model.BoolTyped))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.BoolTyped)
+	fc.Result = res
+	return ec.marshalNBoolTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTyped(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_boolTyped(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -578,7 +1207,331 @@ func (ec *executionContext) fieldContext_Query_bool(ctx context.Context, field g
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_bool_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_boolTyped_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_boolUntyped(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_boolUntyped(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().BoolUntyped(rctx, fc.Args["arg"].(bool))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolUntyped2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_boolUntyped(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type BoolUntyped does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_boolUntyped_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_boolTypedN(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_boolTypedN(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().BoolTypedN(rctx, fc.Args["arg"].(*model.BoolTyped))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.BoolTyped)
+	fc.Result = res
+	return ec.marshalOBoolTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTyped(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_boolTypedN(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type BoolTyped does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_boolTypedN_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_boolUntypedN(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_boolUntypedN(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().BoolUntypedN(rctx, fc.Args["arg"].(*bool))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	fc.Result = res
+	return ec.marshalOBoolUntyped2ᚖbool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_boolUntypedN(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type BoolUntyped does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_boolUntypedN_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_varTyped(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_varTyped(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().VarTyped(rctx, fc.Args["arg"].(model.VarTyped))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(model.VarTyped)
+	fc.Result = res
+	return ec.marshalNVarTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐVarTyped(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_varTyped(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type VarTyped does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_varTyped_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_varUntyped(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_varUntyped(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().VarUntyped(rctx, fc.Args["arg"].(bool))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNVarUntyped2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_varUntyped(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type VarUntyped does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_varUntyped_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_inPackage(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_inPackage(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().InPackage(rctx, fc.Args["arg"].(InPackage))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(InPackage)
+	fc.Result = res
+	return ec.marshalNInPackage2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋapiᚐInPackage(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_inPackage(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type InPackage does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_inPackage_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -2514,16 +3467,19 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "int":
+		case "intTyped":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_int(ctx, field)
+				res = ec._Query_intTyped(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -2533,16 +3489,19 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "string":
+		case "intUntyped":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_string(ctx, field)
+				res = ec._Query_intUntyped(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -2552,7 +3511,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "bool":
+		case "intTypedN":
 			field := field
 
 			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
@@ -2561,7 +3520,256 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_bool(ctx, field)
+				res = ec._Query_intTypedN(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "intUntypedN":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_intUntypedN(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "stringTyped":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_stringTyped(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "stringUntyped":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_stringUntyped(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "stringTypedN":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_stringTypedN(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "stringUntypedN":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_stringUntypedN(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "boolTyped":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_boolTyped(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "boolUntyped":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_boolUntyped(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "boolTypedN":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_boolTypedN(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "boolUntypedN":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_boolUntypedN(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "varTyped":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_varTyped(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "varUntyped":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_varUntyped(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "inPackage":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_inPackage(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -2997,6 +4205,33 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) unmarshalNInPackage2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋapiᚐInPackage(ctx context.Context, v interface{}) (InPackage, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	res := unmarshalNInPackage2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋapiᚐInPackage[tmp]
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInPackage2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋapiᚐInPackage(ctx context.Context, sel ast.SelectionSet, v InPackage) graphql.Marshaler {
+	res := graphql.MarshalString(marshalNInPackage2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋapiᚐInPackage[v])
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+var (
+	unmarshalNInPackage2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋapiᚐInPackage = map[string]InPackage{
+		"TRUE":  InPackageTrue,
+		"FALSE": InPackageFalse,
+	}
+	marshalNInPackage2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋapiᚐInPackage = map[InPackage]string{
+		InPackageTrue:  "TRUE",
+		InPackageFalse: "FALSE",
+	}
+)
+
 func (ec *executionContext) unmarshalNIntTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped(ctx context.Context, v interface{}) (model.IntTyped, error) {
 	tmp, err := graphql.UnmarshalString(v)
 	res := unmarshalNIntTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped[tmp]
@@ -3117,6 +4352,60 @@ var (
 	marshalNStringUntyped2string = map[string]string{
 		model.StringUntypedOne: "ONE",
 		model.StringUntypedTwo: "TWO",
+	}
+)
+
+func (ec *executionContext) unmarshalNVarTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐVarTyped(ctx context.Context, v interface{}) (model.VarTyped, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	res := unmarshalNVarTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐVarTyped[tmp]
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNVarTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐVarTyped(ctx context.Context, sel ast.SelectionSet, v model.VarTyped) graphql.Marshaler {
+	res := graphql.MarshalString(marshalNVarTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐVarTyped[v])
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+var (
+	unmarshalNVarTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐVarTyped = map[string]model.VarTyped{
+		"TRUE":  model.VarTypedTrue,
+		"FALSE": model.VarTypedFalse,
+	}
+	marshalNVarTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐVarTyped = map[model.VarTyped]string{
+		model.VarTypedTrue:  "TRUE",
+		model.VarTypedFalse: "FALSE",
+	}
+)
+
+func (ec *executionContext) unmarshalNVarUntyped2bool(ctx context.Context, v interface{}) (bool, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	res := unmarshalNVarUntyped2bool[tmp]
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNVarUntyped2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
+	res := graphql.MarshalString(marshalNVarUntyped2bool[v])
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+var (
+	unmarshalNVarUntyped2bool = map[string]bool{
+		"TRUE":  model.VarUntypedTrue,
+		"FALSE": model.VarUntypedFalse,
+	}
+	marshalNVarUntyped2bool = map[bool]string{
+		model.VarUntypedTrue:  "TRUE",
+		model.VarUntypedFalse: "FALSE",
 	}
 )
 
@@ -3373,84 +4662,6 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	return res
 }
 
-func (ec *executionContext) unmarshalOBoolTyped2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTypedᚄ(ctx context.Context, v interface{}) ([]model.BoolTyped, error) {
-	if v == nil {
-		return nil, nil
-	}
-	var vSlice []interface{}
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
-	var err error
-	res := make([]model.BoolTyped, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNBoolTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTyped(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) marshalOBoolTyped2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTypedᚄ(ctx context.Context, sel ast.SelectionSet, v []model.BoolTyped) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNBoolTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTyped(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
-var (
-	unmarshalOBoolTyped2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTypedᚄ = map[string]model.BoolTyped{
-		"TRUE":  model.BoolTypedTrue,
-		"FALSE": model.BoolTypedFalse,
-	}
-	marshalOBoolTyped2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTypedᚄ = map[model.BoolTyped]string{
-		model.BoolTypedTrue:  "TRUE",
-		model.BoolTypedFalse: "FALSE",
-	}
-)
-
 func (ec *executionContext) unmarshalOBoolTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTyped(ctx context.Context, v interface{}) (*model.BoolTyped, error) {
 	if v == nil {
 		return nil, nil
@@ -3532,84 +4743,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	res := graphql.MarshalBoolean(*v)
 	return res
 }
-
-func (ec *executionContext) unmarshalOIntTyped2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTypedᚄ(ctx context.Context, v interface{}) ([]model.IntTyped, error) {
-	if v == nil {
-		return nil, nil
-	}
-	var vSlice []interface{}
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
-	var err error
-	res := make([]model.IntTyped, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNIntTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) marshalOIntTyped2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTypedᚄ(ctx context.Context, sel ast.SelectionSet, v []model.IntTyped) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNIntTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
-var (
-	unmarshalOIntTyped2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTypedᚄ = map[string]model.IntTyped{
-		"ONE": model.IntTypedOne,
-		"TWO": model.IntTypedTwo,
-	}
-	marshalOIntTyped2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTypedᚄ = map[model.IntTyped]string{
-		model.IntTypedOne: "ONE",
-		model.IntTypedTwo: "TWO",
-	}
-)
 
 func (ec *executionContext) unmarshalOIntTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped(ctx context.Context, v interface{}) (*model.IntTyped, error) {
 	if v == nil {
@@ -3720,84 +4853,6 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	res := graphql.MarshalString(*v)
 	return res
 }
-
-func (ec *executionContext) unmarshalOStringTyped2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTypedᚄ(ctx context.Context, v interface{}) ([]model.StringTyped, error) {
-	if v == nil {
-		return nil, nil
-	}
-	var vSlice []interface{}
-	if v != nil {
-		vSlice = graphql.CoerceList(v)
-	}
-	var err error
-	res := make([]model.StringTyped, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalNStringTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTyped(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func (ec *executionContext) marshalOStringTyped2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTypedᚄ(ctx context.Context, sel ast.SelectionSet, v []model.StringTyped) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNStringTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTyped(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	for _, e := range ret {
-		if e == graphql.Null {
-			return graphql.Null
-		}
-	}
-
-	return ret
-}
-
-var (
-	unmarshalOStringTyped2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTypedᚄ = map[string]model.StringTyped{
-		"ONE": model.StringTypedOne,
-		"TWO": model.StringTypedTwo,
-	}
-	marshalOStringTyped2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTypedᚄ = map[model.StringTyped]string{
-		model.StringTypedOne: "ONE",
-		model.StringTypedTwo: "TWO",
-	}
-)
 
 func (ec *executionContext) unmarshalOStringTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTyped(ctx context.Context, v interface{}) (*model.StringTyped, error) {
 	if v == nil {

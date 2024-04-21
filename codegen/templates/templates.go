@@ -201,6 +201,7 @@ func Funcs() template.FuncMap {
 		"rawQuote":           rawQuote,
 		"dump":               Dump,
 		"ref":                ref,
+		"obj":                obj,
 		"ts":                 TypeIdentifier,
 		"call":               Call,
 		"prefixLines":        prefixLines,
@@ -245,6 +246,15 @@ func isDelimiter(c rune) bool {
 
 func ref(p types.Type) string {
 	return CurrentImports.LookupType(p)
+}
+
+func obj(obj types.Object) string {
+	pkg := CurrentImports.Lookup(obj.Pkg().Path())
+	if pkg != "" {
+		pkg += "."
+	}
+
+	return pkg + obj.Name()
 }
 
 func Call(p *types.Func) string {

@@ -219,16 +219,16 @@ func TestEnumBinding(t *testing.T) {
 	cf.Models = TypeMap{
 		"Bar": TypeMapEntry{
 			Model: []string{"github.com/99designs/gqlgen/codegen/config/testdata/enum.Bar"},
-			EnumValues: map[string]string{
-				"ONE": "github.com/99designs/gqlgen/codegen/config/testdata/enum.BarOne",
-				"TWO": "github.com/99designs/gqlgen/codegen/config/testdata/enum.BarTwo",
+			EnumValues: map[string]EnumValue{
+				"ONE": {Value: "github.com/99designs/gqlgen/codegen/config/testdata/enum.BarOne"},
+				"TWO": {Value: "github.com/99designs/gqlgen/codegen/config/testdata/enum.BarTwo"},
 			},
 		},
 		"Baz": TypeMapEntry{
 			Model: []string{"github.com/99designs/gqlgen/graphql.Int"},
-			EnumValues: map[string]string{
-				"ONE": "github.com/99designs/gqlgen/codegen/config/testdata/enum.BazOne",
-				"TWO": "github.com/99designs/gqlgen/codegen/config/testdata/enum.BazTwo",
+			EnumValues: map[string]EnumValue{
+				"ONE": {Value: "github.com/99designs/gqlgen/codegen/config/testdata/enum.BazOne"},
+				"TWO": {Value: "github.com/99designs/gqlgen/codegen/config/testdata/enum.BazTwo"},
 			},
 		},
 		"String": TypeMapEntry{
@@ -268,14 +268,14 @@ func TestEnumBinding(t *testing.T) {
 
 	require.NotNil(t, barOne)
 	require.NoError(t, err)
-	require.Equal(t, barOne, bar.EnumValues[0].Type)
+	require.Equal(t, barOne, bar.EnumValues[0].Object)
 	require.Equal(t, cf.Schema.Types["Bar"].EnumValues[0], bar.EnumValues[0].Definition)
 
 	barTwo, err := binder.FindObject("github.com/99designs/gqlgen/codegen/config/testdata/enum", "BarTwo")
 
 	require.NotNil(t, barTwo)
 	require.NoError(t, err)
-	require.Equal(t, barTwo, bar.EnumValues[1].Type)
+	require.Equal(t, barTwo, bar.EnumValues[1].Object)
 	require.Equal(t, cf.Schema.Types["Bar"].EnumValues[1], bar.EnumValues[1].Definition)
 
 	bazType, err := binder.FindType("github.com/99designs/gqlgen/graphql", "Int")
@@ -294,13 +294,13 @@ func TestEnumBinding(t *testing.T) {
 
 	require.NotNil(t, bazOne)
 	require.NoError(t, err)
-	require.Equal(t, bazOne, baz.EnumValues[0].Type)
+	require.Equal(t, bazOne, baz.EnumValues[0].Object)
 	require.Equal(t, cf.Schema.Types["Baz"].EnumValues[0], baz.EnumValues[0].Definition)
 
 	bazTwo, err := binder.FindObject("github.com/99designs/gqlgen/codegen/config/testdata/enum", "BazTwo")
 
 	require.NotNil(t, bazTwo)
 	require.NoError(t, err)
-	require.Equal(t, bazTwo, baz.EnumValues[1].Type)
+	require.Equal(t, bazTwo, baz.EnumValues[1].Object)
 	require.Equal(t, cf.Schema.Types["Baz"].EnumValues[1], baz.EnumValues[1].Definition)
 }

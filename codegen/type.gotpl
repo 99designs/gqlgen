@@ -213,12 +213,12 @@
 	var (
 		{{ $type.UnmarshalFunc }} = map[string]{{ $enum | ref }}{
 		{{- range $value := $type.EnumValues }}
-			"{{ $value.Definition.Name }}": model.{{ $value.Type.Name }},
+			"{{ $value.Definition.Name }}": {{ $value.Object | obj }},
 		{{- end }}
 		}
 		{{ $type.MarshalFunc }} = map[{{ $enum | ref }}]string{
 		{{- range $value := $type.EnumValues }}
-			 model.{{ $value.Type.Name }}: "{{ $value.Definition.Name }}",
+			 {{ $value.Object | obj }}: "{{ $value.Definition.Name }}",
 		{{- end }}
 		}
 	 )

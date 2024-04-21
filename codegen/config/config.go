@@ -283,6 +283,10 @@ func (c *Config) injectTypesFromSchema() error {
 		SkipRuntime: true,
 	}
 
+	c.Directives["goEnum"] = DirectiveConfig{
+		SkipRuntime: true,
+	}
+
 	for _, schemaType := range c.Schema.Types {
 		if c.IsRoot(schemaType) {
 			continue
@@ -345,21 +349,23 @@ func (c *Config) injectTypesFromSchema() error {
 		}
 
 		if schemaType.Kind == ast.Enum && !strings.HasPrefix(schemaType.Name, "__") {
-			if model, ok := c.Models[schemaType.Name]; ok {
-				if model.EnumValues == nil {
-					model.EnumValues = make(map[string]string)
-				}
+			values := make(map[string]EnumValue)
 
-				for _, value := range schemaType.EnumValues {
-					if directive := value.Directives.ForName("goModel"); directive != nil {
-						if arg := directive.Arguments.ForName("model"); arg != nil {
-							if v, err := arg.Value.Value(nil); err == nil {
-								model.EnumValues[value.Name] = v.(string)
+			for _, value := range schemaType.EnumValues {
+				if directive := value.Directives.ForName("goEnum"); directive != nil {
+					if arg := directive.Arguments.ForName("value"); arg != nil {
+						if v, err := arg.Value.Value(nil); err == nil {
+							values[value.Name] = EnumValue{
+								Value: v.(string),
 							}
 						}
 					}
 				}
+			}
 
+			if len(values) > 0 {
+				model := c.Models[schemaType.Name]
+				model.EnumValues = values
 				c.Models[schemaType.Name] = model
 			}
 		}
@@ -372,7 +378,7 @@ type TypeMapEntry struct {
 	Model         StringList              `yaml:"model,omitempty"`
 	ForceGenerate bool                    `yaml:"forceGenerate,omitempty"`
 	Fields        map[string]TypeMapField `yaml:"fields,omitempty"`
-	EnumValues    map[string]string       `yaml:"enum_values,omitempty"`
+	EnumValues    map[string]EnumValue    `yaml:"enum_values,omitempty"`
 
 	// Key is the Go name of the field.
 	ExtraFields map[string]ModelExtraField `yaml:"extraFields,omitempty"`
@@ -382,6 +388,10 @@ type TypeMapField struct {
 	Resolver        bool   `yaml:"resolver"`
 	FieldName       string `yaml:"fieldName"`
 	GeneratedMethod string `yaml:"-"`
+}
+
+type EnumValue struct {
+	Value string
 }
 
 type ModelExtraField struct {
@@ -537,6 +547,14 @@ func (tm TypeMap) Check() error {
 		for _, model := range entry.Model {
 			if strings.LastIndex(model, ".") < strings.LastIndex(model, "/") {
 				return fmt.Errorf("model %s: invalid type specifier \"%s\" - you need to specify a struct to map to", typeName, entry.Model)
+			}
+		}
+
+		if len(entry.Model) == 0 {
+			for enum, v := range entry.EnumValues {
+				if v.Value != "" {
+					return fmt.Errorf("model is emty for: %v, but enum value is specified for %v", typeName, enum)
+				}
 			}
 		}
 	}

@@ -10,7 +10,7 @@ fi
 VERSION=$1
 
 if ! git diff-index --quiet HEAD -- ; then
-    echo "uncommited changes on HEAD, aborting"
+    echo "uncommitted changes on HEAD, aborting"
     exit 1
 fi
 

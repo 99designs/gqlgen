@@ -287,7 +287,7 @@ func (b *builder) findBindStructTagTarget(in types.Type, name string) (types.Obj
 			tags := reflect.StructTag(t.Tag(i))
 			if val, ok := tags.Lookup(b.Config.StructTag); ok && equalFieldName(val, name) {
 				if found != nil {
-					return nil, fmt.Errorf("tag %s is ambigious; multiple fields have the same tag value of %s", b.Config.StructTag, val)
+					return nil, fmt.Errorf("tag %s is ambiguous; multiple fields have the same tag value of %s", b.Config.StructTag, val)
 				}
 
 				found = field

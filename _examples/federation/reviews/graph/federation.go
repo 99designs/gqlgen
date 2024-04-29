@@ -209,18 +209,33 @@ func entityResolverNameForProduct(ctx context.Context, rep map[string]interface{
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if val, ok = m["manufacturer"]; !ok {
+		val, ok = m["manufacturer"]
+		if !ok {
 			break
 		}
 		if m, ok = val.(map[string]interface{}); !ok {
 			break
 		}
-		if _, ok = m["id"]; !ok {
+		val, ok = m["id"]
+		if !ok {
 			break
 		}
+		if allNull {
+			allNull = val == nil
+		}
 		m = rep
-		if _, ok = m["id"]; !ok {
+		val, ok = m["id"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findProductByManufacturerIDAndID", nil
@@ -236,8 +251,18 @@ func entityResolverNameForUser(ctx context.Context, rep map[string]interface{}) 
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["id"]; !ok {
+		val, ok = m["id"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findUserByID", nil

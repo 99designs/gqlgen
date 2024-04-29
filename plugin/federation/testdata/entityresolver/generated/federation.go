@@ -579,8 +579,18 @@ func entityResolverNameForHello(ctx context.Context, rep map[string]interface{})
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["name"]; !ok {
+		val, ok = m["name"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findHelloByName", nil
@@ -596,12 +606,26 @@ func entityResolverNameForHelloMultiSingleKeys(ctx context.Context, rep map[stri
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["key1"]; !ok {
+		val, ok = m["key1"]
+		if !ok {
 			break
 		}
+		if allNull {
+			allNull = val == nil
+		}
 		m = rep
-		if _, ok = m["key2"]; !ok {
+		val, ok = m["key2"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findHelloMultiSingleKeysByKey1AndKey2", nil
@@ -617,8 +641,18 @@ func entityResolverNameForHelloWithErrors(ctx context.Context, rep map[string]in
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["name"]; !ok {
+		val, ok = m["name"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findHelloWithErrorsByName", nil
@@ -634,8 +668,18 @@ func entityResolverNameForMultiHello(ctx context.Context, rep map[string]interfa
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["name"]; !ok {
+		val, ok = m["name"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findManyMultiHelloByNames", nil
@@ -651,8 +695,18 @@ func entityResolverNameForMultiHelloMultipleRequires(ctx context.Context, rep ma
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["name"]; !ok {
+		val, ok = m["name"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findManyMultiHelloMultipleRequiresByNames", nil
@@ -668,8 +722,18 @@ func entityResolverNameForMultiHelloRequires(ctx context.Context, rep map[string
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["name"]; !ok {
+		val, ok = m["name"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findManyMultiHelloRequiresByNames", nil
@@ -685,8 +749,18 @@ func entityResolverNameForMultiHelloWithError(ctx context.Context, rep map[strin
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["name"]; !ok {
+		val, ok = m["name"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findManyMultiHelloWithErrorByNames", nil
@@ -702,8 +776,18 @@ func entityResolverNameForMultiPlanetRequiresNested(ctx context.Context, rep map
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["name"]; !ok {
+		val, ok = m["name"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findManyMultiPlanetRequiresNestedByNames", nil
@@ -719,8 +803,18 @@ func entityResolverNameForPlanetMultipleRequires(ctx context.Context, rep map[st
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["name"]; !ok {
+		val, ok = m["name"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findPlanetMultipleRequiresByName", nil
@@ -736,8 +830,18 @@ func entityResolverNameForPlanetRequires(ctx context.Context, rep map[string]int
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["name"]; !ok {
+		val, ok = m["name"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findPlanetRequiresByName", nil
@@ -753,8 +857,18 @@ func entityResolverNameForPlanetRequiresNested(ctx context.Context, rep map[stri
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["name"]; !ok {
+		val, ok = m["name"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findPlanetRequiresNestedByName", nil
@@ -770,18 +884,33 @@ func entityResolverNameForWorld(ctx context.Context, rep map[string]interface{})
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if val, ok = m["hello"]; !ok {
+		val, ok = m["hello"]
+		if !ok {
 			break
 		}
 		if m, ok = val.(map[string]interface{}); !ok {
 			break
 		}
-		if _, ok = m["name"]; !ok {
+		val, ok = m["name"]
+		if !ok {
 			break
 		}
+		if allNull {
+			allNull = val == nil
+		}
 		m = rep
-		if _, ok = m["foo"]; !ok {
+		val, ok = m["foo"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findWorldByHelloNameAndFoo", nil
@@ -797,8 +926,18 @@ func entityResolverNameForWorldName(ctx context.Context, rep map[string]interfac
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["name"]; !ok {
+		val, ok = m["name"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findWorldNameByName", nil
@@ -814,18 +953,33 @@ func entityResolverNameForWorldWithMultipleKeys(ctx context.Context, rep map[str
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if val, ok = m["hello"]; !ok {
+		val, ok = m["hello"]
+		if !ok {
 			break
 		}
 		if m, ok = val.(map[string]interface{}); !ok {
 			break
 		}
-		if _, ok = m["name"]; !ok {
+		val, ok = m["name"]
+		if !ok {
 			break
 		}
+		if allNull {
+			allNull = val == nil
+		}
 		m = rep
-		if _, ok = m["foo"]; !ok {
+		val, ok = m["foo"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findWorldWithMultipleKeysByHelloNameAndFoo", nil
@@ -837,8 +991,18 @@ func entityResolverNameForWorldWithMultipleKeys(ctx context.Context, rep map[str
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["bar"]; !ok {
+		val, ok = m["bar"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findWorldWithMultipleKeysByBar", nil

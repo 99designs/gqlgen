@@ -197,8 +197,18 @@ func entityResolverNameForEmailHost(ctx context.Context, rep map[string]interfac
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["id"]; !ok {
+		val, ok = m["id"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findEmailHostByID", nil
@@ -214,8 +224,18 @@ func entityResolverNameForUser(ctx context.Context, rep map[string]interface{}) 
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["id"]; !ok {
+		val, ok = m["id"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findUserByID", nil

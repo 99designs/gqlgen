@@ -6,6 +6,10 @@ run:
 linters-settings:
   errcheck:
     ignore: fmt:.*,[rR]ead|[wW]rite|[cC]lose,io:Copy
+  testifylint:
+    disable-all: true
+    enable:
+      - expected-actual
 
 linters:
   disable-all: true
@@ -23,6 +27,7 @@ linters:
     - nakedret
     - prealloc
     - staticcheck
+    - testifylint
     - typecheck
     - unconvert
     - unused

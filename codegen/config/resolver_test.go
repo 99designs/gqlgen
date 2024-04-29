@@ -16,7 +16,7 @@ func TestResolverConfig(t *testing.T) {
 			require.NoError(t, p.Check())
 			require.NoError(t, p.Check())
 
-			require.Equal(t, p.Package, "config_test_data")
+			require.Equal(t, "config_test_data", p.Package)
 			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.ImportPath())
 
 			require.Equal(t, "config_test_data", p.Pkg().Name())
@@ -33,7 +33,7 @@ func TestResolverConfig(t *testing.T) {
 			require.NoError(t, p.Check())
 			require.NoError(t, p.Check())
 
-			require.Equal(t, p.Package, "wololo")
+			require.Equal(t, "wololo", p.Package)
 			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.ImportPath())
 
 			require.Equal(t, "wololo", p.Pkg().Name())
@@ -81,7 +81,7 @@ func TestResolverConfig(t *testing.T) {
 			require.NoError(t, p.Check())
 			require.NoError(t, p.Check())
 
-			require.Equal(t, p.Package, "config_test_data")
+			require.Equal(t, "config_test_data", p.Package)
 			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.ImportPath())
 
 			require.Equal(t, "config_test_data", p.Pkg().Name())
@@ -98,7 +98,7 @@ func TestResolverConfig(t *testing.T) {
 			require.NoError(t, p.Check())
 			require.NoError(t, p.Check())
 
-			require.Equal(t, p.Package, "wololo")
+			require.Equal(t, "wololo", p.Package)
 			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.ImportPath())
 
 			require.Equal(t, "wololo", p.Pkg().Name())
@@ -115,7 +115,7 @@ func TestResolverConfig(t *testing.T) {
 			require.NoError(t, p.Check())
 			require.NoError(t, p.Check())
 
-			require.Equal(t, p.Package, "config_test_data")
+			require.Equal(t, "config_test_data", p.Package)
 			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.ImportPath())
 
 			require.Equal(t, "config_test_data", p.Pkg().Name())

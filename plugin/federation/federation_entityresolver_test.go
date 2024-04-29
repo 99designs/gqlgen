@@ -48,8 +48,8 @@ func TestEntityResolver(t *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, resp.Entities[0].Name, "first name - 1")
-		require.Equal(t, resp.Entities[1].Name, "first name - 2")
+		require.Equal(t, "first name - 1", resp.Entities[0].Name)
+		require.Equal(t, "first name - 2", resp.Entities[1].Name)
 	})
 
 	t.Run("HelloWithError entities", func(t *testing.T) {
@@ -99,11 +99,11 @@ func TestEntityResolver(t *testing.T) {
 		require.Contains(t, errMessages, "resolving Entity \"HelloWithErrors\": error resolving HelloWithErrorsByName")
 
 		require.Len(t, resp.Entities, 5)
-		require.Equal(t, resp.Entities[0].Name, "first name - 1")
-		require.Equal(t, resp.Entities[1].Name, "first name - 2")
-		require.Equal(t, resp.Entities[2].Name, "")
-		require.Equal(t, resp.Entities[3].Name, "first name - 3")
-		require.Equal(t, resp.Entities[4].Name, "")
+		require.Equal(t, "first name - 1", resp.Entities[0].Name)
+		require.Equal(t, "first name - 2", resp.Entities[1].Name)
+		require.Equal(t, "", resp.Entities[2].Name)
+		require.Equal(t, "first name - 3", resp.Entities[3].Name)
+		require.Equal(t, "", resp.Entities[4].Name)
 	})
 
 	t.Run("World entities with nested key", func(t *testing.T) {
@@ -141,10 +141,10 @@ func TestEntityResolver(t *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, resp.Entities[0].Foo, "foo 1")
-		require.Equal(t, resp.Entities[0].Hello.Name, "world name - 1")
-		require.Equal(t, resp.Entities[1].Foo, "foo 2")
-		require.Equal(t, resp.Entities[1].Hello.Name, "world name - 2")
+		require.Equal(t, "foo 1", resp.Entities[0].Foo)
+		require.Equal(t, "world name - 1", resp.Entities[0].Hello.Name)
+		require.Equal(t, "foo 2", resp.Entities[1].Foo)
+		require.Equal(t, "world name - 2", resp.Entities[1].Hello.Name)
 	})
 
 	t.Run("World entities with multiple keys", func(t *testing.T) {
@@ -181,9 +181,9 @@ func TestEntityResolver(t *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, resp.Entities[0].Foo, "foo 1")
-		require.Equal(t, resp.Entities[0].Hello.Name, "world name - 1")
-		require.Equal(t, resp.Entities[1].Bar, 11)
+		require.Equal(t, "foo 1", resp.Entities[0].Foo)
+		require.Equal(t, "world name - 1", resp.Entities[0].Hello.Name)
+		require.Equal(t, 11, resp.Entities[1].Bar)
 	})
 
 	t.Run("Hello WorldName entities (heterogeneous)", func(t *testing.T) {
@@ -265,10 +265,10 @@ func TestEntityResolver(t *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, resp.Entities[0].Name, "earth")
-		require.Equal(t, resp.Entities[0].Diameter, 12)
-		require.Equal(t, resp.Entities[1].Name, "mars")
-		require.Equal(t, resp.Entities[1].Diameter, 10)
+		require.Equal(t, "earth", resp.Entities[0].Name)
+		require.Equal(t, 12, resp.Entities[0].Diameter)
+		require.Equal(t, "mars", resp.Entities[1].Name)
+		require.Equal(t, 10, resp.Entities[1].Diameter)
 	})
 
 	t.Run("PlanetRequires entities with multiple required fields directive", func(t *testing.T) {
@@ -303,12 +303,12 @@ func TestEntityResolver(t *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, resp.Entities[0].Name, "earth")
-		require.Equal(t, resp.Entities[0].Diameter, 12)
-		require.Equal(t, resp.Entities[0].Density, 800)
-		require.Equal(t, resp.Entities[1].Name, "mars")
-		require.Equal(t, resp.Entities[1].Diameter, 10)
-		require.Equal(t, resp.Entities[1].Density, 850)
+		require.Equal(t, "earth", resp.Entities[0].Name)
+		require.Equal(t, 12, resp.Entities[0].Diameter)
+		require.Equal(t, 800, resp.Entities[0].Density)
+		require.Equal(t, "mars", resp.Entities[1].Name)
+		require.Equal(t, 10, resp.Entities[1].Diameter)
+		require.Equal(t, 850, resp.Entities[1].Density)
 	})
 
 	t.Run("PlanetRequiresNested entities with requires directive having nested field", func(t *testing.T) {
@@ -346,10 +346,10 @@ func TestEntityResolver(t *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, resp.Entities[0].Name, "earth")
-		require.Equal(t, resp.Entities[0].World.Foo, "A")
-		require.Equal(t, resp.Entities[1].Name, "mars")
-		require.Equal(t, resp.Entities[1].World.Foo, "B")
+		require.Equal(t, "earth", resp.Entities[0].Name)
+		require.Equal(t, "A", resp.Entities[0].World.Foo)
+		require.Equal(t, "mars", resp.Entities[1].Name)
+		require.Equal(t, "B", resp.Entities[1].World.Foo)
 	})
 }
 
@@ -499,10 +499,10 @@ func TestMultiEntityResolver(t *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, resp.Entities[0].Name, "first name - 1")
-		require.Equal(t, resp.Entities[0].Key1, "key1 - 1")
-		require.Equal(t, resp.Entities[1].Name, "first name - 2")
-		require.Equal(t, resp.Entities[1].Key1, "key1 - 2")
+		require.Equal(t, "first name - 1", resp.Entities[0].Name)
+		require.Equal(t, "key1 - 1", resp.Entities[0].Key1)
+		require.Equal(t, "first name - 2", resp.Entities[1].Name)
+		require.Equal(t, "key1 - 2", resp.Entities[1].Key1)
 	})
 
 	t.Run("MultiHelloMultipleRequires entities with multiple required fields", func(t *testing.T) {
@@ -537,12 +537,12 @@ func TestMultiEntityResolver(t *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, resp.Entities[0].Name, "first name - 1")
-		require.Equal(t, resp.Entities[0].Key1, "key1 - 1")
-		require.Equal(t, resp.Entities[0].Key2, "key2 - 1")
-		require.Equal(t, resp.Entities[1].Name, "first name - 2")
-		require.Equal(t, resp.Entities[1].Key1, "key1 - 2")
-		require.Equal(t, resp.Entities[1].Key2, "key2 - 2")
+		require.Equal(t, "first name - 1", resp.Entities[0].Name)
+		require.Equal(t, "key1 - 1", resp.Entities[0].Key1)
+		require.Equal(t, "key2 - 1", resp.Entities[0].Key2)
+		require.Equal(t, "first name - 2", resp.Entities[1].Name)
+		require.Equal(t, "key1 - 2", resp.Entities[1].Key1)
+		require.Equal(t, "key2 - 2", resp.Entities[1].Key2)
 	})
 
 	t.Run("MultiPlanetRequiresNested entities with requires directive having nested field", func(t *testing.T) {
@@ -580,10 +580,10 @@ func TestMultiEntityResolver(t *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, resp.Entities[0].Name, "earth")
-		require.Equal(t, resp.Entities[0].World.Foo, "A")
-		require.Equal(t, resp.Entities[1].Name, "mars")
-		require.Equal(t, resp.Entities[1].World.Foo, "B")
+		require.Equal(t, "earth", resp.Entities[0].Name)
+		require.Equal(t, "A", resp.Entities[0].World.Foo)
+		require.Equal(t, "mars", resp.Entities[1].Name)
+		require.Equal(t, "B", resp.Entities[1].World.Foo)
 	})
 }
 

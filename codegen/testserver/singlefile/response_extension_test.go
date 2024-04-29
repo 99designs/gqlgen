@@ -30,5 +30,5 @@ func TestResponseExtension(t *testing.T) {
 	c := client.New(srv)
 
 	raw, _ := c.RawPost(`query { valid }`)
-	require.Equal(t, raw.Extensions["example"], "value")
+	require.Equal(t, "value", raw.Extensions["example"])
 }

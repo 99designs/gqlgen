@@ -238,9 +238,9 @@ func TestDefer(t *testing.T) {
 			}
 		}
 
-		assert.Equal(t, valuesByPath["deferCase2.0"], []string{"test defer 1", "test defer 2", "test defer 3"})
-		assert.Equal(t, valuesByPath["deferCase2.1"], []string{"test defer 1", "test defer 2", "test defer 3"})
-		assert.Equal(t, valuesByPath["deferCase2.2"], []string{"test defer 1", "test defer 2", "test defer 3"})
+		assert.Equal(t, []string{"test defer 1", "test defer 2", "test defer 3"}, valuesByPath["deferCase2.0"])
+		assert.Equal(t, []string{"test defer 1", "test defer 2", "test defer 3"}, valuesByPath["deferCase2.1"])
+		assert.Equal(t, []string{"test defer 1", "test defer 2", "test defer 3"}, valuesByPath["deferCase2.2"])
 
 		for i := range resp.Data.DeferCase2 {
 			resp.Data.DeferCase2[i].Values = valuesByPath["deferCase2."+strconv.FormatInt(int64(i), 10)]

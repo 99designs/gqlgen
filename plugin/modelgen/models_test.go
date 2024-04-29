@@ -283,18 +283,18 @@ func TestModelGeneration(t *testing.T) {
 	})
 
 	t.Run("nullable input fields can be made omittable with goField", func(t *testing.T) {
-		require.IsType(t, out.MissingInput{}.NullString, graphql.Omittable[*string]{})
-		require.IsType(t, out.MissingInput{}.NullEnum, graphql.Omittable[*out.MissingEnum]{})
-		require.IsType(t, out.MissingInput{}.NullObject, graphql.Omittable[*out.ExistingInput]{})
+		require.IsType(t, graphql.Omittable[*string]{}, out.MissingInput{}.NullString)
+		require.IsType(t, graphql.Omittable[*out.MissingEnum]{}, out.MissingInput{}.NullEnum)
+		require.IsType(t, graphql.Omittable[*out.ExistingInput]{}, out.MissingInput{}.NullObject)
 	})
 
 	t.Run("extra fields are present", func(t *testing.T) {
 		var m out.ExtraFieldsTest
 
-		require.IsType(t, m.FieldInt, int64(0))
-		require.IsType(t, m.FieldInternalType, extrafields.Type{})
+		require.IsType(t, int64(0), m.FieldInt)
+		require.IsType(t, extrafields.Type{}, m.FieldInternalType)
 		require.IsType(t, m.FieldStringPtr, new(string))
-		require.IsType(t, m.FieldIntSlice, []int64{})
+		require.IsType(t, []int64{}, m.FieldIntSlice)
 	})
 }
 
@@ -390,15 +390,15 @@ func TestModelGenerationNullableInputOmittable(t *testing.T) {
 	require.NoError(t, p.MutateConfig(cfg))
 
 	t.Run("nullable input fields are omittable", func(t *testing.T) {
-		require.IsType(t, out_nullable_input_omittable.MissingInput{}.Name, graphql.Omittable[*string]{})
-		require.IsType(t, out_nullable_input_omittable.MissingInput{}.Enum, graphql.Omittable[*out_nullable_input_omittable.MissingEnum]{})
-		require.IsType(t, out_nullable_input_omittable.MissingInput{}.NullString, graphql.Omittable[*string]{})
-		require.IsType(t, out_nullable_input_omittable.MissingInput{}.NullEnum, graphql.Omittable[*out_nullable_input_omittable.MissingEnum]{})
-		require.IsType(t, out_nullable_input_omittable.MissingInput{}.NullObject, graphql.Omittable[*out_nullable_input_omittable.ExistingInput]{})
+		require.IsType(t, graphql.Omittable[*string]{}, out_nullable_input_omittable.MissingInput{}.Name)
+		require.IsType(t, graphql.Omittable[*out_nullable_input_omittable.MissingEnum]{}, out_nullable_input_omittable.MissingInput{}.Enum)
+		require.IsType(t, graphql.Omittable[*string]{}, out_nullable_input_omittable.MissingInput{}.NullString)
+		require.IsType(t, graphql.Omittable[*out_nullable_input_omittable.MissingEnum]{}, out_nullable_input_omittable.MissingInput{}.NullEnum)
+		require.IsType(t, graphql.Omittable[*out_nullable_input_omittable.ExistingInput]{}, out_nullable_input_omittable.MissingInput{}.NullObject)
 	})
 
 	t.Run("non-nullable input fields are not omittable", func(t *testing.T) {
-		require.IsType(t, out_nullable_input_omittable.MissingInput{}.NonNullString, "")
+		require.IsType(t, "", out_nullable_input_omittable.MissingInput{}.NonNullString)
 	})
 }
 

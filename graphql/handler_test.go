@@ -51,7 +51,7 @@ func TestAddUploadToOperations(t *testing.T) {
 		err := request.AddUpload(upload, key, path)
 		require.Nil(t, err)
 
-		require.Equal(t, request, expected)
+		require.Equal(t, expected, request)
 	})
 
 	t.Run("valid nested variable", func(t *testing.T) {
@@ -87,6 +87,6 @@ func TestAddUploadToOperations(t *testing.T) {
 		err := request.AddUpload(upload, key, path)
 		require.Nil(t, err)
 
-		require.Equal(t, request, expected)
+		require.Equal(t, expected, request)
 	})
 }

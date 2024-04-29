@@ -301,7 +301,7 @@ func TestDirectives(t *testing.T) {
 
 			c.MustPost(`query { directiveField@logged(id:"testes_id") }`, &resp)
 
-			require.Equal(t, resp.DirectiveField, `testes_id`)
+			require.Equal(t, `testes_id`, resp.DirectiveField)
 		})
 		t.Run("without field directive", func(t *testing.T) {
 			var resp struct {

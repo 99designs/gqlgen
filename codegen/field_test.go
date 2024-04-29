@@ -190,7 +190,7 @@ func TestField_CallArgs(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.Name, func(t *testing.T) {
-			require.Equal(t, tc.CallArgs(), tc.Expected)
+			require.Equal(t, tc.Expected, tc.CallArgs())
 		})
 	}
 }

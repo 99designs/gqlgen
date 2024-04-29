@@ -301,8 +301,8 @@ func TestWebsocketInitFunc(t *testing.T) {
 
 		time.Sleep(time.Millisecond * 10)
 		m := readOp(c)
-		assert.Equal(t, m.Type, connectionErrorMsg)
-		assert.Equal(t, string(m.Payload), `{"message":"beep boop"}`)
+		assert.Equal(t, connectionErrorMsg, m.Type)
+		assert.Equal(t, `{"message":"beep boop"}`, string(m.Payload))
 	})
 	t.Run("accept connection if WebsocketInitFunc is provided and is accepting connection", func(t *testing.T) {
 		h := testserver.New()
@@ -383,7 +383,7 @@ func TestWebSocketErrorFunc(t *testing.T) {
 		h.AddTransport(transport.Websocket{
 			ErrorFunc: func(_ context.Context, err error) {
 				require.Error(t, err)
-				assert.Equal(t, err.Error(), "websocket read: invalid message received")
+				assert.Equal(t, "websocket read: invalid message received", err.Error())
 				assert.IsType(t, transport.WebsocketError{}, err)
 				assert.True(t, err.(transport.WebsocketError).IsReadError)
 				errFuncCalled <- true

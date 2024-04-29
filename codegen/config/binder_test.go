@@ -28,7 +28,7 @@ func TestSlicePointerBinding(t *testing.T) {
 			panic(err)
 		}
 
-		require.Equal(t, ta.GO.String(), "[]*github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat.Message")
+		require.Equal(t, "[]*github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat.Message", ta.GO.String())
 	})
 
 	t.Run("with OmitSliceElementPointers", func(t *testing.T) {
@@ -41,7 +41,7 @@ func TestSlicePointerBinding(t *testing.T) {
 			panic(err)
 		}
 
-		require.Equal(t, ta.GO.String(), "[]github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat.Message")
+		require.Equal(t, "[]github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat.Message", ta.GO.String())
 	})
 }
 

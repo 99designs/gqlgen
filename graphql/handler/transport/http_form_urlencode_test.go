@@ -38,22 +38,22 @@ func TestUrlEncodedForm(t *testing.T) {
 	t.Run("decode failure json", func(t *testing.T) {
 		resp := doRequest(h, "POST", "/graphql", "notjson", "application/x-www-form-urlencoded")
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
-		assert.Equal(t, resp.Header().Get("Content-Type"), "application/json")
+		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 		assert.Equal(t, `{"errors":[{"message":"Unexpected Name \"notjson\"","locations":[{"line":1,"column":1}],"extensions":{"code":"GRAPHQL_PARSE_FAILED"}}],"data":null}`, resp.Body.String())
 	})
 
 	t.Run("decode failure urlencoded", func(t *testing.T) {
 		resp := doRequest(h, "POST", "/graphql", "query=%7Bnot-good", "application/x-www-form-urlencoded")
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
-		assert.Equal(t, resp.Header().Get("Content-Type"), "application/json")
+		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 		assert.Equal(t, `{"errors":[{"message":"Expected Name, found \u003cInvalid\u003e","locations":[{"line":1,"column":6}],"extensions":{"code":"GRAPHQL_PARSE_FAILED"}}],"data":null}`, resp.Body.String())
 	})
 
 	t.Run("parse query failure", func(t *testing.T) {
 		resp := doRequest(h, "POST", "/graphql", `{"query":{"wrong": "format"}}`, "application/x-www-form-urlencoded")
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
-		assert.Equal(t, resp.Header().Get("Content-Type"), "application/json")
-		assert.Equal(t, resp.Body.String(), `{"errors":[{"message":"could not cleanup body: json: cannot unmarshal object into Go struct field RawParams.query of type string"}],"data":null}`)
+		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
+		assert.Equal(t, `{"errors":[{"message":"could not cleanup body: json: cannot unmarshal object into Go struct field RawParams.query of type string"}],"data":null}`, resp.Body.String())
 	})
 
 	t.Run("validate content type", func(t *testing.T) {

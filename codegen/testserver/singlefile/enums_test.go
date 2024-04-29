@@ -26,7 +26,7 @@ func TestEnumsResolver(t *testing.T) {
 			enumInInput(input: {enum: OK})
 		}
 		`, &resp)
-		require.Equal(t, resp.EnumInInput, EnumTestOk)
+		require.Equal(t, EnumTestOk, resp.EnumInInput)
 	})
 
 	t.Run("input with invalid enum value", func(t *testing.T) {

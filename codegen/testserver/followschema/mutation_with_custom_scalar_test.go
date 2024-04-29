@@ -30,7 +30,7 @@ func TestErrorInsideMutationArgument(t *testing.T) {
 			&resp,
 			client.Var("input", input),
 		)
-		require.Equal(t, resp["updateSomething"], "Hello world")
+		require.Equal(t, "Hello world", resp["updateSomething"])
 		require.NoError(t, err)
 	})
 

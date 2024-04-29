@@ -48,11 +48,11 @@ func TestReadConfig(t *testing.T) {
 		require.NoError(t, err)
 
 		if runtime.GOOS == "windows" {
-			require.Equal(t, c.SchemaFilename[0], `testdata\cfg\glob\bar\bar with spaces.graphql`)
-			require.Equal(t, c.SchemaFilename[1], `testdata\cfg\glob\foo\foo.graphql`)
+			require.Equal(t, `testdata\cfg\glob\bar\bar with spaces.graphql`, c.SchemaFilename[0])
+			require.Equal(t, `testdata\cfg\glob\foo\foo.graphql`, c.SchemaFilename[1])
 		} else {
-			require.Equal(t, c.SchemaFilename[0], "testdata/cfg/glob/bar/bar with spaces.graphql")
-			require.Equal(t, c.SchemaFilename[1], "testdata/cfg/glob/foo/foo.graphql")
+			require.Equal(t, "testdata/cfg/glob/bar/bar with spaces.graphql", c.SchemaFilename[0])
+			require.Equal(t, "testdata/cfg/glob/foo/foo.graphql", c.SchemaFilename[1])
 		}
 	})
 

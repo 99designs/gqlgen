@@ -48,10 +48,10 @@ func TestExplicitRequires(t *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, resp.Entities[0].Name, "earth")
-		require.Equal(t, resp.Entities[0].Diameter, 12)
-		require.Equal(t, resp.Entities[1].Name, "mars")
-		require.Equal(t, resp.Entities[1].Diameter, 10)
+		require.Equal(t, "earth", resp.Entities[0].Name)
+		require.Equal(t, 12, resp.Entities[0].Diameter)
+		require.Equal(t, "mars", resp.Entities[1].Name)
+		require.Equal(t, 10, resp.Entities[1].Diameter)
 	})
 
 	t.Run("PlanetRequires entities with multiple required fields directive", func(t *testing.T) {
@@ -86,12 +86,12 @@ func TestExplicitRequires(t *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, resp.Entities[0].Name, "earth")
-		require.Equal(t, resp.Entities[0].Diameter, 12)
-		require.Equal(t, resp.Entities[0].Density, 800)
-		require.Equal(t, resp.Entities[1].Name, "mars")
-		require.Equal(t, resp.Entities[1].Diameter, 10)
-		require.Equal(t, resp.Entities[1].Density, 850)
+		require.Equal(t, "earth", resp.Entities[0].Name)
+		require.Equal(t, 12, resp.Entities[0].Diameter)
+		require.Equal(t, 800, resp.Entities[0].Density)
+		require.Equal(t, "mars", resp.Entities[1].Name)
+		require.Equal(t, 10, resp.Entities[1].Diameter)
+		require.Equal(t, 850, resp.Entities[1].Density)
 	})
 
 	t.Run("PlanetRequiresNested entities with requires directive having nested field", func(t *testing.T) {
@@ -129,10 +129,10 @@ func TestExplicitRequires(t *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, resp.Entities[0].Name, "earth")
-		require.Equal(t, resp.Entities[0].World.Foo, "A")
-		require.Equal(t, resp.Entities[1].Name, "mars")
-		require.Equal(t, resp.Entities[1].World.Foo, "B")
+		require.Equal(t, "earth", resp.Entities[0].Name)
+		require.Equal(t, "A", resp.Entities[0].World.Foo)
+		require.Equal(t, "mars", resp.Entities[1].Name)
+		require.Equal(t, "B", resp.Entities[1].World.Foo)
 	})
 }
 
@@ -172,10 +172,10 @@ func TestMultiExplicitRequires(t *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, resp.Entities[0].Name, "first name - 1")
-		require.Equal(t, resp.Entities[0].Key1, "key1 - 1")
-		require.Equal(t, resp.Entities[1].Name, "first name - 2")
-		require.Equal(t, resp.Entities[1].Key1, "key1 - 2")
+		require.Equal(t, "first name - 1", resp.Entities[0].Name)
+		require.Equal(t, "key1 - 1", resp.Entities[0].Key1)
+		require.Equal(t, "first name - 2", resp.Entities[1].Name)
+		require.Equal(t, "key1 - 2", resp.Entities[1].Key1)
 	})
 
 	t.Run("MultiHelloMultipleRequires entities with multiple required fields", func(t *testing.T) {
@@ -210,12 +210,12 @@ func TestMultiExplicitRequires(t *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, resp.Entities[0].Name, "first name - 1")
-		require.Equal(t, resp.Entities[0].Key1, "key1 - 1")
-		require.Equal(t, resp.Entities[0].Key2, "key2 - 1")
-		require.Equal(t, resp.Entities[1].Name, "first name - 2")
-		require.Equal(t, resp.Entities[1].Key1, "key1 - 2")
-		require.Equal(t, resp.Entities[1].Key2, "key2 - 2")
+		require.Equal(t, "first name - 1", resp.Entities[0].Name)
+		require.Equal(t, "key1 - 1", resp.Entities[0].Key1)
+		require.Equal(t, "key2 - 1", resp.Entities[0].Key2)
+		require.Equal(t, "first name - 2", resp.Entities[1].Name)
+		require.Equal(t, "key1 - 2", resp.Entities[1].Key1)
+		require.Equal(t, "key2 - 2", resp.Entities[1].Key2)
 	})
 
 	t.Run("MultiPlanetRequiresNested entities with requires directive having nested field", func(t *testing.T) {
@@ -253,9 +253,9 @@ func TestMultiExplicitRequires(t *testing.T) {
 		)
 
 		require.NoError(t, err)
-		require.Equal(t, resp.Entities[0].Name, "earth")
-		require.Equal(t, resp.Entities[0].World.Foo, "A")
-		require.Equal(t, resp.Entities[1].Name, "mars")
-		require.Equal(t, resp.Entities[1].World.Foo, "B")
+		require.Equal(t, "earth", resp.Entities[0].Name)
+		require.Equal(t, "A", resp.Entities[0].World.Foo)
+		require.Equal(t, "mars", resp.Entities[1].Name)
+		require.Equal(t, "B", resp.Entities[1].World.Foo)
 	})
 }

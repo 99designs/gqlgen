@@ -80,8 +80,8 @@ func TestWithEntities(t *testing.T) {
 	require.Equal(t, "String", f.Entities[5].Resolvers[0].KeyFields[4].Definition.Type.Name())
 
 	require.Len(t, f.Entities[5].Requires, 2)
-	require.Equal(t, f.Entities[5].Requires[0].Name, "id")
-	require.Equal(t, f.Entities[5].Requires[1].Name, "helloSecondary")
+	require.Equal(t, "id", f.Entities[5].Requires[0].Name)
+	require.Equal(t, "helloSecondary", f.Entities[5].Requires[1].Name)
 
 	require.Equal(t, "World", f.Entities[6].Name)
 	require.Len(t, f.Entities[6].Resolvers, 2)

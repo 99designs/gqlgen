@@ -26,9 +26,9 @@ func TestVariadic(t *testing.T) {
 	}
 	err := c.Post(`query { variadicModel { value(rank: 1) } }`, &resp)
 	require.NoError(t, err)
-	require.Equal(t, resp.VariadicModel.Value, "1")
+	require.Equal(t, "1", resp.VariadicModel.Value)
 
 	err = c.Post(`query { variadicModel { value(rank: 2) } }`, &resp)
 	require.NoError(t, err)
-	require.Equal(t, resp.VariadicModel.Value, "2")
+	require.Equal(t, "2", resp.VariadicModel.Value)
 }

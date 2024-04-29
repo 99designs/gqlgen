@@ -113,13 +113,13 @@ func TestInvalid(t *testing.T) {
 }
 
 func TestToGo(t *testing.T) {
-	require.Equal(t, Field{"foo"}.ToGo(), "Foo")
-	require.Equal(t, Field{"foo", "bar"}.ToGo(), "FooBar")
-	require.Equal(t, Field{"bar", "id"}.ToGo(), "BarID")
+	require.Equal(t, "Foo", Field{"foo"}.ToGo())
+	require.Equal(t, "FooBar", Field{"foo", "bar"}.ToGo())
+	require.Equal(t, "BarID", Field{"bar", "id"}.ToGo())
 }
 
 func TestToGoPrivate(t *testing.T) {
-	require.Equal(t, Field{"foo"}.ToGoPrivate(), "foo")
-	require.Equal(t, Field{"foo", "bar"}.ToGoPrivate(), "fooBar")
-	require.Equal(t, Field{"bar", "id"}.ToGoPrivate(), "barID")
+	require.Equal(t, "foo", Field{"foo"}.ToGoPrivate())
+	require.Equal(t, "fooBar", Field{"foo", "bar"}.ToGoPrivate())
+	require.Equal(t, "barID", Field{"bar", "id"}.ToGoPrivate())
 }

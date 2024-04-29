@@ -40,7 +40,7 @@ func TestEmbedded(t *testing.T) {
 		}
 		err := c.Post(`query { embeddedCase1 { exportedEmbeddedPointerExportedMethod } }`, &resp)
 		require.NoError(t, err)
-		require.Equal(t, resp.EmbeddedCase1.ExportedEmbeddedPointerExportedMethod, "ExportedEmbeddedPointerExportedMethodResponse")
+		require.Equal(t, "ExportedEmbeddedPointerExportedMethodResponse", resp.EmbeddedCase1.ExportedEmbeddedPointerExportedMethod)
 	})
 
 	t.Run("embedded case 2", func(t *testing.T) {
@@ -51,7 +51,7 @@ func TestEmbedded(t *testing.T) {
 		}
 		err := c.Post(`query { embeddedCase2 { unexportedEmbeddedPointerExportedMethod } }`, &resp)
 		require.NoError(t, err)
-		require.Equal(t, resp.EmbeddedCase2.UnexportedEmbeddedPointerExportedMethod, "UnexportedEmbeddedPointerExportedMethodResponse")
+		require.Equal(t, "UnexportedEmbeddedPointerExportedMethodResponse", resp.EmbeddedCase2.UnexportedEmbeddedPointerExportedMethod)
 	})
 
 	t.Run("embedded case 3", func(t *testing.T) {
@@ -62,6 +62,6 @@ func TestEmbedded(t *testing.T) {
 		}
 		err := c.Post(`query { embeddedCase3 { unexportedEmbeddedInterfaceExportedMethod } }`, &resp)
 		require.NoError(t, err)
-		require.Equal(t, resp.EmbeddedCase3.UnexportedEmbeddedInterfaceExportedMethod, "UnexportedEmbeddedInterfaceExportedMethod")
+		require.Equal(t, "UnexportedEmbeddedInterfaceExportedMethod", resp.EmbeddedCase3.UnexportedEmbeddedInterfaceExportedMethod)
 	})
 }

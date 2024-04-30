@@ -12,9 +12,6 @@ import (
 	"github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/generated/model"
 )
 
-// FindWorldWithMultipleKeysByHelloNameAndFooBarValue shows we hit the FindWorldWithMultipleKeysByHelloNameAndFoo resolver
-const FindWorldWithMultipleKeysByHelloNameAndFooBarValue = 99
-
 // FindHelloByName is the resolver for the findHelloByName field.
 func (r *entityResolver) FindHelloByName(ctx context.Context, name string) (*model.Hello, error) {
 	return &model.Hello{

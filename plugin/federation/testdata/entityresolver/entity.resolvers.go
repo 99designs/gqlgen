@@ -167,6 +167,7 @@ func (r *entityResolver) FindWorldWithMultipleKeysByHelloNameAndFoo(ctx context.
 			Name: helloName,
 		},
 		Foo: foo,
+		Bar: FindWorldWithMultipleKeysByHelloNameAndFooBarValue,
 	}, nil
 }
 

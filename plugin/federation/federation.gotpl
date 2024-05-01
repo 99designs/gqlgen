@@ -253,19 +253,30 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 						ok bool
 					)
 					_ = val
+					// if all of the KeyFields values for this resolver are null,
+					// we shouldn't use use it
+					allNull := true
 					{{- range $_, $keyField := .KeyFields }}
 						m = rep
 						{{- range $i, $field := .Field }}
-							if {{ if (ne $i $keyField.Field.LastIndex ) -}}val{{- else -}}_{{- end -}}, ok = m["{{.}}"]; !ok {
+							val, ok = m["{{.}}"]
+							if !ok {
 								break
 							}
 							{{- if (ne $i $keyField.Field.LastIndex ) }}
 								if m, ok = val.(map[string]interface{}); !ok {
 									break
 								}
+							{{- else}}
+								if allNull {
+									allNull = val == nil
+								}
 							{{- end}}
 						{{- end}}
 					{{- end }}
+					if allNull {
+						break
+					}
 					return "{{.ResolverName}}", nil
 				}
 			{{- end }}

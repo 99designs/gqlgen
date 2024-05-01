@@ -186,6 +186,43 @@ func TestEntityResolver(t *testing.T) {
 		require.Equal(t, 11, resp.Entities[1].Bar)
 	})
 
+	t.Run("World entities with one single-key nil should hit resolver without nils", func(t *testing.T) {
+		representations := []map[string]interface{}{
+			{
+				"__typename": "WorldWithMultipleKeys",
+				"hello": map[string]interface{}{
+					"name": "world name - 1",
+				},
+				"foo": "foo 1",
+				"bar": nil,
+			},
+		}
+
+		var resp struct {
+			Entities []struct {
+				Foo   string `json:"foo"`
+				Hello struct {
+					Name string `json:"name"`
+				} `json:"hello"`
+				Bar int `json:"bar"`
+			} `json:"_entities"`
+		}
+
+		err := c.Post(
+			entityQuery([]string{
+				"WorldWithMultipleKeys {foo hello {name} bar}",
+			}),
+			&resp,
+			client.Var("representations", representations),
+		)
+
+		require.NoError(t, err)
+		require.Len(t, resp.Entities, 1)
+		require.Equal(t, "foo 1", resp.Entities[0].Foo)
+		require.Equal(t, "world name - 1", resp.Entities[0].Hello.Name)
+		require.Equal(t, entityresolver.FindWorldWithMultipleKeysByHelloNameAndFooBarValue, resp.Entities[0].Bar)
+	})
+
 	t.Run("Hello WorldName entities (heterogeneous)", func(t *testing.T) {
 		// Entity resolution can handle heterogenenous representations. Meaning,
 		// the representations for resolving entities can be of different

@@ -359,8 +359,18 @@ func entityResolverNameForExternalExtension(ctx context.Context, rep map[string]
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["upc"]; !ok {
+		val, ok = m["upc"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findExternalExtensionByUpc", nil
@@ -376,8 +386,18 @@ func entityResolverNameForHello(ctx context.Context, rep map[string]interface{})
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["name"]; !ok {
+		val, ok = m["name"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findHelloByName", nil
@@ -393,8 +413,18 @@ func entityResolverNameForMultiHelloMultiKey(ctx context.Context, rep map[string
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["name"]; !ok {
+		val, ok = m["name"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findManyMultiHelloMultiKeyByNames", nil
@@ -406,8 +436,18 @@ func entityResolverNameForMultiHelloMultiKey(ctx context.Context, rep map[string
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["key2"]; !ok {
+		val, ok = m["key2"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findManyMultiHelloMultiKeyByKey2s", nil
@@ -423,18 +463,33 @@ func entityResolverNameForNestedKey(ctx context.Context, rep map[string]interfac
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["id"]; !ok {
+		val, ok = m["id"]
+		if !ok {
 			break
 		}
+		if allNull {
+			allNull = val == nil
+		}
 		m = rep
-		if val, ok = m["hello"]; !ok {
+		val, ok = m["hello"]
+		if !ok {
 			break
 		}
 		if m, ok = val.(map[string]interface{}); !ok {
 			break
 		}
-		if _, ok = m["name"]; !ok {
+		val, ok = m["name"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findNestedKeyByIDAndHelloName", nil
@@ -450,54 +505,85 @@ func entityResolverNameForVeryNestedKey(ctx context.Context, rep map[string]inte
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["id"]; !ok {
+		val, ok = m["id"]
+		if !ok {
 			break
 		}
+		if allNull {
+			allNull = val == nil
+		}
 		m = rep
-		if val, ok = m["hello"]; !ok {
+		val, ok = m["hello"]
+		if !ok {
 			break
 		}
 		if m, ok = val.(map[string]interface{}); !ok {
 			break
 		}
-		if _, ok = m["name"]; !ok {
+		val, ok = m["name"]
+		if !ok {
 			break
+		}
+		if allNull {
+			allNull = val == nil
 		}
 		m = rep
-		if val, ok = m["world"]; !ok {
+		val, ok = m["world"]
+		if !ok {
 			break
 		}
 		if m, ok = val.(map[string]interface{}); !ok {
 			break
 		}
-		if _, ok = m["foo"]; !ok {
+		val, ok = m["foo"]
+		if !ok {
 			break
+		}
+		if allNull {
+			allNull = val == nil
 		}
 		m = rep
-		if val, ok = m["world"]; !ok {
+		val, ok = m["world"]
+		if !ok {
 			break
 		}
 		if m, ok = val.(map[string]interface{}); !ok {
 			break
 		}
-		if _, ok = m["bar"]; !ok {
+		val, ok = m["bar"]
+		if !ok {
 			break
+		}
+		if allNull {
+			allNull = val == nil
 		}
 		m = rep
-		if val, ok = m["more"]; !ok {
+		val, ok = m["more"]
+		if !ok {
 			break
 		}
 		if m, ok = val.(map[string]interface{}); !ok {
 			break
 		}
-		if val, ok = m["world"]; !ok {
+		val, ok = m["world"]
+		if !ok {
 			break
 		}
 		if m, ok = val.(map[string]interface{}); !ok {
 			break
 		}
-		if _, ok = m["foo"]; !ok {
+		val, ok = m["foo"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo", nil
@@ -513,8 +599,18 @@ func entityResolverNameForWorld(ctx context.Context, rep map[string]interface{})
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["foo"]; !ok {
+		val, ok = m["foo"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findWorldByFoo", nil
@@ -526,8 +622,18 @@ func entityResolverNameForWorld(ctx context.Context, rep map[string]interface{})
 			ok  bool
 		)
 		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
 		m = rep
-		if _, ok = m["bar"]; !ok {
+		val, ok = m["bar"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
 			break
 		}
 		return "findWorldByBar", nil

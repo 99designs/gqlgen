@@ -1,7 +1,5 @@
 run:
   tests: true
-  skip-dirs:
-    - bin
 
 linters-settings:
   errcheck:
@@ -33,6 +31,8 @@ linters:
     - unused
 
 issues:
+  exclude-dirs:
+    - bin
   exclude-rules:
     # Exclude some linters from running on tests files.
     - path: _test\.go

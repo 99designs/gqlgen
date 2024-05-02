@@ -13,7 +13,6 @@ func TestMarshalUUID(t *testing.T) {
 	})
 
 	t.Run("Valid Values", func(t *testing.T) {
-
 		var values = []struct {
 			input    uuid.UUID
 			expected string

@@ -71,7 +71,6 @@ func TestMarshalUintID(t *testing.T) {
 }
 
 func TestUnMarshalUintID(t *testing.T) {
-
 	result, err := UnmarshalUintID("12")
 	assert.Equal(t, uint(12), result)
 	assert.NoError(t, err)

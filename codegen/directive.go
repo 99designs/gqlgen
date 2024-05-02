@@ -124,7 +124,6 @@ func (b *builder) getDirectives(list ast.DirectiveList) ([]*Directive, error) {
 			DirectiveDefinition: list[i].Definition,
 			Builtin:             b.Config.Directives[d.Name].SkipRuntime,
 		}
-
 	}
 
 	return dirs, nil

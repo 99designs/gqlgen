@@ -176,7 +176,6 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 						uniqueMap[iface] = true
 					}
 				}
-
 			}
 
 			b.Models = append(b.Models, it)

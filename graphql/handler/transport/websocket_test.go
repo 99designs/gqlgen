@@ -760,7 +760,6 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
 	})
 	t.Run("pong only messages are sent when configured with graphql-transport-ws", func(t *testing.T) {
-
 		h, srv := initialize(transport.Websocket{PongOnlyInterval: 10 * time.Millisecond})
 		defer srv.Close()
 
@@ -793,7 +792,6 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 		msg = readOp(c)
 		assert.Equal(t, graphqltransportwsPongMsg, msg.Type)
 	})
-
 }
 
 func wsConnect(url string) *websocket.Conn {

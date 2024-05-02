@@ -182,7 +182,6 @@ func (f *federation) InjectSourceLate(schema *ast.Schema) *ast.Source {
 
 	var entities, resolvers, entityResolverInputDefinitions string
 	for _, e := range f.Entities {
-
 		if e.Def.Kind != ast.Interface {
 			if entities != "" {
 				entities += " | "
@@ -329,7 +328,6 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 
 			// add type info to entity
 			e.Type = obj.Type
-
 		}
 	}
 
@@ -416,7 +414,6 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 		if err != nil {
 			return err
 		}
-
 	}
 
 	return templates.Render(templates.Options{

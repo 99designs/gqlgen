@@ -6,6 +6,10 @@ run:
 linters-settings:
   errcheck:
     ignore: fmt:.*,[rR]ead|[wW]rite|[cC]lose,io:Copy
+  revive:
+    enable-all-rules: false
+    rules:
+      - name: empty-lines
   testifylint:
     disable-all: true
     enable:
@@ -26,6 +30,7 @@ linters:
     - misspell
     - nakedret
     - prealloc
+    - revive
     - staticcheck
     - testifylint
     - typecheck

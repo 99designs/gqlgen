@@ -224,7 +224,7 @@ func TestDirectives(t *testing.T) {
 
 			err := c.Post(`query { directiveNullableArg }`, &resp)
 
-			require.Nil(t, err)
+			require.NoError(t, err)
 			require.Equal(t, "Ok", *resp.DirectiveNullableArg)
 		})
 		t.Run("when function success on valid nullable arg directives", func(t *testing.T) {
@@ -234,7 +234,7 @@ func TestDirectives(t *testing.T) {
 
 			err := c.Post(`query { directiveNullableArg(arg: 1) }`, &resp)
 
-			require.Nil(t, err)
+			require.NoError(t, err)
 			require.Equal(t, "Ok", *resp.DirectiveNullableArg)
 		})
 		t.Run("when function success", func(t *testing.T) {
@@ -244,7 +244,7 @@ func TestDirectives(t *testing.T) {
 
 			err := c.Post(`query { directiveArg(arg: "test") }`, &resp)
 
-			require.Nil(t, err)
+			require.NoError(t, err)
 			require.Equal(t, "Ok", *resp.DirectiveArg)
 		})
 	})

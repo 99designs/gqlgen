@@ -85,7 +85,7 @@ func TestNullBubbling(t *testing.T) {
 		}
 		err := c.Post(`query { valid, errorList { id } }`, &resp)
 
-		require.Nil(t, err)
+		require.NoError(t, err)
 		require.Equal(t, 1, len(resp.ErrorList))
 		require.Nil(t, resp.ErrorList[0])
 		require.Equal(t, "Ok", resp.Valid)
@@ -114,7 +114,7 @@ func TestNullBubbling(t *testing.T) {
 		}
 
 		err := c.Post(`query { nullableArg(arg: null) }`, &resp)
-		require.Nil(t, err)
+		require.NoError(t, err)
 		require.Equal(t, "Ok", *resp.NullableArg)
 	})
 
@@ -142,7 +142,7 @@ func TestNullBubbling(t *testing.T) {
 		var resp any
 		err := c.Post(`query { invalid }`, &resp)
 		require.Nil(t, resp)
-		require.NotNil(t, err)
+		require.Error(t, err)
 		require.Contains(t, err.Error(), `{"message":"ERROR","path":["invalid"]}`)
 	})
 }

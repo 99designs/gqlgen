@@ -11,6 +11,8 @@ linters-settings:
   testifylint:
     disable-all: true
     enable:
+      - bool-compare
+      - error-nil
       - expected-actual
 
 linters:

@@ -49,11 +49,11 @@ func TestApolloTracing(t *testing.T) {
 
 	tracing := respData.Extensions.FTV1
 	pbuf, err := base64.StdEncoding.DecodeString(tracing)
-	require.Nil(t, err)
+	require.NoError(t, err)
 
 	ftv1 := &generated.Trace{}
 	err = proto.Unmarshal(pbuf, ftv1)
-	require.Nil(t, err)
+	require.NoError(t, err)
 
 	require.NotZero(t, ftv1.StartTime.Nanos)
 	require.Less(t, ftv1.StartTime.Nanos, ftv1.EndTime.Nanos)
@@ -82,11 +82,11 @@ func TestApolloTracing_Concurrent(t *testing.T) {
 
 			tracing := respData.Extensions.FTV1
 			pbuf, err := base64.StdEncoding.DecodeString(tracing)
-			require.Nil(t, err)
+			require.NoError(t, err)
 
 			ftv1 := &generated.Trace{}
 			err = proto.Unmarshal(pbuf, ftv1)
-			require.Nil(t, err)
+			require.NoError(t, err)
 			require.NotZero(t, ftv1.StartTime.Nanos)
 		}()
 	}

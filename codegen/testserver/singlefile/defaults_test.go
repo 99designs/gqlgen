@@ -13,9 +13,9 @@ import (
 func assertDefaults(t *testing.T, ret *DefaultParametersMirror) {
 	require.NotNil(t, ret)
 	require.NotNil(t, ret.FalsyBoolean)
-	require.Equal(t, false, *ret.FalsyBoolean)
+	require.False(t, *ret.FalsyBoolean)
 	require.NotNil(t, ret.TruthyBoolean)
-	require.Equal(t, true, *ret.TruthyBoolean)
+	require.True(t, *ret.TruthyBoolean)
 }
 
 func TestDefaults(t *testing.T) {

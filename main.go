@@ -1,6 +1,6 @@
 package main
 
-//go:generate sh generate_examples.sh
+//go:generate sh -c "cd _examples && go generate ./..."
 
 import (
 	"bytes"

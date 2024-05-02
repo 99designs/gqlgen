@@ -156,7 +156,7 @@ func TestExecutor(t *testing.T) {
 
 		t.Run("cache hits use document from cache", func(t *testing.T) {
 			doc, err := parser.ParseQuery(&ast.Source{Input: `query Bar {name}`})
-			require.Nil(t, err)
+			require.NoError(t, err)
 			cache.Add(ctx, qry, doc)
 
 			resp := query(exec, "Bar", qry)

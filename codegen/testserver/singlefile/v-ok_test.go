@@ -42,6 +42,6 @@ func TestOk(t *testing.T) {
 		}
 		err := c.Post(`query { vOkCaseNil { value } }`, &resp)
 		require.NoError(t, err)
-		require.Equal(t, true, resp.VOkCaseNil.Value == nil)
+		require.Nil(t, resp.VOkCaseNil.Value)
 	})
 }

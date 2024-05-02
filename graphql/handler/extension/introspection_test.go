@@ -14,5 +14,5 @@ func TestIntrospection(t *testing.T) {
 		DisableIntrospection: true,
 	}
 	require.Nil(t, Introspection{}.MutateOperationContext(context.Background(), rc))
-	require.Equal(t, false, rc.DisableIntrospection)
+	require.False(t, rc.DisableIntrospection)
 }

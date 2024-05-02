@@ -171,7 +171,6 @@ func TestCodeGenerationFederation2(t *testing.T) {
 // This test is to ensure that the input arguments are not
 // changed when cfg.OmitSliceElementPointers is false OR true
 func TestMultiWithOmitSliceElemPointersCfg(t *testing.T) {
-
 	staticRepsString := "reps: [HelloByNamesInput]!"
 	t.Run("OmitSliceElementPointers true", func(t *testing.T) {
 		f, cfg := load(t, "testdata/multi/multi.yml")
@@ -231,7 +230,6 @@ func TestHandlesArgumentGeneration(t *testing.T) {
 	raw := "foo bar baz(limit:4)"
 	requiresFieldSet := fieldset.New(raw, nil)
 	for _, field := range requiresFieldSet {
-
 		e.Requires = append(e.Requires, &Requires{
 			Name:  field.ToGoPrivate(),
 			Field: field,

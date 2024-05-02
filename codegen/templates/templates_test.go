@@ -333,7 +333,6 @@ func TestTemplateOverride(t *testing.T) {
 }
 
 func TestRenderFS(t *testing.T) {
-
 	tempDir := t.TempDir()
 
 	outDir := filepath.Join(tempDir, "output")

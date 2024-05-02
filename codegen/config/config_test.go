@@ -31,19 +31,25 @@ func TestReadConfig(t *testing.T) {
 	})
 
 	t.Run("malformed config", func(t *testing.T) {
-		cfgFile, _ := os.Open("testdata/cfg/malformedconfig.yml")
-		_, err := ReadConfig(cfgFile)
+		cfgFile, err := os.Open("testdata/cfg/malformedconfig.yml")
+		require.NoError(t, err)
+		t.Cleanup(func() { _ = cfgFile.Close() })
+		_, err = ReadConfig(cfgFile)
 		require.EqualError(t, err, "unable to parse config: yaml: unmarshal errors:\n  line 1: cannot unmarshal !!str `asdf` into config.Config")
 	})
 
 	t.Run("unknown keys", func(t *testing.T) {
-		cfgFile, _ := os.Open("testdata/cfg/unknownkeys.yml")
-		_, err := ReadConfig(cfgFile)
+		cfgFile, err := os.Open("testdata/cfg/unknownkeys.yml")
+		require.NoError(t, err)
+		t.Cleanup(func() { _ = cfgFile.Close() })
+		_, err = ReadConfig(cfgFile)
 		require.EqualError(t, err, "unable to parse config: yaml: unmarshal errors:\n  line 2: field unknown not found in type config.Config")
 	})
 
 	t.Run("globbed filenames", func(t *testing.T) {
-		cfgFile, _ := os.Open("testdata/cfg/glob.yml")
+		cfgFile, err := os.Open("testdata/cfg/glob.yml")
+		require.NoError(t, err)
+		t.Cleanup(func() { _ = cfgFile.Close() })
 		c, err := ReadConfig(cfgFile)
 		require.NoError(t, err)
 
@@ -57,8 +63,10 @@ func TestReadConfig(t *testing.T) {
 	})
 
 	t.Run("unwalkable path", func(t *testing.T) {
-		cfgFile, _ := os.Open("testdata/cfg/unwalkable.yml")
-		_, err := ReadConfig(cfgFile)
+		cfgFile, err := os.Open("testdata/cfg/unwalkable.yml")
+		require.NoError(t, err)
+		t.Cleanup(func() { _ = cfgFile.Close() })
+		_, err = ReadConfig(cfgFile)
 		if runtime.GOOS == "windows" {
 			require.EqualError(t, err, "failed to walk schema at root not_walkable/: CreateFile not_walkable/: The system cannot find the file specified.")
 		} else {

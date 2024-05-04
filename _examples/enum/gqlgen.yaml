@@ -4,10 +4,6 @@ exec:
   filename: ./api/exec.go
   package: api
 
-model:
-  filename: ./api/model.go
-  package: api
-
 resolver:
   layout: follow-schema
   package: api
@@ -23,10 +19,21 @@ models:
   BoolTyped:
     model: github.com/99designs/gqlgen/_examples/enum/model.BoolTyped
     enum_values:
-      TRUE: github.com/99designs/gqlgen/_examples/enum/model.BoolTypedTrue
-      FALSE: github.com/99designs/gqlgen/_examples/enum/model.BoolTypedFalse
+      TRUE:
+        value: github.com/99designs/gqlgen/_examples/enum/model.BoolTypedTrue
+      FALSE:
+        value: github.com/99designs/gqlgen/_examples/enum/model.BoolTypedFalse
   BoolUntyped:
     model: github.com/99designs/gqlgen/graphql.Boolean
     enum_values:
-      TRUE: github.com/99designs/gqlgen/_examples/enum/model.BoolUntypedTrue
-      FALSE: github.com/99designs/gqlgen/_examples/enum/model.BoolUntypedFalse
+      TRUE:
+        value: github.com/99designs/gqlgen/_examples/enum/model.BoolUntypedTrue
+      FALSE:
+        value: github.com/99designs/gqlgen/_examples/enum/model.BoolUntypedFalse
+  InPackage:
+    model: github.com/99designs/gqlgen/_examples/enum/api.InPackage
+    enum_values:
+      TRUE:
+        value: github.com/99designs/gqlgen/_examples/enum/api.InPackageTrue
+      FALSE:
+        value: github.com/99designs/gqlgen/_examples/enum/api.InPackageFalse

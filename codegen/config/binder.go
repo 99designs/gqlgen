@@ -205,7 +205,7 @@ type TypeReference struct {
 	IsContext               bool        // Is the Marshaler/Unmarshaller the context version; applies to either the method or interface variety.
 	PointersInUmarshalInput bool        // Inverse values and pointers in return.
 	IsRoot                  bool        // Is the type a root level definition such as Query, Mutation or Subscription
-	EnumValues              []EnumReference
+	EnumValues              []EnumValueReference
 }
 
 func (ref *TypeReference) Elem() *TypeReference {
@@ -429,30 +429,16 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 			IsRoot:     b.cfg.IsRoot(def),
 		}
 
-		ref.EnumValues, err = b.enumValues(def)
-		if err != nil {
-			return nil, err
-		}
-
 		obj, err := b.FindObject(pkgName, typeName)
 		if err != nil {
 			return nil, err
 		}
 
-		if ref.HasEnumValues() {
-			if fn, ok := obj.Type().(*types.Signature); ok {
-				ref.GO = fn.Params().At(0).Type()
-			} else {
-				ref.GO = obj.Type()
-			}
-
-			str, err := b.TypeReference(&ast.Type{NamedType: "String"}, nil)
+		if values := b.enumValues(def); len(values) > 0 {
+			err = b.enumReference(ref, obj, values)
 			if err != nil {
 				return nil, err
 			}
-
-			ref.Marshaler = str.Marshaler
-			ref.Unmarshaler = str.Unmarshaler
 		} else if fun, isFunc := obj.(*types.Func); isFunc {
 			ref.GO = fun.Type().(*types.Signature).Params().At(0).Type()
 			ref.IsContext = fun.Type().(*types.Signature).Results().At(0).Type().String() == "github.com/99designs/gqlgen/graphql.ContextMarshaler"
@@ -574,50 +560,80 @@ func basicUnderlying(it types.Type) *types.Basic {
 	return nil
 }
 
-type EnumReference struct {
+type EnumValueReference struct {
 	Definition *ast.EnumValueDefinition
-	Type       *types.Const
+	Object     types.Object
 }
 
-func (b *Binder) enumValues(def *ast.Definition) ([]EnumReference, error) {
+func (b *Binder) enumValues(def *ast.Definition) map[string]EnumValue {
 	if def.Kind != ast.Enum {
-		return nil, nil
+		return nil
 	}
 
 	if strings.HasPrefix(def.Name, "__") {
-		return nil, nil
+		return nil
 	}
 
 	model, ok := b.cfg.Models[def.Name]
 	if !ok {
-		return nil, nil
+		return nil
 	}
 
-	var values []EnumReference
+	return model.EnumValues
+}
 
-	for _, v := range def.EnumValues {
-		name, ok := model.EnumValues[v.Name]
+func (b *Binder) enumReference(ref *TypeReference, obj types.Object, values map[string]EnumValue) error {
+	if len(ref.Definition.EnumValues) != len(values) {
+		return fmt.Errorf("not all enum values are binded for %v", ref.Definition.Name)
+	}
+
+	if fn, ok := obj.Type().(*types.Signature); ok {
+		ref.GO = fn.Params().At(0).Type()
+	} else {
+		ref.GO = obj.Type()
+	}
+
+	str, err := b.TypeReference(&ast.Type{NamedType: "String"}, nil)
+	if err != nil {
+		return err
+	}
+
+	ref.Marshaler = str.Marshaler
+	ref.Unmarshaler = str.Unmarshaler
+	ref.EnumValues = make([]EnumValueReference, 0, len(values))
+
+	for _, value := range ref.Definition.EnumValues {
+		v, ok := values[value.Name]
 		if !ok {
-			continue
+			return fmt.Errorf("enum value not found for: %v, of enum: %v", value.Name, ref.Definition.Name)
 		}
 
-		pkgName, typeName := code.PkgAndType(name)
+		pkgName, typeName := code.PkgAndType(v.Value)
 		if pkgName == "" {
-			return nil, fmt.Errorf("missing package name for %s", def.Name)
+			return fmt.Errorf("missing package name for %v", value.Name)
 		}
 
-		obj, err := b.FindObject(pkgName, typeName)
+		valueObj, err := b.FindObject(pkgName, typeName)
 		if err != nil {
-			return nil, err
+			return err
 		}
 
-		if c, ok := obj.(*types.Const); ok {
-			values = append(values, EnumReference{
-				Definition: v,
-				Type:       c,
+		if !types.AssignableTo(valueObj.Type(), ref.GO) {
+			return fmt.Errorf("wrong type: %v, for enum value: %v, expected type: %v, of enum: %v",
+				valueObj.Type(), value.Name, ref.GO, ref.Definition.Name)
+		}
+
+		switch valueObj.(type) {
+		case *types.Const, *types.Var:
+			ref.EnumValues = append(ref.EnumValues, EnumValueReference{
+				Definition: value,
+				Object:     valueObj,
 			})
+		default:
+			return fmt.Errorf("unsupported enum value for: %v, of enum: %v, only const and var allowed",
+				value.Name, ref.Definition.Name)
 		}
 	}
 
-	return values, nil
+	return nil
 }

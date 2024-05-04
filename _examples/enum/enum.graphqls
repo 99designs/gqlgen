@@ -1,32 +1,52 @@
 directive @goModel(
     model: String
     models: [String!]
-) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | ENUM_VALUE | INTERFACE | UNION
+) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+
+directive @goEnum(
+    value: String
+) on ENUM_VALUE
 
 type Query {
-    int(typedN: IntTyped, untypedN: IntUntyped, typed: IntTyped!, untyped: IntUntyped!): [IntTyped!]
-    string(typedN: StringTyped, untypedN: StringUntyped, typed: StringTyped!, untyped: StringUntyped!): [StringTyped!]
-    bool(typedN: BoolTyped, untypedN: BoolUntyped, typed: BoolTyped!, untyped: BoolUntyped!): [BoolTyped!]
+    intTyped(arg: IntTyped!): IntTyped!
+    intUntyped(arg: IntUntyped!): IntUntyped!
+    intTypedN(arg: IntTyped): IntTyped
+    intUntypedN(arg: IntUntyped): IntUntyped
+
+    stringTyped(arg: StringTyped!): StringTyped!
+    stringUntyped(arg: StringUntyped!): StringUntyped!
+    stringTypedN(arg: StringTyped): StringTyped
+    stringUntypedN(arg: StringUntyped): StringUntyped
+
+    boolTyped(arg: BoolTyped!): BoolTyped!
+    boolUntyped(arg: BoolUntyped!): BoolUntyped!
+    boolTypedN(arg: BoolTyped): BoolTyped
+    boolUntypedN(arg: BoolUntyped): BoolUntyped
+
+    varTyped(arg: VarTyped!): VarTyped!
+    varUntyped(arg: VarUntyped!): VarUntyped!
+
+    inPackage(arg: InPackage!): InPackage!
 }
 
 enum IntTyped @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.IntTyped") {
-    ONE @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.IntTypedOne")
-    TWO @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.IntTypedTwo")
+    ONE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.IntTypedOne")
+    TWO @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.IntTypedTwo")
 }
 
 enum IntUntyped @goModel(model: "github.com/99designs/gqlgen/graphql.Int") {
-    ONE @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.IntUntypedOne")
-    TWO @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.IntUntypedTwo")
+    ONE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.IntUntypedOne")
+    TWO @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.IntUntypedTwo")
 }
 
-enum StringTyped @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.StringTyped")  {
-    ONE @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.StringTypedOne")
-    TWO @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.StringTypedTwo")
+enum StringTyped @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.StringTyped") {
+    ONE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.StringTypedOne")
+    TWO @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.StringTypedTwo")
 }
 
 enum StringUntyped @goModel(model: "github.com/99designs/gqlgen/graphql.String") {
-    ONE @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.StringUntypedOne")
-    TWO @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.StringUntypedTwo")
+    ONE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.StringUntypedOne")
+    TWO @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.StringUntypedTwo")
 }
 
 enum BoolTyped {
@@ -35,6 +55,21 @@ enum BoolTyped {
 }
 
 enum BoolUntyped {
+    TRUE
+    FALSE
+}
+
+enum VarTyped @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.VarTyped") {
+    TRUE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.VarTypedTrue")
+    FALSE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.VarTypedFalse")
+}
+
+enum VarUntyped @goModel(model: "github.com/99designs/gqlgen/graphql.Boolean") {
+    TRUE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.VarUntypedTrue")
+    FALSE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.VarUntypedFalse")
+}
+
+enum InPackage {
     TRUE
     FALSE
 }

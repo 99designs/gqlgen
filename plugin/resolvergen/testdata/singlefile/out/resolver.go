@@ -24,5 +24,7 @@ func (r *CustomResolverType) Query() QueryResolver { return &queryCustomResolver
 // Resolver returns ResolverResolver implementation.
 func (r *CustomResolverType) Resolver() ResolverResolver { return &resolverCustomResolverType{r} }
 
-type queryCustomResolverType struct{ *CustomResolverType }
-type resolverCustomResolverType struct{ *CustomResolverType }
+type (
+	queryCustomResolverType    struct{ *CustomResolverType }
+	resolverCustomResolverType struct{ *CustomResolverType }
+)

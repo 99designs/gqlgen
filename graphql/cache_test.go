@@ -147,7 +147,7 @@ func TestNoCacheMultipleEntries(t *testing.T) {
 		}
 
 		// Test Get for multiple entries
-		for key, _ := range entries {
+		for key := range entries {
 			gotValue, ok := cache.Get(ctx, key)
 			assert.False(t, ok, "Get should not find the key %s", key)
 			assert.Nil(t, gotValue, "Get should return nil for key %s", key)

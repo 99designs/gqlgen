@@ -1,5 +1,4 @@
 //go:build private
-// +build private
 
 // This file is excluded from the build unless the "private" build tag is set.
 // This is used to test loading private packages.

@@ -28,7 +28,6 @@ Next, create a `tools.go` file and add gqlgen as a [tool dependency for your mod
 
 ```go
 //go:build tools
-// +build tools
 
 package tools
 

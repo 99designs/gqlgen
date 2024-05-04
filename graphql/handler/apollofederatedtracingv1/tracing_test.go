@@ -141,12 +141,14 @@ func TestApolloTracing_withUnexpectedEOF(t *testing.T) {
 	resp := doRequestWithReader(h, http.MethodPost, "/graphql", &alwaysError{})
 	assert.Equal(t, http.StatusOK, resp.Code)
 }
+
 func doRequest(handler http.Handler, method, target, body string) *httptest.ResponseRecorder {
 	return doRequestWithReader(handler, method, target, strings.NewReader(body))
 }
 
 func doRequestWithReader(handler http.Handler, method string, target string,
-	reader io.Reader) *httptest.ResponseRecorder {
+	reader io.Reader,
+) *httptest.ResponseRecorder {
 	r := httptest.NewRequest(method, target, reader)
 	r.Header.Set("Content-Type", "application/json")
 	r.Header.Set("apollo-federation-include-trace", "ftv1")

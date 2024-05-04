@@ -114,7 +114,8 @@ func doRequest(handler http.Handler, method, target, body string) *httptest.Resp
 }
 
 func doRequestWithReader(handler http.Handler, method string, target string,
-	reader io.Reader) *httptest.ResponseRecorder {
+	reader io.Reader,
+) *httptest.ResponseRecorder {
 	r := httptest.NewRequest(method, target, reader)
 	r.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()

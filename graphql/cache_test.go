@@ -56,6 +56,62 @@ func TestMapCacheMultipleEntries(t *testing.T) {
 	})
 }
 
+func TestMapCacheEdgeCases(t *testing.T) {
+	type testCase struct {
+		name       string
+		key        string
+		value      string
+		initialVal string // Initial value if needed (for overwrite tests)
+		wantValue  string
+		wantOk     bool
+	}
+
+	tests := []testCase{
+		{
+			name:      "Empty Key",
+			key:       "",
+			value:     "valueForEmptyKey",
+			wantValue: "valueForEmptyKey",
+			wantOk:    true,
+		},
+		{
+			name:      "Very Long Key",
+			key:       "key" + string(make([]rune, 10000)),
+			value:     "valueForLongKey",
+			wantValue: "valueForLongKey",
+			wantOk:    true,
+		},
+		{
+			name:       "Overwrite Existing Key",
+			key:        "testKey",
+			initialVal: "initialValue",
+			value:      "newValue",
+			wantValue:  "newValue",
+			wantOk:     true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			cache := MapCache{}
+			ctx := context.Background()
+
+			// Set initial value if needed
+			if tc.initialVal != "" {
+				cache.Add(ctx, tc.key, tc.initialVal)
+			}
+
+			// Add the main value
+			cache.Add(ctx, tc.key, tc.value)
+
+			// Test Get
+			gotValue, ok := cache.Get(ctx, tc.key)
+			assert.Equal(t, tc.wantOk, ok, "Expected ok to be %v", tc.wantOk)
+			assert.Equal(t, tc.wantValue, gotValue, "Expected value to be %v", tc.wantValue)
+		})
+	}
+}
+
 func TestNoCache(t *testing.T) {
 	t.Run("Add and Get", func(t *testing.T) {
 		cache := NoCache{}
@@ -97,4 +153,53 @@ func TestNoCacheMultipleEntries(t *testing.T) {
 			assert.Nil(t, gotValue, "Get should return nil for key %s", key)
 		}
 	})
+}
+
+func TestNoCacheEdgeCases(t *testing.T) {
+	type testCase struct {
+		name      string
+		key       string
+		value     string
+		wantOk    bool
+		wantValue interface{}
+	}
+
+	tests := []testCase{
+		{
+			name:      "Get After Add",
+			key:       "anyKey",
+			value:     "anyValue",
+			wantOk:    false,
+			wantValue: nil,
+		},
+		{
+			name:      "Empty Key",
+			key:       "",
+			value:     "value",
+			wantOk:    false,
+			wantValue: nil,
+		},
+		{
+			name:      "Very Long Key",
+			key:       "key" + string(make([]rune, 10000)),
+			value:     "value",
+			wantOk:    false,
+			wantValue: nil,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			cache := NoCache{}
+			ctx := context.Background()
+
+			// Test Add
+			cache.Add(ctx, tc.key, tc.value)
+
+			// Test Get
+			gotValue, ok := cache.Get(ctx, tc.key)
+			assert.Equal(t, tc.wantOk, ok, "Get should not find the key")
+			assert.Equal(t, tc.wantValue, gotValue, "Get should return nil for any key")
+		})
+	}
 }

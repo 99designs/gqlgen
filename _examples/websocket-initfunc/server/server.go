@@ -63,7 +63,7 @@ func main() {
 				return true
 			},
 		},
-		InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (*transport.InitPayload, context.Context, error) {
+		InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, *transport.InitPayload, error) {
 			return webSocketInit(ctx, initPayload)
 		},
 	})

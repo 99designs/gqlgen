@@ -419,7 +419,13 @@ func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition) 
 			f = mf
 		}
 
-		if f.IsResolver && cfg.OmitResolverFields {
+		var shouldGenerateResolver bool
+		if models := cfg.Models; len(models) > 0 {
+			if fields := models[schemaType.Name].Fields; len(fields) > 0 {
+				shouldGenerateResolver = fields[field.Name].Resolver
+			}
+		}
+		if (f.IsResolver || shouldGenerateResolver) && cfg.OmitResolverFields {
 			continue
 		}
 

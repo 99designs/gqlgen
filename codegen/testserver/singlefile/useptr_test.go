@@ -10,5 +10,5 @@ import (
 func TestUserPtr(t *testing.T) {
 	s := &Stub{}
 	r := reflect.TypeOf(s.QueryResolver.OptionalUnion)
-	require.True(t, r.Out(0).Kind() == reflect.Interface)
+	require.Equal(t, reflect.Interface, r.Out(0).Kind())
 }

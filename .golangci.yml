@@ -3,7 +3,10 @@ run:
 
 linters-settings:
   errcheck:
-    ignore: fmt:.*,[rR]ead|[wW]rite|[cC]lose,io:Copy
+    exclude-functions:
+      - (io.Writer).Write
+      - io.Copy
+      - io.WriteString
   revive:
     enable-all-rules: false
     rules:
@@ -48,3 +51,4 @@ issues:
     - path: _test\.go
       linters:
         - dupl
+        - errcheck

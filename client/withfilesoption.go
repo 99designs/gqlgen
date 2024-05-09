@@ -55,7 +55,7 @@ func WithFiles() Option {
 		//
 		// {"query":"mutation ($input: Input!) {}","variables":{"input":{"file":{}}}
 		requestBody, _ := json.Marshal(bd)
-		bodyWriter.WriteField("operations", string(requestBody))
+		_ = bodyWriter.WriteField("operations", string(requestBody))
 
 		// --b7955bd2e1d17b67ac157b9e9ddb6238888caefc6f3541920a1debad284d
 		// Content-Disposition: form-data; name="map"
@@ -97,7 +97,7 @@ func WithFiles() Option {
 
 			mapData = `{` + strings.Join(mapDataFiles, ",") + `}`
 		}
-		bodyWriter.WriteField("map", mapData)
+		_ = bodyWriter.WriteField("map", mapData)
 
 		// --b7955bd2e1d17b67ac157b9e9ddb6238888caefc6f3541920a1debad284d
 		// Content-Disposition: form-data; name="0"; filename="tempFile"

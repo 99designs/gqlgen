@@ -107,7 +107,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			resp := &graphql.Response{Errors: []*gqlerror.Error{gqlErr}}
 			b, _ := json.Marshal(resp)
 			w.WriteHeader(http.StatusUnprocessableEntity)
-			w.Write(b)
+			_, _ = w.Write(b)
 		}
 	}()
 
@@ -128,7 +128,7 @@ func sendError(w http.ResponseWriter, code int, errors ...*gqlerror.Error) {
 	if err != nil {
 		panic(err)
 	}
-	w.Write(b)
+	_, _ = w.Write(b)
 }
 
 func sendErrorf(w http.ResponseWriter, code int, format string, args ...interface{}) {

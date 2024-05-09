@@ -47,7 +47,7 @@ func (p *Client) Websocket(query string, options ...Option) *Subscription {
 // Grab a single response from a websocket based query
 func (p *Client) WebsocketOnce(query string, resp interface{}, options ...Option) error {
 	sock := p.Websocket(query, options...)
-	defer sock.Close()
+	defer func() { _ = sock.Close() }()
 	if reflect.ValueOf(resp).Kind() == reflect.Ptr {
 		return sock.Next(resp)
 	}

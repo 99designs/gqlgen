@@ -18,7 +18,7 @@ func SendError(w http.ResponseWriter, code int, errors ...*gqlerror.Error) {
 	if err != nil {
 		panic(err)
 	}
-	w.Write(b)
+	_, _ = w.Write(b)
 }
 
 // SendErrorf wraps SendError to add formatted messages

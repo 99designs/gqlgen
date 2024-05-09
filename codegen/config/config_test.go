@@ -1,7 +1,6 @@
 package config
 
 import (
-	"errors"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -103,7 +102,7 @@ func TestLoadConfigFromDefaultLocation(t *testing.T) {
 		require.NoError(t, err)
 
 		cfg, err = LoadConfigFromDefaultLocations()
-		require.True(t, errors.Is(err, fs.ErrNotExist))
+		require.ErrorIs(t, err, fs.ErrNotExist)
 	})
 }
 
@@ -126,7 +125,7 @@ func TestLoadDefaultConfig(t *testing.T) {
 		require.NoError(t, err)
 
 		cfg, err = LoadDefaultConfig()
-		require.True(t, errors.Is(err, fs.ErrNotExist))
+		require.ErrorIs(t, err, fs.ErrNotExist)
 	})
 }
 

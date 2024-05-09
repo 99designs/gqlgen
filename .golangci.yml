@@ -12,8 +12,11 @@ linters-settings:
     disable-all: true
     enable:
       - bool-compare
+      - compares
+      - error-is-as
       - error-nil
       - expected-actual
+      - nil-compare
 
 linters:
   disable-all: true

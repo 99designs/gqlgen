@@ -63,7 +63,7 @@ func TestModelGeneration(t *testing.T) {
 		for _, commentGroup := range node.Comments {
 			text := commentGroup.Text()
 			words := strings.Split(text, " ")
-			require.True(t, len(words) > 1, "expected description %q to have more than one word", text)
+			require.Greaterf(t, len(words), 1, "expected description %q to have more than one word", text)
 		}
 	})
 
@@ -81,7 +81,7 @@ func TestModelGeneration(t *testing.T) {
 		}
 
 		for _, tag := range expectedTags {
-			require.True(t, strings.Contains(fileText, tag), "\nexpected:\n"+tag+"\ngot\n"+fileText)
+			require.Contains(t, fileText, tag, "\nexpected:\n"+tag+"\ngot\n"+fileText)
 		}
 	})
 
@@ -99,7 +99,7 @@ func TestModelGeneration(t *testing.T) {
 		}
 
 		for _, tag := range expectedTags {
-			require.True(t, strings.Contains(fileText, tag), "\nexpected:\n"+tag+"\ngot\n"+fileText)
+			require.Contains(t, fileText, tag, "\nexpected:\n"+tag+"\ngot\n"+fileText)
 		}
 	})
 

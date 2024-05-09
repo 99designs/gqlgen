@@ -389,7 +389,7 @@ func TestDirectives(t *testing.T) {
 
 			require.NoError(t, err)
 			require.Equal(t, "Ok", resp.DirectiveObject.Text)
-			require.True(t, resp.DirectiveObject.NullableText == nil)
+			require.Nil(t, resp.DirectiveObject.NullableText)
 			require.Equal(t, "Query_field", resp.DirectiveObject.Order[0])
 			require.Equal(t, "order2_1", resp.DirectiveObject.Order[1])
 			require.Equal(t, "order1_2", resp.DirectiveObject.Order[2])
@@ -405,7 +405,7 @@ func TestDirectives(t *testing.T) {
 			err := c.Post(`query { directiveObjectWithCustomGoModel{ nullableText } }`, &resp)
 
 			require.NoError(t, err)
-			require.True(t, resp.DirectiveObjectWithCustomGoModel.NullableText == nil)
+			require.Nil(t, resp.DirectiveObjectWithCustomGoModel.NullableText)
 		})
 	})
 

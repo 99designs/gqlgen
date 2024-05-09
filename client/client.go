@@ -106,6 +106,8 @@ func (p *Client) RawPost(query string, options ...Option) (*Response, error) {
 	return respDataRaw, nil
 }
 
+var boundaryRegex = regexp.MustCompile(`multipart/form-data; ?boundary=.*`)
+
 func (p *Client) newRequest(query string, options ...Option) (*http.Request, error) {
 	bd := &Request{
 		Query: query,
@@ -124,7 +126,7 @@ func (p *Client) newRequest(query string, options ...Option) (*http.Request, err
 
 	contentType := bd.HTTP.Header.Get("Content-Type")
 	switch {
-	case regexp.MustCompile(`multipart/form-data; ?boundary=.*`).MatchString(contentType):
+	case boundaryRegex.MatchString(contentType):
 		break
 	case "application/json" == contentType:
 		requestBody, err := json.Marshal(bd)

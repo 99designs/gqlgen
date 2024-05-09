@@ -553,7 +553,7 @@ func (tm TypeMap) Check() error {
 		if len(entry.Model) == 0 {
 			for enum, v := range entry.EnumValues {
 				if v.Value != "" {
-					return fmt.Errorf("model is emty for: %v, but enum value is specified for %v", typeName, enum)
+					return fmt.Errorf("model is empty for: %v, but enum value is specified for %v", typeName, enum)
 				}
 			}
 		}

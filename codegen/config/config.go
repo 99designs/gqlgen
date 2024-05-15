@@ -275,6 +275,10 @@ func (c *Config) injectTypesFromSchema() error {
 		SkipRuntime: true,
 	}
 
+	c.Directives["goExtraField"] = DirectiveConfig{
+		SkipRuntime: true,
+	}
+
 	c.Directives["goField"] = DirectiveConfig{
 		SkipRuntime: true,
 	}
@@ -343,6 +347,43 @@ func (c *Config) injectTypesFromSchema() error {
 					c.Models[schemaType.Name].Fields[field.Name] = TypeMapField{
 						FieldName: fieldName,
 						Resolver:  forceResolver,
+					}
+				}
+			}
+
+			if efds := schemaType.Directives.ForNames("goExtraField"); len(efds) != 0 {
+				for _, efd := range efds {
+					if fn := efd.Arguments.ForName("name"); fn != nil {
+						extraFieldName := ""
+						extraField := ModelExtraField{}
+						if fnv, err := fn.Value.Value(nil); err == nil {
+							if !c.Models.Exists(schemaType.Name) {
+								c.Models[schemaType.Name] = TypeMapEntry{
+									ExtraFields: make(map[string]ModelExtraField),
+								}
+							}
+							extraFieldName = fnv.(string)
+						}
+
+						if t := efd.Arguments.ForName("type"); t != nil {
+							if tv, err := t.Value.Value(nil); err == nil {
+								extraField.Type = tv.(string)
+							}
+						}
+
+						if ot := efd.Arguments.ForName("overrideTags"); ot != nil {
+							if otv, err := ot.Value.Value(nil); err == nil {
+								extraField.OverrideTags = otv.(string)
+							}
+						}
+
+						if d := efd.Arguments.ForName("description"); d != nil {
+							if dv, err := d.Value.Value(nil); err == nil {
+								extraField.Description = dv.(string)
+							}
+						}
+
+						c.Models[schemaType.Name].ExtraFields[extraFieldName] = extraField
 					}
 				}
 			}

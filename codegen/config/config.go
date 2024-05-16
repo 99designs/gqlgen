@@ -355,20 +355,31 @@ func (c *Config) injectTypesFromSchema() error {
 				for _, efd := range efds {
 					if fn := efd.Arguments.ForName("name"); fn != nil {
 						extraFieldName := ""
-						extraField := ModelExtraField{}
 						if fnv, err := fn.Value.Value(nil); err == nil {
-							if !c.Models.Exists(schemaType.Name) {
-								c.Models[schemaType.Name] = TypeMapEntry{
-									ExtraFields: make(map[string]ModelExtraField),
-								}
-							}
 							extraFieldName = fnv.(string)
 						}
 
+						if extraFieldName == "" {
+							return fmt.Errorf(
+								"argument 'name' for directive @goExtraField (src: %s, line: %d) cannot by empty",
+								efd.Position.Src.Name,
+								efd.Position.Line,
+							)
+						}
+
+						extraField := ModelExtraField{}
 						if t := efd.Arguments.ForName("type"); t != nil {
 							if tv, err := t.Value.Value(nil); err == nil {
 								extraField.Type = tv.(string)
 							}
+						}
+
+						if extraField.Type == "" {
+							return fmt.Errorf(
+								"argument 'type' for directive @goExtraField (src: %s, line: %d) cannot by empty",
+								efd.Position.Src.Name,
+								efd.Position.Line,
+							)
 						}
 
 						if ot := efd.Arguments.ForName("overrideTags"); ot != nil {
@@ -383,6 +394,12 @@ func (c *Config) injectTypesFromSchema() error {
 							}
 						}
 
+						typeMapEntry := c.Models[schemaType.Name]
+						if typeMapEntry.ExtraFields == nil {
+							typeMapEntry.ExtraFields = make(map[string]ModelExtraField)
+						}
+
+						c.Models[schemaType.Name] = typeMapEntry
 						c.Models[schemaType.Name].ExtraFields[extraFieldName] = extraField
 					}
 				}

@@ -68,7 +68,7 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 				continue
 			}
 
-			resolver := Resolver{o, f, nil, "", `panic("not implemented")`, nil}
+			resolver := Resolver{o, f, nil, "", `panic("not implemented")`, nil, nil}
 			file.Resolvers = append(file.Resolvers, &resolver)
 		}
 	}
@@ -135,7 +135,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 				// use default implementation, if no implementation was previously used
 				implementation = fmt.Sprintf("panic(fmt.Errorf(\"not implemented: %v - %v\"))", f.GoFieldName, f.Name)
 			}
-			resolver := Resolver{o, f, rewriter.GetPrevDecl(structName, f.GoFieldName), comment, implementation, nil}
+			resolver := Resolver{o, f, rewriter.GetPrevDecl(structName, f.GoFieldName), comment, implementation, nil, nil}
 			var implExists bool
 			for _, p := range data.Plugins {
 				rImpl, ok := p.(plugin.ResolverImplementer)
@@ -147,6 +147,10 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 				}
 				implExists = true
 				resolver.ImplementationRender = rImpl.Implement
+				// check if its a CheckedResolverImplementer
+				if cImpl, ok := p.(plugin.CheckedResolverImplementer); ok {
+					resolver.ImplementationRenderCheck = cImpl.ShouldOverwrite
+				}
 			}
 			fnCase := gqlToResolverName(data.Config.Resolver.Dir(), f.Position.Src.Name, data.Config.Resolver.FilenameTemplate)
 			fn := strings.ToLower(fnCase)
@@ -252,16 +256,22 @@ func (f *File) Imports() string {
 }
 
 type Resolver struct {
-	Object               *codegen.Object
-	Field                *codegen.Field
-	PrevDecl             *ast.FuncDecl
-	Comment              string
-	ImplementationStr    string
-	ImplementationRender func(r *codegen.Field) string
+	Object                    *codegen.Object
+	Field                     *codegen.Field
+	PrevDecl                  *ast.FuncDecl
+	Comment                   string
+	ImplementationStr         string
+	ImplementationRender      func(r *codegen.Field) string
+	ImplementationRenderCheck func(r *codegen.Field, existing string) bool
 }
 
 func (r *Resolver) Implementation() string {
-	if r.ImplementationRender != nil {
+	canUseRender := true
+	if r.ImplementationRenderCheck != nil {
+		canUseRender = r.ImplementationRenderCheck(r.Field, r.ImplementationStr)
+	}
+
+	if r.ImplementationRender != nil && canUseRender {
 		return r.ImplementationRender(r.Field)
 	}
 	return r.ImplementationStr

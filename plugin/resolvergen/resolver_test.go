@@ -102,6 +102,24 @@ func TestResolver_Implementation(t *testing.T) {
 	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/testdata/resolver_implementor/out")
 }
 
+func TestCheckedResolver_Implementation(t *testing.T) {
+	_ = syscall.Unlink("testdata/resolver_implementor/resolver.go")
+
+	cfg, err := config.LoadConfig("testdata/resolver_implementor/gqlgen.yml")
+	require.NoError(t, err)
+	p := Plugin{}
+
+	require.NoError(t, cfg.Init())
+
+	data, err := codegen.BuildData(cfg, &checkedImplementorTest{})
+	if err != nil {
+		panic(err)
+	}
+
+	require.NoError(t, p.GenerateCode(data))
+	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/testdata/resolver_implementor/out")
+}
+
 func TestCustomResolverTemplate(t *testing.T) {
 	_ = syscall.Unlink("testdata/resolvertemplate/out/resolver.go")
 	cfg, err := config.LoadConfig("testdata/resolvertemplate/gqlgen.yml")
@@ -165,4 +183,14 @@ type implementorTest struct{}
 
 func (i *implementorTest) Implement(field *codegen.Field) string {
 	return "panic(\"implementor implemented me\")"
+}
+
+type checkedImplementorTest struct{}
+
+func (i *checkedImplementorTest) Implement(field *codegen.Field) string {
+	return "panic(\"implementor implemented me\")"
+}
+
+func (i *checkedImplementorTest) ShouldOverwrite(field *codegen.Field, existing string) bool {
+	return false
 }

@@ -31,7 +31,11 @@ type LateSourceInjector interface {
 	InjectSourceLate(schema *ast.Schema) *ast.Source
 }
 
-// ResolverImplementer is used to generate code inside resolvers
+type CheckedResolverImplementer interface {
+	ResolverImplementer
+	ShouldOverwrite(field *codegen.Field, existing string) bool
+}
+
 type ResolverImplementer interface {
 	Implement(field *codegen.Field) string
 }

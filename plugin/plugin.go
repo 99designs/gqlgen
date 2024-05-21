@@ -33,5 +33,5 @@ type LateSourceInjector interface {
 
 // ResolverImplementer is used to generate code inside resolvers
 type ResolverImplementer interface {
-	Implement(field *codegen.Field) string
+	Implement(prevImplementation string, field *codegen.Field) string
 }

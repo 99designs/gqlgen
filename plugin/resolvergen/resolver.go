@@ -127,14 +127,9 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 			if !f.IsResolver {
 				continue
 			}
-
 			structName := templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type)
 			comment := strings.TrimSpace(strings.TrimLeft(rewriter.GetMethodComment(structName, f.GoFieldName), `\`))
 			implementation := strings.TrimSpace(rewriter.GetMethodBody(structName, f.GoFieldName))
-			if implementation == "" {
-				// use default implementation, if no implementation was previously used
-				implementation = fmt.Sprintf("panic(fmt.Errorf(\"not implemented: %v - %v\"))", f.GoFieldName, f.Name)
-			}
 			resolver := Resolver{o, f, rewriter.GetPrevDecl(structName, f.GoFieldName), comment, implementation, nil}
 			var implExists bool
 			for _, p := range data.Plugins {
@@ -257,13 +252,20 @@ type Resolver struct {
 	PrevDecl             *ast.FuncDecl
 	Comment              string
 	ImplementationStr    string
-	ImplementationRender func(r *codegen.Field) string
+	ImplementationRender func(prevImplementation string, r *codegen.Field) string
 }
 
 func (r *Resolver) Implementation() string {
 	if r.ImplementationRender != nil {
-		return r.ImplementationRender(r.Field)
+		// use custom implementation
+		return r.ImplementationRender(r.ImplementationStr, r.Field)
 	}
+	// if not implementation was previously used, use default implementation
+	if r.ImplementationStr == "" {
+		// use default implementation, if no implementation was previously used
+		return fmt.Sprintf("panic(fmt.Errorf(\"not implemented: %v - %v\"))", r.Field.GoFieldName, r.Field.Name)
+	}
+	// use previously used implementation
 	return r.ImplementationStr
 }
 

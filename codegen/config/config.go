@@ -353,25 +353,11 @@ func (c *Config) injectTypesFromSchema() error {
 
 			if efds := schemaType.Directives.ForNames("goExtraField"); len(efds) != 0 {
 				for _, efd := range efds {
-					if fn := efd.Arguments.ForName("name"); fn != nil {
-						extraFieldName := ""
-						if fnv, err := fn.Value.Value(nil); err == nil {
-							extraFieldName = fnv.(string)
-						}
-
-						if extraFieldName == "" {
-							return fmt.Errorf(
-								"argument 'name' for directive @goExtraField (src: %s, line: %d) cannot by empty",
-								efd.Position.Src.Name,
-								efd.Position.Line,
-							)
-						}
-
+					if t := efd.Arguments.ForName("type"); t != nil {
 						extraField := ModelExtraField{}
-						if t := efd.Arguments.ForName("type"); t != nil {
-							if tv, err := t.Value.Value(nil); err == nil {
-								extraField.Type = tv.(string)
-							}
+
+						if tv, err := t.Value.Value(nil); err == nil {
+							extraField.Type = tv.(string)
 						}
 
 						if extraField.Type == "" {
@@ -394,13 +380,28 @@ func (c *Config) injectTypesFromSchema() error {
 							}
 						}
 
-						typeMapEntry := c.Models[schemaType.Name]
-						if typeMapEntry.ExtraFields == nil {
-							typeMapEntry.ExtraFields = make(map[string]ModelExtraField)
+						extraFieldName := ""
+						if fn := efd.Arguments.ForName("name"); fn != nil {
+							if fnv, err := fn.Value.Value(nil); err == nil {
+								extraFieldName = fnv.(string)
+							}
 						}
 
-						c.Models[schemaType.Name] = typeMapEntry
-						c.Models[schemaType.Name].ExtraFields[extraFieldName] = extraField
+						if extraFieldName == "" {
+							// Embeddable fields
+							typeMapEntry := c.Models[schemaType.Name]
+							typeMapEntry.EmbedExtraFields = append(typeMapEntry.EmbedExtraFields, extraField)
+							c.Models[schemaType.Name] = typeMapEntry
+						} else {
+							// Regular fields
+							typeMapEntry := c.Models[schemaType.Name]
+							if typeMapEntry.ExtraFields == nil {
+								typeMapEntry.ExtraFields = make(map[string]ModelExtraField)
+							}
+
+							c.Models[schemaType.Name] = typeMapEntry
+							c.Models[schemaType.Name].ExtraFields[extraFieldName] = extraField
+						}
 					}
 				}
 			}
@@ -439,7 +440,8 @@ type TypeMapEntry struct {
 	EnumValues    map[string]EnumValue    `yaml:"enum_values,omitempty"`
 
 	// Key is the Go name of the field.
-	ExtraFields map[string]ModelExtraField `yaml:"extraFields,omitempty"`
+	ExtraFields      map[string]ModelExtraField `yaml:"extraFields,omitempty"`
+	EmbedExtraFields []ModelExtraField          `yaml:"embedExtraFields,omitempty"`
 }
 
 type TypeMapField struct {

@@ -54,7 +54,7 @@ To start using it you first need to define it:
 
 ```graphql
 directive @goExtraField(
-	name: String!
+	name: String
 	type: String!
 	overrideTags: String
 	description: String
@@ -71,7 +71,11 @@ type User
 		description: "A Session used by this user"
 		overrideTags: "xml:\"session\""
 	)
-	@goExtraField(name: "Activated", type: "bool") {
+	@goExtraField(name: "Activated", type: "bool")
+	@goExtraField(
+		type: "time.Time"
+		description: "type without name will be embedded"
+	) {
 	id: ID
 	name: String
 }
@@ -86,5 +90,6 @@ type User struct {
   // A Session used by this user.
   Session   mypkg.Session `xml:"session"`
   Activated bool
+  time.Time
 }
 ```

@@ -446,36 +446,67 @@ func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition) 
 		fields = append(fields, f)
 	}
 
-	// appending extra fields at the end of the fields list.
-	modelcfg := cfg.Models[schemaType.Name]
-	if len(modelcfg.ExtraFields) > 0 {
-		ff := make([]*Field, 0, len(modelcfg.ExtraFields))
-		for fname, fspec := range modelcfg.ExtraFields {
-			ftype := buildType(fspec.Type)
-
-			tag := `json:"-"`
-			if fspec.OverrideTags != "" {
-				tag = fspec.OverrideTags
-			}
-
-			ff = append(ff,
-				&Field{
-					Name:        fname,
-					GoName:      fname,
-					Type:        ftype,
-					Description: fspec.Description,
-					Tag:         tag,
-				})
-		}
-
-		sort.Slice(ff, func(i, j int) bool {
-			return ff[i].Name < ff[j].Name
-		})
-
-		fields = append(fields, ff...)
-	}
+	fields = append(fields, getExtraFields(cfg, schemaType.Name)...)
 
 	return fields, nil
+}
+
+func getExtraFields(cfg *config.Config, modelName string) []*Field {
+	modelcfg := cfg.Models[modelName]
+
+	extraFieldsCount := len(modelcfg.ExtraFields) + len(modelcfg.EmbedExtraFields)
+	if extraFieldsCount == 0 {
+		return nil
+	}
+
+	extraFields := make([]*Field, 0, extraFieldsCount)
+
+	makeExtraField := func(fname string, fspec config.ModelExtraField) *Field {
+		ftype := buildType(fspec.Type)
+
+		tag := `json:"-"`
+		if fspec.OverrideTags != "" {
+			tag = fspec.OverrideTags
+		}
+
+		return &Field{
+			Name:        fname,
+			GoName:      fname,
+			Type:        ftype,
+			Description: fspec.Description,
+			Tag:         tag,
+		}
+	}
+
+	if len(modelcfg.ExtraFields) > 0 {
+		for fname, fspec := range modelcfg.ExtraFields {
+			extraFields = append(extraFields, makeExtraField(fname, fspec))
+		}
+	}
+
+	if len(modelcfg.EmbedExtraFields) > 0 {
+		for _, fspec := range modelcfg.EmbedExtraFields {
+			extraFields = append(extraFields, makeExtraField("", fspec))
+		}
+	}
+
+	sort.Slice(extraFields, func(i, j int) bool {
+		if extraFields[i].Name == "" && extraFields[j].Name == "" {
+			return extraFields[i].Type.String() < extraFields[j].Type.String()
+		}
+
+		if extraFields[i].Name == "" {
+			return false
+		}
+
+		if extraFields[j].Name == "" {
+			return true
+		}
+
+		return extraFields[i].Name < extraFields[j].Name
+	})
+
+	return extraFields
 }
 
 func getStructTagFromField(cfg *config.Config, field *ast.FieldDefinition) string {

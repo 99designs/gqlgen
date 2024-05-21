@@ -12,7 +12,7 @@ require (
 	github.com/rs/cors v1.11.0
 	github.com/stretchr/testify v1.9.0
 	github.com/vektah/dataloaden v0.3.0
-	github.com/vektah/gqlparser/v2 v2.5.11
+	github.com/vektah/gqlparser/v2 v2.5.12
 )
 
 require (

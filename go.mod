@@ -16,7 +16,7 @@ require (
 	github.com/sosodev/duration v1.3.1
 	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.27.2
-	github.com/vektah/gqlparser/v2 v2.5.11
+	github.com/vektah/gqlparser/v2 v2.5.12
 	golang.org/x/text v0.15.0
 	golang.org/x/tools v0.21.0
 	google.golang.org/protobuf v1.34.1

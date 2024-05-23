@@ -44,7 +44,7 @@ func TestChatSubscriptions(t *testing.T) {
 			require.Equal(t, "system", msg.resp.MessageAdded.CreatedBy)
 
 			go func() {
-				var resp interface{}
+				var resp any
 				err := c.Post(fmt.Sprintf(`mutation {
 					a:post(text:"Hello!", roomName:"#gophers%d", username:"vektah") { id }
 					b:post(text:"Hello Vektah!", roomName:"#gophers%d", username:"andrey") { id }

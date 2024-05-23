@@ -26,7 +26,7 @@ func TestPanics(t *testing.T) {
 	}
 
 	srv := handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers}))
-	srv.SetRecoverFunc(func(ctx context.Context, err interface{}) (userMessage error) {
+	srv.SetRecoverFunc(func(ctx context.Context, err any) (userMessage error) {
 		return fmt.Errorf("panic: %v", err)
 	})
 
@@ -40,28 +40,28 @@ func TestPanics(t *testing.T) {
 	c := client.New(srv)
 
 	t.Run("panics in marshallers will not kill server", func(t *testing.T) {
-		var resp interface{}
+		var resp any
 		err := c.Post(`query { panics { fieldScalarMarshal } }`, &resp)
 
 		require.EqualError(t, err, "http 422: {\"errors\":[{\"message\":\"presented: panic: BOOM\"}],\"data\":null}")
 	})
 
 	t.Run("panics in unmarshalers will not kill server", func(t *testing.T) {
-		var resp interface{}
+		var resp any
 		err := c.Post(`query { panics { argUnmarshal(u: ["aa", "bb"]) } }`, &resp)
 
 		require.EqualError(t, err, "[{\"message\":\"presented: input: panics.argUnmarshal panic: BOOM\",\"path\":[\"panics\",\"argUnmarshal\"]}]")
 	})
 
 	t.Run("panics in funcs unmarshal return errors", func(t *testing.T) {
-		var resp interface{}
+		var resp any
 		err := c.Post(`query { panics { fieldFuncMarshal(u: ["aa", "bb"]) } }`, &resp)
 
 		require.EqualError(t, err, "[{\"message\":\"presented: input: panics.fieldFuncMarshal panic: BOOM\",\"path\":[\"panics\",\"fieldFuncMarshal\"]}]")
 	})
 
 	t.Run("panics in funcs marshal return errors", func(t *testing.T) {
-		var resp interface{}
+		var resp any
 		err := c.Post(`query { panics { fieldFuncMarshal(u: []) } }`, &resp)
 
 		require.EqualError(t, err, "http 422: {\"errors\":[{\"message\":\"presented: panic: BOOM\"}],\"data\":null}")

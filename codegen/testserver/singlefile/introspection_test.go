@@ -21,7 +21,7 @@ func TestIntrospection(t *testing.T) {
 		srv.AddTransport(transport.POST{})
 		c := client.New(srv)
 
-		var resp interface{}
+		var resp any
 		err := c.Post(introspection.Query, &resp)
 		require.EqualError(t, err, "[{\"message\":\"introspection disabled\",\"path\":[\"__schema\"]}]")
 	})
@@ -33,7 +33,7 @@ func TestIntrospection(t *testing.T) {
 			NewExecutableSchema(Config{Resolvers: resolvers}),
 		))
 
-		var resp interface{}
+		var resp any
 		err := c.Post(introspection.Query, &resp)
 		require.NoError(t, err)
 
@@ -73,7 +73,7 @@ func TestIntrospection(t *testing.T) {
 		})
 		c := client.New(srv)
 
-		var resp interface{}
+		var resp any
 		err := c.Post(introspection.Query, &resp)
 		require.EqualError(t, err, "[{\"message\":\"introspection disabled\",\"path\":[\"__schema\"]}]")
 	})

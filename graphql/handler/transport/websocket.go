@@ -480,7 +480,7 @@ func (c *wsConnection) sendError(id string, errors ...*gqlerror.Error) {
 	c.write(&message{t: errorMessageType, id: id, payload: b})
 }
 
-func (c *wsConnection) sendConnectionError(format string, args ...interface{}) {
+func (c *wsConnection) sendConnectionError(format string, args ...any) {
 	b, err := json.Marshal(&gqlerror.Error{Message: fmt.Sprintf(format, args...)})
 	if err != nil {
 		panic(err)

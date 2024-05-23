@@ -55,7 +55,7 @@ func (Tracer) Validate(graphql.ExecutableSchema) error {
 	return nil
 }
 
-func (Tracer) InterceptField(ctx context.Context, next graphql.Resolver) (interface{}, error) {
+func (Tracer) InterceptField(ctx context.Context, next graphql.Resolver) (any, error) {
 	td, ok := graphql.GetExtension(ctx, "tracing").(*TracingExtension)
 	if !ok {
 		return next(ctx)

@@ -31,7 +31,7 @@ type Field struct {
 	NoErr            bool             // If this is bound to a go method, does that method have an error as the second argument
 	VOkFunc          bool             // If this is bound to a go method, is it of shape (interface{}, bool)
 	Object           *Object          // A link back to the parent object
-	Default          interface{}      // The default value
+	Default          any              // The default value
 	Stream           bool             // does this field return a channel?
 	Directives       []*Directive
 }

@@ -39,7 +39,7 @@ func New() Config {
 			lastID: 4,
 		},
 	}
-	c.Directives.HasRole = func(ctx context.Context, obj interface{}, next graphql.Resolver, role Role) (interface{}, error) {
+	c.Directives.HasRole = func(ctx context.Context, obj any, next graphql.Resolver, role Role) (any, error) {
 		switch role {
 		case RoleAdmin:
 			// No admin for you!
@@ -57,7 +57,7 @@ func New() Config {
 
 		return next(ctx)
 	}
-	c.Directives.User = func(ctx context.Context, obj interface{}, next graphql.Resolver, id int) (interface{}, error) {
+	c.Directives.User = func(ctx context.Context, obj any, next graphql.Resolver, id int) (any, error) {
 		return next(context.WithValue(ctx, ckey("userId"), id))
 	}
 	return c
@@ -124,7 +124,7 @@ func (r *MutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (*Tod
 	return newTodo, nil
 }
 
-func (r *MutationResolver) UpdateTodo(ctx context.Context, id int, changes map[string]interface{}) (*Todo, error) {
+func (r *MutationResolver) UpdateTodo(ctx context.Context, id int, changes map[string]any) (*Todo, error) {
 	var affectedTodo *Todo
 
 	for i := 0; i < len(r.todos); i++ {

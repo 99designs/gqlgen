@@ -19,13 +19,13 @@ type FieldContext struct {
 	// The name of the type this field belongs to
 	Object string
 	// These are the args after processing, they can be mutated in middleware to change what the resolver will get.
-	Args map[string]interface{}
+	Args map[string]any
 	// The raw field
 	Field CollectedField
 	// The index of array in path.
 	Index *int
 	// The result object of resolver
-	Result interface{}
+	Result any
 	// IsMethod indicates if the resolver is a method
 	IsMethod bool
 	// IsResolver indicates if the field has a user-specified resolver

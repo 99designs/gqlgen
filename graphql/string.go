@@ -47,7 +47,7 @@ func writeQuotedString(w io.Writer, s string) {
 	io.WriteString(w, `"`)
 }
 
-func UnmarshalString(v interface{}) (string, error) {
+func UnmarshalString(v any) (string, error) {
 	switch v := v.(type) {
 	case string:
 		return v, nil

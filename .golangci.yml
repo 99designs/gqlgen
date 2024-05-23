@@ -11,6 +11,7 @@ linters-settings:
     enable-all-rules: false
     rules:
       - name: empty-lines
+      - name: use-any
   testifylint:
     disable-all: true
     enable:
@@ -52,3 +53,10 @@ issues:
       linters:
         - dupl
         - errcheck
+    # Disable revive.use-any for backwards compatibility
+    - path: graphql/map.go
+      text: "use-any: since GO 1.18 'interface{}' can be replaced by 'any'"
+    - path: codegen/testserver/followschema/resolver.go
+      text: "use-any: since GO 1.18 'interface{}' can be replaced by 'any'"
+    - path: codegen/testserver/singlefile/resolver.go
+      text: "use-any: since GO 1.18 'interface{}' can be replaced by 'any'"

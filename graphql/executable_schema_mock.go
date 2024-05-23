@@ -19,7 +19,7 @@ var _ ExecutableSchema = &ExecutableSchemaMock{}
 //
 //		// make and configure a mocked ExecutableSchema
 //		mockedExecutableSchema := &ExecutableSchemaMock{
-//			ComplexityFunc: func(typeName string, fieldName string, childComplexity int, args map[string]interface{}) (int, bool) {
+//			ComplexityFunc: func(typeName string, fieldName string, childComplexity int, args map[string]any) (int, bool) {
 //				panic("mock out the Complexity method")
 //			},
 //			ExecFunc: func(ctx context.Context) ResponseHandler {
@@ -36,7 +36,7 @@ var _ ExecutableSchema = &ExecutableSchemaMock{}
 //	}
 type ExecutableSchemaMock struct {
 	// ComplexityFunc mocks the Complexity method.
-	ComplexityFunc func(typeName string, fieldName string, childComplexity int, args map[string]interface{}) (int, bool)
+	ComplexityFunc func(typeName string, fieldName string, childComplexity int, args map[string]any) (int, bool)
 
 	// ExecFunc mocks the Exec method.
 	ExecFunc func(ctx context.Context) ResponseHandler
@@ -55,7 +55,7 @@ type ExecutableSchemaMock struct {
 			// ChildComplexity is the childComplexity argument value.
 			ChildComplexity int
 			// Args is the args argument value.
-			Args map[string]interface{}
+			Args map[string]any
 		}
 		// Exec holds details about calls to the Exec method.
 		Exec []struct {
@@ -72,7 +72,7 @@ type ExecutableSchemaMock struct {
 }
 
 // Complexity calls ComplexityFunc.
-func (mock *ExecutableSchemaMock) Complexity(typeName string, fieldName string, childComplexity int, args map[string]interface{}) (int, bool) {
+func (mock *ExecutableSchemaMock) Complexity(typeName string, fieldName string, childComplexity int, args map[string]any) (int, bool) {
 	if mock.ComplexityFunc == nil {
 		panic("ExecutableSchemaMock.ComplexityFunc: method is nil but ExecutableSchema.Complexity was just called")
 	}
@@ -80,7 +80,7 @@ func (mock *ExecutableSchemaMock) Complexity(typeName string, fieldName string, 
 		TypeName        string
 		FieldName       string
 		ChildComplexity int
-		Args            map[string]interface{}
+		Args            map[string]any
 	}{
 		TypeName:        typeName,
 		FieldName:       fieldName,
@@ -101,13 +101,13 @@ func (mock *ExecutableSchemaMock) ComplexityCalls() []struct {
 	TypeName        string
 	FieldName       string
 	ChildComplexity int
-	Args            map[string]interface{}
+	Args            map[string]any
 } {
 	var calls []struct {
 		TypeName        string
 		FieldName       string
 		ChildComplexity int
-		Args            map[string]interface{}
+		Args            map[string]any
 	}
 	mock.lockComplexity.RLock()
 	calls = mock.calls.Complexity

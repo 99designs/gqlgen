@@ -51,8 +51,8 @@ func TestAPQ(t *testing.T) {
 	t.Run("with hash miss and no query", func(t *testing.T) {
 		ctx := newOC()
 		params := &graphql.RawParams{
-			Extensions: map[string]interface{}{
-				"persistedQuery": map[string]interface{}{
+			Extensions: map[string]any{
+				"persistedQuery": map[string]any{
 					"sha256Hash": hash,
 					"version":    1,
 				},
@@ -67,8 +67,8 @@ func TestAPQ(t *testing.T) {
 		ctx := newOC()
 		params := &graphql.RawParams{
 			Query: query,
-			Extensions: map[string]interface{}{
-				"persistedQuery": map[string]interface{}{
+			Extensions: map[string]any{
+				"persistedQuery": map[string]any{
 					"sha256Hash": hash,
 					"version":    1,
 				},
@@ -86,8 +86,8 @@ func TestAPQ(t *testing.T) {
 		ctx := newOC()
 		params := &graphql.RawParams{
 			Query: query,
-			Extensions: map[string]interface{}{
-				"persistedQuery": map[string]interface{}{
+			Extensions: map[string]any{
+				"persistedQuery": map[string]any{
 					"sha256Hash": hash,
 					"version":    1,
 				},
@@ -104,8 +104,8 @@ func TestAPQ(t *testing.T) {
 	t.Run("with hash hit and no query", func(t *testing.T) {
 		ctx := newOC()
 		params := &graphql.RawParams{
-			Extensions: map[string]interface{}{
-				"persistedQuery": map[string]interface{}{
+			Extensions: map[string]any{
+				"persistedQuery": map[string]any{
 					"sha256Hash": hash,
 					"version":    1,
 				},
@@ -123,7 +123,7 @@ func TestAPQ(t *testing.T) {
 	t.Run("with malformed extension payload", func(t *testing.T) {
 		ctx := newOC()
 		params := &graphql.RawParams{
-			Extensions: map[string]interface{}{
+			Extensions: map[string]any{
 				"persistedQuery": "asdf",
 			},
 		}
@@ -135,8 +135,8 @@ func TestAPQ(t *testing.T) {
 	t.Run("with invalid extension version", func(t *testing.T) {
 		ctx := newOC()
 		params := &graphql.RawParams{
-			Extensions: map[string]interface{}{
-				"persistedQuery": map[string]interface{}{
+			Extensions: map[string]any{
+				"persistedQuery": map[string]any{
 					"version": 2,
 				},
 			},
@@ -149,8 +149,8 @@ func TestAPQ(t *testing.T) {
 		ctx := newOC()
 		params := &graphql.RawParams{
 			Query: query,
-			Extensions: map[string]interface{}{
-				"persistedQuery": map[string]interface{}{
+			Extensions: map[string]any{
+				"persistedQuery": map[string]any{
 					"sha256Hash": "badhash",
 					"version":    1,
 				},

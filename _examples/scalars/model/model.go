@@ -22,7 +22,7 @@ func (b Banned) MarshalGQL(w io.Writer) {
 	}
 }
 
-func (b *Banned) UnmarshalGQL(v interface{}) error {
+func (b *Banned) UnmarshalGQL(v any) error {
 	switch v := v.(type) {
 	case string:
 		*b = strings.ToLower(v) == "true"
@@ -53,7 +53,7 @@ type Point struct {
 	Y int
 }
 
-func (p *Point) UnmarshalGQL(v interface{}) error {
+func (p *Point) UnmarshalGQL(v any) error {
 	pointStr, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("points must be strings")
@@ -90,7 +90,7 @@ func MarshalTimestamp(t time.Time) graphql.Marshaler {
 
 // Unmarshal{Typename} is only required if the scalar appears as an input. The raw values have already been decoded
 // from json into int/float64/bool/nil/map[string]interface/[]interface
-func UnmarshalTimestamp(v interface{}) (time.Time, error) {
+func UnmarshalTimestamp(v any) (time.Time, error) {
 	if tmpStr, ok := v.(int64); ok {
 		return time.Unix(tmpStr, 0), nil
 	}
@@ -105,7 +105,7 @@ func MarshalID(id external.ObjectID) graphql.Marshaler {
 }
 
 // And the same for the unmarshaler
-func UnmarshalID(v interface{}) (external.ObjectID, error) {
+func UnmarshalID(v any) (external.ObjectID, error) {
 	str, ok := v.(string)
 	if !ok {
 		return 0, fmt.Errorf("ids must be strings")
@@ -163,7 +163,7 @@ func (e Tier) String() string {
 	}
 }
 
-func (e *Tier) UnmarshalGQL(v interface{}) error {
+func (e *Tier) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -186,7 +186,7 @@ func MarshalPreferences(p *Prefs) graphql.Marshaler {
 	return graphql.MarshalBoolean(p.DarkMode)
 }
 
-func UnmarshalPreferences(v interface{}) (*Prefs, error) {
+func UnmarshalPreferences(v any) (*Prefs, error) {
 	tmp, err := graphql.UnmarshalBoolean(v)
 	if err != nil {
 		return nil, err

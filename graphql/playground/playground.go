@@ -95,7 +95,7 @@ func Handler(title string, endpoint string) http.HandlerFunc {
 func HandlerWithHeaders(title string, endpoint string, fetcherHeaders map[string]string, uiHeaders map[string]string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "text/html; charset=UTF-8")
-		err := page.Execute(w, map[string]interface{}{
+		err := page.Execute(w, map[string]any{
 			"title":                title,
 			"endpoint":             endpoint,
 			"fetcherHeaders":       fetcherHeaders,

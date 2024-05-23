@@ -37,17 +37,17 @@ func TestMiddleware(t *testing.T) {
 	srv := handler.NewDefaultServer(
 		NewExecutableSchema(Config{Resolvers: resolvers}),
 	)
-	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res any, err error) {
 		path, _ := ctx.Value(ckey("path")).([]int)
 		return next(context.WithValue(ctx, ckey("path"), append(path, 1)))
 	})
 
-	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res any, err error) {
 		path, _ := ctx.Value(ckey("path")).([]int)
 		return next(context.WithValue(ctx, ckey("path"), append(path, 2)))
 	})
 
-	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res any, err error) {
 		fc := graphql.GetFieldContext(ctx)
 		mu.Lock()
 		areMethods[fc.Field.Name] = fc.IsMethod

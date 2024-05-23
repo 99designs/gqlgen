@@ -27,7 +27,7 @@ func TestMarshalUUID(t *testing.T) {
 
 func TestUnmarshalUUID(t *testing.T) {
 	t.Run("Invalid Non-String Values", func(t *testing.T) {
-		values := []interface{}{123, 1.2345678901, 1.2e+20, 1.2e-20, true, false, nil}
+		values := []any{123, 1.2345678901, 1.2e+20, 1.2e-20, true, false, nil}
 		for _, v := range values {
 			result, err := UnmarshalUUID(v)
 			assert.Equal(t, uuid.Nil, result)

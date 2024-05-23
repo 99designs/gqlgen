@@ -71,7 +71,7 @@ func TestComplexityFuncs(t *testing.T) {
 		}
 
 		var resp struct {
-			Overlapping interface{}
+			Overlapping any
 		}
 		err := c.Post(`query { overlapping { oneFoo, twoFoo, oldFoo, newFoo, new_foo } }`, &resp)
 
@@ -90,7 +90,7 @@ func TestComplexityFuncs(t *testing.T) {
 		}
 
 		var resp struct {
-			Overlapping interface{}
+			Overlapping any
 		}
 		c.MustPost(`query { overlapping { newFoo } }`, &resp)
 
@@ -107,7 +107,7 @@ func TestComplexityFuncs(t *testing.T) {
 			}, nil
 		}
 
-		var resp interface{}
+		var resp any
 		err := c.Post(`query {
 			a: overlapping { newFoo },
 			b: overlapping { newFoo },

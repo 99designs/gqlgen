@@ -10,7 +10,7 @@ const (
 
 // InitPayload is a structure that is parsed from the websocket init message payload. TO use
 // request headers for non-websocket, instead wrap the graphql handler in a middleware.
-type InitPayload map[string]interface{}
+type InitPayload map[string]any
 
 // GetString safely gets a string value from the payload. It returns an empty string if the
 // payload is nil or the value isn't set.

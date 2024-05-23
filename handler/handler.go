@@ -235,11 +235,11 @@ type apqAdapter struct {
 	PersistedQueryCache
 }
 
-func (a apqAdapter) Get(ctx context.Context, key string) (value interface{}, ok bool) {
+func (a apqAdapter) Get(ctx context.Context, key string) (value any, ok bool) {
 	return a.PersistedQueryCache.Get(ctx, key)
 }
 
-func (a apqAdapter) Add(ctx context.Context, key string, value interface{}) {
+func (a apqAdapter) Add(ctx context.Context, key string, value any) {
 	a.PersistedQueryCache.Add(ctx, key, value.(string))
 }
 

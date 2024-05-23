@@ -17,7 +17,7 @@ func MarshalTime(t time.Time) Marshaler {
 	})
 }
 
-func UnmarshalTime(v interface{}) (time.Time, error) {
+func UnmarshalTime(v any) (time.Time, error) {
 	if tmpStr, ok := v.(string); ok {
 		return time.Parse(time.RFC3339Nano, tmpStr)
 	}

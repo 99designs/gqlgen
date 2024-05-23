@@ -22,6 +22,6 @@ func SendError(w http.ResponseWriter, code int, errors ...*gqlerror.Error) {
 }
 
 // SendErrorf wraps SendError to add formatted messages
-func SendErrorf(w http.ResponseWriter, code int, format string, args ...interface{}) {
+func SendErrorf(w http.ResponseWriter, code int, format string, args ...any) {
 	SendError(w, code, &gqlerror.Error{Message: fmt.Sprintf(format, args...)})
 }

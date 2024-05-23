@@ -33,7 +33,7 @@ func TestString(t *testing.T) {
 	})
 }
 
-func mustUnmarshalString(v interface{}) string {
+func mustUnmarshalString(v any) string {
 	res, err := UnmarshalString(v)
 	if err != nil {
 		panic(err)

@@ -26,7 +26,7 @@ func (t *testGraphRequestContext) Err() error {
 	return nil
 }
 
-func (t *testGraphRequestContext) Value(key interface{}) interface{} {
+func (t *testGraphRequestContext) Value(key any) any {
 	return t.opContext
 }
 

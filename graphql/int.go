@@ -13,7 +13,7 @@ func MarshalInt(i int) Marshaler {
 	})
 }
 
-func UnmarshalInt(v interface{}) (int, error) {
+func UnmarshalInt(v any) (int, error) {
 	switch v := v.(type) {
 	case string:
 		return strconv.Atoi(v)
@@ -34,7 +34,7 @@ func MarshalInt64(i int64) Marshaler {
 	})
 }
 
-func UnmarshalInt64(v interface{}) (int64, error) {
+func UnmarshalInt64(v any) (int64, error) {
 	switch v := v.(type) {
 	case string:
 		return strconv.ParseInt(v, 10, 64)
@@ -55,7 +55,7 @@ func MarshalInt32(i int32) Marshaler {
 	})
 }
 
-func UnmarshalInt32(v interface{}) (int32, error) {
+func UnmarshalInt32(v any) (int32, error) {
 	switch v := v.(type) {
 	case string:
 		iv, err := strconv.ParseInt(v, 10, 32)

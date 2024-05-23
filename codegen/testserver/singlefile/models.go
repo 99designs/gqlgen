@@ -49,7 +49,7 @@ type EmbeddedPointer struct {
 
 type MarshalPanic string
 
-func (m *MarshalPanic) UnmarshalGQL(v interface{}) error {
+func (m *MarshalPanic) UnmarshalGQL(v any) error {
 	panic("BOOM")
 }
 

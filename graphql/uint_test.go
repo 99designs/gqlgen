@@ -26,7 +26,7 @@ func TestUint(t *testing.T) {
 	})
 }
 
-func mustUnmarshalUint(v interface{}) uint {
+func mustUnmarshalUint(v any) uint {
 	res, err := UnmarshalUint(v)
 	if err != nil {
 		panic(err)
@@ -54,7 +54,7 @@ func TestUint32(t *testing.T) {
 	})
 }
 
-func mustUnmarshalUint32(v interface{}) uint32 {
+func mustUnmarshalUint32(v any) uint32 {
 	res, err := UnmarshalUint32(v)
 	if err != nil {
 		panic(err)
@@ -80,7 +80,7 @@ func TestUint64(t *testing.T) {
 	})
 }
 
-func mustUnmarshalUint64(v interface{}) uint64 {
+func mustUnmarshalUint64(v any) uint64 {
 	res, err := UnmarshalUint64(v)
 	if err != nil {
 		panic(err)

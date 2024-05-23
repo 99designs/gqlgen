@@ -22,7 +22,7 @@ func writeJsonError(w io.Writer, msg string) {
 	writeJson(w, &graphql.Response{Errors: gqlerror.List{{Message: msg}}})
 }
 
-func writeJsonErrorf(w io.Writer, format string, args ...interface{}) {
+func writeJsonErrorf(w io.Writer, format string, args ...any) {
 	writeJson(w, &graphql.Response{Errors: gqlerror.List{{Message: fmt.Sprintf(format, args...)}}})
 }
 

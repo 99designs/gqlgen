@@ -166,7 +166,7 @@ func TestTodo(t *testing.T) {
 
 	t.Run("introspection", func(t *testing.T) {
 		// Make sure we can run the graphiql introspection query without errors
-		var resp interface{}
+		var resp any
 		c.MustPost(introspection.Query, &resp)
 	})
 
@@ -184,7 +184,7 @@ func TestSkipAndIncludeDirectives(t *testing.T) {
 	c := client.New(handler.NewDefaultServer(NewExecutableSchema(New())))
 
 	t.Run("skip on field", func(t *testing.T) {
-		var resp map[string]interface{}
+		var resp map[string]any
 		c.MustPost(`{ todo(id: 1) @skip(if:true) { __typename } }`, &resp)
 		_, ok := resp["todo"]
 		require.False(t, ok)
@@ -192,7 +192,7 @@ func TestSkipAndIncludeDirectives(t *testing.T) {
 
 	t.Run("skip on variable", func(t *testing.T) {
 		q := `query Test($cond: Boolean!) { todo(id: 1) @skip(if: $cond) { __typename } }`
-		var resp map[string]interface{}
+		var resp map[string]any
 
 		c.MustPost(q, &resp, client.Var("cond", true))
 		_, ok := resp["todo"]
@@ -239,7 +239,7 @@ func TestSkipAndIncludeDirectives(t *testing.T) {
 
 	t.Run("include on field", func(t *testing.T) {
 		q := `query Test($cond: Boolean!) { todo(id: 1) @include(if: $cond) { __typename } }`
-		var resp map[string]interface{}
+		var resp map[string]any
 
 		c.MustPost(q, &resp, client.Var("cond", true))
 		_, ok := resp["todo"]
@@ -264,7 +264,7 @@ func TestSkipAndIncludeDirectives(t *testing.T) {
 		}
 		q := `query Test($skip: Boolean!, $include: Boolean!) { todo(id: 1) @skip(if: $skip) @include(if: $include) { __typename } }`
 		for _, tc := range table {
-			var resp map[string]interface{}
+			var resp map[string]any
 			c.MustPost(q, &resp, client.Var("skip", tc.Skip), client.Var("include", tc.Include))
 			_, ok := resp["todo"]
 			require.Equal(t, tc.Expected, ok)
@@ -272,7 +272,7 @@ func TestSkipAndIncludeDirectives(t *testing.T) {
 	})
 
 	t.Run("skip with default query argument", func(t *testing.T) {
-		var resp map[string]interface{}
+		var resp map[string]any
 		c.MustPost(`query Test($skip: Boolean = true) { todo(id: 1) @skip(if: $skip) { __typename } }`, &resp)
 		_, ok := resp["todo"]
 		require.False(t, ok)

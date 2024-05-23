@@ -12,22 +12,22 @@ import (
 
 type SSE struct {
 	Close func() error
-	Next  func(response interface{}) error
+	Next  func(response any) error
 }
 
 type SSEResponse struct {
-	Data       interface{}            `json:"data"`
-	Label      string                 `json:"label"`
-	Path       []interface{}          `json:"path"`
-	HasNext    bool                   `json:"hasNext"`
-	Errors     json.RawMessage        `json:"errors"`
-	Extensions map[string]interface{} `json:"extensions"`
+	Data       any             `json:"data"`
+	Label      string          `json:"label"`
+	Path       []any           `json:"path"`
+	HasNext    bool            `json:"hasNext"`
+	Errors     json.RawMessage `json:"errors"`
+	Extensions map[string]any  `json:"extensions"`
 }
 
 func errorSSE(err error) *SSE {
 	return &SSE{
 		Close: func() error { return nil },
-		Next: func(response interface{}) error {
+		Next: func(response any) error {
 			return err
 		},
 	}
@@ -62,7 +62,7 @@ func (p *Client) SSE(ctx context.Context, query string, options ...Option) *SSE 
 			srv.Close()
 			return nil
 		},
-		Next: func(response interface{}) error {
+		Next: func(response any) error {
 			for {
 				line, err := reader.ReadLine()
 				if err != nil {

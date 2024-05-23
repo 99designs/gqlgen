@@ -68,7 +68,7 @@ func processExtensions(exts []graphql.HandlerExtension) extensions {
 		rootFieldMiddleware: func(ctx context.Context, next graphql.RootResolver) graphql.Marshaler {
 			return next(ctx)
 		},
-		fieldMiddleware: func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+		fieldMiddleware: func(ctx context.Context, next graphql.Resolver) (res any, err error) {
 			return next(ctx)
 		},
 	}
@@ -105,8 +105,8 @@ func processExtensions(exts []graphql.HandlerExtension) extensions {
 
 		if p, ok := p.(graphql.FieldInterceptor); ok {
 			previous := e.fieldMiddleware
-			e.fieldMiddleware = func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
-				return p.InterceptField(ctx, func(ctx context.Context) (res interface{}, err error) {
+			e.fieldMiddleware = func(ctx context.Context, next graphql.Resolver) (res any, err error) {
+				return p.InterceptField(ctx, func(ctx context.Context) (res any, err error) {
 					return previous(ctx, next)
 				})
 			}
@@ -160,7 +160,7 @@ func (r aroundRespFunc) InterceptResponse(ctx context.Context, next graphql.Resp
 	return r(ctx, next)
 }
 
-type aroundFieldFunc func(ctx context.Context, next graphql.Resolver) (res interface{}, err error)
+type aroundFieldFunc func(ctx context.Context, next graphql.Resolver) (res any, err error)
 
 func (f aroundFieldFunc) ExtensionName() string {
 	return "InlineFieldFunc"
@@ -173,7 +173,7 @@ func (f aroundFieldFunc) Validate(schema graphql.ExecutableSchema) error {
 	return nil
 }
 
-func (f aroundFieldFunc) InterceptField(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+func (f aroundFieldFunc) InterceptField(ctx context.Context, next graphql.Resolver) (res any, err error) {
 	return f(ctx, next)
 }
 

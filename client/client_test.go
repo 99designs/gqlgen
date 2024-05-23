@@ -26,8 +26,8 @@ func TestClient(t *testing.T) {
 		}
 		require.Equal(t, `{"query":"user(id:$id){name}","variables":{"id":1}}`, string(b))
 
-		err = json.NewEncoder(w).Encode(map[string]interface{}{
-			"data": map[string]interface{}{
+		err = json.NewEncoder(w).Encode(map[string]any{
+			"data": map[string]any{
 				"name": "bob",
 			},
 		})
@@ -155,8 +155,8 @@ func TestAddExtensions(t *testing.T) {
 			panic(err)
 		}
 		require.Equal(t, `{"query":"user(id:1){name}","extensions":{"persistedQuery":{"sha256Hash":"ceec2897e2da519612279e63f24658c3e91194cbb2974744fa9007a7e1e9f9e7","version":1}}}`, string(b))
-		err = json.NewEncoder(w).Encode(map[string]interface{}{
-			"data": map[string]interface{}{
+		err = json.NewEncoder(w).Encode(map[string]any{
+			"data": map[string]any{
 				"Name": "Bob",
 			},
 		})
@@ -171,7 +171,7 @@ func TestAddExtensions(t *testing.T) {
 		Name string
 	}
 	c.MustPost("user(id:1){name}", &resp,
-		client.Extensions(map[string]interface{}{"persistedQuery": map[string]interface{}{"version": 1, "sha256Hash": "ceec2897e2da519612279e63f24658c3e91194cbb2974744fa9007a7e1e9f9e7"}}),
+		client.Extensions(map[string]any{"persistedQuery": map[string]any{"version": 1, "sha256Hash": "ceec2897e2da519612279e63f24658c3e91194cbb2974744fa9007a7e1e9f9e7"}}),
 	)
 }
 
@@ -188,7 +188,7 @@ func TestSetCustomDecodeConfig(t *testing.T) {
 		TagName:     "json",
 		ErrorUnused: true,
 		ZeroFields:  true,
-		DecodeHook: func(f reflect.Type, t reflect.Type, data interface{}) (interface{}, error) {
+		DecodeHook: func(f reflect.Type, t reflect.Type, data any) (any, error) {
 			if t != reflect.TypeOf(time.Time{}) {
 				return data, nil
 			}

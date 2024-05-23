@@ -92,7 +92,7 @@ func (b *builder) buildDirectives() (map[string]*Directive, error) {
 func (b *builder) getDirectives(list ast.DirectiveList) ([]*Directive, error) {
 	dirs := make([]*Directive, len(list))
 	for i, d := range list {
-		argValues := make(map[string]interface{}, len(d.Arguments))
+		argValues := make(map[string]any, len(d.Arguments))
 		for _, da := range d.Arguments {
 			val, err := da.Value.Value(nil)
 			if err != nil {

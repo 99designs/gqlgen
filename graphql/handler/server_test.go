@@ -81,11 +81,11 @@ func TestServer(t *testing.T) {
 
 	t.Run("invokes field middleware in order", func(t *testing.T) {
 		var calls []string
-		srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+		srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res any, err error) {
 			calls = append(calls, "first")
 			return next(ctx)
 		})
-		srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+		srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res any, err error) {
 			calls = append(calls, "second")
 			return next(ctx)
 		})

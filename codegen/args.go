@@ -19,11 +19,11 @@ type ArgSet struct {
 type FieldArgument struct {
 	*ast.ArgumentDefinition
 	TypeReference *config.TypeReference
-	VarName       string      // The name of the var in go
-	Object        *Object     // A link back to the parent object
-	Default       interface{} // The default value
+	VarName       string  // The name of the var in go
+	Object        *Object // A link back to the parent object
+	Default       any     // The default value
 	Directives    []*Directive
-	Value         interface{} // value set in Data
+	Value         any // value set in Data
 }
 
 // ImplDirectives get not Builtin and location ARGUMENT_DEFINITION directive

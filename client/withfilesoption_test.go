@@ -114,7 +114,7 @@ func TestWithFiles(t *testing.T) {
 
 		var resp struct{}
 		c.MustPost("{ id }", &resp,
-			client.Var("input", map[string]interface{}{
+			client.Var("input", map[string]any{
 				"files": []*os.File{tempFile1, tempFile2},
 			}),
 			client.WithFiles(),
@@ -170,9 +170,9 @@ func TestWithFiles(t *testing.T) {
 
 		var resp struct{}
 		c.MustPost("{ id }", &resp,
-			client.Var("req", map[string]interface{}{
+			client.Var("req", map[string]any{
 				"files": []*os.File{tempFile1, tempFile2},
-				"foo": map[string]interface{}{
+				"foo": map[string]any{
 					"bar": tempFile3,
 				},
 			}),

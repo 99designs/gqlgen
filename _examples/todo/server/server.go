@@ -14,7 +14,7 @@ import (
 
 func main() {
 	srv := handler.NewDefaultServer(todo.NewExecutableSchema(todo.New()))
-	srv.SetRecoverFunc(func(ctx context.Context, err interface{}) (userMessage error) {
+	srv.SetRecoverFunc(func(ctx context.Context, err any) (userMessage error) {
 		// send this panic somewhere
 		log.Print(err)
 		debug.PrintStack()

@@ -220,7 +220,7 @@ func TestStarwars(t *testing.T) {
 
 	t.Run("introspection", func(t *testing.T) {
 		// Make sure we can run the graphiql introspection query without errors
-		var resp interface{}
+		var resp any
 		c.MustPost(introspection.Query, &resp)
 	})
 

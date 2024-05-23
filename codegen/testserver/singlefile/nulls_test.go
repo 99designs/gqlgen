@@ -119,7 +119,7 @@ func TestNullBubbling(t *testing.T) {
 	})
 
 	t.Run("concurrent null detection", func(t *testing.T) {
-		var resp interface{}
+		var resp any
 		resolvers.ErrorsResolver.A = func(ctx context.Context, obj *Errors) (i *Error, e error) { return nil, nil }
 		resolvers.ErrorsResolver.B = func(ctx context.Context, obj *Errors) (i *Error, e error) { return nil, nil }
 		resolvers.ErrorsResolver.C = func(ctx context.Context, obj *Errors) (i *Error, e error) { return nil, nil }

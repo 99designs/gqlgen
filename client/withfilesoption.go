@@ -17,12 +17,12 @@ type fileFormDataMap struct {
 	file   *os.File
 }
 
-func findFiles(parentMapKey string, variables map[string]interface{}) []*fileFormDataMap {
+func findFiles(parentMapKey string, variables map[string]any) []*fileFormDataMap {
 	files := []*fileFormDataMap{}
 	for key, value := range variables {
-		if v, ok := value.(map[string]interface{}); ok {
+		if v, ok := value.(map[string]any); ok {
 			files = append(files, findFiles(parentMapKey+"."+key, v)...)
-		} else if v, ok := value.([]map[string]interface{}); ok {
+		} else if v, ok := value.([]map[string]any); ok {
 			for i, arr := range v {
 				files = append(files, findFiles(fmt.Sprintf(`%s.%s.%d`, parentMapKey, key, i), arr)...)
 			}

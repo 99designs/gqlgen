@@ -29,7 +29,7 @@ func TestAddUploadToOperations(t *testing.T) {
 	t.Run("valid variable", func(t *testing.T) {
 		file, _ := os.Open("path/to/file")
 		request := &RawParams{
-			Variables: map[string]interface{}{
+			Variables: map[string]any{
 				"file": nil,
 			},
 		}
@@ -42,7 +42,7 @@ func TestAddUploadToOperations(t *testing.T) {
 		}
 
 		expected := &RawParams{
-			Variables: map[string]interface{}{
+			Variables: map[string]any{
 				"file": upload,
 			},
 		}
@@ -57,9 +57,9 @@ func TestAddUploadToOperations(t *testing.T) {
 	t.Run("valid nested variable", func(t *testing.T) {
 		file, _ := os.Open("path/to/file")
 		request := &RawParams{
-			Variables: map[string]interface{}{
-				"req": []interface{}{
-					map[string]interface{}{
+			Variables: map[string]any{
+				"req": []any{
+					map[string]any{
 						"file": nil,
 					},
 				},
@@ -74,9 +74,9 @@ func TestAddUploadToOperations(t *testing.T) {
 		}
 
 		expected := &RawParams{
-			Variables: map[string]interface{}{
-				"req": []interface{}{
-					map[string]interface{}{
+			Variables: map[string]any{
+				"req": []any{
+					map[string]any{
 						"file": upload,
 					},
 				},

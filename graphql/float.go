@@ -15,7 +15,7 @@ func MarshalFloat(f float64) Marshaler {
 	})
 }
 
-func UnmarshalFloat(v interface{}) (float64, error) {
+func UnmarshalFloat(v any) (float64, error) {
 	switch v := v.(type) {
 	case string:
 		return strconv.ParseFloat(v, 64)
@@ -42,6 +42,6 @@ func MarshalFloatContext(f float64) ContextMarshaler {
 	})
 }
 
-func UnmarshalFloatContext(ctx context.Context, v interface{}) (float64, error) {
+func UnmarshalFloatContext(ctx context.Context, v any) (float64, error) {
 	return UnmarshalFloat(v)
 }

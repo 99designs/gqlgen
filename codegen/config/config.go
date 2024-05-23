@@ -305,7 +305,7 @@ func (c *Config) injectTypesFromSchema() error {
 
 			if ma := bd.Arguments.ForName("models"); ma != nil {
 				if mvs, err := ma.Value.Value(nil); err == nil {
-					for _, mv := range mvs.([]interface{}) {
+					for _, mv := range mvs.([]any) {
 						c.Models.Add(schemaType.Name, mv.(string))
 					}
 				}
@@ -482,7 +482,7 @@ type ModelExtraField struct {
 
 type StringList []string
 
-func (a *StringList) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (a *StringList) UnmarshalYAML(unmarshal func(any) error) error {
 	var single string
 	err := unmarshal(&single)
 	if err == nil {

@@ -13,7 +13,7 @@ type CustomScalar struct {
 	value int64
 }
 
-func (s *CustomScalar) UnmarshalGQL(v interface{}) (err error) {
+func (s *CustomScalar) UnmarshalGQL(v any) (err error) {
 	switch v := v.(type) {
 	case string:
 		s.value, err = strconv.ParseInt(v, 10, 64)

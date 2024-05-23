@@ -23,7 +23,7 @@ func TestEntityResolver(t *testing.T) {
 	))
 
 	t.Run("Hello entities", func(t *testing.T) {
-		representations := []map[string]interface{}{
+		representations := []map[string]any{
 			{
 				"__typename": "Hello",
 				"name":       "first name - 1",
@@ -53,7 +53,7 @@ func TestEntityResolver(t *testing.T) {
 	})
 
 	t.Run("HelloWithError entities", func(t *testing.T) {
-		representations := []map[string]interface{}{
+		representations := []map[string]any{
 			{
 				"__typename": "HelloWithErrors",
 				"name":       "first name - 1",
@@ -107,16 +107,16 @@ func TestEntityResolver(t *testing.T) {
 	})
 
 	t.Run("World entities with nested key", func(t *testing.T) {
-		representations := []map[string]interface{}{
+		representations := []map[string]any{
 			{
 				"__typename": "World",
-				"hello": map[string]interface{}{
+				"hello": map[string]any{
 					"name": "world name - 1",
 				},
 				"foo": "foo 1",
 			}, {
 				"__typename": "World",
-				"hello": map[string]interface{}{
+				"hello": map[string]any{
 					"name": "world name - 2",
 				},
 				"foo": "foo 2",
@@ -148,10 +148,10 @@ func TestEntityResolver(t *testing.T) {
 	})
 
 	t.Run("World entities with multiple keys", func(t *testing.T) {
-		representations := []map[string]interface{}{
+		representations := []map[string]any{
 			{
 				"__typename": "WorldWithMultipleKeys",
-				"hello": map[string]interface{}{
+				"hello": map[string]any{
 					"name": "world name - 1",
 				},
 				"foo": "foo 1",
@@ -187,10 +187,10 @@ func TestEntityResolver(t *testing.T) {
 	})
 
 	t.Run("World entities with one single-key nil should hit resolver without nils", func(t *testing.T) {
-		representations := []map[string]interface{}{
+		representations := []map[string]any{
 			{
 				"__typename": "WorldWithMultipleKeys",
-				"hello": map[string]interface{}{
+				"hello": map[string]any{
 					"name": "world name - 1",
 				},
 				"foo": "foo 1",
@@ -229,17 +229,17 @@ func TestEntityResolver(t *testing.T) {
 		// __typename. So the tests here will interleve two different entity
 		// types so that we can test support for resolving different types and
 		// correctly handle ordering.
-		representations := []map[string]interface{}{}
+		representations := []map[string]any{}
 		count := 10
 
 		for i := 0; i < count; i++ {
 			if i%2 == 0 {
-				representations = append(representations, map[string]interface{}{
+				representations = append(representations, map[string]any{
 					"__typename": "Hello",
 					"name":       "hello - " + strconv.Itoa(i),
 				})
 			} else {
-				representations = append(representations, map[string]interface{}{
+				representations = append(representations, map[string]any{
 					"__typename": "WorldName",
 					"name":       "world name - " + strconv.Itoa(i),
 				})
@@ -274,7 +274,7 @@ func TestEntityResolver(t *testing.T) {
 	})
 
 	t.Run("PlanetRequires entities with requires directive", func(t *testing.T) {
-		representations := []map[string]interface{}{
+		representations := []map[string]any{
 			{
 				"__typename": "PlanetRequires",
 				"name":       "earth",
@@ -309,7 +309,7 @@ func TestEntityResolver(t *testing.T) {
 	})
 
 	t.Run("PlanetRequires entities with multiple required fields directive", func(t *testing.T) {
-		representations := []map[string]interface{}{
+		representations := []map[string]any{
 			{
 				"__typename": "PlanetMultipleRequires",
 				"name":       "earth",
@@ -349,17 +349,17 @@ func TestEntityResolver(t *testing.T) {
 	})
 
 	t.Run("PlanetRequiresNested entities with requires directive having nested field", func(t *testing.T) {
-		representations := []map[string]interface{}{
+		representations := []map[string]any{
 			{
 				"__typename": "PlanetRequiresNested",
 				"name":       "earth",
-				"world": map[string]interface{}{
+				"world": map[string]any{
 					"foo": "A",
 				},
 			}, {
 				"__typename": "PlanetRequiresNested",
 				"name":       "mars",
-				"world": map[string]interface{}{
+				"world": map[string]any{
 					"foo": "B",
 				},
 			},
@@ -399,10 +399,10 @@ func TestMultiEntityResolver(t *testing.T) {
 
 	t.Run("MultiHello entities", func(t *testing.T) {
 		itemCount := 10
-		representations := []map[string]interface{}{}
+		representations := []map[string]any{}
 
 		for i := 0; i < itemCount; i++ {
-			representations = append(representations, map[string]interface{}{
+			representations = append(representations, map[string]any{
 				"__typename": "MultiHello",
 				"name":       "world name - " + strconv.Itoa(i),
 			})
@@ -431,18 +431,18 @@ func TestMultiEntityResolver(t *testing.T) {
 
 	t.Run("MultiHello and Hello (heterogeneous) entities", func(t *testing.T) {
 		itemCount := 20
-		representations := []map[string]interface{}{}
+		representations := []map[string]any{}
 
 		for i := 0; i < itemCount; i++ {
 			// Let's interleve the representations to test ordering of the
 			// responses from the entity query
 			if i%2 == 0 {
-				representations = append(representations, map[string]interface{}{
+				representations = append(representations, map[string]any{
 					"__typename": "MultiHello",
 					"name":       "world name - " + strconv.Itoa(i),
 				})
 			} else {
-				representations = append(representations, map[string]interface{}{
+				representations = append(representations, map[string]any{
 					"__typename": "Hello",
 					"name":       "hello - " + strconv.Itoa(i),
 				})
@@ -477,10 +477,10 @@ func TestMultiEntityResolver(t *testing.T) {
 
 	t.Run("MultiHelloWithError entities", func(t *testing.T) {
 		itemCount := 10
-		representations := []map[string]interface{}{}
+		representations := []map[string]any{}
 
 		for i := 0; i < itemCount; i++ {
-			representations = append(representations, map[string]interface{}{
+			representations = append(representations, map[string]any{
 				"__typename": "MultiHelloWithError",
 				"name":       "world name - " + strconv.Itoa(i),
 			})
@@ -508,7 +508,7 @@ func TestMultiEntityResolver(t *testing.T) {
 	})
 
 	t.Run("MultiHelloRequires entities with requires directive", func(t *testing.T) {
-		representations := []map[string]interface{}{
+		representations := []map[string]any{
 			{
 				"__typename": "MultiHelloRequires",
 				"name":       "first name - 1",
@@ -543,7 +543,7 @@ func TestMultiEntityResolver(t *testing.T) {
 	})
 
 	t.Run("MultiHelloMultipleRequires entities with multiple required fields", func(t *testing.T) {
-		representations := []map[string]interface{}{
+		representations := []map[string]any{
 			{
 				"__typename": "MultiHelloMultipleRequires",
 				"name":       "first name - 1",
@@ -583,17 +583,17 @@ func TestMultiEntityResolver(t *testing.T) {
 	})
 
 	t.Run("MultiPlanetRequiresNested entities with requires directive having nested field", func(t *testing.T) {
-		representations := []map[string]interface{}{
+		representations := []map[string]any{
 			{
 				"__typename": "MultiPlanetRequiresNested",
 				"name":       "earth",
-				"world": map[string]interface{}{
+				"world": map[string]any{
 					"foo": "A",
 				},
 			}, {
 				"__typename": "MultiPlanetRequiresNested",
 				"name":       "mars",
-				"world": map[string]interface{}{
+				"world": map[string]any{
 					"foo": "B",
 				},
 			},

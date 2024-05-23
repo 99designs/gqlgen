@@ -34,7 +34,7 @@ type Data struct {
 	MutationRoot     *Object
 	SubscriptionRoot *Object
 	AugmentedSources []AugmentedSource
-	Plugins          []interface{}
+	Plugins          []any
 }
 
 func (d *Data) HasEmbeddableSources() bool {
@@ -77,7 +77,7 @@ func (d *Data) Directives() DirectiveList {
 	return res
 }
 
-func BuildData(cfg *config.Config, plugins ...interface{}) (*Data, error) {
+func BuildData(cfg *config.Config, plugins ...any) (*Data, error) {
 	// We reload all packages to allow packages to be compared correctly.
 	cfg.ReloadAllPackages()
 

@@ -161,7 +161,7 @@ func TestNoCacheEdgeCases(t *testing.T) {
 		key       string
 		value     string
 		wantOk    bool
-		wantValue interface{}
+		wantValue any
 	}
 
 	tests := []testCase{

@@ -15,7 +15,7 @@ import (
 
 func main() {
 	srv := handler.NewDefaultServer(generated.NewExecutableSchema(starwars.NewResolver()))
-	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res any, err error) {
 		rc := graphql.GetFieldContext(ctx)
 		fmt.Println("Entered", rc.Object, rc.Field.Name)
 		res, err = next(ctx)

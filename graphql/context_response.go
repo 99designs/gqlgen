@@ -15,7 +15,7 @@ type responseContext struct {
 	errors   gqlerror.List
 	errorsMu sync.Mutex
 
-	extensions   map[string]interface{}
+	extensions   map[string]any
 	extensionsMu sync.Mutex
 }
 
@@ -45,7 +45,7 @@ func WithFreshResponseContext(ctx context.Context) context.Context {
 }
 
 // AddErrorf writes a formatted error to the client, first passing it through the error presenter.
-func AddErrorf(ctx context.Context, format string, args ...interface{}) {
+func AddErrorf(ctx context.Context, format string, args ...any) {
 	AddError(ctx, fmt.Errorf(format, args...))
 }
 
@@ -60,7 +60,7 @@ func AddError(ctx context.Context, err error) {
 	c.errors = append(c.errors, presentedError)
 }
 
-func Recover(ctx context.Context, err interface{}) (userMessage error) {
+func Recover(ctx context.Context, err any) (userMessage error) {
 	c := getResponseContext(ctx)
 	return ErrorOnPath(ctx, c.recover(ctx, err))
 }
@@ -125,13 +125,13 @@ func GetErrors(ctx context.Context) gqlerror.List {
 }
 
 // RegisterExtension allows you to add a new extension into the graphql response
-func RegisterExtension(ctx context.Context, key string, value interface{}) {
+func RegisterExtension(ctx context.Context, key string, value any) {
 	c := getResponseContext(ctx)
 	c.extensionsMu.Lock()
 	defer c.extensionsMu.Unlock()
 
 	if c.extensions == nil {
-		c.extensions = make(map[string]interface{})
+		c.extensions = make(map[string]any)
 	}
 
 	if _, ok := c.extensions[key]; ok {
@@ -142,16 +142,16 @@ func RegisterExtension(ctx context.Context, key string, value interface{}) {
 }
 
 // GetExtensions returns any extensions registered in the current result context
-func GetExtensions(ctx context.Context) map[string]interface{} {
+func GetExtensions(ctx context.Context) map[string]any {
 	ext := getResponseContext(ctx).extensions
 	if ext == nil {
-		return map[string]interface{}{}
+		return map[string]any{}
 	}
 
 	return ext
 }
 
-func GetExtension(ctx context.Context, name string) interface{} {
+func GetExtension(ctx context.Context, name string) any {
 	ext := getResponseContext(ctx).extensions
 	if ext == nil {
 		return nil

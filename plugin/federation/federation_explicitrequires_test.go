@@ -20,7 +20,7 @@ func TestExplicitRequires(t *testing.T) {
 	))
 
 	t.Run("PlanetRequires entities with requires directive", func(t *testing.T) {
-		representations := []map[string]interface{}{
+		representations := []map[string]any{
 			{
 				"__typename": "PlanetRequires",
 				"name":       "earth",
@@ -55,7 +55,7 @@ func TestExplicitRequires(t *testing.T) {
 	})
 
 	t.Run("PlanetRequires entities with multiple required fields directive", func(t *testing.T) {
-		representations := []map[string]interface{}{
+		representations := []map[string]any{
 			{
 				"__typename": "PlanetMultipleRequires",
 				"name":       "earth",
@@ -95,17 +95,17 @@ func TestExplicitRequires(t *testing.T) {
 	})
 
 	t.Run("PlanetRequiresNested entities with requires directive having nested field", func(t *testing.T) {
-		representations := []map[string]interface{}{
+		representations := []map[string]any{
 			{
 				"__typename": "PlanetRequiresNested",
 				"name":       "earth",
-				"world": map[string]interface{}{
+				"world": map[string]any{
 					"foo": "A",
 				},
 			}, {
 				"__typename": "PlanetRequiresNested",
 				"name":       "mars",
-				"world": map[string]interface{}{
+				"world": map[string]any{
 					"foo": "B",
 				},
 			},
@@ -144,7 +144,7 @@ func TestMultiExplicitRequires(t *testing.T) {
 	))
 
 	t.Run("MultiHelloRequires entities with requires directive", func(t *testing.T) {
-		representations := []map[string]interface{}{
+		representations := []map[string]any{
 			{
 				"__typename": "MultiHelloRequires",
 				"name":       "first name - 1",
@@ -179,7 +179,7 @@ func TestMultiExplicitRequires(t *testing.T) {
 	})
 
 	t.Run("MultiHelloMultipleRequires entities with multiple required fields", func(t *testing.T) {
-		representations := []map[string]interface{}{
+		representations := []map[string]any{
 			{
 				"__typename": "MultiHelloMultipleRequires",
 				"name":       "first name - 1",
@@ -219,17 +219,17 @@ func TestMultiExplicitRequires(t *testing.T) {
 	})
 
 	t.Run("MultiPlanetRequiresNested entities with requires directive having nested field", func(t *testing.T) {
-		representations := []map[string]interface{}{
+		representations := []map[string]any{
 			{
 				"__typename": "MultiPlanetRequiresNested",
 				"name":       "earth",
-				"world": map[string]interface{}{
+				"world": map[string]any{
 					"foo": "A",
 				},
 			}, {
 				"__typename": "MultiPlanetRequiresNested",
 				"name":       "mars",
-				"world": map[string]interface{}{
+				"world": map[string]any{
 					"foo": "B",
 				},
 			},

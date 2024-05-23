@@ -20,7 +20,7 @@ func TestInt(t *testing.T) {
 	})
 }
 
-func mustUnmarshalInt(v interface{}) int {
+func mustUnmarshalInt(v any) int {
 	res, err := UnmarshalInt(v)
 	if err != nil {
 		panic(err)
@@ -41,7 +41,7 @@ func TestInt32(t *testing.T) {
 	})
 }
 
-func mustUnmarshalInt32(v interface{}) int32 {
+func mustUnmarshalInt32(v any) int32 {
 	res, err := UnmarshalInt32(v)
 	if err != nil {
 		panic(err)
@@ -62,7 +62,7 @@ func TestInt64(t *testing.T) {
 	})
 }
 
-func mustUnmarshalInt64(v interface{}) int64 {
+func mustUnmarshalInt64(v any) int64 {
 	res, err := UnmarshalInt64(v)
 	if err != nil {
 		panic(err)

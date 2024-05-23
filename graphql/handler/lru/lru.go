@@ -24,10 +24,10 @@ func New(size int) *LRU {
 	return &LRU{cache}
 }
 
-func (l LRU) Get(ctx context.Context, key string) (value interface{}, ok bool) {
+func (l LRU) Get(ctx context.Context, key string) (value any, ok bool) {
 	return l.lru.Get(key)
 }
 
-func (l LRU) Add(ctx context.Context, key string, value interface{}) {
+func (l LRU) Add(ctx context.Context, key string, value any) {
 	l.lru.Add(key, value)
 }

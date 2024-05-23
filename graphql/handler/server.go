@@ -131,7 +131,7 @@ func sendError(w http.ResponseWriter, code int, errors ...*gqlerror.Error) {
 	_, _ = w.Write(b)
 }
 
-func sendErrorf(w http.ResponseWriter, code int, format string, args ...interface{}) {
+func sendErrorf(w http.ResponseWriter, code int, format string, args ...any) {
 	sendError(w, code, &gqlerror.Error{Message: fmt.Sprintf(format, args...)})
 }
 
@@ -169,7 +169,7 @@ func (r ResponseFunc) InterceptResponse(ctx context.Context, next graphql.Respon
 	return r(ctx, next)
 }
 
-type FieldFunc func(ctx context.Context, next graphql.Resolver) (res interface{}, err error)
+type FieldFunc func(ctx context.Context, next graphql.Resolver) (res any, err error)
 
 func (f FieldFunc) ExtensionName() string {
 	return "InlineFieldFunc"
@@ -182,6 +182,6 @@ func (f FieldFunc) Validate(schema graphql.ExecutableSchema) error {
 	return nil
 }
 
-func (f FieldFunc) InterceptField(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+func (f FieldFunc) InterceptField(ctx context.Context, next graphql.Resolver) (res any, err error) {
 	return f(ctx, next)
 }

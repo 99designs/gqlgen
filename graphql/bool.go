@@ -13,7 +13,7 @@ func MarshalBoolean(b bool) Marshaler {
 	return WriterFunc(func(w io.Writer) { w.Write(falseLit) })
 }
 
-func UnmarshalBoolean(v interface{}) (bool, error) {
+func UnmarshalBoolean(v any) (bool, error) {
 	switch v := v.(type) {
 	case string:
 		return strings.ToLower(v) == "true", nil

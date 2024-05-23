@@ -323,7 +323,7 @@ func TestWebsocketInitFunc(t *testing.T) {
 		connAck := readOp(c)
 		assert.Equal(t, connectionAckMsg, connAck.Type)
 
-		var payload map[string]interface{}
+		var payload map[string]any
 		err := json.Unmarshal(connAck.Payload, &payload)
 		if err != nil {
 			t.Fatal("Unexpected Error", err)
@@ -360,7 +360,7 @@ func TestWebSocketInitTimeout(t *testing.T) {
 		c := wsConnect(srv.URL)
 		defer c.Close()
 
-		done := make(chan interface{}, 1)
+		done := make(chan any, 1)
 		go func() {
 			var msg operationMessage
 			_ = c.ReadJSON(&msg)

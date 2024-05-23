@@ -66,7 +66,7 @@ var altairPage = template.Must(template.New("altair").Parse(`<!doctype html>
 // AltairHandler responsible for setting up the altair playground
 func AltairHandler(title, endpoint string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		err := altairPage.Execute(w, map[string]interface{}{
+		err := altairPage.Execute(w, map[string]any{
 			"title":                title,
 			"endpoint":             endpoint,
 			"endpointIsAbsolute":   endpointHasScheme(endpoint),

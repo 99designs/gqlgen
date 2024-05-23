@@ -65,7 +65,7 @@ func TestInterfaces(t *testing.T) {
 			NewExecutableSchema(Config{
 				Resolvers: resolvers,
 				Directives: DirectiveRoot{
-					MakeNil: func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
+					MakeNil: func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
 						return nil, nil
 					},
 				},
@@ -74,7 +74,7 @@ func TestInterfaces(t *testing.T) {
 
 		c := client.New(srv)
 
-		var resp interface{}
+		var resp any
 		c.MustPost(`{ noShape { area } }`, &resp)
 	})
 
@@ -88,7 +88,7 @@ func TestInterfaces(t *testing.T) {
 			NewExecutableSchema(Config{
 				Resolvers: resolvers,
 				Directives: DirectiveRoot{
-					MakeTypedNil: func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
+					MakeTypedNil: func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
 						var circle *Circle
 						return circle, nil
 					},
@@ -98,7 +98,7 @@ func TestInterfaces(t *testing.T) {
 
 		c := client.New(srv)
 
-		var resp interface{}
+		var resp any
 		c.MustPost(`{ noShapeTypedNil { area } }`, &resp)
 	})
 
@@ -112,7 +112,7 @@ func TestInterfaces(t *testing.T) {
 			NewExecutableSchema(Config{
 				Resolvers: resolvers,
 				Directives: DirectiveRoot{
-					MakeTypedNil: func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
+					MakeTypedNil: func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
 						var dog *Dog // return a typed nil, not just nil
 						return dog, nil
 					},
@@ -122,7 +122,7 @@ func TestInterfaces(t *testing.T) {
 
 		c := client.New(srv)
 
-		var resp interface{}
+		var resp any
 		c.MustPost(`{ animal { species } }`, &resp)
 	})
 

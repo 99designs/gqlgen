@@ -29,18 +29,18 @@ type (
 
 	// Request represents an outgoing GraphQL request
 	Request struct {
-		Query         string                 `json:"query"`
-		Variables     map[string]interface{} `json:"variables,omitempty"`
-		OperationName string                 `json:"operationName,omitempty"`
-		Extensions    map[string]interface{} `json:"extensions,omitempty"`
-		HTTP          *http.Request          `json:"-"`
+		Query         string         `json:"query"`
+		Variables     map[string]any `json:"variables,omitempty"`
+		OperationName string         `json:"operationName,omitempty"`
+		Extensions    map[string]any `json:"extensions,omitempty"`
+		HTTP          *http.Request  `json:"-"`
 	}
 
 	// Response is a GraphQL layer response from a handler.
 	Response struct {
-		Data       interface{}
+		Data       any
 		Errors     json.RawMessage
-		Extensions map[string]interface{}
+		Extensions map[string]any
 	}
 )
 
@@ -56,7 +56,7 @@ func New(h http.Handler, opts ...Option) *Client {
 }
 
 // MustPost is a convenience wrapper around Post that automatically panics on error
-func (p *Client) MustPost(query string, response interface{}, options ...Option) {
+func (p *Client) MustPost(query string, response any, options ...Option) {
 	if err := p.Post(query, response, options...); err != nil {
 		panic(err)
 	}
@@ -64,7 +64,7 @@ func (p *Client) MustPost(query string, response interface{}, options ...Option)
 
 // Post sends a http POST request to the graphql endpoint with the given query then unpacks
 // the response into the given object.
-func (p *Client) Post(query string, response interface{}, options ...Option) error {
+func (p *Client) Post(query string, response any, options ...Option) error {
 	respDataRaw, err := p.RawPost(query, options...)
 	if err != nil {
 		return err
@@ -146,7 +146,7 @@ func (p *Client) SetCustomDecodeConfig(dc *mapstructure.DecoderConfig) {
 	p.dc = dc
 }
 
-func unpack(data interface{}, into interface{}, customDc *mapstructure.DecoderConfig) error {
+func unpack(data any, into any, customDc *mapstructure.DecoderConfig) error {
 	dc := &mapstructure.DecoderConfig{
 		TagName:     "json",
 		ErrorUnused: true,

@@ -30,7 +30,7 @@ func TestMarshalID(t *testing.T) {
 func TestUnmarshalID(t *testing.T) {
 	tests := []struct {
 		Name        string
-		Input       interface{}
+		Input       any
 		Expected    string
 		ShouldError bool
 	}{

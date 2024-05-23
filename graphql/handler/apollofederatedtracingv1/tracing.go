@@ -67,7 +67,7 @@ func (t *Tracer) InterceptOperation(ctx context.Context, next graphql.OperationH
 
 // InterceptField is called on each field's resolution, including information about the path and parent node.
 // This information is then used to build the relevant Node Tree used in the FTV1 tracing format
-func (t *Tracer) InterceptField(ctx context.Context, next graphql.Resolver) (interface{}, error) {
+func (t *Tracer) InterceptField(ctx context.Context, next graphql.Resolver) (any, error) {
 	if !t.shouldTrace(ctx) {
 		return next(ctx)
 	}

@@ -12,7 +12,7 @@ import (
 type ExecutableSchema interface {
 	Schema() *ast.Schema
 
-	Complexity(typeName, fieldName string, childComplexity int, args map[string]interface{}) (int, bool)
+	Complexity(typeName, fieldName string, childComplexity int, args map[string]any) (int, bool)
 	Exec(ctx context.Context) ResponseHandler
 }
 
@@ -150,7 +150,7 @@ func getOrCreateAndAppendField(c *[]CollectedField, name string, alias string, o
 	return &(*c)[len(*c)-1]
 }
 
-func shouldIncludeNode(directives ast.DirectiveList, variables map[string]interface{}) bool {
+func shouldIncludeNode(directives ast.DirectiveList, variables map[string]any) bool {
 	if len(directives) == 0 {
 		return true
 	}
@@ -168,7 +168,7 @@ func shouldIncludeNode(directives ast.DirectiveList, variables map[string]interf
 	return !skip && include
 }
 
-func deferrable(directives ast.DirectiveList, variables map[string]interface{}) (shouldDefer bool, label string) {
+func deferrable(directives ast.DirectiveList, variables map[string]any) (shouldDefer bool, label string) {
 	d := directives.ForName("defer")
 	if d == nil {
 		return false, ""
@@ -194,7 +194,7 @@ func deferrable(directives ast.DirectiveList, variables map[string]interface{}) 
 	return shouldDefer, label
 }
 
-func resolveIfArgument(d *ast.Directive, variables map[string]interface{}) bool {
+func resolveIfArgument(d *ast.Directive, variables map[string]any) bool {
 	arg := d.Arguments.ForName("if")
 	if arg == nil {
 		panic(fmt.Sprintf("%s: argument 'if' not defined", d.Name))

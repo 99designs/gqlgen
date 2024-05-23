@@ -10,7 +10,7 @@ const unmarshalInputCtx key = "unmarshal_input_context"
 
 // BuildUnmarshalerMap returns a map of unmarshal functions of the ExecutableContext
 // to use with the WithUnmarshalerMap function.
-func BuildUnmarshalerMap(unmarshaler ...interface{}) map[reflect.Type]reflect.Value {
+func BuildUnmarshalerMap(unmarshaler ...any) map[reflect.Type]reflect.Value {
 	maps := make(map[reflect.Type]reflect.Value)
 	for _, v := range unmarshaler {
 		ft := reflect.TypeOf(v)
@@ -28,7 +28,7 @@ func WithUnmarshalerMap(ctx context.Context, maps map[reflect.Type]reflect.Value
 }
 
 // UnmarshalInputFromContext allows unmarshaling input object from a context.
-func UnmarshalInputFromContext(ctx context.Context, raw, v interface{}) error {
+func UnmarshalInputFromContext(ctx context.Context, raw, v any) error {
 	m, ok := ctx.Value(unmarshalInputCtx).(map[reflect.Type]reflect.Value)
 	if m == nil || !ok {
 		return errors.New("graphql: the input context is empty")

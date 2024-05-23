@@ -77,11 +77,11 @@ func TestDefer(t *testing.T) {
 					Values []string
 				}
 			}
-			Label      string                 `json:"label"`
-			Path       []interface{}          `json:"path"`
-			HasNext    bool                   `json:"hasNext"`
-			Errors     json.RawMessage        `json:"errors"`
-			Extensions map[string]interface{} `json:"extensions"`
+			Label      string          `json:"label"`
+			Path       []any           `json:"path"`
+			HasNext    bool            `json:"hasNext"`
+			Errors     json.RawMessage `json:"errors"`
+			Extensions map[string]any  `json:"extensions"`
 		}
 		var resp response
 
@@ -112,11 +112,11 @@ func TestDefer(t *testing.T) {
 			Data struct {
 				Values []string `json:"values"`
 			}
-			Label      string                 `json:"label"`
-			Path       []interface{}          `json:"path"`
-			HasNext    bool                   `json:"hasNext"`
-			Errors     json.RawMessage        `json:"errors"`
-			Extensions map[string]interface{} `json:"extensions"`
+			Label      string          `json:"label"`
+			Path       []any           `json:"path"`
+			HasNext    bool            `json:"hasNext"`
+			Errors     json.RawMessage `json:"errors"`
+			Extensions map[string]any  `json:"extensions"`
 		}
 
 		var valueResp valuesResponse
@@ -127,7 +127,7 @@ func TestDefer(t *testing.T) {
 				Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 			},
 			Label: "values",
-			Path:  []interface{}{"deferCase1"},
+			Path:  []any{"deferCase1"},
 		}
 
 		require.NoError(t, sse.Next(&valueResp))
@@ -156,11 +156,11 @@ func TestDefer(t *testing.T) {
 					Values []string
 				}
 			}
-			Label      string                 `json:"label"`
-			Path       []interface{}          `json:"path"`
-			HasNext    bool                   `json:"hasNext"`
-			Errors     json.RawMessage        `json:"errors"`
-			Extensions map[string]interface{} `json:"extensions"`
+			Label      string          `json:"label"`
+			Path       []any           `json:"path"`
+			HasNext    bool            `json:"hasNext"`
+			Errors     json.RawMessage `json:"errors"`
+			Extensions map[string]any  `json:"extensions"`
 		}
 		var resp response
 
@@ -203,11 +203,11 @@ func TestDefer(t *testing.T) {
 			Data struct {
 				Values []string `json:"values"`
 			}
-			Label      string                 `json:"label"`
-			Path       []interface{}          `json:"path"`
-			HasNext    bool                   `json:"hasNext"`
-			Errors     json.RawMessage        `json:"errors"`
-			Extensions map[string]interface{} `json:"extensions"`
+			Label      string          `json:"label"`
+			Path       []any           `json:"path"`
+			HasNext    bool            `json:"hasNext"`
+			Errors     json.RawMessage `json:"errors"`
+			Extensions map[string]any  `json:"extensions"`
 		}
 
 		valuesByPath := make(map[string][]string, 2)

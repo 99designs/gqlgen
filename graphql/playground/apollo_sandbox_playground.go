@@ -64,7 +64,7 @@ func ApolloSandboxHandler(title, endpoint string, opts ...ApolloSandboxOption) h
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
-		err := apolloSandboxPage.Execute(w, map[string]interface{}{
+		err := apolloSandboxPage.Execute(w, map[string]any{
 			"title":              title,
 			"endpoint":           endpoint,
 			"endpointIsAbsolute": endpointHasScheme(endpoint),

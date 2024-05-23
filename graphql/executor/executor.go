@@ -153,7 +153,7 @@ func (e *Executor) DispatchError(ctx context.Context, list gqlerror.List) *graph
 	return resp
 }
 
-func (e *Executor) PresentRecoveredError(ctx context.Context, err interface{}) error {
+func (e *Executor) PresentRecoveredError(ctx context.Context, err any) error {
 	return e.errorPresenter(ctx, e.recoverFunc(ctx, err))
 }
 

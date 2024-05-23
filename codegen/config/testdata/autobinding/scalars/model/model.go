@@ -16,7 +16,7 @@ func (b Banned) MarshalGQL(w io.Writer) {
 	}
 }
 
-func (b *Banned) UnmarshalGQL(v interface{}) error {
+func (b *Banned) UnmarshalGQL(v any) error {
 	switch v := v.(type) {
 	case string:
 		*b = strings.ToLower(v) == "true"

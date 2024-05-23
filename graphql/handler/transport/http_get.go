@@ -84,7 +84,7 @@ func (h GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 	writeJson(w, responses(ctx))
 }
 
-func jsonDecode(r io.Reader, val interface{}) error {
+func jsonDecode(r io.Reader, val any) error {
 	dec := json.NewDecoder(r)
 	dec.UseNumber()
 	return dec.Decode(val)

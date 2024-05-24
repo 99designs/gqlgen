@@ -22,13 +22,9 @@ func UnmarshalID(v any) (string, error) {
 	case int64:
 		return strconv.FormatInt(v, 10), nil
 	case float64:
-		return fmt.Sprintf("%f", v), nil
+		return strconv.FormatFloat(v, 'f', 6, 64), nil
 	case bool:
-		if v {
-			return "true", nil
-		} else {
-			return "false", nil
-		}
+		return strconv.FormatBool(v), nil
 	case nil:
 		return "null", nil
 	default:

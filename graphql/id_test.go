@@ -2,6 +2,7 @@ package graphql
 
 import (
 	"bytes"
+	"encoding/json"
 	"math"
 	"testing"
 
@@ -35,10 +36,19 @@ func TestUnmarshalID(t *testing.T) {
 		ShouldError bool
 	}{
 		{
-			Name:        "int64",
-			Input:       int64(12),
-			Expected:    "12",
-			ShouldError: false,
+			Name:     "string",
+			Input:    "str",
+			Expected: "str",
+		},
+		{
+			Name:     "json.Number float64",
+			Input:    json.Number("1.2"),
+			Expected: "1.2",
+		},
+		{
+			Name:     "int64",
+			Input:    int64(12),
+			Expected: "12",
 		},
 		{
 			Name:     "int64 max",
@@ -49,6 +59,66 @@ func TestUnmarshalID(t *testing.T) {
 			Name:     "int64 min",
 			Input:    math.MinInt64,
 			Expected: "-9223372036854775808",
+		},
+		{
+			Name:     "bool true",
+			Input:    true,
+			Expected: "true",
+		},
+		{
+			Name:     "bool false",
+			Input:    false,
+			Expected: "false",
+		},
+		{
+			Name:     "nil",
+			Input:    nil,
+			Expected: "null",
+		},
+		{
+			Name:     "float64",
+			Input:    1.234567,
+			Expected: "1.234567",
+		},
+		{
+			Name:     "float64 0",
+			Input:    0.0,
+			Expected: "0.000000",
+		},
+		{
+			Name:     "float64 loss of precision",
+			Input:    0.0000005,
+			Expected: "0.000000",
+		},
+		{
+			Name:     "float64 rounding up",
+			Input:    0.0000006,
+			Expected: "0.000001",
+		},
+		{
+			Name:     "float64 negative",
+			Input:    -1.234560,
+			Expected: "-1.234560",
+		},
+		{
+			Name:     "float64 math.Inf(0)",
+			Input:    math.Inf(0),
+			Expected: "+Inf",
+		},
+		{
+			Name:     "float64 math.Inf(-1)",
+			Input:    math.Inf(-1),
+			Expected: "-Inf",
+		},
+		{
+			Name:     "float64 -math.Inf(0)",
+			Input:    -math.Inf(0),
+			Expected: "-Inf",
+		},
+		{
+			Name:        "not a string",
+			Input:       struct{}{},
+			ShouldError: true,
 		},
 	}
 

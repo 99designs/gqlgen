@@ -60,11 +60,7 @@ func UnmarshalString(v any) (string, error) {
 	case json.Number:
 		return string(v), nil
 	case bool:
-		if v {
-			return "true", nil
-		} else {
-			return "false", nil
-		}
+		return strconv.FormatBool(v), nil
 	case nil:
 		return "null", nil
 	default:

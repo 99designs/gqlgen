@@ -23,9 +23,7 @@ func TestLayoutSingleFile(t *testing.T) {
 	require.NoError(t, cfg.Init())
 
 	data, err := codegen.BuildData(cfg)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	require.NoError(t, p.GenerateCode(data))
 	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/testdata/singlefile/out")
@@ -76,9 +74,7 @@ func TestOmitTemplateComment(t *testing.T) {
 	require.NoError(t, cfg.Init())
 
 	data, err := codegen.BuildData(cfg)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	require.NoError(t, p.GenerateCode(data))
 	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/testdata/omit_template_comment/out")
@@ -94,9 +90,7 @@ func TestResolver_Implementation(t *testing.T) {
 	require.NoError(t, cfg.Init())
 
 	data, err := codegen.BuildData(cfg, &implementorTest{})
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	require.NoError(t, p.GenerateCode(data))
 	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/testdata/resolver_implementor/out")
@@ -111,9 +105,7 @@ func TestCustomResolverTemplate(t *testing.T) {
 	require.NoError(t, cfg.Init())
 
 	data, err := codegen.BuildData(cfg)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	require.NoError(t, p.GenerateCode(data))
 }
@@ -128,9 +120,7 @@ func testFollowSchemaPersistence(t *testing.T, dir string) {
 	require.NoError(t, cfg.Init())
 
 	data, err := codegen.BuildData(cfg)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	require.NoError(t, p.GenerateCode(data))
 	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/"+dir+"/out")
@@ -146,7 +136,7 @@ func assertNoErrors(t *testing.T, pkg string) {
 			packages.NeedTypesSizes,
 	}, pkg)
 	if err != nil {
-		panic(err)
+		t.Fatal(err)
 	}
 
 	hasErrors := false

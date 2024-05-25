@@ -143,9 +143,7 @@ func TestCodeGeneration(t *testing.T) {
 	require.NoError(t, f.MutateConfig(cfg))
 
 	data, err := codegen.BuildData(cfg)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 	require.NoError(t, f.GenerateCode(data))
 }
 
@@ -162,9 +160,7 @@ func TestCodeGenerationFederation2(t *testing.T) {
 	require.Empty(t, f.Entities[2].Resolvers)
 
 	data, err := codegen.BuildData(cfg)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 	require.NoError(t, f.GenerateCode(data))
 }
 

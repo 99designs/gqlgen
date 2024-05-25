@@ -1,7 +1,6 @@
 package playground
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -23,7 +22,7 @@ func TestHandler_createsAbsoluteURLs(t *testing.T) {
 
 	b, err := io.ReadAll(res.Body)
 	if err != nil {
-		panic(fmt.Errorf("reading res.Body: %w", err))
+		t.Fatalf("reading res.Body: %v", err)
 	}
 
 	want := regexp.MustCompile(`(?m)^.*url\s*=\s*['"]https:\/\/example\.org\/query["'].*$`)
@@ -59,7 +58,7 @@ func TestHandler_createsRelativeURLs(t *testing.T) {
 
 	b, err := io.ReadAll(res.Body)
 	if err != nil {
-		panic(fmt.Errorf("reading res.Body: %w", err))
+		t.Fatalf("reading res.Body: %v", err)
 	}
 
 	wantURL := regexp.MustCompile(`(?m)^.*url\s*=\s*location\.protocol.*$`)

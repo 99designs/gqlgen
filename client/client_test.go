@@ -21,9 +21,7 @@ import (
 func TestClient(t *testing.T) {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		b, err := io.ReadAll(r.Body)
-		if err != nil {
-			panic(err)
-		}
+		require.NoError(t, err)
 		require.Equal(t, `{"query":"user(id:$id){name}","variables":{"id":1}}`, string(b))
 
 		err = json.NewEncoder(w).Encode(map[string]any{
@@ -31,9 +29,7 @@ func TestClient(t *testing.T) {
 				"name": "bob",
 			},
 		})
-		if err != nil {
-			panic(err)
-		}
+		require.NoError(t, err)
 	})
 
 	c := client.New(h)
@@ -151,18 +147,14 @@ func TestAddCookie(t *testing.T) {
 func TestAddExtensions(t *testing.T) {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		b, err := io.ReadAll(r.Body)
-		if err != nil {
-			panic(err)
-		}
+		require.NoError(t, err)
 		require.Equal(t, `{"query":"user(id:1){name}","extensions":{"persistedQuery":{"sha256Hash":"ceec2897e2da519612279e63f24658c3e91194cbb2974744fa9007a7e1e9f9e7","version":1}}}`, string(b))
 		err = json.NewEncoder(w).Encode(map[string]any{
 			"data": map[string]any{
 				"Name": "Bob",
 			},
 		})
-		if err != nil {
-			panic(err)
-		}
+		require.NoError(t, err)
 	})
 
 	c := client.New(h)

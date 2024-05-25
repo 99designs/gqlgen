@@ -16,10 +16,10 @@ import (
 
 func TestLayouts(t *testing.T) {
 	singlefileFSet := token.NewFileSet()
-	singlefilePkg := loadPackage("singlefile", singlefileFSet)
+	singlefilePkg := loadPackage(t, "singlefile", singlefileFSet)
 
 	followschemaFSet := token.NewFileSet()
-	followschemaPkg := loadPackage("followschema", followschemaFSet)
+	followschemaPkg := loadPackage(t, "followschema", followschemaFSet)
 
 	eq, msg := eqgo.PackagesEquivalent(singlefilePkg, singlefileFSet, followschemaPkg, followschemaFSet, nil)
 	if !eq {
@@ -30,15 +30,13 @@ func TestLayouts(t *testing.T) {
 	}
 }
 
-func loadPackage(name string, fset *token.FileSet) *ast.Package {
+func loadPackage(t *testing.T, name string, fset *token.FileSet) *ast.Package {
+	t.Helper()
+
 	path, err := filepath.Abs(name)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 	files, err := os.ReadDir(path)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 
 	pkg := ast.Package{
 		Name:  name,
@@ -53,9 +51,7 @@ func loadPackage(name string, fset *token.FileSet) *ast.Package {
 			f.Name() == "models-gen.go" {
 			filename := filepath.Join(path, f.Name())
 			src, err := parser.ParseFile(fset, filename, nil, parser.AllErrors)
-			if err != nil {
-				panic(err)
-			}
+			require.NoError(t, err)
 			pkg.Files[filename] = src
 		}
 	}

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/base64"
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -59,7 +58,7 @@ func TestApolloTracing(t *testing.T) {
 	require.Less(t, ftv1.StartTime.Nanos, ftv1.EndTime.Nanos)
 	require.EqualValues(t, ftv1.EndTime.Nanos-ftv1.StartTime.Nanos, ftv1.DurationNs)
 
-	fmt.Printf("%#v\n", resp.Body.String())
+	t.Logf("%#v\n", resp.Body.String())
 	require.Equal(t, "Query", ftv1.Root.Child[0].ParentType)
 	require.Equal(t, "name", ftv1.Root.Child[0].GetResponseName())
 	require.Equal(t, "String!", ftv1.Root.Child[0].Type)

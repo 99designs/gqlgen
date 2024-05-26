@@ -250,7 +250,7 @@ func TestInterfaces(t *testing.T) {
 			}
 		`, &resp)
 
-		require.Equal(t, 2, len(resp.Shapes))
+		require.Len(t, resp.Shapes, 2)
 		require.Equal(t, float64(-1), resp.Shapes[0].Coordinates.X)
 		require.Equal(t, float64(0), resp.Shapes[0].Coordinates.Y)
 		require.Equal(t, float64(1), resp.Shapes[1].Coordinates.X)

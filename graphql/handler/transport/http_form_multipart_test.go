@@ -46,7 +46,7 @@ func TestFileUpload(t *testing.T) {
 	t.Run("valid single file upload", func(t *testing.T) {
 		es.ExecFunc = func(ctx context.Context) graphql.ResponseHandler {
 			op := graphql.GetOperationContext(ctx).Operation
-			require.Equal(t, 1, len(op.VariableDefinitions))
+			require.Len(t, op.VariableDefinitions, 1)
 			require.Equal(t, "file", op.VariableDefinitions[0].Variable)
 			return graphql.OneShot(&graphql.Response{Data: []byte(`{"singleUpload":"test"}`)})
 		}
@@ -72,7 +72,7 @@ func TestFileUpload(t *testing.T) {
 	t.Run("valid single file upload with payload", func(t *testing.T) {
 		es.ExecFunc = func(ctx context.Context) graphql.ResponseHandler {
 			op := graphql.GetOperationContext(ctx).Operation
-			require.Equal(t, 1, len(op.VariableDefinitions))
+			require.Len(t, op.VariableDefinitions, 1)
 			require.Equal(t, "req", op.VariableDefinitions[0].Variable)
 			return graphql.OneShot(&graphql.Response{Data: []byte(`{"singleUploadWithPayload":"test"}`)})
 		}
@@ -98,7 +98,7 @@ func TestFileUpload(t *testing.T) {
 	t.Run("valid file list upload", func(t *testing.T) {
 		es.ExecFunc = func(ctx context.Context) graphql.ResponseHandler {
 			op := graphql.GetOperationContext(ctx).Operation
-			require.Equal(t, 1, len(op.VariableDefinitions))
+			require.Len(t, op.VariableDefinitions, 1)
 			require.Equal(t, "files", op.VariableDefinitions[0].Variable)
 			return graphql.OneShot(&graphql.Response{Data: []byte(`{"multipleUpload":[{"id":1},{"id":2}]}`)})
 		}
@@ -130,7 +130,7 @@ func TestFileUpload(t *testing.T) {
 	t.Run("valid file list upload with payload", func(t *testing.T) {
 		es.ExecFunc = func(ctx context.Context) graphql.ResponseHandler {
 			op := graphql.GetOperationContext(ctx).Operation
-			require.Equal(t, 1, len(op.VariableDefinitions))
+			require.Len(t, op.VariableDefinitions, 1)
 			require.Equal(t, "req", op.VariableDefinitions[0].Variable)
 			return graphql.OneShot(&graphql.Response{Data: []byte(`{"multipleUploadWithPayload":[{"id":1},{"id":2}]}`)})
 		}
@@ -163,7 +163,7 @@ func TestFileUpload(t *testing.T) {
 		test := func(uploadMaxMemory int64) {
 			es.ExecFunc = func(ctx context.Context) graphql.ResponseHandler {
 				op := graphql.GetOperationContext(ctx).Operation
-				require.Equal(t, 1, len(op.VariableDefinitions))
+				require.Len(t, op.VariableDefinitions, 1)
 				require.Equal(t, "req", op.VariableDefinitions[0].Variable)
 				return graphql.OneShot(&graphql.Response{Data: []byte(`{"multipleUploadWithPayload":[{"id":1},{"id":2}]}`)})
 			}

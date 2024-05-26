@@ -78,10 +78,10 @@ func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecu
 		return
 	}
 
-	rc, OpErr := exec.CreateOperationContext(ctx, params)
-	if OpErr != nil {
-		w.WriteHeader(statusFor(OpErr))
-		resp := exec.DispatchError(graphql.WithOperationContext(ctx, rc), OpErr)
+	rc, opErr := exec.CreateOperationContext(ctx, params)
+	if opErr != nil {
+		w.WriteHeader(statusFor(opErr))
+		resp := exec.DispatchError(graphql.WithOperationContext(ctx, rc), opErr)
 		writeJson(w, resp)
 		return
 	}

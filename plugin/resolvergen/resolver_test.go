@@ -1,7 +1,6 @@
 package resolvergen
 
 import (
-	"fmt"
 	"os"
 	"syscall"
 	"testing"
@@ -135,20 +134,13 @@ func assertNoErrors(t *testing.T, pkg string) {
 			packages.NeedTypes |
 			packages.NeedTypesSizes,
 	}, pkg)
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
-	hasErrors := false
+	var errors []packages.Error
 	for _, pkg := range pkgs {
-		for _, err := range pkg.Errors {
-			hasErrors = true
-			fmt.Println(err.Pos + ":" + err.Msg)
-		}
+		errors = append(errors, pkg.Errors...)
 	}
-	if hasErrors {
-		t.Fatal("see compilation errors above")
-	}
+	require.Emptyf(t, errors, "There are compilation errors")
 }
 
 type implementorTest struct{}

@@ -2,6 +2,7 @@ package resolvergen
 
 import (
 	"os"
+	"strings"
 	"syscall"
 	"testing"
 
@@ -136,11 +137,16 @@ func assertNoErrors(t *testing.T, pkg string) {
 	}, pkg)
 	require.NoError(t, err)
 
+	var errFilePos []string
 	var errors []packages.Error
 	for _, pkg := range pkgs {
 		errors = append(errors, pkg.Errors...)
+		for _, err := range pkg.Errors {
+			errFilePos = append(errFilePos, err.Pos+":"+err.Msg)
+		}
 	}
-	require.Emptyf(t, errors, "There are compilation errors")
+	require.Emptyf(t, errors, "There are compilation errors:\n"+
+		strings.Join(errFilePos, "\n"))
 }
 
 type implementorTest struct{}

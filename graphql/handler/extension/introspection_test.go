@@ -13,6 +13,6 @@ func TestIntrospection(t *testing.T) {
 	rc := &graphql.OperationContext{
 		DisableIntrospection: true,
 	}
-	require.Nil(t, Introspection{}.MutateOperationContext(context.Background(), rc))
+	require.NoError(t, Introspection{}.MutateOperationContext(context.Background(), rc))
 	require.False(t, rc.DisableIntrospection)
 }

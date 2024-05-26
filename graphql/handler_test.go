@@ -22,7 +22,7 @@ func TestAddUploadToOperations(t *testing.T) {
 		}
 		path := "variables.req.0.file"
 		err := params.AddUpload(upload, key, path)
-		require.NotNil(t, err)
+		require.NoError(t, err)
 		require.Equal(t, "input: path is missing \"variables.\" prefix, key: 0, path: variables.req.0.file", err.Error())
 	})
 
@@ -49,7 +49,7 @@ func TestAddUploadToOperations(t *testing.T) {
 
 		path := "variables.file"
 		err := request.AddUpload(upload, key, path)
-		require.Nil(t, err)
+		require.NoError(t, err)
 
 		require.Equal(t, expected, request)
 	})

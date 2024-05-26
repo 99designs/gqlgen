@@ -23,6 +23,10 @@ updates:
     directory: "/_examples" # Location of package manifests
     schedule:
       interval: "weekly"
+    ignore:
+      - dependency-name: "github.com/gorilla/websocket"
+        # For websocket, v1.5.1 has serious bugs
+        versions: ["v1.5.1"]
   # Maintain dependencies for npm
   - package-ecosystem: "npm" # See documentation for possible values
     directory: "integration" # Location of package manifests

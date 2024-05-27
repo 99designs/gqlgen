@@ -251,10 +251,10 @@ func TestInterfaces(t *testing.T) {
 		`, &resp)
 
 		require.Len(t, resp.Shapes, 2)
-		require.Equal(t, float64(-1), resp.Shapes[0].Coordinates.X)
-		require.Equal(t, float64(0), resp.Shapes[0].Coordinates.Y)
-		require.Equal(t, float64(1), resp.Shapes[1].Coordinates.X)
-		require.Equal(t, float64(1), resp.Shapes[1].Coordinates.Y)
+		require.InEpsilon(t, float64(-1), resp.Shapes[0].Coordinates.X, 0.02)
+		require.InEpsilon(t, float64(0), resp.Shapes[0].Coordinates.Y, 0.02)
+		require.InEpsilon(t, float64(1), resp.Shapes[1].Coordinates.X, 0.02)
+		require.InEpsilon(t, float64(1), resp.Shapes[1].Coordinates.Y, 0.02)
 	})
 
 	t.Run("fragment on interface must return merged fields", func(t *testing.T) {

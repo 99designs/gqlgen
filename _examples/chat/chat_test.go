@@ -6,7 +6,6 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
@@ -50,7 +49,7 @@ func TestChatSubscriptions(t *testing.T) {
 					b:post(text:"Hello Vektah!", roomName:"#gophers%d", username:"andrey") { id }
 					c:post(text:"Whats up?", roomName:"#gophers%d", username:"vektah") { id }
 				}`, i, i, i), &resp)
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}()
 
 			msg.err = sub.Next(&msg.resp)

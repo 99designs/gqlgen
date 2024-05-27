@@ -3,9 +3,10 @@ package fieldset
 import (
 	"testing"
 
-	"github.com/99designs/gqlgen/codegen"
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2/ast"
+
+	"github.com/99designs/gqlgen/codegen"
 )
 
 func TestUnnestedWithoutPrefix(t *testing.T) {

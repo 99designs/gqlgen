@@ -12,6 +12,8 @@ concurrency:
   cancel-in-progress: true
 jobs:
   golangci-lint:
+    env:
+      GOLANGCI_LINT_VERSION: v1.59.0
     strategy:
       matrix:
         go: ["1.21", "1.22"]
@@ -24,11 +26,9 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v6.0.1
         with:
-          version: latest
-          args: '--timeout 5m'
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
       - name: golangci-lint examples
         uses: golangci/golangci-lint-action@v6.0.1
         with:
-          version: latest
-          args: '--timeout 5m'
+          version: ${{ env.GOLANGCI_LINT_VERSION }}
           working-directory: _examples

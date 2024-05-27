@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
@@ -43,7 +44,7 @@ func TestAPQ(t *testing.T) {
 			Query: "original query",
 		}
 		err := extension.AutomaticPersistedQuery{graphql.MapCache{}}.MutateOperationParameters(ctx, params)
-		require.Nil(t, err)
+		require.Equal(t, (*gqlerror.Error)(nil), err)
 
 		require.Equal(t, "original query", params.Query)
 	})
@@ -76,7 +77,7 @@ func TestAPQ(t *testing.T) {
 		}
 		cache := graphql.MapCache{}
 		err := extension.AutomaticPersistedQuery{cache}.MutateOperationParameters(ctx, params)
-		require.Nil(t, err)
+		require.Equal(t, (*gqlerror.Error)(nil), err)
 
 		require.Equal(t, "{ me { name } }", params.Query)
 		require.Equal(t, "{ me { name } }", cache[hash])
@@ -95,7 +96,7 @@ func TestAPQ(t *testing.T) {
 		}
 		cache := graphql.MapCache{}
 		err := extension.AutomaticPersistedQuery{cache}.MutateOperationParameters(ctx, params)
-		require.Nil(t, err)
+		require.Equal(t, (*gqlerror.Error)(nil), err)
 
 		require.Equal(t, "{ me { name } }", params.Query)
 		require.Equal(t, "{ me { name } }", cache[hash])
@@ -115,7 +116,7 @@ func TestAPQ(t *testing.T) {
 			hash: query,
 		}
 		err := extension.AutomaticPersistedQuery{cache}.MutateOperationParameters(ctx, params)
-		require.Nil(t, err)
+		require.Equal(t, (*gqlerror.Error)(nil), err)
 
 		require.Equal(t, "{ me { name } }", params.Query)
 	})

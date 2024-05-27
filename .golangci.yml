@@ -21,6 +21,7 @@ linters-settings:
       - error-nil
       - expected-actual
       - nil-compare
+      - require-error
 
 linters:
   disable-all: true

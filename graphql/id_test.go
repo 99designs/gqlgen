@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMarshalID(t *testing.T) {
@@ -126,12 +127,12 @@ func TestUnmarshalID(t *testing.T) {
 		t.Run(tt.Name, func(t *testing.T) {
 			id, err := UnmarshalID(tt.Input)
 
-			assert.Equal(t, tt.Expected, id)
 			if tt.ShouldError {
-				assert.Error(t, err)
+				require.Error(t, err)
 			} else {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			}
+			assert.Equal(t, tt.Expected, id)
 		})
 	}
 }
@@ -142,30 +143,30 @@ func TestMarshalUintID(t *testing.T) {
 
 func TestUnMarshalUintID(t *testing.T) {
 	result, err := UnmarshalUintID("12")
+	require.NoError(t, err)
 	assert.Equal(t, uint(12), result)
-	assert.NoError(t, err)
 
 	result, err = UnmarshalUintID(12)
+	require.NoError(t, err)
 	assert.Equal(t, uint(12), result)
-	assert.NoError(t, err)
 
 	result, err = UnmarshalUintID(int64(12))
+	require.NoError(t, err)
 	assert.Equal(t, uint(12), result)
-	assert.NoError(t, err)
 
 	result, err = UnmarshalUintID(int32(12))
+	require.NoError(t, err)
 	assert.Equal(t, uint(12), result)
-	assert.NoError(t, err)
 
 	result, err = UnmarshalUintID(int(12))
+	require.NoError(t, err)
 	assert.Equal(t, uint(12), result)
-	assert.NoError(t, err)
 
 	result, err = UnmarshalUintID(uint32(12))
+	require.NoError(t, err)
 	assert.Equal(t, uint(12), result)
-	assert.NoError(t, err)
 
 	result, err = UnmarshalUintID(uint64(12))
+	require.NoError(t, err)
 	assert.Equal(t, uint(12), result)
-	assert.NoError(t, err)
 }

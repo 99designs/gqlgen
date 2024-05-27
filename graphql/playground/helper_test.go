@@ -11,6 +11,7 @@ import (
 
 	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func testResourceIntegrity(t *testing.T, handler func(title, endpoint string) http.HandlerFunc) {
@@ -19,14 +20,14 @@ func testResourceIntegrity(t *testing.T, handler func(title, endpoint string) ht
 	handler("example.org API", "/query").ServeHTTP(recorder, request)
 
 	res := recorder.Result()
-	defer assert.NoError(t, res.Body.Close())
+	t.Cleanup(func() { _ = res.Body.Close() })
 
 	assert.Equal(t, http.StatusOK, res.StatusCode)
 	assert.True(t, strings.HasPrefix(res.Header.Get("Content-Type"), "text/html"))
 
 	doc, err := goquery.NewDocumentFromReader(res.Body)
-	assert.NoError(t, err)
-	assert.NotNil(t, doc)
+	require.NoError(t, err)
+	require.NotNil(t, doc)
 
 	var baseUrl string
 	if base := doc.Find("base"); len(base.Nodes) != 0 {
@@ -58,11 +59,11 @@ func assertNodesIntegrity(t *testing.T, baseUrl string, doc *goquery.Document, s
 
 		if len(url) != 0 && len(integrity) != 0 {
 			resp, err := http.Get(baseUrl + url)
-			assert.NoError(t, err)
+			require.NoError(t, err)
+			t.Cleanup(func() { _ = resp.Body.Close() })
 			hasher := sha256.New()
 			_, err = io.Copy(hasher, resp.Body)
-			assert.NoError(t, err)
-			assert.NoError(t, resp.Body.Close())
+			require.NoError(t, err)
 			actual := "sha256-" + base64.StdEncoding.EncodeToString(hasher.Sum(nil))
 			assert.Equal(t, integrity, actual)
 		}

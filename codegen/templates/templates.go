@@ -206,7 +206,7 @@ func Funcs() template.FuncMap {
 		"call":               Call,
 		"prefixLines":        prefixLines,
 		"notNil":             notNil,
-		"stringsSplit":       stringsSplit,
+		"strSplit":           StrSplit,
 		"reserveImport":      CurrentImports.Reserve,
 		"lookupImport":       CurrentImports.Lookup,
 		"go":                 ToGo,
@@ -582,7 +582,7 @@ func notNil(field string, data any) bool {
 	return val.IsValid() && !val.IsNil()
 }
 
-func stringsSplit(s, sep string) []string {
+func StrSplit(s, sep string) []string {
 	return strings.Split(s, sep)
 }
 

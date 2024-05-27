@@ -56,8 +56,8 @@ func initialState(t *testing.T, opts ...Option) *Packages {
 		"github.com/99designs/gqlgen/internal/code/testdata/a",
 		"github.com/99designs/gqlgen/internal/code/testdata/b",
 	)
-	require.Empty(t, p.Errors())
 
+	require.Empty(t, p.Errors())
 	require.Equal(t, 1, p.numLoadCalls)
 	require.Equal(t, 0, p.numNameCalls)
 	require.Equal(t, "a", pkgs[0].Name)

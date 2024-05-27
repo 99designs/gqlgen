@@ -1,5 +1,6 @@
 run:
   tests: true
+  timeout: 5m
 
 linters-settings:
   errcheck:

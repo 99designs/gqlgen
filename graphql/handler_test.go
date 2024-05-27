@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 func TestAddUploadToOperations(t *testing.T) {
@@ -22,8 +23,7 @@ func TestAddUploadToOperations(t *testing.T) {
 		}
 		path := "variables.req.0.file"
 		err := params.AddUpload(upload, key, path)
-		require.NoError(t, err)
-		require.Equal(t, "input: path is missing \"variables.\" prefix, key: 0, path: variables.req.0.file", err.Error())
+		require.EqualError(t, err, "input: path is missing \"variables.\" prefix, key: 0, path: variables.req.0.file")
 	})
 
 	t.Run("valid variable", func(t *testing.T) {
@@ -49,7 +49,7 @@ func TestAddUploadToOperations(t *testing.T) {
 
 		path := "variables.file"
 		err := request.AddUpload(upload, key, path)
-		require.NoError(t, err)
+		require.Equal(t, (*gqlerror.Error)(nil), err)
 
 		require.Equal(t, expected, request)
 	})
@@ -85,7 +85,7 @@ func TestAddUploadToOperations(t *testing.T) {
 
 		path := "variables.req.0.file"
 		err := request.AddUpload(upload, key, path)
-		require.Nil(t, err)
+		require.Equal(t, (*gqlerror.Error)(nil), err)
 
 		require.Equal(t, expected, request)
 	})

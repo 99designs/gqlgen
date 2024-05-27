@@ -86,7 +86,6 @@ func TestAddUploadToOperations(t *testing.T) {
 		path := "variables.req.0.file"
 		err := request.AddUpload(upload, key, path)
 		require.Equal(t, (*gqlerror.Error)(nil), err)
-
 		require.Equal(t, expected, request)
 	})
 }

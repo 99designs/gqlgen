@@ -107,8 +107,8 @@ func TestServer(t *testing.T) {
 
 		resp := get(srv, "/foo?query=invalid")
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
-		assert.Equal(t, 1, len(errors1))
-		assert.Equal(t, 1, len(errors2))
+		assert.Len(t, errors1, 1)
+		assert.Len(t, errors2, 1)
 	})
 
 	t.Run("query caching", func(t *testing.T) {
@@ -159,8 +159,8 @@ func TestErrorServer(t *testing.T) {
 
 		resp := get(srv, "/foo?query={name}")
 		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
-		assert.Equal(t, 1, len(errors1))
-		assert.Equal(t, 1, len(errors2))
+		assert.Len(t, errors1, 1)
+		assert.Len(t, errors2, 1)
 	})
 }
 

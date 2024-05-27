@@ -24,13 +24,13 @@ func TestGoInitialismsConfig(t *testing.T) {
 	t.Run("initialism config appends if desired", func(t *testing.T) {
 		tt := GoInitialismsConfig{ReplaceDefaults: false, Initialisms: []string{"ASDF"}}
 		result := tt.determineGoInitialisms()
-		assert.Equal(t, len(templates.CommonInitialisms)+1, len(result))
+		assert.Len(t, result, len(templates.CommonInitialisms)+1)
 		assert.True(t, result["ASDF"])
 	})
 	t.Run("initialism config replaces if desired", func(t *testing.T) {
 		tt := GoInitialismsConfig{ReplaceDefaults: true, Initialisms: []string{"ASDF"}}
 		result := tt.determineGoInitialisms()
-		assert.Equal(t, 1, len(result))
+		assert.Len(t, result, 1)
 		assert.True(t, result["ASDF"])
 	})
 	t.Run("initialism config uppercases the initialsms", func(t *testing.T) {

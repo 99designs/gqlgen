@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/codegen/config"
@@ -47,7 +46,7 @@ func TestGenerate(t *testing.T) {
 			cfg, err := config.LoadConfigFromDefaultLocations()
 			require.NoError(t, err, "failed to load config")
 			err = Generate(cfg)
-			assert.NoError(t, err, "failed to generate code")
+			require.NoError(t, err, "failed to generate code")
 		})
 	}
 }

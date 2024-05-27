@@ -24,7 +24,7 @@ func TestHeadersWithPOST(t *testing.T) {
 
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`, "application/json")
 		assert.Equal(t, http.StatusOK, resp.Code)
-		assert.Equal(t, 1, len(resp.Header()))
+		assert.Len(t, resp.Header(), 1)
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 	})
 
@@ -39,7 +39,7 @@ func TestHeadersWithPOST(t *testing.T) {
 
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`, "application/json")
 		assert.Equal(t, http.StatusOK, resp.Code)
-		assert.Equal(t, 2, len(resp.Header()))
+		assert.Len(t, resp.Header(), 2)
 		assert.Equal(t, "application/json; charset: utf8", resp.Header().Get("Content-Type"))
 		assert.Equal(t, "dummy-post", resp.Header().Get("Other-Header"))
 		assert.Equal(t, "another-one", resp.Header().Values("Other-Header")[1])
@@ -53,7 +53,7 @@ func TestHeadersWithGET(t *testing.T) {
 
 		resp := doRequest(h, "GET", "/graphql?query={name}", "", "application/json")
 		assert.Equal(t, http.StatusOK, resp.Code)
-		assert.Equal(t, 1, len(resp.Header()))
+		assert.Len(t, resp.Header(), 1)
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 	})
 
@@ -68,7 +68,7 @@ func TestHeadersWithGET(t *testing.T) {
 
 		resp := doRequest(h, "GET", "/graphql?query={name}", "", "application/json")
 		assert.Equal(t, http.StatusOK, resp.Code)
-		assert.Equal(t, 2, len(resp.Header()))
+		assert.Len(t, resp.Header(), 2)
 		assert.Equal(t, "application/json; charset: utf8", resp.Header().Get("Content-Type"))
 		assert.Equal(t, "dummy-get", resp.Header().Get("Other-Header"))
 	})
@@ -81,7 +81,7 @@ func TestHeadersWithGRAPHQL(t *testing.T) {
 
 		resp := doRequest(h, "POST", "/graphql", `{ name }`, "application/graphql")
 		assert.Equal(t, http.StatusOK, resp.Code)
-		assert.Equal(t, 1, len(resp.Header()))
+		assert.Len(t, resp.Header(), 1)
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 	})
 
@@ -96,7 +96,7 @@ func TestHeadersWithGRAPHQL(t *testing.T) {
 
 		resp := doRequest(h, "POST", "/graphql", `{ name }`, "application/graphql")
 		assert.Equal(t, http.StatusOK, resp.Code)
-		assert.Equal(t, 2, len(resp.Header()))
+		assert.Len(t, resp.Header(), 2)
 		assert.Equal(t, "application/json; charset: utf8", resp.Header().Get("Content-Type"))
 		assert.Equal(t, "dummy-get-qraphql", resp.Header().Get("Other-Header"))
 	})
@@ -109,7 +109,7 @@ func TestHeadersWithFormUrlEncoded(t *testing.T) {
 
 		resp := doRequest(h, "POST", "/graphql", `{ name }`, "application/x-www-form-urlencoded")
 		assert.Equal(t, http.StatusOK, resp.Code)
-		assert.Equal(t, 1, len(resp.Header()))
+		assert.Len(t, resp.Header(), 1)
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 	})
 
@@ -124,7 +124,7 @@ func TestHeadersWithFormUrlEncoded(t *testing.T) {
 
 		resp := doRequest(h, "POST", "/graphql", `{ name }`, "application/x-www-form-urlencoded")
 		assert.Equal(t, http.StatusOK, resp.Code)
-		assert.Equal(t, 2, len(resp.Header()))
+		assert.Len(t, resp.Header(), 2)
 		assert.Equal(t, "application/json; charset: utf8", resp.Header().Get("Content-Type"))
 		assert.Equal(t, "dummy-get-urlencoded-form", resp.Header().Get("Other-Header"))
 	})
@@ -168,7 +168,7 @@ func TestHeadersWithMULTIPART(t *testing.T) {
 		resp := httptest.NewRecorder()
 		h.ServeHTTP(resp, req)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
-		assert.Equal(t, 1, len(resp.Header()))
+		assert.Len(t, resp.Header(), 1)
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 	})
 
@@ -213,7 +213,7 @@ func TestHeadersWithMULTIPART(t *testing.T) {
 		resp := httptest.NewRecorder()
 		h.ServeHTTP(resp, req)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
-		assert.Equal(t, 2, len(resp.Header()))
+		assert.Len(t, resp.Header(), 2)
 		assert.Equal(t, "application/json; charset: utf8", resp.Header().Get("Content-Type"))
 		assert.Equal(t, "dummy-multipart", resp.Header().Get("Other-Header"))
 	})

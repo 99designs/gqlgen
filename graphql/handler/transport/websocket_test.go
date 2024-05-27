@@ -347,7 +347,7 @@ func TestWebSocketInitTimeout(t *testing.T) {
 
 		var msg operationMessage
 		err := c.ReadJSON(&msg)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Contains(t, err.Error(), "timeout")
 	})
 

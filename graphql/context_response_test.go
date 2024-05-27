@@ -85,7 +85,7 @@ func TestGetErrorFromPresenter(t *testing.T) {
 		errs := GetErrors(ctx)
 
 		// because we are still presenting the error it is not expected to be returned, but this should not deadlock.
-		require.Len(t, errs, 0)
+		require.Empty(t, errs)
 		return DefaultErrorPresenter(ctx, err)
 	}, nil)
 

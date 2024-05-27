@@ -27,14 +27,14 @@ func TestExecutor(t *testing.T) {
 		t.Run("no operation", func(t *testing.T) {
 			resp := query(exec, "", "")
 			assert.Equal(t, "", string(resp.Data))
-			assert.Equal(t, 1, len(resp.Errors))
+			assert.Len(t, resp.Errors, 1)
 			assert.Equal(t, errcode.ValidationFailed, resp.Errors[0].Extensions["code"])
 		})
 
 		t.Run("bad operation", func(t *testing.T) {
 			resp := query(exec, "badOp", "query test { name }")
 			assert.Equal(t, "", string(resp.Data))
-			assert.Equal(t, 1, len(resp.Errors))
+			assert.Len(t, resp.Errors, 1)
 			assert.Equal(t, errcode.ValidationFailed, resp.Errors[0].Extensions["code"])
 		})
 	})
@@ -134,9 +134,9 @@ func TestExecutor(t *testing.T) {
 
 		resp := query(exec, "", "invalid")
 		assert.Equal(t, "", string(resp.Data))
-		assert.Equal(t, 1, len(resp.Errors))
-		assert.Equal(t, 1, len(errors1))
-		assert.Equal(t, 1, len(errors2))
+		assert.Len(t, resp.Errors, 1)
+		assert.Len(t, errors1, 1)
+		assert.Len(t, errors2, 1)
 	})
 
 	t.Run("query caching", func(t *testing.T) {
@@ -216,8 +216,8 @@ func TestErrorServer(t *testing.T) {
 
 		resp := query(exec, "", "{name}")
 		assert.Equal(t, "null", string(resp.Data))
-		assert.Equal(t, 1, len(errors1))
-		assert.Equal(t, 1, len(errors2))
+		assert.Len(t, errors1, 1)
+		assert.Len(t, errors2, 1)
 	})
 }
 

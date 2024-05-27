@@ -86,7 +86,7 @@ func TestNullBubbling(t *testing.T) {
 		err := c.Post(`query { valid, errorList { id } }`, &resp)
 
 		require.NoError(t, err)
-		require.Equal(t, 1, len(resp.ErrorList))
+		require.Len(t, resp.ErrorList, 1)
 		require.Nil(t, resp.ErrorList[0])
 		require.Equal(t, "Ok", resp.Valid)
 	})

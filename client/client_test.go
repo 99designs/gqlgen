@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/mitchellh/mapstructure"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
@@ -21,15 +22,16 @@ import (
 func TestClient(t *testing.T) {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		b, err := io.ReadAll(r.Body)
-		require.NoError(t, err)
-		require.Equal(t, `{"query":"user(id:$id){name}","variables":{"id":1}}`, string(b))
+		if assert.NoError(t, err) {
+			assert.Equal(t, `{"query":"user(id:$id){name}","variables":{"id":1}}`, string(b))
 
-		err = json.NewEncoder(w).Encode(map[string]any{
-			"data": map[string]any{
-				"name": "bob",
-			},
-		})
-		require.NoError(t, err)
+			err = json.NewEncoder(w).Encode(map[string]any{
+				"data": map[string]any{
+					"name": "bob",
+				},
+			})
+			assert.NoError(t, err)
+		}
 	})
 
 	c := client.New(h)
@@ -46,14 +48,17 @@ func TestClient(t *testing.T) {
 func TestClientMultipartFormData(t *testing.T) {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		bodyBytes, err := io.ReadAll(r.Body)
-		require.NoError(t, err)
-		require.Contains(t, string(bodyBytes), `Content-Disposition: form-data; name="operations"`)
-		require.Contains(t, string(bodyBytes), `{"query":"mutation ($input: Input!) {}","variables":{"file":{}}`)
-		require.Contains(t, string(bodyBytes), `Content-Disposition: form-data; name="map"`)
-		require.Contains(t, string(bodyBytes), `{"0":["variables.file"]}`)
-		require.Contains(t, string(bodyBytes), `Content-Disposition: form-data; name="0"; filename="example.txt"`)
-		require.Contains(t, string(bodyBytes), `Content-Type: text/plain`)
-		require.Contains(t, string(bodyBytes), `Hello World`)
+		if !assert.NoError(t, err) {
+			return
+		}
+
+		assert.Contains(t, string(bodyBytes), `Content-Disposition: form-data; name="operations"`)
+		assert.Contains(t, string(bodyBytes), `{"query":"mutation ($input: Input!) {}","variables":{"file":{}}`)
+		assert.Contains(t, string(bodyBytes), `Content-Disposition: form-data; name="map"`)
+		assert.Contains(t, string(bodyBytes), `{"0":["variables.file"]}`)
+		assert.Contains(t, string(bodyBytes), `Content-Disposition: form-data; name="0"; filename="example.txt"`)
+		assert.Contains(t, string(bodyBytes), `Content-Type: text/plain`)
+		assert.Contains(t, string(bodyBytes), `Hello World`)
 
 		w.Write([]byte(`{}`))
 	})
@@ -83,7 +88,7 @@ func TestClientMultipartFormData(t *testing.T) {
 
 func TestAddHeader(t *testing.T) {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		require.Equal(t, "ASDF", r.Header.Get("Test-Key"))
+		assert.Equal(t, "ASDF", r.Header.Get("Test-Key"))
 
 		w.Write([]byte(`{}`))
 	})
@@ -98,7 +103,7 @@ func TestAddHeader(t *testing.T) {
 
 func TestAddClientHeader(t *testing.T) {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		require.Equal(t, "ASDF", r.Header.Get("Test-Key"))
+		assert.Equal(t, "ASDF", r.Header.Get("Test-Key"))
 
 		w.Write([]byte(`{}`))
 	})
@@ -112,9 +117,9 @@ func TestAddClientHeader(t *testing.T) {
 func TestBasicAuth(t *testing.T) {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		user, pass, ok := r.BasicAuth()
-		require.True(t, ok)
-		require.Equal(t, "user", user)
-		require.Equal(t, "pass", pass)
+		assert.True(t, ok)
+		assert.Equal(t, "user", user)
+		assert.Equal(t, "pass", pass)
 
 		w.Write([]byte(`{}`))
 	})
@@ -130,8 +135,10 @@ func TestBasicAuth(t *testing.T) {
 func TestAddCookie(t *testing.T) {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		c, err := r.Cookie("foo")
-		require.NoError(t, err)
-		require.Equal(t, "value", c.Value)
+		if !assert.NoError(t, err) {
+			return
+		}
+		assert.Equal(t, "value", c.Value)
 
 		w.Write([]byte(`{}`))
 	})
@@ -147,14 +154,16 @@ func TestAddCookie(t *testing.T) {
 func TestAddExtensions(t *testing.T) {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		b, err := io.ReadAll(r.Body)
-		require.NoError(t, err)
-		require.Equal(t, `{"query":"user(id:1){name}","extensions":{"persistedQuery":{"sha256Hash":"ceec2897e2da519612279e63f24658c3e91194cbb2974744fa9007a7e1e9f9e7","version":1}}}`, string(b))
+		if !assert.NoError(t, err) {
+			return
+		}
+		assert.Equal(t, `{"query":"user(id:1){name}","extensions":{"persistedQuery":{"sha256Hash":"ceec2897e2da519612279e63f24658c3e91194cbb2974744fa9007a7e1e9f9e7","version":1}}}`, string(b))
 		err = json.NewEncoder(w).Encode(map[string]any{
 			"data": map[string]any{
 				"Name": "Bob",
 			},
 		})
-		require.NoError(t, err)
+		assert.NoError(t, err)
 	})
 
 	c := client.New(h)

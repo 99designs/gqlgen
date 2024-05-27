@@ -6,6 +6,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
@@ -38,9 +39,11 @@ func TestChatSubscriptions(t *testing.T) {
 			}
 
 			msg.err = sub.Next(&msg.resp)
-			require.NoError(t, msg.err, "sub.Next")
-			require.Equal(t, "You've joined the room", msg.resp.MessageAdded.Text)
-			require.Equal(t, "system", msg.resp.MessageAdded.CreatedBy)
+			if !assert.NoError(t, msg.err, "sub.Next") {
+				return
+			}
+			assert.Equal(t, "You've joined the room", msg.resp.MessageAdded.Text)
+			assert.Equal(t, "system", msg.resp.MessageAdded.CreatedBy)
 
 			go func() {
 				var resp any
@@ -49,18 +52,22 @@ func TestChatSubscriptions(t *testing.T) {
 					b:post(text:"Hello Vektah!", roomName:"#gophers%d", username:"andrey") { id }
 					c:post(text:"Whats up?", roomName:"#gophers%d", username:"vektah") { id }
 				}`, i, i, i), &resp)
-				require.NoError(t, err)
+				assert.NoError(t, err)
 			}()
 
 			msg.err = sub.Next(&msg.resp)
-			require.NoError(t, msg.err, "sub.Next")
-			require.Equal(t, "Hello!", msg.resp.MessageAdded.Text)
-			require.Equal(t, "vektah", msg.resp.MessageAdded.CreatedBy)
+			if !assert.NoError(t, msg.err, "sub.Next") {
+				return
+			}
+			assert.Equal(t, "Hello!", msg.resp.MessageAdded.Text)
+			assert.Equal(t, "vektah", msg.resp.MessageAdded.CreatedBy)
 
 			msg.err = sub.Next(&msg.resp)
-			require.NoError(t, msg.err, "sub.Next")
-			require.Equal(t, "Whats up?", msg.resp.MessageAdded.Text)
-			require.Equal(t, "vektah", msg.resp.MessageAdded.CreatedBy)
+			if !assert.NoError(t, msg.err, "sub.Next") {
+				return
+			}
+			assert.Equal(t, "Whats up?", msg.resp.MessageAdded.Text)
+			assert.Equal(t, "vektah", msg.resp.MessageAdded.CreatedBy)
 		}(i)
 		// wait for goroutines to finish every N tests to not starve on CPU
 		if (i+1)%batchSize == 0 {

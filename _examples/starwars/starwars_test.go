@@ -67,10 +67,10 @@ func TestStarwars(t *testing.T) {
 		c.MustPost(`{ human(id:"1000") { starships { name length(unit:FOOT) } } }`, &resp)
 
 		require.Equal(t, "X-Wing", resp.Human.Starships[0].Name)
-		require.Equal(t, 41.0105, resp.Human.Starships[0].Length)
+		require.InDelta(t, 41.0105, resp.Human.Starships[0].Length, 0.0001)
 
 		require.Equal(t, "Imperial shuttle", resp.Human.Starships[1].Name)
-		require.Equal(t, 65.6168, resp.Human.Starships[1].Length)
+		require.InDelta(t, 65.6168, resp.Human.Starships[1].Length, 0.0001)
 	})
 
 	t.Run("hero height", func(t *testing.T) {
@@ -81,7 +81,7 @@ func TestStarwars(t *testing.T) {
 		}
 		c.MustPost(`{ hero(episode:EMPIRE) { ... on Human { height(unit:METER) } } }`, &resp)
 
-		require.Equal(t, 1.72, resp.Hero.Height)
+		require.InDelta(t, 1.72, resp.Hero.Height, 0.001)
 	})
 
 	t.Run("default hero episode", func(t *testing.T) {

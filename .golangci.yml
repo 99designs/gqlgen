@@ -16,12 +16,20 @@ linters-settings:
   testifylint:
     disable-all: true
     enable:
+      - blank-import
       - bool-compare
       - compares
+      - empty
       - error-is-as
       - error-nil
       - expected-actual
+      - float-compare
+      - go-require
+      - len
+      - negative-positive
       - nil-compare
+      - require-error
+      - useless-assert
 
 linters:
   disable-all: true

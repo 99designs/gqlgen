@@ -77,16 +77,23 @@ func TestApolloTracing_Concurrent(t *testing.T) {
 					FTV1 string `json:"ftv1"`
 				} `json:"extensions"`
 			}
-			require.NoError(t, json.Unmarshal(resp.Body.Bytes(), &respData))
+
+			err := json.Unmarshal(resp.Body.Bytes(), &respData)
+			if !assert.NoError(t, err) {
+				return
+			}
 
 			tracing := respData.Extensions.FTV1
 			pbuf, err := base64.StdEncoding.DecodeString(tracing)
-			require.NoError(t, err)
+			if !assert.NoError(t, err) {
+				return
+			}
 
 			ftv1 := &generated.Trace{}
 			err = proto.Unmarshal(pbuf, ftv1)
-			require.NoError(t, err)
-			require.NotZero(t, ftv1.StartTime.Nanos)
+			if assert.NoError(t, err) {
+				assert.NotZero(t, ftv1.StartTime.Nanos)
+			}
 		}()
 	}
 }

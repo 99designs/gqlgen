@@ -115,11 +115,9 @@ func (u *userReader) getUsers(ctx context.Context, userIDs []string) ([]*model.U
 	errs := make([]error, 0, len(userIDs))
 	for rows.Next() {
 		var user model.User
-		if err := rows.Scan(&user.ID, &user.Name); err != nil {
-			errs = append(errs, err)
-			continue
-		}
+		err := rows.Scan(&user.ID, &user.Name)
 		users = append(users, &user)
+		errs = append(errs, err)
 	}
 	return users, errs
 }

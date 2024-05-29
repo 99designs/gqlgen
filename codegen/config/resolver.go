@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"go/types"
 	"path/filepath"
@@ -59,7 +60,7 @@ func (r *ResolverConfig) Check() error {
 	}
 
 	if strings.ContainsAny(r.Package, "./\\") {
-		return fmt.Errorf("package should be the output package name only, do not include the output filename")
+		return errors.New("package should be the output package name only, do not include the output filename")
 	}
 
 	if r.Package == "" && r.Dir() != "" {

@@ -2,6 +2,7 @@ package templates
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"go/types"
 	"io/fs"
@@ -71,7 +72,7 @@ var (
 // files inside the directory where you wrote the plugin.
 func Render(cfg Options) error {
 	if CurrentImports != nil {
-		panic(fmt.Errorf("recursive or concurrent call to RenderToFile detected"))
+		panic(errors.New("recursive or concurrent call to RenderToFile detected"))
 	}
 	CurrentImports = &Imports{packages: cfg.Packages, destDir: filepath.Dir(cfg.Filename)}
 
@@ -591,7 +592,7 @@ func Dump(val any) string {
 	case int:
 		return strconv.Itoa(val)
 	case int64:
-		return fmt.Sprintf("%d", val)
+		return strconv.FormatInt(val, 10)
 	case float64:
 		return fmt.Sprintf("%f", val)
 	case string:

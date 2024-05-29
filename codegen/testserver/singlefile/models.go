@@ -2,7 +2,7 @@ package singlefile
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"io"
 )
 
@@ -27,11 +27,11 @@ type Error struct {
 }
 
 func (Error) ErrorOnRequiredField() (string, error) {
-	return "", fmt.Errorf("boom")
+	return "", errors.New("boom")
 }
 
 func (Error) ErrorOnNonRequiredField() (string, error) {
-	return "", fmt.Errorf("boom")
+	return "", errors.New("boom")
 }
 
 func (Error) NilOnRequiredField() *string {

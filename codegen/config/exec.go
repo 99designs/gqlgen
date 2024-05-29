@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"fmt"
 	"go/types"
 	"path/filepath"
@@ -38,15 +39,15 @@ func (r *ExecConfig) Check() error {
 	switch r.Layout {
 	case ExecLayoutSingleFile:
 		if r.Filename == "" {
-			return fmt.Errorf("filename must be specified when using single-file layout")
+			return errors.New("filename must be specified when using single-file layout")
 		}
 		if !strings.HasSuffix(r.Filename, ".go") {
-			return fmt.Errorf("filename should be path to a go source file when using single-file layout")
+			return errors.New("filename should be path to a go source file when using single-file layout")
 		}
 		r.Filename = abs(r.Filename)
 	case ExecLayoutFollowSchema:
 		if r.DirName == "" {
-			return fmt.Errorf("dir must be specified when using follow-schema layout")
+			return errors.New("dir must be specified when using follow-schema layout")
 		}
 		r.DirName = abs(r.DirName)
 	default:
@@ -54,7 +55,7 @@ func (r *ExecConfig) Check() error {
 	}
 
 	if strings.ContainsAny(r.Package, "./\\") {
-		return fmt.Errorf("package should be the output package name only, do not include the output filename")
+		return errors.New("package should be the output package name only, do not include the output filename")
 	}
 
 	if r.Package == "" && r.Dir() != "" {

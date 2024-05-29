@@ -4,6 +4,7 @@ package server
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -40,7 +41,7 @@ func (r *elementResolver) Error(ctx context.Context, obj *models.Element) (bool,
 	// A silly hack to make the result order stable
 	time.Sleep(time.Duration(obj.ID) * 10 * time.Millisecond)
 
-	return false, fmt.Errorf("boom")
+	return false, errors.New("boom")
 }
 
 func (r *elementResolver) Mismatched(ctx context.Context, obj *models.Element) ([]bool, error) {
@@ -58,7 +59,7 @@ func (r *queryResolver) Error(ctx context.Context, typeArg *models.ErrorType) (b
 		return false, &CustomError{"User message", "Internal Message"}
 	}
 
-	return false, fmt.Errorf("normal error")
+	return false, errors.New("normal error")
 }
 
 func (r *queryResolver) Path(ctx context.Context) ([]*models.Element, error) {
@@ -71,11 +72,11 @@ func (r *queryResolver) Coercion(ctx context.Context, input []*models.ListCoerci
 
 func (r *queryResolver) Date(ctx context.Context, filter models.DateFilter) (bool, error) {
 	if filter.Value != "asdf" {
-		return false, fmt.Errorf("value must be asdf")
+		return false, errors.New("value must be asdf")
 	}
 
 	if *filter.Timezone != "UTC" {
-		return false, fmt.Errorf("timezone must be utc")
+		return false, errors.New("timezone must be utc")
 	}
 
 	if *filter.Op != models.DateFilterOpEq {

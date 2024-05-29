@@ -174,7 +174,7 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		} else if s := sig.Results(); s.Len() == 2 && s.At(1).Type().String() == "bool" {
 			f.VOkFunc = true
 		} else if sig.Results().Len() != 2 {
-			return fmt.Errorf("method has wrong number of args")
+			return errors.New("method has wrong number of args")
 		}
 		params := sig.Params()
 		// If the first argument is the context, remove it from the comparison and set

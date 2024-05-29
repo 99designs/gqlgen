@@ -2,7 +2,7 @@ package handler_test
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -171,7 +171,7 @@ func (t panicTransport) Supports(r *http.Request) bool {
 }
 
 func (t panicTransport) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
-	panic(fmt.Errorf("panic in transport"))
+	panic(errors.New("panic in transport"))
 }
 
 func TestRecover(t *testing.T) {

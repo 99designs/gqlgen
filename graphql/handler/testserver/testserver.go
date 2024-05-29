@@ -2,6 +2,7 @@ package testserver
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"time"
 
@@ -122,7 +123,7 @@ func NewError() *TestServer {
 					}
 					ran = true
 
-					graphql.AddError(ctx, fmt.Errorf("resolver error"))
+					graphql.AddError(ctx, errors.New("resolver error"))
 
 					return &graphql.Response{
 						Data: []byte(`null`),

@@ -1,7 +1,7 @@
 package graphql
 
 import (
-	"fmt"
+	"errors"
 	"time"
 
 	dur "github.com/sosodev/duration"
@@ -11,7 +11,7 @@ import (
 func UnmarshalDuration(v any) (time.Duration, error) {
 	input, ok := v.(string)
 	if !ok {
-		return 0, fmt.Errorf("input must be a string")
+		return 0, errors.New("input must be a string")
 	}
 
 	d2, err := dur.Parse(input)

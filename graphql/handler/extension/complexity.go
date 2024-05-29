@@ -2,7 +2,7 @@ package extension
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
@@ -52,7 +52,7 @@ func (c ComplexityLimit) ExtensionName() string {
 
 func (c *ComplexityLimit) Validate(schema graphql.ExecutableSchema) error {
 	if c.Func == nil {
-		return fmt.Errorf("ComplexityLimit func can not be nil")
+		return errors.New("ComplexityLimit func can not be nil")
 	}
 	c.es = schema
 	return nil

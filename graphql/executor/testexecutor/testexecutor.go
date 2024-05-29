@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"time"
@@ -152,7 +153,7 @@ func NewError() *TestExecutor {
 					}
 					ran = true
 
-					graphql.AddError(ctx, fmt.Errorf("resolver error"))
+					graphql.AddError(ctx, errors.New("resolver error"))
 
 					return &graphql.Response{
 						Data: []byte(`null`),

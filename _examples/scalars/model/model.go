@@ -56,13 +56,13 @@ type Point struct {
 func (p *Point) UnmarshalGQL(v any) error {
 	pointStr, ok := v.(string)
 	if !ok {
-		return fmt.Errorf("points must be strings")
+		return errors.New("points must be strings")
 	}
 
 	parts := strings.Split(pointStr, ",")
 
 	if len(parts) != 2 {
-		return fmt.Errorf("points must have 2 parts")
+		return errors.New("points must have 2 parts")
 	}
 
 	var err error
@@ -108,7 +108,7 @@ func MarshalID(id external.ObjectID) graphql.Marshaler {
 func UnmarshalID(v any) (external.ObjectID, error) {
 	str, ok := v.(string)
 	if !ok {
-		return 0, fmt.Errorf("ids must be strings")
+		return 0, errors.New("ids must be strings")
 	}
 	i, err := strconv.Atoi(str[1 : len(str)-1])
 	return external.ObjectID(i), err
@@ -166,7 +166,7 @@ func (e Tier) String() string {
 func (e *Tier) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
-		return fmt.Errorf("enums must be strings")
+		return errors.New("enums must be strings")
 	}
 
 	var err error

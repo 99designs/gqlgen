@@ -5,7 +5,6 @@ package todo
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/mitchellh/mapstructure"
@@ -47,11 +46,11 @@ func New() Config {
 		case RoleOwner:
 			ownable, isOwnable := obj.(Ownable)
 			if !isOwnable {
-				return nil, fmt.Errorf("obj cant be owned")
+				return nil, errors.New("obj cant be owned")
 			}
 
 			if ownable.Owner().ID != getUserId(ctx) {
-				return nil, fmt.Errorf("you don't own that")
+				return nil, errors.New("you don't own that")
 			}
 		}
 

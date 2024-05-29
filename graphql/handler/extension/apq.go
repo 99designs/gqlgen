@@ -4,7 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
-	"fmt"
+	"errors"
 
 	"github.com/mitchellh/mapstructure"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -47,7 +47,7 @@ func (a AutomaticPersistedQuery) ExtensionName() string {
 
 func (a AutomaticPersistedQuery) Validate(schema graphql.ExecutableSchema) error {
 	if a.Cache == nil {
-		return fmt.Errorf("AutomaticPersistedQuery.Cache can not be nil")
+		return errors.New("AutomaticPersistedQuery.Cache can not be nil")
 	}
 	return nil
 }

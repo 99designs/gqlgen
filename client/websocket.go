@@ -2,6 +2,7 @@ package client
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http/httptest"
@@ -127,7 +128,7 @@ func (p *Client) WebsocketWithPayload(query string, initPayload map[string]any, 
 				case connectionKaMsg:
 					continue
 				case errorMsg:
-					return fmt.Errorf(string(op.Payload))
+					return errors.New(string(op.Payload))
 				default:
 					return fmt.Errorf("expected data message, got %#v", op)
 				}

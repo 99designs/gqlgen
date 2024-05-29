@@ -622,7 +622,7 @@ func removeDuplicateTags(t string) string {
 		key := kv[0]
 		value := strings.Join(kv[1:], ":")
 		processed[key] = true
-		if len(returnTags) > 0 {
+		if returnTags != "" {
 			returnTags = " " + returnTags
 		}
 

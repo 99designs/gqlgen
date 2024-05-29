@@ -244,12 +244,12 @@ func (a apqAdapter) Add(ctx context.Context, key string, value any) {
 }
 
 type PersistedQueryCache interface {
-	Add(ctx context.Context, hash string, query string)
+	Add(ctx context.Context, hash, query string)
 	Get(ctx context.Context, hash string) (string, bool)
 }
 
 // Deprecated: use playground.Handler instead
-func Playground(title string, endpoint string) http.HandlerFunc {
+func Playground(title, endpoint string) http.HandlerFunc {
 	return playground.Handler(title, endpoint)
 }
 

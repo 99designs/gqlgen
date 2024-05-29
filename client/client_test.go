@@ -182,7 +182,7 @@ func TestSetCustomDecodeConfig(t *testing.T) {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Header().Set("Content-Type", "application/json")
-		w.Write([]byte(fmt.Sprintf(`{"data": {"created_at":"%s"}}`, now.Format(time.RFC3339))))
+		fmt.Fprintf(w, `{"data": {"created_at":"%s"}}`, now.Format(time.RFC3339))
 	})
 
 	dc := &mapstructure.DecoderConfig{

@@ -85,14 +85,14 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 `))
 
 // Handler responsible for setting up the playground
-func Handler(title string, endpoint string) http.HandlerFunc {
+func Handler(title, endpoint string) http.HandlerFunc {
 	return HandlerWithHeaders(title, endpoint, nil, nil)
 }
 
 // HandlerWithHeaders sets up the playground.
 // fetcherHeaders are used by the playground's fetcher instance and will not be visible in the UI.
 // uiHeaders are default headers that will show up in the UI headers editor.
-func HandlerWithHeaders(title string, endpoint string, fetcherHeaders map[string]string, uiHeaders map[string]string) http.HandlerFunc {
+func HandlerWithHeaders(title, endpoint string, fetcherHeaders, uiHeaders map[string]string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "text/html; charset=UTF-8")
 		err := page.Execute(w, map[string]any{

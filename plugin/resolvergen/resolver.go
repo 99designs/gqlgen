@@ -269,7 +269,7 @@ func (r *Resolver) Implementation() string {
 	return r.ImplementationStr
 }
 
-func gqlToResolverName(base string, gqlname, filenameTmpl string) string {
+func gqlToResolverName(base, gqlname, filenameTmpl string) string {
 	gqlname = filepath.Base(gqlname)
 	ext := filepath.Ext(gqlname)
 	if filenameTmpl == "" {

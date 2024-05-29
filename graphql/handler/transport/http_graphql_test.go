@@ -97,7 +97,7 @@ func TestGRAPHQL(t *testing.T) {
 	})
 }
 
-func doGraphqlRequest(handler http.Handler, method string, target string, body string) *httptest.ResponseRecorder {
+func doGraphqlRequest(handler http.Handler, method, target, body string) *httptest.ResponseRecorder {
 	r := httptest.NewRequest(method, target, strings.NewReader(body))
 	r.Header.Set("Content-Type", "application/graphql")
 	w := httptest.NewRecorder()

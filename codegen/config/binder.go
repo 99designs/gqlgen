@@ -99,7 +99,7 @@ var (
 func (b *Binder) DefaultUserObject(name string) (types.Type, error) {
 	models := b.cfg.Models[name].Model
 	if len(models) == 0 {
-		return nil, fmt.Errorf(name + " not found in typemap")
+		return nil, fmt.Errorf("%s not found in typemap", name)
 	}
 
 	if models[0] == "map[string]interface{}" {
@@ -125,7 +125,7 @@ func (b *Binder) DefaultUserObject(name string) (types.Type, error) {
 
 func (b *Binder) FindObject(pkgName string, typeName string) (types.Object, error) {
 	if pkgName == "" {
-		return nil, fmt.Errorf("package cannot be nil")
+		return nil, errors.New("package cannot be nil")
 	}
 
 	pkg := b.pkgs.LoadWithTypes(pkgName)

@@ -8,6 +8,12 @@ linters-settings:
       - (io.Writer).Write
       - io.Copy
       - io.WriteString
+  perfsprint:
+    int-conversion: false
+    err-error: false
+    errorf: true
+    sprintf1: false
+    strconcat: false
   revive:
     enable-all-rules: false
     rules:
@@ -45,6 +51,7 @@ linters:
     - ineffassign
     - misspell
     - nakedret
+    - perfsprint
     - prealloc
     - revive
     - staticcheck

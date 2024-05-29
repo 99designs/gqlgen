@@ -2,6 +2,7 @@ package executor
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -134,7 +135,7 @@ func (r aroundOpFunc) ExtensionName() string {
 
 func (r aroundOpFunc) Validate(schema graphql.ExecutableSchema) error {
 	if r == nil {
-		return fmt.Errorf("OperationFunc can not be nil")
+		return errors.New("OperationFunc can not be nil")
 	}
 	return nil
 }
@@ -151,7 +152,7 @@ func (r aroundRespFunc) ExtensionName() string {
 
 func (r aroundRespFunc) Validate(schema graphql.ExecutableSchema) error {
 	if r == nil {
-		return fmt.Errorf("ResponseFunc can not be nil")
+		return errors.New("ResponseFunc can not be nil")
 	}
 	return nil
 }
@@ -168,7 +169,7 @@ func (f aroundFieldFunc) ExtensionName() string {
 
 func (f aroundFieldFunc) Validate(schema graphql.ExecutableSchema) error {
 	if f == nil {
-		return fmt.Errorf("FieldFunc can not be nil")
+		return errors.New("FieldFunc can not be nil")
 	}
 	return nil
 }
@@ -185,7 +186,7 @@ func (f aroundRootFieldFunc) ExtensionName() string {
 
 func (f aroundRootFieldFunc) Validate(schema graphql.ExecutableSchema) error {
 	if f == nil {
-		return fmt.Errorf("RootFieldFunc can not be nil")
+		return errors.New("RootFieldFunc can not be nil")
 	}
 	return nil
 }

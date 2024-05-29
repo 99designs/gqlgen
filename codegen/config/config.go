@@ -2,6 +2,7 @@ package config
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"go/types"
 	"io"
@@ -564,11 +565,11 @@ func (c *Config) check() error {
 			Declaree: "federation",
 		})
 		if c.Federation.ImportPath() != c.Exec.ImportPath() {
-			return fmt.Errorf("federation and exec must be in the same package")
+			return errors.New("federation and exec must be in the same package")
 		}
 	}
 	if c.Federated {
-		return fmt.Errorf("federated has been removed, instead use\nfederation:\n    filename: path/to/federated.go")
+		return errors.New("federated has been removed, instead use\nfederation:\n    filename: path/to/federated.go")
 	}
 
 	for importPath, pkg := range fileList {

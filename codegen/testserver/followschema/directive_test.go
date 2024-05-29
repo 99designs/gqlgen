@@ -2,6 +2,7 @@ package followschema
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
@@ -94,9 +95,9 @@ func TestDirectives(t *testing.T) {
 			Length: func(ctx context.Context, obj any, next graphql.Resolver, min int, max *int, message *string) (any, error) {
 				e := func(msg string) error {
 					if message == nil {
-						return fmt.Errorf(msg)
+						return errors.New(msg)
 					}
-					return fmt.Errorf(*message)
+					return errors.New(*message)
 				}
 				res, err := next(ctx)
 				if err != nil {
@@ -121,28 +122,28 @@ func TestDirectives(t *testing.T) {
 				switch res := res.(type) {
 				case int:
 					if min != nil && res < *min {
-						return nil, fmt.Errorf("too small")
+						return nil, errors.New("too small")
 					}
 					if max != nil && res > *max {
-						return nil, fmt.Errorf("too large")
+						return nil, errors.New("too large")
 					}
 					return next(ctx)
 
 				case int64:
 					if min != nil && int(res) < *min {
-						return nil, fmt.Errorf("too small")
+						return nil, errors.New("too small")
 					}
 					if max != nil && int(res) > *max {
-						return nil, fmt.Errorf("too large")
+						return nil, errors.New("too large")
 					}
 					return next(ctx)
 
 				case *int:
 					if min != nil && *res < *min {
-						return nil, fmt.Errorf("too small")
+						return nil, errors.New("too small")
 					}
 					if max != nil && *res > *max {
-						return nil, fmt.Errorf("too large")
+						return nil, errors.New("too large")
 					}
 					return next(ctx)
 				}

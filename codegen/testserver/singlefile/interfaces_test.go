@@ -2,7 +2,7 @@ package singlefile
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"reflect"
 	"testing"
 
@@ -163,7 +163,7 @@ func TestInterfaces(t *testing.T) {
 		resolvers.QueryResolver.NotAnInterface = func(ctx context.Context) (byInterface BackedByInterface, err error) {
 			return &BackedByInterfaceImpl{
 				Value: "A",
-				Error: fmt.Errorf("boom"),
+				Error: errors.New("boom"),
 			}, nil
 		}
 

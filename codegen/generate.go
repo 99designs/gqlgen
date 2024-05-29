@@ -20,7 +20,7 @@ var codegenTemplates embed.FS
 
 func GenerateCode(data *Data) error {
 	if !data.Config.Exec.IsDefined() {
-		return fmt.Errorf("missing exec config")
+		return errors.New("missing exec config")
 	}
 
 	switch data.Config.Exec.Layout {

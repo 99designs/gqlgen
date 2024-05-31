@@ -111,7 +111,7 @@ var boundaryRegex = regexp.MustCompile(`multipart/form-data; ?boundary=.*`)
 func (p *Client) newRequest(query string, options ...Option) (*http.Request, error) {
 	bd := &Request{
 		Query: query,
-		HTTP:  httptest.NewRequest(http.MethodPost, "/", nil),
+		HTTP:  httptest.NewRequest(http.MethodPost, "/", http.NoBody),
 	}
 	bd.HTTP.Header.Set("Content-Type", "application/json")
 
@@ -128,7 +128,7 @@ func (p *Client) newRequest(query string, options ...Option) (*http.Request, err
 	switch {
 	case boundaryRegex.MatchString(contentType):
 		break
-	case "application/json" == contentType:
+	case contentType == "application/json":
 		requestBody, err := json.Marshal(bd)
 		if err != nil {
 			return nil, fmt.Errorf("encode: %w", err)
@@ -146,7 +146,7 @@ func (p *Client) SetCustomDecodeConfig(dc *mapstructure.DecoderConfig) {
 	p.dc = dc
 }
 
-func unpack(data any, into any, customDc *mapstructure.DecoderConfig) error {
+func unpack(data, into any, customDc *mapstructure.DecoderConfig) error {
 	dc := &mapstructure.DecoderConfig{
 		TagName:     "json",
 		ErrorUnused: true,

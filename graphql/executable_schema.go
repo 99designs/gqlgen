@@ -116,7 +116,7 @@ func instanceOf(val string, satisfies []string) bool {
 	return false
 }
 
-func getOrCreateAndAppendField(c *[]CollectedField, name string, alias string, objectDefinition *ast.Definition, creator func() CollectedField) *CollectedField {
+func getOrCreateAndAppendField(c *[]CollectedField, name, alias string, objectDefinition *ast.Definition, creator func() CollectedField) *CollectedField {
 	for i, cf := range *c {
 		if cf.Name == name && cf.Alias == alias {
 			if cf.ObjectDefinition == objectDefinition {

@@ -62,7 +62,7 @@ type Chatroom struct {
 
 type mutationResolver struct{ *resolver }
 
-func (r *mutationResolver) Post(ctx context.Context, text string, username string, roomName string) (*Message, error) {
+func (r *mutationResolver) Post(ctx context.Context, text, username, roomName string) (*Message, error) {
 	room := r.getRoom(roomName)
 
 	message := &Message{

@@ -36,7 +36,7 @@ func Path(url string) Option {
 }
 
 // AddHeader adds a header to the outgoing request. This is useful for setting expected Authentication headers for example.
-func AddHeader(key string, value string) Option {
+func AddHeader(key, value string) Option {
 	return func(bd *Request) {
 		bd.HTTP.Header.Add(key, value)
 	}

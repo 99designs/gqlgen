@@ -25,7 +25,7 @@ func (b Banned) MarshalGQL(w io.Writer) {
 func (b *Banned) UnmarshalGQL(v any) error {
 	switch v := v.(type) {
 	case string:
-		*b = strings.ToLower(v) == "true"
+		*b = Banned(strings.EqualFold(v, "true"))
 		return nil
 	case bool:
 		*b = Banned(v)

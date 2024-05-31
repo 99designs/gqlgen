@@ -98,7 +98,7 @@ func WithFieldContext(ctx context.Context, rc *FieldContext) context.Context {
 	return context.WithValue(ctx, resolverCtx, rc)
 }
 
-func equalPath(a ast.Path, b ast.Path) bool {
+func equalPath(a, b ast.Path) bool {
 	if len(a) != len(b) {
 		return false
 	}

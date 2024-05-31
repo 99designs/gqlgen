@@ -644,7 +644,7 @@ func (tm TypeMap) ReferencedPackages() []string {
 	return pkgs
 }
 
-func (tm TypeMap) Add(name string, goType string) {
+func (tm TypeMap) Add(name, goType string) {
 	modelCfg := tm[name]
 	modelCfg.Model = append(modelCfg.Model, goType)
 	tm[name] = modelCfg

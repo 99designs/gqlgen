@@ -16,7 +16,7 @@ import (
 
 func testResourceIntegrity(t *testing.T, handler func(title, endpoint string) http.HandlerFunc) {
 	recorder := httptest.NewRecorder()
-	request := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", nil)
+	request := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", http.NoBody)
 	handler("example.org API", "/query").ServeHTTP(recorder, request)
 
 	res := recorder.Result()
@@ -40,7 +40,7 @@ func testResourceIntegrity(t *testing.T, handler func(title, endpoint string) ht
 	assertNodesIntegrity(t, baseUrl, doc, "link", "href", "integrity")
 }
 
-func assertNodesIntegrity(t *testing.T, baseUrl string, doc *goquery.Document, selector string, urlAttrKey, integrityAttrKey string) {
+func assertNodesIntegrity(t *testing.T, baseUrl string, doc *goquery.Document, selector, urlAttrKey, integrityAttrKey string) {
 	selection := doc.Find(selector)
 	for _, node := range selection.Nodes {
 		var url string
@@ -53,11 +53,11 @@ func assertNodesIntegrity(t *testing.T, baseUrl string, doc *goquery.Document, s
 			}
 		}
 
-		if len(integrity) != 0 {
+		if integrity != "" {
 			assert.NotEmpty(t, url)
 		}
 
-		if len(url) != 0 && len(integrity) != 0 {
+		if url != "" && integrity != "" {
 			resp, err := http.Get(baseUrl + url)
 			require.NoError(t, err)
 			hasher := sha256.New()

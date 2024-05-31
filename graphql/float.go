@@ -12,7 +12,7 @@ import (
 
 func MarshalFloat(f float64) Marshaler {
 	return WriterFunc(func(w io.Writer) {
-		io.WriteString(w, fmt.Sprintf("%g", f))
+		fmt.Fprintf(w, "%g", f)
 	})
 }
 
@@ -38,7 +38,7 @@ func MarshalFloatContext(f float64) ContextMarshaler {
 		if math.IsInf(f, 0) || math.IsNaN(f) {
 			return errors.New("cannot marshal infinite no NaN float values")
 		}
-		io.WriteString(w, fmt.Sprintf("%g", f))
+		fmt.Fprintf(w, "%g", f)
 		return nil
 	})
 }

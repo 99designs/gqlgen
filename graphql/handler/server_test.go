@@ -186,7 +186,7 @@ func TestRecover(t *testing.T) {
 }
 
 func get(handler http.Handler, target string) *httptest.ResponseRecorder {
-	r := httptest.NewRequest("GET", target, nil)
+	r := httptest.NewRequest("GET", target, http.NoBody)
 	w := httptest.NewRecorder()
 
 	handler.ServeHTTP(w, r)
@@ -194,7 +194,7 @@ func get(handler http.Handler, target string) *httptest.ResponseRecorder {
 }
 
 func post(handler http.Handler, target, contentType string) *httptest.ResponseRecorder {
-	r := httptest.NewRequest("POST", target, nil)
+	r := httptest.NewRequest("POST", target, http.NoBody)
 	r.Header.Set("Content-Type", contentType)
 	w := httptest.NewRecorder()
 

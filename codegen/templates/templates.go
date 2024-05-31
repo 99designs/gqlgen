@@ -185,7 +185,7 @@ func parseTemplates(cfg Options, t *template.Template) (*template.Template, erro
 	return t, nil
 }
 
-func center(width int, pad string, s string) string {
+func center(width int, pad, s string) string {
 	if len(s)+2 > width {
 		return s
 	}

@@ -115,12 +115,14 @@
 						}
 						ctx := graphql.WithFieldContext(ctx, fc)
 						f := func(i int) {
+							{{- if not $.Config.OmitPanicHandler }}
 							defer func() {
 								if r := recover(); r != nil {
 									ec.Error(ctx, ec.Recover(ctx, r))
 									ret = nil
 								}
 							}()
+							{{- end }}
 							if !isLen1 {
 								defer wg.Done()
 							}

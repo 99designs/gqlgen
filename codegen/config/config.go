@@ -41,6 +41,7 @@ type Config struct {
 	OmitGQLGenVersionInFileNotice bool                       `yaml:"omit_gqlgen_version_in_file_notice,omitempty"`
 	OmitRootModels                bool                       `yaml:"omit_root_models,omitempty"`
 	OmitResolverFields            bool                       `yaml:"omit_resolver_fields,omitempty"`
+	OmitPanicHandler              bool                       `yaml:"omit_panic_handler,omitempty"`
 	StructFieldsAlwaysPointers    bool                       `yaml:"struct_fields_always_pointers,omitempty"`
 	ReturnPointersInUmarshalInput bool                       `yaml:"return_pointers_in_unmarshalinput,omitempty"`
 	ResolversAlwaysReturnPointers bool                       `yaml:"resolvers_always_return_pointers,omitempty"`

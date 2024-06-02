@@ -170,13 +170,22 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 							return err
 						}
 
+						{{ if and (index $options "explicit_requires") $entity.Requires }}
+							err = ec.PopulateMany{{$entity.Def.Name}}Requires(ctx, {{- if (not $usePointers) -}}&{{- end -}}entities, reps)
+							if err != nil {
+								return fmt.Errorf(`populating requires for Entity "{{$entity.Def.Name}}": %w`, err)
+							}
+						{{- end }}
+
 						for i, entity := range entities {
+							{{ if not (and (index $options "explicit_requires") $entity.Requires) }}
 							{{- range $entity.Requires }}
 									entity.{{.Field.JoinGo `.`}}, err = ec.{{.Type.UnmarshalFunc}}(ctx, reps[i]["{{.Field.Join `"].(map[string]interface{})["`}}"])
 									if err != nil {
 										return err
 									}
 							{{- end}}
+							{{- end }}
 							list[idx[i]] = entity
 						}
 						return nil

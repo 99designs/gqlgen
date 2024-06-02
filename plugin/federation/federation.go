@@ -136,7 +136,7 @@ func (f *federation) InjectSourceEarly() *ast.Source {
 	directive @interfaceObject on OBJECT
 	directive @link(import: [String!], url: String!) repeatable on SCHEMA
 	directive @override(from: String!, label: String) on FIELD_DEFINITION
-	directive @policy(policies: [[federation__Policy!]!]!) on 
+	directive @policy(policies: [[federation__Policy!]!]!) on
 	  | FIELD_DEFINITION
 	  | OBJECT
 	  | INTERFACE
@@ -144,7 +144,7 @@ func (f *federation) InjectSourceEarly() *ast.Source {
 	  | ENUM
 	directive @provides(fields: FieldSet!) on FIELD_DEFINITION
 	directive @requires(fields: FieldSet!) on FIELD_DEFINITION
-	directive @requiresScopes(scopes: [[federation__Scope!]!]!) on 
+	directive @requiresScopes(scopes: [[federation__Scope!]!]!) on
 	  | FIELD_DEFINITION
 	  | OBJECT
 	  | INTERFACE
@@ -366,8 +366,12 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 
 		for name, entity := range requiresEntities {
 			populator := Populator{
-				FuncName: fmt.Sprintf("Populate%sRequires", name),
-				Entity:   entity,
+				Entity: entity,
+			}
+			if entity.Multi {
+				populator.FuncName = fmt.Sprintf("PopulateMany%sRequires", name)
+			} else {
+				populator.FuncName = fmt.Sprintf("Populate%sRequires", name)
 			}
 
 			populator.Comment = strings.TrimSpace(strings.TrimLeft(rewriter.GetMethodComment("executionContext", populator.FuncName), `\`))

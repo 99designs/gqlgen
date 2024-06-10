@@ -102,21 +102,21 @@ func goModuleRoot(dir string) (string, bool) {
 			// go.mod is not found in the tree, so the same sentinel value fits all the directories in a tree
 			goModuleRootCache[d] = result
 		} else {
-			if relPath, err := filepath.Rel(result.goModPath, d); err != nil {
+			relPath, err := filepath.Rel(result.goModPath, d)
+			if err != nil {
 				panic(err)
-			} else {
-				path := result.moduleName
-				relPath := filepath.ToSlash(relPath)
-				if !strings.HasSuffix(relPath, "/") {
-					path += "/"
-				}
-				path += relPath
+			}
+			path := result.moduleName
+			relPath = filepath.ToSlash(relPath)
+			if !strings.HasSuffix(relPath, "/") {
+				path += "/"
+			}
+			path += relPath
 
-				goModuleRootCache[d] = goModuleSearchResult{
-					path:       path,
-					goModPath:  result.goModPath,
-					moduleName: result.moduleName,
-				}
+			goModuleRootCache[d] = goModuleSearchResult{
+				path:       path,
+				goModPath:  result.goModPath,
+				moduleName: result.moduleName,
 			}
 		}
 	}

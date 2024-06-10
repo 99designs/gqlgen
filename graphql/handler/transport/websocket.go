@@ -193,7 +193,7 @@ func (c *wsConnection) init() bool {
 			}
 		}
 
-		var initAckPayload *InitPayload = nil
+		var initAckPayload *InitPayload
 		if c.InitFunc != nil {
 			var ctx context.Context
 			ctx, initAckPayload, err = c.InitFunc(c.ctx, c.initPayload)

@@ -187,10 +187,7 @@ var generateCmd = &cli.Command{
 			}
 		}
 
-		if err = api.Generate(cfg); err != nil {
-			return err
-		}
-		return nil
+		return api.Generate(cfg)
 	},
 }
 

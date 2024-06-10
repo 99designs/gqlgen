@@ -292,18 +292,17 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 			getter += "\treturn interfaceSlice\n"
 			getter += "}"
 			return getter
-		} else {
-			getter := fmt.Sprintf("func (this %s) Get%s() %s { return ", templates.ToGo(model.Name), field.GoName, goType)
-
-			if interfaceFieldTypeIsPointer && !structFieldTypeIsPointer {
-				getter += "&"
-			} else if !interfaceFieldTypeIsPointer && structFieldTypeIsPointer {
-				getter += "*"
-			}
-
-			getter += fmt.Sprintf("this.%s }", field.GoName)
-			return getter
 		}
+		getter := fmt.Sprintf("func (this %s) Get%s() %s { return ", templates.ToGo(model.Name), field.GoName, goType)
+
+		if interfaceFieldTypeIsPointer && !structFieldTypeIsPointer {
+			getter += "&"
+		} else if !interfaceFieldTypeIsPointer && structFieldTypeIsPointer {
+			getter += "*"
+		}
+
+		getter += fmt.Sprintf("this.%s }", field.GoName)
+		return getter
 	}
 	funcMap := template.FuncMap{
 		"getInterfaceByName": getInterfaceByName,

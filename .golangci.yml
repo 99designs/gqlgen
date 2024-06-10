@@ -32,14 +32,12 @@ linters-settings:
       - name: blank-imports
       - name: context-as-argument
       - name: context-keys-type
-      - name: dot-imports
       - name: error-return
       - name: error-naming
       - name: exported
         disabled: true
       - name: if-return
       - name: increment-decrement
-      - name: var-naming
       - name: var-declaration
       - name: package-comments
         disabled: true
@@ -49,7 +47,6 @@ linters-settings:
       - name: unexported-return
       - name: indent-error-flow
       - name: errorf
-      - name: empty-block
       - name: superfluous-else
       - name: unused-parameter
         disabled: true

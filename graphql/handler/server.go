@@ -67,6 +67,10 @@ func (s *Server) SetQueryCache(cache graphql.Cache) {
 	s.exec.SetQueryCache(cache)
 }
 
+func (s *Server) SetParserTokenLimit(limit int) {
+	s.exec.SetParserTokenLimit(limit)
+}
+
 func (s *Server) Use(extension graphql.HandlerExtension) {
 	s.exec.Use(extension)
 }

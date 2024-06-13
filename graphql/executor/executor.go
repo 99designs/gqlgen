@@ -12,6 +12,8 @@ import (
 	"github.com/99designs/gqlgen/graphql/errcode"
 )
 
+const parserTokenNoLimit = 0
+
 // Executor executes graphql queries against a schema.
 type Executor struct {
 	es         graphql.ExecutableSchema
@@ -36,7 +38,7 @@ func New(es graphql.ExecutableSchema) *Executor {
 		recoverFunc:      graphql.DefaultRecover,
 		queryCache:       graphql.NoCache{},
 		ext:              processExtensions(nil),
-		parserTokenLimit: 0, // 0 means unlimited
+		parserTokenLimit: parserTokenNoLimit,
 	}
 	return e
 }

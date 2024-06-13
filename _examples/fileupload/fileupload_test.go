@@ -23,14 +23,17 @@ func TestFileUpload(t *testing.T) {
 	defer srv.Close()
 	gql := gqlclient.New(srv.Config.Handler, gqlclient.Path("/graphql"))
 
-	aTxtFile, _ := os.CreateTemp(os.TempDir(), "a.txt")
-	defer os.Remove(aTxtFile.Name())
+	aTxtFile, err := os.CreateTemp(t.TempDir(), "a.txt")
+	require.NoError(t, err)
+	defer aTxtFile.Close()
 	aTxtFile.WriteString(`test`)
 
-	a1TxtFile, _ := os.CreateTemp(os.TempDir(), "a.txt")
-	b1TxtFile, _ := os.CreateTemp(os.TempDir(), "b.txt")
-	defer os.Remove(a1TxtFile.Name())
-	defer os.Remove(b1TxtFile.Name())
+	a1TxtFile, err := os.CreateTemp(t.TempDir(), "a.txt")
+	require.NoError(t, err)
+	defer a1TxtFile.Close()
+	b1TxtFile, err := os.CreateTemp(t.TempDir(), "b.txt")
+	require.NoError(t, err)
+	defer b1TxtFile.Close()
 	a1TxtFile.WriteString(`test1`)
 	b1TxtFile.WriteString(`test2`)
 

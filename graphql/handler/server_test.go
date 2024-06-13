@@ -141,6 +141,24 @@ func TestServer(t *testing.T) {
 			require.Equal(t, "Bar", cacheDoc.(*ast.QueryDocument).Operations[0].Name)
 		})
 	})
+
+	t.Run("parser token limit", func(t *testing.T) {
+		qry := `query Foo {   __typename @a }`
+
+		t.Run("parser does not reaches token limit", func(t *testing.T) {
+			srv.SetParserTokenLimit(0)
+			resp := get(srv, "/foo?query="+url.QueryEscape(qry))
+			assert.Equal(t, http.StatusUnprocessableEntity, resp.Code)
+			assert.Equal(t, `{"errors":[{"message":"Unknown directive \"@a\".","locations":[{"line":1,"column":27}],"extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`, resp.Body.String())
+		})
+
+		t.Run("parser reaches token limit", func(t *testing.T) {
+			srv.SetParserTokenLimit(2)
+			resp := get(srv, "/foo?query="+url.QueryEscape(qry))
+			assert.Equal(t, http.StatusUnprocessableEntity, resp.Code)
+			assert.Equal(t, `{"errors":[{"message":"exceeded token limit of 2.","extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`, resp.Body.String())
+		})
+	})
 }
 
 func TestErrorServer(t *testing.T) {

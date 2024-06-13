@@ -11,17 +11,21 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
 )
 
 func TestWithFiles(t *testing.T) {
-	tempFile1, _ := os.CreateTemp(os.TempDir(), "tempFile1")
-	tempFile2, _ := os.CreateTemp(os.TempDir(), "tempFile2")
-	tempFile3, _ := os.CreateTemp(os.TempDir(), "tempFile3")
-	defer os.Remove(tempFile1.Name())
-	defer os.Remove(tempFile2.Name())
-	defer os.Remove(tempFile3.Name())
+	tempFile1, err := os.CreateTemp(t.TempDir(), "tempFile1")
+	require.NoError(t, err)
+	tempFile2, err := os.CreateTemp(t.TempDir(), "tempFile2")
+	require.NoError(t, err)
+	tempFile3, err := os.CreateTemp(t.TempDir(), "tempFile3")
+	require.NoError(t, err)
+	defer tempFile1.Close()
+	defer tempFile2.Close()
+	defer tempFile3.Close()
 	tempFile1.WriteString(`The quick brown fox jumps over the lazy dog`)
 	tempFile2.WriteString(`hello world`)
 	tempFile3.WriteString(`La-Li-Lu-Le-Lo`)

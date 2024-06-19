@@ -45,7 +45,7 @@ jobs:
         run: |
           go install gotest.tools/gotestsum@latest
           export GOBIN="$(go env GOPATH)"
-          "${GOBIN}/bin/gotestsum" --junitfile report.xml --raw-command cat gotest.json
+          "${GOBIN}/bin/gotestsum" --raw-command cat gotest.json
       - name: Example tests
         uses: nick-fields/retry@v3
         with:
@@ -67,14 +67,4 @@ jobs:
         run: |
           go install gotest.tools/gotestsum@latest
           export GOBIN="$(go env GOPATH)"
-          "${GOBIN}/bin/gotestsum" --junitfile go_examples_report.xml --raw-command cat go_examples_test.json
-      - name: Test summary
-        id: unit-tests-summary
-        if: always()
-        uses: test-summary/action@v2
-        with:
-          show: "fail, skip"
-          # output: $GITHUB_STEP_SUMMARY
-          paths: |
-            report.xml
-            go_examples_report.xml
+          "${GOBIN}/bin/gotestsum" --raw-command cat go_examples_test.json

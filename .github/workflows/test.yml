@@ -23,20 +23,58 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go }}
+      # Install gotestfmt on the VM running the action.
       - name: Core tests
         uses: nick-fields/retry@v3
         with:
+          shell: bash
           max_attempts: 3
           timeout_minutes: 20
           command: |
+            set -euo pipefail
             go mod download
-            go test -race ./...
+            go test -json -race ./... -trimpath 2>&1 > gotest.json
+      - name: Annotate tests
+        if: ${{ failure() }}
+        uses: guyarb/golang-test-annotations@v0.8.0
+        with:
+          test-results: gotest.json
+      - name: Convert test output to junit
+        shell: bash
+        if: always()
+        run: |
+          go install gotest.tools/gotestsum@latest
+          export GOBIN="$(go env GOPATH)"
+          "${GOBIN}/bin/gotestsum" --junitfile report.xml --raw-command cat gotest.json
       - name: Example tests
         uses: nick-fields/retry@v3
         with:
+          shell: bash
           max_attempts: 3
           timeout_minutes: 20
           command: |
             cd _examples
             go mod download
-            go test -race ./...
+            go test -json -race ./... -trimpath 2>&1 > ../go_examples_test.json
+            # gotestsum \
+            #  --junitfile .results/results.xml \
+            #  --jsonfile .results/results.json \
+            #  --format testname \
+            #  -- -coverprofile=.results/cover.out ./...
+      - name: Convert example test output to junit
+        shell: bash
+        if: always()
+        run: |
+          go install gotest.tools/gotestsum@latest
+          export GOBIN="$(go env GOPATH)"
+          "${GOBIN}/bin/gotestsum" --junitfile go_examples_report.xml --raw-command cat go_examples_test.json
+      - name: Test summary
+        id: unit-tests-summary
+        if: always()
+        uses: test-summary/action@v2
+        with:
+          show: "fail, skip"
+          # output: $GITHUB_STEP_SUMMARY
+          paths: |
+            report.xml
+            go_examples_report.xml

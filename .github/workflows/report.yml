@@ -1,8 +1,9 @@
 name: test report
 on:
   workflow_run:
-    workflows: [build]
-    types: [completed]
+    workflows: ["Test"]
+    types:
+      - completed
 
 permissions:
   checks: write
@@ -18,7 +19,7 @@ jobs:
           workflow: ${{ github.event.workflow.id }}
           run_id: ${{ github.event.workflow_run.id }}
       - name: Publish Test Report
-        uses: mikepenz/action-junit-report@v3
+        uses: mikepenz/action-junit-report@v4.3.0
         with:
           commit: ${{github.event.workflow_run.head_sha}}
           report_paths: '**/*.xml'

@@ -40,7 +40,7 @@ jobs:
         run: |
           set -euo pipefail
           go mod download
-          gotestsum --junitfile report.xml --format-icons=hivis --format=github-actions -- -race ./... -trimpath
+          gotestsum --junitfile report.xml --format-icons=hivis --format=pkgname-and-test-fails -- -race ./... -trimpath
       - name: Example tests
         shell: bash
         run: |

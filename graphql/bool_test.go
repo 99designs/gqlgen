@@ -17,7 +17,3 @@ func doBooleanMarshal(b bool) string {
 	MarshalBoolean(b).MarshalGQL(&buf)
 	return buf.String()
 }
-
-func TestFoo(t *testing.T) {
-	t.FailNow()
-}

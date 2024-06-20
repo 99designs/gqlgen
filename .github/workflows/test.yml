@@ -46,6 +46,13 @@ jobs:
           cd _examples
           go mod download
           gotestsum --junitfile ../go_examples_report.xml --format-icons=hivis --format=pkgname-and-test-fails -- -race ./... -trimpath
+      - name: Upload Test Report
+        uses: actions/upload-artifact@v4.3.3
+        if: always() # always run even if the previous step fails
+        with:
+          name: test-junit-${{ matrix.os }}-${{ matrix.go }}
+          path: '*.xml'
+          retention-days: 1
       - name: action-junit-report
         shell: bash
         if: success() || failure() # always run even if the previous step fails
@@ -63,7 +70,7 @@ jobs:
         if: success() || failure() # always run even if the previous step fails
         run: |
           echo "### robherley/go-test-action! :rocket:" >> $GITHUB_STEP_SUMMARY
-#      - name: Annotate tests
+#      - name: Annotate tests does not work on pull-requests for security
 #        if: success() || failure() # always run even if the previous step fails
 #        uses: guyarb/golang-test-annotations@v0.8.0
 #        with:
@@ -76,6 +83,9 @@ jobs:
           # Will always exit(0) on successful test file parse.
           # Optional. No default
           fromJSONFile: go_test.json
+          omit: |
+            untested
+            successful
       - name: test-summary/action announcement
         shell: bash
         if: success() || failure() # always run even if the previous step fails
@@ -85,7 +95,7 @@ jobs:
         uses: test-summary/action@v2.3
         if: success() || failure() # always run even if the previous step fails
         with:
+          show: "fail, skip"
           paths: |
             report.xml
             go_examples_report.xml
-          show: "fail, skip"

@@ -1,10 +1,10 @@
 {{- range $input := .Inputs }}
 	{{- if not .HasUnmarshal }}
 	{{- $it := "it" }}
-	{{- if .PointersInUmarshalInput }}
+	{{- if .PointersInUnmarshalInput }}
 	  {{- $it = "&it" }}
 	{{- end }}
-	func (ec *executionContext) unmarshalInput{{ .Name }}(ctx context.Context, obj interface{}) ({{ if .PointersInUmarshalInput }}*{{ end }}{{.Type | ref}}, error) {
+	func (ec *executionContext) unmarshalInput{{ .Name }}(ctx context.Context, obj interface{}) ({{ if .PointersInUnmarshalInput }}*{{ end }}{{.Type | ref}}, error) {
 		{{- if $input.IsMap }}
 			it := make(map[string]interface{}, len(obj.(map[string]interface{})))
 		{{- else }}

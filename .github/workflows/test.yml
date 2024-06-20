@@ -45,7 +45,12 @@ jobs:
         run: |
           cd _examples
           go mod download
-          gotestsum --junitfile ../go_examples_report.xml --format-icons=hivis --format=github-actions -- -race ./... -trimpath
+          gotestsum --junitfile ../go_examples_report.xml --format-icons=hivis --format=pkgname-and-test-fails -- -race ./... -trimpath
+      - name: action-junit-report
+        shell: bash
+        if: success() || failure() # always run even if the previous step fails
+        run: |
+          echo "### mikepenz/action-junit-report! :rocket:" >> $GITHUB_STEP_SUMMARY
       - name: Publish Test Report
         uses: mikepenz/action-junit-report@v4.3.0
         if: success() || failure() # always run even if the previous step fails
@@ -53,11 +58,16 @@ jobs:
           report_paths: |
             report.xml
             go_examples_report.xml
-      - name: Annotate tests
+      - name: robherley/go-test-action announcement
+        shell: bash
         if: success() || failure() # always run even if the previous step fails
-        uses: guyarb/golang-test-annotations@v0.8.0
-        with:
-          test-results: go_test.json
+        run: |
+          echo "### robherley/go-test-action! :rocket:" >> $GITHUB_STEP_SUMMARY
+#      - name: Annotate tests
+#        if: success() || failure() # always run even if the previous step fails
+#        uses: guyarb/golang-test-annotations@v0.8.0
+#        with:
+#          test-results: go_test.json
       - name: Publish go-test-action Report
         if: success() || failure() # always run even if the previous step fails
         uses: robherley/go-test-action@v0.4.1
@@ -66,6 +76,11 @@ jobs:
           # Will always exit(0) on successful test file parse.
           # Optional. No default
           fromJSONFile: go_test.json
+      - name: test-summary/action announcement
+        shell: bash
+        if: success() || failure() # always run even if the previous step fails
+        run: |
+          echo "### test-summary/action! :rocket:" >> $GITHUB_STEP_SUMMARY
       - name: Publish Test Summary Report
         uses: test-summary/action@v2.3
         if: success() || failure() # always run even if the previous step fails

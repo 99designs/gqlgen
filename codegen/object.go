@@ -26,15 +26,15 @@ const (
 type Object struct {
 	*ast.Definition
 
-	Type                    types.Type
-	ResolverInterface       types.Type
-	Root                    bool
-	Fields                  []*Field
-	Implements              []*ast.Definition
-	DisableConcurrency      bool
-	Stream                  bool
-	Directives              []*Directive
-	PointersInUmarshalInput bool
+	Type                     types.Type
+	ResolverInterface        types.Type
+	Root                     bool
+	Fields                   []*Field
+	Implements               []*ast.Definition
+	DisableConcurrency       bool
+	Stream                   bool
+	Directives               []*Directive
+	PointersInUnmarshalInput bool
 }
 
 func (b *builder) buildObject(typ *ast.Definition) (*Object, error) {
@@ -44,12 +44,12 @@ func (b *builder) buildObject(typ *ast.Definition) (*Object, error) {
 	}
 	caser := cases.Title(language.English, cases.NoLower)
 	obj := &Object{
-		Definition:              typ,
-		Root:                    b.Config.IsRoot(typ),
-		DisableConcurrency:      typ == b.Schema.Mutation,
-		Stream:                  typ == b.Schema.Subscription,
-		Directives:              dirs,
-		PointersInUmarshalInput: b.Config.ReturnPointersInUmarshalInput,
+		Definition:               typ,
+		Root:                     b.Config.IsRoot(typ),
+		DisableConcurrency:       typ == b.Schema.Mutation,
+		Stream:                   typ == b.Schema.Subscription,
+		Directives:               dirs,
+		PointersInUnmarshalInput: b.Config.ReturnPointersInUnmarshalInput,
 		ResolverInterface: types.NewNamed(
 			types.NewTypeName(0, b.Config.Exec.Pkg(), caser.String(typ.Name)+"Resolver", nil),
 			nil,

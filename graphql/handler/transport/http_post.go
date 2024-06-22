@@ -27,6 +27,10 @@ func (h POST) Supports(r *http.Request) bool {
 		return false
 	}
 
+	if strings.Contains(r.Header.Get("Accept"), "text/event-stream") {
+		return false
+	}
+
 	mediaType, _, err := mime.ParseMediaType(r.Header.Get("Content-Type"))
 	if err != nil {
 		return false

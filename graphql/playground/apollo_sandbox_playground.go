@@ -2,9 +2,10 @@ package playground
 
 import (
 	"fmt"
-	"github.com/goccy/go-json"
 	"html/template"
 	"net/http"
+
+	"github.com/goccy/go-json"
 )
 
 // NOTE: New version available at https://embeddable-sandbox.cdn.apollographql.com/ -->

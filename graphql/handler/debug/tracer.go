@@ -3,11 +3,11 @@ package debug
 import (
 	"context"
 	"fmt"
-	"github.com/goccy/go-json"
 	"io"
 	"os"
 	"strings"
 
+	"github.com/goccy/go-json"
 	. "github.com/logrusorgru/aurora/v3"
 	"github.com/mattn/go-colorable"
 	"github.com/mattn/go-isatty"

@@ -1,8 +1,8 @@
 package transport
 
 import (
-	"encoding/json"
 	"fmt"
+	"github.com/goccy/go-json"
 	"io"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"

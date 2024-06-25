@@ -1,9 +1,9 @@
 package graphql
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/goccy/go-json"
 	"io"
 	"strconv"
 )

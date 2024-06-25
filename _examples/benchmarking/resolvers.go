@@ -6,9 +6,10 @@ package benchmarking
 import (
 	"context"
 	"errors"
+	"strings"
+
 	"github.com/99designs/gqlgen/_examples/benchmarking/generated"
 	"github.com/99designs/gqlgen/_examples/benchmarking/models"
-	"strings"
 )
 
 type Resolver struct {

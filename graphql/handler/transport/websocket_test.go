@@ -3,12 +3,13 @@ package transport_test
 import (
 	"context"
 	"errors"
-	"github.com/goccy/go-json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/goccy/go-json"
 
 	"github.com/gorilla/websocket"
 	"github.com/stretchr/testify/assert"

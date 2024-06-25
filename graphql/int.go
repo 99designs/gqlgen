@@ -2,9 +2,10 @@ package graphql
 
 import (
 	"fmt"
-	"github.com/goccy/go-json"
 	"io"
 	"strconv"
+
+	"github.com/goccy/go-json"
 )
 
 func MarshalInt(i int) Marshaler {

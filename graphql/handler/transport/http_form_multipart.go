@@ -1,11 +1,12 @@
 package transport
 
 import (
-	"github.com/goccy/go-json"
 	"io"
 	"mime"
 	"net/http"
 	"os"
+
+	"github.com/goccy/go-json"
 
 	"github.com/99designs/gqlgen/graphql"
 )

@@ -2,9 +2,10 @@ package benchmarking
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/99designs/gqlgen/_examples/benchmarking/models"
 	gqlclient "github.com/99designs/gqlgen/client"
-	"testing"
 
 	"github.com/99designs/gqlgen/_examples/benchmarking/generated"
 	"github.com/99designs/gqlgen/graphql/handler"

@@ -5,12 +5,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/goccy/go-json"
 	"log"
 	"net"
 	"net/http"
 	"sync"
 	"time"
+
+	"github.com/goccy/go-json"
 
 	"github.com/gorilla/websocket"
 	"github.com/vektah/gqlparser/v2/gqlerror"

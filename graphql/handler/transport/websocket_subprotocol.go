@@ -2,6 +2,7 @@ package transport
 
 import (
 	"errors"
+
 	"github.com/goccy/go-json"
 
 	"github.com/gorilla/websocket"

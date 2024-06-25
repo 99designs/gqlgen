@@ -2,12 +2,13 @@ package transport
 
 import (
 	"fmt"
-	"github.com/goccy/go-json"
 	"io"
 	"log"
 	"mime"
 	"net/http"
 	"strings"
+
+	"github.com/goccy/go-json"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 

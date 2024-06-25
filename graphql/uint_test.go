@@ -1,9 +1,10 @@
 package graphql
 
 import (
-	"github.com/goccy/go-json"
 	"math"
 	"testing"
+
+	"github.com/goccy/go-json"
 
 	"github.com/stretchr/testify/assert"
 )

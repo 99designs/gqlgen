@@ -2,8 +2,9 @@ package graphql
 
 import (
 	"fmt"
-	"github.com/goccy/go-json"
 	"io"
+
+	"github.com/goccy/go-json"
 )
 
 func MarshalMap(val map[string]interface{}) Marshaler {

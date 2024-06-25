@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/goccy/go-json"
 	"io"
 	"math"
 	"strconv"
+
+	"github.com/goccy/go-json"
 )
 
 func MarshalFloat(f float64) Marshaler {

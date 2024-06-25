@@ -2,6 +2,7 @@ package graphql
 
 import (
 	"encoding/json"
+
 	fastjson "github.com/goccy/go-json"
 )
 

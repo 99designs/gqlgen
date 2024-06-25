@@ -1,14 +1,6 @@
-### starwars example
+### Benchmarking server
 
-This server demonstrates a few advanced features of graphql:
- - connections
- - unions
- - interfaces
- - enums
+This is used to allow you to return and receive json data with a specified size.
 
-to run this server
-```bash
-go run ./server/server.go
-```
-
-and open http://localhost:8080 in your browser
+It is meant to be used to test the performance of gqlgen's generated code when having to deal with
+requests and responses of various sizes.

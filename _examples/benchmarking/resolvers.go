@@ -41,10 +41,10 @@ func (m *mutationResolver) TestMutationPerformance(_ context.Context, in models.
 	return &models.OutputType{Value: m.output}, nil
 }
 
-func GenRandomString(size int) string {
+func generateStringOfSize(size int) string {
 	return strings.Repeat("a", size)
 }
 
 func NewResolver(outputSize int, expectedInput string) *Resolver {
-	return &Resolver{output: GenRandomString(outputSize), input: expectedInput}
+	return &Resolver{output: generateStringOfSize(outputSize), input: expectedInput}
 }

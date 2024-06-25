@@ -22,7 +22,7 @@ func BenchmarkQueriesOfVariableSizes(bmark *testing.B) {
 		{inputSize: 100000000, outputSize: 100000000},
 	} {
 		bmark.Run(fmt.Sprintf("input size: %d output size %d", testCase.inputSize, testCase.outputSize), func(b *testing.B) {
-			input := GenRandomString(testCase.inputSize)
+			input := generateStringOfSize(testCase.inputSize)
 
 			result := &struct {
 				Out models.OutputType `json:"testQueryPerformance"`

@@ -62,7 +62,7 @@ func UnmarshalString(v any) (string, error) {
 	case bool:
 		return strconv.FormatBool(v), nil
 	case nil:
-		return "null", nil
+		return "", nil
 	default:
 		return "", fmt.Errorf("%T is not a string", v)
 	}

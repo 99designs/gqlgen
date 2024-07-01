@@ -88,7 +88,6 @@ func cleanupBody(body string) (out string, err error) {
 	// is where query starts. If it is, query is url encoded.
 	if strings.HasPrefix(body, "%7B") {
 		body, err = url.QueryUnescape(body)
-
 		if err != nil {
 			return body, err
 		}

@@ -92,7 +92,7 @@ jobs:
         run: |
           echo "### test-summary/action! :rocket:" >> $GITHUB_STEP_SUMMARY
       - name: Publish Test Summary Report
-        uses: test-summary/action@v2.3
+        uses: test-summary/action@v2.4
         if: success() || failure() # always run even if the previous step fails
         with:
           show: "fail, skip"

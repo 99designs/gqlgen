@@ -23,6 +23,8 @@ require (
 	gopkg.in/yaml.v3 v3.0.1
 )
 
+require github.com/goccy/go-json v0.10.3
+
 require (
 	github.com/agnivade/levenshtein v1.1.1 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect

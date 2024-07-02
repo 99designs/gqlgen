@@ -53,7 +53,7 @@ func TestUrlEncodedForm(t *testing.T) {
 		resp := doRequest(h, "POST", "/graphql", `{"query":{"wrong": "format"}}`, "application/x-www-form-urlencoded")
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
-		assert.Equal(t, `{"errors":[{"message":"could not cleanup body: json: cannot unmarshal object into Go struct field RawParams.query of type string"}],"data":null}`, resp.Body.String())
+		assert.Equal(t, `{"errors":[{"message":"could not cleanup body: json: cannot unmarshal object into Go struct field RawParams.Query of type string"}],"data":null}`, resp.Body.String())
 	})
 
 	t.Run("validate content type", func(t *testing.T) {

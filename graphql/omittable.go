@@ -1,6 +1,10 @@
 package graphql
 
-import "encoding/json"
+import (
+	"encoding/json"
+
+	fastjson "github.com/goccy/go-json"
+)
 
 // Omittable is a wrapper around a value that also stores whether it is set
 // or not.
@@ -45,11 +49,11 @@ func (o Omittable[T]) MarshalJSON() ([]byte, error) {
 	if !o.set {
 		return []byte("null"), nil
 	}
-	return json.Marshal(o.value)
+	return fastjson.Marshal(o.value)
 }
 
 func (o *Omittable[T]) UnmarshalJSON(bytes []byte) error {
-	err := json.Unmarshal(bytes, &o.value)
+	err := fastjson.Unmarshal(bytes, &o.value)
 	if err != nil {
 		return err
 	}

@@ -1,0 +1,18 @@
+# The query type, represents all of the entry points into our object graph
+input InputArgument {
+    value: String!
+}
+
+type OutputType {
+    value: String!
+}
+
+type Query {
+    testQueryPerformance(in: InputArgument!): OutputType!
+}
+
+# The mutation type, represents all updates we can make to our data
+type Mutation {
+    testMutationPerformance(in: InputArgument!): OutputType!
+}
+

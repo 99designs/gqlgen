@@ -65,7 +65,7 @@ func TestSSE(t *testing.T) {
 		w := httptest.NewRecorder()
 		h.ServeHTTP(w, req)
 		assert.Equal(t, 400, w.Code, "Request return wrong status -> %d", w.Code)
-		assert.Equal(t, `{"errors":[{"message":"json request body could not be decoded: invalid character 'o' in literal null (expecting 'u') body:notjson"}],"data":null}`, w.Body.String())
+		assert.Equal(t, `{"errors":[{"message":"json request body could not be decoded: json: invalid character o as null body:notjson"}],"data":null}`, w.Body.String())
 	})
 
 	t.Run("parse failure", func(t *testing.T) {

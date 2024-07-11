@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/vektah/gqlparser/v2/ast"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -41,7 +42,7 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 	})
 
 	if cfg.cacheSize != 0 {
-		srv.SetQueryCache(lru.New(cfg.cacheSize))
+		srv.SetQueryCache(lru.New[*ast.QueryDocument](cfg.cacheSize))
 	}
 	if cfg.recover != nil {
 		srv.SetRecoverFunc(cfg.recover)
@@ -235,12 +236,12 @@ type apqAdapter struct {
 	PersistedQueryCache
 }
 
-func (a apqAdapter) Get(ctx context.Context, key string) (value any, ok bool) {
+func (a apqAdapter) Get(ctx context.Context, key string) (value string, ok bool) {
 	return a.PersistedQueryCache.Get(ctx, key)
 }
 
-func (a apqAdapter) Add(ctx context.Context, key string, value any) {
-	a.PersistedQueryCache.Add(ctx, key, value.(string))
+func (a apqAdapter) Add(ctx context.Context, key string, value string) {
+	a.PersistedQueryCache.Add(ctx, key, value)
 }
 
 type PersistedQueryCache interface {

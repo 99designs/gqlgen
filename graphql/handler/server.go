@@ -8,6 +8,7 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -41,11 +42,11 @@ func NewDefaultServer(es graphql.ExecutableSchema) *Server {
 	srv.AddTransport(transport.POST{})
 	srv.AddTransport(transport.MultipartForm{})
 
-	srv.SetQueryCache(lru.New(1000))
+	srv.SetQueryCache(lru.New[*ast.QueryDocument](1000))
 
 	srv.Use(extension.Introspection{})
 	srv.Use(extension.AutomaticPersistedQuery{
-		Cache: lru.New(100),
+		Cache: lru.New[string](100),
 	})
 
 	return srv
@@ -63,7 +64,7 @@ func (s *Server) SetRecoverFunc(f graphql.RecoverFunc) {
 	s.exec.SetRecoverFunc(f)
 }
 
-func (s *Server) SetQueryCache(cache graphql.Cache) {
+func (s *Server) SetQueryCache(cache graphql.Cache[*ast.QueryDocument]) {
 	s.exec.SetQueryCache(cache)
 }
 

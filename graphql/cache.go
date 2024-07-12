@@ -3,27 +3,29 @@ package graphql
 import "context"
 
 // Cache is a shared store for APQ and query AST caching
-type Cache interface {
+type Cache[T any] interface {
 	// Get looks up a key's value from the cache.
-	Get(ctx context.Context, key string) (value any, ok bool)
+	Get(ctx context.Context, key string) (value T, ok bool)
 
 	// Add adds a value to the cache.
-	Add(ctx context.Context, key string, value any)
+	Add(ctx context.Context, key string, value T)
 }
 
 // MapCache is the simplest implementation of a cache, because it can not evict it should only be used in tests
-type MapCache map[string]any
+type MapCache[T any] map[string]T
 
 // Get looks up a key's value from the cache.
-func (m MapCache) Get(_ context.Context, key string) (value any, ok bool) {
+func (m MapCache[T]) Get(_ context.Context, key string) (value T, ok bool) {
 	v, ok := m[key]
 	return v, ok
 }
 
 // Add adds a value to the cache.
-func (m MapCache) Add(_ context.Context, key string, value any) { m[key] = value }
+func (m MapCache[T]) Add(_ context.Context, key string, value T) { m[key] = value }
 
-type NoCache struct{}
+type NoCache[T any, T2 *T] struct{}
 
-func (n NoCache) Get(_ context.Context, _ string) (value any, ok bool) { return nil, false }
-func (n NoCache) Add(_ context.Context, _ string, _ any)               {}
+var _ Cache[*string] = (*NoCache[string, *string])(nil)
+
+func (n NoCache[T, T2]) Get(_ context.Context, _ string) (value T2, ok bool) { return nil, false }
+func (n NoCache[T, T2]) Add(_ context.Context, _ string, _ T2)               {}

@@ -141,7 +141,7 @@ func TestExecutor(t *testing.T) {
 
 	t.Run("query caching", func(t *testing.T) {
 		ctx := context.Background()
-		cache := &graphql.MapCache{}
+		cache := &graphql.MapCache[*ast.QueryDocument]{}
 		exec.SetQueryCache(cache)
 		qry := `query Foo {name}`
 
@@ -151,7 +151,7 @@ func TestExecutor(t *testing.T) {
 
 			cacheDoc, ok := cache.Get(ctx, qry)
 			require.True(t, ok)
-			require.Equal(t, "Foo", cacheDoc.(*ast.QueryDocument).Operations[0].Name)
+			require.Equal(t, "Foo", cacheDoc.Operations[0].Name)
 		})
 
 		t.Run("cache hits use document from cache", func(t *testing.T) {
@@ -164,7 +164,7 @@ func TestExecutor(t *testing.T) {
 
 			cacheDoc, ok := cache.Get(ctx, qry)
 			require.True(t, ok)
-			require.Equal(t, "Bar", cacheDoc.(*ast.QueryDocument).Operations[0].Name)
+			require.Equal(t, "Bar", cacheDoc.Operations[0].Name)
 		})
 	})
 }

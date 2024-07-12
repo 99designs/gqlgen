@@ -240,7 +240,7 @@ func (a apqAdapter) Get(ctx context.Context, key string) (value string, ok bool)
 	return a.PersistedQueryCache.Get(ctx, key)
 }
 
-func (a apqAdapter) Add(ctx context.Context, key string, value string) {
+func (a apqAdapter) Add(ctx context.Context, key, value string) {
 	a.PersistedQueryCache.Add(ctx, key, value)
 }
 

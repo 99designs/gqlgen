@@ -181,13 +181,12 @@ func (f *federation) InjectSourcesEarly() ([]*ast.Source, error) {
 func (f *federation) InjectSourcesLate(schema *ast.Schema) ([]*ast.Source, error) {
 	f.Entities = buildEntities(schema, f.Version)
 
-	var entities, resolvers, entityResolverInputDefinitions string
+	entities := make([]string, 0)
+	resolvers := make([]string, 0)
+	entityResolverInputDefinitions := make([]string, 0)
 	for _, e := range f.Entities {
 		if e.Def.Kind != ast.Interface {
-			if entities != "" {
-				entities += " | "
-			}
-			entities += e.Name
+			entities = append(entities, e.Name)
 		} else if len(schema.GetPossibleTypes(e.Def)) == 0 {
 			fmt.Println(
 				"skipping @key field on interface " + e.Def.Name + " as no types implement it",
@@ -196,47 +195,42 @@ func (f *federation) InjectSourcesLate(schema *ast.Schema) ([]*ast.Source, error
 
 		for _, r := range e.Resolvers {
 			if e.Multi {
-				if entityResolverInputDefinitions != "" {
-					entityResolverInputDefinitions += "\n\n"
-				}
-				entityResolverInputDefinitions += "input " + r.InputTypeName + " {\n"
-				for _, keyField := range r.KeyFields {
-					entityResolverInputDefinitions += fmt.Sprintf(
-						"\t%s: %s\n",
-						keyField.Field.ToGo(),
-						keyField.Definition.Type.String(),
-					)
-				}
-				entityResolverInputDefinitions += "}"
-				resolvers += fmt.Sprintf("\t%s(reps: [%s]!): [%s]\n", r.ResolverName, r.InputTypeName, e.Name)
+				entityResolverInputDefinitions = append(
+					entityResolverInputDefinitions,
+					buildEntityResolverInputDefinitionSDL(r),
+				)
+				resolverSDL := fmt.Sprintf("\t%s(reps: [%s]!): [%s]", r.ResolverName, r.InputTypeName, e.Name)
+				resolvers = append(resolvers, resolverSDL)
 			} else {
 				resolverArgs := ""
 				for _, keyField := range r.KeyFields {
 					resolverArgs += fmt.Sprintf("%s: %s,", keyField.Field.ToGoPrivate(), keyField.Definition.Type.String())
 				}
-				resolvers += fmt.Sprintf("\t%s(%s): %s!\n", r.ResolverName, resolverArgs, e.Name)
+				resolverSDL := fmt.Sprintf("\t%s(%s): %s!", r.ResolverName, resolverArgs, e.Name)
+				resolvers = append(resolvers, resolverSDL)
 			}
 		}
 	}
 
 	var blocks []string
-	if entities != "" {
-		entities = `# a union of all types that use the @key directive
-union _Entity = ` + entities
-		blocks = append(blocks, entities)
+	if len(entities) > 0 {
+		entitiesSDL := `# a union of all types that use the @key directive
+union _Entity = ` + strings.Join(entities, " | ")
+		blocks = append(blocks, entitiesSDL)
 	}
 
 	// resolvers can be empty if a service defines only "empty
 	// extend" types.  This should be rare.
-	if resolvers != "" {
-		if entityResolverInputDefinitions != "" {
-			blocks = append(blocks, entityResolverInputDefinitions)
+	if len(resolvers) > 0 {
+		if len(entityResolverInputDefinitions) > 0 {
+			inputSDL := strings.Join(entityResolverInputDefinitions, "\n")
+			blocks = append(blocks, inputSDL)
 		}
-		resolvers = `# fake type to build resolver interfaces for users to implement
+		resolversSDL := `# fake type to build resolver interfaces for users to implement
 type Entity {
-	` + resolvers + `
+	` + strings.Join(resolvers, "\n") + `
 }`
-		blocks = append(blocks, resolvers)
+		blocks = append(blocks, resolversSDL)
 	}
 
 	_serviceTypeDef := `type _Service {
@@ -617,4 +611,16 @@ func isFederatedEntity(schemaType *ast.Definition) ([]*ast.Directive, bool) {
 		// ignore
 	}
 	return nil, false
+}
+
+func buildEntityResolverInputDefinitionSDL(resolver *EntityResolver) string {
+	entityResolverInputDefinition := "input " + resolver.InputTypeName + " {\n"
+	for _, keyField := range resolver.KeyFields {
+		entityResolverInputDefinition += fmt.Sprintf(
+			"\t%s: %s\n",
+			keyField.Field.ToGo(),
+			keyField.Definition.Type.String(),
+		)
+	}
+	return entityResolverInputDefinition + "}"
 }

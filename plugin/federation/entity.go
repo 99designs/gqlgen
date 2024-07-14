@@ -23,10 +23,13 @@ type Entity struct {
 }
 
 type EntityResolver struct {
-	ResolverName  string      // The resolver name, such as FindUserByID
-	KeyFields     []*KeyField // The fields declared in @key.
-	InputType     types.Type  // The Go generated input type for multi entity resolvers
-	InputTypeName string
+	ResolverName   string      // The resolver name, such as FindUserByID
+	KeyFields      []*KeyField // The fields declared in @key.
+	InputType      types.Type  // The Go generated input type for multi entity resolvers
+	InputTypeName  string
+	ReturnType     types.Type // The Go generated return type for the entity
+	ReturnTypeName string
+	NonNull        bool
 }
 
 func (e *EntityResolver) LookupInputType() string {

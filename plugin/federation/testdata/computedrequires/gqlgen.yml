@@ -2,8 +2,10 @@ schema:
   - "testdata/computedrequires/schema.graphql"
 exec:
   filename: testdata/computedrequires/generated/exec.go
+  package: generated
 federation:
   filename: testdata/computedrequires/generated/federation.go
+  package: generated
   options:
     computed_requires: true
 model:

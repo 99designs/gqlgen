@@ -64,7 +64,7 @@ func (r *entityResolver) FindManyMultiHelloMultipleRequiresByNames(ctx context.C
 }
 
 // ComputeManyMultiHelloMultipleRequiresWithKey1AndKey2s is the resolver for the computeManyMultiHelloMultipleRequiresWithKey1AndKey2s field.
-func (r *entityResolver) ComputeManyMultiHelloMultipleRequiresWithKey1AndKey2s(ctx context.Context, reps []*model.MultiHelloMultipleRequiresWithKey1AndKey2sInput) ([]*model.MultiHelloMultipleRequires, error) {
+func (r *entityResolver) ComputeManyMultiHelloMultipleRequiresWithKey1AndKey2s(ctx context.Context, reps []*model.ComputeMultiHelloMultipleRequiresWithKey1AndKey2sInput) ([]*string, error) {
 	panic(fmt.Errorf("not implemented: ComputeManyMultiHelloMultipleRequiresWithKey1AndKey2s - computeManyMultiHelloMultipleRequiresWithKey1AndKey2s"))
 }
 
@@ -82,7 +82,7 @@ func (r *entityResolver) FindManyMultiHelloRequiresByNames(ctx context.Context, 
 }
 
 // ComputeManyMultiHelloRequiresWithKey1s is the resolver for the computeManyMultiHelloRequiresWithKey1s field.
-func (r *entityResolver) ComputeManyMultiHelloRequiresWithKey1s(ctx context.Context, reps []*model.MultiHelloRequiresWithKey1sInput) ([]*model.MultiHelloRequires, error) {
+func (r *entityResolver) ComputeManyMultiHelloRequiresWithKey1s(ctx context.Context, reps []*model.ComputeMultiHelloRequiresWithKey1sInput) ([]*string, error) {
 	panic(fmt.Errorf("not implemented: ComputeManyMultiHelloRequiresWithKey1s - computeManyMultiHelloRequiresWithKey1s"))
 }
 
@@ -121,7 +121,7 @@ func (r *entityResolver) FindManyMultiPlanetRequiresNestedByNames(ctx context.Co
 }
 
 // ComputeManyMultiPlanetRequiresNestedWithWorldFoos is the resolver for the computeManyMultiPlanetRequiresNestedWithWorldFoos field.
-func (r *entityResolver) ComputeManyMultiPlanetRequiresNestedWithWorldFoos(ctx context.Context, reps []*model.MultiPlanetRequiresNestedWithWorldFoosInput) ([]*model.MultiPlanetRequiresNested, error) {
+func (r *entityResolver) ComputeManyMultiPlanetRequiresNestedWithWorldFoos(ctx context.Context, reps []*model.ComputeMultiPlanetRequiresNestedWithWorldFoosInput) ([]*int, error) {
 	panic(fmt.Errorf("not implemented: ComputeManyMultiPlanetRequiresNestedWithWorldFoos - computeManyMultiPlanetRequiresNestedWithWorldFoos"))
 }
 
@@ -131,7 +131,7 @@ func (r *entityResolver) FindPlanetMultipleRequiresByName(ctx context.Context, n
 }
 
 // ComputePlanetMultipleRequiresWithDiameterAndDensity is the resolver for the computePlanetMultipleRequiresWithDiameterAndDensity field.
-func (r *entityResolver) ComputePlanetMultipleRequiresWithDiameterAndDensity(ctx context.Context, diameter int, density int) (*model.PlanetMultipleRequires, error) {
+func (r *entityResolver) ComputePlanetMultipleRequiresWithDiameterAndDensity(ctx context.Context, reps *model.ComputePlanetMultipleRequiresWithDiameterAndDensityInput) (int, error) {
 	panic(fmt.Errorf("not implemented: ComputePlanetMultipleRequiresWithDiameterAndDensity - computePlanetMultipleRequiresWithDiameterAndDensity"))
 }
 
@@ -143,7 +143,7 @@ func (r *entityResolver) FindPlanetRequiresByName(ctx context.Context, name stri
 }
 
 // ComputePlanetRequiresWithDiameter is the resolver for the computePlanetRequiresWithDiameter field.
-func (r *entityResolver) ComputePlanetRequiresWithDiameter(ctx context.Context, diameter int) (*model.PlanetRequires, error) {
+func (r *entityResolver) ComputePlanetRequiresWithDiameter(ctx context.Context, reps *model.ComputePlanetRequiresWithDiameterInput) (int, error) {
 	panic(fmt.Errorf("not implemented: ComputePlanetRequiresWithDiameter - computePlanetRequiresWithDiameter"))
 }
 
@@ -169,12 +169,12 @@ func (r *entityResolver) FindPlanetRequiresNestedByName(ctx context.Context, nam
 }
 
 // ComputePlanetRequiresNestedWithWorldFoo is the resolver for the computePlanetRequiresNestedWithWorldFoo field.
-func (r *entityResolver) ComputePlanetRequiresNestedWithWorldFoo(ctx context.Context, worldFoo string) (*model.PlanetRequiresNested, error) {
+func (r *entityResolver) ComputePlanetRequiresNestedWithWorldFoo(ctx context.Context, reps *model.ComputePlanetRequiresNestedWithWorldFooInput) (int, error) {
 	panic(fmt.Errorf("not implemented: ComputePlanetRequiresNestedWithWorldFoo - computePlanetRequiresNestedWithWorldFoo"))
 }
 
 // ComputePlanetRequiresNestedWithWorldsFoo is the resolver for the computePlanetRequiresNestedWithWorldsFoo field.
-func (r *entityResolver) ComputePlanetRequiresNestedWithWorldsFoo(ctx context.Context, worldsFoo string) (*model.PlanetRequiresNested, error) {
+func (r *entityResolver) ComputePlanetRequiresNestedWithWorldsFoo(ctx context.Context, reps *model.ComputePlanetRequiresNestedWithWorldsFooInput) (*int, error) {
 	panic(fmt.Errorf("not implemented: ComputePlanetRequiresNestedWithWorldsFoo - computePlanetRequiresNestedWithWorldsFoo"))
 }
 

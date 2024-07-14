@@ -216,6 +216,7 @@ func (f *federation) InjectSourcesLate(schema *ast.Schema) ([]*ast.Source, error
 	entities := make([]string, 0)
 	resolvers := make([]string, 0)
 	entityResolverInputDefinitions := make([]string, 0)
+
 	for _, e := range f.Entities {
 		if e.Def.Kind != ast.Interface {
 			entities = append(entities, e.Name)
@@ -226,7 +227,10 @@ func (f *federation) InjectSourcesLate(schema *ast.Schema) ([]*ast.Source, error
 		}
 
 		for _, r := range e.Resolvers {
-			resolverSDL, entityResolverInputSDL := buildResolverSDL(r, e.Name, e.Multi)
+			// Eventually make this a config. If set to true, we will always use an input type
+			// for the resolver rather than individual fields.
+			alwaysUseInput := false
+			resolverSDL, entityResolverInputSDL := buildResolverSDL(r, e.Multi, alwaysUseInput)
 			resolvers = append(resolvers, resolverSDL)
 			if entityResolverInputSDL != "" {
 				entityResolverInputDefinitions = append(entityResolverInputDefinitions, entityResolverInputSDL)
@@ -235,7 +239,10 @@ func (f *federation) InjectSourcesLate(schema *ast.Schema) ([]*ast.Source, error
 
 		if f.PackageOptions.ComputedRequires {
 			for _, r := range e.ComputedRequires {
-				resolverSDL, entityResolverInputSDL := buildResolverSDL(r, e.Name, e.Multi)
+				// We want to force input types for computed fields. The fields selection set
+				// can get large and we don't a want a large number of arguments in the resolver.
+				alwaysUseInput := true
+				resolverSDL, entityResolverInputSDL := buildResolverSDL(r, e.Multi, alwaysUseInput)
 				resolvers = append(resolvers, resolverSDL)
 				if entityResolverInputSDL != "" {
 					entityResolverInputDefinitions = append(entityResolverInputDefinitions, entityResolverInputSDL)
@@ -326,18 +333,11 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 			}
 
 			for _, r := range e.Resolvers {
-				// fill in types for key fields
-				//
-				for _, keyField := range r.KeyFields {
-					if len(keyField.Field) == 0 {
-						fmt.Println(
-							"skipping @key field " + keyField.Definition.Name + " in " + r.ResolverName + " in " + e.Def.Name,
-						)
-						continue
-					}
-					cgField := keyField.Field.TypeReference(obj, data.Objects)
-					keyField.Type = cgField.TypeReference
-				}
+				populateKeyFieldTypes(r, obj, data.Objects, e.Def.Name)
+			}
+
+			for _, r := range e.ComputedRequires {
+				populateKeyFieldTypes(r, obj, data.Objects, e.Def.Name)
 			}
 
 			// fill in types for requires fields
@@ -365,6 +365,17 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 	// fill in types for resolver inputs
 	//
 	for _, entity := range f.Entities {
+		if f.PackageOptions.ComputedRequires {
+			for _, resolver := range entity.ComputedRequires {
+				obj := data.Inputs.ByName(resolver.InputTypeName)
+				if obj == nil {
+					return fmt.Errorf("input object %s not found", resolver.InputTypeName)
+				}
+
+				resolver.InputType = obj.Type
+			}
+		}
+
 		if !entity.Multi {
 			continue
 		}
@@ -458,6 +469,25 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 		Packages:        data.Config.Packages,
 		Template:        federationTemplate,
 	})
+}
+
+// Fill in types for key fields
+func populateKeyFieldTypes(
+	resolver *EntityResolver,
+	obj *codegen.Object,
+	allObjects codegen.Objects,
+	name string,
+) {
+	for _, keyField := range resolver.KeyFields {
+		if len(keyField.Field) == 0 {
+			fmt.Println(
+				"skipping @key field " + keyField.Definition.Name + " in " + resolver.ResolverName + " in " + name,
+			)
+			continue
+		}
+		cgField := keyField.Field.TypeReference(obj, allObjects)
+		keyField.Type = cgField.TypeReference
+	}
 }
 
 func buildEntities(schema *ast.Schema, version int) []*Entity {
@@ -571,9 +601,11 @@ func buildResolvers(
 		}
 
 		resolvers = append(resolvers, &EntityResolver{
-			ResolverName:  resolverName,
-			KeyFields:     keyFields,
-			InputTypeName: resolverFieldsToGo + "Input",
+			ResolverName:   resolverName,
+			KeyFields:      keyFields,
+			InputTypeName:  resolverFieldsToGo + "Input",
+			ReturnTypeName: schemaType.Name,
+			NonNull:        true,
 		})
 	}
 
@@ -624,9 +656,11 @@ func buildComputedRequiresForField(
 	}
 
 	return &EntityResolver{
-		ResolverName:  resolverName,
-		KeyFields:     keyFields,
-		InputTypeName: resolverFieldsToGo + "Input",
+		ResolverName:   resolverName,
+		KeyFields:      keyFields,
+		InputTypeName:  "Compute" + resolverFieldsToGo + "Input",
+		ReturnTypeName: field.Type.Name(),
+		NonNull:        field.Type.NonNull,
 	}
 }
 
@@ -716,12 +750,21 @@ func isFederatedEntity(schemaType *ast.Definition) ([]*ast.Directive, bool) {
 
 func buildResolverSDL(
 	resolver *EntityResolver,
-	name string,
 	multi bool,
+	alwaysUseInput bool,
 ) (resolverSDL string, entityResolverInputSDL string) {
 	if multi {
 		entityResolverInputSDL = buildEntityResolverInputDefinitionSDL(resolver)
-		resolverSDL := fmt.Sprintf("\t%s(reps: [%s]!): [%s]", resolver.ResolverName, resolver.InputTypeName, name)
+		resolverSDL := fmt.Sprintf("\t%s(reps: [%s]!): [%s]", resolver.ResolverName, resolver.InputTypeName, resolver.ReturnTypeName)
+		return resolverSDL, entityResolverInputSDL
+	}
+
+	if alwaysUseInput {
+		entityResolverInputSDL = buildEntityResolverInputDefinitionSDL(resolver)
+		resolverSDL := fmt.Sprintf("\t%s(reps: %s): %s", resolver.ResolverName, resolver.InputTypeName, resolver.ReturnTypeName)
+		if resolver.NonNull {
+			resolverSDL += "!"
+		}
 		return resolverSDL, entityResolverInputSDL
 	}
 
@@ -729,7 +772,10 @@ func buildResolverSDL(
 	for _, keyField := range resolver.KeyFields {
 		resolverArgs += fmt.Sprintf("%s: %s,", keyField.Field.ToGoPrivate(), keyField.Definition.Type.String())
 	}
-	resolverSDL = fmt.Sprintf("\t%s(%s): %s!", resolver.ResolverName, resolverArgs, name)
+	resolverSDL = fmt.Sprintf("\t%s(%s): %s", resolver.ResolverName, resolverArgs, resolver.ReturnTypeName)
+	if resolver.NonNull {
+		resolverSDL += "!"
+	}
 	return resolverSDL, ""
 }
 

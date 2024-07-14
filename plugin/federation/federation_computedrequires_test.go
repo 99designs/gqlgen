@@ -12,7 +12,7 @@ import (
 	"github.com/99designs/gqlgen/plugin/federation/testdata/explicitrequires/generated"
 )
 
-func TestExplicitRequires(t *testing.T) {
+func TestComputedRequires(t *testing.T) {
 	c := client.New(handler.NewDefaultServer(
 		generated.NewExecutableSchema(generated.Config{
 			Resolvers: &explicitrequires.Resolver{},
@@ -136,7 +136,7 @@ func TestExplicitRequires(t *testing.T) {
 	})
 }
 
-func TestMultiExplicitRequires(t *testing.T) {
+func TestMultiComputedRequires(t *testing.T) {
 	c := client.New(handler.NewDefaultServer(
 		generated.NewExecutableSchema(generated.Config{
 			Resolvers: &explicitrequires.Resolver{},

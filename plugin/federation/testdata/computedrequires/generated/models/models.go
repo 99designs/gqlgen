@@ -2,6 +2,36 @@
 
 package model
 
+type ComputeMultiHelloMultipleRequiresWithKey1AndKey2sInput struct {
+	Key1 string `json:"Key1"`
+	Key2 string `json:"Key2"`
+}
+
+type ComputeMultiHelloRequiresWithKey1sInput struct {
+	Key1 string `json:"Key1"`
+}
+
+type ComputeMultiPlanetRequiresNestedWithWorldFoosInput struct {
+	WorldFoo string `json:"WorldFoo"`
+}
+
+type ComputePlanetMultipleRequiresWithDiameterAndDensityInput struct {
+	Diameter int `json:"Diameter"`
+	Density  int `json:"Density"`
+}
+
+type ComputePlanetRequiresNestedWithWorldFooInput struct {
+	WorldFoo string `json:"WorldFoo"`
+}
+
+type ComputePlanetRequiresNestedWithWorldsFooInput struct {
+	WorldsFoo string `json:"WorldsFoo"`
+}
+
+type ComputePlanetRequiresWithDiameterInput struct {
+	Diameter int `json:"Diameter"`
+}
+
 type Hello struct {
 	Name      string `json:"name"`
 	Secondary string `json:"secondary"`
@@ -45,11 +75,6 @@ type MultiHelloMultipleRequiresByNamesInput struct {
 	Name string `json:"Name"`
 }
 
-type MultiHelloMultipleRequiresWithKey1AndKey2sInput struct {
-	Key1 string `json:"Key1"`
-	Key2 string `json:"Key2"`
-}
-
 type MultiHelloRequires struct {
 	Name string `json:"name"`
 	Key1 string `json:"key1"`
@@ -60,10 +85,6 @@ func (MultiHelloRequires) IsEntity() {}
 
 type MultiHelloRequiresByNamesInput struct {
 	Name string `json:"Name"`
-}
-
-type MultiHelloRequiresWithKey1sInput struct {
-	Key1 string `json:"Key1"`
 }
 
 type MultiHelloWithError struct {
@@ -86,10 +107,6 @@ func (MultiPlanetRequiresNested) IsEntity() {}
 
 type MultiPlanetRequiresNestedByNamesInput struct {
 	Name string `json:"Name"`
-}
-
-type MultiPlanetRequiresNestedWithWorldFoosInput struct {
-	WorldFoo string `json:"WorldFoo"`
 }
 
 type PlanetMultipleRequires struct {

@@ -821,26 +821,22 @@ union _Entity = Hello | HelloMultiSingleKeys | HelloWithErrors | MultiHello | Mu
 input MultiHelloByNamesInput {
 	Name: String!
 }
-
 input MultiHelloMultipleRequiresByNamesInput {
 	Name: String!
 }
-
 input MultiHelloRequiresByNamesInput {
 	Name: String!
 }
-
 input MultiHelloWithErrorByNamesInput {
 	Name: String!
 }
-
 input MultiPlanetRequiresNestedByNamesInput {
 	Name: String!
 }
 
 # fake type to build resolver interfaces for users to implement
 type Entity {
-		findHelloByName(name: String!,): Hello!
+	findHelloByName(name: String!,): Hello!
 	findHelloMultiSingleKeysByKey1AndKey2(key1: String!,key2: String!,): HelloMultiSingleKeys!
 	findHelloWithErrorsByName(name: String!,): HelloWithErrors!
 	findManyMultiHelloByNames(reps: [MultiHelloByNamesInput]!): [MultiHello]
@@ -855,7 +851,6 @@ type Entity {
 	findWorldNameByName(name: String!,): WorldName!
 	findWorldWithMultipleKeysByHelloNameAndFoo(helloName: String!,foo: String!,): WorldWithMultipleKeys!
 	findWorldWithMultipleKeysByBar(bar: Int!,): WorldWithMultipleKeys!
-
 }
 
 type _Service {

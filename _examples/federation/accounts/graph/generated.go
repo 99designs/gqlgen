@@ -318,9 +318,8 @@ union _Entity = EmailHost | User
 
 # fake type to build resolver interfaces for users to implement
 type Entity {
-		findEmailHostByID(id: String!,): EmailHost!
+	findEmailHostByID(id: String!,): EmailHost!
 	findUserByID(id: ID!,): User!
-
 }
 
 type _Service {

@@ -228,7 +228,7 @@ union _Entity = ` + strings.Join(entities, " | ")
 		}
 		resolversSDL := `# fake type to build resolver interfaces for users to implement
 type Entity {
-	` + strings.Join(resolvers, "\n") + `
+` + strings.Join(resolvers, "\n") + `
 }`
 		blocks = append(blocks, resolversSDL)
 	}

@@ -376,9 +376,8 @@ union _Entity = EmailHost | Manufacturer | Product | User
 
 # fake type to build resolver interfaces for users to implement
 type Entity {
-		findProductByManufacturerIDAndID(manufacturerID: String!,id: String!,): Product!
+	findProductByManufacturerIDAndID(manufacturerID: String!,id: String!,): Product!
 	findUserByID(id: ID!,): User!
-
 }
 
 type _Service {

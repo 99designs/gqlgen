@@ -345,10 +345,9 @@ union _Entity = Manufacturer | Product
 
 # fake type to build resolver interfaces for users to implement
 type Entity {
-		findManufacturerByID(id: String!,): Manufacturer!
+	findManufacturerByID(id: String!,): Manufacturer!
 	findProductByManufacturerIDAndID(manufacturerID: String!,id: String!,): Product!
 	findProductByUpc(upc: String!,): Product!
-
 }
 
 type _Service {

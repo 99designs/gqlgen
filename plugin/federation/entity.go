@@ -13,12 +13,13 @@ import (
 // Entity represents a federated type
 // that was declared in the GQL schema.
 type Entity struct {
-	Name      string // The same name as the type declaration
-	Def       *ast.Definition
-	Resolvers []*EntityResolver
-	Requires  []*Requires
-	Multi     bool
-	Type      types.Type
+	Name             string // The same name as the type declaration
+	Def              *ast.Definition
+	Resolvers        []*EntityResolver
+	ComputedRequires []*EntityResolver
+	Requires         []*Requires
+	Multi            bool
+	Type             types.Type
 }
 
 type EntityResolver struct {
@@ -76,7 +77,7 @@ func (e *Entity) isFieldImplicitlyExternal(field *ast.FieldDefinition, federatio
 
 // Determine if the entity is resolvable.
 func (e *Entity) isResolvable() bool {
-	key := e.Def.Directives.ForName("key")
+	key := e.Def.Directives.ForName(directiveKey)
 	if key == nil {
 		// If there is no key directive, the entity is resolvable.
 		return true
@@ -102,11 +103,11 @@ func (e *Entity) isKeyField(field *ast.FieldDefinition) bool {
 
 // Get the key fields for this entity.
 func (e *Entity) keyFields() []string {
-	key := e.Def.Directives.ForName("key")
+	key := e.Def.Directives.ForName(directiveKey)
 	if key == nil {
 		return []string{}
 	}
-	fields := key.Arguments.ForName("fields")
+	fields := key.Arguments.ForName(directiveArgFields)
 	if fields == nil {
 		return []string{}
 	}

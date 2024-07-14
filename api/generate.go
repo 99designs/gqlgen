@@ -45,7 +45,11 @@ func Generate(cfg *config.Config, option ...Option) error {
 				}
 			}
 		}
-		plugins = append([]plugin.Plugin{federation.New(cfg.Federation.Version)}, plugins...)
+		federationPlugin, err := federation.New(cfg.Federation.Version, cfg.Federation.Options)
+		if err != nil {
+			return fmt.Errorf("failed to construct the Federation plugin: %w", err)
+		}
+		plugins = append([]plugin.Plugin{federationPlugin}, plugins...)
 	}
 
 	for _, o := range option {

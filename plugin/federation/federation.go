@@ -2,6 +2,7 @@ package federation
 
 import (
 	_ "embed"
+	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -25,17 +26,48 @@ var explicitRequiresTemplate string
 type federation struct {
 	Entities       []*Entity
 	Version        int
-	PackageOptions map[string]bool
+	PackageOptions PackageOptions
+}
+
+type PackageOptions struct {
+	// ExplicitRequires will generate a function in the execution context
+	// to populate fields using the @required directive into the entity.
+	//
+	// You can only set one of ExplicitRequires or ComputedRequires to true.
+	ExplicitRequires bool
+	// ComputedRequires generates resolver functions to compute values for
+	// fields using the @required directive.
+	ComputedRequires bool
 }
 
 // New returns a federation plugin that injects
 // federated directives and types into the schema
-func New(version int) plugin.Plugin {
+func New(version int, packageOptions map[string]bool) (plugin.Plugin, error) {
 	if version == 0 {
 		version = 1
 	}
 
-	return &federation{Version: version}
+	options, err := buildPackageOptions(packageOptions)
+	if err != nil {
+		return nil, fmt.Errorf("invalid federation package options: %w", err)
+	}
+	return &federation{
+		Version:        version,
+		PackageOptions: options,
+	}, nil
+}
+
+func buildPackageOptions(packageOptions map[string]bool) (PackageOptions, error) {
+	explicitRequires := packageOptions["explicit_requires"]
+	computedRequires := packageOptions["computed_requires"]
+	if explicitRequires && computedRequires {
+		return PackageOptions{}, errors.New("only one of explicit_requires or computed_requires can be set to true")
+	}
+
+	return PackageOptions{
+		ExplicitRequires: explicitRequires,
+		ComputedRequires: computedRequires,
+	}, nil
 }
 
 // Name returns the plugin name
@@ -79,9 +111,9 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 		cfg.Models[typeName] = entry
 	}
 	cfg.Directives["external"] = config.DirectiveConfig{SkipRuntime: true}
-	cfg.Directives["requires"] = config.DirectiveConfig{SkipRuntime: true}
+	cfg.Directives[directiveRequires] = config.DirectiveConfig{SkipRuntime: true}
 	cfg.Directives["provides"] = config.DirectiveConfig{SkipRuntime: true}
-	cfg.Directives["key"] = config.DirectiveConfig{SkipRuntime: true}
+	cfg.Directives[directiveKey] = config.DirectiveConfig{SkipRuntime: true}
 	cfg.Directives["extends"] = config.DirectiveConfig{SkipRuntime: true}
 
 	// Federation 2 specific directives
@@ -194,20 +226,20 @@ func (f *federation) InjectSourcesLate(schema *ast.Schema) ([]*ast.Source, error
 		}
 
 		for _, r := range e.Resolvers {
-			if e.Multi {
-				entityResolverInputDefinitions = append(
-					entityResolverInputDefinitions,
-					buildEntityResolverInputDefinitionSDL(r),
-				)
-				resolverSDL := fmt.Sprintf("\t%s(reps: [%s]!): [%s]", r.ResolverName, r.InputTypeName, e.Name)
+			resolverSDL, entityResolverInputSDL := buildResolverSDL(r, e.Name, e.Multi)
+			resolvers = append(resolvers, resolverSDL)
+			if entityResolverInputSDL != "" {
+				entityResolverInputDefinitions = append(entityResolverInputDefinitions, entityResolverInputSDL)
+			}
+		}
+
+		if f.PackageOptions.ComputedRequires {
+			for _, r := range e.ComputedRequires {
+				resolverSDL, entityResolverInputSDL := buildResolverSDL(r, e.Name, e.Multi)
 				resolvers = append(resolvers, resolverSDL)
-			} else {
-				resolverArgs := ""
-				for _, keyField := range r.KeyFields {
-					resolverArgs += fmt.Sprintf("%s: %s,", keyField.Field.ToGoPrivate(), keyField.Definition.Type.String())
+				if entityResolverInputSDL != "" {
+					entityResolverInputDefinitions = append(entityResolverInputDefinitions, entityResolverInputSDL)
 				}
-				resolverSDL := fmt.Sprintf("\t%s(%s): %s!", r.ResolverName, resolverArgs, e.Name)
-				resolvers = append(resolvers, resolverSDL)
 			}
 		}
 	}
@@ -223,7 +255,7 @@ union _Entity = ` + strings.Join(entities, " | ")
 	// extend" types.  This should be rare.
 	if len(resolvers) > 0 {
 		if len(entityResolverInputDefinitions) > 0 {
-			inputSDL := strings.Join(entityResolverInputDefinitions, "\n")
+			inputSDL := strings.Join(entityResolverInputDefinitions, "\n\n")
 			blocks = append(blocks, inputSDL)
 		}
 		resolversSDL := `# fake type to build resolver interfaces for users to implement
@@ -270,7 +302,11 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 	requiresEntities := make(map[string]*Entity, 0)
 
 	// Save package options on f for template use
-	f.PackageOptions = data.Config.Federation.Options
+	packageOptions, err := buildPackageOptions(data.Config.Federation.Options)
+	if err != nil {
+		return fmt.Errorf("invalid federation package options: %w", err)
+	}
+	f.PackageOptions = packageOptions
 
 	if len(f.Entities) > 0 {
 		if data.Objects.ByName("Entity") != nil {
@@ -343,7 +379,7 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 		}
 	}
 
-	if data.Config.Federation.Options["explicit_requires"] && len(requiresEntities) > 0 {
+	if f.PackageOptions.ExplicitRequires && len(requiresEntities) > 0 {
 		// check for existing requires functions
 		type Populator struct {
 			FuncName       string
@@ -487,6 +523,7 @@ func buildEntity(
 	}
 
 	entity.Resolvers = buildResolvers(schemaType, schema, keys, entity.Multi)
+	entity.ComputedRequires = buildComputedRequires(schemaType, schema, entity.Multi)
 	entity.Requires = buildRequires(schemaType)
 
 	return entity
@@ -518,32 +555,11 @@ func buildResolvers(
 		if len(dir.Arguments) > 2 {
 			panic("More than two arguments provided for @key declaration.")
 		}
-		var arg *ast.Argument
-
-		// since keys are able to now have multiple arguments, we need to check both possible for a possible @key(fields="" fields="")
-		for _, a := range dir.Arguments {
-			if a.Name == "fields" {
-				if arg != nil {
-					panic("More than one `fields` provided for @key declaration.")
-				}
-				arg = a
-			}
-		}
-
-		keyFieldSet := fieldset.New(arg.Value.Raw, nil)
-
-		keyFields := make([]*KeyField, len(keyFieldSet))
-		resolverFields := []string{}
-		for i, field := range keyFieldSet {
-			def := field.FieldDefinition(schemaType, schema)
-
-			if def == nil {
-				panic(fmt.Sprintf("no field for %v", field))
-			}
-
-			keyFields[i] = &KeyField{Definition: def, Field: field}
-			resolverFields = append(resolverFields, keyFields[i].Field.ToGo())
-		}
+		keyFields, resolverFields := buildKeyFields(
+			schemaType,
+			schema,
+			dir,
+		)
 
 		resolverFieldsToGo := schemaType.Name + "By" + strings.Join(resolverFields, "And")
 		var resolverName string
@@ -564,14 +580,99 @@ func buildResolvers(
 	return resolvers
 }
 
-func buildRequires(schemaType *ast.Definition) []*Requires {
-	requires := make([]*Requires, 0)
+func buildComputedRequires(
+	schemaType *ast.Definition,
+	schema *ast.Schema,
+	multi bool,
+) []*EntityResolver {
+	resolvers := make([]*EntityResolver, 0)
 	for _, f := range schemaType.Fields {
-		dir := f.Directives.ForName("requires")
+		dir := f.Directives.ForName(directiveRequires)
 		if dir == nil {
 			continue
 		}
-		if len(dir.Arguments) != 1 || dir.Arguments[0].Name != "fields" {
+
+		resolver := buildComputedRequiresForField(schemaType, schema, f, dir, multi)
+		if resolver != nil {
+			resolvers = append(resolvers, resolver)
+		}
+	}
+
+	return resolvers
+}
+
+func buildComputedRequiresForField(
+	schemaType *ast.Definition,
+	schema *ast.Schema,
+	field *ast.FieldDefinition,
+	dir *ast.Directive,
+	multi bool,
+) *EntityResolver {
+	keyFields, resolverFields := buildKeyFields(
+		schemaType,
+		schema,
+		dir,
+	)
+
+	resolverFieldsToGo := schemaType.Name + "With" + strings.Join(resolverFields, "And")
+	var resolverName string
+	if multi {
+		resolverFieldsToGo += "s" // Pluralize for better API readability
+		resolverName = fmt.Sprintf("computeMany%s", resolverFieldsToGo)
+	} else {
+		resolverName = fmt.Sprintf("compute%s", resolverFieldsToGo)
+	}
+
+	return &EntityResolver{
+		ResolverName:  resolverName,
+		KeyFields:     keyFields,
+		InputTypeName: resolverFieldsToGo + "Input",
+	}
+}
+
+func buildKeyFields(
+	schemaType *ast.Definition,
+	schema *ast.Schema,
+	dir *ast.Directive,
+) ([]*KeyField, []string) {
+	var arg *ast.Argument
+
+	// since directives are able to now have multiple arguments, we need to check both possible for a possible @key(fields="" fields="")
+	for _, a := range dir.Arguments {
+		if a.Name == directiveArgFields {
+			if arg != nil {
+				panic("More than one `fields` provided for @requires declaration.")
+			}
+			arg = a
+		}
+	}
+
+	keyFieldSet := fieldset.New(arg.Value.Raw, nil)
+
+	keyFields := make([]*KeyField, len(keyFieldSet))
+	resolverFields := []string{}
+	for i, field := range keyFieldSet {
+		def := field.FieldDefinition(schemaType, schema)
+
+		if def == nil {
+			panic(fmt.Sprintf("no field for %v", field))
+		}
+
+		keyFields[i] = &KeyField{Definition: def, Field: field}
+		resolverFields = append(resolverFields, keyFields[i].Field.ToGo())
+	}
+
+	return keyFields, resolverFields
+}
+
+func buildRequires(schemaType *ast.Definition) []*Requires {
+	requires := make([]*Requires, 0)
+	for _, f := range schemaType.Fields {
+		dir := f.Directives.ForName(directiveRequires)
+		if dir == nil {
+			continue
+		}
+		if len(dir.Arguments) != 1 || dir.Arguments[0].Name != directiveArgFields {
 			panic("Exactly one `fields` argument needed for @requires declaration.")
 		}
 		requiresFieldSet := fieldset.New(dir.Arguments[0].Value.Raw, nil)
@@ -589,12 +690,12 @@ func buildRequires(schemaType *ast.Definition) []*Requires {
 func isFederatedEntity(schemaType *ast.Definition) ([]*ast.Directive, bool) {
 	switch schemaType.Kind {
 	case ast.Object:
-		keys := schemaType.Directives.ForNames("key")
+		keys := schemaType.Directives.ForNames(directiveKey)
 		if len(keys) > 0 {
 			return keys, true
 		}
 	case ast.Interface:
-		keys := schemaType.Directives.ForNames("key")
+		keys := schemaType.Directives.ForNames(directiveKey)
 		if len(keys) > 0 {
 			return keys, true
 		}
@@ -611,6 +712,25 @@ func isFederatedEntity(schemaType *ast.Definition) ([]*ast.Directive, bool) {
 		// ignore
 	}
 	return nil, false
+}
+
+func buildResolverSDL(
+	resolver *EntityResolver,
+	name string,
+	multi bool,
+) (resolverSDL string, entityResolverInputSDL string) {
+	if multi {
+		entityResolverInputSDL = buildEntityResolverInputDefinitionSDL(resolver)
+		resolverSDL := fmt.Sprintf("\t%s(reps: [%s]!): [%s]", resolver.ResolverName, resolver.InputTypeName, name)
+		return resolverSDL, entityResolverInputSDL
+	}
+
+	resolverArgs := ""
+	for _, keyField := range resolver.KeyFields {
+		resolverArgs += fmt.Sprintf("%s: %s,", keyField.Field.ToGoPrivate(), keyField.Definition.Type.String())
+	}
+	resolverSDL = fmt.Sprintf("\t%s(%s): %s!", resolver.ResolverName, resolverArgs, name)
+	return resolverSDL, ""
 }
 
 func buildEntityResolverInputDefinitionSDL(resolver *EntityResolver) string {

@@ -105,7 +105,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 						if err != nil {
 							return fmt.Errorf(`resolving Entity "{{$entity.Def.Name}}": %w`, err)
 						}
-						{{ if and (index $options "explicit_requires") $entity.Requires }}
+						{{ if and $options.ExplicitRequires $entity.Requires }}
 							err = ec.Populate{{$entity.Def.Name}}Requires(ctx, {{- if (not $usePointers) -}}&{{- end -}}entity, rep)
 							if err != nil {
 								return fmt.Errorf(`populating requires for Entity "{{$entity.Def.Name}}": %w`, err)

@@ -821,15 +821,19 @@ union _Entity = Hello | HelloMultiSingleKeys | HelloWithErrors | MultiHello | Mu
 input MultiHelloByNamesInput {
 	Name: String!
 }
+
 input MultiHelloMultipleRequiresByNamesInput {
 	Name: String!
 }
+
 input MultiHelloRequiresByNamesInput {
 	Name: String!
 }
+
 input MultiHelloWithErrorByNamesInput {
 	Name: String!
 }
+
 input MultiPlanetRequiresNestedByNamesInput {
 	Name: String!
 }

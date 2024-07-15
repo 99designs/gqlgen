@@ -171,15 +171,12 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 				if err != nil {
 					return fmt.Errorf(`resolving Entity "PlanetMultipleRequires": %w`, err)
 				}
+				weight, err := ec.resolvers.Entity().ComputePlanetMultipleRequiresWithDiameterAndDensity(ctx, entity)
+				if err != nil {
+					return fmt.Errorf(`computing requires for Entity.field "PlanetMultipleRequires.weight": %w`, err)
+				}
+				entity.Weight = weight
 
-				entity.Diameter, err = ec.unmarshalNInt2int(ctx, rep["diameter"])
-				if err != nil {
-					return err
-				}
-				entity.Density, err = ec.unmarshalNInt2int(ctx, rep["density"])
-				if err != nil {
-					return err
-				}
 				list[idx[i]] = entity
 				return nil
 			}
@@ -199,11 +196,12 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 				if err != nil {
 					return fmt.Errorf(`resolving Entity "PlanetRequires": %w`, err)
 				}
-
-				entity.Diameter, err = ec.unmarshalNInt2int(ctx, rep["diameter"])
+				size, err := ec.resolvers.Entity().ComputePlanetRequiresWithDiameter(ctx, entity)
 				if err != nil {
-					return err
+					return fmt.Errorf(`computing requires for Entity.field "PlanetRequires.size": %w`, err)
 				}
+				entity.Size = size
+
 				list[idx[i]] = entity
 				return nil
 			}
@@ -223,15 +221,17 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 				if err != nil {
 					return fmt.Errorf(`resolving Entity "PlanetRequiresNested": %w`, err)
 				}
+				size, err := ec.resolvers.Entity().ComputePlanetRequiresNestedWithWorldFoo(ctx, entity)
+				if err != nil {
+					return fmt.Errorf(`computing requires for Entity.field "PlanetRequiresNested.size": %w`, err)
+				}
+				entity.Size = size
+				sizes, err := ec.resolvers.Entity().ComputePlanetRequiresNestedWithWorldsFoo(ctx, entity)
+				if err != nil {
+					return fmt.Errorf(`computing requires for Entity.field "PlanetRequiresNested.sizes": %w`, err)
+				}
+				entity.Sizes = sizes
 
-				entity.World.Foo, err = ec.unmarshalNString2string(ctx, rep["world"].(map[string]interface{})["foo"])
-				if err != nil {
-					return err
-				}
-				entity.Worlds.Foo, err = ec.unmarshalNString2string(ctx, rep["worlds"].(map[string]interface{})["foo"])
-				if err != nil {
-					return err
-				}
 				list[idx[i]] = entity
 				return nil
 			}

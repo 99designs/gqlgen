@@ -105,7 +105,15 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 						if err != nil {
 							return fmt.Errorf(`resolving Entity "{{$entity.Def.Name}}": %w`, err)
 						}
-						{{ if and $options.ExplicitRequires $entity.Requires }}
+						{{- if $options.ComputedRequires }}
+							{{- range $i, $computedRequires := $entity.ComputedRequires }}
+							{{$computedRequires.FieldName}}, err := ec.resolvers.Entity().{{go $computedRequires.ResolverName}}(ctx, {{- if (not $usePointers) -}}&{{- end -}}entity)
+							if err != nil {
+								return fmt.Errorf(`computing requires for Entity.field "{{$entity.Def.Name}}.{{$computedRequires.FieldName}}": %w`, err)
+							}
+							entity.{{go $computedRequires.FieldName}} = {{$computedRequires.FieldName}}
+							{{- end }}
+						{{ else if and $options.ExplicitRequires $entity.Requires }}
 							err = ec.Populate{{$entity.Def.Name}}Requires(ctx, {{- if (not $usePointers) -}}&{{- end -}}entity, rep)
 							if err != nil {
 								return fmt.Errorf(`populating requires for Entity "{{$entity.Def.Name}}": %w`, err)

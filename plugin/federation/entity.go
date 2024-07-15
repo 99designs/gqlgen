@@ -30,6 +30,8 @@ type EntityResolver struct {
 	ReturnType     types.Type // The Go generated return type for the entity
 	ReturnTypeName string
 	NonNull        bool
+
+	FieldName string // TODO: we're probably going to have to separate ComputedRequires from EntityResolver
 }
 
 func (e *EntityResolver) LookupInputType() string {

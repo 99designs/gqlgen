@@ -661,6 +661,7 @@ func buildComputedRequiresForField(
 		InputTypeName:  "Compute" + resolverFieldsToGo + "Input",
 		ReturnTypeName: field.Type.Name(),
 		NonNull:        field.Type.NonNull,
+		FieldName:      field.Name,
 	}
 }
 

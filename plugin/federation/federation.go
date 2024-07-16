@@ -361,8 +361,12 @@ func (f *federation) GenerateCode(data *codegen.Data) error {
 
 		for name, entity := range requiresEntities {
 			populator := Populator{
-				FuncName: fmt.Sprintf("Populate%sRequires", name),
-				Entity:   entity,
+				Entity: entity,
+			}
+			if entity.Multi {
+				populator.FuncName = fmt.Sprintf("PopulateMany%sRequires", name)
+			} else {
+				populator.FuncName = fmt.Sprintf("Populate%sRequires", name)
 			}
 
 			populator.Comment = strings.TrimSpace(strings.TrimLeft(rewriter.GetMethodComment("executionContext", populator.FuncName), `\`))

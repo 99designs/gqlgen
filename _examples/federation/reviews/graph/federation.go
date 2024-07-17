@@ -46,26 +46,27 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		return list
 	case 1:
 		for typeName, reps := range repsMap {
-			ec.resolveEntityGroup(ctx, typeName, reps.entityRepresentations, reps.indexes, list)
+			ec.resolveEntityGroup(ctx, typeName, reps, list)
 		}
 		return list
 	default:
 		var g sync.WaitGroup
 		g.Add(len(repsMap))
 		for typeName, reps := range repsMap {
-			go func(typeName string, reps []EntityRepresentation, idx []int) {
-				ec.resolveEntityGroup(ctx, typeName, reps, idx, list)
+			go func(typeName string, reps []EntityWithIndex) {
+				ec.resolveEntityGroup(ctx, typeName, reps, list)
 				g.Done()
-			}(typeName, reps.entityRepresentations, reps.indexes)
+			}(typeName, reps)
 		}
 		g.Wait()
 		return list
 	}
 }
 
-type GroupedRepresentations struct {
-	indexes               []int
-	entityRepresentations []EntityRepresentation
+type EntityWithIndex struct {
+	// The index in the original representation array
+	index  int
+	entity EntityRepresentation
 }
 
 // EntityRepresentation is the JSON representation of an entity sent by the Router
@@ -79,8 +80,8 @@ type EntityRepresentation map[string]any
 func (ec *executionContext) buildRepresentationGroups(
 	ctx context.Context,
 	representations []map[string]any,
-) map[string]GroupedRepresentations {
-	repsMap := make(map[string]GroupedRepresentations)
+) map[string][]EntityWithIndex {
+	repsMap := make(map[string][]EntityWithIndex)
 	for i, rep := range representations {
 		typeName, ok := rep["__typename"].(string)
 		if !ok {
@@ -90,10 +91,10 @@ func (ec *executionContext) buildRepresentationGroups(
 			continue
 		}
 
-		groupedRepresentations := repsMap[typeName]
-		groupedRepresentations.indexes = append(groupedRepresentations.indexes, i)
-		groupedRepresentations.entityRepresentations = append(groupedRepresentations.entityRepresentations, rep)
-		repsMap[typeName] = groupedRepresentations
+		repsMap[typeName] = append(repsMap[typeName], EntityWithIndex{
+			index:  i,
+			entity: rep,
+		})
 	}
 
 	return repsMap
@@ -102,12 +103,11 @@ func (ec *executionContext) buildRepresentationGroups(
 func (ec *executionContext) resolveEntityGroup(
 	ctx context.Context,
 	typeName string,
-	reps []EntityRepresentation,
-	idx []int,
+	reps []EntityWithIndex,
 	list []fedruntime.Entity,
 ) {
 	if isMulti(typeName) {
-		err := ec.resolveManyEntities(ctx, typeName, reps, idx, list)
+		err := ec.resolveManyEntities(ctx, typeName, reps, list)
 		if err != nil {
 			ec.Error(ctx, err)
 		}
@@ -118,10 +118,12 @@ func (ec *executionContext) resolveEntityGroup(
 		e.Add(len(reps))
 		for i, rep := range reps {
 			i, rep := i, rep
-			go func(i int, rep EntityRepresentation) {
-				err := ec.resolveEntity(ctx, typeName, rep, idx, i, list)
+			go func(i int, rep EntityWithIndex) {
+				entity, err := ec.resolveEntity(ctx, typeName, rep.entity)
 				if err != nil {
 					ec.Error(ctx, err)
+				} else {
+					list[rep.index] = entity
 				}
 				e.Done()
 			}(i, rep)
@@ -141,9 +143,7 @@ func (ec *executionContext) resolveEntity(
 	ctx context.Context,
 	typeName string,
 	rep EntityRepresentation,
-	idx []int, i int,
-	list []fedruntime.Entity,
-) (err error) {
+) (e fedruntime.Entity, err error) {
 	// we need to do our own panic handling, because we may be called in a
 	// goroutine, where the usual panic handling can't catch us
 	defer func() {
@@ -156,65 +156,62 @@ func (ec *executionContext) resolveEntity(
 	case "Product":
 		resolverName, err := entityResolverNameForProduct(ctx, rep)
 		if err != nil {
-			return fmt.Errorf(`finding resolver for Entity "Product": %w`, err)
+			return nil, fmt.Errorf(`finding resolver for Entity "Product": %w`, err)
 		}
 		switch resolverName {
 
 		case "findProductByManufacturerIDAndID":
 			id0, err := ec.unmarshalNString2string(ctx, rep["manufacturer"].(EntityRepresentation)["id"])
 			if err != nil {
-				return fmt.Errorf(`unmarshalling param 0 for findProductByManufacturerIDAndID(): %w`, err)
+				return nil, fmt.Errorf(`unmarshalling param 0 for findProductByManufacturerIDAndID(): %w`, err)
 			}
 			id1, err := ec.unmarshalNString2string(ctx, rep["id"])
 			if err != nil {
-				return fmt.Errorf(`unmarshalling param 1 for findProductByManufacturerIDAndID(): %w`, err)
+				return nil, fmt.Errorf(`unmarshalling param 1 for findProductByManufacturerIDAndID(): %w`, err)
 			}
 			entity, err := ec.resolvers.Entity().FindProductByManufacturerIDAndID(ctx, id0, id1)
 			if err != nil {
-				return fmt.Errorf(`resolving Entity "Product": %w`, err)
+				return nil, fmt.Errorf(`resolving Entity "Product": %w`, err)
 			}
 
-			list[idx[i]] = entity
-			return nil
+			return entity, nil
 		}
 	case "User":
 		resolverName, err := entityResolverNameForUser(ctx, rep)
 		if err != nil {
-			return fmt.Errorf(`finding resolver for Entity "User": %w`, err)
+			return nil, fmt.Errorf(`finding resolver for Entity "User": %w`, err)
 		}
 		switch resolverName {
 
 		case "findUserByID":
 			id0, err := ec.unmarshalNID2string(ctx, rep["id"])
 			if err != nil {
-				return fmt.Errorf(`unmarshalling param 0 for findUserByID(): %w`, err)
+				return nil, fmt.Errorf(`unmarshalling param 0 for findUserByID(): %w`, err)
 			}
 			entity, err := ec.resolvers.Entity().FindUserByID(ctx, id0)
 			if err != nil {
-				return fmt.Errorf(`resolving Entity "User": %w`, err)
+				return nil, fmt.Errorf(`resolving Entity "User": %w`, err)
 			}
 
 			entity.Host.ID, err = ec.unmarshalNString2string(ctx, rep["host"].(EntityRepresentation)["id"])
 			if err != nil {
-				return err
+				return nil, err
 			}
 			entity.Email, err = ec.unmarshalNString2string(ctx, rep["email"])
 			if err != nil {
-				return err
+				return nil, err
 			}
-			list[idx[i]] = entity
-			return nil
+			return entity, nil
 		}
 
 	}
-	return fmt.Errorf("%w: %s", ErrUnknownType, typeName)
+	return nil, fmt.Errorf("%w: %s", ErrUnknownType, typeName)
 }
 
 func (ec *executionContext) resolveManyEntities(
 	ctx context.Context,
 	typeName string,
-	reps []EntityRepresentation,
-	idx []int,
+	reps []EntityWithIndex,
 	list []fedruntime.Entity,
 ) (err error) {
 	// we need to do our own panic handling, because we may be called in a

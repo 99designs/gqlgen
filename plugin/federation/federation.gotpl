@@ -36,214 +36,245 @@ func (ec *executionContext) __resolve__service(ctx context.Context) (fedruntime.
 func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]interface{}) []fedruntime.Entity {
 	list := make([]fedruntime.Entity, len(representations))
 
-	repsMap := map[string]struct {
-		i []int
-		r []map[string]interface{}
-	}{}
-
-	// We group entities by typename so that we can parallelize their resolution.
-	// This is particularly helpful when there are entity groups in multi mode.
-	buildRepresentationGroups := func(reps []map[string]interface{}) {
-		for i, rep := range reps {
-			typeName, ok := rep["__typename"].(string)
-			if !ok {
-				// If there is no __typename, we just skip the representation;
-				// we just won't be resolving these unknown types.
-				ec.Error(ctx, errors.New("__typename must be an existing string"))
-				continue
-			}
-
-			_r := repsMap[typeName]
-			_r.i = append(_r.i, i)
-			_r.r = append(_r.r, rep)
-			repsMap[typeName] = _r
-		}
-	}
-
-	isMulti := func(typeName string) bool {
-		switch typeName {
-		{{- range .Entities -}}
-			{{- if .Resolvers -}}
-				{{- if .Multi -}}
-			case "{{.Def.Name}}":
-				return true
-				{{ end }}
-			{{- end -}}
-		{{- end -}}
-		default:
-			return false
-		}
-	}
-
-	resolveEntity := func(ctx context.Context, typeName string, rep map[string]interface{}, idx []int, i int) (err error) {
-		// we need to do our own panic handling, because we may be called in a
-		// goroutine, where the usual panic handling can't catch us
-		defer func () {
-			if r := recover(); r != nil {
-				err = ec.Recover(ctx, r)
-			}
-		}()
-
-		switch typeName {
-			{{ range $_, $entity := .Entities }}
-				{{- if and .Resolvers (not .Multi) -}}
-				case "{{.Def.Name}}":
-					resolverName, err := entityResolverNameFor{{.Def.Name}}(ctx, rep)
-					if err != nil {
-						return fmt.Errorf(`finding resolver for Entity "{{.Def.Name}}": %w`, err)
-					}
-					switch resolverName {
-					{{ range $i, $resolver := .Resolvers }}
-					case "{{.ResolverName}}":
-						{{- range $j, $keyField := .KeyFields }}
-							id{{$j}}, err := ec.{{.Type.UnmarshalFunc}}(ctx, rep["{{.Field.Join `"].(map[string]interface{})["`}}"])
-							if err != nil {
-								return fmt.Errorf(`unmarshalling param {{$j}} for {{$resolver.ResolverName}}(): %w`, err)
-							}
-						{{- end}}
-						entity, err := ec.resolvers.Entity().{{.ResolverName | go}}(ctx, {{- range $j, $_ := .KeyFields -}} id{{$j}}, {{end}})
-						if err != nil {
-							return fmt.Errorf(`resolving Entity "{{$entity.Def.Name}}": %w`, err)
-						}
-						{{- if $options.ComputedRequires }}
-							{{- range $i, $computedRequires := $entity.ComputedRequires }}
-							{{$computedRequires.FieldName}}, err := ec.resolvers.Entity().{{go $computedRequires.ResolverName}}(ctx, {{- if (not $usePointers) -}}&{{- end -}}entity)
-							if err != nil {
-								return fmt.Errorf(`computing requires for Entity.field "{{$entity.Def.Name}}.{{$computedRequires.FieldName}}": %w`, err)
-							}
-							entity.{{go $computedRequires.FieldName}} = {{$computedRequires.FieldName}}
-							{{- end }}
-						{{ else if and $options.ExplicitRequires $entity.Requires }}
-							err = ec.Populate{{$entity.Def.Name}}Requires(ctx, {{- if (not $usePointers) -}}&{{- end -}}entity, rep)
-							if err != nil {
-								return fmt.Errorf(`populating requires for Entity "{{$entity.Def.Name}}": %w`, err)
-							}
-						{{- else }}
-							{{ range $entity.Requires }}
-								entity.{{.Field.JoinGo `.`}}, err = ec.{{.Type.UnmarshalFunc}}(ctx, rep["{{.Field.Join `"].(map[string]interface{})["`}}"])
-								if err != nil {
-									return err
-								}
-							{{- end }}
-						{{- end }}
-						list[idx[i]] = entity
-						return nil
-					{{- end }}
-					}
-				{{ end }}
-			{{- end }}
-		}
-		return fmt.Errorf("%w: %s", ErrUnknownType, typeName)
-	}
-
-	resolveManyEntities := func(ctx context.Context, typeName string, reps []map[string]interface{}, idx []int) (err error) {
-		// we need to do our own panic handling, because we may be called in a
-		// goroutine, where the usual panic handling can't catch us
-		defer func () {
-			if r := recover(); r != nil {
-				err = ec.Recover(ctx, r)
-			}
-		}()
-
-		switch typeName {
-			{{ range $_, $entity := .Entities }}
-				{{ if and .Resolvers .Multi -}}
-				case "{{.Def.Name}}":
-					resolverName, err := entityResolverNameFor{{.Def.Name}}(ctx, reps[0])
-					if err != nil {
-						return fmt.Errorf(`finding resolver for Entity "{{.Def.Name}}": %w`, err)
-					}
-					switch resolverName {
-					{{ range $i, $resolver := .Resolvers }}
-					case "{{.ResolverName}}":
-						_reps := make([]*{{.LookupInputType}}, len(reps))
-
-						for i, rep := range reps {
-							{{ range $i, $keyField := .KeyFields -}}
-								id{{$i}}, err := ec.{{.Type.UnmarshalFunc}}(ctx, rep["{{.Field.Join `"].(map[string]interface{})["`}}"])
-								if err != nil {
-									return errors.New(fmt.Sprintf("Field %s undefined in schema.", "{{.Definition.Name}}"))
-								}
-							{{end}}
-
-							_reps[i] = &{{.LookupInputType}} {
-							{{ range $i, $keyField := .KeyFields -}}
-								{{$keyField.Field.ToGo}}: id{{$i}},
-							{{end}}
-							}
-						}
-
-						entities, err := ec.resolvers.Entity().{{.ResolverName | go}}(ctx, _reps)
-						if err != nil {
-							return err
-						}
-
-						for i, entity := range entities {
-							{{- range $entity.Requires }}
-									entity.{{.Field.JoinGo `.`}}, err = ec.{{.Type.UnmarshalFunc}}(ctx, reps[i]["{{.Field.Join `"].(map[string]interface{})["`}}"])
-									if err != nil {
-										return err
-									}
-							{{- end}}
-							list[idx[i]] = entity
-						}
-						return nil
-					{{ end }}
-					default:
-                    	return fmt.Errorf("unknown resolver: %s", resolverName)
-					}
-				{{ end }}
-			{{- end }}
-		default:
-			return errors.New("unknown type: "+typeName)
-		}
-	}
-
-	resolveEntityGroup := func(typeName string, reps []map[string]interface{}, idx []int) {
-		if isMulti(typeName) {
-			err := resolveManyEntities(ctx, typeName, reps, idx)
-			if err != nil {
-				ec.Error(ctx, err)
-			}
-		} else {
-			// if there are multiple entities to resolve, parallelize (similar to
-			// graphql.FieldSet.Dispatch)
-			var e sync.WaitGroup
-			e.Add(len(reps))
-			for i, rep := range reps {
-				i, rep := i, rep
-				go func(i int, rep map[string]interface{}) {
-					err := resolveEntity(ctx, typeName, rep, idx, i)
-					if err != nil {
-						ec.Error(ctx, err)
-					}
-					e.Done()
-				}(i, rep)
-			}
-			e.Wait()
-		}
-	}
-	buildRepresentationGroups(representations)
+	repsMap := ec.buildRepresentationGroups(ctx, representations)
 
 	switch len(repsMap) {
 	case 0:
 		return list
 	case 1:
 		for typeName, reps := range repsMap {
-			resolveEntityGroup(typeName, reps.r, reps.i)
+			ec.resolveEntityGroup(ctx, typeName, reps.entityRepresentations, reps.indexes, list)
 		}
 		return list
 	default:
 		var g sync.WaitGroup
 		g.Add(len(repsMap))
 		for typeName, reps := range repsMap {
-			go func(typeName string, reps []map[string]interface{}, idx []int) {
-				resolveEntityGroup(typeName, reps, idx)
+			go func(typeName string, reps []EntityRepresentation, idx []int) {
+				ec.resolveEntityGroup(ctx, typeName, reps, idx, list)
 				g.Done()
-			}(typeName, reps.r, reps.i)
+			}(typeName, reps.entityRepresentations, reps.indexes)
 		}
 		g.Wait()
 		return list
+	}
+}
+
+type GroupedRepresentations struct {
+	indexes []int
+	entityRepresentations []EntityRepresentation
+}
+
+// EntityRepresentation is the JSON representation of an entity sent by the Router
+// used as the inputs for us to resolve.
+//
+// We make it a map because we know the top level JSON is always an object.
+type EntityRepresentation map[string]any
+
+// We group entities by typename so that we can parallelize their resolution.
+// This is particularly helpful when there are entity groups in multi mode.
+func (ec *executionContext) buildRepresentationGroups(
+	ctx context.Context,
+	representations []map[string]any,
+) map[string]GroupedRepresentations {
+	repsMap := make(map[string]GroupedRepresentations)
+	for i, rep := range representations {
+		typeName, ok := rep["__typename"].(string)
+		if !ok {
+			// If there is no __typename, we just skip the representation;
+			// we just won't be resolving these unknown types.
+			ec.Error(ctx, errors.New("__typename must be an existing string"))
+			continue
+		}
+
+		groupedRepresentations := repsMap[typeName]
+		groupedRepresentations.indexes = append(groupedRepresentations.indexes, i)
+		groupedRepresentations.entityRepresentations = append(groupedRepresentations.entityRepresentations, rep)
+		repsMap[typeName] = groupedRepresentations
+	}
+
+	return repsMap
+}
+
+func (ec *executionContext) resolveEntityGroup(
+	ctx context.Context,
+	typeName string,
+	reps []EntityRepresentation,
+	idx []int,
+	list []fedruntime.Entity,
+) {
+	if isMulti(typeName) {
+		err := ec.resolveManyEntities(ctx, typeName, reps, idx, list)
+		if err != nil {
+			ec.Error(ctx, err)
+		}
+	} else {
+		// if there are multiple entities to resolve, parallelize (similar to
+		// graphql.FieldSet.Dispatch)
+		var e sync.WaitGroup
+		e.Add(len(reps))
+		for i, rep := range reps {
+			i, rep := i, rep
+			go func(i int, rep EntityRepresentation) {
+				err := ec.resolveEntity(ctx, typeName, rep, idx, i, list)
+				if err != nil {
+					ec.Error(ctx, err)
+				}
+				e.Done()
+			}(i, rep)
+		}
+		e.Wait()
+	}
+}
+
+func isMulti(typeName string) bool {
+	switch typeName {
+	{{- range .Entities -}}
+		{{- if .Resolvers -}}
+			{{- if .Multi -}}
+		case "{{.Def.Name}}":
+			return true
+			{{ end }}
+		{{- end -}}
+	{{- end -}}
+	default:
+		return false
+	}
+}
+
+func (ec *executionContext) resolveEntity(
+	ctx context.Context,
+	typeName string,
+	rep EntityRepresentation,
+	idx []int, i int,
+	list []fedruntime.Entity,
+) (err error) {
+	// we need to do our own panic handling, because we may be called in a
+	// goroutine, where the usual panic handling can't catch us
+	defer func () {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+		}
+	}()
+
+	switch typeName {
+		{{ range $_, $entity := .Entities }}
+			{{- if and .Resolvers (not .Multi) -}}
+			case "{{.Def.Name}}":
+				resolverName, err := entityResolverNameFor{{.Def.Name}}(ctx, rep)
+				if err != nil {
+					return fmt.Errorf(`finding resolver for Entity "{{.Def.Name}}": %w`, err)
+				}
+				switch resolverName {
+				{{ range $i, $resolver := .Resolvers }}
+				case "{{.ResolverName}}":
+					{{- range $j, $keyField := .KeyFields }}
+						id{{$j}}, err := ec.{{.Type.UnmarshalFunc}}(ctx, rep["{{.Field.Join `"].(EntityRepresentation)["`}}"])
+						if err != nil {
+							return fmt.Errorf(`unmarshalling param {{$j}} for {{$resolver.ResolverName}}(): %w`, err)
+						}
+					{{- end}}
+					entity, err := ec.resolvers.Entity().{{.ResolverName | go}}(ctx, {{- range $j, $_ := .KeyFields -}} id{{$j}}, {{end}})
+					if err != nil {
+						return fmt.Errorf(`resolving Entity "{{$entity.Def.Name}}": %w`, err)
+					}
+					{{- if $options.ComputedRequires }}
+						{{- range $i, $computedRequires := $entity.ComputedRequires }}
+						{{$computedRequires.FieldName}}, err := ec.resolvers.Entity().{{go $computedRequires.ResolverName}}(ctx, {{- if (not $usePointers) -}}&{{- end -}}entity)
+						if err != nil {
+							return fmt.Errorf(`computing requires for Entity.field "{{$entity.Def.Name}}.{{$computedRequires.FieldName}}": %w`, err)
+						}
+						entity.{{go $computedRequires.FieldName}} = {{$computedRequires.FieldName}}
+						{{- end }}
+					{{ else if and $options.ExplicitRequires $entity.Requires }}
+						err = ec.Populate{{$entity.Def.Name}}Requires(ctx, {{- if (not $usePointers) -}}&{{- end -}}entity, rep)
+						if err != nil {
+							return fmt.Errorf(`populating requires for Entity "{{$entity.Def.Name}}": %w`, err)
+						}
+					{{- else }}
+						{{ range $entity.Requires }}
+							entity.{{.Field.JoinGo `.`}}, err = ec.{{.Type.UnmarshalFunc}}(ctx, rep["{{.Field.Join `"].(EntityRepresentation)["`}}"])
+							if err != nil {
+								return err
+							}
+						{{- end }}
+					{{- end }}
+					list[idx[i]] = entity
+					return nil
+				{{- end }}
+				}
+			{{ end }}
+		{{- end }}
+	}
+	return fmt.Errorf("%w: %s", ErrUnknownType, typeName)
+}
+
+func (ec *executionContext) resolveManyEntities(
+	ctx context.Context,
+	typeName string,
+	reps []EntityRepresentation,
+	idx []int,
+	list []fedruntime.Entity,
+) (err error) {
+	// we need to do our own panic handling, because we may be called in a
+	// goroutine, where the usual panic handling can't catch us
+	defer func () {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+		}
+	}()
+
+	switch typeName {
+		{{ range $_, $entity := .Entities }}
+			{{ if and .Resolvers .Multi -}}
+			case "{{.Def.Name}}":
+				resolverName, err := entityResolverNameFor{{.Def.Name}}(ctx, reps[0])
+				if err != nil {
+					return fmt.Errorf(`finding resolver for Entity "{{.Def.Name}}": %w`, err)
+				}
+				switch resolverName {
+				{{ range $i, $resolver := .Resolvers }}
+				case "{{.ResolverName}}":
+					_reps := make([]*{{.LookupInputType}}, len(reps))
+
+					for i, rep := range reps {
+						{{ range $i, $keyField := .KeyFields -}}
+							id{{$i}}, err := ec.{{.Type.UnmarshalFunc}}(ctx, rep["{{.Field.Join `"].(EntityRepresentation)["`}}"])
+							if err != nil {
+								return errors.New(fmt.Sprintf("Field %s undefined in schema.", "{{.Definition.Name}}"))
+							}
+						{{end}}
+
+						_reps[i] = &{{.LookupInputType}} {
+						{{ range $i, $keyField := .KeyFields -}}
+							{{$keyField.Field.ToGo}}: id{{$i}},
+						{{end}}
+						}
+					}
+
+					entities, err := ec.resolvers.Entity().{{.ResolverName | go}}(ctx, _reps)
+					if err != nil {
+						return err
+					}
+
+					for i, entity := range entities {
+						{{- range $entity.Requires }}
+								entity.{{.Field.JoinGo `.`}}, err = ec.{{.Type.UnmarshalFunc}}(ctx, reps[i]["{{.Field.Join `"].(EntityRepresentation)["`}}"])
+								if err != nil {
+									return err
+								}
+						{{- end}}
+						list[idx[i]] = entity
+					}
+					return nil
+				{{ end }}
+				default:
+					return fmt.Errorf("unknown resolver: %s", resolverName)
+				}
+			{{ end }}
+		{{- end }}
+	default:
+		return errors.New("unknown type: "+typeName)
 	}
 }
 
@@ -252,13 +283,13 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 {{ range $_, $entity := .Entities }}
 	{{- if .Resolvers }}
 
-		func entityResolverNameFor{{$entity.Name}}(ctx context.Context, rep map[string]interface{}) (string, error) {
+		func entityResolverNameFor{{$entity.Name}}(ctx context.Context, rep EntityRepresentation) (string, error) {
 			{{- range .Resolvers }}
 				for {
 					var (
-						m    map[string]interface{}
+						m   EntityRepresentation
 						val interface{}
-						ok bool
+						ok  bool
 					)
 					_ = val
 					// if all of the KeyFields values for this resolver are null,

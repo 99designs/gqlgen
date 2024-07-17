@@ -28,9 +28,10 @@ type Data struct {
 	// If a single Data instance is used for the entire schema, AllDirectives and Directives()
 	// will be identical.
 	// AllDirectives should rarely be used directly.
-	AllDirectives   DirectiveList
-	Objects         Objects
-	Inputs          Objects
+	AllDirectives DirectiveList
+	Objects       Objects
+	Inputs        Objects
+	// AdditionalResolvers Resolvers
 	Interfaces      map[string]*Interface
 	ReferencedTypes map[string]*config.TypeReference
 	ComplexityRoots map[string]*Object

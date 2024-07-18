@@ -23,7 +23,16 @@ func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
 	}, nil
 }
 
+// Host is the resolver for the host field.
+func (r *userResolver) Host(ctx context.Context, obj *model.User) (*model.EmailHost, error) {
+	return r.HostForUserID(obj.ID)
+}
+
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
+// User returns UserResolver implementation.
+func (r *Resolver) User() UserResolver { return &userResolver{r} }
+
 type queryResolver struct{ *Resolver }
+type userResolver struct{ *Resolver }

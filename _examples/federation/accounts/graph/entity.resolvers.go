@@ -12,10 +12,7 @@ import (
 
 // FindEmailHostByID is the resolver for the findEmailHostByID field.
 func (r *entityResolver) FindEmailHostByID(ctx context.Context, id string) (*model.EmailHost, error) {
-	return &model.EmailHost{
-		ID:   id,
-		Name: "Email Host " + id,
-	}, nil
+	return r.HostForUserID(id)
 }
 
 // FindUserByID is the resolver for the findUserByID field.

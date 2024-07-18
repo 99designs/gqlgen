@@ -292,76 +292,161 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_MyMutation_createTodo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 TodoInput
-	if tmp, ok := rawArgs["todo"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("todo"))
-		arg0, err = ec.unmarshalNTodoInput2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋtypeᚑsystemᚑextensionᚐTodoInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_MyMutation_createTodo_argsTodo(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["todo"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_MyMutation_createTodo_argsTodo(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (TodoInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["todo"]
+	if !ok {
+		var zeroVal TodoInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("todo"))
+	if tmp, ok := rawArgs["todo"]; ok {
+		return ec.unmarshalNTodoInput2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋtypeᚑsystemᚑextensionᚐTodoInput(ctx, tmp)
+	}
+
+	var zeroVal TodoInput
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_MyQuery___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["name"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_MyQuery___type_argsName(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["name"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_MyQuery___type_argsName(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["name"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+	if tmp, ok := rawArgs["name"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_MyQuery_todo_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["id"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-		arg0, err = ec.unmarshalNID2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_MyQuery_todo_argsID(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["id"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_MyQuery_todo_argsID(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["id"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+	if tmp, ok := rawArgs["id"]; ok {
+		return ec.unmarshalNID2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field___Type_enumValues_argsIncludeDeprecated(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field___Type_enumValues_argsIncludeDeprecated(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (bool, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["includeDeprecated"]
+	if !ok {
+		var zeroVal bool
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		return ec.unmarshalOBoolean2bool(ctx, tmp)
+	}
+
+	var zeroVal bool
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 bool
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field___Type_fields_argsIncludeDeprecated(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (bool, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["includeDeprecated"]
+	if !ok {
+		var zeroVal bool
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		return ec.unmarshalOBoolean2bool(ctx, tmp)
+	}
+
+	var zeroVal bool
+	return zeroVal, nil
 }
 
 // endregion ***************************** args.gotpl *****************************
@@ -389,9 +474,11 @@ func (ec *executionContext) _MyMutation_createTodo(ctx context.Context, field gr
 			ctx = rctx // use context from middleware stack in children
 			return ec.resolvers.MyMutation().CreateTodo(rctx, fc.Args["todo"].(TodoInput))
 		}
+
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			if ec.directives.ObjectLogging == nil {
-				return nil, errors.New("directive objectLogging is not implemented")
+				var zeroVal *Todo
+				return zeroVal, errors.New("directive objectLogging is not implemented")
 			}
 			return ec.directives.ObjectLogging(ctx, nil, directive0)
 		}
@@ -474,9 +561,11 @@ func (ec *executionContext) _MyQuery_todos(ctx context.Context, field graphql.Co
 			ctx = rctx // use context from middleware stack in children
 			return ec.resolvers.MyQuery().Todos(rctx)
 		}
+
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			if ec.directives.ObjectLogging == nil {
-				return nil, errors.New("directive objectLogging is not implemented")
+				var zeroVal []*Todo
+				return zeroVal, errors.New("directive objectLogging is not implemented")
 			}
 			return ec.directives.ObjectLogging(ctx, nil, directive0)
 		}
@@ -548,9 +637,11 @@ func (ec *executionContext) _MyQuery_todo(ctx context.Context, field graphql.Col
 			ctx = rctx // use context from middleware stack in children
 			return ec.resolvers.MyQuery().Todo(rctx, fc.Args["id"].(string))
 		}
+
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			if ec.directives.ObjectLogging == nil {
-				return nil, errors.New("directive objectLogging is not implemented")
+				var zeroVal *Todo
+				return zeroVal, errors.New("directive objectLogging is not implemented")
 			}
 			return ec.directives.ObjectLogging(ctx, nil, directive0)
 		}
@@ -891,9 +982,11 @@ func (ec *executionContext) _Todo_verified(ctx context.Context, field graphql.Co
 			ctx = rctx // use context from middleware stack in children
 			return obj.Verified, nil
 		}
+
 		directive1 := func(ctx context.Context) (interface{}, error) {
 			if ec.directives.FieldLogging == nil {
-				return nil, errors.New("directive fieldLogging is not implemented")
+				var zeroVal bool
+				return zeroVal, errors.New("directive fieldLogging is not implemented")
 			}
 			return ec.directives.FieldLogging(ctx, obj, directive0)
 		}
@@ -2728,9 +2821,11 @@ func (ec *executionContext) unmarshalInputTodoInput(ctx context.Context, obj int
 		case "text":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("text"))
 			directive0 := func(ctx context.Context) (interface{}, error) { return ec.unmarshalNString2string(ctx, v) }
+
 			directive1 := func(ctx context.Context) (interface{}, error) {
 				if ec.directives.InputLogging == nil {
-					return nil, errors.New("directive inputLogging is not implemented")
+					var zeroVal string
+					return zeroVal, errors.New("directive inputLogging is not implemented")
 				}
 				return ec.directives.InputLogging(ctx, obj, directive0)
 			}

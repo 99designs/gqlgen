@@ -170,7 +170,6 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 				if err != nil {
 					return fmt.Errorf(`resolving Entity "PlanetMultipleRequires": %w`, err)
 				}
-
 				err = ec.PopulatePlanetMultipleRequiresRequires(ctx, entity, rep)
 				if err != nil {
 					return fmt.Errorf(`populating requires for Entity "PlanetMultipleRequires": %w`, err)
@@ -194,7 +193,6 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 				if err != nil {
 					return fmt.Errorf(`resolving Entity "PlanetRequires": %w`, err)
 				}
-
 				err = ec.PopulatePlanetRequiresRequires(ctx, entity, rep)
 				if err != nil {
 					return fmt.Errorf(`populating requires for Entity "PlanetRequires": %w`, err)
@@ -218,7 +216,6 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 				if err != nil {
 					return fmt.Errorf(`resolving Entity "PlanetRequiresNested": %w`, err)
 				}
-
 				err = ec.PopulatePlanetRequiresNestedRequires(ctx, entity, rep)
 				if err != nil {
 					return fmt.Errorf(`populating requires for Entity "PlanetRequiresNested": %w`, err)

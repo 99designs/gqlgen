@@ -32,18 +32,32 @@ type EarlySourcesInjector interface {
 	InjectSourcesEarly() ([]*ast.Source, error)
 }
 
+// EarlyOperationSourcesInjector is used to inject operations that are required for user schema files
+// to compile. This is mainly used to generated models for Federation directive selection
+// sets like @key(fields: "id") and @requires(fields: "id").
+type EarlyOperationSourcesInjector interface {
+	InjectOperationSourcesEarly() ([]string, error)
+}
+
 // LateSourceInjector is used to inject more sources, after we have loaded the users schema.
 // Deprecated: Use LateSourcesInjector instead
 type LateSourceInjector interface {
 	InjectSourceLate(schema *ast.Schema) *ast.Source
 }
 
-// ResolverImplementer is used to generate code inside resolvers
-type ResolverImplementer interface {
-	Implement(prevImplementation string, field *codegen.Field) string
-}
-
 // LateSourcesInjector is used to inject more sources, after we have loaded the users schema.
 type LateSourcesInjector interface {
 	InjectSourcesLate(schema *ast.Schema) ([]*ast.Source, error)
+}
+
+// LateOperationSourcesInjector is used to inject more operations sources after we've loaded the
+// user's schema. This is mainly used to generated models for Federation directive selection
+// sets like @key(fields: "id") and @requires(fields: "id").
+type LateOperationSourcesInjector interface {
+	InjectOperationSourcesLate(schema *ast.Schema) ([]string, error)
+}
+
+// ResolverImplementer is used to generate code inside resolvers
+type ResolverImplementer interface {
+	Implement(prevImplementation string, field *codegen.Field) string
 }

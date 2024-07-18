@@ -50,8 +50,10 @@ type Config struct {
 	SkipValidation                 bool                       `yaml:"skip_validation,omitempty"`
 	SkipModTidy                    bool                       `yaml:"skip_mod_tidy,omitempty"`
 	Sources                        []*ast.Source              `yaml:"-"`
+	OperationSources               []string                   `yaml:"-"`
 	Packages                       *code.Packages             `yaml:"-"`
 	Schema                         *ast.Schema                `yaml:"-"`
+	Operations                     *ast.QueryDocument         `yaml:"-"`
 
 	// Deprecated: use Federation instead. Will be removed next release
 	Federated bool `yaml:"federated,omitempty"`
@@ -839,6 +841,24 @@ func (c *Config) LoadSchema() error {
 	}
 
 	c.Schema = schema
+
+	return c.loadOperations()
+}
+
+func (c *Config) loadOperations() error {
+	if len(c.OperationSources) == 0 {
+		return nil
+	}
+
+	operations, err := gqlparser.LoadQuery(
+		c.Schema,
+		strings.Join(c.OperationSources, ""),
+	)
+	if err != nil {
+		return err
+	}
+
+	c.Operations = operations
 	return nil
 }
 

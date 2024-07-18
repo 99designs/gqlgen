@@ -1,3 +1,6 @@
+directive @goField(forceResolver: Boolean, name: String, omittable: Boolean) on INPUT_FIELD_DEFINITION
+    | FIELD_DEFINITION
+
 extend type EmailHost @key(fields: "id") {
     id: String! @external
 }
@@ -22,7 +25,7 @@ extend type User @key(fields: "id") {
 
 type Review {
     body: String!
-    author: User! @provides(fields: "username")
+    author: User! @provides(fields: "username") @goField(forceResolver: true)
     product: Product!
 }
 

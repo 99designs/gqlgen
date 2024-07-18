@@ -18,15 +18,20 @@ import (
 type Data struct {
 	Config *config.Config
 	Schema *ast.Schema
+	// For Federation directive selection sets like @key.fields and @requires.fields
+	// we model them as fragments and generate models for them. These models are used
+	// to unmarshall the representations from the Federation router.
+	Operations *ast.QueryDocument
 	// If a schema is broken up into multiple Data instance, each representing part of the schema,
 	// AllDirectives should contain the directives for the entire schema. Directives() can
 	// then be used to get the directives that were defined in this Data instance's sources.
 	// If a single Data instance is used for the entire schema, AllDirectives and Directives()
 	// will be identical.
 	// AllDirectives should rarely be used directly.
-	AllDirectives   DirectiveList
-	Objects         Objects
-	Inputs          Objects
+	AllDirectives DirectiveList
+	Objects       Objects
+	Inputs        Objects
+	// AdditionalResolvers Resolvers
 	Interfaces      map[string]*Interface
 	ReferencedTypes map[string]*config.TypeReference
 	ComplexityRoots map[string]*Object
@@ -106,6 +111,7 @@ func BuildData(cfg *config.Config, plugins ...any) (*Data, error) {
 		Config:        cfg,
 		AllDirectives: dataDirectives,
 		Schema:        b.Schema,
+		Operations:    cfg.Operations,
 		Interfaces:    map[string]*Interface{},
 		Plugins:       plugins,
 	}

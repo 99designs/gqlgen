@@ -11,6 +11,25 @@ import (
 	"github.com/99designs/gqlgen/plugin/federation/fieldset"
 )
 
+func TestNew(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success", func(t *testing.T) {
+		plugin, err := New(1, map[string]bool{})
+		assert.NoError(t, err)
+		assert.NotNil(t, plugin)
+	})
+
+	t.Run("both explicit and computed set", func(t *testing.T) {
+		plugin, err := New(1, map[string]bool{
+			"explicit_requires": true,
+			"computed_requires": true,
+		})
+		assert.Error(t, err)
+		assert.Nil(t, plugin)
+	})
+}
+
 func TestWithEntities(t *testing.T) {
 	f, cfg := load(t, "testdata/allthethings/gqlgen.yml")
 

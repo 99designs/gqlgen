@@ -11,6 +11,11 @@ import (
 	"github.com/99designs/gqlgen/_examples/federation/reviews/graph/model"
 )
 
+// Author is the resolver for the author field.
+func (r *reviewResolver) Author(ctx context.Context, obj *model.Review) (*model.User, error) {
+	panic(fmt.Errorf("not implemented: Author - author"))
+}
+
 // Username is the resolver for the username field.
 func (r *userResolver) Username(ctx context.Context, obj *model.User) (string, error) {
 	panic(fmt.Errorf("not implemented: Username - username"))
@@ -27,7 +32,11 @@ func (r *userResolver) Reviews(ctx context.Context, obj *model.User) ([]*model.R
 	return productReviews, nil
 }
 
+// Review returns ReviewResolver implementation.
+func (r *Resolver) Review() ReviewResolver { return &reviewResolver{r} }
+
 // User returns UserResolver implementation.
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
+type reviewResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }

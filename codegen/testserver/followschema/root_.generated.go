@@ -63,8 +63,10 @@ type DirectiveRoot struct {
 	Logged        func(ctx context.Context, obj interface{}, next graphql.Resolver, id string) (res interface{}, err error)
 	MakeNil       func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 	MakeTypedNil  func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+	Noop          func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 	Order1        func(ctx context.Context, obj interface{}, next graphql.Resolver, location string) (res interface{}, err error)
 	Order2        func(ctx context.Context, obj interface{}, next graphql.Resolver, location string) (res interface{}, err error)
+	Populate      func(ctx context.Context, obj interface{}, next graphql.Resolver, value string) (res interface{}, err error)
 	Range         func(ctx context.Context, obj interface{}, next graphql.Resolver, min *int, max *int) (res interface{}, err error)
 	ToNull        func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 	Unimplemented func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
@@ -337,6 +339,7 @@ type ComplexityRoot struct {
 		DirectiveNullableArg             func(childComplexity int, arg *int, arg2 *int, arg3 *string) int
 		DirectiveObject                  func(childComplexity int) int
 		DirectiveObjectWithCustomGoModel func(childComplexity int) int
+		DirectiveSingleNullableArg       func(childComplexity int, arg1 *string) int
 		DirectiveUnimplemented           func(childComplexity int) int
 		Dog                              func(childComplexity int) int
 		EmbeddedCase1                    func(childComplexity int) int
@@ -1398,6 +1401,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.DirectiveObjectWithCustomGoModel(childComplexity), true
+
+	case "Query.directiveSingleNullableArg":
+		if e.complexity.Query.DirectiveSingleNullableArg == nil {
+			break
+		}
+
+		args, err := ec.field_Query_directiveSingleNullableArg_args(context.TODO(), rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.DirectiveSingleNullableArg(childComplexity, args["arg1"].(*string)), true
 
 	case "Query.directiveUnimplemented":
 		if e.complexity.Query.DirectiveUnimplemented == nil {

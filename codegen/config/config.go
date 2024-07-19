@@ -320,21 +320,30 @@ func (c *Config) injectTypesFromSchema() error {
 			}
 		}
 
-		if schemaType.Kind == ast.Object || schemaType.Kind == ast.InputObject {
+		if schemaType.Kind == ast.Object ||
+			schemaType.Kind == ast.InputObject ||
+			schemaType.Kind == ast.Interface {
 			for _, field := range schemaType.Fields {
 				if fd := field.Directives.ForName("goField"); fd != nil {
 					forceResolver := c.Models[schemaType.Name].Fields[field.Name].Resolver
-					fieldName := c.Models[schemaType.Name].Fields[field.Name].FieldName
-
 					if ra := fd.Arguments.ForName("forceResolver"); ra != nil {
 						if fr, err := ra.Value.Value(nil); err == nil {
 							forceResolver = fr.(bool)
 						}
 					}
 
+					fieldName := c.Models[schemaType.Name].Fields[field.Name].FieldName
 					if na := fd.Arguments.ForName("name"); na != nil {
 						if fr, err := na.Value.Value(nil); err == nil {
 							fieldName = fr.(string)
+						}
+					}
+
+					omittable := c.Models[schemaType.Name].Fields[field.Name].Omittable
+					if arg := fd.Arguments.ForName("omittable"); arg != nil {
+						if k, err := arg.Value.Value(nil); err == nil {
+							val := k.(bool)
+							omittable = &val
 						}
 					}
 
@@ -349,6 +358,7 @@ func (c *Config) injectTypesFromSchema() error {
 					c.Models[schemaType.Name].Fields[field.Name] = TypeMapField{
 						FieldName: fieldName,
 						Resolver:  forceResolver,
+						Omittable: omittable,
 					}
 				}
 			}
@@ -449,6 +459,7 @@ type TypeMapEntry struct {
 type TypeMapField struct {
 	Resolver        bool   `yaml:"resolver"`
 	FieldName       string `yaml:"fieldName"`
+	Omittable       *bool  `yaml:"omittable"`
 	GeneratedMethod string `yaml:"-"`
 }
 

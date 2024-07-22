@@ -456,577 +456,271 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query___type_argsName(ctx, rawArgs)
-	if err != nil {
-		return nil, err
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
 	}
 	args["name"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query___type_argsName(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["name"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-	if tmp, ok := rawArgs["name"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_boolTypedN_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_boolTypedN_argsArg(ctx, rawArgs)
-	if err != nil {
-		return nil, err
+	var arg0 *model.BoolTyped
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalOBoolTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTyped(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_boolTypedN_argsArg(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (*model.BoolTyped, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
-		var zeroVal *model.BoolTyped
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalOBoolTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTyped(ctx, tmp)
-	}
-
-	var zeroVal *model.BoolTyped
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_boolTyped_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_boolTyped_argsArg(ctx, rawArgs)
-	if err != nil {
-		return nil, err
+	var arg0 model.BoolTyped
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalNBoolTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTyped(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_boolTyped_argsArg(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (model.BoolTyped, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
-		var zeroVal model.BoolTyped
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalNBoolTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTyped(ctx, tmp)
-	}
-
-	var zeroVal model.BoolTyped
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_boolUntypedN_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_boolUntypedN_argsArg(ctx, rawArgs)
-	if err != nil {
-		return nil, err
+	var arg0 *bool
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalOBoolUntyped2ᚖbool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_boolUntypedN_argsArg(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (*bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
-		var zeroVal *bool
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalOBoolUntyped2ᚖbool(ctx, tmp)
-	}
-
-	var zeroVal *bool
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_boolUntyped_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_boolUntyped_argsArg(ctx, rawArgs)
-	if err != nil {
-		return nil, err
+	var arg0 bool
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalNBoolUntyped2bool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_boolUntyped_argsArg(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
-		var zeroVal bool
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalNBoolUntyped2bool(ctx, tmp)
-	}
-
-	var zeroVal bool
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_inPackage_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_inPackage_argsArg(ctx, rawArgs)
-	if err != nil {
-		return nil, err
+	var arg0 InPackage
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalNInPackage2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋapiᚐInPackage(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_inPackage_argsArg(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (InPackage, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
-		var zeroVal InPackage
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalNInPackage2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋapiᚐInPackage(ctx, tmp)
-	}
-
-	var zeroVal InPackage
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_intTypedN_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_intTypedN_argsArg(ctx, rawArgs)
-	if err != nil {
-		return nil, err
+	var arg0 *model.IntTyped
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalOIntTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_intTypedN_argsArg(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (*model.IntTyped, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
-		var zeroVal *model.IntTyped
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalOIntTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped(ctx, tmp)
-	}
-
-	var zeroVal *model.IntTyped
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_intTyped_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_intTyped_argsArg(ctx, rawArgs)
-	if err != nil {
-		return nil, err
+	var arg0 model.IntTyped
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalNIntTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_intTyped_argsArg(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (model.IntTyped, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
-		var zeroVal model.IntTyped
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalNIntTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped(ctx, tmp)
-	}
-
-	var zeroVal model.IntTyped
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_intUntypedN_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_intUntypedN_argsArg(ctx, rawArgs)
-	if err != nil {
-		return nil, err
+	var arg0 *int
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalOIntUntyped2ᚖint(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_intUntypedN_argsArg(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
-		var zeroVal *int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalOIntUntyped2ᚖint(ctx, tmp)
-	}
-
-	var zeroVal *int
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_intUntyped_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_intUntyped_argsArg(ctx, rawArgs)
-	if err != nil {
-		return nil, err
+	var arg0 int
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalNIntUntyped2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_intUntyped_argsArg(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
-		var zeroVal int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalNIntUntyped2int(ctx, tmp)
-	}
-
-	var zeroVal int
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_stringTypedN_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_stringTypedN_argsArg(ctx, rawArgs)
-	if err != nil {
-		return nil, err
+	var arg0 *model.StringTyped
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalOStringTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTyped(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_stringTypedN_argsArg(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (*model.StringTyped, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
-		var zeroVal *model.StringTyped
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalOStringTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTyped(ctx, tmp)
-	}
-
-	var zeroVal *model.StringTyped
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_stringTyped_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_stringTyped_argsArg(ctx, rawArgs)
-	if err != nil {
-		return nil, err
+	var arg0 model.StringTyped
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalNStringTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTyped(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_stringTyped_argsArg(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (model.StringTyped, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
-		var zeroVal model.StringTyped
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalNStringTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTyped(ctx, tmp)
-	}
-
-	var zeroVal model.StringTyped
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_stringUntypedN_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_stringUntypedN_argsArg(ctx, rawArgs)
-	if err != nil {
-		return nil, err
+	var arg0 *string
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalOStringUntyped2ᚖstring(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_stringUntypedN_argsArg(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
-		var zeroVal *string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalOStringUntyped2ᚖstring(ctx, tmp)
-	}
-
-	var zeroVal *string
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_stringUntyped_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_stringUntyped_argsArg(ctx, rawArgs)
-	if err != nil {
-		return nil, err
+	var arg0 string
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalNStringUntyped2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_stringUntyped_argsArg(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalNStringUntyped2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_varTyped_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_varTyped_argsArg(ctx, rawArgs)
-	if err != nil {
-		return nil, err
+	var arg0 model.VarTyped
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalNVarTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐVarTyped(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_varTyped_argsArg(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (model.VarTyped, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
-		var zeroVal model.VarTyped
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalNVarTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐVarTyped(ctx, tmp)
-	}
-
-	var zeroVal model.VarTyped
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_varUntyped_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_varUntyped_argsArg(ctx, rawArgs)
-	if err != nil {
-		return nil, err
+	var arg0 bool
+	if tmp, ok := rawArgs["arg"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
+		arg0, err = ec.unmarshalNVarUntyped2bool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_varUntyped_argsArg(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
-		var zeroVal bool
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalNVarUntyped2bool(ctx, tmp)
-	}
-
-	var zeroVal bool
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field___Type_enumValues_argsIncludeDeprecated(ctx, rawArgs)
-	if err != nil {
-		return nil, err
+	var arg0 bool
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
+		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field___Type_enumValues_argsIncludeDeprecated(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["includeDeprecated"]
-	if !ok {
-		var zeroVal bool
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		return ec.unmarshalOBoolean2bool(ctx, tmp)
-	}
-
-	var zeroVal bool
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field___Type_fields_argsIncludeDeprecated(ctx, rawArgs)
-	if err != nil {
-		return nil, err
+	var arg0 bool
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
+		arg0, err = ec.unmarshalOBoolean2bool(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["includeDeprecated"]
-	if !ok {
-		var zeroVal bool
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		return ec.unmarshalOBoolean2bool(ctx, tmp)
-	}
-
-	var zeroVal bool
-	return zeroVal, nil
 }
 
 // endregion ***************************** args.gotpl *****************************

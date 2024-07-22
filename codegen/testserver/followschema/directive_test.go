@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -13,17 +12,6 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 )
-
-// isNil checks if the given value is nil
-func isNil(input any) bool {
-	if input == nil {
-		return true
-	}
-	// Using reflect to check if the value is nil. This is necessary for
-	// for any types that are not nil types but have a nil value (e.g. *string).
-	value := reflect.ValueOf(input)
-	return value.IsNil()
-}
 
 type ckey string
 
@@ -43,14 +31,6 @@ func TestDirectives(t *testing.T) {
 	}
 
 	resolvers.QueryResolver.DirectiveNullableArg = func(ctx context.Context, arg *int, arg2 *int, arg3 *string) (*string, error) {
-		return &ok, nil
-	}
-
-	resolvers.QueryResolver.DirectiveSingleNullableArg = func(ctx context.Context, arg1 *string) (*string, error) {
-		if arg1 != nil {
-			return arg1, nil
-		}
-
 		return &ok, nil
 	}
 
@@ -139,10 +119,6 @@ func TestDirectives(t *testing.T) {
 					return nil, err
 				}
 
-				if isNil(res) {
-					return res, err
-				}
-
 				switch res := res.(type) {
 				case int:
 					if min != nil && res < *min {
@@ -181,21 +157,6 @@ func TestDirectives(t *testing.T) {
 			},
 			ToNull: func(ctx context.Context, obj any, next graphql.Resolver) (any, error) {
 				return nil, nil
-			},
-			Populate: func(ctx context.Context, obj any, next graphql.Resolver, value string) (any, error) {
-				res, err := next(ctx)
-				if err != nil {
-					return nil, err
-				}
-
-				if !isNil(res) {
-					return res, err
-				}
-
-				return &value, nil
-			},
-			Noop: func(ctx context.Context, obj any, next graphql.Resolver) (any, error) {
-				return next(ctx)
 			},
 			Directive1: func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
 				return next(ctx)
@@ -286,17 +247,6 @@ func TestDirectives(t *testing.T) {
 
 			require.NoError(t, err)
 			require.Equal(t, "Ok", *resp.DirectiveArg)
-		})
-
-		t.Run("directive is not called with null arguments", func(t *testing.T) {
-			var resp struct {
-				DirectiveSingleNullableArg *string
-			}
-
-			err := c.Post(`query { directiveSingleNullableArg }`, &resp)
-
-			require.NoError(t, err)
-			require.Equal(t, "Ok", *resp.DirectiveSingleNullableArg)
 		})
 	})
 	t.Run("field definition directives", func(t *testing.T) {

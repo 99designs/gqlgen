@@ -29,65 +29,31 @@ type WrappedSliceResolver interface {
 func (ec *executionContext) field_WrappedMap_get_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_WrappedMap_get_argsKey(ctx, rawArgs)
-	if err != nil {
-		return nil, err
+	var arg0 string
+	if tmp, ok := rawArgs["key"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("key"))
+		arg0, err = ec.unmarshalNString2string(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
 	}
 	args["key"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_WrappedMap_get_argsKey(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["key"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("key"))
-	if tmp, ok := rawArgs["key"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_WrappedSlice_get_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_WrappedSlice_get_argsIdx(ctx, rawArgs)
-	if err != nil {
-		return nil, err
+	var arg0 int
+	if tmp, ok := rawArgs["idx"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("idx"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
 	}
 	args["idx"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_WrappedSlice_get_argsIdx(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["idx"]
-	if !ok {
-		var zeroVal int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("idx"))
-	if tmp, ok := rawArgs["idx"]; ok {
-		return ec.unmarshalNInt2int(ctx, tmp)
-	}
-
-	var zeroVal int
-	return zeroVal, nil
 }
 
 // endregion ***************************** args.gotpl *****************************

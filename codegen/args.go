@@ -18,13 +18,12 @@ type ArgSet struct {
 
 type FieldArgument struct {
 	*ast.ArgumentDefinition
-	TypeReference                  *config.TypeReference
-	VarName                        string  // The name of the var in go
-	Object                         *Object // A link back to the parent object
-	Default                        any     // The default value
-	Directives                     []*Directive
-	Value                          any // value set in Data
-	CallArgumentDirectivesWithNull bool
+	TypeReference *config.TypeReference
+	VarName       string  // The name of the var in go
+	Object        *Object // A link back to the parent object
+	Default       any     // The default value
+	Directives    []*Directive
+	Value         any // value set in Data
 }
 
 // ImplDirectives get not Builtin and location ARGUMENT_DEFINITION directive
@@ -58,12 +57,11 @@ func (b *builder) buildArg(obj *Object, arg *ast.ArgumentDefinition) (*FieldArgu
 		return nil, err
 	}
 	newArg := FieldArgument{
-		ArgumentDefinition:             arg,
-		TypeReference:                  tr,
-		Object:                         obj,
-		VarName:                        templates.ToGoPrivate(arg.Name),
-		Directives:                     argDirs,
-		CallArgumentDirectivesWithNull: b.Config.CallArgumentDirectivesWithNull,
+		ArgumentDefinition: arg,
+		TypeReference:      tr,
+		Object:             obj,
+		VarName:            templates.ToGoPrivate(arg.Name),
+		Directives:         argDirs,
 	}
 
 	if arg.DefaultValue != nil {

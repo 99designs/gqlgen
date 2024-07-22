@@ -21,33 +21,16 @@ import (
 func (ec *executionContext) field_VariadicModel_value_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_VariadicModel_value_argsRank(ctx, rawArgs)
-	if err != nil {
-		return nil, err
+	var arg0 int
+	if tmp, ok := rawArgs["rank"]; ok {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("rank"))
+		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
+		if err != nil {
+			return nil, err
+		}
 	}
 	args["rank"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_VariadicModel_value_argsRank(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["rank"]
-	if !ok {
-		var zeroVal int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("rank"))
-	if tmp, ok := rawArgs["rank"]; ok {
-		return ec.unmarshalNInt2int(ctx, tmp)
-	}
-
-	var zeroVal int
-	return zeroVal, nil
 }
 
 // endregion ***************************** args.gotpl *****************************

@@ -1,25 +1,21 @@
 {{ define "implDirectives" }}{{ $in := .DirectiveObjName }}
-	{{ $zeroVal := .TypeReference.GO | ref}}
 	{{- range $i, $directive := .ImplDirectives -}}
 		directive{{add $i 1}} := func(ctx context.Context) (interface{}, error) {
 			{{- range $arg := $directive.Args }}
 				{{- if notNil "Value" $arg }}
 						{{ $arg.VarName }}, err := ec.{{ $arg.TypeReference.UnmarshalFunc }}(ctx, {{ $arg.Value | dump }})
 						if err != nil{
-							var zeroVal {{$zeroVal}}
-							return zeroVal, err
+							return nil, err
 						}
 					{{- else if notNil "Default" $arg }}
 						{{ $arg.VarName }}, err := ec.{{ $arg.TypeReference.UnmarshalFunc }}(ctx, {{ $arg.Default | dump }})
 						if err != nil{
-							var zeroVal {{$zeroVal}}
-							return zeroVal, err
+							return nil, err
 						}
 					{{- end }}
 			{{- end }}
 			if ec.directives.{{$directive.Name|ucFirst}} == nil {
-				var zeroVal {{$zeroVal}}
-				return zeroVal, errors.New("directive {{$directive.Name}} is not implemented")
+				return nil, errors.New("directive {{$directive.Name}} is not implemented")
 			}
 			return ec.directives.{{$directive.Name|ucFirst}}({{$directive.ResolveArgs $in $i }})
 		}

@@ -188,7 +188,7 @@ func (r *Rewriter) RemainingSource(filename string) string {
 				continue
 			}
 
-			if d, isGen := d.(*ast.GenDecl); isGen && d.Tok == token.IMPORT {
+			if d, isGen := d.(*ast.GenDecl); isGen && (d.Tok == token.IMPORT || d.Tok == token.VAR || d.Tok == token.TYPE) {
 				continue
 			}
 

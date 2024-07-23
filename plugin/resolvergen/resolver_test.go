@@ -29,6 +29,28 @@ func TestLayoutSingleFile(t *testing.T) {
 	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/testdata/singlefile/out")
 }
 
+func TestLayoutSingleFileWhenResolverExists(t *testing.T) {
+	// Ensure the resolver file exists before running the test
+	resolverFilePath := "testdata/singlefile/out/resolver.go"
+	_, err := os.Stat(resolverFilePath)
+	if os.IsNotExist(err) {
+		t.Fatalf("Expected resolver file does not exist: %s", resolverFilePath)
+	}
+	require.NoError(t, err)
+
+	cfg, err := config.LoadConfig("testdata/singlefile/gqlgen.yml")
+	require.NoError(t, err)
+	p := Plugin{}
+
+	require.NoError(t, cfg.Init())
+
+	data, err := codegen.BuildData(cfg)
+	require.NoError(t, err)
+
+	require.NoError(t, p.GenerateCode(data))
+	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/testdata/singlefile/out")
+}
+
 func TestLayoutFollowSchema(t *testing.T) {
 	testFollowSchemaPersistence(t, "testdata/followschema")
 

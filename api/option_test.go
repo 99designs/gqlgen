@@ -53,6 +53,10 @@ func TestReplacePlugin(t *testing.T) {
 		require.EqualValues(t, resolvergen.New(), pg[1])
 		require.EqualValues(t, expectedPlugin, pg[2])
 	})
+
+	t.Run("do nothing if plugins is nil", func(t *testing.T) {
+		ReplacePlugin(&testPlugin{})(config.DefaultConfig(), nil)
+	})
 }
 
 func TestPrependPlugin(t *testing.T) {

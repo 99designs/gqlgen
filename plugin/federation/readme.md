@@ -18,7 +18,7 @@ TODO(miguel): add details.
 
 # Entity resolvers - GetMany entities
 
-The federation plugin implements `GetMany` semantics in which entity resolvers get the entire list of representations that need to be resolved. This functionality is currently optin tho, and to enable it you need to specify the directive `@entityResolver` in the federated entity you want this feature for.  E.g.
+The federation plugin implements `GetMany` semantics in which entity resolvers get the entire list of representations that need to be resolved. This functionality is currently option tho, and to enable it you need to specify the directive `@entityResolver` in the federated entity you want this feature for.  E.g.
 
 ```
 directive @entityResolver(multi: Boolean) on OBJECT

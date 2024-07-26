@@ -675,7 +675,7 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 		h := testserver.New()
 		closeFuncCalled := make(chan bool, 1)
 		h.AddTransport(transport.Websocket{
-			MissingPongOk:    false, // default value but beign explicit for test clarity.
+			MissingPongOk:    false, // default value but being explicit for test clarity.
 			PingPongInterval: 5 * time.Millisecond,
 			CloseFunc: func(_ context.Context, _closeCode int) {
 				closeFuncCalled <- true

@@ -229,7 +229,7 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 }
 
 // findBindTarget attempts to match the name to a field or method on a Type
-// with the following priorites:
+// with the following priorities:
 // 1. Any Fields with a struct tag (see config.StructTag). Errors if more than one match is found
 // 2. Any method or field with a matching name. Errors if more than one match is found
 // 3. Same logic again for embedded fields

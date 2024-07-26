@@ -41,7 +41,7 @@ func TestImports(t *testing.T) {
 		require.Equal(t, "bar", a.Lookup(aBar))
 		require.Equal(t, "bar1", a.Lookup(bBar))
 
-		t.Run("additionial calls get decollisioned name", func(t *testing.T) {
+		t.Run("additional calls get decollisioned name", func(t *testing.T) {
 			require.Equal(t, "bar1", a.Lookup(bBar))
 		})
 	})

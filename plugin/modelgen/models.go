@@ -389,8 +389,8 @@ func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition) 
 		}
 
 		name := templates.ToGo(field.Name)
-		if nameOveride := cfg.Models[schemaType.Name].Fields[field.Name].FieldName; nameOveride != "" {
-			name = nameOveride
+		if nameOverride := cfg.Models[schemaType.Name].Fields[field.Name].FieldName; nameOverride != "" {
+			name = nameOverride
 		}
 
 		typ = binder.CopyModifiersFromAst(field.Type, typ)

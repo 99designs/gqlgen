@@ -14,7 +14,7 @@ type GoInitialismsConfig struct {
 	Initialisms []string `yaml:"initialisms"`
 }
 
-// setInitialisms adjustes GetInitialisms based on its settings.
+// setInitialisms adjusts GetInitialisms based on its settings.
 func (i GoInitialismsConfig) setInitialisms() {
 	toUse := i.determineGoInitialisms()
 	templates.GetInitialisms = func() map[string]bool {
@@ -22,7 +22,7 @@ func (i GoInitialismsConfig) setInitialisms() {
 	}
 }
 
-// determineGoInitialisms returns the Go initialims to be used, based on its settings.
+// determineGoInitialisms returns the Go initialisms to be used, based on its settings.
 func (i GoInitialismsConfig) determineGoInitialisms() (initialismsToUse map[string]bool) {
 	if i.ReplaceDefaults {
 		initialismsToUse = make(map[string]bool, len(i.Initialisms))

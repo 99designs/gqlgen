@@ -332,6 +332,23 @@ func TestModelGenerationOmitResolverFields(t *testing.T) {
 	require.NotContains(t, string(generated), "ResolverField")
 }
 
+func TestModelGenerationOmitResolverFieldsWithExplicitResolver(t *testing.T) {
+	cfg, err := config.LoadConfig("testdata/gqlgen_omit_resolver_fields_with_explicit_resolver.yml")
+	require.NoError(t, err)
+	require.NoError(t, cfg.Init())
+	p := Plugin{
+		MutateHook: mutateHook,
+		FieldHook:  DefaultFieldMutateHook,
+	}
+	require.NoError(t, p.MutateConfig(cfg))
+	require.NoError(t, goBuild(t, "./out_omit_resolver_fields_with_explicit_resolver/"))
+	generated, err := os.ReadFile("./out_omit_resolver_fields_with_explicit_resolver/generated.go")
+	require.NoError(t, err)
+	require.Contains(t, string(generated), "type Base struct")
+	require.Contains(t, string(generated), "StandardField")
+	require.NotContains(t, string(generated), "ResolverField")
+}
+
 func TestModelGenerationStructFieldPointers(t *testing.T) {
 	cfg, err := config.LoadConfig("testdata/gqlgen_struct_field_pointers.yml")
 	require.NoError(t, err)

@@ -1,0 +1,14 @@
+schema:
+  - "testdata/schema_omit_resolver_fields_with_explicit_resolver.graphql"
+
+exec:
+  filename: out_omit_resolver_fields_with_explict_resolver/ignored.go
+model:
+  filename: out_omit_resolver_fields_with_explicit_resolver/generated.go
+
+omit_resolver_fields: true
+models:
+  Base:
+    fields:
+      ResolverField:
+        resolver: true

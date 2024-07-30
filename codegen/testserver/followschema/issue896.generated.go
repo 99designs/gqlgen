@@ -133,7 +133,7 @@ func (ec *executionContext) marshalOCheckIssue8962ᚕᚖgithubᚗcomᚋ99designs
 	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
+	isLen1 := true
 	if !isLen1 {
 		wg.Add(len(v))
 	}
@@ -174,7 +174,7 @@ func (ec *executionContext) marshalOCheckIssue8962ᚕᚖgithubᚗcomᚋ99designs
 	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
+	isLen1 := true
 	if !isLen1 {
 		wg.Add(len(v))
 	}

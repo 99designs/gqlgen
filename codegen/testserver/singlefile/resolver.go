@@ -262,6 +262,11 @@ func (r *queryResolver) DirectiveUnimplemented(ctx context.Context) (*string, er
 	panic("not implemented")
 }
 
+// DirectiveConcurrent is the resolver for the directiveConcurrent field.
+func (r *queryResolver) DirectiveConcurrent(ctx context.Context) ([]*ObjectDirectivesWithCustomGoModel, error) {
+	panic("not implemented")
+}
+
 // EmbeddedCase1 is the resolver for the embeddedCase1 field.
 func (r *queryResolver) EmbeddedCase1(ctx context.Context) (*EmbeddedCase1, error) {
 	panic("not implemented")

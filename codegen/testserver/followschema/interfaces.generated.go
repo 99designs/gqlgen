@@ -1878,7 +1878,7 @@ func (ec *executionContext) marshalOShape2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
+	isLen1 := true
 	if !isLen1 {
 		wg.Add(len(v))
 	}

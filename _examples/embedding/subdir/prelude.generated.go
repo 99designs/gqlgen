@@ -2227,7 +2227,7 @@ func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlge
 func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Directive) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
+	isLen1 := true
 	if !isLen1 {
 		wg.Add(len(v))
 	}
@@ -2303,7 +2303,7 @@ func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx conte
 func (ec *executionContext) marshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
+	isLen1 := true
 	if !isLen1 {
 		wg.Add(len(v))
 	}
@@ -2359,7 +2359,7 @@ func (ec *executionContext) marshalN__InputValue2githubᚗcomᚋ99designsᚋgqlg
 func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
+	isLen1 := true
 	if !isLen1 {
 		wg.Add(len(v))
 	}
@@ -2407,7 +2407,7 @@ func (ec *executionContext) marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋg
 func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
+	isLen1 := true
 	if !isLen1 {
 		wg.Add(len(v))
 	}
@@ -2531,7 +2531,7 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
+	isLen1 := true
 	if !isLen1 {
 		wg.Add(len(v))
 	}
@@ -2578,7 +2578,7 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
+	isLen1 := true
 	if !isLen1 {
 		wg.Add(len(v))
 	}
@@ -2625,7 +2625,7 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
+	isLen1 := true
 	if !isLen1 {
 		wg.Add(len(v))
 	}
@@ -2679,7 +2679,7 @@ func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
+	isLen1 := true
 	if !isLen1 {
 		wg.Add(len(v))
 	}

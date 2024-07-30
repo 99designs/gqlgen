@@ -67,6 +67,12 @@ func TestDirectives(t *testing.T) {
 		return &ok, nil
 	}
 
+	resolvers.QueryResolver.DirectiveConcurrent = func(ctx context.Context) ([]*ObjectDirectivesWithCustomGoModel, error) {
+		return []*ObjectDirectivesWithCustomGoModel{{
+			NullableText: ok,
+		}}, nil
+	}
+
 	okchan := func() (<-chan *string, error) {
 		res := make(chan *string, 1)
 		res <- &ok
@@ -150,6 +156,9 @@ func TestDirectives(t *testing.T) {
 				return nil, fmt.Errorf("unsupported type %T", res)
 			},
 			Custom: func(ctx context.Context, obj any, next graphql.Resolver) (any, error) {
+				return next(ctx)
+			},
+			Concurrent: func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
 				return next(ctx)
 			},
 			Logged: func(ctx context.Context, obj any, next graphql.Resolver, id string) (any, error) {

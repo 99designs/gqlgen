@@ -101,7 +101,11 @@
 				ret := make(graphql.Array, len(v))
 				{{- if not $type.IsScalar }}
 					var wg sync.WaitGroup
-					isLen1 := len(v) == 1
+					{{- if $type.Definition.Directives.ForName "concurrent" }}
+						isLen1 := len(v) == 1
+					{{- else }}
+						isLen1 := true
+					{{- end }}
 					if !isLen1 {
 						wg.Add(len(v))
 					}

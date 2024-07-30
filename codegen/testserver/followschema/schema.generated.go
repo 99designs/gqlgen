@@ -62,6 +62,7 @@ type QueryResolver interface {
 	DirectiveField(ctx context.Context) (*string, error)
 	DirectiveDouble(ctx context.Context) (*string, error)
 	DirectiveUnimplemented(ctx context.Context) (*string, error)
+	DirectiveConcurrent(ctx context.Context) ([]*ObjectDirectivesWithCustomGoModel, error)
 	EmbeddedCase1(ctx context.Context) (*EmbeddedCase1, error)
 	EmbeddedCase2(ctx context.Context) (*EmbeddedCase2, error)
 	EmbeddedCase3(ctx context.Context) (*EmbeddedCase3, error)
@@ -2739,8 +2740,28 @@ func (ec *executionContext) _Query_directiveObjectWithCustomGoModel(ctx context.
 		}
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().DirectiveObjectWithCustomGoModel(rctx)
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().DirectiveObjectWithCustomGoModel(rctx)
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.Concurrent == nil {
+				return nil, errors.New("directive concurrent is not implemented")
+			}
+			return ec.directives.Concurrent(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.(*ObjectDirectivesWithCustomGoModel); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/codegen/testserver/followschema.ObjectDirectivesWithCustomGoModel`, tmp)
 	})
 
 	if resTmp == nil {
@@ -3003,6 +3024,71 @@ func (ec *executionContext) fieldContext_Query_directiveUnimplemented(_ context.
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_directiveConcurrent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_directiveConcurrent(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (interface{}, error) {
+			ctx = rctx // use context from middleware stack in children
+			return ec.resolvers.Query().DirectiveConcurrent(rctx)
+		}
+		directive1 := func(ctx context.Context) (interface{}, error) {
+			if ec.directives.Concurrent == nil {
+				return nil, errors.New("directive concurrent is not implemented")
+			}
+			return ec.directives.Concurrent(ctx, nil, directive0)
+		}
+
+		tmp, err := directive1(rctx)
+		if err != nil {
+			return nil, graphql.ErrorOnPath(ctx, err)
+		}
+		if tmp == nil {
+			return nil, nil
+		}
+		if data, ok := tmp.([]*ObjectDirectivesWithCustomGoModel); ok {
+			return data, nil
+		}
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/codegen/testserver/followschema.ObjectDirectivesWithCustomGoModel`, tmp)
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]*ObjectDirectivesWithCustomGoModel)
+	fc.Result = res
+	return ec.marshalNObjectDirectivesWithCustomGoModel2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐObjectDirectivesWithCustomGoModelᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_directiveConcurrent(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "nullableText":
+				return ec.fieldContext_ObjectDirectivesWithCustomGoModel_nullableText(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ObjectDirectivesWithCustomGoModel", field.Name)
 		},
 	}
 	return fc, nil
@@ -7084,6 +7170,28 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "directiveConcurrent":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_directiveConcurrent(ctx, field)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "embeddedCase1":
 			field := field
 
@@ -8178,7 +8286,7 @@ func (ec *executionContext) marshalNUser2githubᚗcomᚋ99designsᚋgqlgenᚋcod
 func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*User) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
+	isLen1 := true
 	if !isLen1 {
 		wg.Add(len(v))
 	}
@@ -8319,7 +8427,7 @@ func (ec *executionContext) marshalOOuterObject2ᚕᚕᚖgithubᚗcomᚋ99design
 	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
+	isLen1 := true
 	if !isLen1 {
 		wg.Add(len(v))
 	}
@@ -8360,7 +8468,7 @@ func (ec *executionContext) marshalOOuterObject2ᚕᚖgithubᚗcomᚋ99designs�
 	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
+	isLen1 := true
 	if !isLen1 {
 		wg.Add(len(v))
 	}
@@ -8408,7 +8516,7 @@ func (ec *executionContext) marshalOPet2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgen�
 	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
+	isLen1 := true
 	if !isLen1 {
 		wg.Add(len(v))
 	}

@@ -450,7 +450,7 @@ func (ec *executionContext) marshalNPrimitive2githubᚗcomᚋ99designsᚋgqlgen�
 func (ec *executionContext) marshalNPrimitive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPrimitiveᚄ(ctx context.Context, sel ast.SelectionSet, v []Primitive) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
+	isLen1 := true
 	if !isLen1 {
 		wg.Add(len(v))
 	}
@@ -498,7 +498,7 @@ func (ec *executionContext) marshalNPrimitiveString2githubᚗcomᚋ99designsᚋg
 func (ec *executionContext) marshalNPrimitiveString2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPrimitiveStringᚄ(ctx context.Context, sel ast.SelectionSet, v []PrimitiveString) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
+	isLen1 := true
 	if !isLen1 {
 		wg.Add(len(v))
 	}

@@ -263,6 +263,10 @@ type ComplexityRoot struct {
 		Text         func(childComplexity int) int
 	}
 
+	ObjectDirectivesConcurrent struct {
+		Key func(childComplexity int) int
+	}
+
 	ObjectDirectivesWithCustomGoModel struct {
 		NullableText func(childComplexity int) int
 	}
@@ -1058,6 +1062,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ObjectDirectives.Text(childComplexity), true
+
+	case "ObjectDirectivesConcurrent.key":
+		if e.complexity.ObjectDirectivesConcurrent.Key == nil {
+			break
+		}
+
+		return e.complexity.ObjectDirectivesConcurrent.Key(childComplexity), true
 
 	case "ObjectDirectivesWithCustomGoModel.nullableText":
 		if e.complexity.ObjectDirectivesWithCustomGoModel.NullableText == nil {

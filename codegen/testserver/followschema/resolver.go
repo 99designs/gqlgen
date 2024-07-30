@@ -263,7 +263,7 @@ func (r *queryResolver) DirectiveUnimplemented(ctx context.Context) (*string, er
 }
 
 // DirectiveConcurrent is the resolver for the directiveConcurrent field.
-func (r *queryResolver) DirectiveConcurrent(ctx context.Context) ([]*ObjectDirectivesWithCustomGoModel, error) {
+func (r *queryResolver) DirectiveConcurrent(ctx context.Context) ([]*ObjectDirectivesConcurrent, error) {
 	panic("not implemented")
 }
 

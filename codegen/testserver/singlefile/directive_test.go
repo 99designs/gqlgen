@@ -1,9 +1,11 @@
 package singlefile
 
 import (
+	"cmp"
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -67,10 +69,15 @@ func TestDirectives(t *testing.T) {
 		return &ok, nil
 	}
 
-	resolvers.QueryResolver.DirectiveConcurrent = func(ctx context.Context) ([]*ObjectDirectivesWithCustomGoModel, error) {
-		return []*ObjectDirectivesWithCustomGoModel{{
-			NullableText: ok,
-		}}, nil
+	resolvers.QueryResolver.DirectiveConcurrent = func(ctx context.Context) ([]*ObjectDirectivesConcurrent, error) {
+		return []*ObjectDirectivesConcurrent{
+			{
+				Key: 1,
+			},
+			{
+				Key: 2,
+			},
+		}, nil
 	}
 
 	okchan := func() (<-chan *string, error) {
@@ -417,6 +424,26 @@ func TestDirectives(t *testing.T) {
 			require.NoError(t, err)
 			require.Nil(t, resp.DirectiveObjectWithCustomGoModel.NullableText)
 		})
+	})
+	t.Run("concurrent directive", func(t *testing.T) {
+		var resp struct {
+			DirectiveConcurrent []struct {
+				Key int
+			}
+		}
+
+		err := c.Post(`query { directiveConcurrent{ key } }`, &resp)
+		slices.SortFunc(resp.DirectiveConcurrent, func(a, b struct{ Key int }) int {
+			return cmp.Compare(a.Key, b.Key)
+		})
+
+		keys := make([]int, 0, len(resp.DirectiveConcurrent))
+		for _, dc := range resp.DirectiveConcurrent {
+			keys = append(keys, dc.Key)
+		}
+
+		require.NoError(t, err)
+		require.Equal(t, []int{1, 2}, keys)
 	})
 
 	t.Run("Subscription directives", func(t *testing.T) {

@@ -62,7 +62,7 @@ type QueryResolver interface {
 	DirectiveField(ctx context.Context) (*string, error)
 	DirectiveDouble(ctx context.Context) (*string, error)
 	DirectiveUnimplemented(ctx context.Context) (*string, error)
-	DirectiveConcurrent(ctx context.Context) ([]*ObjectDirectivesWithCustomGoModel, error)
+	DirectiveConcurrent(ctx context.Context) ([]*ObjectDirectivesConcurrent, error)
 	EmbeddedCase1(ctx context.Context) (*EmbeddedCase1, error)
 	EmbeddedCase2(ctx context.Context) (*EmbeddedCase2, error)
 	EmbeddedCase3(ctx context.Context) (*EmbeddedCase3, error)
@@ -2740,28 +2740,8 @@ func (ec *executionContext) _Query_directiveObjectWithCustomGoModel(ctx context.
 		}
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().DirectiveObjectWithCustomGoModel(rctx)
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			if ec.directives.Concurrent == nil {
-				return nil, errors.New("directive concurrent is not implemented")
-			}
-			return ec.directives.Concurrent(ctx, nil, directive0)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(*ObjectDirectivesWithCustomGoModel); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/codegen/testserver/followschema.ObjectDirectivesWithCustomGoModel`, tmp)
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().DirectiveObjectWithCustomGoModel(rctx)
 	})
 
 	if resTmp == nil {
@@ -3060,10 +3040,10 @@ func (ec *executionContext) _Query_directiveConcurrent(ctx context.Context, fiel
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.([]*ObjectDirectivesWithCustomGoModel); ok {
+		if data, ok := tmp.([]*ObjectDirectivesConcurrent); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/codegen/testserver/followschema.ObjectDirectivesWithCustomGoModel`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/codegen/testserver/followschema.ObjectDirectivesConcurrent`, tmp)
 	})
 
 	if resTmp == nil {
@@ -3072,9 +3052,9 @@ func (ec *executionContext) _Query_directiveConcurrent(ctx context.Context, fiel
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*ObjectDirectivesWithCustomGoModel)
+	res := resTmp.([]*ObjectDirectivesConcurrent)
 	fc.Result = res
-	return ec.marshalNObjectDirectivesWithCustomGoModel2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐObjectDirectivesWithCustomGoModelᚄ(ctx, field.Selections, res)
+	return ec.marshalNObjectDirectivesConcurrent2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐObjectDirectivesConcurrentᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_directiveConcurrent(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3085,10 +3065,10 @@ func (ec *executionContext) fieldContext_Query_directiveConcurrent(_ context.Con
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "nullableText":
-				return ec.fieldContext_ObjectDirectivesWithCustomGoModel_nullableText(ctx, field)
+			case "key":
+				return ec.fieldContext_ObjectDirectivesConcurrent_key(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type ObjectDirectivesWithCustomGoModel", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type ObjectDirectivesConcurrent", field.Name)
 		},
 	}
 	return fc, nil

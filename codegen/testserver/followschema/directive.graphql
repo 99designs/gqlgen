@@ -23,7 +23,7 @@ extend type Query {
     directiveField: String
     directiveDouble: String @directive1 @directive2
     directiveUnimplemented: String @unimplemented
-    directiveConcurrent: [ObjectDirectivesWithCustomGoModel!]!
+    directiveConcurrent: [ObjectDirectivesConcurrent!]!
 }
 
 extend type Subscription {
@@ -51,6 +51,10 @@ type ObjectDirectives @order1(location: "order1_1") @order1(location: "order1_2"
     order: [String!]!
 }
 
-type ObjectDirectivesWithCustomGoModel @concurrent {
+type ObjectDirectivesWithCustomGoModel {
     nullableText: String @toNull
+}
+
+type ObjectDirectivesConcurrent @concurrent {
+    key: Int!
 }

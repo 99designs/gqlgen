@@ -272,6 +272,10 @@ type ComplexityRoot struct {
 		Text         func(childComplexity int) int
 	}
 
+	ObjectDirectivesConcurrent struct {
+		Key func(childComplexity int) int
+	}
+
 	ObjectDirectivesWithCustomGoModel struct {
 		NullableText func(childComplexity int) int
 	}
@@ -565,7 +569,7 @@ type QueryResolver interface {
 	DirectiveField(ctx context.Context) (*string, error)
 	DirectiveDouble(ctx context.Context) (*string, error)
 	DirectiveUnimplemented(ctx context.Context) (*string, error)
-	DirectiveConcurrent(ctx context.Context) ([]*ObjectDirectivesWithCustomGoModel, error)
+	DirectiveConcurrent(ctx context.Context) ([]*ObjectDirectivesConcurrent, error)
 	EmbeddedCase1(ctx context.Context) (*EmbeddedCase1, error)
 	EmbeddedCase2(ctx context.Context) (*EmbeddedCase2, error)
 	EmbeddedCase3(ctx context.Context) (*EmbeddedCase3, error)
@@ -1211,6 +1215,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ObjectDirectives.Text(childComplexity), true
+
+	case "ObjectDirectivesConcurrent.key":
+		if e.complexity.ObjectDirectivesConcurrent.Key == nil {
+			break
+		}
+
+		return e.complexity.ObjectDirectivesConcurrent.Key(childComplexity), true
 
 	case "ObjectDirectivesWithCustomGoModel.nullableText":
 		if e.complexity.ObjectDirectivesWithCustomGoModel.NullableText == nil {
@@ -7003,6 +7014,47 @@ func (ec *executionContext) fieldContext_ObjectDirectives_order(_ context.Contex
 	return fc, nil
 }
 
+func (ec *executionContext) _ObjectDirectivesConcurrent_key(ctx context.Context, field graphql.CollectedField, obj *ObjectDirectivesConcurrent) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_ObjectDirectivesConcurrent_key(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Key, nil
+	})
+
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_ObjectDirectivesConcurrent_key(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ObjectDirectivesConcurrent",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _ObjectDirectivesWithCustomGoModel_nullableText(ctx context.Context, field graphql.CollectedField, obj *ObjectDirectivesWithCustomGoModel) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_ObjectDirectivesWithCustomGoModel_nullableText(ctx, field)
 	if err != nil {
@@ -9360,28 +9412,8 @@ func (ec *executionContext) _Query_directiveObjectWithCustomGoModel(ctx context.
 		}
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Query().DirectiveObjectWithCustomGoModel(rctx)
-		}
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			if ec.directives.Concurrent == nil {
-				return nil, errors.New("directive concurrent is not implemented")
-			}
-			return ec.directives.Concurrent(ctx, nil, directive0)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(*ObjectDirectivesWithCustomGoModel); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/codegen/testserver/singlefile.ObjectDirectivesWithCustomGoModel`, tmp)
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().DirectiveObjectWithCustomGoModel(rctx)
 	})
 
 	if resTmp == nil {
@@ -9680,10 +9712,10 @@ func (ec *executionContext) _Query_directiveConcurrent(ctx context.Context, fiel
 		if tmp == nil {
 			return nil, nil
 		}
-		if data, ok := tmp.([]*ObjectDirectivesWithCustomGoModel); ok {
+		if data, ok := tmp.([]*ObjectDirectivesConcurrent); ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/codegen/testserver/singlefile.ObjectDirectivesWithCustomGoModel`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/codegen/testserver/singlefile.ObjectDirectivesConcurrent`, tmp)
 	})
 
 	if resTmp == nil {
@@ -9692,9 +9724,9 @@ func (ec *executionContext) _Query_directiveConcurrent(ctx context.Context, fiel
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]*ObjectDirectivesWithCustomGoModel)
+	res := resTmp.([]*ObjectDirectivesConcurrent)
 	fc.Result = res
-	return ec.marshalNObjectDirectivesWithCustomGoModel2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐObjectDirectivesWithCustomGoModelᚄ(ctx, field.Selections, res)
+	return ec.marshalNObjectDirectivesConcurrent2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐObjectDirectivesConcurrentᚄ(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_directiveConcurrent(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -9705,10 +9737,10 @@ func (ec *executionContext) fieldContext_Query_directiveConcurrent(_ context.Con
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "nullableText":
-				return ec.fieldContext_ObjectDirectivesWithCustomGoModel_nullableText(ctx, field)
+			case "key":
+				return ec.fieldContext_ObjectDirectivesConcurrent_key(ctx, field)
 			}
-			return nil, fmt.Errorf("no field named %q was found under type ObjectDirectivesWithCustomGoModel", field.Name)
+			return nil, fmt.Errorf("no field named %q was found under type ObjectDirectivesConcurrent", field.Name)
 		},
 	}
 	return fc, nil
@@ -18259,6 +18291,45 @@ func (ec *executionContext) _ObjectDirectives(ctx context.Context, sel ast.Selec
 	return out
 }
 
+var objectDirectivesConcurrentImplementors = []string{"ObjectDirectivesConcurrent"}
+
+func (ec *executionContext) _ObjectDirectivesConcurrent(ctx context.Context, sel ast.SelectionSet, obj *ObjectDirectivesConcurrent) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, objectDirectivesConcurrentImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ObjectDirectivesConcurrent")
+		case "key":
+			out.Values[i] = ec._ObjectDirectivesConcurrent_key(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var objectDirectivesWithCustomGoModelImplementors = []string{"ObjectDirectivesWithCustomGoModel"}
 
 func (ec *executionContext) _ObjectDirectivesWithCustomGoModel(ctx context.Context, sel ast.SelectionSet, obj *ObjectDirectivesWithCustomGoModel) graphql.Marshaler {
@@ -21989,7 +22060,7 @@ func (ec *executionContext) marshalNNode2githubᚗcomᚋ99designsᚋgqlgenᚋcod
 	return ec._Node(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNObjectDirectivesWithCustomGoModel2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐObjectDirectivesWithCustomGoModelᚄ(ctx context.Context, sel ast.SelectionSet, v []*ObjectDirectivesWithCustomGoModel) graphql.Marshaler {
+func (ec *executionContext) marshalNObjectDirectivesConcurrent2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐObjectDirectivesConcurrentᚄ(ctx context.Context, sel ast.SelectionSet, v []*ObjectDirectivesConcurrent) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
@@ -22013,7 +22084,7 @@ func (ec *executionContext) marshalNObjectDirectivesWithCustomGoModel2ᚕᚖgith
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNObjectDirectivesWithCustomGoModel2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐObjectDirectivesWithCustomGoModel(ctx, sel, v[i])
+			ret[i] = ec.marshalNObjectDirectivesConcurrent2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐObjectDirectivesConcurrent(ctx, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -22033,14 +22104,14 @@ func (ec *executionContext) marshalNObjectDirectivesWithCustomGoModel2ᚕᚖgith
 	return ret
 }
 
-func (ec *executionContext) marshalNObjectDirectivesWithCustomGoModel2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐObjectDirectivesWithCustomGoModel(ctx context.Context, sel ast.SelectionSet, v *ObjectDirectivesWithCustomGoModel) graphql.Marshaler {
+func (ec *executionContext) marshalNObjectDirectivesConcurrent2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐObjectDirectivesConcurrent(ctx context.Context, sel ast.SelectionSet, v *ObjectDirectivesConcurrent) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
 		return graphql.Null
 	}
-	return ec._ObjectDirectivesWithCustomGoModel(ctx, sel, v)
+	return ec._ObjectDirectivesConcurrent(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNOmittableInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐOmittableInput(ctx context.Context, v interface{}) (OmittableInput, error) {

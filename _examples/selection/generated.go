@@ -2604,15 +2604,27 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 	case nil:
 		return graphql.Null
 	case Post:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Event", "Post"})) == 0 {
+			return graphql.Empty{}
+		}
 		return ec._Post(ctx, sel, &obj)
 	case *Post:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Event", "Post"})) == 0 {
+			return graphql.Empty{}
+		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._Post(ctx, sel, obj)
 	case Like:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Event", "Like"})) == 0 {
+			return graphql.Empty{}
+		}
 		return ec._Like(ctx, sel, &obj)
 	case *Like:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Event", "Like"})) == 0 {
+			return graphql.Empty{}
+		}
 		if obj == nil {
 			return graphql.Null
 		}

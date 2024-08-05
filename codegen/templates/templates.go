@@ -652,7 +652,7 @@ func typeName(t types.Type) string {
 	name := types.TypeString(t, func(*types.Package) string {
 		return ""
 	})
-	if len(name) > 0 && strings.HasPrefix(name, "*") {
+	if name != "" && strings.HasPrefix(name, "*") {
 		return name[1:]
 	}
 	return name

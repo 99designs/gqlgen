@@ -1202,27 +1202,48 @@ func (ec *executionContext) _Animal(ctx context.Context, sel ast.SelectionSet, o
 	case nil:
 		return graphql.Null
 	case Horse:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Animal", "Horse"})) == 0 {
+			return graphql.Empty{}
+		}
 		return ec._Horse(ctx, sel, &obj)
 	case *Horse:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Animal", "Horse"})) == 0 {
+			return graphql.Empty{}
+		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._Horse(ctx, sel, obj)
 	case Dog:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Animal", "Dog"})) == 0 {
+			return graphql.Empty{}
+		}
 		return ec._Dog(ctx, sel, &obj)
 	case *Dog:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Animal", "Dog"})) == 0 {
+			return graphql.Empty{}
+		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._Dog(ctx, sel, obj)
 	case Cat:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Animal", "Cat"})) == 0 {
+			return graphql.Empty{}
+		}
 		return ec._Cat(ctx, sel, &obj)
 	case *Cat:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Animal", "Cat"})) == 0 {
+			return graphql.Empty{}
+		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._Cat(ctx, sel, obj)
 	case Mammalian:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Animal", "Mammalian"})) == 0 {
+			return graphql.Empty{}
+		}
 		if obj == nil {
 			return graphql.Null
 		}
@@ -1237,8 +1258,14 @@ func (ec *executionContext) _Mammalian(ctx context.Context, sel ast.SelectionSet
 	case nil:
 		return graphql.Null
 	case Horse:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Mammalian", "Horse"})) == 0 {
+			return graphql.Empty{}
+		}
 		return ec._Horse(ctx, sel, &obj)
 	case *Horse:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Mammalian", "Horse"})) == 0 {
+			return graphql.Empty{}
+		}
 		if obj == nil {
 			return graphql.Null
 		}
@@ -1253,11 +1280,17 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 	case nil:
 		return graphql.Null
 	case *ConcreteNodeA:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Node", "ConcreteNodeA"})) == 0 {
+			return graphql.Empty{}
+		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._ConcreteNodeA(ctx, sel, obj)
 	case ConcreteNodeInterface:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Node", "ConcreteNodeInterface"})) == 0 {
+			return graphql.Empty{}
+		}
 		if obj == nil {
 			return graphql.Null
 		}
@@ -1272,11 +1305,17 @@ func (ec *executionContext) _Shape(ctx context.Context, sel ast.SelectionSet, ob
 	case nil:
 		return graphql.Null
 	case *Circle:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Shape", "Circle"})) == 0 {
+			return graphql.Empty{}
+		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._Circle(ctx, sel, obj)
 	case *Rectangle:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Shape", "Rectangle"})) == 0 {
+			return graphql.Empty{}
+		}
 		if obj == nil {
 			return graphql.Null
 		}
@@ -1291,11 +1330,17 @@ func (ec *executionContext) _ShapeUnion(ctx context.Context, sel ast.SelectionSe
 	case nil:
 		return graphql.Null
 	case *Circle:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"ShapeUnion", "Circle"})) == 0 {
+			return graphql.Empty{}
+		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._Circle(ctx, sel, obj)
 	case *Rectangle:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"ShapeUnion", "Rectangle"})) == 0 {
+			return graphql.Empty{}
+		}
 		if obj == nil {
 			return graphql.Null
 		}

@@ -105,6 +105,29 @@ func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.Selec
 					{{- end -}}
 				})
 			{{- else }}
+				field := field
+
+				{{if not $object.Root}}
+					if field.Deferrable != nil {
+						dfs, ok := deferred[field.Deferrable.Label]
+						di := 0
+						if ok {
+							dfs.AddField(field)
+							di = len(dfs.Values) - 1
+						} else {
+							dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+							deferred[field.Deferrable.Label] = dfs
+						}
+						dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+							return ec._{{$object.Name}}_{{$field.Name}}(ctx, field, obj)
+						})
+
+						// don't run the out.Concurrently() call below
+						out.Values[i] = graphql.Null
+						continue
+					}
+				{{end}}
+
 				{{- if $object.Root -}}
 					out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 						return ec._{{$object.Name}}_{{$field.Name}}(ctx, field)

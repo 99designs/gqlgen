@@ -46,7 +46,7 @@ func (b *builder) buildObject(typ *ast.Definition) (*Object, error) {
 	obj := &Object{
 		Definition:               typ,
 		Root:                     b.Config.IsRoot(typ),
-		DisableConcurrency:       typ == b.Schema.Mutation,
+		DisableConcurrency:       typ == b.Schema.Mutation || typ.Directives.ForName("concurrent") == nil,
 		Stream:                   typ == b.Schema.Subscription,
 		Directives:               dirs,
 		PointersInUnmarshalInput: b.Config.ReturnPointersInUnmarshalInput,

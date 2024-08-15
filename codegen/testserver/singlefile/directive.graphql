@@ -9,6 +9,7 @@ directive @directive3 on INPUT_OBJECT
 directive @unimplemented on FIELD_DEFINITION
 directive @order1(location: String!) repeatable on FIELD_DEFINITION | OBJECT
 directive @order2(location: String!) on OBJECT
+directive @concurrent on OBJECT
 
 extend type Query {
     directiveArg(arg: String! @length(min:1, max: 255, message: "invalid length")): String
@@ -22,6 +23,7 @@ extend type Query {
     directiveField: String
     directiveDouble: String @directive1 @directive2
     directiveUnimplemented: String @unimplemented
+    directiveConcurrent: [ObjectDirectivesConcurrent!]!
 }
 
 extend type Subscription {
@@ -51,4 +53,8 @@ type ObjectDirectives @order1(location: "order1_1") @order1(location: "order1_2"
 
 type ObjectDirectivesWithCustomGoModel {
     nullableText: String @toNull
+}
+
+type ObjectDirectivesConcurrent @concurrent {
+    key: Int!
 }

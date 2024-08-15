@@ -88,6 +88,26 @@ func (ec *executionContext) _EmbeddedDefaultScalar(ctx context.Context, sel ast.
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("EmbeddedDefaultScalar")
 		case "value":
+			field := field
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return ec._EmbeddedDefaultScalar_value(ctx, field, obj)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
 			out.Values[i] = ec._EmbeddedDefaultScalar_value(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))

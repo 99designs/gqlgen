@@ -16,7 +16,7 @@ jobs:
   coverage:
     strategy:
       matrix:
-        go: ["1.22"]
+        go: ["1.22", "1.23"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

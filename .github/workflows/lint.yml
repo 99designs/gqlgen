@@ -15,7 +15,7 @@ concurrency:
 jobs:
   golangci-lint:
     env:
-      GOLANGCI_LINT_VERSION: v1.59.1
+      GOLANGCI_LINT_VERSION: v1.60.2
     strategy:
       matrix:
         go: ["1.21", "1.22", "1.23"]

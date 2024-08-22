@@ -18,7 +18,7 @@ jobs:
       GOLANGCI_LINT_VERSION: v1.60.2
     strategy:
       matrix:
-        go: ["1.21", "1.22", "1.23"]
+        go: ["1.22", "1.23"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

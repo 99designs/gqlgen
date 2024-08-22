@@ -113,3 +113,11 @@ issues:
       text: "use-any: since GO 1.18 'interface{}' can be replaced by 'any'"
     - path: codegen/testserver/singlefile/resolver.go
       text: "use-any: since GO 1.18 'interface{}' can be replaced by 'any'"
+    - path: codegen/testserver/generated_test.go
+      linters:
+        - staticcheck
+      text: SA1019
+    - path: plugin/modelgen/models_test.go
+      linters:
+        - staticcheck
+      text: SA1019

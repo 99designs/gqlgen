@@ -239,7 +239,6 @@ func (c *wsConnection) run() {
 	ctx, cancel := context.WithCancel(c.ctx)
 	defer func() {
 		cancel()
-		c.close(websocket.CloseAbnormalClosure, "unexpected closure")
 	}()
 
 	// If we're running in graphql-ws mode, create a timer that will trigger a

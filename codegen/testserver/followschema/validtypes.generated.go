@@ -22,256 +22,740 @@ import (
 func (ec *executionContext) field_ValidType_validArgs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["break"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("break"))
-		arg0, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_ValidType_validArgs_argsBreak(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["break"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["default"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("default"))
-		arg1, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg1, err := ec.field_ValidType_validArgs_argsDefault(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["default"] = arg1
-	var arg2 string
-	if tmp, ok := rawArgs["func"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("func"))
-		arg2, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg2, err := ec.field_ValidType_validArgs_argsFunc(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["func"] = arg2
-	var arg3 string
-	if tmp, ok := rawArgs["interface"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("interface"))
-		arg3, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg3, err := ec.field_ValidType_validArgs_argsInterface(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["interface"] = arg3
-	var arg4 string
-	if tmp, ok := rawArgs["select"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("select"))
-		arg4, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg4, err := ec.field_ValidType_validArgs_argsSelect(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["select"] = arg4
-	var arg5 string
-	if tmp, ok := rawArgs["case"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("case"))
-		arg5, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg5, err := ec.field_ValidType_validArgs_argsCase(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["case"] = arg5
-	var arg6 string
-	if tmp, ok := rawArgs["defer"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("defer"))
-		arg6, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg6, err := ec.field_ValidType_validArgs_argsDefer(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["defer"] = arg6
-	var arg7 string
-	if tmp, ok := rawArgs["go"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("go"))
-		arg7, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg7, err := ec.field_ValidType_validArgs_argsGo(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["go"] = arg7
-	var arg8 string
-	if tmp, ok := rawArgs["map"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("map"))
-		arg8, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg8, err := ec.field_ValidType_validArgs_argsMap(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["map"] = arg8
-	var arg9 string
-	if tmp, ok := rawArgs["struct"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("struct"))
-		arg9, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg9, err := ec.field_ValidType_validArgs_argsStruct(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["struct"] = arg9
-	var arg10 string
-	if tmp, ok := rawArgs["chan"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("chan"))
-		arg10, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg10, err := ec.field_ValidType_validArgs_argsChan(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["chan"] = arg10
-	var arg11 string
-	if tmp, ok := rawArgs["else"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("else"))
-		arg11, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg11, err := ec.field_ValidType_validArgs_argsElse(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["else"] = arg11
-	var arg12 string
-	if tmp, ok := rawArgs["goto"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("goto"))
-		arg12, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg12, err := ec.field_ValidType_validArgs_argsGoto(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["goto"] = arg12
-	var arg13 string
-	if tmp, ok := rawArgs["package"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("package"))
-		arg13, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg13, err := ec.field_ValidType_validArgs_argsPackage(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["package"] = arg13
-	var arg14 string
-	if tmp, ok := rawArgs["switch"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("switch"))
-		arg14, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg14, err := ec.field_ValidType_validArgs_argsSwitch(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["switch"] = arg14
-	var arg15 string
-	if tmp, ok := rawArgs["const"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("const"))
-		arg15, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg15, err := ec.field_ValidType_validArgs_argsConst(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["const"] = arg15
-	var arg16 string
-	if tmp, ok := rawArgs["fallthrough"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("fallthrough"))
-		arg16, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg16, err := ec.field_ValidType_validArgs_argsFallthrough(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["fallthrough"] = arg16
-	var arg17 string
-	if tmp, ok := rawArgs["if"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("if"))
-		arg17, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg17, err := ec.field_ValidType_validArgs_argsIf(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["if"] = arg17
-	var arg18 string
-	if tmp, ok := rawArgs["range"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("range"))
-		arg18, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg18, err := ec.field_ValidType_validArgs_argsRange(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["range"] = arg18
-	var arg19 string
-	if tmp, ok := rawArgs["type"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
-		arg19, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg19, err := ec.field_ValidType_validArgs_argsType(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["type"] = arg19
-	var arg20 string
-	if tmp, ok := rawArgs["continue"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("continue"))
-		arg20, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg20, err := ec.field_ValidType_validArgs_argsContinue(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["continue"] = arg20
-	var arg21 string
-	if tmp, ok := rawArgs["for"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("for"))
-		arg21, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg21, err := ec.field_ValidType_validArgs_argsFor(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["for"] = arg21
-	var arg22 string
-	if tmp, ok := rawArgs["import"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("import"))
-		arg22, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg22, err := ec.field_ValidType_validArgs_argsImport(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["import"] = arg22
-	var arg23 string
-	if tmp, ok := rawArgs["return"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("return"))
-		arg23, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg23, err := ec.field_ValidType_validArgs_argsReturn(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["return"] = arg23
-	var arg24 string
-	if tmp, ok := rawArgs["var"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("var"))
-		arg24, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg24, err := ec.field_ValidType_validArgs_argsVar(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["var"] = arg24
-	var arg25 string
-	if tmp, ok := rawArgs["_"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("_"))
-		arg25, err = ec.unmarshalNString2string(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg25, err := ec.field_ValidType_validArgs_args_(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["_"] = arg25
 	return args, nil
+}
+func (ec *executionContext) field_ValidType_validArgs_argsBreak(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["break"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("break"))
+	if tmp, ok := rawArgs["break"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsDefault(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["default"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("default"))
+	if tmp, ok := rawArgs["default"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsFunc(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["func"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("func"))
+	if tmp, ok := rawArgs["func"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsInterface(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["interface"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("interface"))
+	if tmp, ok := rawArgs["interface"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsSelect(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["select"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("select"))
+	if tmp, ok := rawArgs["select"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsCase(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["case"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("case"))
+	if tmp, ok := rawArgs["case"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsDefer(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["defer"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("defer"))
+	if tmp, ok := rawArgs["defer"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsGo(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["go"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("go"))
+	if tmp, ok := rawArgs["go"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsMap(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["map"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("map"))
+	if tmp, ok := rawArgs["map"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsStruct(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["struct"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("struct"))
+	if tmp, ok := rawArgs["struct"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsChan(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["chan"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("chan"))
+	if tmp, ok := rawArgs["chan"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsElse(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["else"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("else"))
+	if tmp, ok := rawArgs["else"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsGoto(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["goto"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("goto"))
+	if tmp, ok := rawArgs["goto"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsPackage(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["package"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("package"))
+	if tmp, ok := rawArgs["package"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsSwitch(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["switch"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("switch"))
+	if tmp, ok := rawArgs["switch"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsConst(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["const"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("const"))
+	if tmp, ok := rawArgs["const"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsFallthrough(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["fallthrough"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("fallthrough"))
+	if tmp, ok := rawArgs["fallthrough"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsIf(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["if"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("if"))
+	if tmp, ok := rawArgs["if"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsRange(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["range"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("range"))
+	if tmp, ok := rawArgs["range"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsType(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["type"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
+	if tmp, ok := rawArgs["type"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsContinue(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["continue"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("continue"))
+	if tmp, ok := rawArgs["continue"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsFor(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["for"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("for"))
+	if tmp, ok := rawArgs["for"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsImport(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["import"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("import"))
+	if tmp, ok := rawArgs["import"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsReturn(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["return"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("return"))
+	if tmp, ok := rawArgs["return"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_argsVar(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["var"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("var"))
+	if tmp, ok := rawArgs["var"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_ValidType_validArgs_args_(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (string, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["_"]
+	if !ok {
+		var zeroVal string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("_"))
+	if tmp, ok := rawArgs["_"]; ok {
+		return ec.unmarshalNString2string(ctx, tmp)
+	}
+
+	var zeroVal string
+	return zeroVal, nil
 }
 
 func (ec *executionContext) field_ValidType_validInputKeywords_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 *ValidInput
-	if tmp, ok := rawArgs["input"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-		arg0, err = ec.unmarshalOValidInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐValidInput(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	arg0, err := ec.field_ValidType_validInputKeywords_argsInput(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["input"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_ValidType_validInputKeywords_argsInput(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*ValidInput, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["input"]
+	if !ok {
+		var zeroVal *ValidInput
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalOValidInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐValidInput(ctx, tmp)
+	}
+
+	var zeroVal *ValidInput
+	return zeroVal, nil
 }
 
 // endregion ***************************** args.gotpl *****************************

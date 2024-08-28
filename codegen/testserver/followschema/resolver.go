@@ -217,6 +217,11 @@ func (r *queryResolver) DirectiveNullableArg(ctx context.Context, arg *int, arg2
 	panic("not implemented")
 }
 
+// DirectiveSingleNullableArg is the resolver for the directiveSingleNullableArg field.
+func (r *queryResolver) DirectiveSingleNullableArg(ctx context.Context, arg1 *string) (*string, error) {
+	panic("not implemented")
+}
+
 // DirectiveInputNullable is the resolver for the directiveInputNullable field.
 func (r *queryResolver) DirectiveInputNullable(ctx context.Context, arg *InputDirectives) (*string, error) {
 	panic("not implemented")

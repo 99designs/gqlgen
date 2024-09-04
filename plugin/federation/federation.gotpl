@@ -178,7 +178,9 @@ func (ec *executionContext) resolveEntity(
 						if err != nil {
 							return nil, fmt.Errorf(`resolving Entity "{{$entity.Def.Name}}": %w`, err)
 						}
-						{{ if and (index $options "explicit_requires") $entity.Requires }}
+						{{- if $options.ComputedRequires }}
+							{{/* We don't do anything in this case, computed requires are handled by standard resolvers */}}
+						{{- else if and $options.ExplicitRequires $entity.Requires }}
 							err = ec.Populate{{$entity.Def.Name}}Requires(ctx, {{- if (not $usePointers) -}}&{{- end -}}entity, rep)
 							if err != nil {
 								return nil, fmt.Errorf(`populating requires for Entity "{{$entity.Def.Name}}": %w`, err)

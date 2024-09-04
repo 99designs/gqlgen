@@ -17,7 +17,7 @@ func (r *userResolver) Username(ctx context.Context, obj *model.User) (string, e
 }
 
 // Reviews is the resolver for the reviews field.
-func (r *userResolver) Reviews(ctx context.Context, obj *model.User) ([]*model.Review, error) {
+func (r *userResolver) Reviews(ctx context.Context, obj *model.User, federationRequires map[string]interface{}) ([]*model.Review, error) {
 	var productReviews []*model.Review
 	for _, review := range reviews {
 		if review.Author.ID == obj.ID {

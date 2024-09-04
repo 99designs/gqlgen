@@ -11,6 +11,64 @@ import (
 	"github.com/99designs/gqlgen/plugin/federation/fieldset"
 )
 
+func TestNew(t *testing.T) {
+	t.Parallel()
+
+	t.Run("success_no_options", func(t *testing.T) {
+		cfg := &config.Config{
+			Federation: config.PackageConfig{
+				Options: map[string]bool{},
+			},
+		}
+		plugin, err := New(1, cfg)
+		assert.NoError(t, err)
+		assert.NotNil(t, plugin)
+	})
+
+	t.Run("success_computed", func(t *testing.T) {
+		cfg := &config.Config{
+			Federation: config.PackageConfig{
+				Options: map[string]bool{
+					"computed_requires": true,
+				},
+			},
+			CallArgumentDirectivesWithNull: true,
+		}
+		plugin, err := New(1, cfg)
+		assert.NoError(t, err)
+		assert.NotNil(t, plugin)
+	})
+
+	t.Run("error_computed_CallArgumentDirectivesWithNull_is_false", func(t *testing.T) {
+		cfg := &config.Config{
+			Federation: config.PackageConfig{
+				Options: map[string]bool{
+					"computed_requires": true,
+				},
+			},
+			CallArgumentDirectivesWithNull: false,
+		}
+		plugin, err := New(1, cfg)
+		assert.Error(t, err)
+		assert.Nil(t, plugin)
+	})
+
+	t.Run("error_both_explicit_and_computed_set", func(t *testing.T) {
+		cfg := &config.Config{
+			Federation: config.PackageConfig{
+				Options: map[string]bool{
+					"explicit_requires": true,
+					"computed_requires": true,
+				},
+			},
+		}
+
+		plugin, err := New(1, cfg)
+		assert.Error(t, err)
+		assert.Nil(t, plugin)
+	})
+}
+
 func TestWithEntities(t *testing.T) {
 	f, cfg := load(t, "testdata/allthethings/gqlgen.yml")
 
@@ -273,7 +331,7 @@ func TestInjectSourceLate(t *testing.T) {
 	}
 }
 
-func load(t *testing.T, name string) (*federation, *config.Config) {
+func load(t *testing.T, name string) (*Federation, *config.Config) {
 	t.Helper()
 
 	cfg, err := config.LoadConfig(name)
@@ -283,7 +341,7 @@ func load(t *testing.T, name string) (*federation, *config.Config) {
 		cfg.Federation.Version = 1
 	}
 
-	f := &federation{Version: cfg.Federation.Version}
+	f := &Federation{version: cfg.Federation.Version}
 	s, err := f.InjectSourcesEarly()
 	require.NoError(t, err)
 	cfg.Sources = append(cfg.Sources, s...)

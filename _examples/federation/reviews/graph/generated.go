@@ -45,50 +45,10 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	PopulateFromRepresentations func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
-	EmailHost struct {
-		ID func(childComplexity int) int
-	}
-
-	Entity struct {
-		FindProductByManufacturerIDAndID func(childComplexity int, manufacturerID string, id string) int
-		FindUserByID                     func(childComplexity int, id string) int
-	}
-
-	Manufacturer struct {
-		ID func(childComplexity int) int
-	}
-
-	Product struct {
-		ID           func(childComplexity int) int
-		Manufacturer func(childComplexity int) int
-		Reviews      func(childComplexity int) int
-	}
-
-	Query struct {
-		__resolve__service func(childComplexity int) int
-		__resolve_entities func(childComplexity int, representations []map[string]interface{}) int
-	}
-
-	Review struct {
-		Author  func(childComplexity int) int
-		Body    func(childComplexity int) int
-		Product func(childComplexity int) int
-	}
-
-	User struct {
-		Email    func(childComplexity int) int
-		Host     func(childComplexity int) int
-		ID       func(childComplexity int) int
-		Reviews  func(childComplexity int) int
-		Username func(childComplexity int) int
-	}
-
-	_Service struct {
-		SDL func(childComplexity int) int
-	}
 }
 
 type EntityResolver interface {
@@ -97,7 +57,7 @@ type EntityResolver interface {
 }
 type UserResolver interface {
 	Username(ctx context.Context, obj *model.User) (string, error)
-	Reviews(ctx context.Context, obj *model.User) ([]*model.Review, error)
+	Reviews(ctx context.Context, obj *model.User, federationRequires map[string]interface{}) ([]*model.Review, error)
 }
 
 type executableSchema struct {
@@ -117,150 +77,7 @@ func (e *executableSchema) Schema() *ast.Schema {
 func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
-	switch typeName + "." + field {
 
-	case "EmailHost.id":
-		if e.complexity.EmailHost.ID == nil {
-			break
-		}
-
-		return e.complexity.EmailHost.ID(childComplexity), true
-
-	case "Entity.findProductByManufacturerIDAndID":
-		if e.complexity.Entity.FindProductByManufacturerIDAndID == nil {
-			break
-		}
-
-		args, err := ec.field_Entity_findProductByManufacturerIDAndID_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Entity.FindProductByManufacturerIDAndID(childComplexity, args["manufacturerID"].(string), args["id"].(string)), true
-
-	case "Entity.findUserByID":
-		if e.complexity.Entity.FindUserByID == nil {
-			break
-		}
-
-		args, err := ec.field_Entity_findUserByID_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Entity.FindUserByID(childComplexity, args["id"].(string)), true
-
-	case "Manufacturer.id":
-		if e.complexity.Manufacturer.ID == nil {
-			break
-		}
-
-		return e.complexity.Manufacturer.ID(childComplexity), true
-
-	case "Product.id":
-		if e.complexity.Product.ID == nil {
-			break
-		}
-
-		return e.complexity.Product.ID(childComplexity), true
-
-	case "Product.manufacturer":
-		if e.complexity.Product.Manufacturer == nil {
-			break
-		}
-
-		return e.complexity.Product.Manufacturer(childComplexity), true
-
-	case "Product.reviews":
-		if e.complexity.Product.Reviews == nil {
-			break
-		}
-
-		return e.complexity.Product.Reviews(childComplexity), true
-
-	case "Query._service":
-		if e.complexity.Query.__resolve__service == nil {
-			break
-		}
-
-		return e.complexity.Query.__resolve__service(childComplexity), true
-
-	case "Query._entities":
-		if e.complexity.Query.__resolve_entities == nil {
-			break
-		}
-
-		args, err := ec.field_Query__entities_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.__resolve_entities(childComplexity, args["representations"].([]map[string]interface{})), true
-
-	case "Review.author":
-		if e.complexity.Review.Author == nil {
-			break
-		}
-
-		return e.complexity.Review.Author(childComplexity), true
-
-	case "Review.body":
-		if e.complexity.Review.Body == nil {
-			break
-		}
-
-		return e.complexity.Review.Body(childComplexity), true
-
-	case "Review.product":
-		if e.complexity.Review.Product == nil {
-			break
-		}
-
-		return e.complexity.Review.Product(childComplexity), true
-
-	case "User.email":
-		if e.complexity.User.Email == nil {
-			break
-		}
-
-		return e.complexity.User.Email(childComplexity), true
-
-	case "User.host":
-		if e.complexity.User.Host == nil {
-			break
-		}
-
-		return e.complexity.User.Host(childComplexity), true
-
-	case "User.id":
-		if e.complexity.User.ID == nil {
-			break
-		}
-
-		return e.complexity.User.ID(childComplexity), true
-
-	case "User.reviews":
-		if e.complexity.User.Reviews == nil {
-			break
-		}
-
-		return e.complexity.User.Reviews(childComplexity), true
-
-	case "User.username":
-		if e.complexity.User.Username == nil {
-			break
-		}
-
-		return e.complexity.User.Username(childComplexity), true
-
-	case "_Service.sdl":
-		if e.complexity._Service.SDL == nil {
-			break
-		}
-
-		return e.complexity._Service.SDL(childComplexity), true
-
-	}
 	return 0, false
 }
 
@@ -415,15 +232,6 @@ func (ec *executionContext) field_Entity_findProductByManufacturerIDAndID_argsMa
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["manufacturerID"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("manufacturerID"))
 	if tmp, ok := rawArgs["manufacturerID"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
@@ -437,15 +245,6 @@ func (ec *executionContext) field_Entity_findProductByManufacturerIDAndID_argsID
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["id"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 	if tmp, ok := rawArgs["id"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
@@ -469,15 +268,6 @@ func (ec *executionContext) field_Entity_findUserByID_argsID(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["id"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
 	if tmp, ok := rawArgs["id"]; ok {
 		return ec.unmarshalNID2string(ctx, tmp)
@@ -501,15 +291,6 @@ func (ec *executionContext) field_Query___type_argsName(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["name"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 	if tmp, ok := rawArgs["name"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
@@ -533,15 +314,6 @@ func (ec *executionContext) field_Query__entities_argsRepresentations(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) ([]map[string]interface{}, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["representations"]
-	if !ok {
-		var zeroVal []map[string]interface{}
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("representations"))
 	if tmp, ok := rawArgs["representations"]; ok {
 		return ec.unmarshalN_Any2ᚕmapᚄ(ctx, tmp)
@@ -549,6 +321,54 @@ func (ec *executionContext) field_Query__entities_argsRepresentations(
 
 	var zeroVal []map[string]interface{}
 	return zeroVal, nil
+}
+
+func (ec *executionContext) field_User_reviews_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_User_reviews_argsFederationRequires(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["_federationRequires"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_User_reviews_argsFederationRequires(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (map[string]interface{}, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("_federationRequires"))
+	directive0 := func(ctx context.Context) (interface{}, error) {
+		tmp, ok := rawArgs["_federationRequires"]
+		if !ok {
+			var zeroVal map[string]interface{}
+			return zeroVal, nil
+		}
+		return ec.unmarshalO_RequiresMap2map(ctx, tmp)
+	}
+
+	directive1 := func(ctx context.Context) (interface{}, error) {
+		if ec.directives.PopulateFromRepresentations == nil {
+			var zeroVal map[string]interface{}
+			return zeroVal, errors.New("directive populateFromRepresentations is not implemented")
+		}
+		return ec.directives.PopulateFromRepresentations(ctx, rawArgs, directive0)
+	}
+
+	tmp, err := directive1(ctx)
+	if err != nil {
+		var zeroVal map[string]interface{}
+		return zeroVal, graphql.ErrorOnPath(ctx, err)
+	}
+	if data, ok := tmp.(map[string]interface{}); ok {
+		return data, nil
+	} else if tmp == nil {
+		var zeroVal map[string]interface{}
+		return zeroVal, nil
+	} else {
+		var zeroVal map[string]interface{}
+		return zeroVal, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be map[string]interface{}`, tmp))
+	}
 }
 
 func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
@@ -565,15 +385,6 @@ func (ec *executionContext) field___Type_enumValues_argsIncludeDeprecated(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["includeDeprecated"]
-	if !ok {
-		var zeroVal bool
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
 		return ec.unmarshalOBoolean2bool(ctx, tmp)
@@ -597,15 +408,6 @@ func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["includeDeprecated"]
-	if !ok {
-		var zeroVal bool
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
 		return ec.unmarshalOBoolean2bool(ctx, tmp)
@@ -1560,7 +1362,7 @@ func (ec *executionContext) _User_reviews(ctx context.Context, field graphql.Col
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.User().Reviews(rctx, obj)
+		return ec.resolvers.User().Reviews(rctx, obj, fc.Args["_federationRequires"].(map[string]interface{}))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1574,7 +1376,7 @@ func (ec *executionContext) _User_reviews(ctx context.Context, field graphql.Col
 	return ec.marshalOReview2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋreviewsᚋgraphᚋmodelᚐReview(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_User_reviews(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_User_reviews(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "User",
 		Field:      field,
@@ -1591,6 +1393,17 @@ func (ec *executionContext) fieldContext_User_reviews(_ context.Context, field g
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Review", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_User_reviews_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -4848,6 +4661,22 @@ func (ec *executionContext) marshalO_Entity2githubᚗcomᚋ99designsᚋgqlgenᚋ
 		return graphql.Null
 	}
 	return ec.__Entity(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalO_RequiresMap2map(ctx context.Context, v interface{}) (map[string]interface{}, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalMap(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalO_RequiresMap2map(ctx context.Context, sel ast.SelectionSet, v map[string]interface{}) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalMap(v)
+	return res
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

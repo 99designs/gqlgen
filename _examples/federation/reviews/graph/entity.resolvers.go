@@ -10,22 +10,19 @@ import (
 	"github.com/99designs/gqlgen/_examples/federation/reviews/graph/model"
 )
 
-// FindProductByManufacturerIDAndID is the resolver for the findProductByManufacturerIDAndID field.
-func (r *entityResolver) FindProductByManufacturerIDAndID(ctx context.Context, manufacturerID string, id string) (*model.Product, error) {
-	var productReviews []*model.Review
-
-	for _, review := range reviews {
-		if review.Product.ID == id && review.Product.Manufacturer.ID == manufacturerID {
-			productReviews = append(productReviews, review)
+// FindManyProductByManufacturerIDAndIDs is the resolver for the findManyProductByManufacturerIDAndIDs field.
+func (r *entityResolver) FindManyProductByManufacturerIDAndIDs(ctx context.Context, reps []*model.ProductByManufacturerIDAndIDsInput) ([]*model.Product, error) {
+	products := make([]*model.Product, 0, len(reps))
+	for idx := range reps {
+		rep := reps[len(reps)-idx-1]
+		product, err := r.FindProductByManufacturerIDAndID(ctx, rep.ManufacturerID, rep.ID)
+		if err != nil {
+			return nil, err
 		}
+		products = append(products, product)
 	}
-	return &model.Product{
-		ID: id,
-		Manufacturer: &model.Manufacturer{
-			ID: manufacturerID,
-		},
-		Reviews: productReviews,
-	}, nil
+
+	return products, nil
 }
 
 // FindUserByID is the resolver for the findUserByID field.

@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/99designs/gqlgen/_examples/federation/reviews/graph/model"
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
 )
 
@@ -134,6 +135,8 @@ func (ec *executionContext) resolveEntityGroup(
 
 func isMulti(typeName string) bool {
 	switch typeName {
+	case "Product":
+		return true
 	default:
 		return false
 	}
@@ -153,29 +156,6 @@ func (ec *executionContext) resolveEntity(
 	}()
 
 	switch typeName {
-	case "Product":
-		resolverName, err := entityResolverNameForProduct(ctx, rep)
-		if err != nil {
-			return nil, fmt.Errorf(`finding resolver for Entity "Product": %w`, err)
-		}
-		switch resolverName {
-
-		case "findProductByManufacturerIDAndID":
-			id0, err := ec.unmarshalNString2string(ctx, rep["manufacturer"].(map[string]interface{})["id"])
-			if err != nil {
-				return nil, fmt.Errorf(`unmarshalling param 0 for findProductByManufacturerIDAndID(): %w`, err)
-			}
-			id1, err := ec.unmarshalNString2string(ctx, rep["id"])
-			if err != nil {
-				return nil, fmt.Errorf(`unmarshalling param 1 for findProductByManufacturerIDAndID(): %w`, err)
-			}
-			entity, err := ec.resolvers.Entity().FindProductByManufacturerIDAndID(ctx, id0, id1)
-			if err != nil {
-				return nil, fmt.Errorf(`resolving Entity "Product": %w`, err)
-			}
-
-			return entity, nil
-		}
 	case "User":
 		resolverName, err := entityResolverNameForUser(ctx, rep)
 		if err != nil {
@@ -215,6 +195,50 @@ func (ec *executionContext) resolveManyEntities(
 	}()
 
 	switch typeName {
+
+	case "Product":
+		resolverName, err := entityResolverNameForProduct(ctx, reps[0].entity)
+		if err != nil {
+			return fmt.Errorf(`finding resolver for Entity "Product": %w`, err)
+		}
+		switch resolverName {
+
+		case "findManyProductByManufacturerIDAndIDs":
+			typedReps := make([]*model.ProductByManufacturerIDAndIDsInput, len(reps))
+
+			for i, rep := range reps {
+				id0, err := ec.unmarshalNString2string(ctx, rep.entity["manufacturer"].(map[string]interface{})["id"])
+				if err != nil {
+					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "manufacturerID"))
+				}
+				id1, err := ec.unmarshalNString2string(ctx, rep.entity["id"])
+				if err != nil {
+					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "id"))
+				}
+
+				typedReps[i] = &model.ProductByManufacturerIDAndIDsInput{
+					ManufacturerID: id0,
+					ID:             id1,
+				}
+			}
+
+			entities, err := ec.resolvers.Entity().FindManyProductByManufacturerIDAndIDs(ctx, typedReps)
+			if err != nil {
+				return err
+			}
+
+			for i, entity := range entities {
+				entity.Manufacturer.ID, err = ec.unmarshalNString2string(ctx, reps[i].entity["manufacturer"].(map[string]interface{})["id"])
+				if err != nil {
+					return err
+				}
+				list[reps[i].index] = entity
+			}
+			return nil
+
+		default:
+			return fmt.Errorf("unknown resolver: %s", resolverName)
+		}
 
 	default:
 		return errors.New("unknown type: " + typeName)
@@ -258,7 +282,7 @@ func entityResolverNameForProduct(ctx context.Context, rep EntityRepresentation)
 		if allNull {
 			break
 		}
-		return "findProductByManufacturerIDAndID", nil
+		return "findManyProductByManufacturerIDAndIDs", nil
 	}
 	return "", fmt.Errorf("%w for Product", ErrTypeNotFound)
 }

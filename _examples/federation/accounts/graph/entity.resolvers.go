@@ -25,6 +25,7 @@ func (r *entityResolver) FindUserByID(ctx context.Context, id string) (*model.Us
 	return &model.User{
 		ID:       id,
 		Username: name,
+		Email:    id + "@test.com",
 	}, nil
 }
 

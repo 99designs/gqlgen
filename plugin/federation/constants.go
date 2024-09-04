@@ -20,7 +20,24 @@ const dirNameRequires = "requires"
 const dirNamePopulateFromRepresentations = "populateFromRepresentations"
 
 var populateFromRepresentationsImplementation = `func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
-	return next(ctx)
+	fc := graphql.GetFieldContext(ctx)
+
+	// We get the Federation representations argument from the _entities resolver
+	representations, ok := fc.Parent.Parent.Args["representations"].([gs]map[string]any)
+	if !ok {
+		return nil, errors.New("must be called from within _entities")
+	}
+
+	index := fc.Parent.Index
+	if index == nil {
+		return nil, errors.New("couldn't find input index for entity")
+	}
+
+	if len(representations) < *index {
+		return nil, errors.New("representation not found")
+	}
+
+	return representations[*index], nil
 }`
 
 const DirNameEntityReference = "entityReference"

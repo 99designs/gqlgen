@@ -1,0 +1,26 @@
+interface Node {
+    id: ID!
+}
+
+interface Element implements Node {
+    id: ID!
+    name: String!
+}
+
+type Magnesium implements Element & Node {
+    id: ID!
+    name: String!
+    types: Int!
+}
+
+type Potassium implements Element & Node {
+    id: ID!
+    name: String!
+    price: Float!
+}
+
+type Carbon implements Element & Node {
+    id: ID!
+    name: String!
+    footprint: String!
+}

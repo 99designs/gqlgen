@@ -45,7 +45,6 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	PopulateFromRepresentations func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -59,6 +58,12 @@ type UserResolver interface {
 	Username(ctx context.Context, obj *model.User) (string, error)
 	Reviews(ctx context.Context, obj *model.User, federationRequires map[string]interface{}) ([]*model.Review, error)
 }
+
+var (
+	builtInDirectivePopulateFromRepresentations = func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
+		return next(ctx)
+	}
+)
 
 type executableSchema struct {
 	schema     *ast.Schema
@@ -348,11 +353,7 @@ func (ec *executionContext) field_User_reviews_argsFederationRequires(
 	}
 
 	directive1 := func(ctx context.Context) (interface{}, error) {
-		if ec.directives.PopulateFromRepresentations == nil {
-			var zeroVal map[string]interface{}
-			return zeroVal, errors.New("directive populateFromRepresentations is not implemented")
-		}
-		return ec.directives.PopulateFromRepresentations(ctx, rawArgs, directive0)
+		return builtInDirectivePopulateFromRepresentations(ctx, rawArgs, directive0)
 	}
 
 	tmp, err := directive1(ctx)

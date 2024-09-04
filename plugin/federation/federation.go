@@ -116,6 +116,8 @@ func (f *Federation) MutateConfig(cfg *config.Config) error {
 
 	if f.usesRequires && f.PackageOptions.ComputedRequires {
 		cfg.Schema.Directives[dirPopulateFromRepresentations.Name] = dirPopulateFromRepresentations
+		cfg.Directives[dirPopulateFromRepresentations.Name] = config.DirectiveConfig{Implementation: &populateFromRepresentationsImplementation}
+
 		cfg.Schema.Directives[dirEntityReference.Name] = dirEntityReference
 		cfg.Directives[dirEntityReference.Name] = config.DirectiveConfig{SkipRuntime: true}
 

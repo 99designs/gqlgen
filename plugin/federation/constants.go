@@ -19,6 +19,10 @@ const dirNameRequires = "requires"
 
 const dirNamePopulateFromRepresentations = "populateFromRepresentations"
 
+var populateFromRepresentationsImplementation = `func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
+	return next(ctx)
+}`
+
 const DirNameEntityReference = "entityReference"
 
 // The fields arguments must be provided to both key and requires directives.

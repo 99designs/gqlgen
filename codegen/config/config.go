@@ -676,6 +676,16 @@ func (tm TypeMap) ForceGenerate(name string, forceGenerate bool) {
 
 type DirectiveConfig struct {
 	SkipRuntime bool `yaml:"skip_runtime"`
+
+	// If the directive implementation is statically defined, don't provide a hook for it
+	// in the generated server. This is useful for directives that are implemented
+	// by plugins or the runtime itself.
+	//
+	// The function implemmentation should be provided here as a string.
+	//
+	// The function should have the following signature:
+	// func(ctx context.Context, obj any, next graphql.Resolver[, directive arguments if any]) (res any, err error)
+	Implementation *string
 }
 
 func inStrSlice(haystack []string, needle string) bool {

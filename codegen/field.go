@@ -443,7 +443,7 @@ func (f *Field) ImplDirectives() []*Directive {
 		loc = ast.LocationInputFieldDefinition
 	}
 	for i := range f.Directives {
-		if !f.Directives[i].Builtin &&
+		if !f.Directives[i].SkipRuntime &&
 			(f.Directives[i].IsLocation(loc, ast.LocationObject) || f.Directives[i].IsLocation(loc, ast.LocationInputObject)) {
 			d = append(d, f.Directives[i])
 		}

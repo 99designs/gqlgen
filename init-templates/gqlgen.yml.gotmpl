@@ -11,6 +11,9 @@ exec:
 # federation:
 #   filename: graph/federation.go
 #   package: graph
+#   version: 2
+#   options
+#     computed_requires: true
 
 # Where should any generated models go?
 model:
@@ -62,6 +65,13 @@ resolver:
 
 # Optional: set to skip running `go mod tidy` when generating server code
 # skip_mod_tidy: true
+
+# Optional: if this is set to true, argument directives that
+# decorate a field with a null value will still be called.
+#
+# This enables argumment directives to not just mutate
+# argument values but to set them even if they're null.
+call_argument_directives_with_null: true
 
 # gqlgen will search for any type names in the schema in these go packages
 # if they match it will use them, otherwise it will generate them.

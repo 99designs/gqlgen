@@ -116,7 +116,7 @@ func (s *Imports) Lookup(path string) string {
 }
 
 func (s *Imports) LookupType(t types.Type) string {
-	return types.TypeString(code.Unalias(t), func(i *types.Package) string {
+	return types.TypeString(t, func(i *types.Package) string {
 		return s.Lookup(i.Path())
 	})
 }

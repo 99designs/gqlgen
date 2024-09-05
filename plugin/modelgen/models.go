@@ -117,6 +117,19 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 				return err
 			}
 
+			if !cfg.OmitEmbeddedStructs {
+				ob, err := m.getObject(cfg, schemaType, b)
+				if err != nil {
+					return err
+				}
+				if ob == nil {
+					continue
+				}
+
+				ob.Name = fmt.Sprintf("%s%s", cfg.EmbeddedStructsPrefix, ob.Name)
+				b.Models = append(b.Models, ob)
+			}
+
 			b.Interfaces = append(b.Interfaces, it)
 		}
 	}
@@ -130,6 +143,9 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 			it, err := m.getObject(cfg, schemaType, b)
 			if err != nil {
 				return err
+			}
+			if it == nil {
+				continue
 			}
 
 			b.Models = append(b.Models, it)
@@ -739,17 +755,6 @@ func (m *Plugin) getInterface(cfg *config.Config, schemaType *ast.Definition, b 
 		}
 	}
 
-	if !cfg.OmitEmbeddedStructs {
-		it := &Object{
-			Description: schemaType.Description,
-			// To not conflict with the interface name, we prefix the struct name with "Base"
-			Name:   fmt.Sprintf("%s%s", cfg.EmbeddedStructsPrefix, schemaType.Name),
-			Fields: fields,
-		}
-
-		b.Models = append(b.Models, it)
-	}
-
 	it := &Interface{
 		Description: schemaType.Description,
 		Name:        schemaType.Name,
@@ -774,6 +779,8 @@ func (m *Plugin) getObject(cfg *config.Config, schemaType *ast.Definition, b *Mo
 				Name:        schemaType.Name,
 			}, nil
 		}
+
+		return nil, nil
 	}
 
 	fields, err := m.generateFields(cfg, schemaType, b)

@@ -6,6 +6,7 @@ package computedrequires
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	explicitrequires "github.com/99designs/gqlgen/plugin/federation/testdata/computedrequires/generated"
@@ -13,38 +14,59 @@ import (
 )
 
 // Key3 is the resolver for the key3 field.
-func (r *multiHelloMultipleRequiresResolver) Key3(ctx context.Context, obj *model.MultiHelloMultipleRequires, requires *model.GQLGenRequiresMultiHelloMultipleRequiresKey3) (string, error) {
-	panic(fmt.Errorf("not implemented: Key3 - key3"))
+func (r *multiHelloMultipleRequiresResolver) Key3(ctx context.Context, obj *model.MultiHelloMultipleRequires, federationRequires map[string]interface{}) (string, error) {
+	key1 := federationRequires["key1"].(string)
+	key2 := federationRequires["key2"].(string)
+	return key1 + ":" + key2, nil
 }
 
 // Key2 is the resolver for the key2 field.
-func (r *multiHelloRequiresResolver) Key2(ctx context.Context, obj *model.MultiHelloRequires, requires *model.GQLGenRequiresMultiHelloRequiresKey2) (string, error) {
-	panic(fmt.Errorf("not implemented: Key2 - key2"))
+func (r *multiHelloRequiresResolver) Key2(ctx context.Context, obj *model.MultiHelloRequires, federationRequires map[string]interface{}) (string, error) {
+	key1 := federationRequires["key1"].(string)
+	return key1, nil
 }
 
 // Size is the resolver for the size field.
-func (r *multiPlanetRequiresNestedResolver) Size(ctx context.Context, obj *model.MultiPlanetRequiresNested, requires *model.GQLGenRequiresMultiPlanetRequiresNestedSize) (int, error) {
-	panic(fmt.Errorf("not implemented: Size - size"))
+func (r *multiPlanetRequiresNestedResolver) Size(ctx context.Context, obj *model.MultiPlanetRequiresNested, federationRequires map[string]interface{}) (int, error) {
+	foo := federationRequires["world"].(map[string]interface{})["foo"].(string)
+	return len(foo), nil
 }
 
 // Weight is the resolver for the weight field.
-func (r *planetMultipleRequiresResolver) Weight(ctx context.Context, obj *model.PlanetMultipleRequires, foo *string, requires *model.GQLGenRequiresPlanetMultipleRequiresWeight) (int, error) {
-	panic(fmt.Errorf("not implemented: Weight - weight"))
+func (r *planetMultipleRequiresResolver) Weight(ctx context.Context, obj *model.PlanetMultipleRequires, foo *string, federationRequires map[string]interface{}) (int, error) {
+	diameter, err := federationRequires["diameter"].(json.Number).Int64()
+	if err != nil {
+		return 0, err
+	}
+
+	density, err := federationRequires["density"].(json.Number).Int64()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(diameter) + int(density), nil
 }
 
 // Size is the resolver for the size field.
-func (r *planetRequiresResolver) Size(ctx context.Context, obj *model.PlanetRequires, requires *model.GQLGenRequiresPlanetRequiresSize) (int, error) {
-	panic(fmt.Errorf("not implemented: Size - size"))
+func (r *planetRequiresResolver) Size(ctx context.Context, obj *model.PlanetRequires, federationRequires map[string]interface{}) (int, error) {
+	diameter, err := federationRequires["diameter"].(json.Number).Int64()
+	if err != nil {
+		return 0, err
+	}
+
+	return int(diameter), nil
 }
 
 // Size is the resolver for the size field.
-func (r *planetRequiresNestedResolver) Size(ctx context.Context, obj *model.PlanetRequiresNested, requires *model.GQLGenRequiresPlanetRequiresNestedSize) (int, error) {
-	panic(fmt.Errorf("not implemented: Size - size"))
+func (r *planetRequiresNestedResolver) Size(ctx context.Context, obj *model.PlanetRequiresNested, federationRequires map[string]interface{}) (int, error) {
+	foo := federationRequires["world"].(map[string]interface{})["foo"].(string)
+	return len(foo), nil
 }
 
 // Sizes is the resolver for the sizes field.
-func (r *planetRequiresNestedResolver) Sizes(ctx context.Context, obj *model.PlanetRequiresNested, requires *model.GQLGenRequiresPlanetRequiresNestedSizes) ([]int, error) {
-	panic(fmt.Errorf("not implemented: Sizes - sizes"))
+func (r *planetRequiresNestedResolver) Sizes(ctx context.Context, obj *model.PlanetRequiresNested, federationRequires map[string]interface{}) ([]int, error) {
+	foo := federationRequires["world"].(map[string]interface{})["foo"].(string)
+	return []int{len(foo)}, nil
 }
 
 // Test is the resolver for the test field.

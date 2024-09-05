@@ -8,14 +8,14 @@ import (
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/plugin/federation/testdata/explicitrequires"
-	"github.com/99designs/gqlgen/plugin/federation/testdata/explicitrequires/generated"
+	"github.com/99designs/gqlgen/plugin/federation/testdata/computedrequires"
+	"github.com/99designs/gqlgen/plugin/federation/testdata/computedrequires/generated"
 )
 
 func TestComputedRequires(t *testing.T) {
 	c := client.New(handler.NewDefaultServer(
 		generated.NewExecutableSchema(generated.Config{
-			Resolvers: &explicitrequires.Resolver{},
+			Resolvers: &computedrequires.Resolver{},
 		}),
 	))
 
@@ -34,14 +34,14 @@ func TestComputedRequires(t *testing.T) {
 
 		var resp struct {
 			Entities []struct {
-				Name     string `json:"name"`
-				Diameter int    `json:"diameter"`
+				Name string `json:"name"`
+				Size int    `json:"size"`
 			} `json:"_entities"`
 		}
 
 		err := c.Post(
 			entityQuery([]string{
-				"PlanetRequires {name, diameter}",
+				"PlanetRequires {name size}",
 			}),
 			&resp,
 			client.Var("representations", representations),
@@ -49,9 +49,9 @@ func TestComputedRequires(t *testing.T) {
 
 		require.NoError(t, err)
 		require.Equal(t, "earth", resp.Entities[0].Name)
-		require.Equal(t, 12, resp.Entities[0].Diameter)
+		require.Equal(t, 12, resp.Entities[0].Size)
 		require.Equal(t, "mars", resp.Entities[1].Name)
-		require.Equal(t, 10, resp.Entities[1].Diameter)
+		require.Equal(t, 10, resp.Entities[1].Size)
 	})
 
 	t.Run("PlanetRequires entities with multiple required fields directive", func(t *testing.T) {
@@ -71,15 +71,14 @@ func TestComputedRequires(t *testing.T) {
 
 		var resp struct {
 			Entities []struct {
-				Name     string `json:"name"`
-				Density  int    `json:"density"`
-				Diameter int    `json:"diameter"`
+				Name   string `json:"name"`
+				Weight int    `json:"weight"`
 			} `json:"_entities"`
 		}
 
 		err := c.Post(
 			entityQuery([]string{
-				"PlanetMultipleRequires {name, diameter, density}",
+				"PlanetMultipleRequires {name weight}",
 			}),
 			&resp,
 			client.Var("representations", representations),
@@ -87,11 +86,9 @@ func TestComputedRequires(t *testing.T) {
 
 		require.NoError(t, err)
 		require.Equal(t, "earth", resp.Entities[0].Name)
-		require.Equal(t, 12, resp.Entities[0].Diameter)
-		require.Equal(t, 800, resp.Entities[0].Density)
+		require.Equal(t, 812, resp.Entities[0].Weight)
 		require.Equal(t, "mars", resp.Entities[1].Name)
-		require.Equal(t, 10, resp.Entities[1].Diameter)
-		require.Equal(t, 850, resp.Entities[1].Density)
+		require.Equal(t, 860, resp.Entities[1].Weight)
 	})
 
 	t.Run("PlanetRequiresNested entities with requires directive having nested field", func(t *testing.T) {
@@ -139,7 +136,7 @@ func TestComputedRequires(t *testing.T) {
 func TestMultiComputedRequires(t *testing.T) {
 	c := client.New(handler.NewDefaultServer(
 		generated.NewExecutableSchema(generated.Config{
-			Resolvers: &explicitrequires.Resolver{},
+			Resolvers: &computedrequires.Resolver{},
 		}),
 	))
 

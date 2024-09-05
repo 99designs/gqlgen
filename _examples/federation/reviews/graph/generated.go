@@ -46,7 +46,6 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	EntityResolver func(ctx context.Context, obj interface{}, next graphql.Resolver, multi *bool) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -74,6 +73,8 @@ var (
 			return nil, errors.New("must be called from within _entities")
 		}
 
+		// Get the index of the current entity in the representations list. This is
+		// set by the execution context after the _entities resolver is called.
 		index := fc.Parent.Index
 		if index == nil {
 			return nil, errors.New("couldn't find input index for entity")
@@ -246,38 +247,6 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
-
-func (ec *executionContext) dir_entityResolver_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	arg0, err := ec.dir_entityResolver_argsMulti(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["multi"] = arg0
-	return args, nil
-}
-func (ec *executionContext) dir_entityResolver_argsMulti(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (*bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["multi"]
-	if !ok {
-		var zeroVal *bool
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("multi"))
-	if tmp, ok := rawArgs["multi"]; ok {
-		return ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
-	}
-
-	var zeroVal *bool
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Entity_findManyProductByManufacturerIDAndIDs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -570,35 +539,8 @@ func (ec *executionContext) _Entity_findManyProductByManufacturerIDAndIDs(ctx co
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Entity().FindManyProductByManufacturerIDAndIDs(rctx, fc.Args["reps"].([]*model.ProductByManufacturerIDAndIDsInput))
-		}
-
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			multi, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
-			if err != nil {
-				var zeroVal []*model.Product
-				return zeroVal, err
-			}
-			if ec.directives.EntityResolver == nil {
-				var zeroVal []*model.Product
-				return zeroVal, errors.New("directive entityResolver is not implemented")
-			}
-			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.([]*model.Product); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/_examples/federation/reviews/graph/model.Product`, tmp)
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Entity().FindManyProductByManufacturerIDAndIDs(rctx, fc.Args["reps"].([]*model.ProductByManufacturerIDAndIDsInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1297,35 +1239,8 @@ func (ec *executionContext) _Review_product(ctx context.Context, field graphql.C
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return obj.Product, nil
-		}
-
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			multi, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
-			if err != nil {
-				var zeroVal *model.Product
-				return zeroVal, err
-			}
-			if ec.directives.EntityResolver == nil {
-				var zeroVal *model.Product
-				return zeroVal, errors.New("directive entityResolver is not implemented")
-			}
-			return ec.directives.EntityResolver(ctx, obj, directive0, multi)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(*model.Product); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/_examples/federation/reviews/graph/model.Product`, tmp)
+		ctx = rctx // use context from middleware stack in children
+		return obj.Product, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)

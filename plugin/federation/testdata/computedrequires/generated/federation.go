@@ -180,6 +180,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "Hello": %w`, err)
 			}
+
 			return entity, nil
 		}
 	case "HelloMultiSingleKeys":
@@ -202,6 +203,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "HelloMultiSingleKeys": %w`, err)
 			}
+
 			return entity, nil
 		}
 	case "HelloWithErrors":
@@ -220,6 +222,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "HelloWithErrors": %w`, err)
 			}
+
 			return entity, nil
 		}
 	case "PlanetMultipleRequires":
@@ -238,6 +241,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "PlanetMultipleRequires": %w`, err)
 			}
+
 			return entity, nil
 		}
 	case "PlanetRequires":
@@ -256,6 +260,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "PlanetRequires": %w`, err)
 			}
+
 			return entity, nil
 		}
 	case "PlanetRequiresNested":
@@ -274,6 +279,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "PlanetRequiresNested": %w`, err)
 			}
+
 			return entity, nil
 		}
 	case "World":
@@ -296,6 +302,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "World": %w`, err)
 			}
+
 			return entity, nil
 		}
 	case "WorldName":
@@ -314,6 +321,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "WorldName": %w`, err)
 			}
+
 			return entity, nil
 		}
 	case "WorldWithMultipleKeys":
@@ -336,6 +344,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "WorldWithMultipleKeys": %w`, err)
 			}
+
 			return entity, nil
 		case "findWorldWithMultipleKeysByBar":
 			id0, err := ec.unmarshalNInt2int(ctx, rep["bar"])
@@ -346,6 +355,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "WorldWithMultipleKeys": %w`, err)
 			}
+
 			return entity, nil
 		}
 

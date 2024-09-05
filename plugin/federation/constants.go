@@ -17,17 +17,22 @@ const dirNameKey = "key"
 // The @requires directive that defines the required fields for an entity to be resolved.
 const dirNameRequires = "requires"
 
+// The @entityResolver directive allows users to specify entity resolvers as batch lookups
+const dirNameEntityResolver = "entityResolver"
+
 const dirNamePopulateFromRepresentations = "populateFromRepresentations"
 
 var populateFromRepresentationsImplementation = `func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
 	fc := graphql.GetFieldContext(ctx)
 
 	// We get the Federation representations argument from the _entities resolver
-	representations, ok := fc.Parent.Parent.Args["representations"].([gs]map[string]any)
+	representations, ok := fc.Parent.Parent.Args["representations"].([]map[string]any)
 	if !ok {
 		return nil, errors.New("must be called from within _entities")
 	}
 
+	// Get the index of the current entity in the representations list. This is
+	// set by the execution context after the _entities resolver is called.
 	index := fc.Parent.Index
 	if index == nil {
 		return nil, errors.New("couldn't find input index for entity")
@@ -147,10 +152,8 @@ var dirPopulateFromRepresentations = &ast.DirectiveDefinition{
 	Name:         dirNamePopulateFromRepresentations,
 	IsRepeatable: false,
 	Description: `This is a runtime directive used to implement @requires. It's automatically placed
-on the generated _requires argument, and the implementation of it extracts the
-correct value from the input representations list. If the type is a multi entity resolver,
-it will extract the correct value based on position injected by @injectPosition.
-`,
+on the generated _federationRequires argument, and the implementation of it extracts the
+correct value from the input representations list.`,
 	Locations: []ast.DirectiveLocation{ast.LocationArgumentDefinition},
 	Position: &ast.Position{Src: &ast.Source{
 		Name: dirGraphQLQFile,
@@ -161,8 +164,7 @@ var dirEntityReference = &ast.DirectiveDefinition{
 	Name:         DirNameEntityReference,
 	IsRepeatable: false,
 	Description: `This is a compile-time directive used to implement @requires.
-It tells the code generator how to generate the model for the scalar.
-`,
+It tells the code generator how to generate the model for the scalar.`,
 	Locations: []ast.DirectiveLocation{ast.LocationScalar},
 	Arguments: ast.ArgumentDefinitionList{
 		{

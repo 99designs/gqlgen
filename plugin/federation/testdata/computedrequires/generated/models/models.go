@@ -2,275 +2,132 @@
 
 package model
 
-import (
-"context"
-"fmt"
-"io"
-"strconv"
-"time"
-"sync"
-"errors"
-"bytes"
-gqlparser "github.com/vektah/gqlparser/v2"
-"github.com/vektah/gqlparser/v2/ast"
-"github.com/99designs/gqlgen/graphql"
-"github.com/99designs/gqlgen/graphql/introspection")
+type Hello struct {
+	Name      string `json:"name"`
+	Secondary string `json:"secondary"`
+}
 
+func (Hello) IsEntity() {}
 
+type HelloMultiSingleKeys struct {
+	Key1 string `json:"key1"`
+	Key2 string `json:"key2"`
+}
 
+func (HelloMultiSingleKeys) IsEntity() {}
 
+type HelloWithErrors struct {
+	Name string `json:"name"`
+}
 
+func (HelloWithErrors) IsEntity() {}
 
+type MultiHello struct {
+	Name string `json:"name"`
+}
 
+func (MultiHello) IsEntity() {}
 
+type MultiHelloByNamesInput struct {
+	Name string `json:"Name"`
+}
 
+type MultiHelloMultipleRequires struct {
+	Name string `json:"name"`
+	Key1 string `json:"key1"`
+	Key2 string `json:"key2"`
+	Key3 string `json:"key3"`
+}
 
+func (MultiHelloMultipleRequires) IsEntity() {}
 
+type MultiHelloMultipleRequiresByNamesInput struct {
+	Name string `json:"Name"`
+}
 
+type MultiHelloRequires struct {
+	Name string `json:"name"`
+	Key1 string `json:"key1"`
+	Key2 string `json:"key2"`
+}
 
+func (MultiHelloRequires) IsEntity() {}
 
+type MultiHelloRequiresByNamesInput struct {
+	Name string `json:"Name"`
+}
 
-	
-	type  struct {
-	}
+type MultiHelloWithError struct {
+	Name string `json:"name"`
+}
 
-	
-	
-	type  struct {
-	}
+func (MultiHelloWithError) IsEntity() {}
 
-	
-	
-	type  struct {
-	}
+type MultiHelloWithErrorByNamesInput struct {
+	Name string `json:"Name"`
+}
 
-	
-	
-	type  struct {
-	}
+type MultiPlanetRequiresNested struct {
+	Name  string `json:"name"`
+	World *World `json:"world"`
+	Size  int    `json:"size"`
+}
 
-	
-	
-	type  struct {
-	}
+func (MultiPlanetRequiresNested) IsEntity() {}
 
-	
-	
-	type  struct {
-	}
+type MultiPlanetRequiresNestedByNamesInput struct {
+	Name string `json:"Name"`
+}
 
-	
-	
-	type  struct {
-	}
+type PlanetMultipleRequires struct {
+	Name         string  `json:"name"`
+	Diameter     int     `json:"diameter"`
+	Density      int     `json:"density"`
+	Weight       int     `json:"weight"`
+	AnotherField *string `json:"anotherField,omitempty"`
+}
 
-	
-	
-	type GQLGenRequiresMultiHelloMultipleRequiresKey3 struct {
-	}
+func (PlanetMultipleRequires) IsEntity() {}
 
-	
-	
-	type GQLGenRequiresMultiHelloRequiresKey2 struct {
-	}
+type PlanetRequires struct {
+	Name     string `json:"name"`
+	Size     int    `json:"size"`
+	Diameter int    `json:"diameter"`
+}
 
-	
-	
-	type GQLGenRequiresMultiPlanetRequiresNestedSize struct {
-	}
+func (PlanetRequires) IsEntity() {}
 
-	
-	
-	type GQLGenRequiresPlanetMultipleRequiresWeight struct {
-	}
+type PlanetRequiresNested struct {
+	Name   string   `json:"name"`
+	World  *World   `json:"world"`
+	Worlds []*World `json:"worlds,omitempty"`
+	Size   int      `json:"size"`
+	Sizes  []int    `json:"sizes,omitempty"`
+}
 
-	
-	
-	type GQLGenRequiresPlanetRequiresNestedSize struct {
-	}
+func (PlanetRequiresNested) IsEntity() {}
 
-	
-	
-	type GQLGenRequiresPlanetRequiresNestedSizes struct {
-	}
+type Query struct {
+}
 
-	
-	
-	type GQLGenRequiresPlanetRequiresSize struct {
-	}
+type World struct {
+	Foo   string `json:"foo"`
+	Bar   int    `json:"bar"`
+	Hello *Hello `json:"hello,omitempty"`
+}
 
-	
-	
-	type Hello struct {
-			Name string `json:"name"`
-			Secondary string `json:"secondary"`
-	}
+func (World) IsEntity() {}
 
-	
-		func (Hello) IsEntity() {}
-	
-	
-	type HelloMultiSingleKeys struct {
-			Key1 string `json:"key1"`
-			Key2 string `json:"key2"`
-	}
+type WorldName struct {
+	Name string `json:"name"`
+}
 
-	
-		func (HelloMultiSingleKeys) IsEntity() {}
-	
-	
-	type HelloWithErrors struct {
-			Name string `json:"name"`
-	}
+func (WorldName) IsEntity() {}
 
-	
-		func (HelloWithErrors) IsEntity() {}
-	
-	
-	type MultiHello struct {
-			Name string `json:"name"`
-	}
+type WorldWithMultipleKeys struct {
+	Foo   string `json:"foo"`
+	Bar   int    `json:"bar"`
+	Hello *Hello `json:"hello,omitempty"`
+}
 
-	
-		func (MultiHello) IsEntity() {}
-	
-	
-	type MultiHelloByNamesInput struct {
-			Name string `json:"Name"`
-	}
-
-	
-	
-	type MultiHelloMultipleRequires struct {
-			Name string `json:"name"`
-			Key1 string `json:"key1"`
-			Key2 string `json:"key2"`
-			Key3 string `json:"key3"`
-	}
-
-	
-		func (MultiHelloMultipleRequires) IsEntity() {}
-	
-	
-	type MultiHelloMultipleRequiresByNamesInput struct {
-			Name string `json:"Name"`
-	}
-
-	
-	
-	type MultiHelloRequires struct {
-			Name string `json:"name"`
-			Key1 string `json:"key1"`
-			Key2 string `json:"key2"`
-	}
-
-	
-		func (MultiHelloRequires) IsEntity() {}
-	
-	
-	type MultiHelloRequiresByNamesInput struct {
-			Name string `json:"Name"`
-	}
-
-	
-	
-	type MultiHelloWithError struct {
-			Name string `json:"name"`
-	}
-
-	
-		func (MultiHelloWithError) IsEntity() {}
-	
-	
-	type MultiHelloWithErrorByNamesInput struct {
-			Name string `json:"Name"`
-	}
-
-	
-	
-	type MultiPlanetRequiresNested struct {
-			Name string `json:"name"`
-			World *World `json:"world"`
-			Size int `json:"size"`
-	}
-
-	
-		func (MultiPlanetRequiresNested) IsEntity() {}
-	
-	
-	type MultiPlanetRequiresNestedByNamesInput struct {
-			Name string `json:"Name"`
-	}
-
-	
-	
-	type PlanetMultipleRequires struct {
-			Name string `json:"name"`
-			Diameter int `json:"diameter"`
-			Density int `json:"density"`
-			Weight int `json:"weight"`
-			AnotherField *string `json:"anotherField,omitempty"`
-	}
-
-	
-		func (PlanetMultipleRequires) IsEntity() {}
-	
-	
-	type PlanetRequires struct {
-			Name string `json:"name"`
-			Size int `json:"size"`
-			Diameter int `json:"diameter"`
-	}
-
-	
-		func (PlanetRequires) IsEntity() {}
-	
-	
-	type PlanetRequiresNested struct {
-			Name string `json:"name"`
-			World *World `json:"world"`
-			Worlds []*World `json:"worlds,omitempty"`
-			Size int `json:"size"`
-			Sizes []int `json:"sizes,omitempty"`
-	}
-
-	
-		func (PlanetRequiresNested) IsEntity() {}
-	
-	
-	type Query struct {
-	}
-
-	
-	
-	type World struct {
-			Foo string `json:"foo"`
-			Bar int `json:"bar"`
-			Hello *Hello `json:"hello,omitempty"`
-	}
-
-	
-		func (World) IsEntity() {}
-	
-	
-	type WorldName struct {
-			Name string `json:"name"`
-	}
-
-	
-		func (WorldName) IsEntity() {}
-	
-	
-	type WorldWithMultipleKeys struct {
-			Foo string `json:"foo"`
-			Bar int `json:"bar"`
-			Hello *Hello `json:"hello,omitempty"`
-	}
-
-	
-		func (WorldWithMultipleKeys) IsEntity() {}
-	
-
-
-
-
+func (WorldWithMultipleKeys) IsEntity() {}

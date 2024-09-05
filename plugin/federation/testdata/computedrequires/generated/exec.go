@@ -50,8 +50,6 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	EntityResolver              func(ctx context.Context, obj interface{}, next graphql.Resolver, multi *bool) (res interface{}, err error)
-	PopulateFromRepresentations func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -75,27 +73,52 @@ type EntityResolver interface {
 	FindWorldWithMultipleKeysByBar(ctx context.Context, bar int) (*model.WorldWithMultipleKeys, error)
 }
 type MultiHelloMultipleRequiresResolver interface {
-	Key3(ctx context.Context, obj *model.MultiHelloMultipleRequires, requires *model.GQLGenRequiresMultiHelloMultipleRequiresKey3) (string, error)
+	Key3(ctx context.Context, obj *model.MultiHelloMultipleRequires, federationRequires map[string]interface{}) (string, error)
 }
 type MultiHelloRequiresResolver interface {
-	Key2(ctx context.Context, obj *model.MultiHelloRequires, requires *model.GQLGenRequiresMultiHelloRequiresKey2) (string, error)
+	Key2(ctx context.Context, obj *model.MultiHelloRequires, federationRequires map[string]interface{}) (string, error)
 }
 type MultiPlanetRequiresNestedResolver interface {
-	Size(ctx context.Context, obj *model.MultiPlanetRequiresNested, requires *model.GQLGenRequiresMultiPlanetRequiresNestedSize) (int, error)
+	Size(ctx context.Context, obj *model.MultiPlanetRequiresNested, federationRequires map[string]interface{}) (int, error)
 }
 type PlanetMultipleRequiresResolver interface {
-	Weight(ctx context.Context, obj *model.PlanetMultipleRequires, foo *string, requires *model.GQLGenRequiresPlanetMultipleRequiresWeight) (int, error)
+	Weight(ctx context.Context, obj *model.PlanetMultipleRequires, foo *string, federationRequires map[string]interface{}) (int, error)
 }
 type PlanetRequiresResolver interface {
-	Size(ctx context.Context, obj *model.PlanetRequires, requires *model.GQLGenRequiresPlanetRequiresSize) (int, error)
+	Size(ctx context.Context, obj *model.PlanetRequires, federationRequires map[string]interface{}) (int, error)
 }
 type PlanetRequiresNestedResolver interface {
-	Size(ctx context.Context, obj *model.PlanetRequiresNested, requires *model.GQLGenRequiresPlanetRequiresNestedSize) (int, error)
-	Sizes(ctx context.Context, obj *model.PlanetRequiresNested, requires *model.GQLGenRequiresPlanetRequiresNestedSizes) ([]int, error)
+	Size(ctx context.Context, obj *model.PlanetRequiresNested, federationRequires map[string]interface{}) (int, error)
+	Sizes(ctx context.Context, obj *model.PlanetRequiresNested, federationRequires map[string]interface{}) ([]int, error)
 }
 type QueryResolver interface {
 	Test(ctx context.Context) (*string, error)
 }
+
+var (
+	builtInDirectivePopulateFromRepresentations = func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
+		fc := graphql.GetFieldContext(ctx)
+
+		// We get the Federation representations argument from the _entities resolver
+		representations, ok := fc.Parent.Parent.Args["representations"].([]map[string]any)
+		if !ok {
+			return nil, errors.New("must be called from within _entities")
+		}
+
+		// Get the index of the current entity in the representations list. This is
+		// set by the execution context after the _entities resolver is called.
+		index := fc.Parent.Index
+		if index == nil {
+			return nil, errors.New("couldn't find input index for entity")
+		}
+
+		if len(representations) < *index {
+			return nil, errors.New("representation not found")
+		}
+
+		return representations[*index], nil
+	}
+)
 
 type executableSchema struct {
 	schema     *ast.Schema
@@ -363,38 +386,6 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) dir_entityResolver_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	arg0, err := ec.dir_entityResolver_argsMulti(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["multi"] = arg0
-	return args, nil
-}
-func (ec *executionContext) dir_entityResolver_argsMulti(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (*bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["multi"]
-	if !ok {
-		var zeroVal *bool
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("multi"))
-	if tmp, ok := rawArgs["multi"]; ok {
-		return ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
-	}
-
-	var zeroVal *bool
-	return zeroVal, nil
-}
-
 func (ec *executionContext) field_Entity_findHelloByName_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
@@ -409,15 +400,6 @@ func (ec *executionContext) field_Entity_findHelloByName_argsName(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["name"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 	if tmp, ok := rawArgs["name"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
@@ -446,15 +428,6 @@ func (ec *executionContext) field_Entity_findHelloMultiSingleKeysByKey1AndKey2_a
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["key1"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("key1"))
 	if tmp, ok := rawArgs["key1"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
@@ -468,15 +441,6 @@ func (ec *executionContext) field_Entity_findHelloMultiSingleKeysByKey1AndKey2_a
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["key2"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("key2"))
 	if tmp, ok := rawArgs["key2"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
@@ -500,15 +464,6 @@ func (ec *executionContext) field_Entity_findHelloWithErrorsByName_argsName(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["name"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 	if tmp, ok := rawArgs["name"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
@@ -532,15 +487,6 @@ func (ec *executionContext) field_Entity_findManyMultiHelloByNames_argsReps(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) ([]*model.MultiHelloByNamesInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["reps"]
-	if !ok {
-		var zeroVal []*model.MultiHelloByNamesInput
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("reps"))
 	if tmp, ok := rawArgs["reps"]; ok {
 		return ec.unmarshalNMultiHelloByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐMultiHelloByNamesInput(ctx, tmp)
@@ -564,15 +510,6 @@ func (ec *executionContext) field_Entity_findManyMultiHelloMultipleRequiresByNam
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) ([]*model.MultiHelloMultipleRequiresByNamesInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["reps"]
-	if !ok {
-		var zeroVal []*model.MultiHelloMultipleRequiresByNamesInput
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("reps"))
 	if tmp, ok := rawArgs["reps"]; ok {
 		return ec.unmarshalNMultiHelloMultipleRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐMultiHelloMultipleRequiresByNamesInput(ctx, tmp)
@@ -596,15 +533,6 @@ func (ec *executionContext) field_Entity_findManyMultiHelloRequiresByNames_argsR
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) ([]*model.MultiHelloRequiresByNamesInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["reps"]
-	if !ok {
-		var zeroVal []*model.MultiHelloRequiresByNamesInput
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("reps"))
 	if tmp, ok := rawArgs["reps"]; ok {
 		return ec.unmarshalNMultiHelloRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐMultiHelloRequiresByNamesInput(ctx, tmp)
@@ -628,15 +556,6 @@ func (ec *executionContext) field_Entity_findManyMultiHelloWithErrorByNames_args
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) ([]*model.MultiHelloWithErrorByNamesInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["reps"]
-	if !ok {
-		var zeroVal []*model.MultiHelloWithErrorByNamesInput
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("reps"))
 	if tmp, ok := rawArgs["reps"]; ok {
 		return ec.unmarshalNMultiHelloWithErrorByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐMultiHelloWithErrorByNamesInput(ctx, tmp)
@@ -660,15 +579,6 @@ func (ec *executionContext) field_Entity_findManyMultiPlanetRequiresNestedByName
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) ([]*model.MultiPlanetRequiresNestedByNamesInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["reps"]
-	if !ok {
-		var zeroVal []*model.MultiPlanetRequiresNestedByNamesInput
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("reps"))
 	if tmp, ok := rawArgs["reps"]; ok {
 		return ec.unmarshalNMultiPlanetRequiresNestedByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐMultiPlanetRequiresNestedByNamesInput(ctx, tmp)
@@ -692,15 +602,6 @@ func (ec *executionContext) field_Entity_findPlanetMultipleRequiresByName_argsNa
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["name"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 	if tmp, ok := rawArgs["name"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
@@ -724,15 +625,6 @@ func (ec *executionContext) field_Entity_findPlanetRequiresByName_argsName(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["name"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 	if tmp, ok := rawArgs["name"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
@@ -756,15 +648,6 @@ func (ec *executionContext) field_Entity_findPlanetRequiresNestedByName_argsName
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["name"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 	if tmp, ok := rawArgs["name"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
@@ -793,15 +676,6 @@ func (ec *executionContext) field_Entity_findWorldByHelloNameAndFoo_argsHelloNam
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["helloName"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("helloName"))
 	if tmp, ok := rawArgs["helloName"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
@@ -815,15 +689,6 @@ func (ec *executionContext) field_Entity_findWorldByHelloNameAndFoo_argsFoo(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["foo"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("foo"))
 	if tmp, ok := rawArgs["foo"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
@@ -847,15 +712,6 @@ func (ec *executionContext) field_Entity_findWorldNameByName_argsName(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["name"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 	if tmp, ok := rawArgs["name"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
@@ -879,15 +735,6 @@ func (ec *executionContext) field_Entity_findWorldWithMultipleKeysByBar_argsBar(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["bar"]
-	if !ok {
-		var zeroVal int
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("bar"))
 	if tmp, ok := rawArgs["bar"]; ok {
 		return ec.unmarshalNInt2int(ctx, tmp)
@@ -916,15 +763,6 @@ func (ec *executionContext) field_Entity_findWorldWithMultipleKeysByHelloNameAnd
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["helloName"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("helloName"))
 	if tmp, ok := rawArgs["helloName"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
@@ -938,15 +776,6 @@ func (ec *executionContext) field_Entity_findWorldWithMultipleKeysByHelloNameAnd
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["foo"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("foo"))
 	if tmp, ok := rawArgs["foo"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
@@ -959,171 +788,132 @@ func (ec *executionContext) field_Entity_findWorldWithMultipleKeysByHelloNameAnd
 func (ec *executionContext) field_MultiHelloMultipleRequires_key3_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_MultiHelloMultipleRequires_key3_argsRequires(ctx, rawArgs)
+	arg0, err := ec.field_MultiHelloMultipleRequires_key3_argsFederationRequires(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["_requires"] = arg0
+	args["_federationRequires"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_MultiHelloMultipleRequires_key3_argsRequires(
+func (ec *executionContext) field_MultiHelloMultipleRequires_key3_argsFederationRequires(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (*model.GQLGenRequiresMultiHelloMultipleRequiresKey3, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["_requires"]
-	if !ok {
-		var zeroVal *model.GQLGenRequiresMultiHelloMultipleRequiresKey3
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("_requires"))
+) (map[string]interface{}, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("_federationRequires"))
 	directive0 := func(ctx context.Context) (interface{}, error) {
-		tmp, ok := rawArgs["_requires"]
+		tmp, ok := rawArgs["_federationRequires"]
 		if !ok {
-			var zeroVal *model.GQLGenRequiresMultiHelloMultipleRequiresKey3
+			var zeroVal map[string]interface{}
 			return zeroVal, nil
 		}
-		return ec.unmarshalOGQLGenRequiresMultiHelloMultipleRequiresKey32ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐGQLGenRequiresMultiHelloMultipleRequiresKey3(ctx, tmp)
+		return ec.unmarshalO_RequiresMap2map(ctx, tmp)
 	}
 
 	directive1 := func(ctx context.Context) (interface{}, error) {
-		if ec.directives.PopulateFromRepresentations == nil {
-			var zeroVal *model.GQLGenRequiresMultiHelloMultipleRequiresKey3
-			return zeroVal, errors.New("directive populateFromRepresentations is not implemented")
-		}
-		return ec.directives.PopulateFromRepresentations(ctx, rawArgs, directive0)
+		return builtInDirectivePopulateFromRepresentations(ctx, rawArgs, directive0)
 	}
 
 	tmp, err := directive1(ctx)
 	if err != nil {
-		var zeroVal *model.GQLGenRequiresMultiHelloMultipleRequiresKey3
+		var zeroVal map[string]interface{}
 		return zeroVal, graphql.ErrorOnPath(ctx, err)
 	}
-	if data, ok := tmp.(*model.GQLGenRequiresMultiHelloMultipleRequiresKey3); ok {
+	if data, ok := tmp.(map[string]interface{}); ok {
 		return data, nil
 	} else if tmp == nil {
-		var zeroVal *model.GQLGenRequiresMultiHelloMultipleRequiresKey3
+		var zeroVal map[string]interface{}
 		return zeroVal, nil
 	} else {
-		var zeroVal *model.GQLGenRequiresMultiHelloMultipleRequiresKey3
-		return zeroVal, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/plugin/federation/testdata/computedrequires/generated/models.GQLGenRequiresMultiHelloMultipleRequiresKey3`, tmp))
+		var zeroVal map[string]interface{}
+		return zeroVal, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be map[string]interface{}`, tmp))
 	}
 }
 
 func (ec *executionContext) field_MultiHelloRequires_key2_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_MultiHelloRequires_key2_argsRequires(ctx, rawArgs)
+	arg0, err := ec.field_MultiHelloRequires_key2_argsFederationRequires(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["_requires"] = arg0
+	args["_federationRequires"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_MultiHelloRequires_key2_argsRequires(
+func (ec *executionContext) field_MultiHelloRequires_key2_argsFederationRequires(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (*model.GQLGenRequiresMultiHelloRequiresKey2, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["_requires"]
-	if !ok {
-		var zeroVal *model.GQLGenRequiresMultiHelloRequiresKey2
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("_requires"))
+) (map[string]interface{}, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("_federationRequires"))
 	directive0 := func(ctx context.Context) (interface{}, error) {
-		tmp, ok := rawArgs["_requires"]
+		tmp, ok := rawArgs["_federationRequires"]
 		if !ok {
-			var zeroVal *model.GQLGenRequiresMultiHelloRequiresKey2
+			var zeroVal map[string]interface{}
 			return zeroVal, nil
 		}
-		return ec.unmarshalOGQLGenRequiresMultiHelloRequiresKey22ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐGQLGenRequiresMultiHelloRequiresKey2(ctx, tmp)
+		return ec.unmarshalO_RequiresMap2map(ctx, tmp)
 	}
 
 	directive1 := func(ctx context.Context) (interface{}, error) {
-		if ec.directives.PopulateFromRepresentations == nil {
-			var zeroVal *model.GQLGenRequiresMultiHelloRequiresKey2
-			return zeroVal, errors.New("directive populateFromRepresentations is not implemented")
-		}
-		return ec.directives.PopulateFromRepresentations(ctx, rawArgs, directive0)
+		return builtInDirectivePopulateFromRepresentations(ctx, rawArgs, directive0)
 	}
 
 	tmp, err := directive1(ctx)
 	if err != nil {
-		var zeroVal *model.GQLGenRequiresMultiHelloRequiresKey2
+		var zeroVal map[string]interface{}
 		return zeroVal, graphql.ErrorOnPath(ctx, err)
 	}
-	if data, ok := tmp.(*model.GQLGenRequiresMultiHelloRequiresKey2); ok {
+	if data, ok := tmp.(map[string]interface{}); ok {
 		return data, nil
 	} else if tmp == nil {
-		var zeroVal *model.GQLGenRequiresMultiHelloRequiresKey2
+		var zeroVal map[string]interface{}
 		return zeroVal, nil
 	} else {
-		var zeroVal *model.GQLGenRequiresMultiHelloRequiresKey2
-		return zeroVal, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/plugin/federation/testdata/computedrequires/generated/models.GQLGenRequiresMultiHelloRequiresKey2`, tmp))
+		var zeroVal map[string]interface{}
+		return zeroVal, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be map[string]interface{}`, tmp))
 	}
 }
 
 func (ec *executionContext) field_MultiPlanetRequiresNested_size_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_MultiPlanetRequiresNested_size_argsRequires(ctx, rawArgs)
+	arg0, err := ec.field_MultiPlanetRequiresNested_size_argsFederationRequires(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["_requires"] = arg0
+	args["_federationRequires"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_MultiPlanetRequiresNested_size_argsRequires(
+func (ec *executionContext) field_MultiPlanetRequiresNested_size_argsFederationRequires(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (*model.GQLGenRequiresMultiPlanetRequiresNestedSize, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["_requires"]
-	if !ok {
-		var zeroVal *model.GQLGenRequiresMultiPlanetRequiresNestedSize
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("_requires"))
+) (map[string]interface{}, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("_federationRequires"))
 	directive0 := func(ctx context.Context) (interface{}, error) {
-		tmp, ok := rawArgs["_requires"]
+		tmp, ok := rawArgs["_federationRequires"]
 		if !ok {
-			var zeroVal *model.GQLGenRequiresMultiPlanetRequiresNestedSize
+			var zeroVal map[string]interface{}
 			return zeroVal, nil
 		}
-		return ec.unmarshalOGQLGenRequiresMultiPlanetRequiresNestedSize2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐGQLGenRequiresMultiPlanetRequiresNestedSize(ctx, tmp)
+		return ec.unmarshalO_RequiresMap2map(ctx, tmp)
 	}
 
 	directive1 := func(ctx context.Context) (interface{}, error) {
-		if ec.directives.PopulateFromRepresentations == nil {
-			var zeroVal *model.GQLGenRequiresMultiPlanetRequiresNestedSize
-			return zeroVal, errors.New("directive populateFromRepresentations is not implemented")
-		}
-		return ec.directives.PopulateFromRepresentations(ctx, rawArgs, directive0)
+		return builtInDirectivePopulateFromRepresentations(ctx, rawArgs, directive0)
 	}
 
 	tmp, err := directive1(ctx)
 	if err != nil {
-		var zeroVal *model.GQLGenRequiresMultiPlanetRequiresNestedSize
+		var zeroVal map[string]interface{}
 		return zeroVal, graphql.ErrorOnPath(ctx, err)
 	}
-	if data, ok := tmp.(*model.GQLGenRequiresMultiPlanetRequiresNestedSize); ok {
+	if data, ok := tmp.(map[string]interface{}); ok {
 		return data, nil
 	} else if tmp == nil {
-		var zeroVal *model.GQLGenRequiresMultiPlanetRequiresNestedSize
+		var zeroVal map[string]interface{}
 		return zeroVal, nil
 	} else {
-		var zeroVal *model.GQLGenRequiresMultiPlanetRequiresNestedSize
-		return zeroVal, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/plugin/federation/testdata/computedrequires/generated/models.GQLGenRequiresMultiPlanetRequiresNestedSize`, tmp))
+		var zeroVal map[string]interface{}
+		return zeroVal, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be map[string]interface{}`, tmp))
 	}
 }
 
@@ -1141,15 +931,6 @@ func (ec *executionContext) field_PlanetMultipleRequires_anotherField_argsFoobar
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["foobar"]
-	if !ok {
-		var zeroVal *string
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("foobar"))
 	if tmp, ok := rawArgs["foobar"]; ok {
 		return ec.unmarshalOString2ᚖstring(ctx, tmp)
@@ -1167,26 +948,17 @@ func (ec *executionContext) field_PlanetMultipleRequires_weight_args(ctx context
 		return nil, err
 	}
 	args["foo"] = arg0
-	arg1, err := ec.field_PlanetMultipleRequires_weight_argsRequires(ctx, rawArgs)
+	arg1, err := ec.field_PlanetMultipleRequires_weight_argsFederationRequires(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["_requires"] = arg1
+	args["_federationRequires"] = arg1
 	return args, nil
 }
 func (ec *executionContext) field_PlanetMultipleRequires_weight_argsFoo(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["foo"]
-	if !ok {
-		var zeroVal *string
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("foo"))
 	if tmp, ok := rawArgs["foo"]; ok {
 		return ec.unmarshalOString2ᚖstring(ctx, tmp)
@@ -1196,221 +968,169 @@ func (ec *executionContext) field_PlanetMultipleRequires_weight_argsFoo(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_PlanetMultipleRequires_weight_argsRequires(
+func (ec *executionContext) field_PlanetMultipleRequires_weight_argsFederationRequires(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (*model.GQLGenRequiresPlanetMultipleRequiresWeight, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["_requires"]
-	if !ok {
-		var zeroVal *model.GQLGenRequiresPlanetMultipleRequiresWeight
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("_requires"))
+) (map[string]interface{}, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("_federationRequires"))
 	directive0 := func(ctx context.Context) (interface{}, error) {
-		tmp, ok := rawArgs["_requires"]
+		tmp, ok := rawArgs["_federationRequires"]
 		if !ok {
-			var zeroVal *model.GQLGenRequiresPlanetMultipleRequiresWeight
+			var zeroVal map[string]interface{}
 			return zeroVal, nil
 		}
-		return ec.unmarshalOGQLGenRequiresPlanetMultipleRequiresWeight2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐGQLGenRequiresPlanetMultipleRequiresWeight(ctx, tmp)
+		return ec.unmarshalO_RequiresMap2map(ctx, tmp)
 	}
 
 	directive1 := func(ctx context.Context) (interface{}, error) {
-		if ec.directives.PopulateFromRepresentations == nil {
-			var zeroVal *model.GQLGenRequiresPlanetMultipleRequiresWeight
-			return zeroVal, errors.New("directive populateFromRepresentations is not implemented")
-		}
-		return ec.directives.PopulateFromRepresentations(ctx, rawArgs, directive0)
+		return builtInDirectivePopulateFromRepresentations(ctx, rawArgs, directive0)
 	}
 
 	tmp, err := directive1(ctx)
 	if err != nil {
-		var zeroVal *model.GQLGenRequiresPlanetMultipleRequiresWeight
+		var zeroVal map[string]interface{}
 		return zeroVal, graphql.ErrorOnPath(ctx, err)
 	}
-	if data, ok := tmp.(*model.GQLGenRequiresPlanetMultipleRequiresWeight); ok {
+	if data, ok := tmp.(map[string]interface{}); ok {
 		return data, nil
 	} else if tmp == nil {
-		var zeroVal *model.GQLGenRequiresPlanetMultipleRequiresWeight
+		var zeroVal map[string]interface{}
 		return zeroVal, nil
 	} else {
-		var zeroVal *model.GQLGenRequiresPlanetMultipleRequiresWeight
-		return zeroVal, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/plugin/federation/testdata/computedrequires/generated/models.GQLGenRequiresPlanetMultipleRequiresWeight`, tmp))
+		var zeroVal map[string]interface{}
+		return zeroVal, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be map[string]interface{}`, tmp))
 	}
 }
 
 func (ec *executionContext) field_PlanetRequiresNested_size_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_PlanetRequiresNested_size_argsRequires(ctx, rawArgs)
+	arg0, err := ec.field_PlanetRequiresNested_size_argsFederationRequires(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["_requires"] = arg0
+	args["_federationRequires"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_PlanetRequiresNested_size_argsRequires(
+func (ec *executionContext) field_PlanetRequiresNested_size_argsFederationRequires(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (*model.GQLGenRequiresPlanetRequiresNestedSize, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["_requires"]
-	if !ok {
-		var zeroVal *model.GQLGenRequiresPlanetRequiresNestedSize
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("_requires"))
+) (map[string]interface{}, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("_federationRequires"))
 	directive0 := func(ctx context.Context) (interface{}, error) {
-		tmp, ok := rawArgs["_requires"]
+		tmp, ok := rawArgs["_federationRequires"]
 		if !ok {
-			var zeroVal *model.GQLGenRequiresPlanetRequiresNestedSize
+			var zeroVal map[string]interface{}
 			return zeroVal, nil
 		}
-		return ec.unmarshalOGQLGenRequiresPlanetRequiresNestedSize2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐGQLGenRequiresPlanetRequiresNestedSize(ctx, tmp)
+		return ec.unmarshalO_RequiresMap2map(ctx, tmp)
 	}
 
 	directive1 := func(ctx context.Context) (interface{}, error) {
-		if ec.directives.PopulateFromRepresentations == nil {
-			var zeroVal *model.GQLGenRequiresPlanetRequiresNestedSize
-			return zeroVal, errors.New("directive populateFromRepresentations is not implemented")
-		}
-		return ec.directives.PopulateFromRepresentations(ctx, rawArgs, directive0)
+		return builtInDirectivePopulateFromRepresentations(ctx, rawArgs, directive0)
 	}
 
 	tmp, err := directive1(ctx)
 	if err != nil {
-		var zeroVal *model.GQLGenRequiresPlanetRequiresNestedSize
+		var zeroVal map[string]interface{}
 		return zeroVal, graphql.ErrorOnPath(ctx, err)
 	}
-	if data, ok := tmp.(*model.GQLGenRequiresPlanetRequiresNestedSize); ok {
+	if data, ok := tmp.(map[string]interface{}); ok {
 		return data, nil
 	} else if tmp == nil {
-		var zeroVal *model.GQLGenRequiresPlanetRequiresNestedSize
+		var zeroVal map[string]interface{}
 		return zeroVal, nil
 	} else {
-		var zeroVal *model.GQLGenRequiresPlanetRequiresNestedSize
-		return zeroVal, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/plugin/federation/testdata/computedrequires/generated/models.GQLGenRequiresPlanetRequiresNestedSize`, tmp))
+		var zeroVal map[string]interface{}
+		return zeroVal, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be map[string]interface{}`, tmp))
 	}
 }
 
 func (ec *executionContext) field_PlanetRequiresNested_sizes_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_PlanetRequiresNested_sizes_argsRequires(ctx, rawArgs)
+	arg0, err := ec.field_PlanetRequiresNested_sizes_argsFederationRequires(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["_requires"] = arg0
+	args["_federationRequires"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_PlanetRequiresNested_sizes_argsRequires(
+func (ec *executionContext) field_PlanetRequiresNested_sizes_argsFederationRequires(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (*model.GQLGenRequiresPlanetRequiresNestedSizes, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["_requires"]
-	if !ok {
-		var zeroVal *model.GQLGenRequiresPlanetRequiresNestedSizes
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("_requires"))
+) (map[string]interface{}, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("_federationRequires"))
 	directive0 := func(ctx context.Context) (interface{}, error) {
-		tmp, ok := rawArgs["_requires"]
+		tmp, ok := rawArgs["_federationRequires"]
 		if !ok {
-			var zeroVal *model.GQLGenRequiresPlanetRequiresNestedSizes
+			var zeroVal map[string]interface{}
 			return zeroVal, nil
 		}
-		return ec.unmarshalOGQLGenRequiresPlanetRequiresNestedSizes2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐGQLGenRequiresPlanetRequiresNestedSizes(ctx, tmp)
+		return ec.unmarshalO_RequiresMap2map(ctx, tmp)
 	}
 
 	directive1 := func(ctx context.Context) (interface{}, error) {
-		if ec.directives.PopulateFromRepresentations == nil {
-			var zeroVal *model.GQLGenRequiresPlanetRequiresNestedSizes
-			return zeroVal, errors.New("directive populateFromRepresentations is not implemented")
-		}
-		return ec.directives.PopulateFromRepresentations(ctx, rawArgs, directive0)
+		return builtInDirectivePopulateFromRepresentations(ctx, rawArgs, directive0)
 	}
 
 	tmp, err := directive1(ctx)
 	if err != nil {
-		var zeroVal *model.GQLGenRequiresPlanetRequiresNestedSizes
+		var zeroVal map[string]interface{}
 		return zeroVal, graphql.ErrorOnPath(ctx, err)
 	}
-	if data, ok := tmp.(*model.GQLGenRequiresPlanetRequiresNestedSizes); ok {
+	if data, ok := tmp.(map[string]interface{}); ok {
 		return data, nil
 	} else if tmp == nil {
-		var zeroVal *model.GQLGenRequiresPlanetRequiresNestedSizes
+		var zeroVal map[string]interface{}
 		return zeroVal, nil
 	} else {
-		var zeroVal *model.GQLGenRequiresPlanetRequiresNestedSizes
-		return zeroVal, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/plugin/federation/testdata/computedrequires/generated/models.GQLGenRequiresPlanetRequiresNestedSizes`, tmp))
+		var zeroVal map[string]interface{}
+		return zeroVal, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be map[string]interface{}`, tmp))
 	}
 }
 
 func (ec *executionContext) field_PlanetRequires_size_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_PlanetRequires_size_argsRequires(ctx, rawArgs)
+	arg0, err := ec.field_PlanetRequires_size_argsFederationRequires(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["_requires"] = arg0
+	args["_federationRequires"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_PlanetRequires_size_argsRequires(
+func (ec *executionContext) field_PlanetRequires_size_argsFederationRequires(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (*model.GQLGenRequiresPlanetRequiresSize, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["_requires"]
-	if !ok {
-		var zeroVal *model.GQLGenRequiresPlanetRequiresSize
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("_requires"))
+) (map[string]interface{}, error) {
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("_federationRequires"))
 	directive0 := func(ctx context.Context) (interface{}, error) {
-		tmp, ok := rawArgs["_requires"]
+		tmp, ok := rawArgs["_federationRequires"]
 		if !ok {
-			var zeroVal *model.GQLGenRequiresPlanetRequiresSize
+			var zeroVal map[string]interface{}
 			return zeroVal, nil
 		}
-		return ec.unmarshalOGQLGenRequiresPlanetRequiresSize2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐGQLGenRequiresPlanetRequiresSize(ctx, tmp)
+		return ec.unmarshalO_RequiresMap2map(ctx, tmp)
 	}
 
 	directive1 := func(ctx context.Context) (interface{}, error) {
-		if ec.directives.PopulateFromRepresentations == nil {
-			var zeroVal *model.GQLGenRequiresPlanetRequiresSize
-			return zeroVal, errors.New("directive populateFromRepresentations is not implemented")
-		}
-		return ec.directives.PopulateFromRepresentations(ctx, rawArgs, directive0)
+		return builtInDirectivePopulateFromRepresentations(ctx, rawArgs, directive0)
 	}
 
 	tmp, err := directive1(ctx)
 	if err != nil {
-		var zeroVal *model.GQLGenRequiresPlanetRequiresSize
+		var zeroVal map[string]interface{}
 		return zeroVal, graphql.ErrorOnPath(ctx, err)
 	}
-	if data, ok := tmp.(*model.GQLGenRequiresPlanetRequiresSize); ok {
+	if data, ok := tmp.(map[string]interface{}); ok {
 		return data, nil
 	} else if tmp == nil {
-		var zeroVal *model.GQLGenRequiresPlanetRequiresSize
+		var zeroVal map[string]interface{}
 		return zeroVal, nil
 	} else {
-		var zeroVal *model.GQLGenRequiresPlanetRequiresSize
-		return zeroVal, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/plugin/federation/testdata/computedrequires/generated/models.GQLGenRequiresPlanetRequiresSize`, tmp))
+		var zeroVal map[string]interface{}
+		return zeroVal, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be map[string]interface{}`, tmp))
 	}
 }
 
@@ -1428,15 +1148,6 @@ func (ec *executionContext) field_Query___type_argsName(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["name"]
-	if !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 	if tmp, ok := rawArgs["name"]; ok {
 		return ec.unmarshalNString2string(ctx, tmp)
@@ -1460,15 +1171,6 @@ func (ec *executionContext) field_Query__entities_argsRepresentations(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) ([]map[string]interface{}, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["representations"]
-	if !ok {
-		var zeroVal []map[string]interface{}
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("representations"))
 	if tmp, ok := rawArgs["representations"]; ok {
 		return ec.unmarshalN_Any2ᚕmapᚄ(ctx, tmp)
@@ -1492,15 +1194,6 @@ func (ec *executionContext) field___Type_enumValues_argsIncludeDeprecated(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["includeDeprecated"]
-	if !ok {
-		var zeroVal bool
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
 		return ec.unmarshalOBoolean2bool(ctx, tmp)
@@ -1524,15 +1217,6 @@ func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["includeDeprecated"]
-	if !ok {
-		var zeroVal bool
-		return zeroVal, nil
-	}
-
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
 	if tmp, ok := rawArgs["includeDeprecated"]; ok {
 		return ec.unmarshalOBoolean2bool(ctx, tmp)
@@ -1744,35 +1428,8 @@ func (ec *executionContext) _Entity_findManyMultiHelloByNames(ctx context.Contex
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Entity().FindManyMultiHelloByNames(rctx, fc.Args["reps"].([]*model.MultiHelloByNamesInput))
-		}
-
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			multi, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
-			if err != nil {
-				var zeroVal []*model.MultiHello
-				return zeroVal, err
-			}
-			if ec.directives.EntityResolver == nil {
-				var zeroVal []*model.MultiHello
-				return zeroVal, errors.New("directive entityResolver is not implemented")
-			}
-			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.([]*model.MultiHello); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/plugin/federation/testdata/computedrequires/generated/models.MultiHello`, tmp)
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Entity().FindManyMultiHelloByNames(rctx, fc.Args["reps"].([]*model.MultiHelloByNamesInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1827,35 +1484,8 @@ func (ec *executionContext) _Entity_findManyMultiHelloMultipleRequiresByNames(ct
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Entity().FindManyMultiHelloMultipleRequiresByNames(rctx, fc.Args["reps"].([]*model.MultiHelloMultipleRequiresByNamesInput))
-		}
-
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			multi, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
-			if err != nil {
-				var zeroVal []*model.MultiHelloMultipleRequires
-				return zeroVal, err
-			}
-			if ec.directives.EntityResolver == nil {
-				var zeroVal []*model.MultiHelloMultipleRequires
-				return zeroVal, errors.New("directive entityResolver is not implemented")
-			}
-			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.([]*model.MultiHelloMultipleRequires); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/plugin/federation/testdata/computedrequires/generated/models.MultiHelloMultipleRequires`, tmp)
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Entity().FindManyMultiHelloMultipleRequiresByNames(rctx, fc.Args["reps"].([]*model.MultiHelloMultipleRequiresByNamesInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1916,35 +1546,8 @@ func (ec *executionContext) _Entity_findManyMultiHelloRequiresByNames(ctx contex
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Entity().FindManyMultiHelloRequiresByNames(rctx, fc.Args["reps"].([]*model.MultiHelloRequiresByNamesInput))
-		}
-
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			multi, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
-			if err != nil {
-				var zeroVal []*model.MultiHelloRequires
-				return zeroVal, err
-			}
-			if ec.directives.EntityResolver == nil {
-				var zeroVal []*model.MultiHelloRequires
-				return zeroVal, errors.New("directive entityResolver is not implemented")
-			}
-			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.([]*model.MultiHelloRequires); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/plugin/federation/testdata/computedrequires/generated/models.MultiHelloRequires`, tmp)
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Entity().FindManyMultiHelloRequiresByNames(rctx, fc.Args["reps"].([]*model.MultiHelloRequiresByNamesInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2003,35 +1606,8 @@ func (ec *executionContext) _Entity_findManyMultiHelloWithErrorByNames(ctx conte
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Entity().FindManyMultiHelloWithErrorByNames(rctx, fc.Args["reps"].([]*model.MultiHelloWithErrorByNamesInput))
-		}
-
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			multi, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
-			if err != nil {
-				var zeroVal []*model.MultiHelloWithError
-				return zeroVal, err
-			}
-			if ec.directives.EntityResolver == nil {
-				var zeroVal []*model.MultiHelloWithError
-				return zeroVal, errors.New("directive entityResolver is not implemented")
-			}
-			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.([]*model.MultiHelloWithError); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/plugin/federation/testdata/computedrequires/generated/models.MultiHelloWithError`, tmp)
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Entity().FindManyMultiHelloWithErrorByNames(rctx, fc.Args["reps"].([]*model.MultiHelloWithErrorByNamesInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -2086,35 +1662,8 @@ func (ec *executionContext) _Entity_findManyMultiPlanetRequiresNestedByNames(ctx
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Entity().FindManyMultiPlanetRequiresNestedByNames(rctx, fc.Args["reps"].([]*model.MultiPlanetRequiresNestedByNamesInput))
-		}
-
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			multi, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
-			if err != nil {
-				var zeroVal []*model.MultiPlanetRequiresNested
-				return zeroVal, err
-			}
-			if ec.directives.EntityResolver == nil {
-				var zeroVal []*model.MultiPlanetRequiresNested
-				return zeroVal, errors.New("directive entityResolver is not implemented")
-			}
-			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.([]*model.MultiPlanetRequiresNested); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/plugin/federation/testdata/computedrequires/generated/models.MultiPlanetRequiresNested`, tmp)
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Entity().FindManyMultiPlanetRequiresNestedByNames(rctx, fc.Args["reps"].([]*model.MultiPlanetRequiresNestedByNamesInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3015,7 +2564,7 @@ func (ec *executionContext) _MultiHelloMultipleRequires_key3(ctx context.Context
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.MultiHelloMultipleRequires().Key3(rctx, obj, fc.Args["_requires"].(*model.GQLGenRequiresMultiHelloMultipleRequiresKey3))
+		return ec.resolvers.MultiHelloMultipleRequires().Key3(rctx, obj, fc.Args["_federationRequires"].(map[string]interface{}))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3158,7 +2707,7 @@ func (ec *executionContext) _MultiHelloRequires_key2(ctx context.Context, field 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.MultiHelloRequires().Key2(rctx, obj, fc.Args["_requires"].(*model.GQLGenRequiresMultiHelloRequiresKey2))
+		return ec.resolvers.MultiHelloRequires().Key2(rctx, obj, fc.Args["_federationRequires"].(map[string]interface{}))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3353,7 +2902,7 @@ func (ec *executionContext) _MultiPlanetRequiresNested_size(ctx context.Context,
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.MultiPlanetRequiresNested().Size(rctx, obj, fc.Args["_requires"].(*model.GQLGenRequiresMultiPlanetRequiresNestedSize))
+		return ec.resolvers.MultiPlanetRequiresNested().Size(rctx, obj, fc.Args["_federationRequires"].(map[string]interface{}))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3540,7 +3089,7 @@ func (ec *executionContext) _PlanetMultipleRequires_weight(ctx context.Context, 
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.PlanetMultipleRequires().Weight(rctx, obj, fc.Args["foo"].(*string), fc.Args["_requires"].(*model.GQLGenRequiresPlanetMultipleRequiresWeight))
+		return ec.resolvers.PlanetMultipleRequires().Weight(rctx, obj, fc.Args["foo"].(*string), fc.Args["_federationRequires"].(map[string]interface{}))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3691,7 +3240,7 @@ func (ec *executionContext) _PlanetRequires_size(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.PlanetRequires().Size(rctx, obj, fc.Args["_requires"].(*model.GQLGenRequiresPlanetRequiresSize))
+		return ec.resolvers.PlanetRequires().Size(rctx, obj, fc.Args["_federationRequires"].(map[string]interface{}))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3935,7 +3484,7 @@ func (ec *executionContext) _PlanetRequiresNested_size(ctx context.Context, fiel
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.PlanetRequiresNested().Size(rctx, obj, fc.Args["_requires"].(*model.GQLGenRequiresPlanetRequiresNestedSize))
+		return ec.resolvers.PlanetRequiresNested().Size(rctx, obj, fc.Args["_federationRequires"].(map[string]interface{}))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3990,7 +3539,7 @@ func (ec *executionContext) _PlanetRequiresNested_sizes(ctx context.Context, fie
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.PlanetRequiresNested().Sizes(rctx, obj, fc.Args["_requires"].(*model.GQLGenRequiresPlanetRequiresNestedSizes))
+		return ec.resolvers.PlanetRequiresNested().Sizes(rctx, obj, fc.Args["_federationRequires"].(map[string]interface{}))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -10116,111 +9665,6 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) unmarshalOGQLGenRequiresMultiHelloMultipleRequiresKey32ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐGQLGenRequiresMultiHelloMultipleRequiresKey3(ctx context.Context, v interface{}) (*model.GQLGenRequiresMultiHelloMultipleRequiresKey3, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputGQLGenRequiresMultiHelloMultipleRequiresKey3(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOGQLGenRequiresMultiHelloMultipleRequiresKey32ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐGQLGenRequiresMultiHelloMultipleRequiresKey3(ctx context.Context, sel ast.SelectionSet, v *model.GQLGenRequiresMultiHelloMultipleRequiresKey3) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._GQLGenRequiresMultiHelloMultipleRequiresKey3(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOGQLGenRequiresMultiHelloRequiresKey22ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐGQLGenRequiresMultiHelloRequiresKey2(ctx context.Context, v interface{}) (*model.GQLGenRequiresMultiHelloRequiresKey2, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputGQLGenRequiresMultiHelloRequiresKey2(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOGQLGenRequiresMultiHelloRequiresKey22ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐGQLGenRequiresMultiHelloRequiresKey2(ctx context.Context, sel ast.SelectionSet, v *model.GQLGenRequiresMultiHelloRequiresKey2) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._GQLGenRequiresMultiHelloRequiresKey2(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOGQLGenRequiresMultiPlanetRequiresNestedSize2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐGQLGenRequiresMultiPlanetRequiresNestedSize(ctx context.Context, v interface{}) (*model.GQLGenRequiresMultiPlanetRequiresNestedSize, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputGQLGenRequiresMultiPlanetRequiresNestedSize(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOGQLGenRequiresMultiPlanetRequiresNestedSize2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐGQLGenRequiresMultiPlanetRequiresNestedSize(ctx context.Context, sel ast.SelectionSet, v *model.GQLGenRequiresMultiPlanetRequiresNestedSize) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._GQLGenRequiresMultiPlanetRequiresNestedSize(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOGQLGenRequiresPlanetMultipleRequiresWeight2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐGQLGenRequiresPlanetMultipleRequiresWeight(ctx context.Context, v interface{}) (*model.GQLGenRequiresPlanetMultipleRequiresWeight, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputGQLGenRequiresPlanetMultipleRequiresWeight(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOGQLGenRequiresPlanetMultipleRequiresWeight2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐGQLGenRequiresPlanetMultipleRequiresWeight(ctx context.Context, sel ast.SelectionSet, v *model.GQLGenRequiresPlanetMultipleRequiresWeight) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._GQLGenRequiresPlanetMultipleRequiresWeight(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOGQLGenRequiresPlanetRequiresNestedSize2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐGQLGenRequiresPlanetRequiresNestedSize(ctx context.Context, v interface{}) (*model.GQLGenRequiresPlanetRequiresNestedSize, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputGQLGenRequiresPlanetRequiresNestedSize(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOGQLGenRequiresPlanetRequiresNestedSize2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐGQLGenRequiresPlanetRequiresNestedSize(ctx context.Context, sel ast.SelectionSet, v *model.GQLGenRequiresPlanetRequiresNestedSize) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._GQLGenRequiresPlanetRequiresNestedSize(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOGQLGenRequiresPlanetRequiresNestedSizes2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐGQLGenRequiresPlanetRequiresNestedSizes(ctx context.Context, v interface{}) (*model.GQLGenRequiresPlanetRequiresNestedSizes, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputGQLGenRequiresPlanetRequiresNestedSizes(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOGQLGenRequiresPlanetRequiresNestedSizes2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐGQLGenRequiresPlanetRequiresNestedSizes(ctx context.Context, sel ast.SelectionSet, v *model.GQLGenRequiresPlanetRequiresNestedSizes) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._GQLGenRequiresPlanetRequiresNestedSizes(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOGQLGenRequiresPlanetRequiresSize2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐGQLGenRequiresPlanetRequiresSize(ctx context.Context, v interface{}) (*model.GQLGenRequiresPlanetRequiresSize, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputGQLGenRequiresPlanetRequiresSize(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOGQLGenRequiresPlanetRequiresSize2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐGQLGenRequiresPlanetRequiresSize(ctx context.Context, sel ast.SelectionSet, v *model.GQLGenRequiresPlanetRequiresSize) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._GQLGenRequiresPlanetRequiresSize(ctx, sel, v)
-}
-
 func (ec *executionContext) marshalOHello2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐHello(ctx context.Context, sel ast.SelectionSet, v *model.Hello) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -10624,6 +10068,22 @@ func (ec *executionContext) marshalO_Entity2githubᚗcomᚋ99designsᚋgqlgenᚋ
 		return graphql.Null
 	}
 	return ec.__Entity(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalO_RequiresMap2map(ctx context.Context, v interface{}) (map[string]interface{}, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalMap(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalO_RequiresMap2map(ctx context.Context, sel ast.SelectionSet, v map[string]interface{}) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalMap(v)
+	return res
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

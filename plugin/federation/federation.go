@@ -99,6 +99,7 @@ func (f *Federation) MutateConfig(cfg *config.Config) error {
 	cfg.Directives["provides"] = config.DirectiveConfig{SkipRuntime: true}
 	cfg.Directives[dirNameKey] = config.DirectiveConfig{SkipRuntime: true}
 	cfg.Directives["extends"] = config.DirectiveConfig{SkipRuntime: true}
+	cfg.Directives[dirNameEntityResolver] = config.DirectiveConfig{SkipRuntime: true}
 
 	// Federation 2 specific directives
 	if f.version == 2 {
@@ -410,7 +411,7 @@ func (f *Federation) buildEntity(
 }
 
 func isMultiEntity(schemaType *ast.Definition) bool {
-	dir := schemaType.Directives.ForName("entityResolver")
+	dir := schemaType.Directives.ForName(dirNameEntityResolver)
 	if dir == nil {
 		return false
 	}

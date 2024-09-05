@@ -16,4 +16,6 @@ resolver:
   layout: follow-schema
   dir: testdata/computedrequires
   package: computedrequires
+
 omit_complexity: true
+call_argument_directives_with_null: true

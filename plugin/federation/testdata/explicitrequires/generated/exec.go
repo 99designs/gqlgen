@@ -42,7 +42,6 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	EntityResolver func(ctx context.Context, obj interface{}, next graphql.Resolver, multi *bool) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -325,38 +324,6 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
-
-func (ec *executionContext) dir_entityResolver_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	arg0, err := ec.dir_entityResolver_argsMulti(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["multi"] = arg0
-	return args, nil
-}
-func (ec *executionContext) dir_entityResolver_argsMulti(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (*bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["multi"]
-	if !ok {
-		var zeroVal *bool
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("multi"))
-	if tmp, ok := rawArgs["multi"]; ok {
-		return ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
-	}
-
-	var zeroVal *bool
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Entity_findHelloByName_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
@@ -1249,35 +1216,8 @@ func (ec *executionContext) _Entity_findManyMultiHelloByNames(ctx context.Contex
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Entity().FindManyMultiHelloByNames(rctx, fc.Args["reps"].([]*MultiHelloByNamesInput))
-		}
-
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			multi, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
-			if err != nil {
-				var zeroVal []*MultiHello
-				return zeroVal, err
-			}
-			if ec.directives.EntityResolver == nil {
-				var zeroVal []*MultiHello
-				return zeroVal, errors.New("directive entityResolver is not implemented")
-			}
-			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.([]*MultiHello); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/plugin/federation/testdata/explicitrequires/generated.MultiHello`, tmp)
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Entity().FindManyMultiHelloByNames(rctx, fc.Args["reps"].([]*MultiHelloByNamesInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1332,35 +1272,8 @@ func (ec *executionContext) _Entity_findManyMultiHelloMultipleRequiresByNames(ct
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Entity().FindManyMultiHelloMultipleRequiresByNames(rctx, fc.Args["reps"].([]*MultiHelloMultipleRequiresByNamesInput))
-		}
-
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			multi, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
-			if err != nil {
-				var zeroVal []*MultiHelloMultipleRequires
-				return zeroVal, err
-			}
-			if ec.directives.EntityResolver == nil {
-				var zeroVal []*MultiHelloMultipleRequires
-				return zeroVal, errors.New("directive entityResolver is not implemented")
-			}
-			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.([]*MultiHelloMultipleRequires); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/plugin/federation/testdata/explicitrequires/generated.MultiHelloMultipleRequires`, tmp)
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Entity().FindManyMultiHelloMultipleRequiresByNames(rctx, fc.Args["reps"].([]*MultiHelloMultipleRequiresByNamesInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1421,35 +1334,8 @@ func (ec *executionContext) _Entity_findManyMultiHelloRequiresByNames(ctx contex
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Entity().FindManyMultiHelloRequiresByNames(rctx, fc.Args["reps"].([]*MultiHelloRequiresByNamesInput))
-		}
-
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			multi, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
-			if err != nil {
-				var zeroVal []*MultiHelloRequires
-				return zeroVal, err
-			}
-			if ec.directives.EntityResolver == nil {
-				var zeroVal []*MultiHelloRequires
-				return zeroVal, errors.New("directive entityResolver is not implemented")
-			}
-			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.([]*MultiHelloRequires); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/plugin/federation/testdata/explicitrequires/generated.MultiHelloRequires`, tmp)
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Entity().FindManyMultiHelloRequiresByNames(rctx, fc.Args["reps"].([]*MultiHelloRequiresByNamesInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1508,35 +1394,8 @@ func (ec *executionContext) _Entity_findManyMultiHelloWithErrorByNames(ctx conte
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Entity().FindManyMultiHelloWithErrorByNames(rctx, fc.Args["reps"].([]*MultiHelloWithErrorByNamesInput))
-		}
-
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			multi, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
-			if err != nil {
-				var zeroVal []*MultiHelloWithError
-				return zeroVal, err
-			}
-			if ec.directives.EntityResolver == nil {
-				var zeroVal []*MultiHelloWithError
-				return zeroVal, errors.New("directive entityResolver is not implemented")
-			}
-			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.([]*MultiHelloWithError); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/plugin/federation/testdata/explicitrequires/generated.MultiHelloWithError`, tmp)
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Entity().FindManyMultiHelloWithErrorByNames(rctx, fc.Args["reps"].([]*MultiHelloWithErrorByNamesInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1591,35 +1450,8 @@ func (ec *executionContext) _Entity_findManyMultiPlanetRequiresNestedByNames(ctx
 		}
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		directive0 := func(rctx context.Context) (interface{}, error) {
-			ctx = rctx // use context from middleware stack in children
-			return ec.resolvers.Entity().FindManyMultiPlanetRequiresNestedByNames(rctx, fc.Args["reps"].([]*MultiPlanetRequiresNestedByNamesInput))
-		}
-
-		directive1 := func(ctx context.Context) (interface{}, error) {
-			multi, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
-			if err != nil {
-				var zeroVal []*MultiPlanetRequiresNested
-				return zeroVal, err
-			}
-			if ec.directives.EntityResolver == nil {
-				var zeroVal []*MultiPlanetRequiresNested
-				return zeroVal, errors.New("directive entityResolver is not implemented")
-			}
-			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
-		}
-
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.([]*MultiPlanetRequiresNested); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/plugin/federation/testdata/explicitrequires/generated.MultiPlanetRequiresNested`, tmp)
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Entity().FindManyMultiPlanetRequiresNestedByNames(rctx, fc.Args["reps"].([]*MultiPlanetRequiresNestedByNamesInput))
 	})
 	if err != nil {
 		ec.Error(ctx, err)

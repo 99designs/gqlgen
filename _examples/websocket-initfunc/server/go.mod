@@ -1,6 +1,6 @@
 module github.com/gqlgen/_examples/websocket-initfunc/server
 
-go 1.21
+go 1.22.5
 
 require (
 	github.com/99designs/gqlgen v0.17.49

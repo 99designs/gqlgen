@@ -1,8 +1,6 @@
 module github.com/99designs/gqlgen/_examples
 
-go 1.23
-
-toolchain go1.23.0
+go 1.21
 
 replace github.com/99designs/gqlgen => ../
 

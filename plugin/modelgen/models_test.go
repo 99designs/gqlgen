@@ -329,15 +329,15 @@ func TestModelGenerationDontOmitEmbeddedStructs(t *testing.T) {
 	require.Contains(t, string(generated), "type BaseElement")
 
 	carbonStr := getStringInBetween(string(generated), "type Carbon struct {", "}")
-	require.NotEqual(t, carbonStr, "")
+	require.NotEqual(t, "", carbonStr)
 	require.Contains(t, carbonStr, "BaseElement")
 
 	magnesiumStr := getStringInBetween(string(generated), "type Magnesium struct {", "}")
-	require.NotEqual(t, magnesiumStr, "")
+	require.NotEqual(t, "", magnesiumStr)
 	require.Contains(t, magnesiumStr, "BaseElement")
 
 	potassiumStr := getStringInBetween(string(generated), "type Potassium struct {", "}")
-	require.NotEqual(t, potassiumStr, "")
+	require.NotEqual(t, "", potassiumStr)
 	require.Contains(t, potassiumStr, "BaseElement")
 }
 
@@ -726,7 +726,7 @@ func TestCustomTemplate(t *testing.T) {
 	require.NoError(t, p.MutateConfig(cfg))
 }
 
-func getStringInBetween(str string, start string, end string) string {
+func getStringInBetween(str, start, end string) string {
 	startIndex := strings.Index(str, start)
 	if startIndex == -1 {
 		return ""

@@ -69,11 +69,20 @@ func buildPackageOptions(cfg *config.Config) (PackageOptions, error) {
 		return PackageOptions{}, errors.New("only one of explicit_requires or computed_requires can be set to true")
 	}
 
+	if computedRequires {
+		if cfg.Federation.Version != 2 {
+			return PackageOptions{}, errors.New("when using federation.options.computed_requires you must be using Federation 2")
+		}
+
+		// We rely on injecting a null argument with a directives for fields with @requires, so we need to ensure
+		// our directive is always called.
+		if !cfg.CallArgumentDirectivesWithNull {
+			return PackageOptions{}, errors.New("when using federation.options.computed_requires, call_argument_directives_with_null must be set to true")
+		}
+	}
+
 	// We rely on injecting a null argument with a directives for fields with @requires, so we need to ensure
 	// our directive is always called.
-	if computedRequires && !cfg.CallArgumentDirectivesWithNull {
-		return PackageOptions{}, errors.New("when using federation.options.computed_requires, call_argument_directives_with_null must be set to true")
-	}
 
 	return PackageOptions{
 		ExplicitRequires: explicitRequires,

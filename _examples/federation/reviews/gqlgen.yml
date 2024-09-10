@@ -10,6 +10,7 @@ exec:
 federation:
   filename: graph/federation.go
   package: graph
+  version: 2
   options:
     computed_requires: true
 

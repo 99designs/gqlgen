@@ -175,7 +175,7 @@ set should be validated against.`,
 		},
 		{
 			Name:        DirArgFields,
-			Type:        ast.NonNullNamedType("_FieldSet", nil),
+			Type:        ast.NonNullNamedType("FieldSet", nil),
 			Description: "The selection that the scalar should generate into.",
 		},
 	},

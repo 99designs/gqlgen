@@ -6,6 +6,7 @@ exec:
 federation:
   filename: testdata/computedrequires/generated/federation.go
   package: generated
+  version: 2
   options:
     computed_requires: true
 model:

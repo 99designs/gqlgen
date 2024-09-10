@@ -28,6 +28,7 @@ func TestNew(t *testing.T) {
 	t.Run("success_computed", func(t *testing.T) {
 		cfg := &config.Config{
 			Federation: config.PackageConfig{
+				Version: 2,
 				Options: map[string]bool{
 					"computed_requires": true,
 				},
@@ -39,9 +40,25 @@ func TestNew(t *testing.T) {
 		assert.NotNil(t, plugin)
 	})
 
+	t.Run("error_computed_verion_1", func(t *testing.T) {
+		cfg := &config.Config{
+			Federation: config.PackageConfig{
+				Version: 1,
+				Options: map[string]bool{
+					"computed_requires": true,
+				},
+			},
+			CallArgumentDirectivesWithNull: true,
+		}
+		plugin, err := New(1, cfg)
+		assert.Error(t, err)
+		assert.Nil(t, plugin)
+	})
+
 	t.Run("error_computed_CallArgumentDirectivesWithNull_is_false", func(t *testing.T) {
 		cfg := &config.Config{
 			Federation: config.PackageConfig{
+				Version: 2,
 				Options: map[string]bool{
 					"computed_requires": true,
 				},
@@ -56,6 +73,7 @@ func TestNew(t *testing.T) {
 	t.Run("error_both_explicit_and_computed_set", func(t *testing.T) {
 		cfg := &config.Config{
 			Federation: config.PackageConfig{
+				Version: 2,
 				Options: map[string]bool{
 					"explicit_requires": true,
 					"computed_requires": true,

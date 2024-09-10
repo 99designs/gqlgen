@@ -1257,8 +1257,7 @@ func (ec *executionContext) _Entity_findManyMultiHelloByNames(ctx context.Contex
 				return zeroVal, err
 			}
 			if ec.directives.EntityResolver == nil {
-				var zeroVal []*MultiHello
-				return zeroVal, errors.New("directive entityResolver is not implemented")
+				return directive0(ctx)
 			}
 			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
 		}
@@ -1340,8 +1339,7 @@ func (ec *executionContext) _Entity_findManyMultiHelloMultipleRequiresByNames(ct
 				return zeroVal, err
 			}
 			if ec.directives.EntityResolver == nil {
-				var zeroVal []*MultiHelloMultipleRequires
-				return zeroVal, errors.New("directive entityResolver is not implemented")
+				return directive0(ctx)
 			}
 			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
 		}
@@ -1429,8 +1427,7 @@ func (ec *executionContext) _Entity_findManyMultiHelloRequiresByNames(ctx contex
 				return zeroVal, err
 			}
 			if ec.directives.EntityResolver == nil {
-				var zeroVal []*MultiHelloRequires
-				return zeroVal, errors.New("directive entityResolver is not implemented")
+				return directive0(ctx)
 			}
 			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
 		}
@@ -1516,8 +1513,7 @@ func (ec *executionContext) _Entity_findManyMultiHelloWithErrorByNames(ctx conte
 				return zeroVal, err
 			}
 			if ec.directives.EntityResolver == nil {
-				var zeroVal []*MultiHelloWithError
-				return zeroVal, errors.New("directive entityResolver is not implemented")
+				return directive0(ctx)
 			}
 			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
 		}
@@ -1599,8 +1595,7 @@ func (ec *executionContext) _Entity_findManyMultiPlanetRequiresNestedByNames(ctx
 				return zeroVal, err
 			}
 			if ec.directives.EntityResolver == nil {
-				var zeroVal []*MultiPlanetRequiresNested
-				return zeroVal, errors.New("directive entityResolver is not implemented")
+				return directive0(ctx)
 			}
 			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
 		}

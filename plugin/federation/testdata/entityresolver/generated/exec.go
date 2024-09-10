@@ -1804,8 +1804,7 @@ func (ec *executionContext) _Entity_findManyMultiHelloByNames(ctx context.Contex
 				return zeroVal, err
 			}
 			if ec.directives.EntityResolver == nil {
-				var zeroVal []*model.MultiHello
-				return zeroVal, errors.New("directive entityResolver is not implemented")
+				return directive0(ctx)
 			}
 			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
 		}
@@ -1887,8 +1886,7 @@ func (ec *executionContext) _Entity_findManyMultiHelloMultipleRequiresByNames(ct
 				return zeroVal, err
 			}
 			if ec.directives.EntityResolver == nil {
-				var zeroVal []*model.MultiHelloMultipleRequires
-				return zeroVal, errors.New("directive entityResolver is not implemented")
+				return directive0(ctx)
 			}
 			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
 		}
@@ -1976,8 +1974,7 @@ func (ec *executionContext) _Entity_findManyMultiHelloRequiresByNames(ctx contex
 				return zeroVal, err
 			}
 			if ec.directives.EntityResolver == nil {
-				var zeroVal []*model.MultiHelloRequires
-				return zeroVal, errors.New("directive entityResolver is not implemented")
+				return directive0(ctx)
 			}
 			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
 		}
@@ -2063,8 +2060,7 @@ func (ec *executionContext) _Entity_findManyMultiHelloWithErrorByNames(ctx conte
 				return zeroVal, err
 			}
 			if ec.directives.EntityResolver == nil {
-				var zeroVal []*model.MultiHelloWithError
-				return zeroVal, errors.New("directive entityResolver is not implemented")
+				return directive0(ctx)
 			}
 			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
 		}
@@ -2146,8 +2142,7 @@ func (ec *executionContext) _Entity_findManyMultiPlanetRequiresNestedByNames(ctx
 				return zeroVal, err
 			}
 			if ec.directives.EntityResolver == nil {
-				var zeroVal []*model.MultiPlanetRequiresNested
-				return zeroVal, errors.New("directive entityResolver is not implemented")
+				return directive0(ctx)
 			}
 			return ec.directives.EntityResolver(ctx, nil, directive0, multi)
 		}

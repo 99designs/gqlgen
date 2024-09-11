@@ -381,3 +381,16 @@ func TestTypeName(t *testing.T) {
 		assert.Equal(t, test.expected, result)
 	}
 }
+
+func TestTypeIdentifierWithAlias(t *testing.T) {
+	pkg := types.NewPackage("example.com/pkg", "pkg")
+
+	basicType := types.Typ[types.String]
+	aliasType := types.NewAlias(types.NewTypeName(0, pkg, "MyAlias", nil), basicType)
+	namedType := types.NewNamed(types.NewTypeName(0, pkg, "MyType", nil), aliasType, nil)
+	result := TypeIdentifier(namedType)
+
+	expected := "exampleᚗcomᚋpkgᚐMyType"
+
+	assert.Equal(t, expected, result, "TypeIdentifier should handle alias types correctly")
+}

@@ -706,6 +706,8 @@ func TypeIdentifier(t types.Type) string {
 	res := ""
 	for {
 		switch it := code.Unalias(t).(type) {
+		case *types.Alias:
+			return TypeIdentifier(it.Underlying())
 		case *types.Pointer:
 			t.Underlying()
 			res += "ᚖ"

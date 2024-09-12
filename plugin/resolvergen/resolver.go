@@ -53,24 +53,42 @@ func (m *Plugin) GenerateCode(data *codegen.Data) error {
 
 func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 	file := File{}
-
-	if _, err := os.Stat(data.Config.Resolver.Filename); err == nil {
-		// file already exists and we do not support updating resolvers with layout = single so just return
-		return nil
+	rewriter, err := rewrite.New(data.Config.Resolver.Dir())
+	if err != nil {
+		return err
 	}
 
 	for _, o := range data.Objects {
 		if o.HasResolvers() {
+			caser := cases.Title(language.English, cases.NoLower)
+			rewriter.MarkStructCopied(templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type))
+			rewriter.GetMethodBody(data.Config.Resolver.Type, caser.String(o.Name))
+
 			file.Objects = append(file.Objects, o)
 		}
+
 		for _, f := range o.Fields {
 			if !f.IsResolver {
 				continue
 			}
 
-			resolver := Resolver{o, f, nil, "", `panic("not implemented")`, nil}
-			file.Resolvers = append(file.Resolvers, &resolver)
+			structName := templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type)
+			comment := strings.TrimSpace(strings.TrimLeft(rewriter.GetMethodComment(structName, f.GoFieldName), `\`))
+			implementation := strings.TrimSpace(rewriter.GetMethodBody(structName, f.GoFieldName))
+			if implementation != "" {
+				resolver := Resolver{o, f, rewriter.GetPrevDecl(structName, f.GoFieldName), comment, implementation, nil}
+				file.Resolvers = append(file.Resolvers, &resolver)
+			} else {
+				resolver := Resolver{o, f, nil, "", `panic("not implemented")`, nil}
+				file.Resolvers = append(file.Resolvers, &resolver)
+			}
 		}
+	}
+
+	if _, err := os.Stat(data.Config.Resolver.Filename); err == nil {
+		file.name = data.Config.Resolver.Filename
+		file.imports = rewriter.ExistingImports(file.name)
+		file.RemainingSource = rewriter.RemainingSource(file.name)
 	}
 
 	resolverBuild := &ResolverBuild{
@@ -88,7 +106,7 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 
 	return templates.Render(templates.Options{
 		PackageName: data.Config.Resolver.Package,
-		FileNotice:  `// THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.`,
+		FileNotice:  `// THIS CODE WILL BE UPDATED WITH SCHEMA CHANGES. PREVIOUS IMPLEMENTATION FOR SCHEMA CHANGES WILL BE KEPT IN THE COMMENT SECTION. IMPLEMENTATION FOR UNCHANGED SCHEMA WILL BE KEPT.`,
 		Filename:    data.Config.Resolver.Filename,
 		Data:        resolverBuild,
 		Packages:    data.Config.Packages,

@@ -109,8 +109,8 @@ func TestPOST(t *testing.T) {
 		}
 
 		resp := doReq(h, "POST", "/graphql", `{"query":"{ name }"}`)
-		assert.Equal(t, http.StatusBadRequest, resp.Code, resp.Body.String())
-		assert.Equal(t, `{"errors":[{"message":"transport not supported"}],"data":null}`, resp.Body.String())
+		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+		assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
 	})
 }
 

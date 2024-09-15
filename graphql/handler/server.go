@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"slices"
 	"time"
 
 	"github.com/vektah/gqlparser/v2/ast"
@@ -39,6 +40,8 @@ func NewDefaultServer(es graphql.ExecutableSchema) *Server {
 	})
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})
+	// To enable Server-Sent-Events, must insert here:
+	// srv.AddTransport(transport.SSE{})
 	srv.AddTransport(transport.POST{})
 	srv.AddTransport(transport.MultipartForm{})
 
@@ -54,6 +57,22 @@ func NewDefaultServer(es graphql.ExecutableSchema) *Server {
 
 func (s *Server) AddTransport(transport graphql.Transport) {
 	s.transports = append(s.transports, transport)
+}
+
+func (s *Server) PrependTransport(transport graphql.Transport) {
+	s.transports = append([]graphql.Transport{transport}, s.transports...)
+}
+
+// AddPrePostTransport is primarily for adding experimental transports like
+// SSE so that the usual POST transport doesn't respond
+func (s *Server) AddPrePostTransport(transport graphql.Transport) {
+	postIndex := slices.IndexFunc(s.transports, func(n graphql.Transport) bool {
+		return n.String() == "POST"
+	})
+
+	if postIndex != -1 {
+		s.transports = slices.Insert(s.transports, postIndex, transport)
+	}
 }
 
 func (s *Server) SetErrorPresenter(f graphql.ErrorPresenterFunc) {
@@ -96,6 +115,7 @@ func (s *Server) AroundResponses(f graphql.ResponseMiddleware) {
 	s.exec.AroundResponses(f)
 }
 
+// Transport choice is first acceptable
 func (s *Server) getTransport(r *http.Request) graphql.Transport {
 	for _, t := range s.transports {
 		if t.Supports(r) {
@@ -119,13 +139,13 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	r = r.WithContext(graphql.StartOperationTrace(r.Context()))
 
-	transport := s.getTransport(r)
-	if transport == nil {
+	gqlTransport := s.getTransport(r)
+	if gqlTransport == nil {
 		sendErrorf(w, http.StatusBadRequest, "transport not supported")
 		return
 	}
 
-	transport.Do(w, r, s.exec)
+	gqlTransport.Do(w, r, s.exec)
 }
 
 func sendError(w http.ResponseWriter, code int, errors ...*gqlerror.Error) {

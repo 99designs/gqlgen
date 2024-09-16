@@ -185,9 +185,6 @@ func TestDirectives(t *testing.T) {
 			Custom: func(ctx context.Context, obj any, next graphql.Resolver) (any, error) {
 				return next(ctx)
 			},
-			Concurrent: func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
-				return next(ctx)
-			},
 			Logged: func(ctx context.Context, obj any, next graphql.Resolver, id string) (any, error) {
 				return next(context.WithValue(ctx, ckey("request_id"), &id))
 			},

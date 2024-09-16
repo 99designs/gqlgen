@@ -182,9 +182,6 @@ func TestDirectives(t *testing.T) {
 				}
 				return nil, fmt.Errorf("unsupported type %T", res)
 			},
-			Concurrent: func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
-				return next(ctx)
-			},
 			Custom: func(ctx context.Context, obj any, next graphql.Resolver) (any, error) {
 				return next(ctx)
 			},

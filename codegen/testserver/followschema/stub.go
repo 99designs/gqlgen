@@ -85,7 +85,6 @@ type Stub struct {
 		DirectiveField                   func(ctx context.Context) (*string, error)
 		DirectiveDouble                  func(ctx context.Context) (*string, error)
 		DirectiveUnimplemented           func(ctx context.Context) (*string, error)
-		DirectiveConcurrent              func(ctx context.Context) ([]*ObjectDirectivesConcurrent, error)
 		EmbeddedCase1                    func(ctx context.Context) (*EmbeddedCase1, error)
 		EmbeddedCase2                    func(ctx context.Context) (*EmbeddedCase2, error)
 		EmbeddedCase3                    func(ctx context.Context) (*EmbeddedCase3, error)
@@ -394,9 +393,6 @@ func (r *stubQuery) DirectiveDouble(ctx context.Context) (*string, error) {
 }
 func (r *stubQuery) DirectiveUnimplemented(ctx context.Context) (*string, error) {
 	return r.QueryResolver.DirectiveUnimplemented(ctx)
-}
-func (r *stubQuery) DirectiveConcurrent(ctx context.Context) ([]*ObjectDirectivesConcurrent, error) {
-	return r.QueryResolver.DirectiveConcurrent(ctx)
 }
 func (r *stubQuery) EmbeddedCase1(ctx context.Context) (*EmbeddedCase1, error) {
 	return r.QueryResolver.EmbeddedCase1(ctx)

@@ -184,10 +184,6 @@ type ObjectDirectives struct {
 	Order        []string `json:"order"`
 }
 
-type ObjectDirectivesConcurrent struct {
-	Key int `json:"key"`
-}
-
 type OmittableInput struct {
 	ID     graphql.Omittable[*string]     `json:"id,omitempty"`
 	Bool   graphql.Omittable[*bool]       `json:"bool,omitempty"`

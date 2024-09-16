@@ -54,7 +54,6 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	Concurrent    func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 	Custom        func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 	Defer         func(ctx context.Context, obj interface{}, next graphql.Resolver, ifArg *bool, label *string) (res interface{}, err error)
 	Directive1    func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
@@ -265,10 +264,6 @@ type ComplexityRoot struct {
 		Text         func(childComplexity int) int
 	}
 
-	ObjectDirectivesConcurrent struct {
-		Key func(childComplexity int) int
-	}
-
 	ObjectDirectivesWithCustomGoModel struct {
 		NullableText func(childComplexity int) int
 	}
@@ -335,7 +330,6 @@ type ComplexityRoot struct {
 		DeferCase2                       func(childComplexity int) int
 		DeprecatedField                  func(childComplexity int) int
 		DirectiveArg                     func(childComplexity int, arg string) int
-		DirectiveConcurrent              func(childComplexity int) int
 		DirectiveDouble                  func(childComplexity int) int
 		DirectiveField                   func(childComplexity int) int
 		DirectiveFieldDef                func(childComplexity int, ret string) int
@@ -1066,13 +1060,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ObjectDirectives.Text(childComplexity), true
 
-	case "ObjectDirectivesConcurrent.key":
-		if e.complexity.ObjectDirectivesConcurrent.Key == nil {
-			break
-		}
-
-		return e.complexity.ObjectDirectivesConcurrent.Key(childComplexity), true
-
 	case "ObjectDirectivesWithCustomGoModel.nullableText":
 		if e.complexity.ObjectDirectivesWithCustomGoModel.NullableText == nil {
 			break
@@ -1326,13 +1313,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.DirectiveArg(childComplexity, args["arg"].(string)), true
-
-	case "Query.directiveConcurrent":
-		if e.complexity.Query.DirectiveConcurrent == nil {
-			break
-		}
-
-		return e.complexity.Query.DirectiveConcurrent(childComplexity), true
 
 	case "Query.directiveDouble":
 		if e.complexity.Query.DirectiveDouble == nil {

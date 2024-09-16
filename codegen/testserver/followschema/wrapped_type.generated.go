@@ -307,6 +307,19 @@ func (ec *executionContext) _WrappedMap(ctx context.Context, sel ast.SelectionSe
 		case "get":
 			field := field
 
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._WrappedMap_get(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
 			if field.Deferrable != nil {
 				dfs, ok := deferred[field.Deferrable.Label]
 				di := 0
@@ -318,17 +331,15 @@ func (ec *executionContext) _WrappedMap(ctx context.Context, sel ast.SelectionSe
 					deferred[field.Deferrable.Label] = dfs
 				}
 				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return ec._WrappedMap_get(ctx, field, obj)
+					return innerFunc(ctx, dfs)
 				})
 
 				// don't run the out.Concurrently() call below
 				out.Values[i] = graphql.Null
 				continue
 			}
-			out.Values[i] = ec._WrappedMap_get(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -366,6 +377,19 @@ func (ec *executionContext) _WrappedSlice(ctx context.Context, sel ast.Selection
 		case "get":
 			field := field
 
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._WrappedSlice_get(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
 			if field.Deferrable != nil {
 				dfs, ok := deferred[field.Deferrable.Label]
 				di := 0
@@ -377,17 +401,15 @@ func (ec *executionContext) _WrappedSlice(ctx context.Context, sel ast.Selection
 					deferred[field.Deferrable.Label] = dfs
 				}
 				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return ec._WrappedSlice_get(ctx, field, obj)
+					return innerFunc(ctx, dfs)
 				})
 
 				// don't run the out.Concurrently() call below
 				out.Values[i] = graphql.Null
 				continue
 			}
-			out.Values[i] = ec._WrappedSlice_get(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -423,51 +445,11 @@ func (ec *executionContext) _WrappedStruct(ctx context.Context, sel ast.Selectio
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("WrappedStruct")
 		case "name":
-			field := field
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return ec._WrappedStruct_name(ctx, field, obj)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
 			out.Values[i] = ec._WrappedStruct_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		case "desc":
-			field := field
-
-			if field.Deferrable != nil {
-				dfs, ok := deferred[field.Deferrable.Label]
-				di := 0
-				if ok {
-					dfs.AddField(field)
-					di = len(dfs.Values) - 1
-				} else {
-					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
-					deferred[field.Deferrable.Label] = dfs
-				}
-				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return ec._WrappedStruct_desc(ctx, field, obj)
-				})
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
 			out.Values[i] = ec._WrappedStruct_desc(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))

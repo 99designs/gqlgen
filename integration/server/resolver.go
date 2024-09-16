@@ -35,10 +35,6 @@ func (r *Resolver) Query() QueryResolver {
 	return &queryResolver{r}
 }
 
-func (r *Resolver) Viewer() ViewerResolver {
-	return &viewerResolver{r}
-}
-
 type elementResolver struct{ *Resolver }
 
 func (r *elementResolver) Error(ctx context.Context, obj *models.Element) (bool, error) {
@@ -108,10 +104,4 @@ type userResolver struct{ *Resolver }
 
 func (r *userResolver) Likes(ctx context.Context, obj *remote_api.User) ([]string, error) {
 	return obj.Likes, nil
-}
-
-type viewerResolver struct{ *Resolver }
-
-func (r *viewerResolver) User(ctx context.Context, obj *models.Viewer) (*remote_api.User, error) {
-	return obj.User, nil
 }

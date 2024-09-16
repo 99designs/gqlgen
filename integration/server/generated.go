@@ -44,7 +44,6 @@ type ResolverRoot interface {
 	Element() ElementResolver
 	Query() QueryResolver
 	User() UserResolver
-	Viewer() ViewerResolver
 }
 
 type DirectiveRoot struct {
@@ -100,9 +99,6 @@ type QueryResolver interface {
 }
 type UserResolver interface {
 	Likes(ctx context.Context, obj *remote_api.User) ([]string, error)
-}
-type ViewerResolver interface {
-	User(ctx context.Context, obj *models.Viewer) (*remote_api.User, error)
 }
 
 type executableSchema struct {
@@ -1491,7 +1487,7 @@ func (ec *executionContext) _Viewer_user(ctx context.Context, field graphql.Coll
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Viewer().User(rctx, obj)
+		return obj.User, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1509,8 +1505,8 @@ func (ec *executionContext) fieldContext_Viewer_user(_ context.Context, field gr
 	fc = &graphql.FieldContext{
 		Object:     "Viewer",
 		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
+		IsMethod:   false,
+		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
 			case "name":
@@ -3925,16 +3921,6 @@ func (ec *executionContext) _Viewer(ctx context.Context, sel ast.SelectionSet, o
 		case "user":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Viewer_user(ctx, field, obj)
-				return res
-			}
-
 			if field.Deferrable != nil {
 				dfs, ok := deferred[field.Deferrable.Label]
 				di := 0
@@ -3946,15 +3932,14 @@ func (ec *executionContext) _Viewer(ctx context.Context, sel ast.SelectionSet, o
 					deferred[field.Deferrable.Label] = dfs
 				}
 				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, dfs)
+					return ec._Viewer_user(ctx, field, obj)
 				})
 
 				// don't run the out.Concurrently() call below
 				out.Values[i] = graphql.Null
 				continue
 			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			out.Values[i] = ec._Viewer_user(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

@@ -40,7 +40,7 @@ type Field struct {
 func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, error) {
 	dirs, err := b.getDirectives(field.Directives)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s: %w", field.Name, err)
 	}
 
 	f := Field{
@@ -95,7 +95,7 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		if f.TypeReference != nil {
 			dirs, err := b.getDirectives(f.TypeReference.Definition.Directives)
 			if err != nil {
-				errret = err
+				errret = fmt.Errorf("%s: %w", f.Name, err)
 			}
 			for _, dir := range obj.Directives {
 				if dir.IsLocation(ast.LocationInputObject) {
@@ -137,6 +137,7 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		return nil
 	case b.Config.Models[obj.Name].Fields[f.Name].Resolver:
 		f.IsResolver = true
+		makeConcurrentObjectAndField(obj, f)
 		return nil
 	case obj.Type == config.MapType:
 		f.GoFieldType = GoFieldMap

@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"container/list"
 	"errors"
 	"fmt"
 	"os"
@@ -153,6 +154,8 @@ func BuildData(cfg *config.Config, plugins ...any) (*Data, error) {
 		return nil, err
 	}
 
+	handleConcurrent(s.Objects)
+
 	s.ReferencedTypes = b.buildTypes()
 
 	sort.Slice(s.Objects, func(i, j int) bool {
@@ -233,4 +236,43 @@ func (b *builder) injectIntrospectionRoots(s *Data) error {
 	obj.Fields = append(obj.Fields, __type, __schema)
 
 	return nil
+}
+
+func handleConcurrent(objects Objects) {
+	concurrentObjects := make([]*Object, 0)
+	for _, obj := range objects {
+		for _, dir := range obj.Directives {
+			if dir.Name == concurrentDirectiveName {
+				concurrentObjects = append(concurrentObjects, obj)
+				break
+			}
+		}
+	}
+
+	queue := list.New()
+	for _, obj := range concurrentObjects {
+		queue.PushBack(obj)
+	}
+
+	concurrentObjectsCache := make(map[string]struct{}, 0)
+
+	for queue.Len() > 0 {
+		v := queue.Front()
+		concurrentObject := v.Value.(*Object)
+		for _, obj := range objects {
+			if _, ok := concurrentObjectsCache[obj.Name]; ok {
+				continue
+			}
+
+			for _, f := range obj.Fields {
+				if f.TypeReference.Definition == concurrentObject.Definition {
+					makeConcurrentObjectAndField(obj, f)
+
+					queue.PushBack(obj)
+					concurrentObjectsCache[obj.Name] = struct{}{}
+				}
+			}
+		}
+		queue.Remove(v)
+	}
 }

@@ -55,7 +55,7 @@ func (b *builder) buildArg(obj *Object, arg *ast.ArgumentDefinition) (*FieldArgu
 
 	argDirs, err := b.getDirectives(arg.Directives)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("%s: %w", arg.Name, err)
 	}
 	newArg := FieldArgument{
 		ArgumentDefinition:             arg,

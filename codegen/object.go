@@ -44,9 +44,10 @@ func (b *builder) buildObject(typ *ast.Definition) (*Object, error) {
 	}
 	caser := cases.Title(language.English, cases.NoLower)
 	obj := &Object{
-		Definition:               typ,
-		Root:                     b.Config.IsRoot(typ),
-		DisableConcurrency:       typ == b.Schema.Mutation || typ.Directives.ForName("concurrent") == nil,
+		Definition: typ,
+		Root:       b.Config.IsRoot(typ),
+		DisableConcurrency: typ == b.Schema.Mutation ||
+			typ.Directives.ForName(concurrentDirectiveName) == nil,
 		Stream:                   typ == b.Schema.Subscription,
 		Directives:               dirs,
 		PointersInUnmarshalInput: b.Config.ReturnPointersInUnmarshalInput,

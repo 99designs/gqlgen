@@ -54,7 +54,6 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	Concurrent    func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 	Custom        func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
 	Defer         func(ctx context.Context, obj interface{}, next graphql.Resolver, ifArg *bool, label *string) (res interface{}, err error)
 	Directive1    func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)

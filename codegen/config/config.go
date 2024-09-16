@@ -299,6 +299,10 @@ func (c *Config) injectTypesFromSchema() error {
 		SkipRuntime: true,
 	}
 
+	c.Directives["concurrent"] = DirectiveConfig{
+		SkipRuntime: true,
+	}
+
 	for _, schemaType := range c.Schema.Types {
 		if c.IsRoot(schemaType) {
 			continue

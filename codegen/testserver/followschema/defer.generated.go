@@ -200,7 +200,7 @@ func (ec *executionContext) _DeferModel(ctx context.Context, sel ast.SelectionSe
 			}
 			out.Values[i] = ec._DeferModel_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "name":
 			field := field
@@ -225,10 +225,23 @@ func (ec *executionContext) _DeferModel(ctx context.Context, sel ast.SelectionSe
 			}
 			out.Values[i] = ec._DeferModel_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "values":
 			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._DeferModel_values(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
 
 			if field.Deferrable != nil {
 				dfs, ok := deferred[field.Deferrable.Label]
@@ -241,17 +254,15 @@ func (ec *executionContext) _DeferModel(ctx context.Context, sel ast.SelectionSe
 					deferred[field.Deferrable.Label] = dfs
 				}
 				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
-					return ec._DeferModel_values(ctx, field, obj)
+					return innerFunc(ctx, dfs)
 				})
 
 				// don't run the out.Concurrently() call below
 				out.Values[i] = graphql.Null
 				continue
 			}
-			out.Values[i] = ec._DeferModel_values(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -295,7 +306,7 @@ func (ec *executionContext) marshalODeferModel2ᚕᚖgithubᚗcomᚋ99designsᚋ
 	}
 	ret := make(graphql.Array, len(v))
 	var wg sync.WaitGroup
-	isLen1 := true
+	isLen1 := len(v) == 1
 	if !isLen1 {
 		wg.Add(len(v))
 	}

@@ -5902,183 +5902,99 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 	case nil:
 		return graphql.Null
 	case Hello:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "Hello"})) == 0 {
-			return graphql.Empty{}
-		}
 		return ec._Hello(ctx, sel, &obj)
 	case *Hello:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "Hello"})) == 0 {
-			return graphql.Empty{}
-		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._Hello(ctx, sel, obj)
 	case HelloMultiSingleKeys:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "HelloMultiSingleKeys"})) == 0 {
-			return graphql.Empty{}
-		}
 		return ec._HelloMultiSingleKeys(ctx, sel, &obj)
 	case *HelloMultiSingleKeys:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "HelloMultiSingleKeys"})) == 0 {
-			return graphql.Empty{}
-		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._HelloMultiSingleKeys(ctx, sel, obj)
 	case HelloWithErrors:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "HelloWithErrors"})) == 0 {
-			return graphql.Empty{}
-		}
 		return ec._HelloWithErrors(ctx, sel, &obj)
 	case *HelloWithErrors:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "HelloWithErrors"})) == 0 {
-			return graphql.Empty{}
-		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._HelloWithErrors(ctx, sel, obj)
 	case MultiHello:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "MultiHello"})) == 0 {
-			return graphql.Empty{}
-		}
 		return ec._MultiHello(ctx, sel, &obj)
 	case *MultiHello:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "MultiHello"})) == 0 {
-			return graphql.Empty{}
-		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._MultiHello(ctx, sel, obj)
 	case MultiHelloMultipleRequires:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "MultiHelloMultipleRequires"})) == 0 {
-			return graphql.Empty{}
-		}
 		return ec._MultiHelloMultipleRequires(ctx, sel, &obj)
 	case *MultiHelloMultipleRequires:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "MultiHelloMultipleRequires"})) == 0 {
-			return graphql.Empty{}
-		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._MultiHelloMultipleRequires(ctx, sel, obj)
 	case MultiHelloRequires:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "MultiHelloRequires"})) == 0 {
-			return graphql.Empty{}
-		}
 		return ec._MultiHelloRequires(ctx, sel, &obj)
 	case *MultiHelloRequires:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "MultiHelloRequires"})) == 0 {
-			return graphql.Empty{}
-		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._MultiHelloRequires(ctx, sel, obj)
 	case MultiHelloWithError:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "MultiHelloWithError"})) == 0 {
-			return graphql.Empty{}
-		}
 		return ec._MultiHelloWithError(ctx, sel, &obj)
 	case *MultiHelloWithError:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "MultiHelloWithError"})) == 0 {
-			return graphql.Empty{}
-		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._MultiHelloWithError(ctx, sel, obj)
 	case MultiPlanetRequiresNested:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "MultiPlanetRequiresNested"})) == 0 {
-			return graphql.Empty{}
-		}
 		return ec._MultiPlanetRequiresNested(ctx, sel, &obj)
 	case *MultiPlanetRequiresNested:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "MultiPlanetRequiresNested"})) == 0 {
-			return graphql.Empty{}
-		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._MultiPlanetRequiresNested(ctx, sel, obj)
 	case PlanetMultipleRequires:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "PlanetMultipleRequires"})) == 0 {
-			return graphql.Empty{}
-		}
 		return ec._PlanetMultipleRequires(ctx, sel, &obj)
 	case *PlanetMultipleRequires:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "PlanetMultipleRequires"})) == 0 {
-			return graphql.Empty{}
-		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._PlanetMultipleRequires(ctx, sel, obj)
 	case PlanetRequires:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "PlanetRequires"})) == 0 {
-			return graphql.Empty{}
-		}
 		return ec._PlanetRequires(ctx, sel, &obj)
 	case *PlanetRequires:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "PlanetRequires"})) == 0 {
-			return graphql.Empty{}
-		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._PlanetRequires(ctx, sel, obj)
 	case PlanetRequiresNested:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "PlanetRequiresNested"})) == 0 {
-			return graphql.Empty{}
-		}
 		return ec._PlanetRequiresNested(ctx, sel, &obj)
 	case *PlanetRequiresNested:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "PlanetRequiresNested"})) == 0 {
-			return graphql.Empty{}
-		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._PlanetRequiresNested(ctx, sel, obj)
 	case World:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "World"})) == 0 {
-			return graphql.Empty{}
-		}
 		return ec._World(ctx, sel, &obj)
 	case *World:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "World"})) == 0 {
-			return graphql.Empty{}
-		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._World(ctx, sel, obj)
 	case WorldName:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "WorldName"})) == 0 {
-			return graphql.Empty{}
-		}
 		return ec._WorldName(ctx, sel, &obj)
 	case *WorldName:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "WorldName"})) == 0 {
-			return graphql.Empty{}
-		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._WorldName(ctx, sel, obj)
 	case WorldWithMultipleKeys:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "WorldWithMultipleKeys"})) == 0 {
-			return graphql.Empty{}
-		}
 		return ec._WorldWithMultipleKeys(ctx, sel, &obj)
 	case *WorldWithMultipleKeys:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "WorldWithMultipleKeys"})) == 0 {
-			return graphql.Empty{}
-		}
 		if obj == nil {
 			return graphql.Null
 		}

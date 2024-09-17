@@ -72,16 +72,11 @@ type Array []Marshaler
 
 func (a Array) MarshalGQL(writer io.Writer) {
 	writer.Write(openBracket)
-	var notEmpty bool
-	for _, val := range a {
-		if _, ok := val.(Empty); ok {
-			continue
-		}
-		if notEmpty {
+	for i, val := range a {
+		if i != 0 {
 			writer.Write(comma)
 		}
 		val.MarshalGQL(writer)
-		notEmpty = true
 	}
 	writer.Write(closeBracket)
 }
@@ -92,15 +87,7 @@ func (l lit) MarshalGQL(w io.Writer) {
 	w.Write(l.b)
 }
 
-func (l lit) MarshalGQLContext(_ context.Context, w io.Writer) error {
+func (l lit) MarshalGQLContext(ctx context.Context, w io.Writer) error {
 	w.Write(l.b)
-	return nil
-}
-
-type Empty struct{}
-
-func (e Empty) MarshalGQL(_ io.Writer) {}
-
-func (e Empty) MarshalGQLContext(_ context.Context, _ io.Writer) error {
 	return nil
 }

@@ -2855,14 +2855,8 @@ func (ec *executionContext) _Data(ctx context.Context, sel ast.SelectionSet, obj
 	case nil:
 		return graphql.Null
 	case Todo:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Data", "Todo"})) == 0 {
-			return graphql.Empty{}
-		}
 		return ec._Todo(ctx, sel, &obj)
 	case *Todo:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Data", "Todo"})) == 0 {
-			return graphql.Empty{}
-		}
 		if obj == nil {
 			return graphql.Null
 		}
@@ -2877,14 +2871,8 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 	case nil:
 		return graphql.Null
 	case Todo:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Node", "Todo"})) == 0 {
-			return graphql.Empty{}
-		}
 		return ec._Todo(ctx, sel, &obj)
 	case *Todo:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Node", "Todo"})) == 0 {
-			return graphql.Empty{}
-		}
 		if obj == nil {
 			return graphql.Null
 		}

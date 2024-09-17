@@ -11,7 +11,7 @@ import (
 
 type RecoverFunc func(ctx context.Context, err any) (userMessage error)
 
-func DefaultRecover(_ context.Context, err any) error {
+func DefaultRecover(ctx context.Context, err any) error {
 	fmt.Fprintln(os.Stderr, err)
 	fmt.Fprintln(os.Stderr)
 	debug.PrintStack()

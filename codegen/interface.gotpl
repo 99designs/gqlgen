@@ -6,9 +6,6 @@ func (ec *executionContext) _{{$interface.Name}}(ctx context.Context, sel ast.Se
 		return graphql.Null
 	{{- range $implementor := $interface.Implementors }}
 		case {{$implementor.Type | ref}}:
-			if len(graphql.CollectFields(ec.OperationContext, sel, []string{"{{$interface.Type | typeName }}", "{{$implementor.Type | typeName}}"})) == 0 {
-				return graphql.Empty{}
-			}
 			{{- if $implementor.CanBeNil }}
 				if obj == nil {
 					return graphql.Null

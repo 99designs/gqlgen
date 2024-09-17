@@ -3044,27 +3044,15 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 	case nil:
 		return graphql.Null
 	case model.EmailHost:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "EmailHost"})) == 0 {
-			return graphql.Empty{}
-		}
 		return ec._EmailHost(ctx, sel, &obj)
 	case *model.EmailHost:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "EmailHost"})) == 0 {
-			return graphql.Empty{}
-		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._EmailHost(ctx, sel, obj)
 	case model.User:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "User"})) == 0 {
-			return graphql.Empty{}
-		}
 		return ec._User(ctx, sel, &obj)
 	case *model.User:
-		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "User"})) == 0 {
-			return graphql.Empty{}
-		}
 		if obj == nil {
 			return graphql.Null
 		}

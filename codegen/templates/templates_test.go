@@ -3,7 +3,6 @@ package templates
 import (
 	"embed"
 	"fmt"
-	"go/types"
 	"os"
 	"path/filepath"
 	"testing"
@@ -355,29 +354,4 @@ func TestRenderFS(t *testing.T) {
 
 	// don't look at last character since it's \n on Linux and \r\n on Windows
 	assert.Equal(t, expectedString, actualContentsStr[:len(expectedString)])
-}
-
-func TestTypeName(t *testing.T) {
-	testType := types.NewNamed(
-		types.NewTypeName(0, types.NewPackage(
-			"github.com/99designs/gqlgen/codegen/templates",
-			"templates",
-		), "testType", nil),
-		types.NewStruct(nil, nil),
-		nil,
-	)
-
-	tests := []struct {
-		input    types.Type
-		expected string
-	}{
-		{testType, "testType"},
-		{types.NewPointer(testType), "testType"},
-		{types.NewPointer(types.NewPointer(testType)), "*testType"},
-	}
-
-	for _, test := range tests {
-		result := typeName(test.input)
-		assert.Equal(t, test.expected, result)
-	}
 }

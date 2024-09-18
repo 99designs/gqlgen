@@ -11,7 +11,7 @@ import (
 
 type Resolver struct{}
 
-func (r *entityResolver) FindProductByManufacturerIDAndID(ctx context.Context, manufacturerID string, id string) (*model.Product, error) {
+func (r *entityResolver) FindProductByManufacturerIDAndID(ctx context.Context, manufacturerID, id string) (*model.Product, error) {
 	var productReviews []*model.Review
 
 	for _, review := range reviews {

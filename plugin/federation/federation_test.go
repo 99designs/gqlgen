@@ -21,7 +21,7 @@ func TestNew(t *testing.T) {
 			},
 		}
 		plugin, err := New(1, cfg)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, plugin)
 	})
 
@@ -36,7 +36,7 @@ func TestNew(t *testing.T) {
 			CallArgumentDirectivesWithNull: true,
 		}
 		plugin, err := New(1, cfg)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		assert.NotNil(t, plugin)
 	})
 
@@ -51,7 +51,7 @@ func TestNew(t *testing.T) {
 			CallArgumentDirectivesWithNull: true,
 		}
 		plugin, err := New(1, cfg)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, plugin)
 	})
 
@@ -66,7 +66,7 @@ func TestNew(t *testing.T) {
 			CallArgumentDirectivesWithNull: false,
 		}
 		plugin, err := New(1, cfg)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, plugin)
 	})
 
@@ -82,7 +82,7 @@ func TestNew(t *testing.T) {
 		}
 
 		plugin, err := New(1, cfg)
-		assert.Error(t, err)
+		require.Error(t, err)
 		assert.Nil(t, plugin)
 	})
 }

@@ -640,7 +640,7 @@ func (f *Federation) generateExplicitRequires(
 func buildResolverSDL(
 	resolver *EntityResolver,
 	multi bool,
-) (resolverSDL string, entityResolverInputSDL string) {
+) (resolverSDL, entityResolverInputSDL string) {
 	if multi {
 		entityResolverInputSDL = buildEntityResolverInputDefinitionSDL(resolver)
 		resolverSDL := fmt.Sprintf("\t%s(reps: [%s]!): [%s]", resolver.ResolverName, resolver.InputTypeName, resolver.ReturnTypeName)

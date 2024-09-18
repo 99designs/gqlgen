@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
+	model "github.com/99designs/gqlgen/plugin/federation/testdata/computedrequires/generated/models"
 )
 
 var (
@@ -240,10 +241,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "PlanetMultipleRequires": %w`, err)
 			}
-			err = ec.PopulatePlanetMultipleRequiresRequires(ctx, entity, rep)
-			if err != nil {
-				return nil, fmt.Errorf(`populating requires for Entity "PlanetMultipleRequires": %w`, err)
-			}
+
 			return entity, nil
 		}
 	case "PlanetRequires":
@@ -262,10 +260,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "PlanetRequires": %w`, err)
 			}
-			err = ec.PopulatePlanetRequiresRequires(ctx, entity, rep)
-			if err != nil {
-				return nil, fmt.Errorf(`populating requires for Entity "PlanetRequires": %w`, err)
-			}
+
 			return entity, nil
 		}
 	case "PlanetRequiresNested":
@@ -284,10 +279,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "PlanetRequiresNested": %w`, err)
 			}
-			err = ec.PopulatePlanetRequiresNestedRequires(ctx, entity, rep)
-			if err != nil {
-				return nil, fmt.Errorf(`populating requires for Entity "PlanetRequiresNested": %w`, err)
-			}
+
 			return entity, nil
 		}
 	case "World":
@@ -395,7 +387,7 @@ func (ec *executionContext) resolveManyEntities(
 		switch resolverName {
 
 		case "findManyMultiHelloByNames":
-			typedReps := make([]*MultiHelloByNamesInput, len(reps))
+			typedReps := make([]*model.MultiHelloByNamesInput, len(reps))
 
 			for i, rep := range reps {
 				id0, err := ec.unmarshalNString2string(ctx, rep.entity["name"])
@@ -403,7 +395,7 @@ func (ec *executionContext) resolveManyEntities(
 					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
 				}
 
-				typedReps[i] = &MultiHelloByNamesInput{
+				typedReps[i] = &model.MultiHelloByNamesInput{
 					Name: id0,
 				}
 			}
@@ -430,7 +422,7 @@ func (ec *executionContext) resolveManyEntities(
 		switch resolverName {
 
 		case "findManyMultiHelloMultipleRequiresByNames":
-			typedReps := make([]*MultiHelloMultipleRequiresByNamesInput, len(reps))
+			typedReps := make([]*model.MultiHelloMultipleRequiresByNamesInput, len(reps))
 
 			for i, rep := range reps {
 				id0, err := ec.unmarshalNString2string(ctx, rep.entity["name"])
@@ -438,7 +430,7 @@ func (ec *executionContext) resolveManyEntities(
 					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
 				}
 
-				typedReps[i] = &MultiHelloMultipleRequiresByNamesInput{
+				typedReps[i] = &model.MultiHelloMultipleRequiresByNamesInput{
 					Name: id0,
 				}
 			}
@@ -473,7 +465,7 @@ func (ec *executionContext) resolveManyEntities(
 		switch resolverName {
 
 		case "findManyMultiHelloRequiresByNames":
-			typedReps := make([]*MultiHelloRequiresByNamesInput, len(reps))
+			typedReps := make([]*model.MultiHelloRequiresByNamesInput, len(reps))
 
 			for i, rep := range reps {
 				id0, err := ec.unmarshalNString2string(ctx, rep.entity["name"])
@@ -481,7 +473,7 @@ func (ec *executionContext) resolveManyEntities(
 					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
 				}
 
-				typedReps[i] = &MultiHelloRequiresByNamesInput{
+				typedReps[i] = &model.MultiHelloRequiresByNamesInput{
 					Name: id0,
 				}
 			}
@@ -512,7 +504,7 @@ func (ec *executionContext) resolveManyEntities(
 		switch resolverName {
 
 		case "findManyMultiHelloWithErrorByNames":
-			typedReps := make([]*MultiHelloWithErrorByNamesInput, len(reps))
+			typedReps := make([]*model.MultiHelloWithErrorByNamesInput, len(reps))
 
 			for i, rep := range reps {
 				id0, err := ec.unmarshalNString2string(ctx, rep.entity["name"])
@@ -520,7 +512,7 @@ func (ec *executionContext) resolveManyEntities(
 					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
 				}
 
-				typedReps[i] = &MultiHelloWithErrorByNamesInput{
+				typedReps[i] = &model.MultiHelloWithErrorByNamesInput{
 					Name: id0,
 				}
 			}
@@ -547,7 +539,7 @@ func (ec *executionContext) resolveManyEntities(
 		switch resolverName {
 
 		case "findManyMultiPlanetRequiresNestedByNames":
-			typedReps := make([]*MultiPlanetRequiresNestedByNamesInput, len(reps))
+			typedReps := make([]*model.MultiPlanetRequiresNestedByNamesInput, len(reps))
 
 			for i, rep := range reps {
 				id0, err := ec.unmarshalNString2string(ctx, rep.entity["name"])
@@ -555,7 +547,7 @@ func (ec *executionContext) resolveManyEntities(
 					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
 				}
 
-				typedReps[i] = &MultiPlanetRequiresNestedByNamesInput{
+				typedReps[i] = &model.MultiPlanetRequiresNestedByNamesInput{
 					Name: id0,
 				}
 			}

@@ -27,11 +27,11 @@ type FieldArgument struct {
 	CallArgumentDirectivesWithNull bool
 }
 
-// ImplDirectives get not Builtin and location ARGUMENT_DEFINITION directive
+// ImplDirectives get not SkipRuntime and location ARGUMENT_DEFINITION directive
 func (f *FieldArgument) ImplDirectives() []*Directive {
 	d := make([]*Directive, 0)
 	for i := range f.Directives {
-		if !f.Directives[i].Builtin && f.Directives[i].IsLocation(ast.LocationArgumentDefinition) {
+		if !f.Directives[i].SkipRuntime && f.Directives[i].IsLocation(ast.LocationArgumentDefinition) {
 			d = append(d, f.Directives[i])
 		}
 	}

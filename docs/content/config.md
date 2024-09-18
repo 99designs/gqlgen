@@ -25,6 +25,9 @@ exec:
 federation:
   filename: graph/federation.go
   package: graph
+  version: 2
+  options:
+    computed_requires: true
 
 # Where should any generated models go?
 model:
@@ -89,7 +92,7 @@ resolver:
 #
 # This enables argumment directives to not just mutate
 # argument values but to set them even if they're null.
-# call_argument_directives_with_null: false
+call_argument_directives_with_null: true
 
 # Optional: set to speed up generation time by not performing a final validation pass.
 # skip_validation: true

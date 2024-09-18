@@ -64,6 +64,30 @@ type builder struct {
 	Directives map[string]*Directive
 }
 
+// Get only the directives which should have a user provided definition on server instantiation
+func (d *Data) UserDirectives() DirectiveList {
+	res := DirectiveList{}
+	directives := d.Directives()
+	for k, directive := range directives {
+		if directive.Implementation == nil {
+			res[k] = directive
+		}
+	}
+	return res
+}
+
+// Get only the directives which should have a statically provided definition
+func (d *Data) BuiltInDirectives() DirectiveList {
+	res := DirectiveList{}
+	directives := d.Directives()
+	for k, directive := range directives {
+		if directive.Implementation != nil {
+			res[k] = directive
+		}
+	}
+	return res
+}
+
 // Get only the directives which are defined in the config's sources.
 func (d *Data) Directives() DirectiveList {
 	res := DirectiveList{}
@@ -97,7 +121,7 @@ func BuildData(cfg *config.Config, plugins ...any) (*Data, error) {
 
 	dataDirectives := make(map[string]*Directive)
 	for name, d := range b.Directives {
-		if !d.Builtin {
+		if !d.SkipRuntime {
 			dataDirectives[name] = d
 		}
 	}

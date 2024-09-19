@@ -3087,12 +3087,12 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 		return graphql.Null
 	case model.EmailHost:
 		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "EmailHost"})) == 0 {
-			return graphql.Empty{}
+			return graphql.NullItem
 		}
 		return ec._EmailHost(ctx, sel, &obj)
 	case *model.EmailHost:
 		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "EmailHost"})) == 0 {
-			return graphql.Empty{}
+			return graphql.NullItem
 		}
 		if obj == nil {
 			return graphql.Null
@@ -3100,12 +3100,12 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 		return ec._EmailHost(ctx, sel, obj)
 	case model.User:
 		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "User"})) == 0 {
-			return graphql.Empty{}
+			return graphql.NullItem
 		}
 		return ec._User(ctx, sel, &obj)
 	case *model.User:
 		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "User"})) == 0 {
-			return graphql.Empty{}
+			return graphql.NullItem
 		}
 		if obj == nil {
 			return graphql.Null

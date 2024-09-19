@@ -1,6 +1,6 @@
 package followschema
 
-// THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
+// THIS CODE WILL BE UPDATED WITH SCHEMA CHANGES. PREVIOUS IMPLEMENTATION FOR SCHEMA CHANGES WILL BE KEPT IN THE COMMENT SECTION. IMPLEMENTATION FOR UNCHANGED SCHEMA WILL BE KEPT.
 
 import (
 	"context"
@@ -214,6 +214,11 @@ func (r *queryResolver) DirectiveArg(ctx context.Context, arg string) (*string, 
 
 // DirectiveNullableArg is the resolver for the directiveNullableArg field.
 func (r *queryResolver) DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int, arg3 *string) (*string, error) {
+	panic("not implemented")
+}
+
+// DirectiveSingleNullableArg is the resolver for the directiveSingleNullableArg field.
+func (r *queryResolver) DirectiveSingleNullableArg(ctx context.Context, arg1 *string) (*string, error) {
 	panic("not implemented")
 }
 

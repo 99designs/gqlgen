@@ -1,3 +1,4 @@
+{{/* Context object: codegen.Data */}}
 {{ reserveImport "context"  }}
 {{ reserveImport "fmt"  }}
 {{ reserveImport "io"  }}
@@ -45,7 +46,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-{{ range $directive := .Directives }}
+{{ range $directive := .UserDirectives }}
 	{{- $directive.Declaration }}
 {{ end }}
 }
@@ -66,6 +67,12 @@ type ComplexityRoot struct {
 {{ end }}
 {{- end }}
 }
+
+{{ range $directive := .BuiltInDirectives }}
+	var (
+		{{- $directive.FunctionImpl }}
+	)
+{{ end }}
 
 type executableSchema struct {
 	schema    *ast.Schema

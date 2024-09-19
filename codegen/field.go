@@ -16,6 +16,7 @@ import (
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
+	"github.com/99designs/gqlgen/internal/code"
 )
 
 type Field struct {
@@ -144,7 +145,7 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		f.GoFieldName = b.Config.Models[obj.Name].Fields[f.Name].FieldName
 	}
 
-	target, err := b.findBindTarget(obj.Type.(*types.Named), f.GoFieldName)
+	target, err := b.findBindTarget(obj.Type, f.GoFieldName)
 	if err != nil {
 		return err
 	}
@@ -380,7 +381,7 @@ func (b *builder) findBindStructEmbedsTarget(strukt *types.Struct, name string) 
 			continue
 		}
 
-		fieldType := field.Type()
+		fieldType := code.Unalias(field.Type())
 		if ptr, ok := fieldType.(*types.Pointer); ok {
 			fieldType = ptr.Elem()
 		}
@@ -442,7 +443,7 @@ func (f *Field) ImplDirectives() []*Directive {
 		loc = ast.LocationInputFieldDefinition
 	}
 	for i := range f.Directives {
-		if !f.Directives[i].Builtin &&
+		if !f.Directives[i].SkipRuntime &&
 			(f.Directives[i].IsLocation(loc, ast.LocationObject) || f.Directives[i].IsLocation(loc, ast.LocationInputObject)) {
 			d = append(d, f.Directives[i])
 		}

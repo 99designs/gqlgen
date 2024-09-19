@@ -2,6 +2,7 @@
 
 set -exuo pipefail
 export GO111MODULE=on
+export GOTOOLCHAIN=local
 go fmt ./...
 cd _examples && go fmt ./...
 if [[ $(git --no-pager diff) ]] ; then

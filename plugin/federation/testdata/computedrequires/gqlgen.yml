@@ -1,0 +1,22 @@
+schema:
+  - "testdata/computedrequires/schema.graphql"
+exec:
+  filename: testdata/computedrequires/generated/exec.go
+  package: generated
+federation:
+  filename: testdata/computedrequires/generated/federation.go
+  package: generated
+  version: 2
+  options:
+    computed_requires: true
+model:
+  package: model
+  filename: testdata/computedrequires/generated/models/models.go
+resolver:
+  filename: testdata/computedrequires/resolver.go
+  layout: follow-schema
+  dir: testdata/computedrequires
+  package: computedrequires
+
+omit_complexity: true
+call_argument_directives_with_null: true

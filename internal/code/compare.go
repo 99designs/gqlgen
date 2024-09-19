@@ -8,6 +8,8 @@ import (
 
 // CompatibleTypes isnt a strict comparison, it allows for pointer differences
 func CompatibleTypes(expected, actual types.Type) error {
+	// Unwrap any aliases
+	expected, actual = Unalias(expected), Unalias(actual)
 	// Special case to deal with pointer mismatches
 	{
 		expectedPtr, expectedIsPtr := expected.(*types.Pointer)

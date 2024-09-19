@@ -1,3 +1,4 @@
+{{/* Context object: codegen.Data */}}
 {{ reserveImport "context"  }}
 {{ reserveImport "fmt"  }}
 {{ reserveImport "io"  }}
@@ -46,7 +47,7 @@
 }
 
 	type DirectiveRoot struct {
-	{{ range $directive := .Directives }}
+	{{ range $directive := .UserDirectives }}
 		{{- $directive.Declaration }}
 	{{ end }}
 	}
@@ -92,6 +93,12 @@
 		}
 	{{- end }}
 {{- end }}
+
+{{ range $directive := .BuiltInDirectives }}
+	var (
+		{{- $directive.FunctionImpl }}
+	)
+{{ end }}
 
 {{ if eq .Config.Exec.Layout "single-file" }}
 	type executableSchema struct {

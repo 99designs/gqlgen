@@ -705,7 +705,7 @@ var pkgReplacer = strings.NewReplacer(
 func TypeIdentifier(t types.Type) string {
 	res := ""
 	for {
-		switch it := t.(type) {
+		switch it := code.Unalias(t).(type) {
 		case *types.Pointer:
 			t.Underlying()
 			res += "ᚖ"

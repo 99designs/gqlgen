@@ -782,6 +782,7 @@ var CommonInitialisms = map[string]bool{
 	"XMPP":  true,
 	"XSRF":  true,
 	"XSS":   true,
+	"AWS":   true,
 }
 
 // GetInitialisms returns the initialisms to capitalize in Go names. If unchanged, default initialisms will be returned

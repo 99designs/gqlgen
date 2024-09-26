@@ -305,6 +305,10 @@ func Test_wordWalker(t *testing.T) {
 			expected: []*wordInfo{{Word: "Related"}, {WordOffset: 1, Word: "Urls"}},
 		},
 		{
+			input:    makeInput("USER_IDENTITY"),
+			expected: []*wordInfo{{Word: "USER"}, {WordOffset: 1, Word: "IDENTITY"}},
+		},
+		{
 			input:    makeInput("ITicket"),
 			expected: []*wordInfo{{Word: "ITicket"}},
 		},

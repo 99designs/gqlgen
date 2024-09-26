@@ -520,6 +520,7 @@ func (b *Binder) CopyModifiersFromAst(t *ast.Type, base types.Type) types.Type {
 }
 
 func IsNilable(t types.Type) bool {
+	t = code.Unalias(t)
 	if namedType, isNamed := t.(*types.Named); isNamed {
 		return IsNilable(namedType.Underlying())
 	}

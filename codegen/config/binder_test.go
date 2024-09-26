@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"go/types"
 	"testing"
 
@@ -263,4 +264,32 @@ func TestEnumBinding(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, bazTwo, baz.EnumValues[1].Object)
 	require.Equal(t, cf.Schema.Types["Baz"].EnumValues[1], baz.EnumValues[1].Definition)
+}
+
+func TestIsNilable(t *testing.T) {
+	type aTest struct {
+		input    types.Type
+		expected bool
+	}
+
+	theTests := []aTest{
+		{types.Universe.Lookup("any").Type(), true},
+		{types.Universe.Lookup("rune").Type(), false},
+		{types.Universe.Lookup("byte").Type(), false},
+		{types.Universe.Lookup("error").Type(), true},
+		{types.Typ[types.Int], false},
+		{types.Typ[types.String], false},
+		{types.NewChan(types.SendOnly, types.Typ[types.Int]), true},
+		{types.NewPointer(types.Typ[types.Int]), true},
+		{types.NewPointer(types.Typ[types.String]), true},
+		{types.NewMap(types.Typ[types.Int], types.Typ[types.Int]), true},
+		{types.NewSlice(types.Typ[types.Int]), true},
+		{types.NewInterfaceType(nil, nil), true},
+	}
+
+	for _, at := range theTests {
+		t.Run(fmt.Sprintf("nilable-%s", at.input.String()), func(t *testing.T) {
+			require.Equal(t, at.expected, IsNilable(at.input))
+		})
+	}
 }

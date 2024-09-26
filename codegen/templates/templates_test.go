@@ -53,6 +53,9 @@ func TestToGo(t *testing.T) {
 	require.Equal(t, "Identities", ToGo("identities"))
 	require.Equal(t, "Iphone", ToGo("IPHONE"))
 	require.Equal(t, "IPhone", ToGo("iPHONE"))
+	require.Equal(t, "UserIdentity", ToGo("USER_IDENTITY"))
+	require.Equal(t, "UserIdentity", ToGo("UserIdentity"))
+	require.Equal(t, "UserIdentity", ToGo("userIdentity"))
 }
 
 func TestToGoPrivate(t *testing.T) {
@@ -299,6 +302,10 @@ func Test_wordWalker(t *testing.T) {
 		{
 			input:    makeInput("RelatedUrls"),
 			expected: []*wordInfo{{Word: "Related"}, {WordOffset: 1, Word: "Urls"}},
+		},
+		{
+			input:    makeInput("USER_IDENTITY"),
+			expected: []*wordInfo{{Word: "USER"}, {WordOffset: 1, Word: "IDENTITY"}},
 		},
 		{
 			input:    makeInput("ITicket"),

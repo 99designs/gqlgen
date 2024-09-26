@@ -54,6 +54,9 @@ func TestToGo(t *testing.T) {
 	require.Equal(t, "Identities", ToGo("identities"))
 	require.Equal(t, "Iphone", ToGo("IPHONE"))
 	require.Equal(t, "IPhone", ToGo("iPHONE"))
+	require.Equal(t, "UserIdentity", ToGo("USER_IDENTITY"))
+	require.Equal(t, "UserIdentity", ToGo("UserIdentity"))
+	require.Equal(t, "UserIdentity", ToGo("userIdentity"))
 }
 
 func TestToGoPrivate(t *testing.T) {

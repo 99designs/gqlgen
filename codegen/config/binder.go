@@ -520,6 +520,10 @@ func (b *Binder) CopyModifiersFromAst(t *ast.Type, base types.Type) types.Type {
 }
 
 func IsNilable(t types.Type) bool {
+	// Note that we use types.Unalias rather than code.Unalias here
+	// because we want to always check the underlying type.
+	// code.Unalias only unwraps aliases in Go 1.23
+	t = types.Unalias(t)
 	if namedType, isNamed := t.(*types.Named); isNamed {
 		return IsNilable(namedType.Underlying())
 	}

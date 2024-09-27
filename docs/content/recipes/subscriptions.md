@@ -122,7 +122,7 @@ func (r *subscriptionResolver) CurrentTime(ctx context.Context) (<-chan *model.T
 	// For this example we'll simply use a Goroutine with a simple loop.
 	go func() {
 		// Handle deregistration of the channel here. Note the `defer`
-    defer close(ch)
+		defer close(ch)
 
 		for {
 			// In our example we'll send the current time every second.

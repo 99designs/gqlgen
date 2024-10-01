@@ -18,12 +18,8 @@
 					{{- end }}
 			{{- end }}
 			if ec.directives.{{$directive.Name|ucFirst}} == nil {
-				{{- if ne $directive.Name "entityResolver" }}
-					var zeroVal {{$zeroVal}}
-					return zeroVal, errors.New("directive {{$directive.Name}} is not implemented")
-				{{- else }}
-					return directive{{ $i }}(ctx)
-				{{- end }}
+				var zeroVal {{$zeroVal}}
+				return zeroVal, errors.New("directive {{$directive.Name}} is not implemented")
 			}
 			return ec.directives.{{$directive.Name|ucFirst}}({{$directive.ResolveArgs $in $i }})
 		}

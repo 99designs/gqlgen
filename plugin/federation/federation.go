@@ -83,6 +83,7 @@ func (f *federation) MutateConfig(cfg *config.Config) error {
 	cfg.Directives["provides"] = config.DirectiveConfig{SkipRuntime: true}
 	cfg.Directives["key"] = config.DirectiveConfig{SkipRuntime: true}
 	cfg.Directives["extends"] = config.DirectiveConfig{SkipRuntime: true}
+	cfg.Directives["entityResolver"] = config.DirectiveConfig{SkipRuntime: true}
 
 	// Federation 2 specific directives
 	if f.Version == 2 {

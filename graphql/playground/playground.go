@@ -75,7 +75,8 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
           fetcher: fetcher,
           isHeadersEditorEnabled: true,
           shouldPersistHeaders: true,
-		  headers: JSON.stringify(uiHeaders, null, 2)
+          headers: JSON.stringify(uiHeaders, null, 2),
+          defaultQuery: {{.defaultQuery}}
         }),
         document.getElementById('graphiql'),
       );
@@ -84,24 +85,43 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 </html>
 `))
 
+// PlaygroundOpts contains options for configuring the GraphQL Playground
+type PlaygroundOpts struct {
+	Title        string
+	Endpoint     string
+	DefaultQuery string
+}
+
+// WithDefaultQuery sets the default query for the playground
+func WithDefaultQuery(query string) func(*PlaygroundOpts) {
+	return func(opts *PlaygroundOpts) {
+		opts.DefaultQuery = query
+	}
+}
+
 // Handler responsible for setting up the playground
-func Handler(title, endpoint string) http.HandlerFunc {
-	return HandlerWithHeaders(title, endpoint, nil, nil)
+func Handler(title, endpoint string, options ...func(*PlaygroundOpts)) http.HandlerFunc {
+	opts := initOpts(title, endpoint, options...)
+
+	return HandlerWithHeaders(opts.Title, opts.Endpoint, nil, nil, options...)
 }
 
 // HandlerWithHeaders sets up the playground.
 // fetcherHeaders are used by the playground's fetcher instance and will not be visible in the UI.
 // uiHeaders are default headers that will show up in the UI headers editor.
-func HandlerWithHeaders(title, endpoint string, fetcherHeaders, uiHeaders map[string]string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+func HandlerWithHeaders(title, endpoint string, fetcherHeaders, uiHeaders map[string]string, options ...func(*PlaygroundOpts)) http.HandlerFunc {
+	opts := initOpts(title, endpoint, options...)
+
+	return func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Add("Content-Type", "text/html; charset=UTF-8")
 		err := page.Execute(w, map[string]any{
-			"title":                title,
-			"endpoint":             endpoint,
+			"title":                opts.Title,
+			"endpoint":             opts.Endpoint,
 			"fetcherHeaders":       fetcherHeaders,
 			"uiHeaders":            uiHeaders,
-			"endpointIsAbsolute":   endpointHasScheme(endpoint),
-			"subscriptionEndpoint": getSubscriptionEndpoint(endpoint),
+			"endpointIsAbsolute":   endpointHasScheme(opts.Endpoint),
+			"subscriptionEndpoint": getSubscriptionEndpoint(opts.Endpoint),
+			"defaultQuery":         opts.DefaultQuery,
 			"version":              "3.0.6",
 			"cssSRI":               "sha256-wTzfn13a+pLMB5rMeysPPR1hO7x0SwSeQI+cnw7VdbE=",
 			"jsSRI":                "sha256-eNxH+Ah7Z9up9aJYTQycgyNuy953zYZwE9Rqf5rH+r4=",
@@ -112,6 +132,18 @@ func HandlerWithHeaders(title, endpoint string, fetcherHeaders, uiHeaders map[st
 			panic(err)
 		}
 	}
+}
+
+// initOpts initializes the playground options with the given title and endpoint.
+func initOpts(title, endpoint string, optFuncs ...func(*PlaygroundOpts)) *PlaygroundOpts {
+	opts := &PlaygroundOpts{
+		Title:    title,
+		Endpoint: endpoint,
+	}
+	for _, optFunc := range optFuncs {
+		optFunc(opts)
+	}
+	return opts
 }
 
 // endpointHasScheme checks if the endpoint has a scheme.

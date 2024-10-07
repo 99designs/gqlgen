@@ -1243,15 +1243,27 @@ func (ec *executionContext) _Content_Child(ctx context.Context, sel ast.Selectio
 	case nil:
 		return graphql.Null
 	case ContentUser:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"ContentChild", "Content_User"})) == 0 {
+			return graphql.NullItem
+		}
 		return ec._Content_User(ctx, sel, &obj)
 	case *ContentUser:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"ContentChild", "Content_User"})) == 0 {
+			return graphql.NullItem
+		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._Content_User(ctx, sel, obj)
 	case ContentPost:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"ContentChild", "Content_Post"})) == 0 {
+			return graphql.NullItem
+		}
 		return ec._Content_Post(ctx, sel, &obj)
 	case *ContentPost:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"ContentChild", "Content_Post"})) == 0 {
+			return graphql.NullItem
+		}
 		if obj == nil {
 			return graphql.Null
 		}

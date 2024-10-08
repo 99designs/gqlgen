@@ -127,7 +127,7 @@ func addBuild(filename string, p *ast.Position, data *Data, builds *map[string]*
 	}
 }
 
-// go:embed root_.gotpl
+//go:embed root_.gotpl
 var rootTemplate string
 
 // Root file contains top-level definitions that should not be duplicated across the generated

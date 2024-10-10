@@ -24,6 +24,43 @@ func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.Selec
 }
 {{- else }}
 func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.SelectionSet{{ if not $object.Root }},obj {{$object.Reference | ref }}{{ end }}) graphql.Marshaler {
+	{{- if gt (len $object.Directives) 0 }}
+		directive0 := func(rctx context.Context) (interface{}, error) {
+    		ctx = rctx  // use context from middleware stack in children
+    		return obj, nil
+    	}
+
+		{{range $i, $directive := .Directives -}}
+			directive{{add $i 1}} := func(ctx context.Context) (interface{}, error) {
+				{{- range $arg := $directive.Args }}
+					{{- if notNil "Value" $arg }}
+							{{ $arg.VarName }}, err := ec.{{ $arg.TypeReference.UnmarshalFunc }}(ctx, {{ $arg.Value | dump }})
+							if err != nil{
+								return obj, err
+							}
+						{{- else if notNil "Default" $arg }}
+							{{ $arg.VarName }}, err := ec.{{ $arg.TypeReference.UnmarshalFunc }}(ctx, {{ $arg.Default | dump }})
+							if err != nil{
+								return obj, err
+							}
+						{{- end }}
+				{{- end }}
+				{{- if not $directive.IsBuiltIn}}
+					if {{$directive.CallPath}} == nil {
+						return obj, errors.New("directive {{$directive.Name}} is not implemented")
+					}
+				{{- end}}
+				return {{$directive.CallPath}}({{$directive.ResolveArgs "obj" $i }})
+			}
+		{{ end -}}
+
+		_, err := directive{{.Directives|len}}(ctx)
+		if err != nil {
+			ec.Error(ctx, err)
+			return graphql.Null
+		}
+	{{end}}
+
 	fields := graphql.CollectFields(ec.OperationContext, sel, {{$object.Name|lcFirst}}Implementors)
 	{{- if $object.Root }}
 		ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{

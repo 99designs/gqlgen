@@ -98,7 +98,12 @@
 	}
 
 	func (e {{ goModelName .Name }}) MarshalGQL(w io.Writer) {
-		fmt.Fprint(w, strconv.Quote(e.String()))
+		switch e.IsValid() {
+		case true:
+			fmt.Fprint(w, strconv.Quote(e.String()))
+		case false:
+			graphql.Null.MarshalGQL(w)
+		}
 	}
 
 {{- end }}

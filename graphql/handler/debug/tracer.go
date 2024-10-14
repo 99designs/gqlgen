@@ -61,9 +61,12 @@ func (a Tracer) InterceptResponse(ctx context.Context, next graphql.ResponseHand
 	resp := next(ctx)
 
 	_, _ = fmt.Fprintln(a.out, "  resp:", aurora.Green(stringify(resp)))
-	for _, err := range resp.Errors {
-		_, _ = fmt.Fprintln(a.out, "  error:", aurora.Bold(err.Path.String()+":"), aurora.Red(err.Message))
+	if resp != nil {
+		for _, err := range resp.Errors {
+			_, _ = fmt.Fprintln(a.out, "  error:", aurora.Bold(err.Path.String()+":"), aurora.Red(err.Message))
+		}
 	}
+
 	_, _ = fmt.Fprintln(a.out, "}")
 	_, _ = fmt.Fprintln(a.out)
 	return resp

@@ -71,6 +71,13 @@ resolver:
 # Optional: turn on to exclude resolver fields from the generated models file.
 # omit_resolver_fields: false
 
+# Optional: turn off to generate the models using embedding where a base struct is created that implements an interface
+# and subsequent graphql types that implement that particular interface will embed the base struct.
+# omit_embedded_structs: true
+
+# Optional: turn on to set a different prefix to the generated base structs used for embedding.
+# embedded_structs_prefix: "Base"
+
 # Optional: turn off to make struct-type struct fields not use pointers
 # e.g. type Thing struct { FieldA OtherThing } instead of { FieldA *OtherThing }
 # struct_fields_always_pointers: true

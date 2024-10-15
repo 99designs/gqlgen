@@ -414,6 +414,12 @@ type ComplexityRoot struct {
 		Test4 func(childComplexity int) int
 	}
 
+	Square struct {
+		Area        func(childComplexity int) int
+		Coordinates func(childComplexity int) int
+		Length      func(childComplexity int) int
+	}
+
 	Subscription struct {
 		DirectiveArg           func(childComplexity int, arg string) int
 		DirectiveDouble        func(childComplexity int) int
@@ -1914,6 +1920,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Slices.Test4(childComplexity), true
+
+	case "Square.area":
+		if e.complexity.Square.Area == nil {
+			break
+		}
+
+		return e.complexity.Square.Area(childComplexity), true
+
+	case "Square.coordinates":
+		if e.complexity.Square.Coordinates == nil {
+			break
+		}
+
+		return e.complexity.Square.Coordinates(childComplexity), true
+
+	case "Square.length":
+		if e.complexity.Square.Length == nil {
+			break
+		}
+
+		return e.complexity.Square.Length(childComplexity), true
 
 	case "Subscription.directiveArg":
 		if e.complexity.Subscription.DirectiveArg == nil {

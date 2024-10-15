@@ -122,15 +122,27 @@ func (ec *executionContext) _TestUnion(ctx context.Context, sel ast.SelectionSet
 	case nil:
 		return graphql.Null
 	case A:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"TestUnion", "A"})) == 0 {
+			return graphql.NullItem
+		}
 		return ec._A(ctx, sel, &obj)
 	case *A:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"TestUnion", "A"})) == 0 {
+			return graphql.NullItem
+		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._A(ctx, sel, obj)
 	case B:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"TestUnion", "B"})) == 0 {
+			return graphql.NullItem
+		}
 		return ec._B(ctx, sel, &obj)
 	case *B:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"TestUnion", "B"})) == 0 {
+			return graphql.NullItem
+		}
 		if obj == nil {
 			return graphql.Null
 		}

@@ -18,9 +18,10 @@ var (
 )
 
 var (
-	Null  = &lit{nullLit}
-	True  = &lit{trueLit}
-	False = &lit{falseLit}
+	Null     = &lit{nullLit}
+	NullItem = &lit{nullLit}
+	True     = &lit{trueLit}
+	False    = &lit{falseLit}
 )
 
 type Marshaler interface {
@@ -72,11 +73,16 @@ type Array []Marshaler
 
 func (a Array) MarshalGQL(writer io.Writer) {
 	writer.Write(openBracket)
-	for i, val := range a {
-		if i != 0 {
+	var notEmpty bool
+	for _, val := range a {
+		if _, ok := val.(*lit); ok && val == NullItem {
+			continue
+		}
+		if notEmpty {
 			writer.Write(comma)
 		}
 		val.MarshalGQL(writer)
+		notEmpty = true
 	}
 	writer.Write(closeBracket)
 }
@@ -87,7 +93,7 @@ func (l lit) MarshalGQL(w io.Writer) {
 	w.Write(l.b)
 }
 
-func (l lit) MarshalGQLContext(ctx context.Context, w io.Writer) error {
+func (l lit) MarshalGQLContext(_ context.Context, w io.Writer) error {
 	w.Write(l.b)
 	return nil
 }

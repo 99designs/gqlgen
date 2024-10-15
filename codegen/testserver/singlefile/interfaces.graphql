@@ -56,7 +56,12 @@ type Rectangle implements Shape {
     area: Float
     coordinates: Coordinates
 }
-union ShapeUnion @goModel(model: "singlefile.ShapeUnion") = Circle | Rectangle
+type Square implements Shape @goModel(model: "singlefile.SquareShape") {
+    length: Float
+    area: Float
+    coordinates: Coordinates
+}
+union ShapeUnion @goModel(model: "singlefile.ShapeUnion") = Circle | Rectangle | Square
 
 directive @makeNil on FIELD_DEFINITION
 directive @makeTypedNil on FIELD_DEFINITION

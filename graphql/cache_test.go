@@ -114,7 +114,7 @@ func TestMapCacheEdgeCases(t *testing.T) {
 
 func TestNoCache(t *testing.T) {
 	t.Run("Add and Get", func(t *testing.T) {
-		cache := NoCache[string, *string]{}
+		cache := NoCache[*string]{}
 		ctx := context.Background()
 		key := "testKey"
 		value := "testValue"
@@ -131,7 +131,7 @@ func TestNoCache(t *testing.T) {
 
 func TestNoCacheMultipleEntries(t *testing.T) {
 	t.Run("Multiple Add and Get", func(t *testing.T) {
-		cache := NoCache[string, *string]{}
+		cache := NoCache[*string]{}
 		ctx := context.Background()
 
 		// Define multiple key-value pairs
@@ -190,7 +190,7 @@ func TestNoCacheEdgeCases(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			cache := NoCache[string, *string]{}
+			cache := NoCache[*string]{}
 			ctx := context.Background()
 
 			// Test Add

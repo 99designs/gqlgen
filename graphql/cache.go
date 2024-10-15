@@ -23,9 +23,13 @@ func (m MapCache[T]) Get(_ context.Context, key string) (value T, ok bool) {
 // Add adds a value to the cache.
 func (m MapCache[T]) Add(_ context.Context, key string, value T) { m[key] = value }
 
-type NoCache[T any, T2 *T] struct{}
+type NoCache[T any] struct{}
 
-var _ Cache[*string] = (*NoCache[string, *string])(nil)
+var _ Cache[string] = (*NoCache[string])(nil)
 
-func (n NoCache[T, T2]) Get(_ context.Context, _ string) (value T2, ok bool) { return nil, false }
-func (n NoCache[T, T2]) Add(_ context.Context, _ string, _ T2)               {}
+func (n NoCache[T]) Get(_ context.Context, _ string) (value T, ok bool) {
+	var val T
+	return val, false
+}
+
+func (n NoCache[T]) Add(_ context.Context, _ string, _ T) {}

@@ -36,7 +36,7 @@ func New(es graphql.ExecutableSchema) *Executor {
 		es:               es,
 		errorPresenter:   graphql.DefaultErrorPresenter,
 		recoverFunc:      graphql.DefaultRecover,
-		queryCache:       graphql.NoCache[ast.QueryDocument, *ast.QueryDocument]{},
+		queryCache:       graphql.NoCache[*ast.QueryDocument]{},
 		ext:              processExtensions(nil),
 		parserTokenLimit: parserTokenNoLimit,
 	}

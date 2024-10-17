@@ -36,8 +36,8 @@ type FieldContext struct {
 	//
 	//	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
 	//		fc := graphql.GetFieldContext(ctx)
-	//		op := graphql.GetOperationContext(ctx)
-	//		collected := graphql.CollectFields(opCtx, fc.Field.Selections, []string{"User"})
+	//		rc := graphql.GetOperationContext(ctx)
+	//		collected := graphql.CollectFields(rc, fc.Field.Selections, []string{"User"})
 	//
 	//		child, err := fc.Child(ctx, collected[0])
 	//		if err != nil {

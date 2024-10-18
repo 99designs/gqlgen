@@ -315,6 +315,32 @@ func TestModelGenerationOmitRootModels(t *testing.T) {
 	require.NotContains(t, string(generated), "type Subscription struct")
 }
 
+func TestModelGenerationDontOmitEmbeddedStructs(t *testing.T) {
+	cfg, err := config.LoadConfig("testdata/gqlgen_embedded_structs_models.yml")
+	require.NoError(t, err)
+	require.NoError(t, cfg.Init())
+	p := Plugin{
+		FieldHook: DefaultFieldMutateHook,
+	}
+	require.NoError(t, p.MutateConfig(cfg))
+	require.NoError(t, goBuild(t, "./out_embedded_structs_models/"))
+	generated, err := os.ReadFile("./out_embedded_structs_models/generated_embedded_structs_models.go")
+	require.NoError(t, err)
+	require.Contains(t, string(generated), "type BaseElement")
+
+	carbonStr := getStringInBetween(string(generated), "type Carbon struct {", "}")
+	require.NotEqual(t, "", carbonStr)
+	require.Contains(t, carbonStr, "BaseElement")
+
+	magnesiumStr := getStringInBetween(string(generated), "type Magnesium struct {", "}")
+	require.NotEqual(t, "", magnesiumStr)
+	require.Contains(t, magnesiumStr, "BaseElement")
+
+	potassiumStr := getStringInBetween(string(generated), "type Potassium struct {", "}")
+	require.NotEqual(t, "", potassiumStr)
+	require.Contains(t, potassiumStr, "BaseElement")
+}
+
 func TestModelGenerationOmitResolverFields(t *testing.T) {
 	cfg, err := config.LoadConfig("testdata/gqlgen_omit_resolver_fields.yml")
 	require.NoError(t, err)
@@ -698,4 +724,19 @@ func TestCustomTemplate(t *testing.T) {
 		FieldHook:  DefaultFieldMutateHook,
 	}
 	require.NoError(t, p.MutateConfig(cfg))
+}
+
+func getStringInBetween(str, start, end string) string {
+	startIndex := strings.Index(str, start)
+	if startIndex == -1 {
+		return ""
+	}
+
+	newStr := str[startIndex+len(start):]
+	e := strings.Index(newStr, end)
+	if e == -1 {
+		return ""
+	}
+
+	return newStr[:e]
 }

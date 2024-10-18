@@ -104,73 +104,48 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		PackageName: cfg.Model.Package,
 	}
 
+	// We need to generate the models in a more deterministic order, therefor, we iterate through `interfaces` and `unions
+	//  first and afterward, the rest of the types.
 	for _, schemaType := range cfg.Schema.Types {
 		if cfg.Models.UserDefined(schemaType.Name) {
 			continue
 		}
 		switch schemaType.Kind {
 		case ast.Interface, ast.Union:
-			var fields []*Field
-			var err error
-			if !cfg.OmitGetters {
-				fields, err = m.generateFields(cfg, schemaType)
-				if err != nil {
-					return err
-				}
-			}
-
-			it := &Interface{
-				Description: schemaType.Description,
-				Name:        schemaType.Name,
-				Implements:  schemaType.Interfaces,
-				Fields:      fields,
-				OmitCheck:   cfg.OmitInterfaceChecks,
-			}
-
-			// if the interface has a key directive as an entity interface, allow it to implement _Entity
-			if schemaType.Directives.ForName("key") != nil {
-				it.Implements = append(it.Implements, "_Entity")
-			}
-
-			b.Interfaces = append(b.Interfaces, it)
-		case ast.Object, ast.InputObject:
-			if cfg.IsRoot(schemaType) {
-				if !cfg.OmitRootModels {
-					b.Models = append(b.Models, &Object{
-						Description: schemaType.Description,
-						Name:        schemaType.Name,
-					})
-				}
-				continue
-			}
-
-			fields, err := m.generateFields(cfg, schemaType)
+			it, err := m.getInterface(cfg, schemaType, b)
 			if err != nil {
 				return err
 			}
 
-			it := &Object{
-				Description: schemaType.Description,
-				Name:        schemaType.Name,
-				Fields:      fields,
+			if !cfg.OmitEmbeddedStructs {
+				ob, err := m.getObject(cfg, schemaType, b)
+				if err != nil {
+					return err
+				}
+				if ob == nil {
+					continue
+				}
+
+				ob.Name = fmt.Sprintf("%s%s", cfg.EmbeddedStructsPrefix, ob.Name)
+				b.Models = append(b.Models, ob)
 			}
 
-			// If Interface A implements interface B, and Interface C also implements interface B
-			// then both A and C have methods of B.
-			// The reason for checking unique is to prevent the same method B from being generated twice.
-			uniqueMap := map[string]bool{}
-			for _, implementor := range cfg.Schema.GetImplements(schemaType) {
-				if !uniqueMap[implementor.Name] {
-					it.Implements = append(it.Implements, implementor.Name)
-					uniqueMap[implementor.Name] = true
-				}
-				// for interface implements
-				for _, iface := range implementor.Interfaces {
-					if !uniqueMap[iface] {
-						it.Implements = append(it.Implements, iface)
-						uniqueMap[iface] = true
-					}
-				}
+			b.Interfaces = append(b.Interfaces, it)
+		}
+	}
+
+	for _, schemaType := range cfg.Schema.Types {
+		if cfg.Models.UserDefined(schemaType.Name) {
+			continue
+		}
+		switch schemaType.Kind {
+		case ast.Object, ast.InputObject:
+			it, err := m.getObject(cfg, schemaType, b)
+			if err != nil {
+				return err
+			}
+			if it == nil {
+				continue
 			}
 
 			b.Models = append(b.Models, it)
@@ -192,6 +167,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 			b.Scalars = append(b.Scalars, schemaType.Name)
 		}
 	}
+
 	sort.Slice(b.Enums, func(i, j int) bool { return b.Enums[i].Name < b.Enums[j].Name })
 	sort.Slice(b.Models, func(i, j int) bool { return b.Models[i].Name < b.Models[j].Name })
 	sort.Slice(b.Interfaces, func(i, j int) bool { return b.Interfaces[i].Name < b.Interfaces[j].Name })
@@ -278,7 +254,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 			getter += fmt.Sprintf("\tif this.%s == nil { return nil }\n", field.GoName)
 			getter += fmt.Sprintf("\tinterfaceSlice := make(%s, 0, len(this.%s))\n", goType, field.GoName)
 			getter += fmt.Sprintf("\tfor _, concrete := range this.%s { interfaceSlice = append(interfaceSlice, ", field.GoName)
-			if interfaceFieldTypeIsPointer && !structFieldTypeIsPointer {
+			if interfaceFieldTypeIsPointer && !structFieldTypeIsPointer && cfg.OmitEmbeddedStructs {
 				getter += "&"
 			} else if !interfaceFieldTypeIsPointer && structFieldTypeIsPointer {
 				getter += "*"
@@ -290,7 +266,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		}
 		getter := fmt.Sprintf("func (this %s) Get%s() %s { return ", templates.ToGo(model.Name), field.GoName, goType)
 
-		if interfaceFieldTypeIsPointer && !structFieldTypeIsPointer {
+		if interfaceFieldTypeIsPointer && !structFieldTypeIsPointer && cfg.OmitEmbeddedStructs {
 			getter += "&"
 		} else if !interfaceFieldTypeIsPointer && structFieldTypeIsPointer {
 			getter += "*"
@@ -328,11 +304,52 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 	return nil
 }
 
-func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition) ([]*Field, error) {
+func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition, model *ModelBuild) ([]*Field, error) {
+	// func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition) ([]*Field, error) {
 	binder := cfg.NewBinder()
 	fields := make([]*Field, 0)
+	embeddedFields := map[string]*Field{}
 
 	for _, field := range schemaType.Fields {
+		if model != nil && !cfg.OmitEmbeddedStructs && schemaType.Kind == ast.Object && len(schemaType.Interfaces) > 0 {
+			interfaceHasField := false
+			interfaceName := ""
+
+			for _, iface := range schemaType.Interfaces {
+				// We skip the node interface as it should be present in all interfaces implementing it, and it
+				//  creates an issue with ambiguity when referencing `ID`.
+				if iface == "Node" {
+					continue
+				}
+
+				for _, modelInterface := range model.Interfaces {
+					if modelInterface.Name == iface {
+						for _, mField := range modelInterface.Fields {
+							if field.Name == mField.Name {
+								interfaceHasField = true
+								interfaceName = iface
+								break
+							}
+						}
+					}
+				}
+			}
+
+			if interfaceHasField {
+				embeddedField := &Field{
+					Type: types.NewNamed(
+						types.NewTypeName(0, cfg.Model.Pkg(), templates.ToGo(fmt.Sprintf("%s%s", cfg.EmbeddedStructsPrefix, interfaceName)), nil),
+						types.NewStruct(nil, nil),
+						nil,
+					),
+				}
+
+				embeddedFields[interfaceName] = embeddedField
+
+				continue
+			}
+		}
+
 		f, err := m.generateField(cfg, binder, schemaType, field)
 		if err != nil {
 			return nil, err
@@ -343,6 +360,10 @@ func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition) 
 		}
 
 		fields = append(fields, f)
+	}
+
+	for _, field := range embeddedFields {
+		fields = append(fields, field)
 	}
 
 	fields = append(fields, getExtraFields(cfg, schemaType.Name)...)
@@ -722,4 +743,74 @@ func readModelTemplate(customModelTemplate string) string {
 		panic(err)
 	}
 	return string(contentBytes)
+}
+
+func (m *Plugin) getInterface(cfg *config.Config, schemaType *ast.Definition, b *ModelBuild) (*Interface, error) {
+	var fields []*Field
+	var err error
+	if !cfg.OmitGetters {
+		fields, err = m.generateFields(cfg, schemaType, nil)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	it := &Interface{
+		Description: schemaType.Description,
+		Name:        schemaType.Name,
+		Implements:  schemaType.Interfaces,
+		Fields:      fields,
+		OmitCheck:   cfg.OmitInterfaceChecks,
+	}
+
+	// if the interface has a key directive as an entity interface, allow it to implement _Entity
+	if schemaType.Directives.ForName("key") != nil {
+		it.Implements = append(it.Implements, "_Entity")
+	}
+
+	return it, nil
+}
+
+func (m *Plugin) getObject(cfg *config.Config, schemaType *ast.Definition, b *ModelBuild) (*Object, error) {
+	if cfg.IsRoot(schemaType) {
+		if !cfg.OmitRootModels {
+			return &Object{
+				Description: schemaType.Description,
+				Name:        schemaType.Name,
+			}, nil
+		}
+
+		return nil, nil
+	}
+
+	fields, err := m.generateFields(cfg, schemaType, b)
+	if err != nil {
+		return nil, err
+	}
+
+	it := &Object{
+		Description: schemaType.Description,
+		Name:        schemaType.Name,
+		Fields:      fields,
+	}
+
+	// If Interface A implements interface B, and Interface C also implements interface B
+	// then both A and C have methods of B.
+	// The reason for checking unique is to prevent the same method B from being generated twice.
+	uniqueMap := map[string]bool{}
+	for _, implementor := range cfg.Schema.GetImplements(schemaType) {
+		if !uniqueMap[implementor.Name] {
+			it.Implements = append(it.Implements, implementor.Name)
+			uniqueMap[implementor.Name] = true
+		}
+		// for interface implements
+		for _, iface := range implementor.Interfaces {
+			if !uniqueMap[iface] {
+				it.Implements = append(it.Implements, iface)
+				uniqueMap[iface] = true
+			}
+		}
+	}
+
+	return it, nil
 }

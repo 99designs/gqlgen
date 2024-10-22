@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/vektah/gqlparser/v2"
@@ -43,6 +44,32 @@ func New() *TestServer {
 			switch rc.Operation.Operation {
 			case ast.Query:
 				ran := false
+				// If the query contains @defer, we will mimick a deferred response.
+				if strings.Contains(rc.RawQuery, "@defer") {
+					initialResponse := true
+					return func(context context.Context) *graphql.Response {
+						select {
+						case <-ctx.Done():
+							return nil
+						case <-next:
+							if initialResponse {
+								initialResponse = false
+								hasNext := true
+								return &graphql.Response{
+									Data:    []byte(`{"name":null}`),
+									HasNext: &hasNext,
+								}
+							}
+							hasNext := false
+							return &graphql.Response{
+								Data:    []byte(`{"name":"test"}`),
+								HasNext: &hasNext,
+							}
+						case <-completeSubscription:
+							return nil
+						}
+					}
+				}
 				return func(ctx context.Context) *graphql.Response {
 					if ran {
 						return nil
@@ -59,9 +86,10 @@ func New() *TestServer {
 							},
 						},
 					})
-					res, err := graphql.GetOperationContext(ctx).ResolverMiddleware(ctx, func(ctx context.Context) (any, error) {
-						return &graphql.Response{Data: []byte(`{"name":"test"}`)}, nil
-					})
+					res, err := graphql.GetOperationContext(ctx).
+						ResolverMiddleware(ctx, func(ctx context.Context) (any, error) {
+							return &graphql.Response{Data: []byte(`{"name":"test"}`)}, nil
+						})
 					if err != nil {
 						panic(err)
 					}

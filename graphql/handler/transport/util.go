@@ -13,7 +13,7 @@ import (
 func writeJson(w io.Writer, response *graphql.Response) {
 	b, err := json.Marshal(response)
 	if err != nil {
-		panic(err)
+		panic(fmt.Errorf("unable to marshal %s: %w", string(response.Data), err))
 	}
 	w.Write(b)
 }

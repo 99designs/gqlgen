@@ -279,8 +279,6 @@ func (f *Federation) GenerateCode(data *codegen.Data) error {
 				typeString := strings.Split(obj.Type.String(), ".")
 				requiresImports[strings.Join(typeString[:len(typeString)-1], ".")] = true
 
-				cgField := reqField.Field.TypeReference(obj, data.Objects)
-				reqField.Type = cgField.TypeReference
 			}
 
 			// add type info to entity

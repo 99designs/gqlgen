@@ -2,7 +2,6 @@ package codegen
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/ast"
@@ -143,7 +142,7 @@ func (d *Directive) CallArgs() string {
 	args := []string{"ctx", "obj", "n"}
 
 	for _, arg := range d.Args {
-		args = append(args, "args["+strconv.Quote(arg.Name)+"].("+templates.CurrentImports.LookupType(arg.TypeReference.GO)+")")
+		args = append(args, fmt.Sprintf("args[%q].(%s)", arg.Name, templates.CurrentImports.LookupType(arg.TypeReference.GO)))
 	}
 
 	return strings.Join(args, ", ")

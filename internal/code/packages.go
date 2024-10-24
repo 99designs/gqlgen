@@ -231,8 +231,7 @@ func (p *Packages) ModTidy() error {
 
 // Errors returns any errors that were returned by Load, either from the call itself or any of the loaded packages.
 func (p *Packages) Errors() PkgErrors {
-	var res []error //nolint:prealloc
-	res = append(res, p.loadErrors...)
+	res := append([]error{}, p.loadErrors...)
 	for _, pkg := range p.packages {
 		for _, err := range pkg.Errors {
 			res = append(res, err)

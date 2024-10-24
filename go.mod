@@ -4,6 +4,7 @@ go 1.22.5
 
 require (
 	github.com/PuerkitoBio/goquery v1.9.3
+	github.com/go-viper/mapstructure/v2 v2.2.1
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.0 // do not upgrade to v1.5.1 as it has serious bugs
 	github.com/hashicorp/golang-lru/v2 v2.0.7
@@ -12,7 +13,6 @@ require (
 	github.com/matryer/moq v0.4.0
 	github.com/mattn/go-colorable v0.1.13
 	github.com/mattn/go-isatty v0.0.20
-	github.com/mitchellh/mapstructure v1.5.0
 	github.com/sosodev/duration v1.3.1
 	github.com/stretchr/testify v1.9.0
 	github.com/urfave/cli/v2 v2.27.5

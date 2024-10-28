@@ -144,7 +144,7 @@ func parseUnnestedKeyFieldSet(raw string, prefix []string) Set {
 			continue
 		}
 
-		if unionField == true {
+		if unionField {
 			s = "... on " + s
 			unionField = false
 		}

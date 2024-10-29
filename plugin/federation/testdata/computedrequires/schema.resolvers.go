@@ -32,6 +32,11 @@ func (r *multiPlanetRequiresNestedResolver) Size(ctx context.Context, obj *model
 	return len(foo), nil
 }
 
+// WelcomeMessage is the resolver for the welcomeMessage field.
+func (r *personResolver) WelcomeMessage(ctx context.Context, obj *model.Person, federationRequires map[string]interface{}) (*string, error) {
+	panic(fmt.Errorf("not implemented: WelcomeMessage - welcomeMessage"))
+}
+
 // Weight is the resolver for the weight field.
 func (r *planetMultipleRequiresResolver) Weight(ctx context.Context, obj *model.PlanetMultipleRequires, foo *string, federationRequires map[string]interface{}) (int, error) {
 	diameter, err := federationRequires["diameter"].(json.Number).Int64()
@@ -89,6 +94,9 @@ func (r *Resolver) MultiPlanetRequiresNested() explicitrequires.MultiPlanetRequi
 	return &multiPlanetRequiresNestedResolver{r}
 }
 
+// Person returns explicitrequires.PersonResolver implementation.
+func (r *Resolver) Person() explicitrequires.PersonResolver { return &personResolver{r} }
+
 // PlanetMultipleRequires returns explicitrequires.PlanetMultipleRequiresResolver implementation.
 func (r *Resolver) PlanetMultipleRequires() explicitrequires.PlanetMultipleRequiresResolver {
 	return &planetMultipleRequiresResolver{r}
@@ -110,6 +118,7 @@ func (r *Resolver) Query() explicitrequires.QueryResolver { return &queryResolve
 type multiHelloMultipleRequiresResolver struct{ *Resolver }
 type multiHelloRequiresResolver struct{ *Resolver }
 type multiPlanetRequiresNestedResolver struct{ *Resolver }
+type personResolver struct{ *Resolver }
 type planetMultipleRequiresResolver struct{ *Resolver }
 type planetRequiresResolver struct{ *Resolver }
 type planetRequiresNestedResolver struct{ *Resolver }

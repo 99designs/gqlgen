@@ -56,7 +56,7 @@ var altairPage = template.Must(template.New("altair").Parse(`<!doctype html>
         endpointURL: url,
         subscriptionsEndpoint: subscriptionUrl,
     };
-	var options = new Map([...altairOptions, ...JSON.parse({{.options}})]);
+	var options = {...altairOptions, ...JSON.parse({{.options}})};
     window.addEventListener("load", function() {
       AltairGraphQL.init(options);
     });

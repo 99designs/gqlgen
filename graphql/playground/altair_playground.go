@@ -1,6 +1,7 @@
 package playground
 
 import (
+	"encoding/json"
 	"html/template"
 	"net/http"
 )
@@ -66,10 +67,10 @@ var altairPage = template.Must(template.New("altair").Parse(`<!doctype html>
 
 // AltairHandler responsible for setting up the altair playground
 func AltairHandler(title, endpoint string, options map[string]interface{}) http.HandlerFunc {
-	jsonEnv, _ := json.Marshal(options)
-    if err != nil {
-       jsonEnv = []byte("{}")
-    
+	jsonEnv, err := json.Marshal(options)
+	if err != nil {
+		jsonEnv = []byte("{}")
+	}
 	
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := altairPage.Execute(w, map[string]any{

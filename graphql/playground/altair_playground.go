@@ -55,8 +55,9 @@ var altairPage = template.Must(template.New("altair").Parse(`<!doctype html>
         endpointURL: url,
         subscriptionsEndpoint: subscriptionUrl,
     };
+	var options = new Map([...altairOptions, ...{{.options}}]);
     window.addEventListener("load", function() {
-      AltairGraphQL.init(altairOptions);
+      AltairGraphQL.init(options);
     });
   </script>
 </body>
@@ -64,7 +65,12 @@ var altairPage = template.Must(template.New("altair").Parse(`<!doctype html>
 </html>`))
 
 // AltairHandler responsible for setting up the altair playground
-func AltairHandler(title, endpoint string) http.HandlerFunc {
+func AltairHandler(title, endpoint string, options map[string]interface) http.HandlerFunc {
+	jsonEnv, _ := json.Marshal(options)
+    if err != nil {
+       jsonEnv = []byte("{}")
+    
+	
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := altairPage.Execute(w, map[string]any{
 			"title":                title,
@@ -76,6 +82,7 @@ func AltairHandler(title, endpoint string) http.HandlerFunc {
 			"mainSRI":              "sha256-nWdVTcGTlBDV1L04UQnqod+AJedzBCnKHv6Ct65liHE=",
 			"polyfillsSRI":         "sha256-1aVEg2sROcCQ/RxU3AlcPaRZhZdIWA92q2M+mdd/R4c=",
 			"runtimeSRI":           "sha256-cK2XhXqQr0WS1Z5eKNdac0rJxTD6miC3ubd+aEVMQDk=",
+			"options":              string(jsonEnv),
 		})
 		if err != nil {
 			panic(err)

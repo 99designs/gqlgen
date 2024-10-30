@@ -279,10 +279,13 @@ func (f *Federation) GenerateCode(data *codegen.Data) error {
 				typeString := strings.Split(obj.Type.String(), ".")
 				requiresImports[strings.Join(typeString[:len(typeString)-1], ".")] = true
 
+				if containsUnionField(reqField) {
+					continue
+				}
+
 				cgField := reqField.Field.TypeReference(obj, data.Objects)
 				reqField.Type = cgField.TypeReference
 			}
-
 			// add type info to entity
 			e.Type = obj.Type
 		}
@@ -327,6 +330,15 @@ func (f *Federation) GenerateCode(data *codegen.Data) error {
 		Packages:        data.Config.Packages,
 		Template:        federationTemplate,
 	})
+}
+
+func containsUnionField(reqField *Requires) bool {
+	for _, requireFields := range reqField.Field {
+		if strings.HasPrefix(requireFields, "... on") {
+			return true
+		}
+	}
+	return false
 }
 
 // Fill in types for key fields

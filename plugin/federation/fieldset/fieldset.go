@@ -133,8 +133,22 @@ func (f Field) LastIndex() int {
 // parseUnnestedKeyFieldSet // handles simple case where none of the fields are nested.
 func parseUnnestedKeyFieldSet(raw string, prefix []string) Set {
 	ret := Set{}
+	unionField := false
 
 	for _, s := range strings.Fields(raw) {
+		if s == "..." {
+			continue
+		}
+		if s == "on" {
+			unionField = true
+			continue
+		}
+
+		if unionField {
+			s = "... on " + s
+			unionField = false
+		}
+
 		next := append(prefix[0:len(prefix):len(prefix)], s) //nolint:gocritic // set cap=len in order to force slice reallocation
 		ret = append(ret, next)
 	}

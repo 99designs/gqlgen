@@ -110,6 +110,11 @@ func (r *entityResolver) FindManyMultiPlanetRequiresNestedByNames(ctx context.Co
 	return results, nil
 }
 
+// FindPersonByName is the resolver for the findPersonByName field.
+func (r *entityResolver) FindPersonByName(ctx context.Context, name string) (*model.Person, error) {
+	panic(fmt.Errorf("not implemented: FindPersonByName - findPersonByName"))
+}
+
 // FindPlanetMultipleRequiresByName is the resolver for the findPlanetMultipleRequiresByName field.
 func (r *entityResolver) FindPlanetMultipleRequiresByName(ctx context.Context, name string) (*model.PlanetMultipleRequires, error) {
 	return &model.PlanetMultipleRequires{Name: name}, nil

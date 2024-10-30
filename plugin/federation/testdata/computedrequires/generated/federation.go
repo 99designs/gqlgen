@@ -225,6 +225,25 @@ func (ec *executionContext) resolveEntity(
 
 			return entity, nil
 		}
+	case "Person":
+		resolverName, err := entityResolverNameForPerson(ctx, rep)
+		if err != nil {
+			return nil, fmt.Errorf(`finding resolver for Entity "Person": %w`, err)
+		}
+		switch resolverName {
+
+		case "findPersonByName":
+			id0, err := ec.unmarshalNString2string(ctx, rep["name"])
+			if err != nil {
+				return nil, fmt.Errorf(`unmarshalling param 0 for findPersonByName(): %w`, err)
+			}
+			entity, err := ec.resolvers.Entity().FindPersonByName(ctx, id0)
+			if err != nil {
+				return nil, fmt.Errorf(`resolving Entity "Person": %w`, err)
+			}
+
+			return entity, nil
+		}
 	case "PlanetMultipleRequires":
 		resolverName, err := entityResolverNameForPlanetMultipleRequires(ctx, rep)
 		if err != nil {
@@ -797,6 +816,33 @@ func entityResolverNameForMultiPlanetRequiresNested(ctx context.Context, rep Ent
 		return "findManyMultiPlanetRequiresNestedByNames", nil
 	}
 	return "", fmt.Errorf("%w for MultiPlanetRequiresNested", ErrTypeNotFound)
+}
+
+func entityResolverNameForPerson(ctx context.Context, rep EntityRepresentation) (string, error) {
+	for {
+		var (
+			m   EntityRepresentation
+			val interface{}
+			ok  bool
+		)
+		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
+		m = rep
+		val, ok = m["name"]
+		if !ok {
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
+			break
+		}
+		return "findPersonByName", nil
+	}
+	return "", fmt.Errorf("%w for Person", ErrTypeNotFound)
 }
 
 func entityResolverNameForPlanetMultipleRequires(ctx context.Context, rep EntityRepresentation) (string, error) {

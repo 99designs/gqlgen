@@ -217,3 +217,33 @@ func TestSetCustomDecodeConfig(t *testing.T) {
 	c.MustPost("user(id: 1) {created_at}", &resp)
 	require.WithinDuration(t, now, resp.CreatedAt, time.Second)
 }
+
+func TestClientWithCustomTarget(t *testing.T) {
+	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		b, err := io.ReadAll(r.Body)
+		if assert.NoError(t, err) {
+			assert.Equal(t, `{"query":"user(id:$id){name}","variables":{"id":1}}`, string(b))
+
+			err = json.NewEncoder(w).Encode(map[string]any{
+				"data": map[string]any{
+					"name": "bob",
+				},
+			})
+			assert.NoError(t, err)
+		}
+	})
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/test", h)
+
+	c := client.New(mux)
+	c.SetCustomTarget("/test")
+
+	var resp struct {
+		Name string
+	}
+
+	c.MustPost("user(id:$id){name}", &resp, client.Var("id", 1))
+
+	require.Equal(t, "bob", resp.Name)
+}

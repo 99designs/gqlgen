@@ -60,8 +60,8 @@ func New() *TestExecutor {
 
 	exec.schema = &graphql.ExecutableSchemaMock{
 		ExecFunc: func(ctx context.Context) graphql.ResponseHandler {
-			rc := graphql.GetOperationContext(ctx)
-			switch rc.Operation.Operation {
+			opCtx := graphql.GetOperationContext(ctx)
+			switch opCtx.Operation.Operation {
 			case ast.Query:
 				ran := false
 				return func(ctx context.Context) *graphql.Response {
@@ -143,8 +143,8 @@ func NewError() *TestExecutor {
 
 	exec.schema = &graphql.ExecutableSchemaMock{
 		ExecFunc: func(ctx context.Context) graphql.ResponseHandler {
-			rc := graphql.GetOperationContext(ctx)
-			switch rc.Operation.Operation {
+			opCtx := graphql.GetOperationContext(ctx)
+			switch opCtx.Operation.Operation {
 			case ast.Query:
 				ran := false
 				return func(ctx context.Context) *graphql.Response {

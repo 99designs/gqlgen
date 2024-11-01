@@ -171,14 +171,14 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 }
 
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
-	rc := graphql.GetOperationContext(ctx)
-	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
+	opCtx := graphql.GetOperationContext(ctx)
+	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputTodoInput,
 	)
 	first := true
 
-	switch rc.Operation.Operation {
+	switch opCtx.Operation.Operation {
 	case ast.Query:
 		return func(ctx context.Context) *graphql.Response {
 			var response graphql.Response
@@ -186,8 +186,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			if first {
 				first = false
 				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-				data = ec._queryMiddleware(ctx, rc.Operation, func(ctx context.Context) (interface{}, error) {
-					return ec._MyQuery(ctx, rc.Operation.SelectionSet), nil
+				data = ec._queryMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (interface{}, error) {
+					return ec._MyQuery(ctx, opCtx.Operation.SelectionSet), nil
 				})
 			} else {
 				if atomic.LoadInt32(&ec.pendingDeferred) > 0 {
@@ -218,8 +218,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			}
 			first = false
 			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-			data := ec._mutationMiddleware(ctx, rc.Operation, func(ctx context.Context) (interface{}, error) {
-				return ec._MyMutation(ctx, rc.Operation.SelectionSet), nil
+			data := ec._mutationMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (interface{}, error) {
+				return ec._MyMutation(ctx, opCtx.Operation.SelectionSet), nil
 			})
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)

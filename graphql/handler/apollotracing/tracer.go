@@ -66,14 +66,14 @@ func (Tracer) InterceptField(ctx context.Context, next graphql.Resolver) (any, e
 	defer func() {
 		end := graphql.Now()
 
-		rc := graphql.GetOperationContext(ctx)
+		opCtx := graphql.GetOperationContext(ctx)
 		fc := graphql.GetFieldContext(ctx)
 		resolver := &ResolverExecution{
 			Path:        fc.Path(),
 			ParentType:  fc.Object,
 			FieldName:   fc.Field.Name,
 			ReturnType:  fc.Field.Definition.Type.String(),
-			StartOffset: start.Sub(rc.Stats.OperationStart),
+			StartOffset: start.Sub(opCtx.Stats.OperationStart),
 			Duration:    end.Sub(start),
 		}
 
@@ -90,21 +90,21 @@ func (Tracer) InterceptResponse(ctx context.Context, next graphql.ResponseHandle
 		return next(ctx)
 	}
 
-	rc := graphql.GetOperationContext(ctx)
+	opCtx := graphql.GetOperationContext(ctx)
 
-	start := rc.Stats.OperationStart
+	start := opCtx.Stats.OperationStart
 
 	td := &TracingExtension{
 		Version:   1,
 		StartTime: start,
 		Parsing: Span{
-			StartOffset: rc.Stats.Parsing.Start.Sub(start),
-			Duration:    rc.Stats.Parsing.End.Sub(rc.Stats.Parsing.Start),
+			StartOffset: opCtx.Stats.Parsing.Start.Sub(start),
+			Duration:    opCtx.Stats.Parsing.End.Sub(opCtx.Stats.Parsing.Start),
 		},
 
 		Validation: Span{
-			StartOffset: rc.Stats.Validation.Start.Sub(start),
-			Duration:    rc.Stats.Validation.End.Sub(rc.Stats.Validation.Start),
+			StartOffset: opCtx.Stats.Validation.Start.Sub(start),
+			Duration:    opCtx.Stats.Validation.End.Sub(opCtx.Stats.Validation.Start),
 		},
 	}
 

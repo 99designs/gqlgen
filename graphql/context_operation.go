@@ -65,8 +65,8 @@ func GetOperationContext(ctx context.Context) *OperationContext {
 	panic("missing operation context")
 }
 
-func WithOperationContext(ctx context.Context, rc *OperationContext) context.Context {
-	return context.WithValue(ctx, operationCtx, rc)
+func WithOperationContext(ctx context.Context, opCtx *OperationContext) context.Context {
+	return context.WithValue(ctx, operationCtx, opCtx)
 }
 
 // HasOperationContext checks if the given context is part of an ongoing operation

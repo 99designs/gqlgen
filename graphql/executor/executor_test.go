@@ -112,7 +112,7 @@ func TestExecutor(t *testing.T) {
 			},
 		})
 		exec.Use(&testCtxMutator{
-			Mutate: func(ctx context.Context, rc *graphql.OperationContext) *gqlerror.Error {
+			Mutate: func(ctx context.Context, opCtx *graphql.OperationContext) *gqlerror.Error {
 				calls = append(calls, "context")
 				return nil
 			},
@@ -197,8 +197,8 @@ func (m *testCtxMutator) Validate(s graphql.ExecutableSchema) error {
 	return nil
 }
 
-func (m *testCtxMutator) MutateOperationContext(ctx context.Context, rc *graphql.OperationContext) *gqlerror.Error {
-	return m.Mutate(ctx, rc)
+func (m *testCtxMutator) MutateOperationContext(ctx context.Context, opCtx *graphql.OperationContext) *gqlerror.Error {
+	return m.Mutate(ctx, opCtx)
 }
 
 func TestErrorServer(t *testing.T) {

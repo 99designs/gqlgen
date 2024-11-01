@@ -18,8 +18,8 @@ import (
 func TestHandlerComplexity(t *testing.T) {
 	h := testserver.New()
 	h.Use(&extension.ComplexityLimit{
-		Func: func(ctx context.Context, rc *graphql.OperationContext) int {
-			if rc.RawQuery == "{ ok: name }" {
+		Func: func(ctx context.Context, opCtx *graphql.OperationContext) int {
+			if opCtx.RawQuery == "{ ok: name }" {
 				return 4
 			}
 			return 2

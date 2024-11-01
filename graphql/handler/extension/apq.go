@@ -98,12 +98,12 @@ func (a AutomaticPersistedQuery) MutateOperationParameters(ctx context.Context, 
 }
 
 func GetApqStats(ctx context.Context) *ApqStats {
-	rc := graphql.GetOperationContext(ctx)
-	if rc == nil {
+	opCtx := graphql.GetOperationContext(ctx)
+	if opCtx == nil {
 		return nil
 	}
 
-	s, _ := rc.Stats.GetExtension(apqExtension).(*ApqStats)
+	s, _ := opCtx.Stats.GetExtension(apqExtension).(*ApqStats)
 	return s
 }
 

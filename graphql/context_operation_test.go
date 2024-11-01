@@ -31,13 +31,13 @@ func (t *testGraphRequestContext) Value(key any) any {
 }
 
 func TestGetOperationContext(t *testing.T) {
-	rc := &OperationContext{}
+	opCtx := &OperationContext{}
 
 	t.Run("with operation context", func(t *testing.T) {
-		ctx := WithOperationContext(context.Background(), rc)
+		ctx := WithOperationContext(context.Background(), opCtx)
 
 		require.True(t, HasOperationContext(ctx))
-		require.Equal(t, rc, GetOperationContext(ctx))
+		require.Equal(t, opCtx, GetOperationContext(ctx))
 	})
 
 	t.Run("without operation context", func(t *testing.T) {

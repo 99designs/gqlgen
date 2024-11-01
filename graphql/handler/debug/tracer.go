@@ -49,13 +49,13 @@ func stringify(value any) string {
 }
 
 func (a Tracer) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
-	rctx := graphql.GetOperationContext(ctx)
+	opCtx := graphql.GetOperationContext(ctx)
 
 	_, _ = fmt.Fprintln(a.out, "GraphQL Request {")
-	for _, line := range strings.Split(rctx.RawQuery, "\n") {
+	for _, line := range strings.Split(opCtx.RawQuery, "\n") {
 		_, _ = fmt.Fprintln(a.out, " ", aurora.Cyan(line))
 	}
-	for name, value := range rctx.Variables {
+	for name, value := range opCtx.Variables {
 		_, _ = fmt.Fprintf(a.out, "  var %s = %s\n", name, aurora.Yellow(stringify(value)))
 	}
 	resp := next(ctx)

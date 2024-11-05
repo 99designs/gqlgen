@@ -19,7 +19,9 @@ import (
 func TestMultipartMixed(t *testing.T) {
 	initialize := func() *testserver.TestServer {
 		h := testserver.New()
-		h.AddTransport(transport.MultipartMixed{})
+		h.AddTransport(transport.MultipartMixed{
+			Boundary: "graphql",
+		})
 		return h
 	}
 
@@ -136,7 +138,6 @@ func TestMultipartMixed(t *testing.T) {
 			"{\"data\":{\"name\":null},\"hasNext\":true}\r\n",
 			readLine(br),
 		)
-		assert.Equal(t, "\r\n", readLine(br))
 
 		wg.Add(1)
 		go func() {
@@ -152,7 +153,8 @@ func TestMultipartMixed(t *testing.T) {
 			"{\"incremental\":[{\"data\":{\"name\":\"test\"},\"hasNext\":false}],\"hasNext\":false}\r\n",
 			readLine(br),
 		)
-		assert.Equal(t, "\r\n", readLine(br))
+
+		assert.Equal(t, "--graphql--\r\n", readLine(br))
 
 		wg.Add(1)
 		go func() {

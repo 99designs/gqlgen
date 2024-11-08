@@ -20,6 +20,9 @@ type ExecConfig struct {
 	// Only for follow-schema layout:
 	FilenameTemplate string `yaml:"filename_template,omitempty"` // String template with {name} as placeholder for base name.
 	DirName          string `yaml:"dir"`
+
+	ExecTemplate    string `yaml:"exec_template,omitempty"`
+	ExecTemplateDir string `yaml:"exec_template_dir,omitempty"`
 }
 
 type ExecLayout string

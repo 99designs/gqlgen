@@ -43,6 +43,8 @@ type Options struct {
 	// this is an alternative to passing the Template option
 	TemplateFS fs.FS
 
+	TemplateDir string
+
 	// Filename is the name of the file that will be
 	// written to the system disk once the template is rendered.
 	Filename        string
@@ -168,9 +170,12 @@ func parseTemplates(cfg Options, t *template.Template) (*template.Template, erro
 	}
 
 	var fileSystem fs.FS
-	if cfg.TemplateFS != nil {
+	switch {
+	case cfg.TemplateDir != "":
+		fileSystem = os.DirFS(cfg.TemplateDir)
+	case cfg.TemplateFS != nil:
 		fileSystem = cfg.TemplateFS
-	} else {
+	default:
 		// load path relative to calling source file
 		_, callerFile, _, _ := runtime.Caller(2)
 		rootDir := filepath.Dir(callerFile)

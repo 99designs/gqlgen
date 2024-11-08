@@ -4,6 +4,7 @@ import (
 	"embed"
 	"errors"
 	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -32,15 +33,27 @@ func GenerateCode(data *Data) error {
 }
 
 func generateSingleFile(data *Data) error {
-	return templates.Render(templates.Options{
-		PackageName:     data.Config.Exec.Package,
-		Filename:        data.Config.Exec.Filename,
+	config := data.Config.Exec
+	opts := templates.Options{
+		PackageName:     config.Package,
+		Filename:        config.Filename,
 		Data:            data,
 		RegionTags:      true,
 		GeneratedHeader: true,
 		Packages:        data.Config.Packages,
-		TemplateFS:      codegenTemplates,
-	})
+	}
+
+	switch {
+	case config.ExecTemplate != "":
+		execTemplate := readExecTemplate(config.ExecTemplate)
+		opts.Template = execTemplate
+	case config.ExecTemplateDir != "":
+		opts.TemplateDir = config.ExecTemplateDir
+	default:
+		opts.TemplateFS = codegenTemplates
+	}
+
+	return templates.Render(opts)
 }
 
 func generatePerSchema(data *Data) error {
@@ -210,4 +223,12 @@ func addReferencedTypes(data *Data, builds *map[string]*Data) error {
 		build.ReferencedTypes[k] = rt
 	}
 	return nil
+}
+
+func readExecTemplate(customExecTemplate string) string {
+	contentBytes, err := os.ReadFile(customExecTemplate)
+	if err != nil {
+		panic(err)
+	}
+	return string(contentBytes)
 }

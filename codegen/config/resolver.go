@@ -19,6 +19,7 @@ type ResolverConfig struct {
 	DirName             string         `yaml:"dir"`
 	OmitTemplateComment bool           `yaml:"omit_template_comment,omitempty"`
 	ResolverTemplate    string         `yaml:"resolver_template,omitempty"`
+	PreserveResolver    bool           `yaml:"preserve_resolver,omitempty"`
 }
 
 type ResolverLayout string
@@ -54,6 +55,9 @@ func (r *ResolverConfig) Check() error {
 			r.Filename = filepath.Join(r.DirName, "resolver.go")
 		} else {
 			r.Filename = abs(r.Filename)
+		}
+		if r.PreserveResolver {
+			return fmt.Errorf("preserve_resolver=true cannot be used with layout=%s", r.Layout)
 		}
 	default:
 		return fmt.Errorf("invalid layout %s. must be %s or %s", r.Layout, LayoutSingleFile, LayoutFollowSchema)

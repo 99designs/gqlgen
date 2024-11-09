@@ -1,8 +1,9 @@
 package federation
 
 import (
-	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/vektah/gqlparser/v2/ast"
+
+	"github.com/99designs/gqlgen/codegen/config"
 )
 
 // The name of the field argument that is injected into the resolver to support @requires.

@@ -56,9 +56,6 @@ func (r *ResolverConfig) Check() error {
 		} else {
 			r.Filename = abs(r.Filename)
 		}
-		if r.PreserveResolver {
-			return fmt.Errorf("preserve_resolver=true cannot be used with layout=%s", r.Layout)
-		}
 	default:
 		return fmt.Errorf("invalid layout %s. must be %s or %s", r.Layout, LayoutSingleFile, LayoutFollowSchema)
 	}

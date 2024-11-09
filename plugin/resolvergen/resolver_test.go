@@ -157,7 +157,7 @@ func overWriteFile(t *testing.T, sourceFile, destinationFile string) {
 	input, err := os.ReadFile(sourceFile)
 	require.NoError(t, err)
 
-	err = os.WriteFile(destinationFile, input, 0644)
+	err = os.WriteFile(destinationFile, input, 0o644)
 	require.NoError(t, err)
 }
 

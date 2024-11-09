@@ -7,11 +7,12 @@ import (
 	"log"
 	"net/http"
 
+	"golang.org/x/sync/errgroup"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/debug"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"golang.org/x/sync/errgroup"
 )
 
 type Config struct {

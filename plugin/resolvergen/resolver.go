@@ -53,6 +53,14 @@ func (m *Plugin) GenerateCode(data *codegen.Data) error {
 
 func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 	file := File{}
+
+	if _, err := os.Stat(data.Config.Resolver.Filename); err == nil &&
+		data.Config.Resolver.PreserveResolver {
+		// file already exists and config says not to update resolver
+		// with layout = single so just return
+		return nil
+	}
+
 	rewriter, err := rewrite.New(data.Config.Resolver.Dir())
 	if err != nil {
 		return err
@@ -104,9 +112,14 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 		newResolverTemplate = readResolverTemplate(data.Config.Resolver.ResolverTemplate)
 	}
 
+	fileNotice := `// THIS CODE WILL BE UPDATED WITH SCHEMA CHANGES. PREVIOUS IMPLEMENTATION FOR SCHEMA CHANGES WILL BE KEPT IN THE COMMENT SECTION. IMPLEMENTATION FOR UNCHANGED SCHEMA WILL BE KEPT.`
+	if data.Config.Resolver.PreserveResolver {
+		fileNotice = `// THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.`
+	}
+
 	return templates.Render(templates.Options{
 		PackageName: data.Config.Resolver.Package,
-		FileNotice:  `// THIS CODE WILL BE UPDATED WITH SCHEMA CHANGES. PREVIOUS IMPLEMENTATION FOR SCHEMA CHANGES WILL BE KEPT IN THE COMMENT SECTION. IMPLEMENTATION FOR UNCHANGED SCHEMA WILL BE KEPT.`,
+		FileNotice:  fileNotice,
 		Filename:    data.Config.Resolver.Filename,
 		Data:        resolverBuild,
 		Packages:    data.Config.Packages,

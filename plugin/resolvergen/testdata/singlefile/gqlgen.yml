@@ -8,6 +8,7 @@ model:
 resolver:
   filename: testdata/singlefile/out/resolver.go
   type: CustomResolverType
+  preserve_resolver: false
 
 models:
   Resolver:

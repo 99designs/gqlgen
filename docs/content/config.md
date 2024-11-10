@@ -46,6 +46,8 @@ resolver:
   # omit_template_comment: false
   # Optional: Pass in a path to a new gotpl template to use for generating resolvers
   # resolver_template: [your/path/resolver.gotpl]
+	# Optional: turn on to avoid rewriting existing resolver(s) when generating
+	# preserve_resolver: false
 
 # Optional: turn on use ` + "`" + `gqlgen:"fieldName"` + "`" + ` tags in your models
 # struct_tag: json

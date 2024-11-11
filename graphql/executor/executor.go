@@ -2,6 +2,7 @@ package executor
 
 import (
 	"context"
+	"sync"
 
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
@@ -19,6 +20,7 @@ type Executor struct {
 	es         graphql.ExecutableSchema
 	extensions []graphql.HandlerExtension
 	ext        extensions
+	pool sync.Pool
 
 	errorPresenter graphql.ErrorPresenterFunc
 	recoverFunc    graphql.RecoverFunc
@@ -32,12 +34,23 @@ var _ graphql.GraphExecutor = &Executor{}
 // New creates a new Executor with the given schema, and a default error and
 // recovery callbacks, and no query cache or extensions.
 func New(es graphql.ExecutableSchema) *Executor {
+	ext := processExtensions(nil)
 	e := &Executor{
+		pool: sync.Pool{
+			New: func() any {
+				return &graphql.OperationContext{
+					DisableIntrospection: true,
+					RecoverFunc: 				graphql.DefaultRecover,
+					ResolverMiddleware: ext.fieldMiddleware,
+					RootResolverMiddleware: ext.rootFieldMiddleware,
+				}
+			},
+		},
 		es:               es,
 		errorPresenter:   graphql.DefaultErrorPresenter,
 		recoverFunc:      graphql.DefaultRecover,
 		queryCache:       graphql.NoCache[*ast.QueryDocument]{},
-		ext:              processExtensions(nil),
+		ext:              ext,
 		parserTokenLimit: parserTokenNoLimit,
 	}
 	return e
@@ -47,16 +60,16 @@ func (e *Executor) CreateOperationContext(
 	ctx context.Context,
 	params *graphql.RawParams,
 ) (*graphql.OperationContext, gqlerror.List) {
-	opCtx := &graphql.OperationContext{
-		DisableIntrospection:   true,
-		RecoverFunc:            e.recoverFunc,
-		ResolverMiddleware:     e.ext.fieldMiddleware,
-		RootResolverMiddleware: e.ext.rootFieldMiddleware,
-		Stats: graphql.Stats{
-			Read:           params.ReadTime,
-			OperationStart: graphql.GetStartTime(ctx),
-		},
-	}
+	opCtx := e.pool.Get().(*graphql.OperationContext)
+	defer e.pool.Put(opCtx)
+
+	opCtx.DisableIntrospection = true
+	opCtx.RecoverFunc = e.recoverFunc
+	opCtx.ResolverMiddleware = e.ext.fieldMiddleware
+	opCtx.RootResolverMiddleware = e.ext.rootFieldMiddleware
+	opCtx.Stats.Read = params.ReadTime
+	opCtx.Stats.OperationStart = graphql.GetStartTime(ctx)
+
 	ctx = graphql.WithOperationContext(ctx, opCtx)
 
 	for _, p := range e.ext.operationParameterMutators {

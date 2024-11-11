@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"sync"
 	"time"
 
 	"github.com/vektah/gqlparser/v2/ast"
@@ -21,21 +20,14 @@ import (
 
 type (
 	Server struct {
-		execPool sync.Pool
 		transports []graphql.Transport
 		exec       *executor.Executor
 	}
 )
 
 func New(es graphql.ExecutableSchema) *Server {
-	exec := executor.New(es)
 	return &Server{
-		execPool: sync.Pool{
-			New: func() any {
-				return exec
-			},
-		},
-		exec: exec,
+		exec: executor.New(es),
 	}
 }
 
@@ -114,7 +106,6 @@ func (s *Server) getTransport(r *http.Request) graphql.Transport {
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	exec := s.execPool.Get().(*executor.Executor)
 	defer func() {
 		if err := recover(); err != nil {
 			err := s.exec.PresentRecoveredError(r.Context(), err)
@@ -134,8 +125,7 @@ func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	transport.Do(w, r, exec)
-	s.execPool.Put(exec)
+	transport.Do(w, r, s.exec)
 }
 
 func sendError(w http.ResponseWriter, code int, errors ...*gqlerror.Error) {

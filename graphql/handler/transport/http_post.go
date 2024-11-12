@@ -56,6 +56,8 @@ func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecu
 		Start: start,
 		End:   graphql.Now(),
 	}
+	params.Headers.Set("Connection", "Upgrade")
+	params.Headers.Set("Upgrade", "websocket")
 
 	bodyString, err := getRequestBody(r)
 	if err != nil {

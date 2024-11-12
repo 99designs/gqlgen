@@ -63,12 +63,23 @@ func (e *Executor) CreateOperationContext(
 	opCtx := e.pool.Get().(*graphql.OperationContext)
 	defer e.pool.Put(opCtx)
 
-	opCtx.DisableIntrospection = true
-	opCtx.RecoverFunc = e.recoverFunc
-	opCtx.ResolverMiddleware = e.ext.fieldMiddleware
-	opCtx.RootResolverMiddleware = e.ext.rootFieldMiddleware
-	opCtx.Stats.Read = params.ReadTime
-	opCtx.Stats.OperationStart = graphql.GetStartTime(ctx)
+	if params.Headers.Get("Connection") == "Upgrade" && params.Headers.Get("Upgrade") == "websocket" {
+		copyCtx := *opCtx
+		copyCtx.DisableIntrospection = true
+		copyCtx.RecoverFunc = e.recoverFunc
+		copyCtx.ResolverMiddleware = e.ext.fieldMiddleware
+		copyCtx.RootResolverMiddleware = e.ext.rootFieldMiddleware
+		copyCtx.Stats.Read = params.ReadTime
+		copyCtx.Stats.OperationStart = graphql.GetStartTime(ctx)
+		opCtx = &copyCtx
+	} else {
+		opCtx.DisableIntrospection = true
+		opCtx.RecoverFunc = e.recoverFunc
+		opCtx.ResolverMiddleware = e.ext.fieldMiddleware
+		opCtx.RootResolverMiddleware = e.ext.rootFieldMiddleware
+		opCtx.Stats.Read = params.ReadTime
+		opCtx.Stats.OperationStart = graphql.GetStartTime(ctx)
+	}
 
 	ctx = graphql.WithOperationContext(ctx, opCtx)
 

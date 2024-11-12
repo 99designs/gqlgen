@@ -375,7 +375,13 @@ func (c *wsConnection) closeOnCancel(ctx context.Context) {
 
 func (c *wsConnection) subscribe(start time.Time, msg *message) {
 	ctx := graphql.StartOperationTrace(c.ctx)
-	var params *graphql.RawParams
+	params := &graphql.RawParams{
+		Headers: http.Header{
+			"Upgrade": []string{"websocket"},
+			"Connection": []string{"Upgrade"},
+		},
+	}
+	
 	if err := jsonDecode(bytes.NewReader(msg.payload), &params); err != nil {
 		c.sendError(msg.id, &gqlerror.Error{Message: "invalid json"})
 		c.complete(msg.id)
@@ -386,7 +392,7 @@ func (c *wsConnection) subscribe(start time.Time, msg *message) {
 		Start: start,
 		End:   graphql.Now(),
 	}
-
+	
 	rc, err := c.exec.CreateOperationContext(ctx, params)
 	if err != nil {
 		resp := c.exec.DispatchError(graphql.WithOperationContext(ctx, rc), err)

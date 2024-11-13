@@ -74,26 +74,26 @@ func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecu
 		Start: start,
 		End:   graphql.Now(),
 	}
-	
+
 	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
-			gqlErr := gqlerror.Errorf("could not read request body: %+v", err)
-			resp := exec.DispatchError(ctx, gqlerror.List{gqlErr})
-			writeJson(w, resp)
-			return
+		gqlErr := gqlerror.Errorf("could not read request body: %+v", err)
+		resp := exec.DispatchError(ctx, gqlerror.List{gqlErr})
+		writeJson(w, resp)
+		return
 	}
 
 	bodyReader := bytes.NewReader(bodyBytes)
 	if err := jsonDecode(bodyReader, &params); err != nil {
-			w.WriteHeader(http.StatusBadRequest)
-			gqlErr := gqlerror.Errorf(
-					"json request body could not be decoded: %+v body:%s",
-					err,
-					string(bodyBytes),
-			)
-			resp := exec.DispatchError(ctx, gqlerror.List{gqlErr})
-			writeJson(w, resp)
-			return
+		w.WriteHeader(http.StatusBadRequest)
+		gqlErr := gqlerror.Errorf(
+			"json request body could not be decoded: %+v body:%s",
+			err,
+			string(bodyBytes),
+		)
+		resp := exec.DispatchError(ctx, gqlerror.List{gqlErr})
+		writeJson(w, resp)
+		return
 	}
 
 	rc, opErr := exec.CreateOperationContext(ctx, params)

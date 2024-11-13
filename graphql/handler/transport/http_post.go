@@ -6,6 +6,7 @@ import (
 	"io"
 	"mime"
 	"net/http"
+	"sync"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
@@ -46,12 +47,29 @@ func getRequestBody(r *http.Request) (string, error) {
 	return string(body), nil
 }
 
+var pool = sync.Pool{
+	New: func() any {
+		return &graphql.RawParams{}
+	},
+}
+
 func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
 	ctx := r.Context()
 	writeHeaders(w, h.ResponseHeaders)
-	params := &graphql.RawParams{}
-	start := graphql.Now()
+	params := pool.Get().(*graphql.RawParams)
+	defer func() {
+		params.Headers = nil
+		params.ReadTime = graphql.TraceTiming{}
+		params.Extensions = nil
+		params.OperationName = ""
+		params.Query = ""
+		params.Variables = nil
+
+		pool.Put(params)
+	}()
 	params.Headers = r.Header
+
+	start := graphql.Now()
 	params.ReadTime = graphql.TraceTiming{
 		Start: start,
 		End:   graphql.Now(),
@@ -64,7 +82,6 @@ func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecu
 			writeJson(w, resp)
 			return
 	}
-
 
 	bodyReader := bytes.NewReader(bodyBytes)
 	if err := jsonDecode(bodyReader, &params); err != nil {

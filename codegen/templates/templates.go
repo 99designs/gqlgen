@@ -43,6 +43,8 @@ type Options struct {
 	// this is an alternative to passing the Template option
 	TemplateFS fs.FS
 
+	// The location of the customized template files by users
+	// If TemplateDir is set, the plugin processor will look for all .gotpl files under the directory
 	TemplateDir string
 
 	// Filename is the name of the file that will be

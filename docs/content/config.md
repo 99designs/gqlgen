@@ -20,6 +20,11 @@ exec:
   layout: follow-schema
   dir: graph/generated
   package: generated
+  # NOTE: It is not permitted to set `exec_template` and `exec_template_dir` at the same time.
+  # Optional: Pass in a file path to a new gotpl template to use for generating the server code
+  # exec_template: [your/path/exec.gotpl]
+  # Optional: Pass in a directory path contained new gotpl template to use for generating the server code
+  # exec_template_dir: [your/directory/path]
 
 # Enable Apollo federation support
 federation:

@@ -16,7 +16,10 @@ func cleanup(workDir string) {
 	_ = os.Remove(filepath.Join(workDir, "graph", "resolver.go"))
 	_ = os.Remove(filepath.Join(workDir, "graph", "federation.go"))
 	_ = os.Remove(filepath.Join(workDir, "graph", "schema.resolvers.go"))
+	_ = os.Remove(filepath.Join(workDir, "graph", "todo.resolvers.go"))
+	_ = os.Remove(filepath.Join(workDir, "graph", "user.resolvers.go"))
 	_ = os.Remove(filepath.Join(workDir, "graph", "model", "models_gen.go"))
+	_ = os.RemoveAll(filepath.Join(workDir, "graph", "generated"))
 }
 
 func TestGenerate(t *testing.T) {
@@ -33,6 +36,22 @@ func TestGenerate(t *testing.T) {
 		{
 			name:    "federation2",
 			workDir: filepath.Join(wd, "testdata", "federation2"),
+		},
+		{
+			name:    "single-file with multiple custom templates",
+			workDir: filepath.Join(wd, "testdata", "template", "single-file", "dir"),
+		},
+		{
+			name:    "single-file with a single custom template",
+			workDir: filepath.Join(wd, "testdata", "template", "single-file", "file"),
+		},
+		{
+			name:    "follow-schema with multiple custom templates",
+			workDir: filepath.Join(wd, "testdata", "template", "follow-schema", "dir"),
+		},
+		{
+			name:    "follow-schema with a single custom template",
+			workDir: filepath.Join(wd, "testdata", "template", "follow-schema", "file"),
 		},
 	}
 	for _, tt := range tests {

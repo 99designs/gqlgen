@@ -43,16 +43,7 @@ func generateSingleFile(data *Data) error {
 		Packages:        data.Config.Packages,
 	}
 
-	switch {
-	case config.ExecTemplate != "":
-		execTemplate := readExecTemplate(config.ExecTemplate)
-		opts.Template = execTemplate
-	case config.ExecTemplateDir != "":
-		opts.TemplateDir = config.ExecTemplateDir
-	default:
-		opts.TemplateFS = codegenTemplates
-	}
-
+	opts = applyTemplate(opts, data)
 	return templates.Render(opts)
 }
 
@@ -89,24 +80,42 @@ func generatePerSchema(data *Data) error {
 			continue
 		}
 
-		dir := data.Config.Exec.DirName
+		config := data.Config.Exec
+		dir := config.DirName
 		path := filepath.Join(dir, filename)
 
-		err = templates.Render(templates.Options{
-			PackageName:     data.Config.Exec.Package,
+		opts := templates.Options{
+			PackageName:     config.Package,
 			Filename:        path,
 			Data:            build,
 			RegionTags:      true,
 			GeneratedHeader: true,
 			Packages:        data.Config.Packages,
-			TemplateFS:      codegenTemplates,
-		})
-		if err != nil {
+		}
+
+		opts = applyTemplate(opts, data)
+		if err = templates.Render(opts); err != nil {
 			return err
 		}
 	}
 
 	return nil
+}
+
+func applyTemplate(opts templates.Options, data *Data) templates.Options {
+	config := data.Config.Exec
+
+	switch {
+	case config.ExecTemplate != "":
+		execTemplate := readExecTemplate(config.ExecTemplate)
+		opts.Template = execTemplate
+	case config.ExecTemplateDir != "":
+		opts.TemplateDir = config.ExecTemplateDir
+	default:
+		opts.TemplateFS = codegenTemplates
+	}
+
+	return opts
 }
 
 func filename(p *ast.Position, config *config.Config) string {

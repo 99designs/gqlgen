@@ -14,15 +14,16 @@ type ExecConfig struct {
 	Package string     `yaml:"package,omitempty"`
 	Layout  ExecLayout `yaml:"layout,omitempty"` // Default: single-file
 
+	// If `exec_template` and `exec_template_dir` are defined at the same time, an error will occur to avoid confusion.
+	ExecTemplate    string `yaml:"exec_template,omitempty"`
+	ExecTemplateDir string `yaml:"exec_template_dir,omitempty"`
+
 	// Only for single-file layout:
 	Filename string `yaml:"filename,omitempty"`
 
 	// Only for follow-schema layout:
 	FilenameTemplate string `yaml:"filename_template,omitempty"` // String template with {name} as placeholder for base name.
 	DirName          string `yaml:"dir"`
-
-	ExecTemplate    string `yaml:"exec_template,omitempty"`
-	ExecTemplateDir string `yaml:"exec_template_dir,omitempty"`
 }
 
 type ExecLayout string
@@ -63,6 +64,10 @@ func (r *ExecConfig) Check() error {
 
 	if r.Package == "" && r.Dir() != "" {
 		r.Package = code.NameForDir(r.Dir())
+	}
+
+	if r.ExecTemplate != "" && r.ExecTemplateDir != "" {
+		return errors.New("exec_template and exec_template_dir cannot be defined at the same time")
 	}
 
 	return nil

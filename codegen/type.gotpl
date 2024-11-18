@@ -101,6 +101,9 @@
 				ret := make(graphql.Array, len(v))
 				{{- if not $type.IsScalar }}
 					var wg sync.WaitGroup
+					{{- if gt $.Config.Exec.WorkerLimit 0 }}
+						sm := semaphore.NewWeighted({{ $.Config.Exec.WorkerLimit }})
+					{{- end }}
 					isLen1 := len(v) == 1
 					if !isLen1 {
 						wg.Add(len(v))
@@ -124,14 +127,29 @@
 							}()
 							{{- end }}
 							if !isLen1 {
-								defer wg.Done()
+								{{- if gt $.Config.Exec.WorkerLimit 0 }}
+									defer func(){
+										sm.Release(1)
+										wg.Done()
+									}()
+								{{- else }}
+									defer wg.Done()
+								{{- end }}
 							}
 							ret[i] = ec.{{ $type.Elem.MarshalFunc }}(ctx, sel, v[i])
 						}
 						if isLen1 {
 							f(i)
 						} else {
-							go f(i)
+							{{- if gt $.Config.Exec.WorkerLimit 0 }}
+								if err := sm.Acquire(ctx, 1); err != nil {
+									ec.Error(ctx, ctx.Err())
+								} else {
+									go f(i)
+								}
+							{{- else }}
+								go f(i)
+							{{- end }}
 						}
 					{{ else }}
 						ret[i] = ec.{{ $type.Elem.MarshalFunc }}(ctx, sel, v[i])

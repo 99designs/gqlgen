@@ -21,6 +21,10 @@ type ExecConfig struct {
 	FilenameTemplate string `yaml:"filename_template,omitempty"` // String template with {name} as placeholder for base name.
 	DirName          string `yaml:"dir"`
 
+	// Maximum number of goroutines in parallel to use when running multiple child resolvers
+	// Suppressing the number of goroutines generated can reduce memory consumption per request,
+	// but processing time may increase due to the reduced number of concurrences
+	// Default: 0 (unlimited)
 	WorkerLimit uint `yaml:"worker_limit"`
 }
 

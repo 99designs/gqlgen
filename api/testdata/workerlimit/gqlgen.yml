@@ -6,16 +6,12 @@ schema:
 exec:
   filename: graph/generated.go
   package: graph
-  # Optional: Maximum number of goroutines in concurrency to use per child resolvers(default: unlimited)
-  # worker_limit: 1000
+  worker_limit: 1
 
 # Uncomment to enable federation
 # federation:
 #   filename: graph/federation.go
 #   package: graph
-#   version: 2
-#   options
-#     computed_requires: true
 
 # Where should any generated models go?
 model:
@@ -27,27 +23,12 @@ resolver:
   layout: follow-schema
   dir: graph
   package: graph
-  filename_template: "{name}.resolvers.go"
-  # Optional: turn on to not generate template comments above resolvers
-  # omit_template_comment: false
 
-# Optional: turn on use ` + "`" + `gqlgen:"fieldName"` + "`" + ` tags in your models
+# Optional: turn on use `gqlgen:"fieldName"` tags in your models
 # struct_tag: json
 
 # Optional: turn on to use []Thing instead of []*Thing
 # omit_slice_element_pointers: false
-
-# Optional: turn on to omit Is<Name>() methods to interface and unions
-# omit_interface_checks : true
-
-# Optional: turn on to skip generation of ComplexityRoot struct content and Complexity function
-# omit_complexity: false
-
-# Optional: turn on to not generate any file notice comments in generated files
-# omit_gqlgen_file_notice: false
-
-# Optional: turn on to exclude the gqlgen version in the generated file notice. No effect if `omit_gqlgen_file_notice` is true.
-# omit_gqlgen_version_in_file_notice: false
 
 # Optional: turn off to make struct-type struct fields not use pointers
 # e.g. type Thing struct { FieldA OtherThing } instead of { FieldA *OtherThing }
@@ -65,20 +46,10 @@ resolver:
 # Optional: set to speed up generation time by not performing a final validation pass.
 # skip_validation: true
 
-# Optional: set to skip running `go mod tidy` when generating server code
-# skip_mod_tidy: true
-
-# Optional: if this is set to true, argument directives that
-# decorate a field with a null value will still be called.
-#
-# This enables argumment directives to not just mutate
-# argument values but to set them even if they're null.
-call_argument_directives_with_null: true
-
 # gqlgen will search for any type names in the schema in these go packages
 # if they match it will use them, otherwise it will generate them.
 autobind:
-#  - "{{.}}/graph/model"
+  - "github.com/99designs/gqlgen/api/testdata/default/graph/model"
 
 # This section declares type mapping between the GraphQL and go type systems
 #

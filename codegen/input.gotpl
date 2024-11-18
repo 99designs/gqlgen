@@ -1,10 +1,16 @@
+{{ $shouldGenerateRegularFunctions := .Config.GenerateRegularFunctions }}
+
 {{- range $input := .Inputs }}
 	{{- if not .HasUnmarshal }}
 	{{- $it := "it" }}
 	{{- if .PointersInUnmarshalInput }}
 	  {{- $it = "&it" }}
 	{{- end }}
+	{{ if $shouldGenerateRegularFunctions -}}
+	func unmarshalInput{{ .Name }}(ctx context.Context, ec *executionContext, obj interface{}) ({{ if .PointersInUnmarshalInput }}*{{ end }}{{.Type | ref}}, error) {
+	{{- else -}}
 	func (ec *executionContext) unmarshalInput{{ .Name }}(ctx context.Context, obj interface{}) ({{ if .PointersInUnmarshalInput }}*{{ end }}{{.Type | ref}}, error) {
+	{{- end }}
 		{{- if $input.IsMap }}
 			it := make(map[string]interface{}, len(obj.(map[string]interface{})))
 		{{- else }}
@@ -37,8 +43,12 @@
 				{{- end }}
 				ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField({{$field.Name|quote}}))
 				{{- if $field.ImplDirectives }}
+					{{ if $shouldGenerateRegularFunctions -}}
+					directive0 := func(ctx context.Context) (interface{}, error) { return {{ $field.TypeReference.UnmarshalFunc }}(ctx, ec, v) }
+					{{- else -}}
 					directive0 := func(ctx context.Context) (interface{}, error) { return ec.{{ $field.TypeReference.UnmarshalFunc }}(ctx, v) }
-					{{ template "implDirectives" $field }}
+					{{- end }}
+					{{ template "implDirectives" (dict "Data" $field "ShouldGenerateRegularFunctions" $shouldGenerateRegularFunctions) }}
 					tmp, err := directive{{$field.ImplDirectives|len}}(ctx)
 					if err != nil {
 						return {{$it}}, graphql.ErrorOnPath(ctx, err)
@@ -71,7 +81,11 @@
 					}
 				{{- else }}
 					{{- if $field.IsResolver }}
+						{{ if $shouldGenerateRegularFunctions -}}
+						data, err := {{ $field.TypeReference.UnmarshalFunc }}(ctx, ec, v)
+						{{- else -}}
 						data, err := ec.{{ $field.TypeReference.UnmarshalFunc }}(ctx, v)
+						{{- end }}
 						if err != nil {
 							return {{$it}}, err
 						}
@@ -79,7 +93,11 @@
 							return {{$it}}, err
 						}
 					{{- else }}
+						{{ if $shouldGenerateRegularFunctions -}}
+						data, err := {{ $field.TypeReference.UnmarshalFunc }}(ctx, ec, v)
+						{{- else -}}
 						data, err := ec.{{ $field.TypeReference.UnmarshalFunc }}(ctx, v)
+						{{- end }}
 						if err != nil {
 							return {{$it}}, err
 						}

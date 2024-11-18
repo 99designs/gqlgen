@@ -4274,6 +4274,7 @@ func (ec *executionContext) unmarshalNListCoercion2ᚖgithubᚗcomᚋ99designs�
 
 func (ec *executionContext) marshalNQuery2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋserverᚋmodelsᚑgoᚐQuery(ctx context.Context, sel ast.SelectionSet, v models.Query) graphql.Marshaler {
 	return ec._Query(ctx, sel)
+
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

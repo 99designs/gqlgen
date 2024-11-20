@@ -1,4 +1,4 @@
-package graph
+package deferexample
 
 // This file will not be regenerated automatically.
 //

@@ -39,17 +39,18 @@ func (r *queryResolver) Events(ctx context.Context) ([]Event, error) {
 
 	var events []Event
 	for i := 0; i < 10; i++ {
+		resCtx := graphql.GetFieldContext(ctx)
 		if i%2 == 0 {
 			events = append(events, &Like{
 				Selection: sels,
-				Collected: formatCollected(graphql.CollectFieldsCtx(ctx, []string{"Like"})),
+				Collected: formatCollected(graphql.CollectFields(opCtx, resCtx.Field.Selections, []string{"Like"})),
 				Reaction:  ":=)",
 				Sent:      time.Now(),
 			})
 		} else {
 			events = append(events, &Post{
 				Selection: sels,
-				Collected: formatCollected(graphql.CollectFieldsCtx(ctx, []string{"Post"})),
+				Collected: formatCollected(graphql.CollectFields(opCtx, resCtx.Field.Selections, []string{"Post"})),
 				Message:   "Hey",
 				Sent:      time.Now(),
 			})

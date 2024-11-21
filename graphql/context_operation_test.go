@@ -59,15 +59,30 @@ func TestGetOperationContext(t *testing.T) {
 	})
 }
 
-func TestCollectAllFields(t *testing.T) {
+func TestCollectFields(t *testing.T) {
+	flattenFields := func(collected []CollectedField) []string {
+		uniq := make([]string, 0, len(collected))
+	Next:
+		for _, f := range collected {
+			for _, name := range uniq {
+				if name == f.Name {
+					continue Next
+				}
+			}
+			uniq = append(uniq, f.Name)
+		}
+		return uniq
+	}
+
 	t.Run("collect fields", func(t *testing.T) {
 		ctx := testContext(ast.SelectionSet{
 			&ast.Field{
 				Name: "field",
 			},
 		})
-		s := CollectAllFields(ctx)
-		require.Equal(t, []string{"field"}, s)
+		resCtx := GetFieldContext(ctx)
+		collected := CollectFields(GetOperationContext(ctx), resCtx.Field.Selections, nil)
+		require.Equal(t, []string{"field"}, flattenFields(collected))
 	})
 
 	t.Run("unique field names", func(t *testing.T) {
@@ -80,8 +95,9 @@ func TestCollectAllFields(t *testing.T) {
 				Alias: "field alias",
 			},
 		})
-		s := CollectAllFields(ctx)
-		require.Equal(t, []string{"field"}, s)
+		resCtx := GetFieldContext(ctx)
+		collected := CollectFields(GetOperationContext(ctx), resCtx.Field.Selections, nil)
+		require.Equal(t, []string{"field"}, flattenFields(collected))
 	})
 
 	t.Run("collect fragments", func(t *testing.T) {
@@ -106,8 +122,9 @@ func TestCollectAllFields(t *testing.T) {
 				},
 			},
 		})
-		s := CollectAllFields(ctx)
-		require.Equal(t, []string{"fieldA", "fieldB"}, s)
+		resCtx := GetFieldContext(ctx)
+		collected := CollectFields(GetOperationContext(ctx), resCtx.Field.Selections, nil)
+		require.Equal(t, []string{"fieldA", "fieldB"}, flattenFields(collected))
 	})
 
 	t.Run("collect fragments with same field name on different types", func(t *testing.T) {

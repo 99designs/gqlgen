@@ -191,7 +191,7 @@ func TestMultipartMixed(t *testing.T) {
 				srv.URL,
 				`{"query":"query { ... @defer { name } }"}`,
 			)
-			res, err = client.Do(req)
+			res, err = client.Do(req) //nolint:bodyclose // false positive
 		}()
 
 		handler.SendNextSubscriptionMessage()
@@ -231,6 +231,5 @@ func TestMultipartMixed(t *testing.T) {
 
 		_, err = br.ReadByte()
 		assert.Equal(t, err, io.EOF)
-
 	})
 }

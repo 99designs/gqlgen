@@ -81,7 +81,7 @@ func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies 
 				panic(fmt.Errorf("missing fragment %s", fragmentName))
 			}
 
-			if satisfies != nil && fragment.TypeCondition != "" && !instanceOf(fragment.TypeCondition, satisfies) {
+			if satisfies != nil && !instanceOf(fragment.TypeCondition, satisfies) {
 				continue
 			}
 

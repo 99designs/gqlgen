@@ -256,6 +256,13 @@ func (a *multipartResponseAggregator) flush(w http.ResponseWriter) {
 
 		writeJson(w, a.initialResponse)
 		hasNext = a.initialResponse.HasNext != nil && *a.initialResponse.HasNext
+
+		// Handle when initial is aggregated with deferred responses.
+		if len(a.deferResponses) > 0 {
+			fmt.Fprintf(w, "\r\n")
+			writeBoundary(w, a.boundary, false)
+		}
+
 		// Reset the initial response so we don't send it again
 		a.initialResponse = nil
 	}

@@ -44,7 +44,7 @@ func New() *TestServer {
 			switch opCtx.Operation.Operation {
 			case ast.Query:
 				ran := false
-				// If the query contains @defer, we will mimick a deferred response.
+				// If the query contains @defer, we will mimic a deferred response.
 				if strings.Contains(opCtx.RawQuery, "@defer") {
 					initialResponse := true
 					return func(context context.Context) *graphql.Response {

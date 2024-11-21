@@ -17,8 +17,7 @@ type ExecutableSchema interface {
 }
 
 // CollectFields returns the set of fields from an ast.SelectionSet where all collected fields satisfy at least one of the GraphQL types
-// passed through satisfies. Providing an empty or nil slice for satisfies will return collect all fields regardless of fragment
-// type conditions.
+// passed through satisfies. Providing a nil slice for satisfies will collect all fields regardless of fragment type conditions.
 func CollectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies []string) []CollectedField {
 	return collectFields(reqCtx, selSet, satisfies, map[string]bool{})
 }
@@ -70,9 +69,6 @@ func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies 
 			}
 
 		case *ast.FragmentSpread:
-			if !shouldIncludeNode(sel.Directives, reqCtx.Variables) {
-				continue
-			}
 			fragmentName := sel.Name
 			if _, seen := visited[fragmentName]; seen {
 				continue
@@ -85,10 +81,13 @@ func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies 
 				panic(fmt.Errorf("missing fragment %s", fragmentName))
 			}
 
-			if len(satisfies) > 0 && !instanceOf(fragment.TypeCondition, satisfies) {
+			if satisfies != nil && fragment.TypeCondition != "" && !instanceOf(fragment.TypeCondition, satisfies) {
 				continue
 			}
 
+			if !shouldIncludeNode(sel.Directives, reqCtx.Variables) {
+				continue
+			}
 			shouldDefer, label := deferrable(sel.Directives, reqCtx.Variables)
 
 			for _, childField := range collectFields(reqCtx, fragment.SelectionSet, satisfies, visited) {

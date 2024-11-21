@@ -39,13 +39,22 @@ func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies 
 			f.Selections = append(f.Selections, sel.SelectionSet...)
 
 		case *ast.InlineFragment:
-			if !shouldIncludeNode(sel.Directives, reqCtx.Variables) {
-				continue
-			}
-			if len(satisfies) > 0 && !instanceOf(sel.TypeCondition, satisfies) {
+			// To allow simplified "collect all" behavior, pass an explicit nil for
+			// the list of types the fragment type may satisfy (var satisfies).
+			//
+			// When the type condition is null / empty (... { field }) we will apply
+			// the fragment to every type.
+			//
+			// We only narrow when we have a list of types we want to apply to and a
+			// type to check if it applies, and that type does not apply.
+			if satisfies != nil && sel.TypeCondition != "" && !instanceOf(sel.TypeCondition, satisfies) {
 				continue
 			}
 
+			// Directives on the fragment apply to every field included.
+			if !shouldIncludeNode(sel.Directives, reqCtx.Variables) {
+				continue
+			}
 			shouldDefer, label := deferrable(sel.Directives, reqCtx.Variables)
 
 			for _, childField := range collectFields(reqCtx, sel.SelectionSet, satisfies, visited) {

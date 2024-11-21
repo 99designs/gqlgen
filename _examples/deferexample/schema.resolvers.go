@@ -6,22 +6,46 @@ package deferexample
 
 import (
 	"context"
+	"crypto/rand"
 	"fmt"
+	"math/big"
+	"time"
 )
 
 // CreateTodo is the resolver for the createTodo field.
-func (r *mutationResolver) CreateTodo(ctx context.Context, input NewTodo) (*Todo, error) {
-	panic(fmt.Errorf("not implemented: CreateTodo - createTodo"))
+func (r *mutationResolver) CreateTodo(_ context.Context, input NewTodo) (*Todo, error) {
+	randNumber, _ := rand.Int(rand.Reader, big.NewInt(100))
+	todo := &Todo{
+		Text:   input.Text,
+		ID:     fmt.Sprintf("T%d", randNumber),
+		userID: input.UserID,
+	}
+
+	r.mu.Lock()
+	r.todos = append(r.todos, todo)
+	r.mu.Unlock()
+
+	return todo, nil
 }
 
 // Todos is the resolver for the todos field.
-func (r *queryResolver) Todos(ctx context.Context) ([]*Todo, error) {
-	panic(fmt.Errorf("not implemented: Todos - todos"))
+func (r *queryResolver) Todos(_ context.Context) ([]*Todo, error) {
+	r.mu.RLock()
+	defer r.mu.RUnlock()
+	return r.todos, nil
 }
 
-// User is the resolver for the user field.
-func (r *todoResolver) User(ctx context.Context, obj *Todo) (*User, error) {
-	panic(fmt.Errorf("not implemented: User - user"))
+// User is the resolver for the user field on Todos. Having this
+// separate resolver makes the field "deferrable," ie GQLGen will handle
+// an operation with an @defer directive applied to the given field as a
+// separately-delivered response, and depending on the logic applied in
+// the transport can deliver them in the same response or serially.
+func (r *todoResolver) User(_ context.Context, t *Todo) (*User, error) {
+	time.Sleep(time.Millisecond * 10)
+	return &User{
+		ID:   t.userID,
+		Name: fmt.Sprintf("User %v", t.userID),
+	}, nil
 }
 
 // Mutation returns MutationResolver implementation.

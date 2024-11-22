@@ -17,7 +17,7 @@ type ExecutableSchema interface {
 }
 
 // CollectFields returns the set of fields from an ast.SelectionSet where all collected fields satisfy at least one of the GraphQL types
-// passed through satisfies. Providing a nil slice for satisfies will collect all fields regardless of fragment type conditions.
+// passed through satisfies. Providing an empty slice for satisfies will collect all fields regardless of fragment type conditions.
 func CollectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies []string) []CollectedField {
 	return collectFields(reqCtx, selSet, satisfies, map[string]bool{})
 }
@@ -38,19 +38,19 @@ func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies 
 			f.Selections = append(f.Selections, sel.SelectionSet...)
 
 		case *ast.InlineFragment:
-			// To allow simplified "collect all" behavior, pass an explicit nil for
-			// the list of types the fragment type may satisfy (var satisfies).
+			// To allow simplified "collect all" types behavior, pass an empty list
+			// of types that the type condition must satisfy: we will apply the
+			// fragment regardless of type condition.
 			//
-			// When the type condition is null / empty (... { field }) we will apply
-			// the fragment to every type.
+			// When the type condition is not set (... { field }) we will apply the
+			// fragment to any satisfying types.
 			//
-			// We only narrow when we have a list of types we want to apply to and a
-			// type to check if it applies, and that type does not apply.
-			if satisfies != nil && sel.TypeCondition != "" && !instanceOf(sel.TypeCondition, satisfies) {
+			// We will only NOT apply the fragment when we have at least one type in
+			// the list we must satisfy and a type condition to compare them to.
+			if len(satisfies) > 0 && sel.TypeCondition != "" && !instanceOf(sel.TypeCondition, satisfies) {
 				continue
 			}
 
-			// Directives on the fragment apply to every field included.
 			if !shouldIncludeNode(sel.Directives, reqCtx.Variables) {
 				continue
 			}
@@ -81,7 +81,7 @@ func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies 
 				panic(fmt.Errorf("missing fragment %s", fragmentName))
 			}
 
-			if satisfies != nil && !instanceOf(fragment.TypeCondition, satisfies) {
+			if len(satisfies) > 0 && !instanceOf(fragment.TypeCondition, satisfies) {
 				continue
 			}
 

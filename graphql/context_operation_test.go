@@ -463,7 +463,7 @@ func TestCollectAllFields(t *testing.T) {
 		require.Equal(t, []string{"fieldA", "fieldB", "fieldC", "fieldD"}, CollectAllFields(ctx))
 	})
 
-	t.Run("de-dupes aliased field getNames", func(t *testing.T) {
+	t.Run("de-dupes aliased field names", func(t *testing.T) {
 		ctx := testContext(ast.SelectionSet{
 			&ast.Field{
 				Name: "field",

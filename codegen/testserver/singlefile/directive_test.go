@@ -112,6 +112,7 @@ func TestDirectives(t *testing.T) {
 	srv := handler.NewDefaultServer(NewExecutableSchema(Config{
 		Resolvers: resolvers,
 		Directives: DirectiveRoot{
+			//nolint:revive // can't rename min, max because it's generated code
 			Length: func(ctx context.Context, obj any, next graphql.Resolver, min int, max *int, message *string) (any, error) {
 				e := func(msg string) error {
 					if message == nil {
@@ -133,6 +134,7 @@ func TestDirectives(t *testing.T) {
 				}
 				return res, nil
 			},
+			//nolint:revive // can't rename min, max because it's generated code
 			Range: func(ctx context.Context, obj any, next graphql.Resolver, min *int, max *int) (any, error) {
 				res, err := next(ctx)
 				if err != nil {

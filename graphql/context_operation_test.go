@@ -169,7 +169,7 @@ func TestCollectFields(t *testing.T) {
 		require.Equal(t, []string{"fieldA", "fieldB", "fieldC"}, getNames(collected))
 	})
 
-	t.Run("handles inline fragments with with include and skip", func(t *testing.T) {
+	t.Run("handles inline fragments with include and skip", func(t *testing.T) {
 		ctx := testContext(ast.SelectionSet{
 			&ast.InlineFragment{
 				TypeCondition: "",

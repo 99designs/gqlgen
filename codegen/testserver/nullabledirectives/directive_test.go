@@ -21,7 +21,7 @@ func isNil(input any) bool {
 		return true
 	}
 	// Using reflect to check if the value is nil. This is necessary for
-	// for any types that are not nil types but have a nil value (e.g. *string).
+	// any types that are not nil types but have a nil value (e.g. *string).
 	value := reflect.ValueOf(input)
 	return value.IsNil()
 }

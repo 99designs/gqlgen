@@ -104,9 +104,9 @@ func WebsocketUpgrader(upgrader websocket.Upgrader) Option {
 }
 
 // Deprecated: switch to graphql/handler.New
-func RecoverFunc(recover graphql.RecoverFunc) Option {
+func RecoverFunc(recoverFn graphql.RecoverFunc) Option {
 	return func(cfg *Config) {
-		cfg.recover = recover
+		cfg.recover = recoverFn
 	}
 }
 

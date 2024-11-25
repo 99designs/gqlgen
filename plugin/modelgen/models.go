@@ -356,7 +356,6 @@ func (m *Plugin) generateField(
 	schemaType *ast.Definition,
 	field *ast.FieldDefinition,
 ) (*Field, error) {
-	var omittableType types.Type
 	var typ types.Type
 	fieldDef := cfg.Schema.Types[field.Type.Name()]
 
@@ -449,13 +448,9 @@ func (m *Plugin) generateField(
 			return nil, fmt.Errorf("generror: field %v.%v: omittable is only applicable to nullable input fields", schemaType.Name, field.Name)
 		}
 
-		var err error
-
-		if omittableType == nil {
-			omittableType, err = binder.FindTypeFromName("github.com/99designs/gqlgen/graphql.Omittable")
-			if err != nil {
-				return nil, err
-			}
+		omittableType, err := binder.FindTypeFromName("github.com/99designs/gqlgen/graphql.Omittable")
+		if err != nil {
+			return nil, err
 		}
 
 		f.Type, err = binder.InstantiateType(omittableType, []types.Type{f.Type})

@@ -12,6 +12,12 @@ linters-settings:
       - paramTypeCombine
       - preferFprint
       - yodaStyleExpr
+  govet:
+    enable-all: true
+    disable:
+      - fieldalignment
+      - shadow
+      - unusedwrite # TODO: fix and enable
   errcheck:
     exclude-functions:
       - (io.Writer).Write

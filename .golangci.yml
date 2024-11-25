@@ -86,6 +86,7 @@ linters:
     - ineffassign
     - misspell
     - nakedret
+    - nolintlint
     - perfsprint
     - prealloc
     - revive

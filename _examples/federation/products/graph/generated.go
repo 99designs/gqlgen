@@ -3174,15 +3174,27 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 	case nil:
 		return graphql.Null
 	case model.Manufacturer:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "Manufacturer"})) == 0 {
+			return graphql.NullItem
+		}
 		return ec._Manufacturer(ctx, sel, &obj)
 	case *model.Manufacturer:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "Manufacturer"})) == 0 {
+			return graphql.NullItem
+		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._Manufacturer(ctx, sel, obj)
 	case model.Product:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "Product"})) == 0 {
+			return graphql.NullItem
+		}
 		return ec._Product(ctx, sel, &obj)
 	case *model.Product:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Entity", "Product"})) == 0 {
+			return graphql.NullItem
+		}
 		if obj == nil {
 			return graphql.Null
 		}

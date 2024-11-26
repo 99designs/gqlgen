@@ -35,6 +35,17 @@ func (r *Rectangle) Area() float64 {
 func (r *Rectangle) isShapeUnion() {}
 func (r *Rectangle) isShape()      {}
 
+type SquareShape struct {
+	Length float64
+	Coordinates
+}
+
+func (r *SquareShape) Area() float64 {
+	return r.Length * r.Length
+}
+func (r *SquareShape) isShapeUnion() {}
+func (r *SquareShape) isShape()      {}
+
 type Node interface {
 	Child() (Node, error)
 }

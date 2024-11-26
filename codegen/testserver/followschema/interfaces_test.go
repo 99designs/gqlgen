@@ -297,4 +297,95 @@ func TestInterfaces(t *testing.T) {
 		require.Equal(t, 100, resp.Dog.Size.Height)
 		require.Equal(t, 35, resp.Dog.Size.Weight)
 	})
+
+	t.Run("fetch_go_model_for_union", func(t *testing.T) {
+		resolvers := &Stub{}
+		resolvers.QueryResolver.Shapes = func(ctx context.Context) ([]Shape, error) {
+			return []Shape{
+				&SquareShape{
+					Length: 10,
+					Coordinates: Coordinates{
+						X: 5,
+						Y: 15,
+					},
+				},
+			}, nil
+		}
+
+		c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+		var resp struct {
+			Shapes []struct {
+				Length      float64
+				Area        float64
+				Coordinates struct {
+					X float64
+					Y float64
+				}
+			}
+		}
+
+		c.MustPost(`
+			{
+				shapes {
+					... on Square {
+						length
+						area
+						coordinates {
+							x
+							y
+						}
+					}
+				}
+			}
+		`, &resp)
+
+		require.Len(t, resp.Shapes, 1)
+
+		square := resp.Shapes[0]
+
+		require.InDelta(t, 10, square.Length, 0.1)
+		require.InDelta(t, 100, square.Area, 0.1)
+		require.InDelta(t, 5, square.Coordinates.X, 0.1)
+		require.InDelta(t, 15, square.Coordinates.Y, 0.1)
+	})
+
+	t.Run("not_fetch_field_that_has_values", func(t *testing.T) {
+		resolvers := &Stub{}
+		resolvers.QueryResolver.Shapes = func(ctx context.Context) ([]Shape, error) {
+			return []Shape{
+				&Circle{
+					Radius: 10,
+					Coordinates: Coordinates{
+						X: 5,
+						Y: 15,
+					},
+				},
+			}, nil
+		}
+
+		c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+		var resp struct {
+			Shapes []struct {
+				Coordinates struct {
+					X float64
+					Y float64
+				}
+			}
+		}
+
+		c.MustPost(`
+			{
+				shapes {
+					... on Rectangle {
+						coordinates {
+							x
+							y
+						}
+					}
+				}
+			}
+		`, &resp)
+
+		require.Empty(t, resp.Shapes)
+	})
 }

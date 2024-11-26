@@ -1189,6 +1189,126 @@ func (ec *executionContext) fieldContext_Size_weight(_ context.Context, field gr
 	return fc, nil
 }
 
+func (ec *executionContext) _Square_length(ctx context.Context, field graphql.CollectedField, obj *SquareShape) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Square_length(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Length, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalOFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Square_length(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Square",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Square_area(ctx context.Context, field graphql.CollectedField, obj *SquareShape) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Square_area(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Area(), nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(float64)
+	fc.Result = res
+	return ec.marshalOFloat2float64(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Square_area(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Square",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Float does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Square_coordinates(ctx context.Context, field graphql.CollectedField, obj *SquareShape) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Square_coordinates(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Coordinates, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(Coordinates)
+	fc.Result = res
+	return ec.marshalOCoordinates2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCoordinates(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Square_coordinates(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Square",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "x":
+				return ec.fieldContext_Coordinates_x(ctx, field)
+			case "y":
+				return ec.fieldContext_Coordinates_y(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Coordinates", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 // endregion **************************** field.gotpl *****************************
 
 // region    **************************** input.gotpl *****************************
@@ -1202,27 +1322,48 @@ func (ec *executionContext) _Animal(ctx context.Context, sel ast.SelectionSet, o
 	case nil:
 		return graphql.Null
 	case Horse:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Animal", "Horse"})) == 0 {
+			return graphql.NullItem
+		}
 		return ec._Horse(ctx, sel, &obj)
 	case *Horse:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Animal", "Horse"})) == 0 {
+			return graphql.NullItem
+		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._Horse(ctx, sel, obj)
 	case Dog:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Animal", "Dog"})) == 0 {
+			return graphql.NullItem
+		}
 		return ec._Dog(ctx, sel, &obj)
 	case *Dog:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Animal", "Dog"})) == 0 {
+			return graphql.NullItem
+		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._Dog(ctx, sel, obj)
 	case Cat:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Animal", "Cat"})) == 0 {
+			return graphql.NullItem
+		}
 		return ec._Cat(ctx, sel, &obj)
 	case *Cat:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Animal", "Cat"})) == 0 {
+			return graphql.NullItem
+		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._Cat(ctx, sel, obj)
 	case Mammalian:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Animal", "Mammalian"})) == 0 {
+			return graphql.NullItem
+		}
 		if obj == nil {
 			return graphql.Null
 		}
@@ -1237,8 +1378,14 @@ func (ec *executionContext) _Mammalian(ctx context.Context, sel ast.SelectionSet
 	case nil:
 		return graphql.Null
 	case Horse:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Mammalian", "Horse"})) == 0 {
+			return graphql.NullItem
+		}
 		return ec._Horse(ctx, sel, &obj)
 	case *Horse:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Mammalian", "Horse"})) == 0 {
+			return graphql.NullItem
+		}
 		if obj == nil {
 			return graphql.Null
 		}
@@ -1253,11 +1400,17 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 	case nil:
 		return graphql.Null
 	case *ConcreteNodeA:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Node", "ConcreteNodeA"})) == 0 {
+			return graphql.NullItem
+		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._ConcreteNodeA(ctx, sel, obj)
 	case ConcreteNodeInterface:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Node", "ConcreteNodeInterface"})) == 0 {
+			return graphql.NullItem
+		}
 		if obj == nil {
 			return graphql.Null
 		}
@@ -1272,15 +1425,29 @@ func (ec *executionContext) _Shape(ctx context.Context, sel ast.SelectionSet, ob
 	case nil:
 		return graphql.Null
 	case *Circle:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Shape", "Circle"})) == 0 {
+			return graphql.NullItem
+		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._Circle(ctx, sel, obj)
 	case *Rectangle:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Shape", "Rectangle"})) == 0 {
+			return graphql.NullItem
+		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._Rectangle(ctx, sel, obj)
+	case *SquareShape:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Shape", "Square"})) == 0 {
+			return graphql.NullItem
+		}
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Square(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -1291,15 +1458,29 @@ func (ec *executionContext) _ShapeUnion(ctx context.Context, sel ast.SelectionSe
 	case nil:
 		return graphql.Null
 	case *Circle:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"ShapeUnion", "Circle"})) == 0 {
+			return graphql.NullItem
+		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._Circle(ctx, sel, obj)
 	case *Rectangle:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"ShapeUnion", "Rectangle"})) == 0 {
+			return graphql.NullItem
+		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._Rectangle(ctx, sel, obj)
+	case *SquareShape:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"ShapeUnion", "Square"})) == 0 {
+			return graphql.NullItem
+		}
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Square(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -1776,6 +1957,46 @@ func (ec *executionContext) _Size(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var squareImplementors = []string{"Square", "Shape", "ShapeUnion"}
+
+func (ec *executionContext) _Square(ctx context.Context, sel ast.SelectionSet, obj *SquareShape) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, squareImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Square")
+		case "length":
+			out.Values[i] = ec._Square_length(ctx, field, obj)
+		case "area":
+			out.Values[i] = ec._Square_area(ctx, field, obj)
+		case "coordinates":
+			out.Values[i] = ec._Square_coordinates(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

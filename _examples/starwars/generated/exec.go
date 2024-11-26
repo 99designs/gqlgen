@@ -5251,15 +5251,27 @@ func (ec *executionContext) _Character(ctx context.Context, sel ast.SelectionSet
 	case nil:
 		return graphql.Null
 	case models.Human:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Character", "Human"})) == 0 {
+			return graphql.NullItem
+		}
 		return ec._Human(ctx, sel, &obj)
 	case *models.Human:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Character", "Human"})) == 0 {
+			return graphql.NullItem
+		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._Human(ctx, sel, obj)
 	case models.Droid:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Character", "Droid"})) == 0 {
+			return graphql.NullItem
+		}
 		return ec._Droid(ctx, sel, &obj)
 	case *models.Droid:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"Character", "Droid"})) == 0 {
+			return graphql.NullItem
+		}
 		if obj == nil {
 			return graphql.Null
 		}
@@ -5274,22 +5286,40 @@ func (ec *executionContext) _SearchResult(ctx context.Context, sel ast.Selection
 	case nil:
 		return graphql.Null
 	case models.Human:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"SearchResult", "Human"})) == 0 {
+			return graphql.NullItem
+		}
 		return ec._Human(ctx, sel, &obj)
 	case *models.Human:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"SearchResult", "Human"})) == 0 {
+			return graphql.NullItem
+		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._Human(ctx, sel, obj)
 	case models.Droid:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"SearchResult", "Droid"})) == 0 {
+			return graphql.NullItem
+		}
 		return ec._Droid(ctx, sel, &obj)
 	case *models.Droid:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"SearchResult", "Droid"})) == 0 {
+			return graphql.NullItem
+		}
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._Droid(ctx, sel, obj)
 	case models.Starship:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"SearchResult", "Starship"})) == 0 {
+			return graphql.NullItem
+		}
 		return ec._Starship(ctx, sel, &obj)
 	case *models.Starship:
+		if len(graphql.CollectFields(ec.OperationContext, sel, []string{"SearchResult", "Starship"})) == 0 {
+			return graphql.NullItem
+		}
 		if obj == nil {
 			return graphql.Null
 		}

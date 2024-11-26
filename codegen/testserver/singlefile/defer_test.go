@@ -61,25 +61,6 @@ func TestDefer(t *testing.T) {
 		}, nil
 	}
 
-	deferSingleQuery := `query testDefer {
-	    deferSingle {
-	        id
-	        name
-	        ... @defer(label: "values") {
-	            values
-	        }
-	    }
-	}`
-	deferMultipleQuery := `query testDefer {
-	    deferMultiple {
-	        id
-	        name
-	        ... @defer(label: "values") {
-	            values
-	        }
-	    }
-	}`
-
 	type deferModel struct {
 		Id     string
 		Name   string
@@ -131,8 +112,16 @@ func TestDefer(t *testing.T) {
 			expectedDeferredResponses []sseDeferredResponse
 		}{
 			{
-				name:  "defer single",
-				query: deferSingleQuery,
+				name: "defer single",
+				query: `query testDefer {
+	deferSingle {
+		id
+		name
+		... @defer {
+			values
+		}
+	}
+}`,
 				expectedInitialResponse: response[struct {
 					DeferSingle deferModel
 				}]{
@@ -154,14 +143,156 @@ func TestDefer(t *testing.T) {
 						}{
 							Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 						},
-						Label: "values",
+						Path: []any{"deferSingle"},
+					},
+				},
+			},
+			{
+				name: "defer single using fragment type",
+				query: `query testDefer {
+	deferSingle {
+		id
+		name
+		... on DeferModel @defer {
+			values
+		}
+	}
+}`,
+				expectedInitialResponse: response[struct {
+					DeferSingle deferModel
+				}]{
+					Data: struct {
+						DeferSingle deferModel
+					}{
+						DeferSingle: deferModel{
+							Id:     "1",
+							Name:   "Defer test 1",
+							Values: nil,
+						},
+					},
+					HasNext: true,
+				},
+				expectedDeferredResponses: []sseDeferredResponse{
+					{
+						Data: struct {
+							Values []string `json:"values"`
+						}{
+							Values: []string{"test defer 1", "test defer 2", "test defer 3"},
+						},
+						Path: []any{"deferSingle"},
+					},
+				},
+			},
+			{
+				name: "defer single with label",
+				query: `query testDefer {
+	deferSingle {
+		id
+		name
+		... @defer(label: "test label") {
+			values
+		}
+	}
+}`,
+				expectedInitialResponse: response[struct {
+					DeferSingle deferModel
+				}]{
+					Data: struct {
+						DeferSingle deferModel
+					}{
+						DeferSingle: deferModel{
+							Id:     "1",
+							Name:   "Defer test 1",
+							Values: nil,
+						},
+					},
+					HasNext: true,
+				},
+				expectedDeferredResponses: []sseDeferredResponse{
+					{
+						Data: struct {
+							Values []string `json:"values"`
+						}{
+							Values: []string{"test defer 1", "test defer 2", "test defer 3"},
+						},
+						Label: "test label",
 						Path:  []any{"deferSingle"},
 					},
 				},
 			},
 			{
-				name:  "defer multiple",
-				query: deferMultipleQuery,
+				name: "defer single when if arg is true",
+				query: `query testDefer {
+	deferSingle {
+		id
+		name
+		... @defer(if: true, label: "test label") {
+			values
+		}
+	}
+}`,
+				expectedInitialResponse: response[struct {
+					DeferSingle deferModel
+				}]{
+					Data: struct {
+						DeferSingle deferModel
+					}{
+						DeferSingle: deferModel{
+							Id:     "1",
+							Name:   "Defer test 1",
+							Values: nil,
+						},
+					},
+					HasNext: true,
+				},
+				expectedDeferredResponses: []sseDeferredResponse{
+					{
+						Data: struct {
+							Values []string `json:"values"`
+						}{
+							Values: []string{"test defer 1", "test defer 2", "test defer 3"},
+						},
+						Label: "test label",
+						Path:  []any{"deferSingle"},
+					},
+				},
+			},
+			{
+				name: "defer single when if arg is false",
+				query: `query testDefer {
+	deferSingle {
+		id
+		name
+		... @defer(if: false) {
+			values
+		}
+	}
+}`,
+				expectedInitialResponse: response[struct {
+					DeferSingle deferModel
+				}]{
+					Data: struct {
+						DeferSingle deferModel
+					}{
+						DeferSingle: deferModel{
+							Id:     "1",
+							Name:   "Defer test 1",
+							Values: []string{"test defer 1", "test defer 2", "test defer 3"},
+						},
+					},
+				},
+			},
+			{
+				name: "defer multiple",
+				query: `query testDefer {
+	deferMultiple {
+		id
+		name
+		... @defer (label: "test label") {
+			values
+		}
+	}
+}`,
 				expectedInitialResponse: response[struct {
 					DeferMultiple []deferModel
 				}]{
@@ -195,7 +326,7 @@ func TestDefer(t *testing.T) {
 						}{
 							Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 						},
-						Label: "values",
+						Label: "test label",
 						Path:  []any{"deferMultiple", float64(0)},
 					},
 					{
@@ -204,7 +335,7 @@ func TestDefer(t *testing.T) {
 						}{
 							Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 						},
-						Label: "values",
+						Label: "test label",
 						Path:  []any{"deferMultiple", float64(1)},
 					},
 					{
@@ -213,20 +344,63 @@ func TestDefer(t *testing.T) {
 						}{
 							Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 						},
-						Label: "values",
+						Label: "test label",
 						Path:  []any{"deferMultiple", float64(2)},
+					},
+				},
+			},
+			{
+				name: "defer multiple when if arg is false",
+				query: `query testDefer {
+	deferMultiple {
+		id
+		name
+		... @defer(label: "test label", if: false) {
+			values
+		}
+	}
+}`,
+				expectedInitialResponse: response[struct {
+					DeferMultiple []deferModel
+				}]{
+					Data: struct {
+						DeferMultiple []deferModel
+					}{
+						DeferMultiple: []deferModel{
+							{
+								Id:     "1",
+								Name:   "Defer test 1",
+								Values: []string{"test defer 1", "test defer 2", "test defer 3"},
+							},
+							{
+								Id:     "2",
+								Name:   "Defer test 2",
+								Values: []string{"test defer 1", "test defer 2", "test defer 3"},
+							},
+							{
+								Id:     "3",
+								Name:   "Defer test 3",
+								Values: []string{"test defer 1", "test defer 2", "test defer 3"},
+							},
+						},
 					},
 				},
 			},
 		}
 		for _, tc := range cases {
 			t.Run(tc.name, func(t *testing.T) {
-				initRespT := reflect.TypeOf(tc.expectedInitialResponse)
-
 				sse := c.SSE(context.Background(), tc.query)
-				resp := reflect.New(initRespT).Elem().Interface()
+
+				resT := reflect.TypeOf(tc.expectedInitialResponse)
+				resE := reflect.New(resT).Elem()
+				resp := resE.Interface()
 				require.NoError(t, sse.Next(&resp))
 				assert.Equal(t, tc.expectedInitialResponse, resp)
+
+				// If there are no deferred responses, we can stop here.
+				if !resE.FieldByName("HasNext").Bool() && len(tc.expectedDeferredResponses) == 0 {
+					return
+				}
 
 				deferredResponses := make([]sseDeferredResponse, 0)
 				for {

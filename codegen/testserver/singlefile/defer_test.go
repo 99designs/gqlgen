@@ -1,9 +1,12 @@
 package singlefile
 
 import (
+	"cmp"
 	"context"
 	"encoding/json"
 	"math/rand"
+	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 	"testing"
@@ -25,14 +28,14 @@ func TestDefer(t *testing.T) {
 
 	c := client.New(srv)
 
-	resolvers.QueryResolver.DeferCase1 = func(ctx context.Context) (*DeferModel, error) {
+	resolvers.QueryResolver.DeferSingle = func(ctx context.Context) (*DeferModel, error) {
 		return &DeferModel{
 			ID:   "1",
 			Name: "Defer test 1",
 		}, nil
 	}
 
-	resolvers.QueryResolver.DeferCase2 = func(ctx context.Context) ([]*DeferModel, error) {
+	resolvers.QueryResolver.DeferMultiple = func(ctx context.Context) ([]*DeferModel, error) {
 		return []*DeferModel{
 			{
 				ID:   "1",
@@ -58,228 +61,197 @@ func TestDefer(t *testing.T) {
 		}, nil
 	}
 
-	t.Run("test deferCase1 using SSE", func(t *testing.T) {
-		sse := c.SSE(context.Background(), `query testDefer {
-    deferCase1 {
-        id
-        name
-        ... on DeferModel @defer(label: "values") {
-            values
-        }
-    }
-}`)
+	deferSingleQuery := `query testDefer {
+	    deferSingle {
+	        id
+	        name
+	        ... @defer(label: "values") {
+	            values
+	        }
+	    }
+	}`
+	deferMultipleQuery := `query testDefer {
+	    deferMultiple {
+	        id
+	        name
+	        ... @defer(label: "values") {
+	            values
+	        }
+	    }
+	}`
 
-		type response struct {
-			Data struct {
-				DeferCase1 struct {
-					Id     string
-					Name   string
-					Values []string
-				}
-			}
-			Label      string          `json:"label"`
-			Path       []any           `json:"path"`
-			HasNext    bool            `json:"hasNext"`
-			Errors     json.RawMessage `json:"errors"`
-			Extensions map[string]any  `json:"extensions"`
+	type deferModel struct {
+		Id     string
+		Name   string
+		Values []string
+	}
+	type response[T any] struct {
+		Data       T
+		Label      string          `json:"label"`
+		Path       []any           `json:"path"`
+		HasNext    bool            `json:"hasNext"`
+		Errors     json.RawMessage `json:"errors"`
+		Extensions map[string]any  `json:"extensions"`
+	}
+	type sseDeferredResponse struct {
+		Data struct {
+			Values []string `json:"values"`
 		}
-		var resp response
+		Label      string          `json:"label"`
+		Path       []any           `json:"path"`
+		HasNext    bool            `json:"hasNext"`
+		Errors     json.RawMessage `json:"errors"`
+		Extensions map[string]any  `json:"extensions"`
+	}
 
-		require.NoError(t, sse.Next(&resp))
-		expectedInitialResponse := response{
-			Data: struct {
-				DeferCase1 struct {
-					Id     string
-					Name   string
-					Values []string
-				}
-			}{
-				DeferCase1: struct {
-					Id     string
-					Name   string
-					Values []string
-				}{
-					Id:     "1",
-					Name:   "Defer test 1",
-					Values: nil,
+	pathStringer := func(path []any) string {
+		var kb strings.Builder
+		for i, part := range path {
+			if i != 0 {
+				kb.WriteRune('.')
+			}
+
+			switch pathValue := part.(type) {
+			case string:
+				kb.WriteString(pathValue)
+			case float64:
+				kb.WriteString(strconv.FormatFloat(pathValue, 'f', -1, 64))
+			default:
+				t.Fatalf("unexpected path type: %T", pathValue)
+			}
+		}
+		return kb.String()
+	}
+
+	t.Run("using SSE", func(t *testing.T) {
+		cases := []struct {
+			name                      string
+			query                     string
+			expectedInitialResponse   interface{}
+			expectedDeferredResponses []sseDeferredResponse
+		}{
+			{
+				name:  "defer single",
+				query: deferSingleQuery,
+				expectedInitialResponse: response[struct {
+					DeferSingle deferModel
+				}]{
+					Data: struct {
+						DeferSingle deferModel
+					}{
+						DeferSingle: deferModel{
+							Id:     "1",
+							Name:   "Defer test 1",
+							Values: nil,
+						},
+					},
+					HasNext: true,
 				},
-			},
-			HasNext: true,
-		}
-		assert.Equal(t, expectedInitialResponse, resp)
-
-		type valuesResponse struct {
-			Data struct {
-				Values []string `json:"values"`
-			}
-			Label      string          `json:"label"`
-			Path       []any           `json:"path"`
-			HasNext    bool            `json:"hasNext"`
-			Errors     json.RawMessage `json:"errors"`
-			Extensions map[string]any  `json:"extensions"`
-		}
-
-		var valueResp valuesResponse
-		expectedResponse := valuesResponse{
-			Data: struct {
-				Values []string `json:"values"`
-			}{
-				Values: []string{"test defer 1", "test defer 2", "test defer 3"},
-			},
-			Label: "values",
-			Path:  []any{"deferCase1"},
-		}
-
-		require.NoError(t, sse.Next(&valueResp))
-
-		assert.Equal(t, expectedResponse, valueResp)
-
-		require.NoError(t, sse.Close())
-	})
-
-	t.Run("test deferCase2 using SSE", func(t *testing.T) {
-		sse := c.SSE(context.Background(), `query testDefer {
-    deferCase2 {
-        id
-        name
-        ... on DeferModel @defer(label: "values") {
-            values
-        }
-    }
-}`)
-
-		type response struct {
-			Data struct {
-				DeferCase2 []struct {
-					Id     string
-					Name   string
-					Values []string
-				}
-			}
-			Label      string          `json:"label"`
-			Path       []any           `json:"path"`
-			HasNext    bool            `json:"hasNext"`
-			Errors     json.RawMessage `json:"errors"`
-			Extensions map[string]any  `json:"extensions"`
-		}
-		var resp response
-
-		require.NoError(t, sse.Next(&resp))
-		expectedInitialResponse := response{
-			Data: struct {
-				DeferCase2 []struct {
-					Id     string
-					Name   string
-					Values []string
-				}
-			}{
-				DeferCase2: []struct {
-					Id     string
-					Name   string
-					Values []string
-				}{
+				expectedDeferredResponses: []sseDeferredResponse{
 					{
-						Id:     "1",
-						Name:   "Defer test 1",
-						Values: nil,
-					},
-					{
-						Id:     "2",
-						Name:   "Defer test 2",
-						Values: nil,
-					},
-					{
-						Id:     "3",
-						Name:   "Defer test 3",
-						Values: nil,
+						Data: struct {
+							Values []string `json:"values"`
+						}{
+							Values: []string{"test defer 1", "test defer 2", "test defer 3"},
+						},
+						Label: "values",
+						Path:  []any{"deferSingle"},
 					},
 				},
 			},
-			HasNext: true,
-		}
-		assert.Equal(t, expectedInitialResponse, resp)
-
-		type valuesResponse struct {
-			Data struct {
-				Values []string `json:"values"`
-			}
-			Label      string          `json:"label"`
-			Path       []any           `json:"path"`
-			HasNext    bool            `json:"hasNext"`
-			Errors     json.RawMessage `json:"errors"`
-			Extensions map[string]any  `json:"extensions"`
-		}
-
-		valuesByPath := make(map[string][]string, 2)
-
-		for {
-			var valueResp valuesResponse
-			require.NoError(t, sse.Next(&valueResp))
-
-			var kb strings.Builder
-			for i, path := range valueResp.Path {
-				if i != 0 {
-					kb.WriteRune('.')
-				}
-
-				switch pathValue := path.(type) {
-				case string:
-					kb.WriteString(pathValue)
-				case float64:
-					kb.WriteString(strconv.FormatFloat(pathValue, 'f', -1, 64))
-				default:
-					t.Fatalf("unexpected path type: %T", pathValue)
-				}
-			}
-
-			valuesByPath[kb.String()] = valueResp.Data.Values
-			if !valueResp.HasNext {
-				break
-			}
-		}
-
-		assert.Equal(t, []string{"test defer 1", "test defer 2", "test defer 3"}, valuesByPath["deferCase2.0"])
-		assert.Equal(t, []string{"test defer 1", "test defer 2", "test defer 3"}, valuesByPath["deferCase2.1"])
-		assert.Equal(t, []string{"test defer 1", "test defer 2", "test defer 3"}, valuesByPath["deferCase2.2"])
-
-		for i := range resp.Data.DeferCase2 {
-			resp.Data.DeferCase2[i].Values = valuesByPath["deferCase2."+strconv.FormatInt(int64(i), 10)]
-		}
-
-		expectedDeferCase2Response := response{
-			Data: struct {
-				DeferCase2 []struct {
-					Id     string
-					Name   string
-					Values []string
-				}
-			}{
-				DeferCase2: []struct {
-					Id     string
-					Name   string
-					Values []string
-				}{
+			{
+				name:  "defer multiple",
+				query: deferMultipleQuery,
+				expectedInitialResponse: response[struct {
+					DeferMultiple []deferModel
+				}]{
+					Data: struct {
+						DeferMultiple []deferModel
+					}{
+						DeferMultiple: []deferModel{
+							{
+								Id:     "1",
+								Name:   "Defer test 1",
+								Values: nil,
+							},
+							{
+								Id:     "2",
+								Name:   "Defer test 2",
+								Values: nil,
+							},
+							{
+								Id:     "3",
+								Name:   "Defer test 3",
+								Values: nil,
+							},
+						},
+					},
+					HasNext: true,
+				},
+				expectedDeferredResponses: []sseDeferredResponse{
 					{
-						Id:     "1",
-						Name:   "Defer test 1",
-						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
+						Data: struct {
+							Values []string `json:"values"`
+						}{
+							Values: []string{"test defer 1", "test defer 2", "test defer 3"},
+						},
+						Label: "values",
+						Path:  []any{"deferMultiple", float64(0)},
 					},
 					{
-						Id:     "2",
-						Name:   "Defer test 2",
-						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
+						Data: struct {
+							Values []string `json:"values"`
+						}{
+							Values: []string{"test defer 1", "test defer 2", "test defer 3"},
+						},
+						Label: "values",
+						Path:  []any{"deferMultiple", float64(1)},
 					},
 					{
-						Id:     "3",
-						Name:   "Defer test 3",
-						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
+						Data: struct {
+							Values []string `json:"values"`
+						}{
+							Values: []string{"test defer 1", "test defer 2", "test defer 3"},
+						},
+						Label: "values",
+						Path:  []any{"deferMultiple", float64(2)},
 					},
 				},
 			},
-			HasNext: true,
 		}
-		assert.Equal(t, expectedDeferCase2Response, resp)
+		for _, tc := range cases {
+			t.Run(tc.name, func(t *testing.T) {
+				initRespT := reflect.TypeOf(tc.expectedInitialResponse)
 
-		require.NoError(t, sse.Close())
+				sse := c.SSE(context.Background(), tc.query)
+				resp := reflect.New(initRespT).Elem().Interface()
+				require.NoError(t, sse.Next(&resp))
+				assert.Equal(t, tc.expectedInitialResponse, resp)
+
+				deferredResponses := make([]sseDeferredResponse, 0)
+				for {
+					var valueResp sseDeferredResponse
+					require.NoError(t, sse.Next(&valueResp))
+
+					if !valueResp.HasNext {
+						deferredResponses = append(deferredResponses, valueResp)
+						break
+					} else {
+						// Remove HasNext from comparison: we don't know the order they will be
+						// delivered in, and so this can't be known in the setup. But if HasNext
+						// does not work right we will either error out or get too few
+						// responses, so it's still checked.
+						valueResp.HasNext = false
+						deferredResponses = append(deferredResponses, valueResp)
+					}
+				}
+				require.NoError(t, sse.Close())
+
+				slices.SortFunc(deferredResponses, func(a, b sseDeferredResponse) int {
+					return cmp.Compare(pathStringer(a.Path), pathStringer(b.Path))
+				})
+				assert.Equal(t, tc.expectedDeferredResponses, deferredResponses)
+			})
+		}
 	})
 }

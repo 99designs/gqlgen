@@ -197,13 +197,13 @@ func (r *queryResolver) DefaultParameters(ctx context.Context, falsyBoolean *boo
 	panic("not implemented")
 }
 
-// DeferCase1 is the resolver for the deferCase1 field.
-func (r *queryResolver) DeferCase1(ctx context.Context) (*DeferModel, error) {
+// DeferSingle is the resolver for the deferSingle field.
+func (r *queryResolver) DeferSingle(ctx context.Context) (*DeferModel, error) {
 	panic("not implemented")
 }
 
-// DeferCase2 is the resolver for the deferCase2 field.
-func (r *queryResolver) DeferCase2(ctx context.Context) ([]*DeferModel, error) {
+// DeferMultiple is the resolver for the deferMultiple field.
+func (r *queryResolver) DeferMultiple(ctx context.Context) ([]*DeferModel, error) {
 	panic("not implemented")
 }
 

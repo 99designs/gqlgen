@@ -150,7 +150,7 @@ func TestDefer(t *testing.T) {
 			},
 		},
 		{
-			name: "defer single using fragment type",
+			name: "defer single using inline fragment with type",
 			query: `query testDefer {
 	deferSingle {
 		id
@@ -160,6 +160,45 @@ func TestDefer(t *testing.T) {
 		}
 	}
 }`,
+			expectedInitialResponse: response[struct {
+				DeferSingle deferModel
+			}]{
+				Data: struct {
+					DeferSingle deferModel
+				}{
+					DeferSingle: deferModel{
+						Id:     "1",
+						Name:   "Defer test 1",
+						Values: nil,
+					},
+				},
+				HasNext: true,
+			},
+			expectedDeferredResponses: []deferredData{
+				{
+					Data: struct {
+						Values []string `json:"values"`
+					}{
+						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
+					},
+					Path: []any{"deferSingle"},
+				},
+			},
+		},
+		{
+			name: "defer single using spread fragment",
+			query: `query testDefer {
+	deferSingle {
+		id
+		name
+		... DeferFragment @defer
+	}
+}
+
+fragment DeferFragment on DeferModel {
+	values
+}
+`,
 			expectedInitialResponse: response[struct {
 				DeferSingle deferModel
 			}]{
@@ -196,6 +235,46 @@ func TestDefer(t *testing.T) {
 		}
 	}
 }`,
+			expectedInitialResponse: response[struct {
+				DeferSingle deferModel
+			}]{
+				Data: struct {
+					DeferSingle deferModel
+				}{
+					DeferSingle: deferModel{
+						Id:     "1",
+						Name:   "Defer test 1",
+						Values: nil,
+					},
+				},
+				HasNext: true,
+			},
+			expectedDeferredResponses: []deferredData{
+				{
+					Data: struct {
+						Values []string `json:"values"`
+					}{
+						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
+					},
+					Label: "test label",
+					Path:  []any{"deferSingle"},
+				},
+			},
+		},
+		{
+			name: "defer single using spread fragment with label",
+			query: `query testDefer {
+	deferSingle {
+		id
+		name
+		... DeferFragment @defer(label: "test label")
+	}
+}
+
+fragment DeferFragment on DeferModel {
+	values
+}
+`,
 			expectedInitialResponse: response[struct {
 				DeferSingle deferModel
 			}]{

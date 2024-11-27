@@ -11,16 +11,16 @@ import (
 	"net/http/httptest"
 )
 
-type Incremental struct {
+type IncrementalHandler struct {
 	close func() error
 	next  func(response any) error
 }
 
-func (i *Incremental) Close() error {
+func (i *IncrementalHandler) Close() error {
 	return i.close()
 }
 
-func (i *Incremental) Next(response any) error {
+func (i *IncrementalHandler) Next(response any) error {
 	return i.next(response)
 }
 
@@ -56,8 +56,8 @@ type IncrementalResponse struct {
 	Extensions  map[string]any    `json:"extensions"`
 }
 
-func errorIncremental(err error) *Incremental {
-	return &Incremental{
+func errorIncremental(err error) *IncrementalHandler {
+	return &IncrementalHandler{
 		close: func() error { return nil },
 		next: func(response any) error {
 			return err
@@ -65,22 +65,25 @@ func errorIncremental(err error) *Incremental {
 	}
 }
 
-// Incremental returns a GraphQL response handler for the current GQLGen
-// implementation of the [incremental delivery over HTTP spec]. This is
-// an alternate approach to server-sent events that provides "streaming"
-// responses triggered by the use of @stream or @defer. To that end, the
-// client retains the interface of the handler returned from Client.SSE.
+// IncrementalHTTP returns a GraphQL response handler for the current
+// GQLGen implementation of the [incremental delivery over HTTP spec].
+// This spec provides for "streaming" responses triggered by the use of
+// @stream or @defer using is an alternate approach to SSE. To that end,
+// the client retains the interface of the handler returned from
+// Client.SSE.
 //
-// Incremental delivery using multipart/mixed is just the structure of
-// the response: the payloads are specified by the defer-stream spec,
+// IncrementalHTTP delivery using multipart/mixed is just the structure
+// of the response: the payloads are specified by the defer-stream spec,
 // which are in transition. For more detail, see the links in the
-// definition for transport.MultipartMixed.
+// definition for transport.MultipartMixed. We use the name
+// IncrementalHTTP here to distinguish from the multipart form upload
+// (the term "multipart" usually referring to the latter).
 //
-// The Incremental handler is not safe for concurrent use or for
-// production use at all.
+// IncrementalHandler is not safe for concurrent use, or for production
+// use at all.
 //
 // [incremental delivery over HTTP spec]: https://github.com/graphql/graphql-over-http/blob/main/rfcs/IncrementalDelivery.md
-func (p *Client) Incremental(ctx context.Context, query string, options ...Option) *Incremental {
+func (p *Client) IncrementalHTTP(ctx context.Context, query string, options ...Option) *IncrementalHandler {
 	r, err := p.newRequest(query, options...)
 	if err != nil {
 		return errorIncremental(fmt.Errorf("request: %w", err))
@@ -119,7 +122,7 @@ func (p *Client) Incremental(ctx context.Context, query string, options ...Optio
 	ctx, cancel := context.WithCancelCause(ctx)
 	initial := true
 
-	return &Incremental{
+	return &IncrementalHandler{
 		close: func() error {
 			cancel(context.Canceled)
 			return nil

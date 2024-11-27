@@ -280,7 +280,6 @@ func (a *multipartResponseAggregator) flush(w http.ResponseWriter) {
 		// TODO: use the "HasNext" status of deferResponses items to determine
 		// the operation status and pending / complete fields, but remove from
 		// the incremental (deferResponses) object.
-		var hasNext bool
 		hasNext = a.deferResponses[len(a.deferResponses)-1].HasNext != nil &&
 			*a.deferResponses[len(a.deferResponses)-1].HasNext
 		writeIncrementalJson(w, a.deferResponses, hasNext)

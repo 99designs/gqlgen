@@ -77,15 +77,15 @@ func TestDefer(t *testing.T) {
 		Extensions map[string]any  `json:"extensions"`
 	}
 
-	type deferredResponse response[struct {
+	type deferredData response[struct {
 		Values []string `json:"values"`
 	}]
 
 	type incrementalDeferredResponse struct {
-		Incremental []deferredResponse `json:"incremental"`
-		HasNext     bool               `json:"hasNext"`
-		Errors      json.RawMessage    `json:"errors"`
-		Extensions  map[string]any     `json:"extensions"`
+		Incremental []deferredData  `json:"incremental"`
+		HasNext     bool            `json:"hasNext"`
+		Errors      json.RawMessage `json:"errors"`
+		Extensions  map[string]any  `json:"extensions"`
 	}
 
 	pathStringer := func(path []any) string {
@@ -111,7 +111,7 @@ func TestDefer(t *testing.T) {
 		name                      string
 		query                     string
 		expectedInitialResponse   interface{}
-		expectedDeferredResponses []deferredResponse
+		expectedDeferredResponses []deferredData
 	}{
 		{
 			name: "defer single",
@@ -138,7 +138,7 @@ func TestDefer(t *testing.T) {
 				},
 				HasNext: true,
 			},
-			expectedDeferredResponses: []deferredResponse{
+			expectedDeferredResponses: []deferredData{
 				{
 					Data: struct {
 						Values []string `json:"values"`
@@ -174,7 +174,7 @@ func TestDefer(t *testing.T) {
 				},
 				HasNext: true,
 			},
-			expectedDeferredResponses: []deferredResponse{
+			expectedDeferredResponses: []deferredData{
 				{
 					Data: struct {
 						Values []string `json:"values"`
@@ -210,7 +210,7 @@ func TestDefer(t *testing.T) {
 				},
 				HasNext: true,
 			},
-			expectedDeferredResponses: []deferredResponse{
+			expectedDeferredResponses: []deferredData{
 				{
 					Data: struct {
 						Values []string `json:"values"`
@@ -247,7 +247,7 @@ func TestDefer(t *testing.T) {
 				},
 				HasNext: true,
 			},
-			expectedDeferredResponses: []deferredResponse{
+			expectedDeferredResponses: []deferredData{
 				{
 					Data: struct {
 						Values []string `json:"values"`
@@ -321,7 +321,7 @@ func TestDefer(t *testing.T) {
 				},
 				HasNext: true,
 			},
-			expectedDeferredResponses: []deferredResponse{
+			expectedDeferredResponses: []deferredData{
 				{
 					Data: struct {
 						Values []string `json:"values"`
@@ -390,7 +390,7 @@ func TestDefer(t *testing.T) {
 		},
 	}
 	for _, tc := range cases {
-		t.Run("using SSE/"+tc.name, func(t *testing.T) {
+		t.Run(tc.name+"/over SSE", func(t *testing.T) {
 			resT := reflect.TypeOf(tc.expectedInitialResponse)
 			resE := reflect.New(resT).Elem()
 			resp := resE.Interface()
@@ -404,9 +404,9 @@ func TestDefer(t *testing.T) {
 				return
 			}
 
-			deferredResponses := make([]deferredResponse, 0)
+			deferredResponses := make([]deferredData, 0)
 			for {
-				var valueResp deferredResponse
+				var valueResp deferredData
 				require.NoError(t, read.Next(&valueResp))
 
 				if !valueResp.HasNext {
@@ -423,18 +423,18 @@ func TestDefer(t *testing.T) {
 			}
 			require.NoError(t, read.Close())
 
-			slices.SortFunc(deferredResponses, func(a, b deferredResponse) int {
+			slices.SortFunc(deferredResponses, func(a, b deferredData) int {
 				return cmp.Compare(pathStringer(a.Path), pathStringer(b.Path))
 			})
 			assert.Equal(t, tc.expectedDeferredResponses, deferredResponses)
 		})
 
-		t.Run("using incremental delivery/"+tc.name, func(t *testing.T) {
+		t.Run(tc.name+"/over multipart HTTP", func(t *testing.T) {
 			resT := reflect.TypeOf(tc.expectedInitialResponse)
 			resE := reflect.New(resT).Elem()
 			resp := resE.Interface()
 
-			read := c.Incremental(context.Background(), tc.query)
+			read := c.IncrementalHTTP(context.Background(), tc.query)
 			require.NoError(t, read.Next(&resp))
 			assert.Equal(t, tc.expectedInitialResponse, resp)
 
@@ -443,7 +443,7 @@ func TestDefer(t *testing.T) {
 				return
 			}
 
-			deferredIncrementalData := make([]deferredResponse, 0)
+			deferredIncrementalData := make([]deferredData, 0)
 			for {
 				var valueResp incrementalDeferredResponse
 				require.NoError(t, read.Next(&valueResp))
@@ -472,7 +472,7 @@ func TestDefer(t *testing.T) {
 			}
 			require.NoError(t, read.Close())
 
-			slices.SortFunc(deferredIncrementalData, func(a, b deferredResponse) int {
+			slices.SortFunc(deferredIncrementalData, func(a, b deferredData) int {
 				return cmp.Compare(pathStringer(a.Path), pathStringer(b.Path))
 			})
 			assert.Equal(t, tc.expectedDeferredResponses, deferredIncrementalData)

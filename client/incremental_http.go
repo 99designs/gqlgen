@@ -125,6 +125,7 @@ func (p *Client) IncrementalHTTP(ctx context.Context, query string, options ...O
 
 	return &IncrementalHandler{
 		close: func() error {
+			res.Body.Close()
 			cancel(context.Canceled)
 			return nil
 		},

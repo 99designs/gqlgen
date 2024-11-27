@@ -110,7 +110,7 @@ func TestDefer(t *testing.T) {
 	cases := []struct {
 		name                      string
 		query                     string
-		expectedInitialResponse   interface{}
+		expectedInitialResponse   any
 		expectedDeferredResponses []deferredData
 	}{
 		{
@@ -491,14 +491,14 @@ fragment DeferFragment on DeferModel {
 				if !valueResp.HasNext {
 					deferredResponses = append(deferredResponses, valueResp)
 					break
-				} else {
-					// Remove HasNext from comparison: we don't know the order they will be
-					// delivered in, and so this can't be known in the setup. But if HasNext
-					// does not work right we will either error out or get too few
-					// responses, so it's still checked.
-					valueResp.HasNext = false
-					deferredResponses = append(deferredResponses, valueResp)
 				}
+
+				// Remove HasNext from comparison: we don't know the order they will be
+				// delivered in, and so this can't be known in the setup. But if HasNext
+				// does not work right we will either error out or get too few
+				// responses, so it's still checked.
+				valueResp.HasNext = false
+				deferredResponses = append(deferredResponses, valueResp)
 			}
 			require.NoError(t, read.Close())
 

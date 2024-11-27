@@ -3,6 +3,7 @@ package client
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"mime"
@@ -93,7 +94,7 @@ func (p *Client) IncrementalHTTP(ctx context.Context, query string, options ...O
 	w := httptest.NewRecorder()
 	p.h.ServeHTTP(w, r)
 
-	res := w.Result()
+	res := w.Result() //nolint:bodyclose // Remains open since we are reading from it incrementally.
 	if res.StatusCode >= http.StatusBadRequest {
 		return errorIncremental(fmt.Errorf("http %d: %s", w.Code, w.Body.String()))
 	}
@@ -110,12 +111,12 @@ func (p *Client) IncrementalHTTP(ctx context.Context, query string, options ...O
 	// expected range.
 	deferSpec, ok := params["deferspec"]
 	if !ok || deferSpec == "" {
-		return errorIncremental(fmt.Errorf("expected deferSpec in content-type"))
+		return errorIncremental(errors.New("expected deferSpec in content-type"))
 	}
 
 	boundary, ok := params["boundary"]
 	if !ok || boundary == "" {
-		return errorIncremental(fmt.Errorf("expected boundary in content-type"))
+		return errorIncremental(errors.New("expected boundary in content-type"))
 	}
 	mr := multipart.NewReader(res.Body, boundary)
 
@@ -130,6 +131,7 @@ func (p *Client) IncrementalHTTP(ctx context.Context, query string, options ...O
 		next: func(response any) (err error) {
 			defer func() {
 				if err != nil {
+					res.Body.Close()
 					cancel(err)
 				}
 			}()
@@ -157,6 +159,7 @@ func (p *Client) IncrementalHTTP(ctx context.Context, query string, options ...O
 			}
 
 			if next.Err == io.EOF {
+				res.Body.Close()
 				cancel(context.Canceled)
 				return nil
 			}
@@ -181,7 +184,7 @@ func (p *Client) IncrementalHTTP(ctx context.Context, query string, options ...O
 			// We want to unpack even if there is an error, so we can see partial
 			// responses.
 			err = unpack(data, response, p.dc)
-			if rawErrors != nil {
+			if len(rawErrors) != 0 {
 				err = RawJsonError{rawErrors}
 				return err
 			}

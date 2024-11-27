@@ -77,24 +77,15 @@ func TestDefer(t *testing.T) {
 		Extensions map[string]any  `json:"extensions"`
 	}
 
-	type sseDeferredResponse struct {
-		Data struct {
-			Values []string `json:"values"`
-		}
-		Label      string          `json:"label"`
-		Path       []any           `json:"path"`
-		HasNext    bool            `json:"hasNext"`
-		Errors     json.RawMessage `json:"errors"`
-		Extensions map[string]any  `json:"extensions"`
-	}
+	type deferredResponse response[struct {
+		Values []string `json:"values"`
+	}]
 
 	type incrementalDeferredResponse struct {
-		Incremental []response[struct {
-			Values []string `json:"values"`
-		}] `json:"incremental"`
-		HasNext    bool            `json:"hasNext"`
-		Errors     json.RawMessage `json:"errors"`
-		Extensions map[string]any  `json:"extensions"`
+		Incremental []deferredResponse `json:"incremental"`
+		HasNext     bool               `json:"hasNext"`
+		Errors      json.RawMessage    `json:"errors"`
+		Extensions  map[string]any     `json:"extensions"`
 	}
 
 	pathStringer := func(path []any) string {
@@ -117,11 +108,10 @@ func TestDefer(t *testing.T) {
 	}
 
 	cases := []struct {
-		name                         string
-		query                        string
-		expectedInitialResponse      interface{}
-		expectedSSEDeferredResponses []sseDeferredResponse
-		expectedIncrementalResponses []incrementalDeferredResponse
+		name                      string
+		query                     string
+		expectedInitialResponse   interface{}
+		expectedDeferredResponses []deferredResponse
 	}{
 		{
 			name: "defer single",
@@ -148,7 +138,7 @@ func TestDefer(t *testing.T) {
 				},
 				HasNext: true,
 			},
-			expectedSSEDeferredResponses: []sseDeferredResponse{
+			expectedDeferredResponses: []deferredResponse{
 				{
 					Data: struct {
 						Values []string `json:"values"`
@@ -156,22 +146,6 @@ func TestDefer(t *testing.T) {
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Path: []any{"deferSingle"},
-				},
-			},
-			expectedIncrementalResponses: []incrementalDeferredResponse{
-				{
-					Incremental: []response[struct {
-						Values []string `json:"values"`
-					}]{
-						{
-							Data: struct {
-								Values []string `json:"values"`
-							}{
-								Values: []string{"test defer 1", "test defer 2", "test defer 3"},
-							},
-							Path: []any{"deferSingle"},
-						},
-					},
 				},
 			},
 		},
@@ -200,7 +174,7 @@ func TestDefer(t *testing.T) {
 				},
 				HasNext: true,
 			},
-			expectedSSEDeferredResponses: []sseDeferredResponse{
+			expectedDeferredResponses: []deferredResponse{
 				{
 					Data: struct {
 						Values []string `json:"values"`
@@ -208,22 +182,6 @@ func TestDefer(t *testing.T) {
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Path: []any{"deferSingle"},
-				},
-			},
-			expectedIncrementalResponses: []incrementalDeferredResponse{
-				{
-					Incremental: []response[struct {
-						Values []string `json:"values"`
-					}]{
-						{
-							Data: struct {
-								Values []string `json:"values"`
-							}{
-								Values: []string{"test defer 1", "test defer 2", "test defer 3"},
-							},
-							Path: []any{"deferSingle"},
-						},
-					},
 				},
 			},
 		},
@@ -252,7 +210,7 @@ func TestDefer(t *testing.T) {
 				},
 				HasNext: true,
 			},
-			expectedSSEDeferredResponses: []sseDeferredResponse{
+			expectedDeferredResponses: []deferredResponse{
 				{
 					Data: struct {
 						Values []string `json:"values"`
@@ -261,23 +219,6 @@ func TestDefer(t *testing.T) {
 					},
 					Label: "test label",
 					Path:  []any{"deferSingle"},
-				},
-			},
-			expectedIncrementalResponses: []incrementalDeferredResponse{
-				{
-					Incremental: []response[struct {
-						Values []string `json:"values"`
-					}]{
-						{
-							Data: struct {
-								Values []string `json:"values"`
-							}{
-								Values: []string{"test defer 1", "test defer 2", "test defer 3"},
-							},
-							Label: "test label",
-							Path:  []any{"deferSingle"},
-						},
-					},
 				},
 			},
 		},
@@ -306,7 +247,7 @@ func TestDefer(t *testing.T) {
 				},
 				HasNext: true,
 			},
-			expectedSSEDeferredResponses: []sseDeferredResponse{
+			expectedDeferredResponses: []deferredResponse{
 				{
 					Data: struct {
 						Values []string `json:"values"`
@@ -315,23 +256,6 @@ func TestDefer(t *testing.T) {
 					},
 					Label: "test label",
 					Path:  []any{"deferSingle"},
-				},
-			},
-			expectedIncrementalResponses: []incrementalDeferredResponse{
-				{
-					Incremental: []response[struct {
-						Values []string `json:"values"`
-					}]{
-						{
-							Data: struct {
-								Values []string `json:"values"`
-							}{
-								Values: []string{"test defer 1", "test defer 2", "test defer 3"},
-							},
-							Label: "test label",
-							Path:  []any{"deferSingle"},
-						},
-					},
 				},
 			},
 		},
@@ -397,7 +321,7 @@ func TestDefer(t *testing.T) {
 				},
 				HasNext: true,
 			},
-			expectedSSEDeferredResponses: []sseDeferredResponse{
+			expectedDeferredResponses: []deferredResponse{
 				{
 					Data: struct {
 						Values []string `json:"values"`
@@ -424,41 +348,6 @@ func TestDefer(t *testing.T) {
 					},
 					Label: "test label",
 					Path:  []any{"deferMultiple", float64(2)},
-				},
-			},
-			expectedIncrementalResponses: []incrementalDeferredResponse{
-				{
-					Incremental: []response[struct {
-						Values []string `json:"values"`
-					}]{
-						{
-							Data: struct {
-								Values []string `json:"values"`
-							}{
-								Values: []string{"test defer 1", "test defer 2", "test defer 3"},
-							},
-							Label: "test label",
-							Path:  []any{"deferMultiple", float64(0)},
-						},
-						{
-							Data: struct {
-								Values []string `json:"values"`
-							}{
-								Values: []string{"test defer 1", "test defer 2", "test defer 3"},
-							},
-							Label: "test label",
-							Path:  []any{"deferMultiple", float64(1)},
-						},
-						{
-							Data: struct {
-								Values []string `json:"values"`
-							}{
-								Values: []string{"test defer 1", "test defer 2", "test defer 3"},
-							},
-							Label: "test label",
-							Path:  []any{"deferMultiple", float64(2)},
-						},
-					},
 				},
 			},
 		},
@@ -511,13 +400,13 @@ func TestDefer(t *testing.T) {
 			assert.Equal(t, tc.expectedInitialResponse, resp)
 
 			// If there are no deferred responses, we can stop here.
-			if !resE.FieldByName("HasNext").Bool() && len(tc.expectedSSEDeferredResponses) == 0 {
+			if !resE.FieldByName("HasNext").Bool() && len(tc.expectedDeferredResponses) == 0 {
 				return
 			}
 
-			deferredResponses := make([]sseDeferredResponse, 0)
+			deferredResponses := make([]deferredResponse, 0)
 			for {
-				var valueResp sseDeferredResponse
+				var valueResp deferredResponse
 				require.NoError(t, read.Next(&valueResp))
 
 				if !valueResp.HasNext {
@@ -534,10 +423,10 @@ func TestDefer(t *testing.T) {
 			}
 			require.NoError(t, read.Close())
 
-			slices.SortFunc(deferredResponses, func(a, b sseDeferredResponse) int {
+			slices.SortFunc(deferredResponses, func(a, b deferredResponse) int {
 				return cmp.Compare(pathStringer(a.Path), pathStringer(b.Path))
 			})
-			assert.Equal(t, tc.expectedSSEDeferredResponses, deferredResponses)
+			assert.Equal(t, tc.expectedDeferredResponses, deferredResponses)
 		})
 
 		t.Run("using incremental delivery/"+tc.name, func(t *testing.T) {
@@ -550,33 +439,43 @@ func TestDefer(t *testing.T) {
 			assert.Equal(t, tc.expectedInitialResponse, resp)
 
 			// If there are no deferred responses, we can stop here.
-			if !reflect.ValueOf(resp).FieldByName("HasNext").Bool() && len(tc.expectedIncrementalResponses) == 0 {
+			if !reflect.ValueOf(resp).FieldByName("HasNext").Bool() && len(tc.expectedDeferredResponses) == 0 {
 				return
 			}
 
-			deferredResponses := make([]incrementalDeferredResponse, 0)
+			deferredIncrementalData := make([]deferredResponse, 0)
 			for {
 				var valueResp incrementalDeferredResponse
 				require.NoError(t, read.Next(&valueResp))
+				assert.Empty(t, valueResp.Errors)
+				assert.Empty(t, valueResp.Extensions)
+
+				// Extract the incremental data from the response.
+				//
+				// FIXME: currently the HasNext field does not describe the state of the
+				// delivery as bounded by the associated path, but rather the state of
+				// the operation as a whole. This makes it impossible to determine it
+				// from the response, so we can not define it ahead of time.
+				//
+				// It is also questionable that the incremental data objects should
+				// include hasNext, so for now we remove them from assertion. Once we
+				// align on the spec we must update this test, as the status of the
+				// path-bounded delivery should be determinative and can be asserted.
+				for _, incr := range valueResp.Incremental {
+					incr.HasNext = false
+					deferredIncrementalData = append(deferredIncrementalData, incr)
+				}
 
 				if !valueResp.HasNext {
-					deferredResponses = append(deferredResponses, valueResp)
 					break
-				} else {
-					// Remove HasNext from comparison: we don't know the order they will be
-					// delivered in, and so this can't be known in the setup. But if HasNext
-					// does not work right we will either error out or get too few
-					// responses, so it's still checked.
-					valueResp.HasNext = false
-					deferredResponses = append(deferredResponses, valueResp)
 				}
 			}
 			require.NoError(t, read.Close())
 
-			// slices.SortFunc(deferredResponses, func(a, b incrementalDeferredResponse) int {
-			// 	return cmp.Compare(pathStringer(a.Path), pathStringer(b.Path))
-			// })
-			assert.Equal(t, tc.expectedIncrementalResponses, deferredResponses)
+			slices.SortFunc(deferredIncrementalData, func(a, b deferredResponse) int {
+				return cmp.Compare(pathStringer(a.Path), pathStringer(b.Path))
+			})
+			assert.Equal(t, tc.expectedDeferredResponses, deferredIncrementalData)
 		})
 	}
 }

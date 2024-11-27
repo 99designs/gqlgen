@@ -12,11 +12,19 @@ import (
 )
 
 type Incremental struct {
-	Close func() error
-	Next  func(response any) error
+	close func() error
+	next  func(response any) error
 }
 
-type IncrementalInitialResponse = struct {
+func (i *Incremental) Close() error {
+	return i.close()
+}
+
+func (i *Incremental) Next(response any) error {
+	return i.next(response)
+}
+
+type IncrementalInitialResponse struct {
 	Data       any             `json:"data"`
 	Label      string          `json:"label"`
 	Path       []any           `json:"path"`
@@ -25,19 +33,12 @@ type IncrementalInitialResponse = struct {
 	Extensions map[string]any  `json:"extensions"`
 }
 
-type IncrementalPendingData struct {
-	ID    string `json:"id"`
-	Path  []any  `json:"path"`
-	Label string `json:"label"`
-}
+type IncrementalData struct {
+	// Support for "items" for @stream is not yet available, only "data" for
+	// @defer, as per the 2023 spec. Similarly, this retains a more complete
+	// list of fields, but not "id," and represents a mid-point between the
+	// 2022 and 2023 specs.
 
-type IncrementalCompletedData struct {
-	ID string `json:"id"`
-}
-
-type IncrementalDataResponse struct {
-	// ID         string          `json:"id"`
-	// Items      []any           `json:"items"`
 	Data       any             `json:"data"`
 	Label      string          `json:"label"`
 	Path       []any           `json:"path"`
@@ -47,23 +48,38 @@ type IncrementalDataResponse struct {
 }
 
 type IncrementalResponse struct {
-	// Pending     []IncrementalPendingData   `json:"pending"`
-	// Completed   []IncrementalCompletedData `json:"completed"`
-	Incremental []IncrementalDataResponse `json:"incremental"`
-	HasNext     bool                      `json:"hasNext"`
-	Errors      json.RawMessage           `json:"errors"`
-	Extensions  map[string]any            `json:"extensions"`
+	// Does not include the pending or completed fields from the 2023 spec.
+
+	Incremental []IncrementalData `json:"incremental"`
+	HasNext     bool              `json:"hasNext"`
+	Errors      json.RawMessage   `json:"errors"`
+	Extensions  map[string]any    `json:"extensions"`
 }
 
 func errorIncremental(err error) *Incremental {
 	return &Incremental{
-		Close: func() error { return nil },
-		Next: func(response any) error {
+		close: func() error { return nil },
+		next: func(response any) error {
 			return err
 		},
 	}
 }
 
+// Incremental returns a GraphQL response handler for the current GQLGen
+// implementation of the [incremental delivery over HTTP spec]. This is
+// an alternate approach to server-sent events that provides "streaming"
+// responses triggered by the use of @stream or @defer. To that end, the
+// client retains the interface of the handler returned from Client.SSE.
+//
+// Incremental delivery using multipart/mixed is just the structure of
+// the response: the payloads are specified by the defer-stream spec,
+// which are in transition. For more detail, see the links in the
+// definition for transport.MultipartMixed.
+//
+// The Incremental handler is not safe for concurrent use or for
+// production use at all.
+//
+// [incremental delivery over HTTP spec]: https://github.com/graphql/graphql-over-http/blob/main/rfcs/IncrementalDelivery.md
 func (p *Client) Incremental(ctx context.Context, query string, options ...Option) *Incremental {
 	r, err := p.newRequest(query, options...)
 	if err != nil {
@@ -85,27 +101,39 @@ func (p *Client) Incremental(ctx context.Context, query string, options ...Optio
 	if mediaType != "multipart/mixed" {
 		return errorIncremental(fmt.Errorf("expected content-type multipart/mixed, got %s", mediaType))
 	}
-	boundary, ok := params["boundary"]
-	if !ok || boundary == "" {
-		return errorIncremental(fmt.Errorf("expected boundary in content-type"))
-	}
+
+	// TODO: worth checking the deferSpec either to confirm this client
+	// supports it exactly, or simply to make sure it is within some
+	// expected range.
 	deferSpec, ok := params["deferspec"]
 	if !ok || deferSpec == "" {
 		return errorIncremental(fmt.Errorf("expected deferSpec in content-type"))
 	}
 
-	errCh := make(chan error, 1)
-	initCh := make(chan IncrementalInitialResponse)
-	nextCh := make(chan IncrementalResponse)
+	boundary, ok := params["boundary"]
+	if !ok || boundary == "" {
+		return errorIncremental(fmt.Errorf("expected boundary in content-type"))
+	}
+	mr := multipart.NewReader(res.Body, boundary)
 
-	ctx, cancel := context.WithCancel(ctx)
-	go func() {
-		defer cancel()
-		defer res.Body.Close()
+	ctx, cancel := context.WithCancelCause(ctx)
+	initial := true
 
-		initialResponse := true
-		mr := multipart.NewReader(res.Body, boundary)
-		for {
+	return &Incremental{
+		close: func() error {
+			cancel(context.Canceled)
+			return nil
+		},
+		next: func(response any) (err error) {
+			defer func() {
+				if err != nil {
+					cancel(err)
+				}
+			}()
+
+			var data any
+			var rawErrors json.RawMessage
+
 			type nextPart struct {
 				*multipart.Part
 				Err error
@@ -121,77 +149,40 @@ func (p *Client) Incremental(ctx context.Context, query string, options ...Optio
 			var next nextPart
 			select {
 			case <-ctx.Done():
-				if err := ctx.Err(); err != nil {
-					errCh <- fmt.Errorf("context: %w", err)
-				}
-				return
+				return ctx.Err()
 			case next = <-nextPartCh:
 			}
 
 			if next.Err == io.EOF {
-				break
+				cancel(context.Canceled)
+				return nil
 			}
-			if next.Err != nil {
-				errCh <- fmt.Errorf("next part: %w", next.Err)
-				return
+			if err = next.Err; err != nil {
+				return err
 			}
 			if ct := next.Header.Get("Content-Type"); ct != "application/json" {
-				errCh <- fmt.Errorf(`expected content-type "application/json", got %q`, ct)
-				return
+				err = fmt.Errorf(`expected content-type "application/json", got %q`, ct)
+				return err
 			}
 
-			if initialResponse {
-				initialResponse = false
-				var data IncrementalInitialResponse
-				if err = json.NewDecoder(next.Part).Decode(&data); err != nil {
-					errCh <- fmt.Errorf("decode part: %w", err)
-					return
-				}
-				initCh <- data
-				close(initCh)
+			if initial {
+				initial = false
+				data = IncrementalInitialResponse{}
 			} else {
-				var data IncrementalResponse
-				if err = json.NewDecoder(next.Part).Decode(&data); err != nil {
-					errCh <- fmt.Errorf("decode part: %w", err)
-					return
-				}
-				nextCh <- data
+				data = IncrementalResponse{}
 			}
-		}
-	}()
-
-	return &Incremental{
-		Close: func() error {
-			cancel()
-			return nil
-		},
-		Next: func(response any) error {
-			var data any
-			var rawErrors json.RawMessage
-
-			select {
-			case nextErr := <-errCh:
-				return nextErr
-			case initData, ok := <-initCh:
-				if !ok {
-					select {
-					case nextErr := <-errCh:
-						return nextErr
-					case nextData := <-nextCh:
-						data = nextData
-						rawErrors = nextData.Errors
-					}
-				} else {
-					data = initData
-					rawErrors = initData.Errors
-				}
+			if err = json.NewDecoder(next.Part).Decode(&data); err != nil {
+				return err
 			}
-			// we want to unpack even if there is an error, so we can see partial responses
-			unpackErr := unpack(data, response, p.dc)
+
+			// We want to unpack even if there is an error, so we can see partial
+			// responses.
+			err = unpack(data, response, p.dc)
 			if rawErrors != nil {
-				return RawJsonError{rawErrors}
+				err = RawJsonError{rawErrors}
+				return err
 			}
-			return unpackErr
+			return err
 		},
 	}
 }

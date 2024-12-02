@@ -50,6 +50,7 @@ type Config struct {
 	CallArgumentDirectivesWithNull bool           `yaml:"call_argument_directives_with_null,omitempty"`
 	StructFieldsAlwaysPointers     bool           `yaml:"struct_fields_always_pointers,omitempty"`
 	ReturnPointersInUnmarshalInput bool           `yaml:"return_pointers_in_unmarshalinput,omitempty"`
+	ReturnInt32ForInt              bool           `yaml:"return_int32_for_int,omitempty"`
 	ResolversAlwaysReturnPointers  bool           `yaml:"resolvers_always_return_pointers,omitempty"`
 	NullableInputOmittable         bool           `yaml:"nullable_input_omittable,omitempty"`
 	EnableModelJsonOmitemptyTag    *bool          `yaml:"enable_model_json_omitempty_tag,omitempty"`
@@ -75,8 +76,9 @@ func DefaultConfig() *Config {
 		Models:                         TypeMap{},
 		StructFieldsAlwaysPointers:     true,
 		ReturnPointersInUnmarshalInput: false,
-		ResolversAlwaysReturnPointers:  true,
-		NullableInputOmittable:         false,
+		// ReturnInt32ForInt: true, // TODO: change default to true and opt out in config.
+		ResolversAlwaysReturnPointers: true,
+		NullableInputOmittable:        false,
 	}
 }
 
@@ -807,11 +809,11 @@ func (c *Config) injectBuiltins() {
 		"Float":               {Model: StringList{"github.com/99designs/gqlgen/graphql.FloatContext"}},
 		"String":              {Model: StringList{"github.com/99designs/gqlgen/graphql.String"}},
 		"Boolean":             {Model: StringList{"github.com/99designs/gqlgen/graphql.Boolean"}},
-		"Int": {Model: StringList{
-			"github.com/99designs/gqlgen/graphql.Int",
-			"github.com/99designs/gqlgen/graphql.Int32",
-			"github.com/99designs/gqlgen/graphql.Int64",
-		}},
+		"Int": {
+			Model: StringList{
+				"github.com/99designs/gqlgen/graphql.Int32",
+			},
+		},
 		"ID": {
 			Model: StringList{
 				"github.com/99designs/gqlgen/graphql.ID",
@@ -828,6 +830,12 @@ func (c *Config) injectBuiltins() {
 
 	// These are additional types that are injected if defined in the schema as scalars.
 	extraBuiltins := TypeMap{
+		"Int64": {
+			Model: StringList{
+				"github.com/99designs/gqlgen/graphql.Int",
+				"github.com/99designs/gqlgen/graphql.Int64",
+			},
+		},
 		"Time":   {Model: StringList{"github.com/99designs/gqlgen/graphql.Time"}},
 		"Map":    {Model: StringList{"github.com/99designs/gqlgen/graphql.Map"}},
 		"Upload": {Model: StringList{"github.com/99designs/gqlgen/graphql.Upload"}},

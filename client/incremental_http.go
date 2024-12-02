@@ -69,7 +69,7 @@ func errorIncremental(err error) *IncrementalHandler {
 // IncrementalHTTP returns a GraphQL response handler for the current
 // GQLGen implementation of the [incremental delivery over HTTP spec].
 // The IncrementalHTTP spec provides for "streaming" responses triggered by
-//  the use of @stream or @defer as an alternate approach to SSE. To that end,
+// the use of @stream or @defer as an alternate approach to SSE. To that end,
 // the client retains the interface of the handler returned from
 // Client.SSE.
 //

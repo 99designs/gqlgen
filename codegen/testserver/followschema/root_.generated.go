@@ -326,8 +326,8 @@ type ComplexityRoot struct {
 		Collision                        func(childComplexity int) int
 		DefaultParameters                func(childComplexity int, falsyBoolean *bool, truthyBoolean *bool) int
 		DefaultScalar                    func(childComplexity int, arg string) int
-		DeferCase1                       func(childComplexity int) int
-		DeferCase2                       func(childComplexity int) int
+		DeferMultiple                    func(childComplexity int) int
+		DeferSingle                      func(childComplexity int) int
 		DeprecatedField                  func(childComplexity int) int
 		DirectiveArg                     func(childComplexity int, arg string) int
 		DirectiveDouble                  func(childComplexity int) int
@@ -1281,19 +1281,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.DefaultScalar(childComplexity, args["arg"].(string)), true
 
-	case "Query.deferCase1":
-		if e.complexity.Query.DeferCase1 == nil {
+	case "Query.deferMultiple":
+		if e.complexity.Query.DeferMultiple == nil {
 			break
 		}
 
-		return e.complexity.Query.DeferCase1(childComplexity), true
+		return e.complexity.Query.DeferMultiple(childComplexity), true
 
-	case "Query.deferCase2":
-		if e.complexity.Query.DeferCase2 == nil {
+	case "Query.deferSingle":
+		if e.complexity.Query.DeferSingle == nil {
 			break
 		}
 
-		return e.complexity.Query.DeferCase2(childComplexity), true
+		return e.complexity.Query.DeferSingle(childComplexity), true
 
 	case "Query.deprecatedField":
 		if e.complexity.Query.DeprecatedField == nil {

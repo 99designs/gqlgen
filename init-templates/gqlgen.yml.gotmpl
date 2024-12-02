@@ -92,8 +92,18 @@ models:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
+
+  # The GraphQL spec explicitly states that Int is a signed 32-bit integer.
+  # Using Go int or int64 to represent it can lead to unexpected behavior, and
+  # GraphQL tools like Apollo Router will fail when communicating large numbers.
   Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int32
+  Int64:
     model:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
-      - github.com/99designs/gqlgen/graphql.Int32
+
+# Optional: ensure that resolvers use Go int32 for result values when mapping to
+# GraphQL Int.
+return_int32_for_int: true

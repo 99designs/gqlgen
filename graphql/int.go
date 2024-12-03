@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"strconv"
 )
 
@@ -93,7 +94,7 @@ func (e *Int32OverflowError) Error() string {
 }
 
 func safeCastInt32(i int64) (int32, error) {
-	if i > 2147483647 || i < -2147483648 {
+	if i > math.MaxInt32 || i < math.MinInt32 {
 		return 0, &Int32OverflowError{i}
 	}
 	return int32(i), nil

@@ -1,6 +1,6 @@
-//go:generate go run ../../../testdata/gqlgen.go -config gqlgen_default.yml -stub generated_default/stub.go
-//go:generate go run ../../../testdata/gqlgen.go -config gqlgen_compliant.yml -stub generated_compliant/stub.go
-//go:generate go run ../../../testdata/gqlgen.go -config gqlgen_compliant_input_int.yml -stub generated_compliant_input_int/stub.go
+//go:generate go run ../../../testdata/gqlgen.go -config gqlgen_default.yml -stub generated-default/stub.go
+//go:generate go run ../../../testdata/gqlgen.go -config gqlgen_compliant_strict.yml -stub generated-compliant-strict/stub.go
+//go:generate go run ../../../testdata/gqlgen.go -config gqlgen_compliant_input_int.yml -stub generated-compliant-input-int/stub.go
 
 package compliant_int
 
@@ -18,8 +18,8 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
-	genstrict "github.com/99designs/gqlgen/codegen/testserver/compliant-int/generated_compliant"
-	gendefault "github.com/99designs/gqlgen/codegen/testserver/compliant-int/generated_default"
+	genstrict "github.com/99designs/gqlgen/codegen/testserver/compliant-int/generated-compliant-strict"
+	gendefault "github.com/99designs/gqlgen/codegen/testserver/compliant-int/generated-default"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
@@ -35,7 +35,7 @@ func TestCodegen(t *testing.T) {
 	}{
 		{
 			name:    "no model configuration default generation",
-			pkgPath: "generated_default",
+			pkgPath: "generated-default",
 			signature: map[string]string{
 				"EchoIntToInt":     "func(ctx context.Context, n *int) (int, error)",
 				"EchoInt64ToInt64": "func(ctx context.Context, n *int) (int, error)",
@@ -49,7 +49,7 @@ func TestCodegen(t *testing.T) {
 		},
 		{
 			name:    "strict compliant model configuration in yaml",
-			pkgPath: "generated_compliant",
+			pkgPath: "generated-compliant-strict",
 			signature: map[string]string{
 				"EchoIntToInt":     "func(ctx context.Context, n *int32) (int32, error)",
 				"EchoInt64ToInt64": "func(ctx context.Context, n *int) (int, error)",
@@ -63,7 +63,7 @@ func TestCodegen(t *testing.T) {
 		},
 		{
 			name:    "compliant model configuration with int input setting",
-			pkgPath: "generated_compliant_input_int",
+			pkgPath: "generated-compliant-input-int",
 			signature: map[string]string{
 				"EchoIntToInt":     "func(ctx context.Context, n *int) (int32, error)",
 				"EchoInt64ToInt64": "func(ctx context.Context, n *int) (int, error)",

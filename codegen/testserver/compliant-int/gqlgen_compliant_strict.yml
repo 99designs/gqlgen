@@ -3,13 +3,13 @@ schema:
 skip_validation: true
 exec:
   layout: follow-schema
-  dir: generated_compliant
+  dir: generated-compliant-strict
   package: generated
 model:
-  filename: generated_compliant/models.go
+  filename: generated-compliant-strict/models.go
   package: generated
 resolver:
-  filename: generated_compliant/resolver.go
+  filename: generated-compliant-strict/resolver.go
   package: generated
   type: Resolver
 

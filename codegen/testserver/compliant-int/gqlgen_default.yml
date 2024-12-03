@@ -3,12 +3,12 @@ schema:
 skip_validation: true
 exec:
   layout: follow-schema
-  dir: generated_default
+  dir: generated-default
   package: generated
 model:
-  filename: generated_default/models.go
+  filename: generated-default/models.go
   package: generated
 resolver:
-  filename: generated_default/resolver.go
+  filename: generated-default/resolver.go
   package: generated
   type: Resolver

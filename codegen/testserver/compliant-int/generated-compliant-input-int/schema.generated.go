@@ -84,7 +84,7 @@ func (ec *executionContext) field_Query_echoInt64InputToInt64Object_argsInput(
 
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNInput642githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgenerated_compliant_input_intᚐInput64(ctx, tmp)
+		return ec.unmarshalNInput642githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgeneratedᚑcompliantᚑinputᚑintᚐInput64(ctx, tmp)
 	}
 
 	var zeroVal Input64
@@ -148,7 +148,7 @@ func (ec *executionContext) field_Query_echoIntInputToIntObject_argsInput(
 
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
 	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgenerated_compliant_input_intᚐInput(ctx, tmp)
+		return ec.unmarshalNInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgeneratedᚑcompliantᚑinputᚑintᚐInput(ctx, tmp)
 	}
 
 	var zeroVal Input
@@ -330,7 +330,7 @@ func (ec *executionContext) _Query_echoIntInputToIntObject(ctx context.Context, 
 	}
 	res := resTmp.(*Result)
 	fc.Result = res
-	return ec.marshalOResult2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgenerated_compliant_input_intᚐResult(ctx, field.Selections, res)
+	return ec.marshalOResult2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgeneratedᚑcompliantᚑinputᚑintᚐResult(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_echoIntInputToIntObject(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -386,7 +386,7 @@ func (ec *executionContext) _Query_echoInt64InputToInt64Object(ctx context.Conte
 	}
 	res := resTmp.(*Result64)
 	fc.Result = res
-	return ec.marshalOResult642ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgenerated_compliant_input_intᚐResult64(ctx, field.Selections, res)
+	return ec.marshalOResult642ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgeneratedᚑcompliantᚑinputᚑintᚐResult64(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Query_echoInt64InputToInt64Object(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -914,12 +914,12 @@ func (ec *executionContext) _Result64(ctx context.Context, sel ast.SelectionSet,
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgenerated_compliant_input_intᚐInput(ctx context.Context, v interface{}) (Input, error) {
+func (ec *executionContext) unmarshalNInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgeneratedᚑcompliantᚑinputᚑintᚐInput(ctx context.Context, v interface{}) (Input, error) {
 	res, err := ec.unmarshalInputInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNInput642githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgenerated_compliant_input_intᚐInput64(ctx context.Context, v interface{}) (Input64, error) {
+func (ec *executionContext) unmarshalNInput642githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgeneratedᚑcompliantᚑinputᚑintᚐInput64(ctx context.Context, v interface{}) (Input64, error) {
 	res, err := ec.unmarshalInputInput64(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -955,14 +955,14 @@ func (ec *executionContext) marshalOInt642ᚖint(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalOResult2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgenerated_compliant_input_intᚐResult(ctx context.Context, sel ast.SelectionSet, v *Result) graphql.Marshaler {
+func (ec *executionContext) marshalOResult2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgeneratedᚑcompliantᚑinputᚑintᚐResult(ctx context.Context, sel ast.SelectionSet, v *Result) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Result(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalOResult642ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgenerated_compliant_input_intᚐResult64(ctx context.Context, sel ast.SelectionSet, v *Result64) graphql.Marshaler {
+func (ec *executionContext) marshalOResult642ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgeneratedᚑcompliantᚑinputᚑintᚐResult64(ctx context.Context, sel ast.SelectionSet, v *Result64) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

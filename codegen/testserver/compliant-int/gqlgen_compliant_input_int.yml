@@ -6,7 +6,7 @@ exec:
   dir: generated_compliant_input_int
   package: generated
 model:
-  filename: generated_compliant_input_int/models_gen.go
+  filename: generated_compliant_input_int/models.go
   package: generated
 resolver:
   filename: generated_compliant_input_int/resolver.go

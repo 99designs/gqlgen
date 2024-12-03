@@ -6,7 +6,7 @@ exec:
   dir: generated_compliant
   package: generated
 model:
-  filename: generated_compliant/models_gen.go
+  filename: generated_compliant/models.go
   package: generated
 resolver:
   filename: generated_compliant/resolver.go

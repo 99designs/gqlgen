@@ -1,20 +1,15 @@
 scalar Int64
 
-enum Sign {
-  POSITIVE
-  NEGATIVE
-}
-
 input Input {
     n: Int
 }
 
-type Result {
-    m: Int!
-}
-
 input Input64 {
     n: Int64
+}
+
+type Result {
+    n: Int!
 }
 
 type Result64 {
@@ -22,11 +17,8 @@ type Result64 {
 }
 
 type Query {
-  overflowInt32ButReturnInt64(sign: Sign!): Int64
-  overflowInt32(sign: Sign!): Int
-
-  echoInt32In(n: Int): Int!
-  echoInt64In(n: Int64): Int!
-  echoInt32(input: Input!): Result
-  echoInt64(input: Input64!): Result64
+  echoIntToInt(n: Int): Int!
+  echoInt64ToInt64(n: Int64): Int64!
+  echoIntInputToIntObject(input: Input!): Result
+  echoInt64InputToInt64Object(input: Input64!): Result64
 }

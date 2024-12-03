@@ -8,33 +8,23 @@ import (
 
 type Resolver struct{}
 
-// OverflowInt32ButReturnInt64 is the resolver for the overflowInt32ButReturnInt64 field.
-func (r *queryResolver) OverflowInt32ButReturnInt64(ctx context.Context, sign Sign) (*int, error) {
+// EchoIntToInt is the resolver for the echoIntToInt field.
+func (r *queryResolver) EchoIntToInt(ctx context.Context, n *int) (int, error) {
 	panic("not implemented")
 }
 
-// OverflowInt32 is the resolver for the overflowInt32 field.
-func (r *queryResolver) OverflowInt32(ctx context.Context, sign Sign) (*int, error) {
+// EchoInt64ToInt64 is the resolver for the echoInt64ToInt64 field.
+func (r *queryResolver) EchoInt64ToInt64(ctx context.Context, n *int) (int, error) {
 	panic("not implemented")
 }
 
-// EchoInt32In is the resolver for the echoInt32In field.
-func (r *queryResolver) EchoInt32In(ctx context.Context, n *int) (int, error) {
+// EchoIntInputToIntObject is the resolver for the echoIntInputToIntObject field.
+func (r *queryResolver) EchoIntInputToIntObject(ctx context.Context, input Input) (*Result, error) {
 	panic("not implemented")
 }
 
-// EchoInt64In is the resolver for the echoInt64In field.
-func (r *queryResolver) EchoInt64In(ctx context.Context, n *int) (int, error) {
-	panic("not implemented")
-}
-
-// EchoInt32 is the resolver for the echoInt32 field.
-func (r *queryResolver) EchoInt32(ctx context.Context, input Input) (*Result, error) {
-	panic("not implemented")
-}
-
-// EchoInt64 is the resolver for the echoInt64 field.
-func (r *queryResolver) EchoInt64(ctx context.Context, input Input64) (*Result64, error) {
+// EchoInt64InputToInt64Object is the resolver for the echoInt64InputToInt64Object field.
+func (r *queryResolver) EchoInt64InputToInt64Object(ctx context.Context, input Input64) (*Result64, error) {
 	panic("not implemented")
 }
 

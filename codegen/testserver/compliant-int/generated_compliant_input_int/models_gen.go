@@ -2,12 +2,6 @@
 
 package generated
 
-import (
-	"fmt"
-	"io"
-	"strconv"
-)
-
 type Input struct {
 	N *int32 `json:"n,omitempty"`
 }
@@ -20,50 +14,9 @@ type Query struct {
 }
 
 type Result struct {
-	M int32 `json:"m"`
+	N int32 `json:"n"`
 }
 
 type Result64 struct {
 	N int `json:"n"`
-}
-
-type Sign string
-
-const (
-	SignPositive Sign = "POSITIVE"
-	SignNegative Sign = "NEGATIVE"
-)
-
-var AllSign = []Sign{
-	SignPositive,
-	SignNegative,
-}
-
-func (e Sign) IsValid() bool {
-	switch e {
-	case SignPositive, SignNegative:
-		return true
-	}
-	return false
-}
-
-func (e Sign) String() string {
-	return string(e)
-}
-
-func (e *Sign) UnmarshalGQL(v interface{}) error {
-	str, ok := v.(string)
-	if !ok {
-		return fmt.Errorf("enums must be strings")
-	}
-
-	*e = Sign(str)
-	if !e.IsValid() {
-		return fmt.Errorf("%s is not a valid Sign", str)
-	}
-	return nil
-}
-
-func (e Sign) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
 }

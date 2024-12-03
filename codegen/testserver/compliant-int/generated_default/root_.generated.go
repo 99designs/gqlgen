@@ -40,16 +40,14 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Query struct {
-		EchoInt32                   func(childComplexity int, input Input) int
-		EchoInt32In                 func(childComplexity int, n *int) int
-		EchoInt64                   func(childComplexity int, input Input64) int
-		EchoInt64In                 func(childComplexity int, n *int) int
-		OverflowInt32               func(childComplexity int, sign Sign) int
-		OverflowInt32ButReturnInt64 func(childComplexity int, sign Sign) int
+		EchoInt64InputToInt64Object func(childComplexity int, input Input64) int
+		EchoInt64ToInt64            func(childComplexity int, n *int) int
+		EchoIntInputToIntObject     func(childComplexity int, input Input) int
+		EchoIntToInt                func(childComplexity int, n *int) int
 	}
 
 	Result struct {
-		M func(childComplexity int) int
+		N func(childComplexity int) int
 	}
 
 	Result64 struct {
@@ -76,84 +74,60 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	_ = ec
 	switch typeName + "." + field {
 
-	case "Query.echoInt32":
-		if e.complexity.Query.EchoInt32 == nil {
+	case "Query.echoInt64InputToInt64Object":
+		if e.complexity.Query.EchoInt64InputToInt64Object == nil {
 			break
 		}
 
-		args, err := ec.field_Query_echoInt32_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_echoInt64InputToInt64Object_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.EchoInt32(childComplexity, args["input"].(Input)), true
+		return e.complexity.Query.EchoInt64InputToInt64Object(childComplexity, args["input"].(Input64)), true
 
-	case "Query.echoInt32In":
-		if e.complexity.Query.EchoInt32In == nil {
+	case "Query.echoInt64ToInt64":
+		if e.complexity.Query.EchoInt64ToInt64 == nil {
 			break
 		}
 
-		args, err := ec.field_Query_echoInt32In_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_echoInt64ToInt64_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.EchoInt32In(childComplexity, args["n"].(*int)), true
+		return e.complexity.Query.EchoInt64ToInt64(childComplexity, args["n"].(*int)), true
 
-	case "Query.echoInt64":
-		if e.complexity.Query.EchoInt64 == nil {
+	case "Query.echoIntInputToIntObject":
+		if e.complexity.Query.EchoIntInputToIntObject == nil {
 			break
 		}
 
-		args, err := ec.field_Query_echoInt64_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_echoIntInputToIntObject_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.EchoInt64(childComplexity, args["input"].(Input64)), true
+		return e.complexity.Query.EchoIntInputToIntObject(childComplexity, args["input"].(Input)), true
 
-	case "Query.echoInt64In":
-		if e.complexity.Query.EchoInt64In == nil {
+	case "Query.echoIntToInt":
+		if e.complexity.Query.EchoIntToInt == nil {
 			break
 		}
 
-		args, err := ec.field_Query_echoInt64In_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_echoIntToInt_args(context.TODO(), rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.EchoInt64In(childComplexity, args["n"].(*int)), true
+		return e.complexity.Query.EchoIntToInt(childComplexity, args["n"].(*int)), true
 
-	case "Query.overflowInt32":
-		if e.complexity.Query.OverflowInt32 == nil {
+	case "Result.n":
+		if e.complexity.Result.N == nil {
 			break
 		}
 
-		args, err := ec.field_Query_overflowInt32_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.OverflowInt32(childComplexity, args["sign"].(Sign)), true
-
-	case "Query.overflowInt32ButReturnInt64":
-		if e.complexity.Query.OverflowInt32ButReturnInt64 == nil {
-			break
-		}
-
-		args, err := ec.field_Query_overflowInt32ButReturnInt64_args(context.TODO(), rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.OverflowInt32ButReturnInt64(childComplexity, args["sign"].(Sign)), true
-
-	case "Result.m":
-		if e.complexity.Result.M == nil {
-			break
-		}
-
-		return e.complexity.Result.M(childComplexity), true
+		return e.complexity.Result.N(childComplexity), true
 
 	case "Result64.n":
 		if e.complexity.Result64.N == nil {
@@ -256,21 +230,16 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 var sources = []*ast.Source{
 	{Name: "../schema.graphql", Input: `scalar Int64
 
-enum Sign {
-  POSITIVE
-  NEGATIVE
-}
-
 input Input {
     n: Int
 }
 
-type Result {
-    m: Int!
-}
-
 input Input64 {
     n: Int64
+}
+
+type Result {
+    n: Int!
 }
 
 type Result64 {
@@ -278,13 +247,10 @@ type Result64 {
 }
 
 type Query {
-  overflowInt32ButReturnInt64(sign: Sign!): Int64
-  overflowInt32(sign: Sign!): Int
-
-  echoInt32In(n: Int): Int!
-  echoInt64In(n: Int64): Int!
-  echoInt32(input: Input!): Result
-  echoInt64(input: Input64!): Result64
+  echoIntToInt(n: Int): Int!
+  echoInt64ToInt64(n: Int64): Int64!
+  echoIntInputToIntObject(input: Input!): Result
+  echoInt64InputToInt64Object(input: Input64!): Result64
 }
 `, BuiltIn: false},
 }

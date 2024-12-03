@@ -17,12 +17,10 @@ import (
 // region    ************************** generated!.gotpl **************************
 
 type QueryResolver interface {
-	OverflowInt32ButReturnInt64(ctx context.Context, sign Sign) (*int, error)
-	OverflowInt32(ctx context.Context, sign Sign) (*int32, error)
-	EchoInt32In(ctx context.Context, n *int32) (int32, error)
-	EchoInt64In(ctx context.Context, n *int) (int32, error)
-	EchoInt32(ctx context.Context, input Input) (*Result, error)
-	EchoInt64(ctx context.Context, input Input64) (*Result64, error)
+	EchoIntToInt(ctx context.Context, n *int32) (int32, error)
+	EchoInt64ToInt64(ctx context.Context, n *int) (int, error)
+	EchoIntInputToIntObject(ctx context.Context, input Input) (*Result, error)
+	EchoInt64InputToInt64Object(ctx context.Context, input Input64) (*Result64, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -61,113 +59,17 @@ func (ec *executionContext) field_Query___type_argsName(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_echoInt32In_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_echoInt64InputToInt64Object_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_echoInt32In_argsN(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["n"] = arg0
-	return args, nil
-}
-func (ec *executionContext) field_Query_echoInt32In_argsN(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (*int32, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["n"]
-	if !ok {
-		var zeroVal *int32
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("n"))
-	if tmp, ok := rawArgs["n"]; ok {
-		return ec.unmarshalOInt2ᚖint32(ctx, tmp)
-	}
-
-	var zeroVal *int32
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Query_echoInt32_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_echoInt32_argsInput(ctx, rawArgs)
+	arg0, err := ec.field_Query_echoInt64InputToInt64Object_argsInput(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
 	args["input"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query_echoInt32_argsInput(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (Input, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["input"]
-	if !ok {
-		var zeroVal Input
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgenerated_compliant_input_intᚐInput(ctx, tmp)
-	}
-
-	var zeroVal Input
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Query_echoInt64In_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_echoInt64In_argsN(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["n"] = arg0
-	return args, nil
-}
-func (ec *executionContext) field_Query_echoInt64In_argsN(
-	ctx context.Context,
-	rawArgs map[string]interface{},
-) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["n"]
-	if !ok {
-		var zeroVal *int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("n"))
-	if tmp, ok := rawArgs["n"]; ok {
-		return ec.unmarshalOInt642ᚖint(ctx, tmp)
-	}
-
-	var zeroVal *int
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Query_echoInt64_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	var err error
-	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_echoInt64_argsInput(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["input"] = arg0
-	return args, nil
-}
-func (ec *executionContext) field_Query_echoInt64_argsInput(
+func (ec *executionContext) field_Query_echoInt64InputToInt64Object_argsInput(
 	ctx context.Context,
 	rawArgs map[string]interface{},
 ) (Input64, error) {
@@ -189,67 +91,99 @@ func (ec *executionContext) field_Query_echoInt64_argsInput(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_overflowInt32ButReturnInt64_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_echoInt64ToInt64_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_overflowInt32ButReturnInt64_argsSign(ctx, rawArgs)
+	arg0, err := ec.field_Query_echoInt64ToInt64_argsN(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["sign"] = arg0
+	args["n"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query_overflowInt32ButReturnInt64_argsSign(
+func (ec *executionContext) field_Query_echoInt64ToInt64_argsN(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (Sign, error) {
+) (*int, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
 	// even if the argument is null.
-	_, ok := rawArgs["sign"]
+	_, ok := rawArgs["n"]
 	if !ok {
-		var zeroVal Sign
+		var zeroVal *int
 		return zeroVal, nil
 	}
 
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("sign"))
-	if tmp, ok := rawArgs["sign"]; ok {
-		return ec.unmarshalNSign2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgenerated_compliant_input_intᚐSign(ctx, tmp)
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("n"))
+	if tmp, ok := rawArgs["n"]; ok {
+		return ec.unmarshalOInt642ᚖint(ctx, tmp)
 	}
 
-	var zeroVal Sign
+	var zeroVal *int
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_overflowInt32_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_echoIntInputToIntObject_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	arg0, err := ec.field_Query_overflowInt32_argsSign(ctx, rawArgs)
+	arg0, err := ec.field_Query_echoIntInputToIntObject_argsInput(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
-	args["sign"] = arg0
+	args["input"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query_overflowInt32_argsSign(
+func (ec *executionContext) field_Query_echoIntInputToIntObject_argsInput(
 	ctx context.Context,
 	rawArgs map[string]interface{},
-) (Sign, error) {
+) (Input, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
 	// even if the argument is null.
-	_, ok := rawArgs["sign"]
+	_, ok := rawArgs["input"]
 	if !ok {
-		var zeroVal Sign
+		var zeroVal Input
 		return zeroVal, nil
 	}
 
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("sign"))
-	if tmp, ok := rawArgs["sign"]; ok {
-		return ec.unmarshalNSign2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgenerated_compliant_input_intᚐSign(ctx, tmp)
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
+	if tmp, ok := rawArgs["input"]; ok {
+		return ec.unmarshalNInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgenerated_compliant_input_intᚐInput(ctx, tmp)
 	}
 
-	var zeroVal Sign
+	var zeroVal Input
+	return zeroVal, nil
+}
+
+func (ec *executionContext) field_Query_echoIntToInt_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	var err error
+	args := map[string]interface{}{}
+	arg0, err := ec.field_Query_echoIntToInt_argsN(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["n"] = arg0
+	return args, nil
+}
+func (ec *executionContext) field_Query_echoIntToInt_argsN(
+	ctx context.Context,
+	rawArgs map[string]interface{},
+) (*int32, error) {
+	// We won't call the directive if the argument is null.
+	// Set call_argument_directives_with_null to true to call directives
+	// even if the argument is null.
+	_, ok := rawArgs["n"]
+	if !ok {
+		var zeroVal *int32
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("n"))
+	if tmp, ok := rawArgs["n"]; ok {
+		return ec.unmarshalOInt2ᚖint32(ctx, tmp)
+	}
+
+	var zeroVal *int32
 	return zeroVal, nil
 }
 
@@ -261,8 +195,8 @@ func (ec *executionContext) field_Query_overflowInt32_argsSign(
 
 // region    **************************** field.gotpl *****************************
 
-func (ec *executionContext) _Query_overflowInt32ButReturnInt64(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_overflowInt32ButReturnInt64(ctx, field)
+func (ec *executionContext) _Query_echoIntToInt(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_echoIntToInt(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -275,21 +209,79 @@ func (ec *executionContext) _Query_overflowInt32ButReturnInt64(ctx context.Conte
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().OverflowInt32ButReturnInt64(rctx, fc.Args["sign"].(Sign))
+		return ec.resolvers.Query().EchoIntToInt(rctx, fc.Args["n"].(*int32))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
 	}
 	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*int)
+	res := resTmp.(int32)
 	fc.Result = res
-	return ec.marshalOInt642ᚖint(ctx, field.Selections, res)
+	return ec.marshalNInt2int32(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_overflowInt32ButReturnInt64(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_echoIntToInt(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_echoIntToInt_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_echoInt64ToInt64(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_echoInt64ToInt64(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().EchoInt64ToInt64(rctx, fc.Args["n"].(*int))
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt642int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_echoInt64ToInt64(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -306,15 +298,15 @@ func (ec *executionContext) fieldContext_Query_overflowInt32ButReturnInt64(ctx c
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_overflowInt32ButReturnInt64_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_echoInt64ToInt64_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_overflowInt32(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_overflowInt32(ctx, field)
+func (ec *executionContext) _Query_echoIntInputToIntObject(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_echoIntInputToIntObject(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -327,169 +319,7 @@ func (ec *executionContext) _Query_overflowInt32(ctx context.Context, field grap
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().OverflowInt32(rctx, fc.Args["sign"].(Sign))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*int32)
-	fc.Result = res
-	return ec.marshalOInt2ᚖint32(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_overflowInt32(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_overflowInt32_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_echoInt32In(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_echoInt32In(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().EchoInt32In(rctx, fc.Args["n"].(*int32))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int32)
-	fc.Result = res
-	return ec.marshalNInt2int32(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_echoInt32In(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_echoInt32In_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_echoInt64In(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_echoInt64In(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().EchoInt64In(rctx, fc.Args["n"].(*int))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int32)
-	fc.Result = res
-	return ec.marshalNInt2int32(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Query_echoInt64In(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_echoInt64In_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_echoInt32(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_echoInt32(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().EchoInt32(rctx, fc.Args["input"].(Input))
+		return ec.resolvers.Query().EchoIntInputToIntObject(rctx, fc.Args["input"].(Input))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -503,7 +333,7 @@ func (ec *executionContext) _Query_echoInt32(ctx context.Context, field graphql.
 	return ec.marshalOResult2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgenerated_compliant_input_intᚐResult(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_echoInt32(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_echoIntInputToIntObject(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -511,8 +341,8 @@ func (ec *executionContext) fieldContext_Query_echoInt32(ctx context.Context, fi
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			switch field.Name {
-			case "m":
-				return ec.fieldContext_Result_m(ctx, field)
+			case "n":
+				return ec.fieldContext_Result_n(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Result", field.Name)
 		},
@@ -524,15 +354,15 @@ func (ec *executionContext) fieldContext_Query_echoInt32(ctx context.Context, fi
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_echoInt32_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_echoIntInputToIntObject_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_echoInt64(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_echoInt64(ctx, field)
+func (ec *executionContext) _Query_echoInt64InputToInt64Object(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_echoInt64InputToInt64Object(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -545,7 +375,7 @@ func (ec *executionContext) _Query_echoInt64(ctx context.Context, field graphql.
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().EchoInt64(rctx, fc.Args["input"].(Input64))
+		return ec.resolvers.Query().EchoInt64InputToInt64Object(rctx, fc.Args["input"].(Input64))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -559,7 +389,7 @@ func (ec *executionContext) _Query_echoInt64(ctx context.Context, field graphql.
 	return ec.marshalOResult642ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgenerated_compliant_input_intᚐResult64(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_echoInt64(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_echoInt64InputToInt64Object(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -580,7 +410,7 @@ func (ec *executionContext) fieldContext_Query_echoInt64(ctx context.Context, fi
 		}
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_echoInt64_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+	if fc.Args, err = ec.field_Query_echoInt64InputToInt64Object_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -716,8 +546,8 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Result_m(ctx context.Context, field graphql.CollectedField, obj *Result) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Result_m(ctx, field)
+func (ec *executionContext) _Result_n(ctx context.Context, field graphql.CollectedField, obj *Result) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Result_n(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -730,7 +560,7 @@ func (ec *executionContext) _Result_m(ctx context.Context, field graphql.Collect
 	}()
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.M, nil
+		return obj.N, nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -747,7 +577,7 @@ func (ec *executionContext) _Result_m(ctx context.Context, field graphql.Collect
 	return ec.marshalNInt2int32(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Result_m(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Result_n(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Result",
 		Field:      field,
@@ -889,45 +719,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
-		case "overflowInt32ButReturnInt64":
-			field := field
-
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_overflowInt32ButReturnInt64(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "overflowInt32":
-			field := field
-
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_overflowInt32(ctx, field)
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "echoInt32In":
+		case "echoIntToInt":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -936,7 +728,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_echoInt32In(ctx, field)
+				res = ec._Query_echoIntToInt(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -949,7 +741,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "echoInt64In":
+		case "echoInt64ToInt64":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -958,7 +750,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_echoInt64In(ctx, field)
+				res = ec._Query_echoInt64ToInt64(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
@@ -971,7 +763,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "echoInt32":
+		case "echoIntInputToIntObject":
 			field := field
 
 			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
@@ -980,7 +772,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_echoInt32(ctx, field)
+				res = ec._Query_echoIntInputToIntObject(ctx, field)
 				return res
 			}
 
@@ -990,7 +782,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "echoInt64":
+		case "echoInt64InputToInt64Object":
 			field := field
 
 			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
@@ -999,7 +791,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_echoInt64(ctx, field)
+				res = ec._Query_echoInt64InputToInt64Object(ctx, field)
 				return res
 			}
 
@@ -1051,8 +843,8 @@ func (ec *executionContext) _Result(ctx context.Context, sel ast.SelectionSet, o
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Result")
-		case "m":
-			out.Values[i] = ec._Result_m(ctx, field, obj)
+		case "n":
+			out.Values[i] = ec._Result_n(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -1145,16 +937,6 @@ func (ec *executionContext) marshalNInt642int(ctx context.Context, sel ast.Selec
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) unmarshalNSign2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgenerated_compliant_input_intᚐSign(ctx context.Context, v interface{}) (Sign, error) {
-	var res Sign
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNSign2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgenerated_compliant_input_intᚐSign(ctx context.Context, sel ast.SelectionSet, v Sign) graphql.Marshaler {
-	return v
 }
 
 func (ec *executionContext) unmarshalOInt642ᚖint(ctx context.Context, v interface{}) (*int, error) {

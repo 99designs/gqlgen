@@ -8,12 +8,10 @@ import (
 
 type Stub struct {
 	QueryResolver struct {
-		OverflowInt32ButReturnInt64 func(ctx context.Context, sign Sign) (*int, error)
-		OverflowInt32               func(ctx context.Context, sign Sign) (*int32, error)
-		EchoInt32In                 func(ctx context.Context, n *int32) (int32, error)
-		EchoInt64In                 func(ctx context.Context, n *int) (int32, error)
-		EchoInt32                   func(ctx context.Context, input Input) (*Result, error)
-		EchoInt64                   func(ctx context.Context, input Input64) (*Result64, error)
+		EchoIntToInt                func(ctx context.Context, n *int32) (int32, error)
+		EchoInt64ToInt64            func(ctx context.Context, n *int) (int, error)
+		EchoIntInputToIntObject     func(ctx context.Context, input Input) (*Result, error)
+		EchoInt64InputToInt64Object func(ctx context.Context, input Input64) (*Result64, error)
 	}
 }
 
@@ -23,21 +21,15 @@ func (r *Stub) Query() QueryResolver {
 
 type stubQuery struct{ *Stub }
 
-func (r *stubQuery) OverflowInt32ButReturnInt64(ctx context.Context, sign Sign) (*int, error) {
-	return r.QueryResolver.OverflowInt32ButReturnInt64(ctx, sign)
+func (r *stubQuery) EchoIntToInt(ctx context.Context, n *int32) (int32, error) {
+	return r.QueryResolver.EchoIntToInt(ctx, n)
 }
-func (r *stubQuery) OverflowInt32(ctx context.Context, sign Sign) (*int32, error) {
-	return r.QueryResolver.OverflowInt32(ctx, sign)
+func (r *stubQuery) EchoInt64ToInt64(ctx context.Context, n *int) (int, error) {
+	return r.QueryResolver.EchoInt64ToInt64(ctx, n)
 }
-func (r *stubQuery) EchoInt32In(ctx context.Context, n *int32) (int32, error) {
-	return r.QueryResolver.EchoInt32In(ctx, n)
+func (r *stubQuery) EchoIntInputToIntObject(ctx context.Context, input Input) (*Result, error) {
+	return r.QueryResolver.EchoIntInputToIntObject(ctx, input)
 }
-func (r *stubQuery) EchoInt64In(ctx context.Context, n *int) (int32, error) {
-	return r.QueryResolver.EchoInt64In(ctx, n)
-}
-func (r *stubQuery) EchoInt32(ctx context.Context, input Input) (*Result, error) {
-	return r.QueryResolver.EchoInt32(ctx, input)
-}
-func (r *stubQuery) EchoInt64(ctx context.Context, input Input64) (*Result64, error) {
-	return r.QueryResolver.EchoInt64(ctx, input)
+func (r *stubQuery) EchoInt64InputToInt64Object(ctx context.Context, input Input64) (*Result64, error) {
+	return r.QueryResolver.EchoInt64InputToInt64Object(ctx, input)
 }

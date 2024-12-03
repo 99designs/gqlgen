@@ -45,12 +45,12 @@ type Config struct {
 	// If this is set to true, argument directives that
 	// decorate a field with a null value will still be called.
 	//
-	// This enables argumment directives to not just mutate
+	// This enables argument directives to not just mutate
 	// argument values but to set them even if they're null.
 	CallArgumentDirectivesWithNull bool           `yaml:"call_argument_directives_with_null,omitempty"`
 	StructFieldsAlwaysPointers     bool           `yaml:"struct_fields_always_pointers,omitempty"`
 	ReturnPointersInUnmarshalInput bool           `yaml:"return_pointers_in_unmarshalinput,omitempty"`
-	ReturnInt32ForInt              bool           `yaml:"return_int32_for_int,omitempty"`
+	InputIntForInt32               bool           `yaml:"input_int_for_int32,omitempty"`
 	ResolversAlwaysReturnPointers  bool           `yaml:"resolvers_always_return_pointers,omitempty"`
 	NullableInputOmittable         bool           `yaml:"nullable_input_omittable,omitempty"`
 	EnableModelJsonOmitemptyTag    *bool          `yaml:"enable_model_json_omitempty_tag,omitempty"`
@@ -76,7 +76,7 @@ func DefaultConfig() *Config {
 		Models:                         TypeMap{},
 		StructFieldsAlwaysPointers:     true,
 		ReturnPointersInUnmarshalInput: false,
-		// ReturnInt32ForInt: true, // TODO: change default to true and opt out in config.
+		// InputIntForInt32: true, // TODO: change default to true and opt out in config.
 		ResolversAlwaysReturnPointers: true,
 		NullableInputOmittable:        false,
 	}
@@ -810,8 +810,12 @@ func (c *Config) injectBuiltins() {
 		"String":              {Model: StringList{"github.com/99designs/gqlgen/graphql.String"}},
 		"Boolean":             {Model: StringList{"github.com/99designs/gqlgen/graphql.Boolean"}},
 		"Int": {
+			// FIXME: using int / int64 for Int is not spec compliant and introduces
+			// security risks. We should default to int32.
 			Model: StringList{
+				"github.com/99designs/gqlgen/graphql.Int",
 				"github.com/99designs/gqlgen/graphql.Int32",
+				"github.com/99designs/gqlgen/graphql.Int64",
 			},
 		},
 		"ID": {

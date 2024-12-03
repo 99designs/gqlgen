@@ -35,7 +35,7 @@ type Object struct {
 	Stream                   bool
 	Directives               []*Directive
 	PointersInUnmarshalInput bool
-	Int32ForInt              bool
+	IntForInt32              bool
 }
 
 func (b *builder) buildObject(typ *ast.Definition) (*Object, error) {
@@ -51,7 +51,7 @@ func (b *builder) buildObject(typ *ast.Definition) (*Object, error) {
 		Stream:                   typ == b.Schema.Subscription,
 		Directives:               dirs,
 		PointersInUnmarshalInput: b.Config.ReturnPointersInUnmarshalInput,
-		Int32ForInt:              b.Config.ReturnInt32ForInt,
+		IntForInt32:              b.Config.InputIntForInt32,
 		ResolverInterface: types.NewNamed(
 			types.NewTypeName(0, b.Config.Exec.Pkg(), caser.String(typ.Name)+"Resolver", nil),
 			nil,

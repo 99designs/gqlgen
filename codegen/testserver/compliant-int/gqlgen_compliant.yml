@@ -1,0 +1,23 @@
+schema:
+  - "*.graphql"
+skip_validation: true
+exec:
+  layout: follow-schema
+  dir: generated_compliant_config
+  package: generated
+model:
+  filename: generated_compliant_config/models_gen.go
+  package: generated
+resolver:
+  filename: generated_compliant_config/resolver.go
+  package: generated
+  type: Resolver
+
+models:
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int32
+  Int64:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64

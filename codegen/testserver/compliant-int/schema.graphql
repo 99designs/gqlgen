@@ -1,0 +1,32 @@
+scalar Int64
+
+enum Sign {
+  POSITIVE
+  NEGATIVE
+}
+
+input Input {
+    n: Int
+}
+
+type Result {
+    m: Int!
+}
+
+input Input64 {
+    n: Int64
+}
+
+type Result64 {
+    n: Int64!
+}
+
+type Query {
+  overflowInt32ButReturnInt64(sign: Sign!): Int64
+  overflowInt32(sign: Sign!): Int
+
+  echoInt32In(n: Int): Int!
+  echoInt64In(n: Int64): Int!
+  echoInt32(input: Input!): Result
+  echoInt64(input: Input64!): Result64
+}

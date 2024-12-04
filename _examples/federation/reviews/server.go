@@ -9,6 +9,7 @@ import (
 	"github.com/99designs/gqlgen/_examples/federation/reviews/graph"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/debug"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 )
@@ -26,6 +27,7 @@ func main() {
 	)
 	srv.AddTransport(transport.GET{})
 	srv.AddTransport(transport.POST{})
+	srv.Use(extension.Introspection{})
 	srv.Use(&debug.Tracer{})
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))

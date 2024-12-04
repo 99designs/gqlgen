@@ -7,12 +7,13 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/debug"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 )
 
@@ -61,6 +62,7 @@ func newServer(name, port string, schema graphql.ExecutableSchema) *http.Server 
 	srv := handler.New(schema)
 	srv.AddTransport(transport.GET{})
 	srv.AddTransport(transport.POST{})
+	srv.Use(extension.Introspection{})
 	srv.Use(&debug.Tracer{})
 	mux := http.NewServeMux()
 	mux.Handle("/", playground.Handler("GraphQL playground", "/query"))

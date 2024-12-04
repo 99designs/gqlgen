@@ -69,7 +69,8 @@ func TestIntrospection(t *testing.T) {
 	t.Run("disabled by middleware", func(t *testing.T) {
 		resolvers := &Stub{}
 
-		srv := handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers}))
+		srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+		srv.AddTransport(transport.POST{})
 		srv.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
 			graphql.GetOperationContext(ctx).DisableIntrospection = true
 			return next(ctx)

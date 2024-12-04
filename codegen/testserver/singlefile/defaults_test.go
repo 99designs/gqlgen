@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
@@ -20,7 +21,8 @@ func assertDefaults(t *testing.T, ret *DefaultParametersMirror) {
 
 func TestDefaults(t *testing.T) {
 	resolvers := &Stub{}
-	srv := handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv.AddTransport(transport.POST{})
 	c := client.New(srv)
 
 	t.Run("default field parameters", func(t *testing.T) {

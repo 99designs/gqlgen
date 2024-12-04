@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
@@ -17,10 +18,8 @@ func TestResponseExtension(t *testing.T) {
 		return "Ok", nil
 	}
 
-	srv := handler.NewDefaultServer(
-		NewExecutableSchema(Config{Resolvers: resolvers}),
-	)
-
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv.AddTransport(transport.POST{})
 	srv.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
 		graphql.RegisterExtension(ctx, "example", "value")
 

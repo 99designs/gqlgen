@@ -2,7 +2,7 @@ package transport_test
 
 import (
 	"context"
-	"encoding/json"
+	"github.com/goccy/go-json"
 	"errors"
 	"net/http"
 	"net/http/httptest"

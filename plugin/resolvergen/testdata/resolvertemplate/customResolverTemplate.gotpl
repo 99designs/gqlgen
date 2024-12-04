@@ -6,7 +6,7 @@
 {{ reserveImport "sync"  }}
 {{ reserveImport "errors"  }}
 {{ reserveImport "bytes"  }}
-{{ reserveImport "encoding/json"  }}
+{{ reserveImport "github.com/goccy/go-json"  }}
 
 {{ reserveImport "github.com/vektah/gqlparser/v2" }}
 {{ reserveImport "github.com/vektah/gqlparser/v2/ast" }}

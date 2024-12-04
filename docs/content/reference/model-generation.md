@@ -11,7 +11,7 @@ advantageous, or even necessary, to have control over some aspects of this outpu
 ## json ",omitempty"
 
 By default, fields that are marked as nullable in the GraphQL schema, e.g. `field: String` rather than `field: String!`,
-have the [json ",omitempty"](https://pkg.go.dev/encoding/json#Marshal) field tag applied to them.  This is probably fine
+have the [json ",omitempty"](https://pkg.go.dev/github.com/goccy/go-json#Marshal) field tag applied to them.  This is probably fine
 if the downstream consumers of json serialized representations of this model are all written in Go, but obviously this
 is not always true.
 

@@ -1,6 +1,6 @@
 package graphql
 
-import "encoding/json"
+import "github.com/goccy/go-json"
 
 // Omittable is a wrapper around a value that also stores whether it is set
 // or not.

@@ -3,7 +3,7 @@ package client
 import (
 	"bufio"
 	"context"
-	"encoding/json"
+	"github.com/goccy/go-json"
 	"fmt"
 	"net/http/httptest"
 	"net/textproto"

@@ -1,7 +1,7 @@
 package singlefile
 
 import (
-	"encoding/json"
+	"github.com/goccy/go-json"
 	"errors"
 	"io"
 	"regexp"

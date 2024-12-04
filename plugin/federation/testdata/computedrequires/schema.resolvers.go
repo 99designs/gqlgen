@@ -6,7 +6,7 @@ package computedrequires
 
 import (
 	"context"
-	"encoding/json"
+	"github.com/goccy/go-json"
 	"fmt"
 
 	explicitrequires "github.com/99designs/gqlgen/plugin/federation/testdata/computedrequires/generated"

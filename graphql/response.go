@@ -2,7 +2,7 @@ package graphql
 
 import (
 	"context"
-	"encoding/json"
+	"github.com/goccy/go-json"
 	"fmt"
 
 	"github.com/vektah/gqlparser/v2/ast"

@@ -1,6 +1,6 @@
 package client
 
-import "encoding/json"
+import "github.com/goccy/go-json"
 
 // RawJsonError is a json formatted error from a GraphQL server.
 type RawJsonError struct {

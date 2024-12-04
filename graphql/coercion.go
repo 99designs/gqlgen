@@ -1,7 +1,7 @@
 package graphql
 
 import (
-	"encoding/json"
+	"github.com/goccy/go-json"
 )
 
 // CoerceList applies coercion from a single value to a list.

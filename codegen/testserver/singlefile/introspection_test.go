@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
@@ -29,9 +30,11 @@ func TestIntrospection(t *testing.T) {
 	t.Run("enabled by default", func(t *testing.T) {
 		resolvers := &Stub{}
 
-		c := client.New(handler.NewDefaultServer(
-			NewExecutableSchema(Config{Resolvers: resolvers}),
-		))
+		srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+		srv.AddTransport(transport.POST{})
+		srv.Use(extension.Introspection{})
+
+		c := client.New(srv)
 
 		var resp any
 		err := c.Post(introspection.Query, &resp)

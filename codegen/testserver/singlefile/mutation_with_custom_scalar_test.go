@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
-	"github.com/99designs/gqlgen/graphql/handler"
 )
 
 func TestErrorInsideMutationArgument(t *testing.T) {
@@ -16,7 +15,7 @@ func TestErrorInsideMutationArgument(t *testing.T) {
 		return "Hello world", nil
 	}
 
-	c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+	c := newDefaultClient(NewExecutableSchema(Config{Resolvers: resolvers}))
 
 	t.Run("mutation with correct input doesn't return error", func(t *testing.T) {
 		var resp map[string]any

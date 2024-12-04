@@ -5,9 +5,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-
-	"github.com/99designs/gqlgen/client"
-	"github.com/99designs/gqlgen/graphql/handler"
 )
 
 func TestPrimitiveObjects(t *testing.T) {
@@ -20,7 +17,7 @@ func TestPrimitiveObjects(t *testing.T) {
 		return int(*obj), nil
 	}
 
-	c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+	c := newDefaultClient(NewExecutableSchema(Config{Resolvers: resolvers}))
 
 	t.Run("can fetch value", func(t *testing.T) {
 		var resp struct {
@@ -52,7 +49,7 @@ func TestPrimitiveStringObjects(t *testing.T) {
 		return len(string(*obj)), nil
 	}
 
-	c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+	c := newDefaultClient(NewExecutableSchema(Config{Resolvers: resolvers}))
 
 	t.Run("can fetch value", func(t *testing.T) {
 		var resp struct {

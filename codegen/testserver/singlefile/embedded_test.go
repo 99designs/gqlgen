@@ -5,9 +5,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-
-	"github.com/99designs/gqlgen/client"
-	"github.com/99designs/gqlgen/graphql/handler"
 )
 
 type fakeUnexportedEmbeddedInterface struct{}
@@ -28,9 +25,7 @@ func TestEmbedded(t *testing.T) {
 		return &EmbeddedCase3{&fakeUnexportedEmbeddedInterface{}}, nil
 	}
 
-	c := client.New(handler.NewDefaultServer(
-		NewExecutableSchema(Config{Resolvers: resolver}),
-	))
+	c := newDefaultClient(NewExecutableSchema(Config{Resolvers: resolver}))
 
 	t.Run("embedded case 1", func(t *testing.T) {
 		var resp struct {

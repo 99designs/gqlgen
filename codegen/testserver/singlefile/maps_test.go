@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
-	"github.com/99designs/gqlgen/graphql/handler"
 )
 
 func TestMaps(t *testing.T) {
@@ -24,9 +23,7 @@ func TestMaps(t *testing.T) {
 		return in.Map, nil
 	}
 
-	c := client.New(handler.NewDefaultServer(
-		NewExecutableSchema(Config{Resolvers: resolver}),
-	))
+	c := newDefaultClient(NewExecutableSchema(Config{Resolvers: resolver}))
 	t.Run("unset", func(t *testing.T) {
 		var resp struct {
 			MapStringInterface map[string]any

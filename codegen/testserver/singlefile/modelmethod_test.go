@@ -5,9 +5,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-
-	"github.com/99designs/gqlgen/client"
-	"github.com/99designs/gqlgen/graphql/handler"
 )
 
 func TestModelMethods(t *testing.T) {
@@ -19,9 +16,7 @@ func TestModelMethods(t *testing.T) {
 		return true, nil
 	}
 
-	c := client.New(handler.NewDefaultServer(
-		NewExecutableSchema(Config{Resolvers: resolver}),
-	))
+	c := newDefaultClient(NewExecutableSchema(Config{Resolvers: resolver}))
 	t.Run("without context", func(t *testing.T) {
 		var resp struct {
 			ModelMethods struct {

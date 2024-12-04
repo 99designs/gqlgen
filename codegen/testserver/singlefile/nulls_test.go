@@ -5,6 +5,9 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/99designs/gqlgen/client"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 )
 
@@ -29,7 +32,9 @@ func TestNullBubbling(t *testing.T) {
 		return []*Error{nil}, nil
 	}
 
-	c := newDefaultClient(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv.AddTransport(transport.POST{})
+	c := client.New(srv)
 
 	t.Run("when function errors on non required field", func(t *testing.T) {
 		var resp struct {

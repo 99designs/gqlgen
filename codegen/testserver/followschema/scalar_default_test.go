@@ -4,13 +4,18 @@ import (
 	"context"
 	"testing"
 
+	"github.com/99designs/gqlgen/client"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 )
 
 func TestDefaultScalarImplementation(t *testing.T) {
 	resolvers := &Stub{}
 
-	c := newDefaultClient(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv.AddTransport(transport.POST{})
+	c := client.New(srv)
 
 	resolvers.QueryResolver.DefaultScalar = func(ctx context.Context, arg string) (i string, e error) {
 		return arg, nil

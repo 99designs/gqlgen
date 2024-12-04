@@ -6,15 +6,13 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/codegen/testserver/followschema/otherpkg"
-	"github.com/99designs/gqlgen/graphql/handler"
 )
 
 func TestWrappedTypes(t *testing.T) {
 	resolvers := &Stub{}
 
-	c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+	c := newDefaultClient(NewExecutableSchema(Config{Resolvers: resolvers}))
 
 	resolvers.QueryResolver.WrappedScalar = func(ctx context.Context) (scalar WrappedScalar, e error) {
 		return "hello", nil

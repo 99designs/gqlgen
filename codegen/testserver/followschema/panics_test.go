@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
@@ -25,7 +26,8 @@ func TestPanics(t *testing.T) {
 		return []MarshalPanic{MarshalPanic("aa"), MarshalPanic("bb")}, nil
 	}
 
-	srv := handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv.AddTransport(transport.POST{})
 	srv.SetRecoverFunc(func(ctx context.Context, err any) (userMessage error) {
 		return fmt.Errorf("panic: %v", err)
 	})

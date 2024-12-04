@@ -5,9 +5,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-
-	"github.com/99designs/gqlgen/client"
-	"github.com/99designs/gqlgen/graphql/handler"
 )
 
 func TestValidType(t *testing.T) {
@@ -19,7 +16,7 @@ func TestValidType(t *testing.T) {
 		}, nil
 	}
 
-	c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+	c := newDefaultClient(NewExecutableSchema(Config{Resolvers: resolvers}))
 
 	t.Run("fields with differing cases can be distinguished", func(t *testing.T) {
 		var resp struct {

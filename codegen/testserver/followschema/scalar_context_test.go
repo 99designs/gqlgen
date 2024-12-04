@@ -6,15 +6,12 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
-
-	"github.com/99designs/gqlgen/client"
-	"github.com/99designs/gqlgen/graphql/handler"
 )
 
 func TestFloatInfAndNaN(t *testing.T) {
 	resolvers := &Stub{}
 
-	c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+	c := newDefaultClient(NewExecutableSchema(Config{Resolvers: resolvers}))
 
 	resolvers.QueryResolver.Infinity = func(ctx context.Context) (float64, error) {
 		return math.Inf(-1), nil
@@ -29,7 +26,7 @@ func TestFloatInfAndNaN(t *testing.T) {
 func TestContextPassedToMarshal(t *testing.T) {
 	resolvers := &Stub{}
 
-	c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+	c := newDefaultClient(NewExecutableSchema(Config{Resolvers: resolvers}))
 
 	resolvers.QueryResolver.StringFromContextInterface = func(ctx context.Context) (*StringFromContextInterface, error) {
 		return &StringFromContextInterface{}, nil

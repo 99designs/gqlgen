@@ -7,7 +7,6 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
-	"github.com/99designs/gqlgen/graphql/handler"
 )
 
 func TestEnumsResolver(t *testing.T) {
@@ -16,7 +15,7 @@ func TestEnumsResolver(t *testing.T) {
 		return input.Enum, nil
 	}
 
-	c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+	c := newDefaultClient(NewExecutableSchema(Config{Resolvers: resolvers}))
 
 	t.Run("input with valid enum value", func(t *testing.T) {
 		var resp struct {

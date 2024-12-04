@@ -4,6 +4,7 @@ package federation
 import (
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
@@ -13,11 +14,13 @@ import (
 )
 
 func TestComputedRequires(t *testing.T) {
-	c := client.New(handler.NewDefaultServer(
+	srv := handler.New(
 		generated.NewExecutableSchema(generated.Config{
 			Resolvers: &computedrequires.Resolver{},
 		}),
-	))
+	)
+	srv.AddTransport(transport.POST{})
+	c := client.New(srv)
 
 	t.Run("PlanetRequires entities with requires directive", func(t *testing.T) {
 		representations := []map[string]any{
@@ -134,11 +137,13 @@ func TestComputedRequires(t *testing.T) {
 }
 
 func TestMultiComputedRequires(t *testing.T) {
-	c := client.New(handler.NewDefaultServer(
+	srv := handler.New(
 		generated.NewExecutableSchema(generated.Config{
 			Resolvers: &computedrequires.Resolver{},
 		}),
-	))
+	)
+	srv.AddTransport(transport.POST{})
+	c := client.New(srv)
 
 	t.Run("MultiHelloRequires entities with requires directive", func(t *testing.T) {
 		representations := []map[string]any{

@@ -27,7 +27,7 @@ func TestIntrospection(t *testing.T) {
 		require.EqualError(t, err, "[{\"message\":\"introspection disabled\",\"path\":[\"__schema\"]}]")
 	})
 
-	t.Run("enabled by by adding extension", func(t *testing.T) {
+	t.Run("enabled by adding extension", func(t *testing.T) {
 		resolvers := &Stub{}
 
 		srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))

@@ -19,7 +19,9 @@ import (
 
 func TestFileUpload(t *testing.T) {
 	resolver := &Stub{}
-	srv := httptest.NewServer(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolver})))
+	h := handler.New(NewExecutableSchema(Config{Resolvers: resolver}))
+	h.AddTransport(transport.MultipartForm{})
+	srv := httptest.NewServer(h)
 	defer srv.Close()
 	gql := gqlclient.New(srv.Config.Handler, gqlclient.Path("/graphql"))
 

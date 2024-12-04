@@ -189,6 +189,48 @@ func TestWebsocketWithKeepAlive(t *testing.T) {
 	assert.Equal(t, connectionKeepAliveMsg, msg.Type)
 }
 
+func TestWebsocketWithPassedHeaders(t *testing.T) {
+	h := testserver.New()
+	h.AddTransport(transport.Websocket{
+		KeepAlivePingInterval: 100 * time.Millisecond,
+	})
+
+	h.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+		assert.NotNil(t, graphql.GetOperationContext(ctx).Headers)
+
+		return next(ctx)
+	})
+
+	srv := httptest.NewServer(h)
+	defer srv.Close()
+
+	c := wsConnect(srv.URL)
+	defer c.Close()
+
+	require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
+	assert.Equal(t, connectionAckMsg, readOp(c).Type)
+	assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
+
+	require.NoError(t, c.WriteJSON(&operationMessage{
+		Type:    startMsg,
+		ID:      "test_1",
+		Payload: json.RawMessage(`{"query": "subscription { name }"}`),
+	}))
+
+	// keepalive
+	msg := readOp(c)
+	assert.Equal(t, connectionKeepAliveMsg, msg.Type)
+
+	// server message
+	h.SendNextSubscriptionMessage()
+	msg = readOp(c)
+	assert.Equal(t, dataMsg, msg.Type)
+
+	// keepalive
+	msg = readOp(c)
+	assert.Equal(t, connectionKeepAliveMsg, msg.Type)
+}
+
 func TestWebsocketInitFunc(t *testing.T) {
 	t.Run("accept connection if WebsocketInitFunc is NOT provided", func(t *testing.T) {
 		h := testserver.New()

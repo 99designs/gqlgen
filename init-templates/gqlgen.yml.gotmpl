@@ -6,6 +6,8 @@ schema:
 exec:
   filename: graph/generated.go
   package: graph
+  # Optional: Maximum number of goroutines in concurrency to use per child resolvers(default: unlimited)
+  # worker_limit: 1000
 
 # Uncomment to enable federation
 # federation:

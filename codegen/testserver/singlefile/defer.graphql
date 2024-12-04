@@ -1,6 +1,6 @@
 extend type Query {
-    deferCase1: DeferModel
-    deferCase2: [DeferModel!]
+    deferSingle: DeferModel
+    deferMultiple: [DeferModel!]
 }
 
 type DeferModel {

@@ -54,6 +54,7 @@ type (
 		receivedPong    bool
 		exec            graphql.GraphExecutor
 		closed          bool
+		headers         http.Header
 
 		initPayload InitPayload
 	}
@@ -119,6 +120,7 @@ func (t Websocket) Do(w http.ResponseWriter, r *http.Request, exec graphql.Graph
 		ctx:       r.Context(),
 		exec:      exec,
 		me:        me,
+		headers:   r.Header,
 		Websocket: t,
 	}
 
@@ -386,6 +388,8 @@ func (c *wsConnection) subscribe(start time.Time, msg *message) {
 		Start: start,
 		End:   graphql.Now(),
 	}
+
+	params.Headers = c.headers
 
 	rc, err := c.exec.CreateOperationContext(ctx, params)
 	if err != nil {

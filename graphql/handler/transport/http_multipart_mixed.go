@@ -256,15 +256,34 @@ func (a *multipartResponseAggregator) flush(w http.ResponseWriter) {
 
 		writeJson(w, a.initialResponse)
 		hasNext = a.initialResponse.HasNext != nil && *a.initialResponse.HasNext
+
+		// Handle when initial is aggregated with deferred responses.
+		if len(a.deferResponses) > 0 {
+			fmt.Fprintf(w, "\r\n")
+			writeBoundary(w, a.boundary, false)
+		}
+
 		// Reset the initial response so we don't send it again
 		a.initialResponse = nil
 	}
 
 	if len(a.deferResponses) > 0 {
 		writeContentTypeHeader(w)
+
+		// Note: while the 2023 spec that includes "incremental" does not
+		// explicitly list the fields that should be included as part of the
+		// incremental object, it shows hasNext only on the response payload
+		// (marking the status of the operation as a whole), and instead the
+		// response payload implements pending and complete fields to mark the
+		// status of the incrementally delivered data.
+		//
+		// TODO: use the "HasNext" status of deferResponses items to determine
+		// the operation status and pending / complete fields, but remove from
+		// the incremental (deferResponses) object.
 		hasNext = a.deferResponses[len(a.deferResponses)-1].HasNext != nil &&
 			*a.deferResponses[len(a.deferResponses)-1].HasNext
 		writeIncrementalJson(w, a.deferResponses, hasNext)
+
 		// Reset the deferResponses so we don't send them again
 		a.deferResponses = nil
 	}

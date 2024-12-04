@@ -77,7 +77,7 @@ func HasOperationContext(ctx context.Context) bool {
 	return ok && val != nil
 }
 
-// This is just a convenient wrapper method for CollectFields
+// CollectFieldsCtx is just a convenient wrapper method for CollectFields.
 func CollectFieldsCtx(ctx context.Context, satisfies []string) []CollectedField {
 	resctx := GetFieldContext(ctx)
 	return CollectFields(GetOperationContext(ctx), resctx.Field.Selections, satisfies)

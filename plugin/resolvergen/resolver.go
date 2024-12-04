@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -45,6 +44,7 @@ func (m *Plugin) GenerateCode(data *codegen.Data) error {
 	case config.LayoutSingleFile:
 		return m.generateSingleFile(data)
 	case config.LayoutFollowSchema:
+
 		return m.generatePerSchema(data)
 	}
 
@@ -54,10 +54,10 @@ func (m *Plugin) GenerateCode(data *codegen.Data) error {
 func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 	file := File{}
 
-	if _, err := os.Stat(data.Config.Resolver.Filename); err == nil &&
+	if fileExists(data.Config.Resolver.Filename) &&
 		data.Config.Resolver.PreserveResolver {
 		// file already exists and config says not to update resolver
-		// with layout = single so just return
+		// so just return
 		return nil
 	}
 
@@ -93,7 +93,7 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 		}
 	}
 
-	if _, err := os.Stat(data.Config.Resolver.Filename); err == nil {
+	if fileExists(data.Config.Resolver.Filename) {
 		file.name = data.Config.Resolver.Filename
 		file.imports = rewriter.ExistingImports(file.name)
 		file.RemainingSource = rewriter.RemainingSource(file.name)
@@ -196,6 +196,11 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 	}
 
 	for _, file := range files {
+		if fileExists(file.name) &&
+			data.Config.Resolver.PreserveResolver {
+			// file already exists and config says not to update resolver
+			continue
+		}
 		resolverBuild := &ResolverBuild{
 			File:                file,
 			PackageName:         data.Config.Resolver.Package,
@@ -229,7 +234,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 		}
 	}
 
-	if _, err := os.Stat(data.Config.Resolver.Filename); errors.Is(err, fs.ErrNotExist) {
+	if !fileExists(data.Config.Resolver.Filename) {
 		err := templates.Render(templates.Options{
 			PackageName: data.Config.Resolver.Package,
 			FileNotice: `
@@ -316,4 +321,11 @@ func readResolverTemplate(customResolverTemplate string) string {
 		panic(err)
 	}
 	return string(contentBytes)
+}
+
+func fileExists(fileName string) bool {
+	if _, err := os.Stat(fileName); err == nil {
+		return true
+	}
+	return false
 }

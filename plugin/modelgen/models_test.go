@@ -200,7 +200,6 @@ func TestModelGeneration(t *testing.T) {
 			},
 		}
 		for _, tc := range cases {
-			tc := tc
 			t.Run(tc.name, func(t *testing.T) {
 				typeSpec, ok := generated.Scope.Lookup(tc.name).Decl.(*ast.TypeSpec)
 				require.True(t, ok)

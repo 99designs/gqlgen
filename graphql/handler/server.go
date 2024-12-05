@@ -31,6 +31,21 @@ func New(es graphql.ExecutableSchema) *Server {
 	}
 }
 
+// NewDefaultServer is a demonstration only. Not for prod.
+//
+// Currently, the server just picks the first available transport,
+// so this example NewDefaultServer orders them, but it is just
+// for demonstration purposes.
+// You will likely want to tune and better configure Websocket transport
+// since adding a new one (To configure it) doesn't have effect.
+//
+// Also SSE support is not in here at all!
+// SSE when used over HTTP/1.1 (but not HTTP/2 or HTTP/3),
+// SSE suffers from a severe limitation to the maximum number
+// of open connections of 6 per browser. See:
+// https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#sect1
+//
+// Deprecated: This was and is just an example.
 func NewDefaultServer(es graphql.ExecutableSchema) *Server {
 	srv := New(es)
 

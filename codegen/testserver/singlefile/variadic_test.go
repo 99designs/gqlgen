@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/stretchr/testify/require"
 )
 
 func TestVariadic(t *testing.T) {
@@ -15,9 +15,9 @@ func TestVariadic(t *testing.T) {
 	resolver.QueryResolver.VariadicModel = func(ctx context.Context) (*VariadicModel, error) {
 		return &VariadicModel{}, nil
 	}
-	c := client.New(handler.NewDefaultServer(
-		NewExecutableSchema(Config{Resolvers: resolver}),
-	))
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolver}))
+	srv.AddTransport(transport.POST{})
+	c := client.New(srv)
 
 	var resp struct {
 		VariadicModel struct {

@@ -7,6 +7,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
@@ -37,7 +38,7 @@ func TestDirectives(t *testing.T) {
 		return &ok, nil
 	}
 
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{
+	srv := handler.New(generated.NewExecutableSchema(generated.Config{
 		Resolvers: resolvers,
 		Directives: generated.DirectiveRoot{
 			Populate: func(ctx context.Context, obj any, next graphql.Resolver, value string) (any, error) {
@@ -57,7 +58,7 @@ func TestDirectives(t *testing.T) {
 			},
 		},
 	}))
-
+	srv.AddTransport(transport.POST{})
 	c := client.New(srv)
 
 	t.Run("arg directives", func(t *testing.T) {

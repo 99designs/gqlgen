@@ -12,6 +12,8 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/debug"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 )
 
@@ -57,7 +59,10 @@ func newServer(name, port string, schema graphql.ExecutableSchema) *http.Server 
 	if port == "" {
 		panic(fmt.Errorf("port for %s is empty", name))
 	}
-	srv := handler.NewDefaultServer(schema)
+	srv := handler.New(schema)
+	srv.AddTransport(transport.GET{})
+	srv.AddTransport(transport.POST{})
+	srv.Use(extension.Introspection{})
 	srv.Use(&debug.Tracer{})
 	mux := http.NewServeMux()
 	mux.Handle("/", playground.Handler("GraphQL playground", "/query"))

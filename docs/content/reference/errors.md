@@ -137,7 +137,10 @@ import (
 )
 
 func main() {
-	server := handler.NewDefaultServer(MakeExecutableSchema(resolvers))
+	server := handler.New(MakeExecutableSchema(resolvers))
+
+	// Server setup...
+
 	server.SetErrorPresenter(func(ctx context.Context, e error) *gqlerror.Error {
 		err := graphql.DefaultErrorPresenter(ctx, e)
 
@@ -164,9 +167,12 @@ returned from here will also go through the error presenter.
 
 You change this when creating the server:
 ```go
-server := handler.NewDefaultServer(MakeExecutableSchema(resolvers))
+server := handler.New(MakeExecutableSchema(resolvers))
+
+// Server setup...
+
 server.SetRecoverFunc(func(ctx context.Context, err interface{}) error {
-    // notify bug tracker...
+    // Notify bug tracker...
 
 		return gqlerror.Errorf("Internal server error!")
 })

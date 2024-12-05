@@ -79,6 +79,7 @@ import (
 
 	"github.com/99designs/gqlgen/_examples/starwars"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
 )
@@ -88,7 +89,8 @@ func main() {
 
 	router.Use(auth.Middleware(db))
 
-	srv := handler.NewDefaultServer(starwars.NewExecutableSchema(starwars.NewResolver()))
+	srv := handler.New(starwars.NewExecutableSchema(starwars.NewResolver()))
+	srv.AddTransport(transport.POST{})
 	router.Handle("/", playground.Handler("Starwars", "/query"))
 	router.Handle("/query", srv)
 
@@ -116,8 +118,8 @@ func (r *queryResolver) Hero(ctx context.Context, episode Episode) (Character, e
 
 ### Websockets
 
-If you need access to the websocket init payload you can add your `InitFunc` in `AddTransport`.  
-Your InitFunc implementation could then attempt to extract items from the payload:  
+If you need access to the websocket init payload you can add your `InitFunc` in `AddTransport`.
+Your InitFunc implementation could then attempt to extract items from the payload:
 
 ```go
 package main
@@ -177,7 +179,6 @@ func main() {
 	})
 
 	srv := handler.New(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
-	srv.AddTransport(transport.POST{})
 	srv.AddTransport(transport.Websocket{
 		KeepAlivePingInterval: 10 * time.Second,
 		Upgrader: websocket.Upgrader{
@@ -189,6 +190,7 @@ func main() {
 			return webSocketInit(ctx, initPayload)
 		},
 	})
+	srv.AddTransport(transport.POST{})
 	srv.Use(extension.Introspection{})
 
 	router.Handle("/", playground.Handler("My GraphQL App", "/app"))

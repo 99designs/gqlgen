@@ -217,6 +217,17 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 			return err
 		}
 
+		if xformType, ok := b.Config.TransformInputInts(f.Type, tr.GO); ok {
+			tr, err = b.Binder.TypeReference(f.Type, xformType)
+			var typeErr *config.IncompatibleTypeError
+			if errors.As(err, &typeErr) {
+				return fmt.Errorf("can not use input_int_for_int32 unless Int is bound to a model that can handle int values")
+			}
+			if err != nil {
+				return err
+			}
+		}
+
 		// success, bind to var
 		f.GoFieldType = GoFieldVariable
 		f.GoReceiverName = "obj"

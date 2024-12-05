@@ -17,6 +17,7 @@ models:
   Int:
     model:
       - github.com/99designs/gqlgen/graphql.Int32
+      - github.com/99designs/gqlgen/graphql.Int # Allow input_int_for_int32 to work.
   Int64:
     model:
       - github.com/99designs/gqlgen/graphql.Int

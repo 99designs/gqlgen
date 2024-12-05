@@ -280,6 +280,33 @@ func (c *Config) IsRoot(def *ast.Definition) bool {
 	return def == c.Schema.Query || def == c.Schema.Mutation || def == c.Schema.Subscription
 }
 
+var (
+	intType        = types.Typ[types.Int]
+	intPointerType = types.NewPointer(types.Typ[types.Int])
+)
+
+// TransformInputInts is an escape hatch out of using GraphQL-spec compliant
+// int32 values for input types that are defined as Int in the schema. Since an
+// int value will never overflow when copying an int32 value regardless of the
+// system, we can safely use int for input types, maintain spec compliance and
+// avoid forcing resolver implementations to handle int32 values.
+//
+// If Int does not contain a compatible model in its configuration that handles
+// int values, this function will not fail but generation will.
+func (c *Config) TransformInputInts(schemaType *ast.Type, goType types.Type) (t types.Type, ok bool) {
+	if !c.InputIntForInt32 || schemaType.Name() != "Int" {
+		return nil, false
+	}
+
+	if goType.String() == "int32" {
+		return intType, true
+	} else if goType.String() == "*int32" {
+		return intPointerType, true
+	}
+
+	return nil, false
+}
+
 func (c *Config) injectTypesFromSchema() error {
 	c.Directives["goModel"] = DirectiveConfig{
 		SkipRuntime: true,

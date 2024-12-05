@@ -572,9 +572,9 @@ func (ec *executionContext) _Result_n(ctx context.Context, field graphql.Collect
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int32)
+	res := resTmp.(int)
 	fc.Result = res
-	return ec.marshalNInt2int32(ctx, field.Selections, res)
+	return ec.marshalNInt2int(ctx, field.Selections, res)
 }
 
 func (ec *executionContext) fieldContext_Result_n(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -654,7 +654,7 @@ func (ec *executionContext) unmarshalInputInput(ctx context.Context, obj interfa
 		switch k {
 		case "n":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("n"))
-			data, err := ec.unmarshalOInt2ᚖint32(ctx, v)
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
 			if err != nil {
 				return it, err
 			}

@@ -3,7 +3,7 @@
 package generated
 
 type Input struct {
-	N *int32 `json:"n,omitempty"`
+	N *int `json:"n,omitempty"`
 }
 
 type Input64 struct {

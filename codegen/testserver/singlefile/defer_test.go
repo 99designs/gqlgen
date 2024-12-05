@@ -3,7 +3,7 @@ package singlefile
 import (
 	"cmp"
 	"context"
-	"encoding/json"
+	"github.com/goccy/go-json"
 	"math/rand"
 	"reflect"
 	"slices"

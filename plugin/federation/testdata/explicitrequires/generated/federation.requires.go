@@ -2,7 +2,7 @@ package generated
 
 import (
 	"context"
-	"encoding/json"
+	"github.com/goccy/go-json"
 	"fmt"
 )
 

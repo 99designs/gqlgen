@@ -1,7 +1,7 @@
 package playground
 
 import (
-	"encoding/json"
+	"github.com/goccy/go-json"
 	"fmt"
 	"html/template"
 	"net/http"

@@ -227,7 +227,7 @@ genrated resolver functions that include a new argument, `federationRequires`, t
 fields you requested in your `@requires.fields` selection set.
 
 > Note: currently it's represented as a map[string]any where the contained values are encoded with
-`encoding/json`. Eventually we will generate a typesafe model that represents these models,
+`github.com/goccy/go-json`. Eventually we will generate a typesafe model that represents these models,
 however that is a large lift. This typesafe support will be added in the future.
 
 ### Example

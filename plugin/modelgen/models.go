@@ -361,23 +361,9 @@ func (m *Plugin) generateField(
 
 	if cfg.Models.UserDefined(field.Type.Name()) {
 		var err error
-		for _, model := range cfg.Models[field.Type.Name()].Model {
-			typ, err = binder.FindTypeFromName(model)
-			if err != nil {
-				return nil, err
-			}
-			if _, ok := cfg.TransformInputInts(field.Type, typ); ok && schemaType.IsInputType() {
-				continue // Input found for int32, but we want an model that handles ints.
-			}
-			if typ != nil {
-				break // Type found.
-			}
-		}
-
-		if typ == nil && schemaType.IsInputType() && field.Type.Name() == "Int" {
-			return nil, fmt.Errorf("can not use input_int_for_int32 unless Int is bound to a model that can handle int values")
-		} else if typ == nil {
-			return nil, fmt.Errorf("user defined model for %v not found", field.Type.Name())
+		typ, err = binder.FindTypeFromName(cfg.Models[field.Type.Name()].Model[0])
+		if err != nil {
+			return nil, err
 		}
 	} else {
 		switch fieldDef.Kind {

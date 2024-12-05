@@ -86,9 +86,8 @@ func TestSubscriptions(t *testing.T) {
 		return res, nil
 	}
 
-	srv := handler.NewDefaultServer(
-		NewExecutableSchema(Config{Resolvers: resolvers}),
-	)
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv.AddTransport(transport.Websocket{KeepAlivePingInterval: time.Second})
 	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res any, err error) {
 		path, _ := ctx.Value(ckey("path")).([]int)
 		return next(context.WithValue(ctx, ckey("path"), append(path, 1)))

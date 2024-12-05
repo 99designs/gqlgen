@@ -3,6 +3,8 @@ package starwars
 import (
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/_examples/starwars/generated"
@@ -12,7 +14,10 @@ import (
 )
 
 func TestStarwars(t *testing.T) {
-	c := client.New(handler.NewDefaultServer(generated.NewExecutableSchema(NewResolver())))
+	srv := handler.New(generated.NewExecutableSchema(NewResolver()))
+	srv.AddTransport(transport.POST{})
+	srv.Use(extension.Introspection{})
+	c := client.New(srv)
 
 	t.Run("Lukes starships", func(t *testing.T) {
 		var resp struct {

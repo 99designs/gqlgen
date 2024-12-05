@@ -4,10 +4,10 @@ import (
 	"context"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/stretchr/testify/require"
 )
 
 type UpdatePtrToPtrResults struct {
@@ -17,7 +17,9 @@ type UpdatePtrToPtrResults struct {
 func TestPtrToPtr(t *testing.T) {
 	resolvers := &Stub{}
 
-	c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv.AddTransport(transport.POST{})
+	c := client.New(srv)
 
 	resolvers.MutationResolver.UpdatePtrToPtr = func(ctx context.Context, in UpdatePtrToPtrOuter) (ret *PtrToPtrOuter, err error) {
 		ret = &PtrToPtrOuter{

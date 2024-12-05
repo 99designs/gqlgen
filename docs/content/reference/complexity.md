@@ -49,8 +49,11 @@ Limiting query complexity is as simple as specifying it with the provided extens
 func main() {
 	c := Config{ Resolvers: &resolvers{} }
 
-	srv := handler.NewDefaultServer(blog.NewExecutableSchema(c))
+	srv := handler.New(blog.NewExecutableSchema(c))
+	// Server setup...
+
 	srv.Use(extension.FixedComplexityLimit(5)) // This line is key
+
 	r.Handle("/query", srv)
 }
 ```
@@ -73,7 +76,8 @@ func main() {
 	c.Complexity.Query.Posts = countComplexity
 	c.Complexity.Post.Related = countComplexity
 
-	srv := handler.NewDefaultServer(blog.NewExecutableSchema(c))
+	srv := handler.New(blog.NewExecutableSchema(c))
+	srv.AddTransport(transport.POST{})
 	srv.Use(extension.FixedComplexityLimit(5))
 	http.Handle("/query", gqlHandler)
 }

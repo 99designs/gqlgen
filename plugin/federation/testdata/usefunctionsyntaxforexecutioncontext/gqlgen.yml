@@ -1,0 +1,15 @@
+schema:
+  - "testdata/usefunctionsyntaxforexecutioncontext/schema.graphql"
+use_function_syntax_for_execution_context: true
+exec:
+  filename: testdata/usefunctionsyntaxforexecutioncontext/generated/exec.go
+federation:
+  filename: testdata/usefunctionsyntaxforexecutioncontext/generated/federation.go
+model:
+  filename: testdata/usefunctionsyntaxforexecutioncontext/generated/model/models.go
+  package: model
+resolver:
+  filename: testdata/usefunctionsyntaxforexecutioncontext/resolver.go
+  layout: follow-schema
+  dir: testdata/usefunctionsyntaxforexecutioncontext
+  package: usefunctionsyntaxforexecutioncontext

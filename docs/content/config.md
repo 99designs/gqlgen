@@ -115,6 +115,10 @@ resolver:
 # argument values but to set them even if they're null.
 call_argument_directives_with_null: true
 
+# This enables gql server to use function syntax for execution context
+# instead of generating receiver methods of the execution context.
+# use_function_syntax_for_execution_context: true
+
 # Optional: set build tags that will be used to load packages
 # go_build_tags:
 #  - private
@@ -144,7 +148,7 @@ models:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
-  # gqlgen provides a default GraphQL UUID convenience wrapper for github.com/google/uuid 
+  # gqlgen provides a default GraphQL UUID convenience wrapper for github.com/google/uuid
   # but you can override this to provide your own GraphQL UUID implementation
   UUID:
     model:

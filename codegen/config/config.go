@@ -22,26 +22,27 @@ import (
 )
 
 type Config struct {
-	SchemaFilename                StringList                 `yaml:"schema,omitempty"`
-	Exec                          ExecConfig                 `yaml:"exec"`
-	Model                         PackageConfig              `yaml:"model,omitempty"`
-	Federation                    PackageConfig              `yaml:"federation,omitempty"`
-	Resolver                      ResolverConfig             `yaml:"resolver,omitempty"`
-	AutoBind                      []string                   `yaml:"autobind"`
-	Models                        TypeMap                    `yaml:"models,omitempty"`
-	StructTag                     string                     `yaml:"struct_tag,omitempty"`
-	Directives                    map[string]DirectiveConfig `yaml:"directives,omitempty"`
-	GoBuildTags                   StringList                 `yaml:"go_build_tags,omitempty"`
-	GoInitialisms                 GoInitialismsConfig        `yaml:"go_initialisms,omitempty"`
-	OmitSliceElementPointers      bool                       `yaml:"omit_slice_element_pointers,omitempty"`
-	OmitGetters                   bool                       `yaml:"omit_getters,omitempty"`
-	OmitInterfaceChecks           bool                       `yaml:"omit_interface_checks,omitempty"`
-	OmitComplexity                bool                       `yaml:"omit_complexity,omitempty"`
-	OmitGQLGenFileNotice          bool                       `yaml:"omit_gqlgen_file_notice,omitempty"`
-	OmitGQLGenVersionInFileNotice bool                       `yaml:"omit_gqlgen_version_in_file_notice,omitempty"`
-	OmitRootModels                bool                       `yaml:"omit_root_models,omitempty"`
-	OmitResolverFields            bool                       `yaml:"omit_resolver_fields,omitempty"`
-	OmitPanicHandler              bool                       `yaml:"omit_panic_handler,omitempty"`
+	SchemaFilename                       StringList                 `yaml:"schema,omitempty"`
+	Exec                                 ExecConfig                 `yaml:"exec"`
+	Model                                PackageConfig              `yaml:"model,omitempty"`
+	Federation                           PackageConfig              `yaml:"federation,omitempty"`
+	Resolver                             ResolverConfig             `yaml:"resolver,omitempty"`
+	AutoBind                             []string                   `yaml:"autobind"`
+	Models                               TypeMap                    `yaml:"models,omitempty"`
+	StructTag                            string                     `yaml:"struct_tag,omitempty"`
+	Directives                           map[string]DirectiveConfig `yaml:"directives,omitempty"`
+	GoBuildTags                          StringList                 `yaml:"go_build_tags,omitempty"`
+	GoInitialisms                        GoInitialismsConfig        `yaml:"go_initialisms,omitempty"`
+	OmitSliceElementPointers             bool                       `yaml:"omit_slice_element_pointers,omitempty"`
+	OmitGetters                          bool                       `yaml:"omit_getters,omitempty"`
+	OmitInterfaceChecks                  bool                       `yaml:"omit_interface_checks,omitempty"`
+	OmitComplexity                       bool                       `yaml:"omit_complexity,omitempty"`
+	OmitGQLGenFileNotice                 bool                       `yaml:"omit_gqlgen_file_notice,omitempty"`
+	OmitGQLGenVersionInFileNotice        bool                       `yaml:"omit_gqlgen_version_in_file_notice,omitempty"`
+	OmitRootModels                       bool                       `yaml:"omit_root_models,omitempty"`
+	OmitResolverFields                   bool                       `yaml:"omit_resolver_fields,omitempty"`
+	OmitPanicHandler                     bool                       `yaml:"omit_panic_handler,omitempty"`
+	UseFunctionSyntaxForExecutionContext bool                       `yaml:"use_function_syntax_for_execution_context,omitempty"`
 	// If this is set to true, argument directives that
 	// decorate a field with a null value will still be called.
 	//

@@ -96,6 +96,10 @@ resolver:
 # argument values but to set them even if they're null.
 call_argument_directives_with_null: true
 
+# This enables gql server to use function syntax for execution context
+# instead of generating receiver methods of the execution context.
+# use_function_syntax_for_execution_context: true
+
 # Optional: set to speed up generation time by not performing a final validation pass.
 # skip_validation: true
 

@@ -362,14 +362,6 @@ func unwrapOmittable(t types.Type) (types.Type, bool) {
 	return named.TypeArgs().At(0), true
 }
 
-type IncompatibleTypeError struct {
-	schemaType, goType string
-}
-
-func (i *IncompatibleTypeError) Error() string {
-	return fmt.Sprintf("%s is incompatible with %s", i.schemaType, i.goType)
-}
-
 func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret *TypeReference, err error) {
 	if bindTarget != nil {
 		bindTarget = code.Unalias(bindTarget)
@@ -495,7 +487,7 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 		return ref, nil
 	}
 
-	return nil, &IncompatibleTypeError{schemaType: schemaType.Name(), goType: bindTarget.String()}
+	return nil, fmt.Errorf("%s is incompatible with %s", schemaType.Name(), bindTarget.String())
 }
 
 func isValid(t types.Type) bool {

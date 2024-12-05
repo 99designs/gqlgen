@@ -1,6 +1,5 @@
 //go:generate go run ../../../testdata/gqlgen.go -config gqlgen_default.yml -stub generated-default/stub.go
 //go:generate go run ../../../testdata/gqlgen.go -config gqlgen_compliant_strict.yml -stub generated-compliant-strict/stub.go
-//go:generate go run ../../../testdata/gqlgen.go -config gqlgen_compliant_input_int.yml -stub generated-compliant-input-int/stub.go
 
 package compliant_int
 
@@ -18,7 +17,7 @@ import (
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
-	genstrict "github.com/99designs/gqlgen/codegen/testserver/compliant-int/generated-compliant-strict"
+	gencompliant "github.com/99designs/gqlgen/codegen/testserver/compliant-int/generated-compliant-strict"
 	gendefault "github.com/99designs/gqlgen/codegen/testserver/compliant-int/generated-default"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -56,20 +55,6 @@ func TestCodegen(t *testing.T) {
 			},
 			models: map[string][]string{
 				"Input":    {"N *int32"},
-				"Result":   {"N int32"},
-				"Input64":  {"N *int"},
-				"Result64": {"N int"},
-			},
-		},
-		{
-			name:    "compliant model configuration with int input setting",
-			pkgPath: "generated-compliant-input-int",
-			signature: map[string]string{
-				"EchoIntToInt":     "func(ctx context.Context, n *int) (int32, error)",
-				"EchoInt64ToInt64": "func(ctx context.Context, n *int) (int, error)",
-			},
-			models: map[string][]string{
-				"Input":    {"N *int"},
 				"Result":   {"N int32"},
 				"Input64":  {"N *int"},
 				"Result64": {"N int"},
@@ -137,15 +122,8 @@ func TestIntegration(t *testing.T) {
 		}
 		return *n, nil
 	}
-	// compliantStub := &gencompliant.Stub{}
-	// compliantStub.QueryResolver.EchoIntToInt = func(_ context.Context, n *int) (int32, error) {
-	// 	if n == nil {
-	// 		return 0, nil
-	// 	}
-	// 	return int32(*n), nil
-	// }
-	strictStub := &genstrict.Stub{}
-	strictStub.QueryResolver.EchoIntToInt = func(_ context.Context, n *int32) (int32, error) {
+	strictCompliantStub := &gencompliant.Stub{}
+	strictCompliantStub.QueryResolver.EchoIntToInt = func(_ context.Context, n *int32) (int32, error) {
 		if n == nil {
 			return 0, nil
 		}
@@ -162,15 +140,9 @@ func TestIntegration(t *testing.T) {
 			exec:      gendefault.NewExecutableSchema(gendefault.Config{Resolvers: defaultStub}),
 			willError: false,
 		},
-		// {
-		// 	// rely on client to send good data, but the server should not error
-		// 	name:      "compliant generation with int input setting allows int32 overflow inputs",
-		// 	exec:      gencompliant.NewExecutableSchema(gencompliant.Config{Resolvers: compliantStub}),
-		// 	willError: false,
-		// },
 		{
 			name:      "strict compliant generation does not allow int32 overflow inputs",
-			exec:      genstrict.NewExecutableSchema(genstrict.Config{Resolvers: strictStub}),
+			exec:      gencompliant.NewExecutableSchema(gencompliant.Config{Resolvers: strictCompliantStub}),
 			willError: true,
 		},
 	}

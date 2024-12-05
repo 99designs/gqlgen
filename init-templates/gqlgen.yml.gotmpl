@@ -109,9 +109,3 @@ models:
     model:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
-
-# Optional: ensure that resolvers use Go int for input values when mapping to
-# GraphQL Int instead of int32. This is useful when you map Int to int32, but
-# prefer to accept ints as inputs for simplicity. Will still enforce int32
-# on results.
-input_int_for_int32: true

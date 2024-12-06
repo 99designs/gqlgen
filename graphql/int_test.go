@@ -60,7 +60,7 @@ func TestInt32(t *testing.T) {
 		for _, tc := range cases {
 			t.Run(tc.name, func(t *testing.T) {
 				res, err := UnmarshalInt32(tc.v)
-				assert.EqualError(t, err, tc.err)
+				assert.EqualError(t, err, tc.err) //nolint:testifylint // An error assertion makes more sense.
 				assert.Equal(t, int32(0), res)
 			})
 		}

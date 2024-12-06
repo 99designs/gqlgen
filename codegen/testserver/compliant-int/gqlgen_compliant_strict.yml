@@ -2,16 +2,14 @@ schema:
   - "*.graphql"
 skip_validation: true
 exec:
-  layout: follow-schema
-  dir: generated-compliant-strict
   package: generated
+  filename: generated-compliant-strict/schema.go
 model:
+  package: generated
   filename: generated-compliant-strict/models.go
-  package: generated
 resolver:
-  filename: generated-compliant-strict/resolver.go
   package: generated
-  type: Resolver
+  filename: generated-compliant-strict/resolver.go
 
 models:
   Int:

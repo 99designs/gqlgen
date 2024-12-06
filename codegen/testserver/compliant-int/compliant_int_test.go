@@ -168,7 +168,7 @@ func TestIntegration(t *testing.T) {
 	}
 }
 
-func printNode(t *testing.T, node interface{}) string {
+func printNode(t *testing.T, node any) string {
 	t.Helper()
 
 	buf := &bytes.Buffer{}

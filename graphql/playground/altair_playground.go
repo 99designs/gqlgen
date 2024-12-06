@@ -71,14 +71,14 @@ func AltairHandler(title, endpoint string, options map[string]interface{}) http.
 	if err != nil {
 		jsonEnv = []byte("{}")
 	}
-	
+
 	return func(w http.ResponseWriter, r *http.Request) {
 		err := altairPage.Execute(w, map[string]any{
 			"title":                title,
 			"endpoint":             endpoint,
 			"endpointIsAbsolute":   endpointHasScheme(endpoint),
 			"subscriptionEndpoint": getSubscriptionEndpoint(endpoint),
-			"version":              "5.0.5",
+			"version":              "8.0.4",
 			"cssSRI":               "sha256-kZ35e5mdMYN5ALEbnsrA2CLn85Oe4hBodfsih9BqNxs=",
 			"mainSRI":              "sha256-nWdVTcGTlBDV1L04UQnqod+AJedzBCnKHv6Ct65liHE=",
 			"polyfillsSRI":         "sha256-1aVEg2sROcCQ/RxU3AlcPaRZhZdIWA92q2M+mdd/R4c=",

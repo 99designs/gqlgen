@@ -79,10 +79,10 @@ func AltairHandler(title, endpoint string, options map[string]interface{}) http.
 			"endpointIsAbsolute":   endpointHasScheme(endpoint),
 			"subscriptionEndpoint": getSubscriptionEndpoint(endpoint),
 			"version":              "8.0.4",
-			"cssSRI":               "sha256-kZ35e5mdMYN5ALEbnsrA2CLn85Oe4hBodfsih9BqNxs=",
-			"mainSRI":              "sha256-nWdVTcGTlBDV1L04UQnqod+AJedzBCnKHv6Ct65liHE=",
-			"polyfillsSRI":         "sha256-1aVEg2sROcCQ/RxU3AlcPaRZhZdIWA92q2M+mdd/R4c=",
-			"runtimeSRI":           "sha256-cK2XhXqQr0WS1Z5eKNdac0rJxTD6miC3ubd+aEVMQDk=",
+			"cssSRI":               "sha256-MzrcfdppBQWMgCaWau9MByzXaL5sgTLRodWc3nxBcKM=",
+			"mainSRI":              "sha256-O89H6FZJD2Xu+Jx13Md9+0Om/AR7Ci2GxQuY6Rvp4c4=",
+			"polyfillsSRI":         "sha256-uNZYE3zw33w6fygZ91pRsr4ko1JTYsbXt98bGrM7WFw=",
+			"runtimeSRI":           "sha256-Uv9Q6l/ZfA3l2WjzZQ8DmTuaVd4X0SRSoUcM31iCUdA=",
 			"options":              string(jsonEnv),
 		})
 		if err != nil {

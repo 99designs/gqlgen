@@ -60,8 +60,8 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 		srv.Use(extension.FixedComplexityLimit(cfg.complexityLimit))
 	} else if cfg.complexityLimitFunc != nil {
 		srv.Use(&extension.ComplexityLimit{
-			Func: func(ctx context.Context, rc *graphql.OperationContext) int {
-				return cfg.complexityLimitFunc(graphql.WithOperationContext(ctx, rc))
+			Func: func(ctx context.Context, opCtx *graphql.OperationContext) int {
+				return cfg.complexityLimitFunc(graphql.WithOperationContext(ctx, opCtx))
 			},
 		})
 	}
@@ -104,9 +104,9 @@ func WebsocketUpgrader(upgrader websocket.Upgrader) Option {
 }
 
 // Deprecated: switch to graphql/handler.New
-func RecoverFunc(recover graphql.RecoverFunc) Option {
+func RecoverFunc(recoverFn graphql.RecoverFunc) Option {
 	return func(cfg *Config) {
-		cfg.recover = recover
+		cfg.recover = recoverFn
 	}
 }
 

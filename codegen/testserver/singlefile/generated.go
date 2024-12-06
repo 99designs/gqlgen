@@ -335,8 +335,8 @@ type ComplexityRoot struct {
 		Collision                        func(childComplexity int) int
 		DefaultParameters                func(childComplexity int, falsyBoolean *bool, truthyBoolean *bool) int
 		DefaultScalar                    func(childComplexity int, arg string) int
-		DeferCase1                       func(childComplexity int) int
-		DeferCase2                       func(childComplexity int) int
+		DeferMultiple                    func(childComplexity int) int
+		DeferSingle                      func(childComplexity int) int
 		DeprecatedField                  func(childComplexity int) int
 		DirectiveArg                     func(childComplexity int, arg string) int
 		DirectiveDouble                  func(childComplexity int) int
@@ -553,8 +553,8 @@ type QueryResolver interface {
 	DeprecatedField(ctx context.Context) (string, error)
 	Overlapping(ctx context.Context) (*OverlappingFields, error)
 	DefaultParameters(ctx context.Context, falsyBoolean *bool, truthyBoolean *bool) (*DefaultParametersMirror, error)
-	DeferCase1(ctx context.Context) (*DeferModel, error)
-	DeferCase2(ctx context.Context) ([]*DeferModel, error)
+	DeferSingle(ctx context.Context) (*DeferModel, error)
+	DeferMultiple(ctx context.Context) ([]*DeferModel, error)
 	DirectiveArg(ctx context.Context, arg string) (*string, error)
 	DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int, arg3 *string) (*string, error)
 	DirectiveSingleNullableArg(ctx context.Context, arg1 *string) (*string, error)
@@ -1434,19 +1434,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.DefaultScalar(childComplexity, args["arg"].(string)), true
 
-	case "Query.deferCase1":
-		if e.complexity.Query.DeferCase1 == nil {
+	case "Query.deferMultiple":
+		if e.complexity.Query.DeferMultiple == nil {
 			break
 		}
 
-		return e.complexity.Query.DeferCase1(childComplexity), true
+		return e.complexity.Query.DeferMultiple(childComplexity), true
 
-	case "Query.deferCase2":
-		if e.complexity.Query.DeferCase2 == nil {
+	case "Query.deferSingle":
+		if e.complexity.Query.DeferSingle == nil {
 			break
 		}
 
-		return e.complexity.Query.DeferCase2(childComplexity), true
+		return e.complexity.Query.DeferSingle(childComplexity), true
 
 	case "Query.deprecatedField":
 		if e.complexity.Query.DeprecatedField == nil {
@@ -2309,8 +2309,8 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 }
 
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
-	rc := graphql.GetOperationContext(ctx)
-	ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
+	opCtx := graphql.GetOperationContext(ctx)
+	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputChanges,
 		ec.unmarshalInputDefaultInput,
@@ -2333,7 +2333,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	)
 	first := true
 
-	switch rc.Operation.Operation {
+	switch opCtx.Operation.Operation {
 	case ast.Query:
 		return func(ctx context.Context) *graphql.Response {
 			var response graphql.Response
@@ -2341,7 +2341,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			if first {
 				first = false
 				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-				data = ec._Query(ctx, rc.Operation.SelectionSet)
+				data = ec._Query(ctx, opCtx.Operation.SelectionSet)
 			} else {
 				if atomic.LoadInt32(&ec.pendingDeferred) > 0 {
 					result := <-ec.deferredResults
@@ -2371,7 +2371,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			}
 			first = false
 			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-			data := ec._Mutation(ctx, rc.Operation.SelectionSet)
+			data := ec._Mutation(ctx, opCtx.Operation.SelectionSet)
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 
@@ -2380,7 +2380,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			}
 		}
 	case ast.Subscription:
-		next := ec._Subscription(ctx, rc.Operation.SelectionSet)
+		next := ec._Subscription(ctx, opCtx.Operation.SelectionSet)
 
 		var buf bytes.Buffer
 		return func(ctx context.Context) *graphql.Response {
@@ -10481,8 +10481,8 @@ func (ec *executionContext) fieldContext_Query_defaultParameters(ctx context.Con
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_deferCase1(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_deferCase1(ctx, field)
+func (ec *executionContext) _Query_deferSingle(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_deferSingle(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -10495,7 +10495,7 @@ func (ec *executionContext) _Query_deferCase1(ctx context.Context, field graphql
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().DeferCase1(rctx)
+		return ec.resolvers.Query().DeferSingle(rctx)
 	})
 
 	if resTmp == nil {
@@ -10506,7 +10506,7 @@ func (ec *executionContext) _Query_deferCase1(ctx context.Context, field graphql
 	return ec.marshalODeferModel2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐDeferModel(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_deferCase1(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_deferSingle(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -10527,8 +10527,8 @@ func (ec *executionContext) fieldContext_Query_deferCase1(_ context.Context, fie
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_deferCase2(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Query_deferCase2(ctx, field)
+func (ec *executionContext) _Query_deferMultiple(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_deferMultiple(ctx, field)
 	if err != nil {
 		return graphql.Null
 	}
@@ -10541,7 +10541,7 @@ func (ec *executionContext) _Query_deferCase2(ctx context.Context, field graphql
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().DeferCase2(rctx)
+		return ec.resolvers.Query().DeferMultiple(rctx)
 	})
 
 	if resTmp == nil {
@@ -10552,7 +10552,7 @@ func (ec *executionContext) _Query_deferCase2(ctx context.Context, field graphql
 	return ec.marshalODeferModel2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐDeferModelᚄ(ctx, field.Selections, res)
 }
 
-func (ec *executionContext) fieldContext_Query_deferCase2(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_deferMultiple(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -20934,7 +20934,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "deferCase1":
+		case "deferSingle":
 			field := field
 
 			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
@@ -20943,7 +20943,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_deferCase1(ctx, field)
+				res = ec._Query_deferSingle(ctx, field)
 				return res
 			}
 
@@ -20953,7 +20953,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "deferCase2":
+		case "deferMultiple":
 			field := field
 
 			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
@@ -20962,7 +20962,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_deferCase2(ctx, field)
+				res = ec._Query_deferMultiple(ctx, field)
 				return res
 			}
 

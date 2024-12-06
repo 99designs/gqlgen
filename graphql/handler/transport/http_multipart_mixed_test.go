@@ -8,6 +8,7 @@ import (
 	"strings"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -19,7 +20,9 @@ import (
 func TestMultipartMixed(t *testing.T) {
 	initialize := func() *testserver.TestServer {
 		h := testserver.New()
-		h.AddTransport(transport.MultipartMixed{})
+		h.AddTransport(transport.MultipartMixed{
+			Boundary: "graphql",
+		})
 		return h
 	}
 
@@ -100,7 +103,7 @@ func TestMultipartMixed(t *testing.T) {
 		return bs
 	}
 
-	t.Run("initial and incremental patches", func(t *testing.T) {
+	t.Run("initial and incremental patches un-aggregated", func(t *testing.T) {
 		handler, srv := initializeWithServer()
 		defer srv.Close()
 
@@ -136,7 +139,6 @@ func TestMultipartMixed(t *testing.T) {
 			"{\"data\":{\"name\":null},\"hasNext\":true}\r\n",
 			readLine(br),
 		)
-		assert.Equal(t, "\r\n", readLine(br))
 
 		wg.Add(1)
 		go func() {
@@ -152,7 +154,8 @@ func TestMultipartMixed(t *testing.T) {
 			"{\"incremental\":[{\"data\":{\"name\":\"test\"},\"hasNext\":false}],\"hasNext\":false}\r\n",
 			readLine(br),
 		)
-		assert.Equal(t, "\r\n", readLine(br))
+
+		assert.Equal(t, "--graphql--\r\n", readLine(br))
 
 		wg.Add(1)
 		go func() {
@@ -164,5 +167,69 @@ func TestMultipartMixed(t *testing.T) {
 		assert.Equal(t, err, io.EOF)
 
 		wg.Wait()
+	})
+
+	t.Run("initial and incremental patches aggregated", func(t *testing.T) {
+		handler := testserver.New()
+		handler.AddTransport(transport.MultipartMixed{
+			Boundary:        "graphql",
+			DeliveryTimeout: time.Hour,
+		})
+
+		srv := httptest.NewServer(handler)
+		defer srv.Close()
+
+		var err error
+		var res *http.Response
+
+		var wg sync.WaitGroup
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			client := &http.Client{}
+			req := createHTTPRequest(
+				srv.URL,
+				`{"query":"query { ... @defer { name } }"}`,
+			)
+			res, err = client.Do(req) //nolint:bodyclose // false positive
+		}()
+
+		handler.SendNextSubscriptionMessage()
+		handler.SendNextSubscriptionMessage()
+		handler.SendCompleteSubscriptionMessage()
+		wg.Wait()
+
+		require.NoError(t, err, "Request threw error -> %s", err)
+		defer func() {
+			require.NoError(t, res.Body.Close())
+		}()
+
+		assert.Equal(t, 200, res.StatusCode, "Request return wrong status -> %d", res.Status)
+		assert.Equal(t, "keep-alive", res.Header.Get("Connection"))
+		assert.Contains(t, res.Header.Get("Content-Type"), "multipart/mixed")
+		assert.Contains(t, res.Header.Get("Content-Type"), `boundary="graphql"`)
+
+		br := bufio.NewReader(res.Body)
+		assert.Equal(t, "--graphql\r\n", readLine(br))
+		assert.Equal(t, "Content-Type: application/json\r\n", readLine(br))
+		assert.Equal(t, "\r\n", readLine(br))
+		assert.Equal(t,
+			"{\"data\":{\"name\":null},\"hasNext\":true}\r\n",
+			readLine(br),
+		)
+
+		assert.Equal(t, "--graphql\r\n", readLine(br))
+		assert.Equal(t, "Content-Type: application/json\r\n", readLine(br))
+		assert.Equal(t, "\r\n", readLine(br))
+		assert.Equal(
+			t,
+			"{\"incremental\":[{\"data\":{\"name\":\"test\"},\"hasNext\":false}],\"hasNext\":false}\r\n",
+			readLine(br),
+		)
+
+		assert.Equal(t, "--graphql--\r\n", readLine(br))
+
+		_, err = br.ReadByte()
+		assert.Equal(t, err, io.EOF)
 	})
 }

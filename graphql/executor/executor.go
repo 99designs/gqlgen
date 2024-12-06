@@ -47,7 +47,7 @@ func (e *Executor) CreateOperationContext(
 	ctx context.Context,
 	params *graphql.RawParams,
 ) (*graphql.OperationContext, gqlerror.List) {
-	rc := &graphql.OperationContext{
+	opCtx := &graphql.OperationContext{
 		DisableIntrospection:   true,
 		RecoverFunc:            e.recoverFunc,
 		ResolverMiddleware:     e.ext.fieldMiddleware,
@@ -57,56 +57,56 @@ func (e *Executor) CreateOperationContext(
 			OperationStart: graphql.GetStartTime(ctx),
 		},
 	}
-	ctx = graphql.WithOperationContext(ctx, rc)
+	ctx = graphql.WithOperationContext(ctx, opCtx)
 
 	for _, p := range e.ext.operationParameterMutators {
 		if err := p.MutateOperationParameters(ctx, params); err != nil {
-			return rc, gqlerror.List{err}
+			return opCtx, gqlerror.List{err}
 		}
 	}
 
-	rc.RawQuery = params.Query
-	rc.OperationName = params.OperationName
-	rc.Headers = params.Headers
+	opCtx.RawQuery = params.Query
+	opCtx.OperationName = params.OperationName
+	opCtx.Headers = params.Headers
 
 	var listErr gqlerror.List
-	rc.Doc, listErr = e.parseQuery(ctx, &rc.Stats, params.Query)
+	opCtx.Doc, listErr = e.parseQuery(ctx, &opCtx.Stats, params.Query)
 	if len(listErr) != 0 {
-		return rc, listErr
+		return opCtx, listErr
 	}
 
-	rc.Operation = rc.Doc.Operations.ForName(params.OperationName)
-	if rc.Operation == nil {
+	opCtx.Operation = opCtx.Doc.Operations.ForName(params.OperationName)
+	if opCtx.Operation == nil {
 		err := gqlerror.Errorf("operation %s not found", params.OperationName)
 		errcode.Set(err, errcode.ValidationFailed)
-		return rc, gqlerror.List{err}
+		return opCtx, gqlerror.List{err}
 	}
 
 	var err error
-	rc.Variables, err = validator.VariableValues(e.es.Schema(), rc.Operation, params.Variables)
+	opCtx.Variables, err = validator.VariableValues(e.es.Schema(), opCtx.Operation, params.Variables)
 	if err != nil {
 		gqlErr, ok := err.(*gqlerror.Error)
 		if ok {
 			errcode.Set(gqlErr, errcode.ValidationFailed)
-			return rc, gqlerror.List{gqlErr}
+			return opCtx, gqlerror.List{gqlErr}
 		}
 	}
-	rc.Stats.Validation.End = graphql.Now()
+	opCtx.Stats.Validation.End = graphql.Now()
 
 	for _, p := range e.ext.operationContextMutators {
-		if err := p.MutateOperationContext(ctx, rc); err != nil {
-			return rc, gqlerror.List{err}
+		if err := p.MutateOperationContext(ctx, opCtx); err != nil {
+			return opCtx, gqlerror.List{err}
 		}
 	}
 
-	return rc, nil
+	return opCtx, nil
 }
 
 func (e *Executor) DispatchOperation(
 	ctx context.Context,
-	rc *graphql.OperationContext,
+	opCtx *graphql.OperationContext,
 ) (graphql.ResponseHandler, context.Context) {
-	ctx = graphql.WithOperationContext(ctx, rc)
+	ctx = graphql.WithOperationContext(ctx, opCtx)
 
 	var innerCtx context.Context
 	res := e.ext.operationMiddleware(ctx, func(ctx context.Context) graphql.ResponseHandler {

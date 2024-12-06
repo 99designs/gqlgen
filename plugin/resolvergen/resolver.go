@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"go/ast"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -45,6 +44,7 @@ func (m *Plugin) GenerateCode(data *codegen.Data) error {
 	case config.LayoutSingleFile:
 		return m.generateSingleFile(data)
 	case config.LayoutFollowSchema:
+
 		return m.generatePerSchema(data)
 	}
 
@@ -53,6 +53,14 @@ func (m *Plugin) GenerateCode(data *codegen.Data) error {
 
 func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 	file := File{}
+
+	if fileExists(data.Config.Resolver.Filename) &&
+		data.Config.Resolver.PreserveResolver {
+		// file already exists and config says not to update resolver
+		// so just return
+		return nil
+	}
+
 	rewriter, err := rewrite.New(data.Config.Resolver.Dir())
 	if err != nil {
 		return err
@@ -85,7 +93,7 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 		}
 	}
 
-	if _, err := os.Stat(data.Config.Resolver.Filename); err == nil {
+	if fileExists(data.Config.Resolver.Filename) {
 		file.name = data.Config.Resolver.Filename
 		file.imports = rewriter.ExistingImports(file.name)
 		file.RemainingSource = rewriter.RemainingSource(file.name)
@@ -104,9 +112,14 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 		newResolverTemplate = readResolverTemplate(data.Config.Resolver.ResolverTemplate)
 	}
 
+	fileNotice := `// THIS CODE WILL BE UPDATED WITH SCHEMA CHANGES. PREVIOUS IMPLEMENTATION FOR SCHEMA CHANGES WILL BE KEPT IN THE COMMENT SECTION. IMPLEMENTATION FOR UNCHANGED SCHEMA WILL BE KEPT.`
+	if data.Config.Resolver.PreserveResolver {
+		fileNotice = `// THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.`
+	}
+
 	return templates.Render(templates.Options{
 		PackageName: data.Config.Resolver.Package,
-		FileNotice:  `// THIS CODE WILL BE UPDATED WITH SCHEMA CHANGES. PREVIOUS IMPLEMENTATION FOR SCHEMA CHANGES WILL BE KEPT IN THE COMMENT SECTION. IMPLEMENTATION FOR UNCHANGED SCHEMA WILL BE KEPT.`,
+		FileNotice:  fileNotice,
 		Filename:    data.Config.Resolver.Filename,
 		Data:        resolverBuild,
 		Packages:    data.Config.Packages,
@@ -183,6 +196,11 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 	}
 
 	for _, file := range files {
+		if fileExists(file.name) &&
+			data.Config.Resolver.PreserveResolver {
+			// file already exists and config says not to update resolver
+			continue
+		}
 		resolverBuild := &ResolverBuild{
 			File:                file,
 			PackageName:         data.Config.Resolver.Package,
@@ -216,7 +234,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 		}
 	}
 
-	if _, err := os.Stat(data.Config.Resolver.Filename); errors.Is(err, fs.ErrNotExist) {
+	if !fileExists(data.Config.Resolver.Filename) {
 		err := templates.Render(templates.Options{
 			PackageName: data.Config.Resolver.Package,
 			FileNotice: `
@@ -303,4 +321,11 @@ func readResolverTemplate(customResolverTemplate string) string {
 		panic(err)
 	}
 	return string(contentBytes)
+}
+
+func fileExists(fileName string) bool {
+	if _, err := os.Stat(fileName); err == nil {
+		return true
+	}
+	return false
 }

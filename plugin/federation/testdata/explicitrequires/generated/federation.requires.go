@@ -21,6 +21,11 @@ func (ec *executionContext) PopulateMultiPlanetRequiresNestedRequires(ctx contex
 	panic(fmt.Errorf("not implemented: PopulateMultiPlanetRequiresNestedRequires"))
 }
 
+// PopulatePersonRequires is the requires populator for the Person entity.
+func (ec *executionContext) PopulatePersonRequires(ctx context.Context, entity *Person, reps map[string]interface{}) error {
+	panic(fmt.Errorf("not implemented: PopulatePersonRequires"))
+}
+
 // PopulatePlanetMultipleRequiresRequires is the requires populator for the PlanetMultipleRequires entity.
 func (ec *executionContext) PopulatePlanetMultipleRequiresRequires(ctx context.Context, entity *PlanetMultipleRequires, reps map[string]interface{}) error {
 	diameter, _ := reps["diameter"].(json.Number).Int64()

@@ -54,8 +54,8 @@ func (tb *TreeBuilder) StartTimer(ctx context.Context) {
 		fmt.Println(errors.New("StartTimer called after StopTimer"))
 	}
 
-	rc := graphql.GetOperationContext(ctx)
-	start := rc.Stats.OperationStart
+	opCtx := graphql.GetOperationContext(ctx)
+	start := opCtx.Stats.OperationStart
 
 	tb.Trace.StartTime = timestamppb.New(start)
 	tb.startTime = &start

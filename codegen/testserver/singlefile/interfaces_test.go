@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
@@ -34,12 +35,8 @@ func TestInterfaces(t *testing.T) {
 			}, nil
 		}
 
-		srv := handler.NewDefaultServer(
-			NewExecutableSchema(Config{
-				Resolvers: resolvers,
-			}),
-		)
-
+		srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+		srv.AddTransport(transport.POST{})
 		c := client.New(srv)
 
 		var resp struct {
@@ -61,7 +58,7 @@ func TestInterfaces(t *testing.T) {
 			return nil, nil
 		}
 
-		srv := handler.NewDefaultServer(
+		srv := handler.New(
 			NewExecutableSchema(Config{
 				Resolvers: resolvers,
 				Directives: DirectiveRoot{
@@ -71,7 +68,7 @@ func TestInterfaces(t *testing.T) {
 				},
 			}),
 		)
-
+		srv.AddTransport(transport.POST{})
 		c := client.New(srv)
 
 		var resp any
@@ -85,7 +82,7 @@ func TestInterfaces(t *testing.T) {
 			return
 		}
 
-		srv := handler.NewDefaultServer(
+		srv := handler.New(
 			NewExecutableSchema(Config{
 				Resolvers: resolvers,
 				Directives: DirectiveRoot{
@@ -96,7 +93,7 @@ func TestInterfaces(t *testing.T) {
 				},
 			}),
 		)
-
+		srv.AddTransport(transport.POST{})
 		c := client.New(srv)
 
 		var resp any
@@ -110,7 +107,7 @@ func TestInterfaces(t *testing.T) {
 			return
 		}
 
-		srv := handler.NewDefaultServer(
+		srv := handler.New(
 			NewExecutableSchema(Config{
 				Resolvers: resolvers,
 				Directives: DirectiveRoot{
@@ -121,7 +118,7 @@ func TestInterfaces(t *testing.T) {
 				},
 			}),
 		)
-
+		srv.AddTransport(transport.POST{})
 		c := client.New(srv)
 
 		var resp any
@@ -140,8 +137,9 @@ func TestInterfaces(t *testing.T) {
 			}, nil
 		}
 
-		c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
-
+		srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+		srv.AddTransport(transport.POST{})
+		c := client.New(srv)
 		var resp struct {
 			NotAnInterface struct {
 				ID                      string
@@ -167,7 +165,9 @@ func TestInterfaces(t *testing.T) {
 			}, nil
 		}
 
-		c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+		srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+		srv.AddTransport(transport.POST{})
+		c := client.New(srv)
 
 		var resp struct {
 			NotAnInterface struct {
@@ -186,7 +186,9 @@ func TestInterfaces(t *testing.T) {
 			return ConcreteNodeInterfaceImplementor{}, nil
 		}
 
-		c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+		srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+		srv.AddTransport(transport.POST{})
+		c := client.New(srv)
 
 		var resp struct {
 			Node struct {
@@ -220,7 +222,9 @@ func TestInterfaces(t *testing.T) {
 			}, nil
 		}
 
-		c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+		srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+		srv.AddTransport(transport.POST{})
+		c := client.New(srv)
 		var resp struct {
 			Shapes []struct {
 				Coordinates struct {
@@ -268,7 +272,9 @@ func TestInterfaces(t *testing.T) {
 			}, nil
 		}
 
-		c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+		srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+		srv.AddTransport(transport.POST{})
+		c := client.New(srv)
 		var resp struct {
 			Dog struct {
 				Size struct {

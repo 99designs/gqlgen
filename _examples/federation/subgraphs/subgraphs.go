@@ -7,11 +7,14 @@ import (
 	"log"
 	"net/http"
 
+	"golang.org/x/sync/errgroup"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/debug"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"golang.org/x/sync/errgroup"
 )
 
 type Config struct {
@@ -40,7 +43,6 @@ func (s *Subgraphs) Shutdown(ctx context.Context) error {
 func (s *Subgraphs) ListenAndServe(ctx context.Context) error {
 	group, _ := errgroup.WithContext(ctx)
 	for _, srv := range s.servers {
-		srv := srv
 		group.Go(func() error {
 			err := srv.ListenAndServe()
 			if err != nil && !errors.Is(err, http.ErrServerClosed) {
@@ -57,7 +59,10 @@ func newServer(name, port string, schema graphql.ExecutableSchema) *http.Server 
 	if port == "" {
 		panic(fmt.Errorf("port for %s is empty", name))
 	}
-	srv := handler.NewDefaultServer(schema)
+	srv := handler.New(schema)
+	srv.AddTransport(transport.GET{})
+	srv.AddTransport(transport.POST{})
+	srv.Use(extension.Introspection{})
 	srv.Use(&debug.Tracer{})
 	mux := http.NewServeMux()
 	mux.Handle("/", playground.Handler("GraphQL playground", "/query"))

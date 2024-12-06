@@ -19,6 +19,7 @@ ignore_list=(
   'integration/*'
   'integration/*/*'
   'codegen/testserver/**/*generated*'
+  'codegen/testserver/**/*generated*/**'
   'codegen/testserver/**/models-gen.go'
   'codegen/testserver/**/resolver.go'
   'plugin/resolvergen/testdata/*/*'

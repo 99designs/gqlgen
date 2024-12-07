@@ -1,0 +1,86 @@
+# Custom directive to log field access (limited to fields, not input fields)
+directive @log(message: String) on FIELD_DEFINITION
+
+# Custom scalar for Date
+scalar Date
+
+# Enum for user roles
+enum Role {
+  ADMIN
+  USER
+  GUEST
+}
+
+# Interface representing an Entity with common fields
+interface Entity {
+  id: ID!
+  createdAt: Date
+}
+
+# Input type for creating a user
+input CreateUserInput {
+  name: String!
+  email: String!
+  age: Int
+  role: Role = USER
+}
+
+# Input type with parameters for filtering users
+input UserFilter {
+  name: String
+  email: String
+  age: Int
+  roles: [Role!]
+  isActive: Boolean = true
+}
+
+# Type representing a user, implementing the Entity interface
+type User implements Entity {
+  id: ID!
+  name: String!
+  email: String!
+  age: Int
+  role: Role!
+  createdAt: Date
+}
+
+# Type representing an admin, implementing the Entity interface
+type Admin implements Entity {
+  id: ID!
+  name: String!
+  permissions: [String!]!
+  createdAt: Date
+}
+
+# Type for mutation result
+type MutationResponse {
+  success: Boolean!
+  message: String
+}
+
+# Root Query type
+type Query {
+  # Fetch a user by ID
+  getUser(id: ID!): User @log(message: "Fetching a user")
+
+  # List all users with optional filters
+  listUsers(filter: UserFilter): [User!]! @log(message: "Listing users")
+
+  # Fetch an entity by ID (could be User or Admin)
+  getEntity(id: ID!): Entity @log(message: "Fetching an entity")
+}
+
+# Root Mutation type
+type Mutation {
+  # Create a new user
+  createUser(input: CreateUserInput!): User! @log(message: "Creating a user")
+
+  # Delete a user by ID
+  deleteUser(id: ID!): MutationResponse! @log(message: "Deleting a user")
+}
+
+# Root Subscription type
+type Subscription {
+  # Subscription to notify when a user is created
+  userCreated: User! @log(message: "User created subscription")
+}

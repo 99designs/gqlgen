@@ -362,3 +362,49 @@ func TestRenderFS(t *testing.T) {
 	// don't look at last character since it's \n on Linux and \r\n on Windows
 	assert.Equal(t, expectedString, actualContentsStr[:len(expectedString)])
 }
+
+func TestDict(t *testing.T) {
+	tests := []struct {
+		name      string
+		input     []any
+		expected  map[string]any
+		expectErr bool
+	}{
+		{
+			name:      "valid key-value pairs",
+			input:     []any{"key1", "value1", "key2", "value2"},
+			expected:  map[string]any{"key1": "value1", "key2": "value2"},
+			expectErr: false,
+		},
+		{
+			name:      "odd number of arguments",
+			input:     []any{"key1", "value1", "key2"},
+			expected:  nil,
+			expectErr: true,
+		},
+		{
+			name:      "non-string key",
+			input:     []any{"key1", "value1", 123, "value2"},
+			expected:  nil,
+			expectErr: true,
+		},
+		{
+			name:      "empty input",
+			input:     []any{},
+			expected:  map[string]any{},
+			expectErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := dict(tt.input...)
+			if tt.expectErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, tt.expected, result)
+			}
+		})
+	}
+}

@@ -8,6 +8,8 @@
 {{ $options := .PackageOptions }}
 {{ $usePointers := .UsePointers }}
 
+{{ $useFunctionSyntaxForExecutionContext := .UseFunctionSyntaxForExecutionContext }}
+
 var (
 	ErrUnknownType = errors.New("unknown type")
 	ErrTypeNotFound = errors.New("type not found")
@@ -169,7 +171,11 @@ func (ec *executionContext) resolveEntity(
 					{{ range $i, $resolver := .Resolvers }}
 					case "{{.ResolverName}}":
 						{{- range $j, $keyField := .KeyFields }}
+						{{ if $useFunctionSyntaxForExecutionContext -}}
+						id{{$j}}, err := {{.Type.UnmarshalFunc}}(ctx, ec, rep["{{.Field.Join `"].(map[string]interface{})["`}}"])
+						{{- else -}}
 						id{{$j}}, err := ec.{{.Type.UnmarshalFunc}}(ctx, rep["{{.Field.Join `"].(map[string]interface{})["`}}"])
+						{{- end }}
 							if err != nil {
 							return nil, fmt.Errorf(`unmarshalling param {{$j}} for {{$resolver.ResolverName}}(): %w`, err)
 							}
@@ -187,7 +193,11 @@ func (ec *executionContext) resolveEntity(
 							}
 						{{- else }}
 							{{ range $entity.Requires }}
+								{{ if $useFunctionSyntaxForExecutionContext -}}
+								entity.{{.Field.JoinGo `.`}}, err = {{.Type.UnmarshalFunc}}(ctx, ec, rep["{{.Field.Join `"].(map[string]interface{})["`}}"])
+								{{- else -}}
 								entity.{{.Field.JoinGo `.`}}, err = ec.{{.Type.UnmarshalFunc}}(ctx, rep["{{.Field.Join `"].(map[string]interface{})["`}}"])
+								{{- end }}
 								if err != nil {
 									return nil, err
 								}
@@ -231,7 +241,11 @@ func (ec *executionContext) resolveManyEntities(
 
 						for i, rep := range reps {
 							{{ range $i, $keyField := .KeyFields -}}
+							{{ if $useFunctionSyntaxForExecutionContext -}}
+							id{{$i}}, err := {{.Type.UnmarshalFunc}}(ctx, ec, rep.entity["{{.Field.Join `"].(map[string]interface{})["`}}"])
+							{{- else -}}
 							id{{$i}}, err := ec.{{.Type.UnmarshalFunc}}(ctx, rep.entity["{{.Field.Join `"].(map[string]interface{})["`}}"])
+							{{- end }}
 								if err != nil {
 									return errors.New(fmt.Sprintf("Field %s undefined in schema.", "{{.Definition.Name}}"))
 								}
@@ -251,7 +265,11 @@ func (ec *executionContext) resolveManyEntities(
 
 						for i, entity := range entities {
 							{{- range $entity.Requires }}
+								{{ if $useFunctionSyntaxForExecutionContext -}}
+								entity.{{.Field.JoinGo `.`}}, err = {{.Type.UnmarshalFunc}}(ctx, ec, reps[i].entity["{{.Field.Join `"].(map[string]interface{})["`}}"])
+								{{- else -}}
 								entity.{{.Field.JoinGo `.`}}, err = ec.{{.Type.UnmarshalFunc}}(ctx, reps[i].entity["{{.Field.Join `"].(map[string]interface{})["`}}"])
+								{{- end }}
 									if err != nil {
 										return err
 									}

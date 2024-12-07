@@ -1,9 +1,15 @@
+{{ $useFunctionSyntaxForExecutionContext := .Config.UseFunctionSyntaxForExecutionContext }}
+
 {{- range $object := .Objects }}
 
 var {{ $object.Name|lcFirst}}Implementors = {{$object.Implementors}}
 
 {{- if .Stream }}
+{{ if $useFunctionSyntaxForExecutionContext -}}
+func _{{$object.Name}}(ctx context.Context, ec *executionContext, sel ast.SelectionSet) func(ctx context.Context) graphql.Marshaler {
+{{- else -}}
 func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.SelectionSet) func(ctx context.Context) graphql.Marshaler {
+{{- end }}
 	fields := graphql.CollectFields(ec.OperationContext, sel, {{$object.Name|lcFirst}}Implementors)
 	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
 		Object: {{$object.Name|quote}},
@@ -16,14 +22,23 @@ func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.Selec
 	switch fields[0].Name {
 	{{- range $field := $object.Fields }}
 	case "{{$field.Name}}":
+		{{ if $useFunctionSyntaxForExecutionContext -}}
+		return _{{$object.Name}}_{{$field.Name}}(ctx, ec, fields[0])
+		{{- else -}}
 		return ec._{{$object.Name}}_{{$field.Name}}(ctx, fields[0])
+		{{- end }}
 	{{- end }}
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
 }
 {{- else }}
+
+{{ if $useFunctionSyntaxForExecutionContext -}}
+func _{{$object.Name}}(ctx context.Context, ec *executionContext, sel ast.SelectionSet{{ if not $object.Root }},obj {{$object.Reference | ref }}{{ end }}) graphql.Marshaler {
+{{- else -}}
 func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.SelectionSet{{ if not $object.Root }},obj {{$object.Reference | ref }}{{ end }}) graphql.Marshaler {
+{{- end }}
 	fields := graphql.CollectFields(ec.OperationContext, sel, {{$object.Name|lcFirst}}Implementors)
 	{{- if $object.Root }}
 		ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
@@ -56,7 +71,11 @@ func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.Selec
 						}
 					}()
 					{{- end }}
+					{{ if $useFunctionSyntaxForExecutionContext -}}
+					res = _{{$object.Name}}_{{$field.Name}}(ctx, ec, field{{if not $object.Root}}, obj{{end}})
+					{{- else -}}
 					res = ec._{{$object.Name}}_{{$field.Name}}(ctx, field{{if not $object.Root}}, obj{{end}})
+					{{- end }}
 					{{- if $field.TypeReference.GQL.NonNull }}
 						if res == graphql.Null {
 							{{- if $object.IsConcurrent }}
@@ -107,10 +126,18 @@ func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.Selec
 			{{- else }}
 				{{- if $object.Root -}}
 					out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+						{{ if $useFunctionSyntaxForExecutionContext -}}
+						return _{{$object.Name}}_{{$field.Name}}(ctx, ec, field)
+						{{- else -}}
 						return ec._{{$object.Name}}_{{$field.Name}}(ctx, field)
+						{{- end }}
 					})
 				{{- else -}}
+					{{ if $useFunctionSyntaxForExecutionContext -}}
+					out.Values[i] = _{{$object.Name}}_{{$field.Name}}(ctx, ec, field, obj)
+					{{- else -}}
 					out.Values[i] = ec._{{$object.Name}}_{{$field.Name}}(ctx, field, obj)
+					{{- end }}
 				{{- end -}}
 
 				{{- if $field.TypeReference.GQL.NonNull }}

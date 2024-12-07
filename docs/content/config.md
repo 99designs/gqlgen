@@ -30,13 +30,13 @@ exec:
   # Optional: Maximum number of goroutines in concurrency to use per child resolvers(default: unlimited)
   # worker_limit: 1000
 
-# Uncomment to enable federation
-# federation:
-#   filename: graph/federation.go
-#   package: graph
-#   version: 2
-#   options:
-#     computed_requires: true
+# Comment or remove this section to skip Apollo Federation support
+federation:
+  filename: graph/federation.go
+  package: graph
+  version: 2
+  options:
+    computed_requires: true
 
 # Where should any generated models go?
 model:
@@ -144,6 +144,8 @@ models:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
+  # gqlgen provides a default GraphQL UUID convenience wrapper for github.com/google/uuid 
+  # but you can override this to provide your own GraphQL UUID implementation
   UUID:
     model:
       - github.com/99designs/gqlgen/graphql.UUID

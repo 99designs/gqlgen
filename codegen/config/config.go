@@ -45,7 +45,7 @@ type Config struct {
 	// If this is set to true, argument directives that
 	// decorate a field with a null value will still be called.
 	//
-	// This enables argumment directives to not just mutate
+	// This enables argument directives to not just mutate
 	// argument values but to set them even if they're null.
 	CallArgumentDirectivesWithNull bool           `yaml:"call_argument_directives_with_null,omitempty"`
 	StructFieldsAlwaysPointers     bool           `yaml:"struct_fields_always_pointers,omitempty"`
@@ -807,11 +807,15 @@ func (c *Config) injectBuiltins() {
 		"Float":               {Model: StringList{"github.com/99designs/gqlgen/graphql.FloatContext"}},
 		"String":              {Model: StringList{"github.com/99designs/gqlgen/graphql.String"}},
 		"Boolean":             {Model: StringList{"github.com/99designs/gqlgen/graphql.Boolean"}},
-		"Int": {Model: StringList{
-			"github.com/99designs/gqlgen/graphql.Int",
-			"github.com/99designs/gqlgen/graphql.Int32",
-			"github.com/99designs/gqlgen/graphql.Int64",
-		}},
+		"Int": {
+			// FIXME: using int / int64 for Int is not spec compliant and introduces
+			// security risks. We should default to int32.
+			Model: StringList{
+				"github.com/99designs/gqlgen/graphql.Int",
+				"github.com/99designs/gqlgen/graphql.Int32",
+				"github.com/99designs/gqlgen/graphql.Int64",
+			},
+		},
 		"ID": {
 			Model: StringList{
 				"github.com/99designs/gqlgen/graphql.ID",
@@ -828,6 +832,12 @@ func (c *Config) injectBuiltins() {
 
 	// These are additional types that are injected if defined in the schema as scalars.
 	extraBuiltins := TypeMap{
+		"Int64": {
+			Model: StringList{
+				"github.com/99designs/gqlgen/graphql.Int",
+				"github.com/99designs/gqlgen/graphql.Int64",
+			},
+		},
 		"Time":   {Model: StringList{"github.com/99designs/gqlgen/graphql.Time"}},
 		"Map":    {Model: StringList{"github.com/99designs/gqlgen/graphql.Map"}},
 		"Upload": {Model: StringList{"github.com/99designs/gqlgen/graphql.Upload"}},

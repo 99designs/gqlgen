@@ -1,0 +1,24 @@
+scalar Int64
+
+input Input {
+    n: Int
+}
+
+input Input64 {
+    n: Int64
+}
+
+type Result {
+    n: Int!
+}
+
+type Result64 {
+    n: Int64!
+}
+
+type Query {
+  echoIntToInt(n: Int): Int!
+  echoInt64ToInt64(n: Int64): Int64!
+  echoIntInputToIntObject(input: Input!): Result
+  echoInt64InputToInt64Object(input: Input64!): Result64
+}

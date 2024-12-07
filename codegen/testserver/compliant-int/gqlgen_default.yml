@@ -1,0 +1,12 @@
+schema:
+  - "*.graphql"
+skip_validation: true
+exec:
+  package: generated
+  filename: generated-default/schema.go
+model:
+  package: generated
+  filename: generated-default/models.go
+resolver:
+  package: generated
+  filename: generated-default/resolver.go

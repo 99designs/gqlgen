@@ -87,6 +87,10 @@ func (s *Server) SetParserTokenLimit(limit int) {
 	s.exec.SetParserTokenLimit(limit)
 }
 
+func (s *Server) SetDisableSuggestion(value bool) {
+	s.exec.SetDisableSuggestion(value)
+}
+
 func (s *Server) Use(extension graphql.HandlerExtension) {
 	s.exec.Use(extension)
 }

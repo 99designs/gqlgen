@@ -169,6 +169,22 @@ func TestExecutor(t *testing.T) {
 	})
 }
 
+func TestExecutorDisableSuggestion(t *testing.T) {
+	exec := testexecutor.New()
+	t.Run("by default, the error message will include suggestions", func(t *testing.T) {
+		resp := query(exec, "", "{nam}")
+		assert.Equal(t, "", string(resp.Data))
+		assert.Equal(t, "input:1: Cannot query field \"nam\" on type \"Query\". Did you mean \"name\"?\n", resp.Errors.Error())
+	})
+
+	t.Run("disable suggestion, the error message will not include suggestions", func(t *testing.T) {
+		exec.SetDisableSuggestion(true)
+		resp := query(exec, "", "{nam}")
+		assert.Equal(t, "", string(resp.Data))
+		assert.Equal(t, "input:1: Cannot query field \"nam\" on type \"Query\".\n", resp.Errors.Error())
+	})
+}
+
 type testParamMutator struct {
 	Mutate func(context.Context, *graphql.RawParams) *gqlerror.Error
 }

@@ -1,0 +1,24 @@
+schema:
+  - "*.graphql"
+skip_validation: true
+use_function_syntax_for_execution_context: true
+exec:
+  filename: generated.go
+  package: usefunctionsyntaxforexecutioncontext
+model:
+  filename: models-gen.go
+  package: usefunctionsyntaxforexecutioncontext
+resolver:
+  filename: resolver.go
+  package: usefunctionsyntaxforexecutioncontext
+  type: Resolver
+
+autobind:
+  - "github.com/99designs/gqlgen/codegen/testserver"
+  - "github.com/99designs/gqlgen/codegen/testserver/usefunctionsyntaxforexecutioncontext"
+
+models:
+  Email:
+    model: "github.com/99designs/gqlgen/codegen/testserver/singlefile.Email"
+  StringFromContextFunction:
+    model: "github.com/99designs/gqlgen/codegen/testserver/singlefile.StringFromContextFunction"

@@ -22,7 +22,6 @@ func TestFederationWithUseFunctionSyntaxForExecutionContext(t *testing.T) {
 	srv.AddTransport(transport.POST{})
 	c := client.New(srv)
 
-
 	t.Run("Hello entities", func(t *testing.T) {
 		representations := []map[string]any{
 			{

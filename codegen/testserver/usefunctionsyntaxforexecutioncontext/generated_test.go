@@ -7,6 +7,7 @@ import (
 	"context"
 	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
@@ -233,6 +234,9 @@ func TestSubscription(t *testing.T) {
 			Log: LogDirective,
 		},
 	}))
+	srv.AddTransport(transport.Websocket{
+		KeepAlivePingInterval: time.Second,
+	})
 	srv.AddTransport(transport.POST{})
 	c := client.New(srv)
 

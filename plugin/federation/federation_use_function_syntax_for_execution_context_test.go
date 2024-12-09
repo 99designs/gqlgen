@@ -4,6 +4,7 @@ package federation
 import (
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
@@ -13,11 +14,14 @@ import (
 )
 
 func TestFederationWithUseFunctionSyntaxForExecutionContext(t *testing.T) {
-	c := client.New(handler.NewDefaultServer(
+	srv := handler.New(
 		generated.NewExecutableSchema(generated.Config{
 			Resolvers: &usefunctionsyntaxforexecutioncontext.Resolver{},
 		}),
-	))
+	)
+	srv.AddTransport(transport.POST{})
+	c := client.New(srv)
+
 
 	t.Run("Hello entities", func(t *testing.T) {
 		representations := []map[string]any{

@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
@@ -16,12 +17,13 @@ import (
 
 func TestQuery(t *testing.T) {
 	resolvers := &Stub{}
-	srv := handler.NewDefaultServer(NewExecutableSchema(Config{
+	srv := handler.New(NewExecutableSchema(Config{
 		Resolvers: resolvers,
 		Directives: DirectiveRoot{
 			Log: LogDirective,
 		},
 	}))
+	srv.AddTransport(transport.POST{})
 	c := client.New(srv)
 
 	testAge := new(int)
@@ -139,12 +141,13 @@ func TestQuery(t *testing.T) {
 
 func TestMutation(t *testing.T) {
 	resolvers := &Stub{}
-	srv := handler.NewDefaultServer(NewExecutableSchema(Config{
+	srv := handler.New(NewExecutableSchema(Config{
 		Resolvers: resolvers,
 		Directives: DirectiveRoot{
 			Log: LogDirective,
 		},
 	}))
+	srv.AddTransport(transport.POST{})
 	c := client.New(srv)
 
 	createdAt := "2021-01-01"
@@ -224,12 +227,13 @@ func TestMutation(t *testing.T) {
 
 func TestSubscription(t *testing.T) {
 	resolvers := &Stub{}
-	srv := handler.NewDefaultServer(NewExecutableSchema(Config{
+	srv := handler.New(NewExecutableSchema(Config{
 		Resolvers: resolvers,
 		Directives: DirectiveRoot{
 			Log: LogDirective,
 		},
 	}))
+	srv.AddTransport(transport.POST{})
 	c := client.New(srv)
 
 	createdAt := "2021-01-01"

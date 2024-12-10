@@ -45,9 +45,6 @@ func TestInt32(t *testing.T) {
 	})
 
 	t.Run("overflow", func(t *testing.T) {
-		var int32OverflowErr *Int32OverflowError
-		var intErr *IntegerError
-
 		cases := []struct {
 			name string
 			v    any
@@ -64,6 +61,9 @@ func TestInt32(t *testing.T) {
 		}
 		for _, tc := range cases {
 			t.Run(tc.name, func(t *testing.T) {
+				var int32OverflowErr *Int32OverflowError
+				var intErr *IntegerError
+
 				res, err := UnmarshalInt32(tc.v)
 				assert.EqualError(t, err, tc.err)         //nolint:testifylint // An error assertion makes more sense.
 				assert.ErrorAs(t, err, &int32OverflowErr) //nolint:testifylint // An error assertion makes more sense.
@@ -71,6 +71,20 @@ func TestInt32(t *testing.T) {
 				assert.Equal(t, int32(0), res)
 			})
 		}
+	})
+
+	t.Run("invalid string numbers are not integer errors", func(t *testing.T) {
+		var intErr *IntegerError
+
+		res, err := UnmarshalInt32("-1.03")
+		assert.EqualError(t, err, "strconv.ParseInt: parsing \"-1.03\": invalid syntax") //nolint:testifylint // An error assertion makes more sense.
+		assert.NotErrorAs(t, err, &intErr)
+		assert.Equal(t, int32(0), res)
+
+		res, err = UnmarshalInt32(json.Number(" 1"))
+		assert.EqualError(t, err, "strconv.ParseInt: parsing \" 1\": invalid syntax") //nolint:testifylint // An error assertion makes more sense.
+		assert.NotErrorAs(t, err, &intErr)
+		assert.Equal(t, int32(0), res)
 	})
 }
 
@@ -82,7 +96,7 @@ func mustUnmarshalInt32(t *testing.T, v any) int32 {
 
 func TestInt64(t *testing.T) {
 	t.Run("marshal", func(t *testing.T) {
-		assert.Equal(t, "123", m2s(MarshalInt32(123)))
+		assert.Equal(t, "123", m2s(MarshalInt(123)))
 	})
 
 	t.Run("unmarshal", func(t *testing.T) {

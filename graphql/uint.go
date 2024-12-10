@@ -161,7 +161,7 @@ func (e *UintSignError) Unwrap() error {
 }
 
 func isSignedInteger(v string) bool {
-	if len(v) == 0 {
+	if v == "" {
 		return false
 	}
 	if v[0] != '-' && v[0] != '+' {

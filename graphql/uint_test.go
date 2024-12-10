@@ -38,9 +38,9 @@ func TestUint(t *testing.T) {
 		for _, tc := range cases {
 			t.Run(tc.name, func(t *testing.T) {
 				res, err := UnmarshalUint(tc.v)
-				assert.EqualError(t, err, tc.err) //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &uintSignErr)
-				assert.ErrorAs(t, err, &intErr)
+				assert.EqualError(t, err, tc.err)    //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(t, err, &uintSignErr) //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(t, err, &intErr)      //nolint:testifylint // An error assertion makes more sense.
 				assert.Equal(t, uint(0), res)
 			})
 		}
@@ -98,9 +98,9 @@ func TestUint32(t *testing.T) {
 		for _, tc := range cases {
 			t.Run(tc.name, func(t *testing.T) {
 				res, err := UnmarshalUint32(tc.v)
-				assert.EqualError(t, err, tc.err) //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &uintSignErr)
-				assert.ErrorAs(t, err, &intErr)
+				assert.EqualError(t, err, tc.err)    //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(t, err, &uintSignErr) //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(t, err, &intErr)      //nolint:testifylint // An error assertion makes more sense.
 				assert.Equal(t, uint32(0), res)
 			})
 		}
@@ -134,9 +134,9 @@ func TestUint32(t *testing.T) {
 		for _, tc := range cases {
 			t.Run(tc.name, func(t *testing.T) {
 				res, err := UnmarshalUint32(tc.v)
-				assert.EqualError(t, err, tc.err) //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &uint32OverflowErr)
-				assert.ErrorAs(t, err, &intErr)
+				assert.EqualError(t, err, tc.err)          //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(t, err, &uint32OverflowErr) //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(t, err, &intErr)            //nolint:testifylint // An error assertion makes more sense.
 				assert.Equal(t, uint32(0), res)
 			})
 		}
@@ -181,9 +181,9 @@ func TestUint64(t *testing.T) {
 		for _, tc := range cases {
 			t.Run(tc.name, func(t *testing.T) {
 				res, err := UnmarshalUint64(tc.v)
-				assert.EqualError(t, err, tc.err) //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &uintSignErr)
-				assert.ErrorAs(t, err, &intErr)
+				assert.EqualError(t, err, tc.err)    //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(t, err, &uintSignErr) //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(t, err, &intErr)      //nolint:testifylint // An error assertion makes more sense.
 				assert.Equal(t, uint64(0), res)
 			})
 		}

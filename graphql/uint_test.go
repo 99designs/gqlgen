@@ -95,7 +95,6 @@ func TestUint32(t *testing.T) {
 	})
 
 	t.Run("can't unmarshal negative numbers", func(t *testing.T) {
-
 		cases := []struct {
 			name string
 			v    any

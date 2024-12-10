@@ -158,7 +158,7 @@ func TestIntegration(t *testing.T) {
 			}
 			err := c.Post(`query { echoIntToInt(n: 2147483648) }`, &resp)
 			if tc.willError {
-				require.EqualError(t, err, `[{"message":"2147483648 overflows 32-bit integer","path":["echoIntToInt","n"]}]`)
+				require.EqualError(t, err, `[{"message":"2147483648 overflows signed 32-bit integer","path":["echoIntToInt","n"]}]`)
 				require.Equal(t, 0, resp.EchoIntToInt)
 				return
 			}

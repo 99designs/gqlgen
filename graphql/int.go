@@ -85,17 +85,40 @@ func UnmarshalInt32(v any) (int32, error) {
 	}
 }
 
-type Int32OverflowError struct {
-	Value int64
+// IntegerError is an error type that allows users to identify errors associated
+// with receiving an integer value that is not valid for the specific integer
+// type designated by the API. IntegerErrors designate otherwise valid unsigned
+// or signed 64-bit integers that are invalid in a specific context: they do not
+// designate integers that overflow 64-bit versions of the current type.
+type IntegerError struct {
+	Message string
 }
 
-func (e *Int32OverflowError) Error() string {
-	return fmt.Sprintf("%d overflows 32-bit integer", e.Value)
+func (e IntegerError) Error() string {
+	return e.Message
+}
+
+type Int32OverflowError struct {
+	Value int64
+	*IntegerError
+}
+
+func newInt32OverflowError(i int64) *Int32OverflowError {
+	return &Int32OverflowError{
+		Value: i,
+		IntegerError: &IntegerError{
+			Message: fmt.Sprintf("%d overflows signed 32-bit integer", i),
+		},
+	}
+}
+
+func (e *Int32OverflowError) Unwrap() error {
+	return e.IntegerError
 }
 
 func safeCastInt32(i int64) (int32, error) {
 	if i > math.MaxInt32 || i < math.MinInt32 {
-		return 0, &Int32OverflowError{i}
+		return 0, newInt32OverflowError(i)
 	}
 	return int32(i), nil
 }

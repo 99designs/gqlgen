@@ -15,6 +15,7 @@ func TestInt(t *testing.T) {
 	})
 
 	t.Run("unmarshal", func(t *testing.T) {
+		assert.Equal(t, 0, mustUnmarshalInt(t, nil))
 		assert.Equal(t, 123, mustUnmarshalInt(t, 123))
 		assert.Equal(t, 123, mustUnmarshalInt(t, int64(123)))
 		assert.Equal(t, 123, mustUnmarshalInt(t, json.Number("123")))
@@ -35,6 +36,7 @@ func TestInt32(t *testing.T) {
 	})
 
 	t.Run("unmarshal", func(t *testing.T) {
+		assert.Equal(t, int32(0), mustUnmarshalInt32(t, nil))
 		assert.Equal(t, int32(123), mustUnmarshalInt32(t, 123))
 		assert.Equal(t, int32(123), mustUnmarshalInt32(t, int64(123)))
 		assert.Equal(t, int32(123), mustUnmarshalInt32(t, json.Number("123")))
@@ -43,24 +45,29 @@ func TestInt32(t *testing.T) {
 	})
 
 	t.Run("overflow", func(t *testing.T) {
+		var int32OverflowErr *Int32OverflowError
+		var intErr *IntegerError
+
 		cases := []struct {
 			name string
 			v    any
 			err  string
 		}{
-			{"positive int overflow", math.MaxInt32 + 1, "2147483648 overflows 32-bit integer"},
-			{"negative int overflow", math.MinInt32 - 1, "-2147483649 overflows 32-bit integer"},
-			{"positive int overflow", int64(math.MaxInt32 + 1), "2147483648 overflows 32-bit integer"},
-			{"negative int overflow", int64(math.MinInt32 - 1), "-2147483649 overflows 32-bit integer"},
-			{"positive json.Number overflow", json.Number("2147483648"), "2147483648 overflows 32-bit integer"},
-			{"negative json.Number overflow", json.Number("-2147483649"), "-2147483649 overflows 32-bit integer"},
-			{"positive string overflow", "2147483648", "2147483648 overflows 32-bit integer"},
-			{"negative string overflow", "-2147483649", "-2147483649 overflows 32-bit integer"},
+			{"positive int overflow", math.MaxInt32 + 1, "2147483648 overflows signed 32-bit integer"},
+			{"negative int overflow", math.MinInt32 - 1, "-2147483649 overflows signed 32-bit integer"},
+			{"positive int64 overflow", int64(math.MaxInt32 + 1), "2147483648 overflows signed 32-bit integer"},
+			{"negative int64 overflow", int64(math.MinInt32 - 1), "-2147483649 overflows signed 32-bit integer"},
+			{"positive json.Number overflow", json.Number("2147483648"), "2147483648 overflows signed 32-bit integer"},
+			{"negative json.Number overflow", json.Number("-2147483649"), "-2147483649 overflows signed 32-bit integer"},
+			{"positive string overflow", "2147483648", "2147483648 overflows signed 32-bit integer"},
+			{"negative string overflow", "-2147483649", "-2147483649 overflows signed 32-bit integer"},
 		}
 		for _, tc := range cases {
 			t.Run(tc.name, func(t *testing.T) {
 				res, err := UnmarshalInt32(tc.v)
 				assert.EqualError(t, err, tc.err) //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(t, err, &int32OverflowErr)
+				assert.ErrorAs(t, err, &intErr)
 				assert.Equal(t, int32(0), res)
 			})
 		}
@@ -79,6 +86,7 @@ func TestInt64(t *testing.T) {
 	})
 
 	t.Run("unmarshal", func(t *testing.T) {
+		assert.Equal(t, int64(0), mustUnmarshalInt64(t, nil))
 		assert.Equal(t, int64(123), mustUnmarshalInt64(t, 123))
 		assert.Equal(t, int64(123), mustUnmarshalInt64(t, int64(123)))
 		assert.Equal(t, int64(123), mustUnmarshalInt64(t, json.Number("123")))

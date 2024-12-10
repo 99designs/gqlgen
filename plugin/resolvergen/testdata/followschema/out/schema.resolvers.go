@@ -17,6 +17,7 @@ func (r *queryCustomResolverType) Resolver(ctx context.Context) (_ *customresolv
 }
 
 // Name is the resolver for the name field.
+// This comment is multiline method doc
 func (r *resolverCustomResolverType) Name(ctx context.Context, obj *customresolver.Resolver) (string, error) {
 	// CustomerResolverType.Name implementation
 	return "", nil
@@ -26,6 +27,7 @@ func (r *resolverCustomResolverType) Name(ctx context.Context, obj *customresolv
 func (r *CustomResolverType) Query() customresolver.QueryResolver { return &queryCustomResolverType{r} }
 
 // Resolver returns customresolver.ResolverResolver implementation.
+// This comment is multiline method doc
 func (r *CustomResolverType) Resolver() customresolver.ResolverResolver {
 	return &resolverCustomResolverType{r}
 }

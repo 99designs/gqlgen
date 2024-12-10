@@ -96,7 +96,7 @@ func mustUnmarshalInt32(t *testing.T, v any) int32 {
 
 func TestInt64(t *testing.T) {
 	t.Run("marshal", func(t *testing.T) {
-		assert.Equal(t, "123", m2s(MarshalInt(123)))
+		assert.Equal(t, "123", m2s(MarshalInt64(123)))
 	})
 
 	t.Run("unmarshal", func(t *testing.T) {

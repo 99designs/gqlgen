@@ -229,6 +229,7 @@ func (c *Config) Init() error {
 	if c.Packages == nil {
 		c.Packages = code.NewPackages(
 			code.WithBuildTags(c.GoBuildTags...),
+			code.PackagePrefixToCache("github.com/99designs/gqlgen/graphql"),
 		)
 	}
 
@@ -856,6 +857,7 @@ func (c *Config) LoadSchema() error {
 	if c.Packages != nil {
 		c.Packages = code.NewPackages(
 			code.WithBuildTags(c.GoBuildTags...),
+			code.PackagePrefixToCache("github.com/99designs/gqlgen/graphql"),
 		)
 	}
 

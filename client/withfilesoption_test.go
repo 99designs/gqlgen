@@ -56,10 +56,10 @@ func TestWithFiles(t *testing.T) {
 				contentDisposition := p.Header.Get("Content-Disposition")
 
 				if contentDisposition == `form-data; name="operations"` {
-					assert.EqualValues(t, `{"query":"{ id }","variables":{"file":{}}}`, slurp)
+					assert.JSONEq(t, `{"query":"{ id }","variables":{"file":{}}}`, string(slurp))
 				}
 				if contentDisposition == `form-data; name="map"` {
-					assert.EqualValues(t, `{"0":["variables.file"]}`, slurp)
+					assert.JSONEq(t, `{"0":["variables.file"]}`, string(slurp))
 				}
 				if regexp.MustCompile(`form-data; name="0"; filename=.*`).MatchString(contentDisposition) {
 					assert.Equal(t, `text/plain; charset=utf-8`, p.Header.Get("Content-Type"))
@@ -104,7 +104,7 @@ func TestWithFiles(t *testing.T) {
 				contentDisposition := p.Header.Get("Content-Disposition")
 
 				if contentDisposition == `form-data; name="operations"` {
-					assert.EqualValues(t, `{"query":"{ id }","variables":{"input":{"files":[{},{}]}}}`, slurp)
+					assert.JSONEq(t, `{"query":"{ id }","variables":{"input":{"files":[{},{}]}}}`, string(slurp))
 				}
 				if contentDisposition == `form-data; name="map"` {
 					// returns `{"0":["variables.input.files.0"],"1":["variables.input.files.1"]}`
@@ -163,7 +163,7 @@ func TestWithFiles(t *testing.T) {
 				contentDisposition := p.Header.Get("Content-Disposition")
 
 				if contentDisposition == `form-data; name="operations"` {
-					assert.EqualValues(t, `{"query":"{ id }","variables":{"req":{"files":[{},{}],"foo":{"bar":{}}}}}`, slurp)
+					assert.JSONEq(t, `{"query":"{ id }","variables":{"req":{"files":[{},{}],"foo":{"bar":{}}}}}`, string(slurp))
 				}
 				if contentDisposition == `form-data; name="map"` {
 					// returns `{"0":["variables.req.files.0"],"1":["variables.req.files.1"],"2":["variables.req.foo.bar"]}`
@@ -228,10 +228,10 @@ func TestWithFiles(t *testing.T) {
 				contentDisposition := p.Header.Get("Content-Disposition")
 
 				if contentDisposition == `form-data; name="operations"` {
-					assert.EqualValues(t, `{"query":"{ id }","variables":{"files":[{},{},{}]}}`, slurp)
+					assert.JSONEq(t, `{"query":"{ id }","variables":{"files":[{},{},{}]}}`, string(slurp))
 				}
 				if contentDisposition == `form-data; name="map"` {
-					assert.EqualValues(t, `{"0":["variables.files.0","variables.files.2"],"1":["variables.files.1"]}`, slurp)
+					assert.JSONEq(t, `{"0":["variables.files.0","variables.files.2"],"1":["variables.files.1"]}`, string(slurp))
 					// returns `{"0":["variables.files.0","variables.files.2"],"1":["variables.files.1"]}`
 					// but the order of file inputs is unpredictable between different OS systems
 					assert.Contains(t, string(slurp), `{"0":`)

@@ -20,7 +20,7 @@ func TestExecutor(t *testing.T) {
 
 	t.Run("calls query on executable schema", func(t *testing.T) {
 		resp := query(exec, "", "{name}")
-		assert.Equal(t, `{"name":"test"}`, string(resp.Data))
+		assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 	})
 
 	t.Run("validates operation", func(t *testing.T) {
@@ -51,7 +51,7 @@ func TestExecutor(t *testing.T) {
 		})
 
 		resp := query(exec, "", "{name}")
-		assert.Equal(t, `{"name":"test"}`, string(resp.Data))
+		assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 		assert.Equal(t, []string{"first", "second"}, calls)
 	})
 
@@ -67,7 +67,7 @@ func TestExecutor(t *testing.T) {
 		})
 
 		resp := query(exec, "", "{name}")
-		assert.Equal(t, `{"name":"test"}`, string(resp.Data))
+		assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 		assert.Equal(t, []string{"first", "second"}, calls)
 	})
 
@@ -83,7 +83,7 @@ func TestExecutor(t *testing.T) {
 		})
 
 		resp := query(exec, "", "{name}")
-		assert.Equal(t, `{"name":"test"}`, string(resp.Data))
+		assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 		assert.Equal(t, []string{"first", "second"}, calls)
 	})
 
@@ -99,7 +99,7 @@ func TestExecutor(t *testing.T) {
 		})
 
 		resp := query(exec, "", "{name}")
-		assert.Equal(t, `{"name":"test"}`, string(resp.Data))
+		assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 		assert.Equal(t, []string{"first", "second"}, calls)
 	})
 
@@ -118,7 +118,7 @@ func TestExecutor(t *testing.T) {
 			},
 		})
 		resp := query(exec, "", "{name}")
-		assert.Equal(t, `{"name":"test"}`, string(resp.Data))
+		assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 		assert.Equal(t, []string{"param", "context"}, calls)
 	})
 
@@ -147,7 +147,7 @@ func TestExecutor(t *testing.T) {
 
 		t.Run("cache miss populates cache", func(t *testing.T) {
 			resp := query(exec, "Foo", qry)
-			assert.Equal(t, `{"name":"test"}`, string(resp.Data))
+			assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 
 			cacheDoc, ok := cache.Get(ctx, qry)
 			require.True(t, ok)
@@ -160,7 +160,7 @@ func TestExecutor(t *testing.T) {
 			cache.Add(ctx, qry, doc)
 
 			resp := query(exec, "Bar", qry)
-			assert.Equal(t, `{"name":"test"}`, string(resp.Data))
+			assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 
 			cacheDoc, ok := cache.Get(ctx, qry)
 			require.True(t, ok)

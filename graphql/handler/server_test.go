@@ -26,25 +26,25 @@ func TestServer(t *testing.T) {
 	t.Run("returns an error if no transport matches", func(t *testing.T) {
 		resp := post(srv, "/foo", "application/json")
 		assert.Equal(t, http.StatusBadRequest, resp.Code)
-		assert.Equal(t, `{"errors":[{"message":"transport not supported"}],"data":null}`, resp.Body.String())
+		assert.JSONEq(t, `{"errors":[{"message":"transport not supported"}],"data":null}`, resp.Body.String())
 	})
 
 	t.Run("calls query on executable schema", func(t *testing.T) {
 		resp := get(srv, "/foo?query={name}")
 		assert.Equal(t, http.StatusOK, resp.Code)
-		assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+		assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 	})
 
 	t.Run("mutations are forbidden", func(t *testing.T) {
 		resp := get(srv, "/foo?query=mutation{name}")
 		assert.Equal(t, http.StatusNotAcceptable, resp.Code)
-		assert.Equal(t, `{"errors":[{"message":"GET requests only allow query operations"}],"data":null}`, resp.Body.String())
+		assert.JSONEq(t, `{"errors":[{"message":"GET requests only allow query operations"}],"data":null}`, resp.Body.String())
 	})
 
 	t.Run("subscriptions are forbidden", func(t *testing.T) {
 		resp := get(srv, "/foo?query=subscription{name}")
 		assert.Equal(t, http.StatusNotAcceptable, resp.Code)
-		assert.Equal(t, `{"errors":[{"message":"GET requests only allow query operations"}],"data":null}`, resp.Body.String())
+		assert.JSONEq(t, `{"errors":[{"message":"GET requests only allow query operations"}],"data":null}`, resp.Body.String())
 	})
 
 	t.Run("invokes operation middleware in order", func(t *testing.T) {
@@ -120,7 +120,7 @@ func TestServer(t *testing.T) {
 		t.Run("cache miss populates cache", func(t *testing.T) {
 			resp := get(srv, "/foo?query="+url.QueryEscape(qry))
 			assert.Equal(t, http.StatusOK, resp.Code)
-			assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+			assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 
 			cacheDoc, ok := cache.Get(ctx, qry)
 			require.True(t, ok)
@@ -134,7 +134,7 @@ func TestServer(t *testing.T) {
 
 			resp := get(srv, "/foo?query="+url.QueryEscape(qry))
 			assert.Equal(t, http.StatusOK, resp.Code)
-			assert.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+			assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 
 			cacheDoc, ok := cache.Get(ctx, qry)
 			require.True(t, ok)

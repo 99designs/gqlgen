@@ -611,7 +611,7 @@ func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {
 		_, srv := initialize(transport.Websocket{})
 		defer srv.Close()
 
-		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
+		c := wsConnectWithSubprotocol(srv.URL, graphqltransportwsSubprotocol)
 		defer c.Close()
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
@@ -622,7 +622,7 @@ func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {
 		handler, srv := initialize(transport.Websocket{})
 		defer srv.Close()
 
-		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
+		c := wsConnectWithSubprotocol(srv.URL, graphqltransportwsSubprotocol)
 		defer c.Close()
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
@@ -657,7 +657,7 @@ func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {
 		_, srv := initialize(transport.Websocket{KeepAlivePingInterval: 5 * time.Millisecond})
 		defer srv.Close()
 
-		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
+		c := wsConnectWithSubprotocol(srv.URL, graphqltransportwsSubprotocol)
 		defer c.Close()
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
@@ -683,7 +683,7 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 		_, srv := initialize(transport.Websocket{PingPongInterval: 20 * time.Millisecond})
 		defer srv.Close()
 
-		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
+		c := wsConnectWithSubprotocol(srv.URL, graphqltransportwsSubprotocol)
 		defer c.Close()
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
@@ -703,7 +703,7 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 		_, srv := initialize(transport.Websocket{PingPongInterval: 10 * time.Millisecond})
 		defer srv.Close()
 
-		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
+		c := wsConnectWithSubprotocol(srv.URL, graphqltransportwsSubprotocol)
 		defer c.Close()
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
@@ -727,7 +727,7 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 		srv := httptest.NewServer(h)
 		defer srv.Close()
 
-		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
+		c := wsConnectWithSubprotocol(srv.URL, graphqltransportwsSubprotocol)
 		defer c.Close()
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
@@ -758,7 +758,7 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 		srv := httptest.NewServer(h)
 		defer srv.Close()
 
-		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
+		c := wsConnectWithSubprotocol(srv.URL, graphqltransportwsSubprotocol)
 		defer c.Close()
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
@@ -804,7 +804,7 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 		h, srv := initialize(transport.Websocket{PongOnlyInterval: 10 * time.Millisecond})
 		defer srv.Close()
 
-		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
+		c := wsConnectWithSubprotocol(srv.URL, graphqltransportwsSubprotocol)
 		defer c.Close()
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
@@ -836,13 +836,13 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 }
 
 func wsConnect(url string) *websocket.Conn {
-	return wsConnectWithSubprocotol(url, "")
+	return wsConnectWithSubprotocol(url, "")
 }
 
-func wsConnectWithSubprocotol(url, subprocotol string) *websocket.Conn {
+func wsConnectWithSubprotocol(url, subprotocol string) *websocket.Conn {
 	h := make(http.Header)
-	if subprocotol != "" {
-		h.Add("Sec-WebSocket-Protocol", subprocotol)
+	if subprotocol != "" {
+		h.Add("Sec-WebSocket-Protocol", subprotocol)
 	}
 
 	c, resp, err := websocket.DefaultDialer.Dial(strings.ReplaceAll(url, "http://", "ws://"), h)

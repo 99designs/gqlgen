@@ -27,7 +27,7 @@ func TestAPQIntegration(t *testing.T) {
 
 	resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }","extensions":{"persistedQuery":{"version":1,"sha256Hash":"30166fc3298853f22709fce1e4a00e98f1b6a3160eaaaf9cb3b7db6a16073b07"}}}`)
 	require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
-	require.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+	require.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 
 	require.NotNil(t, stats)
 	require.True(t, stats.SentQuery)

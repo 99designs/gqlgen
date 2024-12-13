@@ -23,7 +23,7 @@ func TestClient(t *testing.T) {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		b, err := io.ReadAll(r.Body)
 		if assert.NoError(t, err) {
-			assert.Equal(t, `{"query":"user(id:$id){name}","variables":{"id":1}}`, string(b))
+			assert.JSONEq(t, `{"query":"user(id:$id){name}","variables":{"id":1}}`, string(b))
 
 			err = json.NewEncoder(w).Encode(map[string]any{
 				"data": map[string]any{
@@ -157,7 +157,7 @@ func TestAddExtensions(t *testing.T) {
 		if !assert.NoError(t, err) {
 			return
 		}
-		assert.Equal(t, `{"query":"user(id:1){name}","extensions":{"persistedQuery":{"sha256Hash":"ceec2897e2da519612279e63f24658c3e91194cbb2974744fa9007a7e1e9f9e7","version":1}}}`, string(b))
+		assert.JSONEq(t, `{"query":"user(id:1){name}","extensions":{"persistedQuery":{"sha256Hash":"ceec2897e2da519612279e63f24658c3e91194cbb2974744fa9007a7e1e9f9e7","version":1}}}`, string(b))
 		err = json.NewEncoder(w).Encode(map[string]any{
 			"data": map[string]any{
 				"Name": "Bob",
@@ -222,7 +222,7 @@ func TestClientWithCustomTarget(t *testing.T) {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		b, err := io.ReadAll(r.Body)
 		if assert.NoError(t, err) {
-			assert.Equal(t, `{"query":"user(id:$id){name}","variables":{"id":1}}`, string(b))
+			assert.JSONEq(t, `{"query":"user(id:$id){name}","variables":{"id":1}}`, string(b))
 
 			err = json.NewEncoder(w).Encode(map[string]any{
 				"data": map[string]any{

@@ -136,10 +136,6 @@ func Generate(cfg *config.Config, option ...Option) error {
 		}
 	}
 
-	if err = codegen.GenerateCode(data); err != nil {
-		return fmt.Errorf("generating core failed: %w", err)
-	}
-
 	if !cfg.SkipValidation {
 		if err := validate(cfg); err != nil {
 			return fmt.Errorf("validation failed: %w", err)

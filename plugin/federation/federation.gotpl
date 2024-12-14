@@ -294,6 +294,9 @@ func (ec *executionContext) resolveManyEntities(
 	{{- if .Resolvers }}
 
 		func entityResolverNameFor{{$entity.Name}}(ctx context.Context, rep EntityRepresentation) (string, error) {
+			// we collect errors because a later entity resolver may work fine
+			// when an entity has multiple keys
+			entityResolverErrs := []error{}
 			{{- range .Resolvers }}
 				for {
 					var (
@@ -310,12 +313,16 @@ func (ec *executionContext) resolveManyEntities(
 						{{- range $i, $field := .Field }}
 							val, ok = m["{{.}}"]
 							if !ok {
-								return "", fmt.Errorf("%w due to missing Key Field {{.}} for User", ErrTypeNotFound)
+								entityResolverErrs = append(entityResolverErrs,
+									fmt.Errorf("%w due to missing Key Field \"{{.}}\" for {{$entity.Name}}", ErrTypeNotFound))
+								break
 							}
 							{{- if (ne $i $keyField.Field.LastIndex ) }}
 								if m, ok = val.(map[string]interface{}); !ok {
-									// nested field value is not a map[string]interface
-									return "", fmt.Errorf("%w for {{$entity.Name}} due to nested Keyfield not being map value", ErrTypeNotFound)
+									// nested field value is not a map[string]interface so don't use it
+									entityResolverErrs = append(entityResolverErrs,
+										fmt.Errorf("%w due to nested Key Field \"{{.}}\" value not matching map[string]any for {{$entity.Name}}", ErrTypeNotFound))
+									break
 								}
 							{{- else}}
 								if allNull {
@@ -325,12 +332,15 @@ func (ec *executionContext) resolveManyEntities(
 						{{- end}}
 					{{- end }}
 					if allNull {
-						return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
+						entityResolverErrs = append(entityResolverErrs,
+							fmt.Errorf("%w due to all null value KeyFields for {{$entity.Name}}", ErrTypeNotFound))
+						break
 					}
 					return "{{.ResolverName}}", nil
 				}
 			{{- end }}
-			return "", fmt.Errorf("%w for {{$entity.Name}}", ErrTypeNotFound)
+			return "", fmt.Errorf("%w for {{$entity.Name}} due to %v", ErrTypeNotFound,
+				errors.Join(entityResolverErrs...).Error())
 		}
 	{{- end }}
 {{- end }}

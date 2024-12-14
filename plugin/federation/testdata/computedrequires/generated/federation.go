@@ -595,6 +595,9 @@ func (ec *executionContext) resolveManyEntities(
 }
 
 func entityResolverNameForHello(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -608,20 +611,28 @@ func entityResolverNameForHello(ctx context.Context, rep EntityRepresentation) (
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"name\" for Hello", ErrTypeNotFound))
+			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for Hello", ErrTypeNotFound))
+			break
 		}
 		return "findHelloByName", nil
 	}
-	return "", fmt.Errorf("%w for Hello", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for Hello due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForHelloMultiSingleKeys(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -635,7 +646,9 @@ func entityResolverNameForHelloMultiSingleKeys(ctx context.Context, rep EntityRe
 		m = rep
 		val, ok = m["key1"]
 		if !ok {
-			return "", fmt.Errorf("%w due to missing Key Field key1 for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"key1\" for HelloMultiSingleKeys", ErrTypeNotFound))
+			break
 		}
 		if allNull {
 			allNull = val == nil
@@ -643,20 +656,28 @@ func entityResolverNameForHelloMultiSingleKeys(ctx context.Context, rep EntityRe
 		m = rep
 		val, ok = m["key2"]
 		if !ok {
-			return "", fmt.Errorf("%w due to missing Key Field key2 for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"key2\" for HelloMultiSingleKeys", ErrTypeNotFound))
+			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for HelloMultiSingleKeys", ErrTypeNotFound))
+			break
 		}
 		return "findHelloMultiSingleKeysByKey1AndKey2", nil
 	}
-	return "", fmt.Errorf("%w for HelloMultiSingleKeys", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for HelloMultiSingleKeys due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForHelloWithErrors(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -670,20 +691,28 @@ func entityResolverNameForHelloWithErrors(ctx context.Context, rep EntityReprese
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"name\" for HelloWithErrors", ErrTypeNotFound))
+			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for HelloWithErrors", ErrTypeNotFound))
+			break
 		}
 		return "findHelloWithErrorsByName", nil
 	}
-	return "", fmt.Errorf("%w for HelloWithErrors", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for HelloWithErrors due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForMultiHello(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -697,20 +726,28 @@ func entityResolverNameForMultiHello(ctx context.Context, rep EntityRepresentati
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"name\" for MultiHello", ErrTypeNotFound))
+			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for MultiHello", ErrTypeNotFound))
+			break
 		}
 		return "findManyMultiHelloByNames", nil
 	}
-	return "", fmt.Errorf("%w for MultiHello", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for MultiHello due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForMultiHelloMultipleRequires(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -724,20 +761,28 @@ func entityResolverNameForMultiHelloMultipleRequires(ctx context.Context, rep En
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"name\" for MultiHelloMultipleRequires", ErrTypeNotFound))
+			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for MultiHelloMultipleRequires", ErrTypeNotFound))
+			break
 		}
 		return "findManyMultiHelloMultipleRequiresByNames", nil
 	}
-	return "", fmt.Errorf("%w for MultiHelloMultipleRequires", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for MultiHelloMultipleRequires due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForMultiHelloRequires(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -751,20 +796,28 @@ func entityResolverNameForMultiHelloRequires(ctx context.Context, rep EntityRepr
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"name\" for MultiHelloRequires", ErrTypeNotFound))
+			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for MultiHelloRequires", ErrTypeNotFound))
+			break
 		}
 		return "findManyMultiHelloRequiresByNames", nil
 	}
-	return "", fmt.Errorf("%w for MultiHelloRequires", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for MultiHelloRequires due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForMultiHelloWithError(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -778,20 +831,28 @@ func entityResolverNameForMultiHelloWithError(ctx context.Context, rep EntityRep
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"name\" for MultiHelloWithError", ErrTypeNotFound))
+			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for MultiHelloWithError", ErrTypeNotFound))
+			break
 		}
 		return "findManyMultiHelloWithErrorByNames", nil
 	}
-	return "", fmt.Errorf("%w for MultiHelloWithError", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for MultiHelloWithError due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForMultiPlanetRequiresNested(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -805,20 +866,28 @@ func entityResolverNameForMultiPlanetRequiresNested(ctx context.Context, rep Ent
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"name\" for MultiPlanetRequiresNested", ErrTypeNotFound))
+			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for MultiPlanetRequiresNested", ErrTypeNotFound))
+			break
 		}
 		return "findManyMultiPlanetRequiresNestedByNames", nil
 	}
-	return "", fmt.Errorf("%w for MultiPlanetRequiresNested", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for MultiPlanetRequiresNested due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForPerson(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -832,20 +901,28 @@ func entityResolverNameForPerson(ctx context.Context, rep EntityRepresentation) 
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"name\" for Person", ErrTypeNotFound))
+			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for Person", ErrTypeNotFound))
+			break
 		}
 		return "findPersonByName", nil
 	}
-	return "", fmt.Errorf("%w for Person", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for Person due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForPlanetMultipleRequires(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -859,20 +936,28 @@ func entityResolverNameForPlanetMultipleRequires(ctx context.Context, rep Entity
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"name\" for PlanetMultipleRequires", ErrTypeNotFound))
+			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for PlanetMultipleRequires", ErrTypeNotFound))
+			break
 		}
 		return "findPlanetMultipleRequiresByName", nil
 	}
-	return "", fmt.Errorf("%w for PlanetMultipleRequires", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for PlanetMultipleRequires due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForPlanetRequires(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -886,20 +971,28 @@ func entityResolverNameForPlanetRequires(ctx context.Context, rep EntityRepresen
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"name\" for PlanetRequires", ErrTypeNotFound))
+			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for PlanetRequires", ErrTypeNotFound))
+			break
 		}
 		return "findPlanetRequiresByName", nil
 	}
-	return "", fmt.Errorf("%w for PlanetRequires", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for PlanetRequires due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForPlanetRequiresNested(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -913,20 +1006,28 @@ func entityResolverNameForPlanetRequiresNested(ctx context.Context, rep EntityRe
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"name\" for PlanetRequiresNested", ErrTypeNotFound))
+			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for PlanetRequiresNested", ErrTypeNotFound))
+			break
 		}
 		return "findPlanetRequiresNestedByName", nil
 	}
-	return "", fmt.Errorf("%w for PlanetRequiresNested", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for PlanetRequiresNested due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForWorld(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -940,15 +1041,21 @@ func entityResolverNameForWorld(ctx context.Context, rep EntityRepresentation) (
 		m = rep
 		val, ok = m["hello"]
 		if !ok {
-			return "", fmt.Errorf("%w due to missing Key Field hello for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"hello\" for World", ErrTypeNotFound))
+			break
 		}
 		if m, ok = val.(map[string]interface{}); !ok {
-			// nested field value is not a map[string]interface
-			return "", fmt.Errorf("%w for World due to nested Keyfield not being map value", ErrTypeNotFound)
+			// nested field value is not a map[string]interface so don't use it
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to nested Key Field \"hello\" value not matching map[string]any for World", ErrTypeNotFound))
+			break
 		}
 		val, ok = m["name"]
 		if !ok {
-			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"name\" for World", ErrTypeNotFound))
+			break
 		}
 		if allNull {
 			allNull = val == nil
@@ -956,20 +1063,28 @@ func entityResolverNameForWorld(ctx context.Context, rep EntityRepresentation) (
 		m = rep
 		val, ok = m["foo"]
 		if !ok {
-			return "", fmt.Errorf("%w due to missing Key Field foo for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"foo\" for World", ErrTypeNotFound))
+			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for World", ErrTypeNotFound))
+			break
 		}
 		return "findWorldByHelloNameAndFoo", nil
 	}
-	return "", fmt.Errorf("%w for World", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for World due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForWorldName(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -983,20 +1098,28 @@ func entityResolverNameForWorldName(ctx context.Context, rep EntityRepresentatio
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"name\" for WorldName", ErrTypeNotFound))
+			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for WorldName", ErrTypeNotFound))
+			break
 		}
 		return "findWorldNameByName", nil
 	}
-	return "", fmt.Errorf("%w for WorldName", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for WorldName due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForWorldWithMultipleKeys(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -1010,15 +1133,21 @@ func entityResolverNameForWorldWithMultipleKeys(ctx context.Context, rep EntityR
 		m = rep
 		val, ok = m["hello"]
 		if !ok {
-			return "", fmt.Errorf("%w due to missing Key Field hello for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"hello\" for WorldWithMultipleKeys", ErrTypeNotFound))
+			break
 		}
 		if m, ok = val.(map[string]interface{}); !ok {
-			// nested field value is not a map[string]interface
-			return "", fmt.Errorf("%w for WorldWithMultipleKeys due to nested Keyfield not being map value", ErrTypeNotFound)
+			// nested field value is not a map[string]interface so don't use it
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to nested Key Field \"hello\" value not matching map[string]any for WorldWithMultipleKeys", ErrTypeNotFound))
+			break
 		}
 		val, ok = m["name"]
 		if !ok {
-			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"name\" for WorldWithMultipleKeys", ErrTypeNotFound))
+			break
 		}
 		if allNull {
 			allNull = val == nil
@@ -1026,13 +1155,17 @@ func entityResolverNameForWorldWithMultipleKeys(ctx context.Context, rep EntityR
 		m = rep
 		val, ok = m["foo"]
 		if !ok {
-			return "", fmt.Errorf("%w due to missing Key Field foo for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"foo\" for WorldWithMultipleKeys", ErrTypeNotFound))
+			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for WorldWithMultipleKeys", ErrTypeNotFound))
+			break
 		}
 		return "findWorldWithMultipleKeysByHelloNameAndFoo", nil
 	}
@@ -1049,15 +1182,20 @@ func entityResolverNameForWorldWithMultipleKeys(ctx context.Context, rep EntityR
 		m = rep
 		val, ok = m["bar"]
 		if !ok {
-			return "", fmt.Errorf("%w due to missing Key Field bar for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"bar\" for WorldWithMultipleKeys", ErrTypeNotFound))
+			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for WorldWithMultipleKeys", ErrTypeNotFound))
+			break
 		}
 		return "findWorldWithMultipleKeysByBar", nil
 	}
-	return "", fmt.Errorf("%w for WorldWithMultipleKeys", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for WorldWithMultipleKeys due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }

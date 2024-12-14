@@ -376,6 +376,9 @@ func (ec *executionContext) resolveManyEntities(
 }
 
 func entityResolverNameForExternalExtension(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -389,20 +392,28 @@ func entityResolverNameForExternalExtension(ctx context.Context, rep EntityRepre
 		m = rep
 		val, ok = m["upc"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"upc\" for ExternalExtension", ErrTypeNotFound))
 			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for ExternalExtension", ErrTypeNotFound))
 			break
 		}
 		return "findExternalExtensionByUpc", nil
 	}
-	return "", fmt.Errorf("%w for ExternalExtension", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for ExternalExtension due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForHello(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -416,20 +427,28 @@ func entityResolverNameForHello(ctx context.Context, rep EntityRepresentation) (
 		m = rep
 		val, ok = m["name"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"name\" for Hello", ErrTypeNotFound))
 			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for Hello", ErrTypeNotFound))
 			break
 		}
 		return "findHelloByName", nil
 	}
-	return "", fmt.Errorf("%w for Hello", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for Hello due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForMultiHelloMultiKey(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -443,12 +462,16 @@ func entityResolverNameForMultiHelloMultiKey(ctx context.Context, rep EntityRepr
 		m = rep
 		val, ok = m["name"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"name\" for MultiHelloMultiKey", ErrTypeNotFound))
 			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for MultiHelloMultiKey", ErrTypeNotFound))
 			break
 		}
 		return "findManyMultiHelloMultiKeyByNames", nil
@@ -466,20 +489,28 @@ func entityResolverNameForMultiHelloMultiKey(ctx context.Context, rep EntityRepr
 		m = rep
 		val, ok = m["key2"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"key2\" for MultiHelloMultiKey", ErrTypeNotFound))
 			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for MultiHelloMultiKey", ErrTypeNotFound))
 			break
 		}
 		return "findManyMultiHelloMultiKeyByKey2s", nil
 	}
-	return "", fmt.Errorf("%w for MultiHelloMultiKey", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for MultiHelloMultiKey due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForNestedKey(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -493,6 +524,8 @@ func entityResolverNameForNestedKey(ctx context.Context, rep EntityRepresentatio
 		m = rep
 		val, ok = m["id"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"id\" for NestedKey", ErrTypeNotFound))
 			break
 		}
 		if allNull {
@@ -501,27 +534,40 @@ func entityResolverNameForNestedKey(ctx context.Context, rep EntityRepresentatio
 		m = rep
 		val, ok = m["hello"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"hello\" for NestedKey", ErrTypeNotFound))
 			break
 		}
 		if m, ok = val.(map[string]interface{}); !ok {
+			// nested field value is not a map[string]interface so don't use it
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to nested Key Field \"hello\" value not matching map[string]any for NestedKey", ErrTypeNotFound))
 			break
 		}
 		val, ok = m["name"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"name\" for NestedKey", ErrTypeNotFound))
 			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for NestedKey", ErrTypeNotFound))
 			break
 		}
 		return "findNestedKeyByIDAndHelloName", nil
 	}
-	return "", fmt.Errorf("%w for NestedKey", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for NestedKey due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForVeryNestedKey(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -535,6 +581,8 @@ func entityResolverNameForVeryNestedKey(ctx context.Context, rep EntityRepresent
 		m = rep
 		val, ok = m["id"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"id\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		if allNull {
@@ -543,13 +591,20 @@ func entityResolverNameForVeryNestedKey(ctx context.Context, rep EntityRepresent
 		m = rep
 		val, ok = m["hello"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"hello\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		if m, ok = val.(map[string]interface{}); !ok {
+			// nested field value is not a map[string]interface so don't use it
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to nested Key Field \"hello\" value not matching map[string]any for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		val, ok = m["name"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"name\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		if allNull {
@@ -558,13 +613,20 @@ func entityResolverNameForVeryNestedKey(ctx context.Context, rep EntityRepresent
 		m = rep
 		val, ok = m["world"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"world\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		if m, ok = val.(map[string]interface{}); !ok {
+			// nested field value is not a map[string]interface so don't use it
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to nested Key Field \"world\" value not matching map[string]any for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		val, ok = m["foo"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"foo\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		if allNull {
@@ -573,13 +635,20 @@ func entityResolverNameForVeryNestedKey(ctx context.Context, rep EntityRepresent
 		m = rep
 		val, ok = m["world"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"world\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		if m, ok = val.(map[string]interface{}); !ok {
+			// nested field value is not a map[string]interface so don't use it
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to nested Key Field \"world\" value not matching map[string]any for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		val, ok = m["bar"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"bar\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		if allNull {
@@ -588,34 +657,52 @@ func entityResolverNameForVeryNestedKey(ctx context.Context, rep EntityRepresent
 		m = rep
 		val, ok = m["more"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"more\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		if m, ok = val.(map[string]interface{}); !ok {
+			// nested field value is not a map[string]interface so don't use it
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to nested Key Field \"more\" value not matching map[string]any for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		val, ok = m["world"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"world\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		if m, ok = val.(map[string]interface{}); !ok {
+			// nested field value is not a map[string]interface so don't use it
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to nested Key Field \"world\" value not matching map[string]any for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		val, ok = m["foo"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"foo\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		return "findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo", nil
 	}
-	return "", fmt.Errorf("%w for VeryNestedKey", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for VeryNestedKey due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForWorld(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -629,12 +716,16 @@ func entityResolverNameForWorld(ctx context.Context, rep EntityRepresentation) (
 		m = rep
 		val, ok = m["foo"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"foo\" for World", ErrTypeNotFound))
 			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for World", ErrTypeNotFound))
 			break
 		}
 		return "findWorldByFoo", nil
@@ -652,15 +743,20 @@ func entityResolverNameForWorld(ctx context.Context, rep EntityRepresentation) (
 		m = rep
 		val, ok = m["bar"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"bar\" for World", ErrTypeNotFound))
 			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for World", ErrTypeNotFound))
 			break
 		}
 		return "findWorldByBar", nil
 	}
-	return "", fmt.Errorf("%w for World", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for World due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }

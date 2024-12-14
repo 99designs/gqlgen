@@ -218,6 +218,9 @@ func (ec *executionContext) resolveManyEntities(
 }
 
 func entityResolverNameForEmailHost(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -231,20 +234,28 @@ func entityResolverNameForEmailHost(ctx context.Context, rep EntityRepresentatio
 		m = rep
 		val, ok = m["id"]
 		if !ok {
-			return "", fmt.Errorf("%w due to missing Key Field id for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"id\" for EmailHost", ErrTypeNotFound))
+			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for EmailHost", ErrTypeNotFound))
+			break
 		}
 		return "findEmailHostByID", nil
 	}
-	return "", fmt.Errorf("%w for EmailHost", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for EmailHost due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForUser(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -258,15 +269,20 @@ func entityResolverNameForUser(ctx context.Context, rep EntityRepresentation) (s
 		m = rep
 		val, ok = m["id"]
 		if !ok {
-			return "", fmt.Errorf("%w due to missing Key Field id for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"id\" for User", ErrTypeNotFound))
+			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound))
+			break
 		}
 		return "findUserByID", nil
 	}
-	return "", fmt.Errorf("%w for User", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for User due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }

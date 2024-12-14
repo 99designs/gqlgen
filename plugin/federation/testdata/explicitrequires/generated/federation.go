@@ -619,13 +619,13 @@ func entityResolverNameForHello(ctx context.Context, rep EntityRepresentation) (
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			break
+			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
 		}
 		return "findHelloByName", nil
 	}
@@ -646,7 +646,7 @@ func entityResolverNameForHelloMultiSingleKeys(ctx context.Context, rep EntityRe
 		m = rep
 		val, ok = m["key1"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field key1 for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
@@ -654,13 +654,13 @@ func entityResolverNameForHelloMultiSingleKeys(ctx context.Context, rep EntityRe
 		m = rep
 		val, ok = m["key2"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field key2 for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			break
+			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
 		}
 		return "findHelloMultiSingleKeysByKey1AndKey2", nil
 	}
@@ -681,13 +681,13 @@ func entityResolverNameForHelloWithErrors(ctx context.Context, rep EntityReprese
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			break
+			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
 		}
 		return "findHelloWithErrorsByName", nil
 	}
@@ -708,13 +708,13 @@ func entityResolverNameForMultiHello(ctx context.Context, rep EntityRepresentati
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			break
+			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
 		}
 		return "findManyMultiHelloByNames", nil
 	}
@@ -735,13 +735,13 @@ func entityResolverNameForMultiHelloMultipleRequires(ctx context.Context, rep En
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			break
+			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
 		}
 		return "findManyMultiHelloMultipleRequiresByNames", nil
 	}
@@ -762,13 +762,13 @@ func entityResolverNameForMultiHelloRequires(ctx context.Context, rep EntityRepr
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			break
+			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
 		}
 		return "findManyMultiHelloRequiresByNames", nil
 	}
@@ -789,13 +789,13 @@ func entityResolverNameForMultiHelloWithError(ctx context.Context, rep EntityRep
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			break
+			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
 		}
 		return "findManyMultiHelloWithErrorByNames", nil
 	}
@@ -816,13 +816,13 @@ func entityResolverNameForMultiPlanetRequiresNested(ctx context.Context, rep Ent
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			break
+			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
 		}
 		return "findManyMultiPlanetRequiresNestedByNames", nil
 	}
@@ -843,13 +843,13 @@ func entityResolverNameForPerson(ctx context.Context, rep EntityRepresentation) 
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			break
+			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
 		}
 		return "findPersonByName", nil
 	}
@@ -870,13 +870,13 @@ func entityResolverNameForPlanetMultipleRequires(ctx context.Context, rep Entity
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			break
+			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
 		}
 		return "findPlanetMultipleRequiresByName", nil
 	}
@@ -897,13 +897,13 @@ func entityResolverNameForPlanetRequires(ctx context.Context, rep EntityRepresen
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			break
+			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
 		}
 		return "findPlanetRequiresByName", nil
 	}
@@ -924,13 +924,13 @@ func entityResolverNameForPlanetRequiresNested(ctx context.Context, rep EntityRe
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			break
+			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
 		}
 		return "findPlanetRequiresNestedByName", nil
 	}
@@ -951,14 +951,15 @@ func entityResolverNameForWorld(ctx context.Context, rep EntityRepresentation) (
 		m = rep
 		val, ok = m["hello"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field hello for User", ErrTypeNotFound)
 		}
 		if m, ok = val.(map[string]interface{}); !ok {
-			break
+			// nested field value is not a map[string]interface
+			return "", fmt.Errorf("%w for World due to nested Keyfield not being map value", ErrTypeNotFound)
 		}
 		val, ok = m["name"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
@@ -966,13 +967,13 @@ func entityResolverNameForWorld(ctx context.Context, rep EntityRepresentation) (
 		m = rep
 		val, ok = m["foo"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field foo for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			break
+			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
 		}
 		return "findWorldByHelloNameAndFoo", nil
 	}
@@ -993,13 +994,13 @@ func entityResolverNameForWorldName(ctx context.Context, rep EntityRepresentatio
 		m = rep
 		val, ok = m["name"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			break
+			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
 		}
 		return "findWorldNameByName", nil
 	}
@@ -1020,14 +1021,15 @@ func entityResolverNameForWorldWithMultipleKeys(ctx context.Context, rep EntityR
 		m = rep
 		val, ok = m["hello"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field hello for User", ErrTypeNotFound)
 		}
 		if m, ok = val.(map[string]interface{}); !ok {
-			break
+			// nested field value is not a map[string]interface
+			return "", fmt.Errorf("%w for WorldWithMultipleKeys due to nested Keyfield not being map value", ErrTypeNotFound)
 		}
 		val, ok = m["name"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field name for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
@@ -1035,13 +1037,13 @@ func entityResolverNameForWorldWithMultipleKeys(ctx context.Context, rep EntityR
 		m = rep
 		val, ok = m["foo"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field foo for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			break
+			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
 		}
 		return "findWorldWithMultipleKeysByHelloNameAndFoo", nil
 	}
@@ -1058,13 +1060,13 @@ func entityResolverNameForWorldWithMultipleKeys(ctx context.Context, rep EntityR
 		m = rep
 		val, ok = m["bar"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field bar for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			break
+			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
 		}
 		return "findWorldWithMultipleKeysByBar", nil
 	}

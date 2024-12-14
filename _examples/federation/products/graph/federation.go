@@ -246,13 +246,13 @@ func entityResolverNameForManufacturer(ctx context.Context, rep EntityRepresenta
 		m = rep
 		val, ok = m["id"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field id for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			break
+			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
 		}
 		return "findManufacturerByID", nil
 	}
@@ -273,14 +273,15 @@ func entityResolverNameForProduct(ctx context.Context, rep EntityRepresentation)
 		m = rep
 		val, ok = m["manufacturer"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field manufacturer for User", ErrTypeNotFound)
 		}
 		if m, ok = val.(map[string]interface{}); !ok {
-			break
+			// nested field value is not a map[string]interface
+			return "", fmt.Errorf("%w for Product due to nested Keyfield not being map value", ErrTypeNotFound)
 		}
 		val, ok = m["id"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field id for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
@@ -288,13 +289,13 @@ func entityResolverNameForProduct(ctx context.Context, rep EntityRepresentation)
 		m = rep
 		val, ok = m["id"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field id for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			break
+			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
 		}
 		return "findProductByManufacturerIDAndID", nil
 	}
@@ -311,13 +312,13 @@ func entityResolverNameForProduct(ctx context.Context, rep EntityRepresentation)
 		m = rep
 		val, ok = m["upc"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field upc for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			break
+			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
 		}
 		return "findProductByUpc", nil
 	}

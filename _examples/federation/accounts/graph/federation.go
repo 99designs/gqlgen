@@ -231,13 +231,13 @@ func entityResolverNameForEmailHost(ctx context.Context, rep EntityRepresentatio
 		m = rep
 		val, ok = m["id"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field id for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			break
+			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
 		}
 		return "findEmailHostByID", nil
 	}
@@ -258,13 +258,13 @@ func entityResolverNameForUser(ctx context.Context, rep EntityRepresentation) (s
 		m = rep
 		val, ok = m["id"]
 		if !ok {
-			break
+			return "", fmt.Errorf("%w due to missing Key Field id for User", ErrTypeNotFound)
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
-			break
+			return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
 		}
 		return "findUserByID", nil
 	}

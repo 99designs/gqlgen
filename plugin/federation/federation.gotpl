@@ -310,11 +310,12 @@ func (ec *executionContext) resolveManyEntities(
 						{{- range $i, $field := .Field }}
 							val, ok = m["{{.}}"]
 							if !ok {
-								break
+								return "", fmt.Errorf("%w due to missing Key Field {{.}} for User", ErrTypeNotFound)
 							}
 							{{- if (ne $i $keyField.Field.LastIndex ) }}
 								if m, ok = val.(map[string]interface{}); !ok {
-									break
+									// nested field value is not a map[string]interface
+									return "", fmt.Errorf("%w for {{$entity.Name}} due to nested Keyfield not being map value", ErrTypeNotFound)
 								}
 							{{- else}}
 								if allNull {
@@ -324,7 +325,7 @@ func (ec *executionContext) resolveManyEntities(
 						{{- end}}
 					{{- end }}
 					if allNull {
-						break
+						return "", fmt.Errorf("%w due to all null value KeyFields for User", ErrTypeNotFound)
 					}
 					return "{{.ResolverName}}", nil
 				}

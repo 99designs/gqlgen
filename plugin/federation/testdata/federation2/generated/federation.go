@@ -199,6 +199,9 @@ func (ec *executionContext) resolveManyEntities(
 }
 
 func entityResolverNameForExternalExtension(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
 			m   EntityRepresentation
@@ -212,15 +215,20 @@ func entityResolverNameForExternalExtension(ctx context.Context, rep EntityRepre
 		m = rep
 		val, ok = m["upc"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"upc\" for ExternalExtension", ErrTypeNotFound))
 			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for ExternalExtension", ErrTypeNotFound))
 			break
 		}
 		return "findExternalExtensionByUpc", nil
 	}
-	return "", fmt.Errorf("%w for ExternalExtension", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for ExternalExtension due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }

@@ -18,6 +18,10 @@ type SSE struct{}
 
 var _ graphql.Transport = SSE{}
 
+func (t SSE) String() string {
+	return "SSE"
+}
+
 func (t SSE) Supports(r *http.Request) bool {
 	if !strings.Contains(r.Header.Get("Accept"), "text/event-stream") {
 		return false

@@ -36,7 +36,7 @@ func (ec *executionContext) __resolve__service(ctx context.Context) (fedruntime.
 	}, nil
 }
 
-func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]interface{}) []fedruntime.Entity {
+func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]any) []fedruntime.Entity {
 	list := make([]fedruntime.Entity, len(representations))
 
 	repsMap := ec.buildRepresentationGroups(ctx, representations)
@@ -180,7 +180,7 @@ func (ec *executionContext) resolveEntity(
 		switch resolverName {
 
 		case "findProductByManufacturerIDAndID":
-			id0, err := ec.unmarshalNString2string(ctx, rep["manufacturer"].(map[string]interface{})["id"])
+			id0, err := ec.unmarshalNString2string(ctx, rep["manufacturer"].(map[string]any)["id"])
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findProductByManufacturerIDAndID(): %w`, err)
 			}
@@ -239,7 +239,7 @@ func entityResolverNameForManufacturer(ctx context.Context, rep EntityRepresenta
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -274,7 +274,7 @@ func entityResolverNameForProduct(ctx context.Context, rep EntityRepresentation)
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -288,7 +288,7 @@ func entityResolverNameForProduct(ctx context.Context, rep EntityRepresentation)
 				fmt.Errorf("%w due to missing Key Field \"manufacturer\" for Product", ErrTypeNotFound))
 			break
 		}
-		if m, ok = val.(map[string]interface{}); !ok {
+		if m, ok = val.(map[string]any); !ok {
 			// nested field value is not a map[string]interface so don't use it
 			entityResolverErrs = append(entityResolverErrs,
 				fmt.Errorf("%w due to nested Key Field \"manufacturer\" value not matching map[string]any for Product", ErrTypeNotFound))
@@ -323,7 +323,7 @@ func entityResolverNameForProduct(ctx context.Context, rep EntityRepresentation)
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val

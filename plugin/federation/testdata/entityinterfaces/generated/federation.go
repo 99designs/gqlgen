@@ -36,17 +36,17 @@ func (ec *executionContext) __resolve__service(ctx context.Context) (fedruntime.
 	}, nil
 }
 
-func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]interface{}) []fedruntime.Entity {
+func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]any) []fedruntime.Entity {
 	list := make([]fedruntime.Entity, len(representations))
 
 	repsMap := map[string]struct {
 		i []int
-		r []map[string]interface{}
+		r []map[string]any
 	}{}
 
 	// We group entities by typename so that we can parallelize their resolution.
 	// This is particularly helpful when there are entity groups in multi mode.
-	buildRepresentationGroups := func(reps []map[string]interface{}) {
+	buildRepresentationGroups := func(reps []map[string]any) {
 		for i, rep := range reps {
 			typeName, ok := rep["__typename"].(string)
 			if !ok {
@@ -70,7 +70,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		}
 	}
 
-	resolveEntity := func(ctx context.Context, typeName string, rep map[string]interface{}, idx []int, i int) (err error) {
+	resolveEntity := func(ctx context.Context, typeName string, rep map[string]any, idx []int, i int) (err error) {
 		// we need to do our own panic handling, because we may be called in a
 		// goroutine, where the usual panic handling can't catch us
 		defer func() {
@@ -125,7 +125,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		return fmt.Errorf("%w: %s", ErrUnknownType, typeName)
 	}
 
-	resolveManyEntities := func(ctx context.Context, typeName string, reps []map[string]interface{}, idx []int) (err error) {
+	resolveManyEntities := func(ctx context.Context, typeName string, reps []map[string]any, idx []int) (err error) {
 		// we need to do our own panic handling, because we may be called in a
 		// goroutine, where the usual panic handling can't catch us
 		defer func() {
@@ -141,7 +141,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		}
 	}
 
-	resolveEntityGroup := func(typeName string, reps []map[string]interface{}, idx []int) {
+	resolveEntityGroup := func(typeName string, reps []map[string]any, idx []int) {
 		if isMulti(typeName) {
 			err := resolveManyEntities(ctx, typeName, reps, idx)
 			if err != nil {
@@ -154,7 +154,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 			e.Add(len(reps))
 			for i, rep := range reps {
 				i, rep := i, rep
-				go func(i int, rep map[string]interface{}) {
+				go func(i int, rep map[string]any) {
 					err := resolveEntity(ctx, typeName, rep, idx, i)
 					if err != nil {
 						ec.Error(ctx, err)
@@ -179,7 +179,7 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 		var g sync.WaitGroup
 		g.Add(len(repsMap))
 		for typeName, reps := range repsMap {
-			go func(typeName string, reps []map[string]interface{}, idx []int) {
+			go func(typeName string, reps []map[string]any, idx []int) {
 				resolveEntityGroup(typeName, reps, idx)
 				g.Done()
 			}(typeName, reps.r, reps.i)
@@ -189,11 +189,11 @@ func (ec *executionContext) __resolve_entities(ctx context.Context, representati
 	}
 }
 
-func entityResolverNameForHello(ctx context.Context, rep map[string]interface{}) (string, error) {
+func entityResolverNameForHello(ctx context.Context, rep map[string]any) (string, error) {
 	for {
 		var (
-			m   map[string]interface{}
-			val interface{}
+			m   map[string]any
+			val any
 			ok  bool
 		)
 		_ = val
@@ -206,11 +206,11 @@ func entityResolverNameForHello(ctx context.Context, rep map[string]interface{})
 	return "", fmt.Errorf("%w for Hello", ErrTypeNotFound)
 }
 
-func entityResolverNameForWorld(ctx context.Context, rep map[string]interface{}) (string, error) {
+func entityResolverNameForWorld(ctx context.Context, rep map[string]any) (string, error) {
 	for {
 		var (
-			m   map[string]interface{}
-			val interface{}
+			m   map[string]any
+			val any
 			ok  bool
 		)
 		_ = val

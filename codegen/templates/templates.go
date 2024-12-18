@@ -622,10 +622,10 @@ func Dump(val any) string {
 		for _, part := range val {
 			parts = append(parts, Dump(part))
 		}
-		return "[]interface{}{" + strings.Join(parts, ",") + "}"
+		return "[]any{" + strings.Join(parts, ",") + "}"
 	case map[string]any:
 		buf := bytes.Buffer{}
-		buf.WriteString("map[string]interface{}{")
+		buf.WriteString("map[string]any{")
 		var keys []string
 		for key := range val {
 			keys = append(keys, key)

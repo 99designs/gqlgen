@@ -39,7 +39,7 @@ func (ec *executionContext) _MapNested_value(ctx context.Context, field graphql.
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Value, nil
 	})
@@ -68,7 +68,7 @@ func (ec *executionContext) fieldContext_MapNested_value(_ context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _MapStringInterfaceType_a(ctx context.Context, field graphql.CollectedField, obj map[string]interface{}) (ret graphql.Marshaler) {
+func (ec *executionContext) _MapStringInterfaceType_a(ctx context.Context, field graphql.CollectedField, obj map[string]any) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_MapStringInterfaceType_a(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -80,7 +80,7 @@ func (ec *executionContext) _MapStringInterfaceType_a(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		switch v := obj["a"].(type) {
 		case *string:
@@ -115,7 +115,7 @@ func (ec *executionContext) fieldContext_MapStringInterfaceType_a(_ context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _MapStringInterfaceType_b(ctx context.Context, field graphql.CollectedField, obj map[string]interface{}) (ret graphql.Marshaler) {
+func (ec *executionContext) _MapStringInterfaceType_b(ctx context.Context, field graphql.CollectedField, obj map[string]any) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_MapStringInterfaceType_b(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -127,7 +127,7 @@ func (ec *executionContext) _MapStringInterfaceType_b(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		switch v := obj["b"].(type) {
 		case *int:
@@ -162,7 +162,7 @@ func (ec *executionContext) fieldContext_MapStringInterfaceType_b(_ context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _MapStringInterfaceType_c(ctx context.Context, field graphql.CollectedField, obj map[string]interface{}) (ret graphql.Marshaler) {
+func (ec *executionContext) _MapStringInterfaceType_c(ctx context.Context, field graphql.CollectedField, obj map[string]any) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_MapStringInterfaceType_c(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -174,7 +174,7 @@ func (ec *executionContext) _MapStringInterfaceType_c(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		switch v := obj["c"].(type) {
 		case *CustomScalar:
@@ -209,7 +209,7 @@ func (ec *executionContext) fieldContext_MapStringInterfaceType_c(_ context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _MapStringInterfaceType_nested(ctx context.Context, field graphql.CollectedField, obj map[string]interface{}) (ret graphql.Marshaler) {
+func (ec *executionContext) _MapStringInterfaceType_nested(ctx context.Context, field graphql.CollectedField, obj map[string]any) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_MapStringInterfaceType_nested(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -221,7 +221,7 @@ func (ec *executionContext) _MapStringInterfaceType_nested(ctx context.Context, 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		switch v := obj["nested"].(type) {
 		case *MapNested:
@@ -264,10 +264,10 @@ func (ec *executionContext) fieldContext_MapStringInterfaceType_nested(_ context
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputMapNestedInput(ctx context.Context, obj interface{}) (MapNested, error) {
+func (ec *executionContext) unmarshalInputMapNestedInput(ctx context.Context, obj any) (MapNested, error) {
 	var it MapNested
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -291,10 +291,10 @@ func (ec *executionContext) unmarshalInputMapNestedInput(ctx context.Context, ob
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Context, obj interface{}) (map[string]interface{}, error) {
-	it := make(map[string]interface{}, len(obj.(map[string]interface{})))
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Context, obj any) (map[string]any, error) {
+	it := make(map[string]any, len(obj.(map[string]any)))
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -339,10 +339,10 @@ func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Co
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputNestedMapInput(ctx context.Context, obj interface{}) (NestedMapInput, error) {
+func (ec *executionContext) unmarshalInputNestedMapInput(ctx context.Context, obj any) (NestedMapInput, error) {
 	var it NestedMapInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -415,7 +415,7 @@ func (ec *executionContext) _MapNested(ctx context.Context, sel ast.SelectionSet
 
 var mapStringInterfaceTypeImplementors = []string{"MapStringInterfaceType"}
 
-func (ec *executionContext) _MapStringInterfaceType(ctx context.Context, sel ast.SelectionSet, obj map[string]interface{}) graphql.Marshaler {
+func (ec *executionContext) _MapStringInterfaceType(ctx context.Context, sel ast.SelectionSet, obj map[string]any) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, mapStringInterfaceTypeImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -459,7 +459,7 @@ func (ec *executionContext) _MapStringInterfaceType(ctx context.Context, sel ast
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNCustomScalar2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCustomScalar(ctx context.Context, v interface{}) (CustomScalar, error) {
+func (ec *executionContext) unmarshalNCustomScalar2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCustomScalar(ctx context.Context, v any) (CustomScalar, error) {
 	var res CustomScalar
 	err := res.UnmarshalGQL(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -469,7 +469,7 @@ func (ec *executionContext) marshalNCustomScalar2githubᚗcomᚋ99designsᚋgqlg
 	return v
 }
 
-func (ec *executionContext) unmarshalOCustomScalar2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCustomScalar(ctx context.Context, v interface{}) (*CustomScalar, error) {
+func (ec *executionContext) unmarshalOCustomScalar2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCustomScalar(ctx context.Context, v any) (*CustomScalar, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -492,7 +492,7 @@ func (ec *executionContext) marshalOMapNested2ᚖgithubᚗcomᚋ99designsᚋgqlg
 	return ec._MapNested(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOMapNestedInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐMapNested(ctx context.Context, v interface{}) (*MapNested, error) {
+func (ec *executionContext) unmarshalOMapNestedInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐMapNested(ctx context.Context, v any) (*MapNested, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -500,7 +500,7 @@ func (ec *executionContext) unmarshalOMapNestedInput2ᚖgithubᚗcomᚋ99designs
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOMapStringInterfaceInput2map(ctx context.Context, v interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) unmarshalOMapStringInterfaceInput2map(ctx context.Context, v any) (map[string]any, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -508,14 +508,14 @@ func (ec *executionContext) unmarshalOMapStringInterfaceInput2map(ctx context.Co
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOMapStringInterfaceType2map(ctx context.Context, sel ast.SelectionSet, v map[string]interface{}) graphql.Marshaler {
+func (ec *executionContext) marshalOMapStringInterfaceType2map(ctx context.Context, sel ast.SelectionSet, v map[string]any) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._MapStringInterfaceType(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalONestedMapInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐNestedMapInput(ctx context.Context, v interface{}) (*NestedMapInput, error) {
+func (ec *executionContext) unmarshalONestedMapInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐNestedMapInput(ctx context.Context, v any) (*NestedMapInput, error) {
 	if v == nil {
 		return nil, nil
 	}

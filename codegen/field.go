@@ -30,7 +30,7 @@ type Field struct {
 	Args             []*FieldArgument // A list of arguments to be passed to this field
 	MethodHasContext bool             // If this is bound to a go method, does the method also take a context
 	NoErr            bool             // If this is bound to a go method, does that method have an error as the second argument
-	VOkFunc          bool             // If this is bound to a go method, is it of shape (interface{}, bool)
+	VOkFunc          bool             // If this is bound to a go method, is it of shape (any, bool)
 	Object           *Object          // A link back to the parent object
 	Default          any              // The default value
 	Stream           bool             // does this field return a channel?
@@ -602,11 +602,11 @@ func (f *Field) CallArgs() string {
 
 		if iface, ok := arg.TypeReference.GO.(*types.Interface); ok && iface.Empty() {
 			tmp = fmt.Sprintf(`
-				func () interface{} {
+				func () any {
 					if fc.Args["%s"] == nil {
 						return nil
 					}
-					return fc.Args["%s"].(interface{})
+					return fc.Args["%s"].(any)
 				}()`, arg.Name, arg.Name,
 			)
 		}

@@ -43,14 +43,14 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 	{{- else}}
 		{{- if  $.AllDirectives.LocationDirectives "FIELD" }}
 			{{ if $useFunctionSyntaxForExecutionContext -}}
-			resTmp := _fieldMiddleware(ctx, ec, {{if $object.Root}}nil{{else}}obj{{end}}, func(rctx context.Context) (interface{}, error) {
+			resTmp := _fieldMiddleware(ctx, ec, {{if $object.Root}}nil{{else}}obj{{end}}, func(rctx context.Context) (any, error) {
 			{{- else -}}
-			resTmp := ec._fieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(rctx context.Context) (interface{}, error) {
+			resTmp := ec._fieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(rctx context.Context) (any, error) {
 			{{- end }}
 				{{ template "field" (dict "Field" $field "UseFunctionSyntaxForExecutionContext" $useFunctionSyntaxForExecutionContext) }}
 			})
 		{{ else }}
-			resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+			resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 				{{ template "field" (dict "Field" $field "UseFunctionSyntaxForExecutionContext" $useFunctionSyntaxForExecutionContext) }}
 			})
 			if err != nil {
@@ -157,7 +157,7 @@ func (ec *executionContext) {{ $field.FieldContextFunc }}({{ if not $field.Args 
 {{ define "field" }}
 	{{- $useFunctionSyntaxForExecutionContext := .UseFunctionSyntaxForExecutionContext -}}
 	{{- if .Field.HasDirectives -}}
-		directive0 := func(rctx context.Context) (interface{}, error) {
+		directive0 := func(rctx context.Context) (any, error) {
 			ctx = rctx  // use context from middleware stack in children
 			{{ template "fieldDefinition" .Field }}
 		}

@@ -56,7 +56,7 @@ type Stub struct {
 	QueryResolver struct {
 		InvalidIdentifier                func(ctx context.Context) (*invalid_packagename.InvalidIdentifier, error)
 		Collision                        func(ctx context.Context) (*introspection1.It, error)
-		MapInput                         func(ctx context.Context, input map[string]interface{}) (*bool, error)
+		MapInput                         func(ctx context.Context, input map[string]any) (*bool, error)
 		Recursive                        func(ctx context.Context, input *RecursiveInputSlice) (*bool, error)
 		NestedInputs                     func(ctx context.Context, input [][]*OuterInput) (*bool, error)
 		NestedOutputs                    func(ctx context.Context) ([][]*OuterObject, error)
@@ -97,8 +97,8 @@ type Stub struct {
 		NotAnInterface                   func(ctx context.Context) (BackedByInterface, error)
 		Dog                              func(ctx context.Context) (*Dog, error)
 		Issue896a                        func(ctx context.Context) ([]*CheckIssue896, error)
-		MapStringInterface               func(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
-		MapNestedStringInterface         func(ctx context.Context, in *NestedMapInput) (map[string]interface{}, error)
+		MapStringInterface               func(ctx context.Context, in map[string]any) (map[string]any, error)
+		MapNestedStringInterface         func(ctx context.Context, in *NestedMapInput) (map[string]any, error)
 		ErrorBubble                      func(ctx context.Context) (*Error, error)
 		ErrorBubbleList                  func(ctx context.Context) ([]*Error, error)
 		ErrorList                        func(ctx context.Context) ([]*Error, error)
@@ -307,7 +307,7 @@ func (r *stubQuery) InvalidIdentifier(ctx context.Context) (*invalid_packagename
 func (r *stubQuery) Collision(ctx context.Context) (*introspection1.It, error) {
 	return r.QueryResolver.Collision(ctx)
 }
-func (r *stubQuery) MapInput(ctx context.Context, input map[string]interface{}) (*bool, error) {
+func (r *stubQuery) MapInput(ctx context.Context, input map[string]any) (*bool, error) {
 	return r.QueryResolver.MapInput(ctx, input)
 }
 func (r *stubQuery) Recursive(ctx context.Context, input *RecursiveInputSlice) (*bool, error) {
@@ -430,10 +430,10 @@ func (r *stubQuery) Dog(ctx context.Context) (*Dog, error) {
 func (r *stubQuery) Issue896a(ctx context.Context) ([]*CheckIssue896, error) {
 	return r.QueryResolver.Issue896a(ctx)
 }
-func (r *stubQuery) MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
+func (r *stubQuery) MapStringInterface(ctx context.Context, in map[string]any) (map[string]any, error) {
 	return r.QueryResolver.MapStringInterface(ctx, in)
 }
-func (r *stubQuery) MapNestedStringInterface(ctx context.Context, in *NestedMapInput) (map[string]interface{}, error) {
+func (r *stubQuery) MapNestedStringInterface(ctx context.Context, in *NestedMapInput) (map[string]any, error) {
 	return r.QueryResolver.MapNestedStringInterface(ctx, in)
 }
 func (r *stubQuery) ErrorBubble(ctx context.Context) (*Error, error) {

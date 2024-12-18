@@ -126,7 +126,7 @@ type ComplexityRoot struct {
 
 	Query struct {
 		__resolve__service func(childComplexity int) int
-		__resolve_entities func(childComplexity int, representations []map[string]interface{}) int
+		__resolve_entities func(childComplexity int, representations []map[string]any) int
 	}
 
 	World struct {
@@ -182,7 +182,7 @@ func (e *executableSchema) Schema() *ast.Schema {
 	return parsedSchema
 }
 
-func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
+func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]any) (int, bool) {
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
@@ -573,7 +573,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.__resolve_entities(childComplexity, args["representations"].([]map[string]interface{})), true
+		return e.complexity.Query.__resolve_entities(childComplexity, args["representations"].([]map[string]any)), true
 
 	case "World.bar":
 		if e.complexity.World.Bar == nil {
@@ -872,9 +872,9 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // region    ***************************** args.gotpl *****************************
 
-func field_Entity_findHelloByName_args(ctx context.Context, ec *executionContext, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Entity_findHelloByName_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := field_Entity_findHelloByName_argsName(ctx, ec, rawArgs)
 	if err != nil {
 		return nil, err
@@ -885,7 +885,7 @@ func field_Entity_findHelloByName_args(ctx context.Context, ec *executionContext
 func field_Entity_findHelloByName_argsName(
 	ctx context.Context,
 	ec *executionContext,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
@@ -905,9 +905,9 @@ func field_Entity_findHelloByName_argsName(
 	return zeroVal, nil
 }
 
-func field_Entity_findHelloMultiSingleKeysByKey1AndKey2_args(ctx context.Context, ec *executionContext, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Entity_findHelloMultiSingleKeysByKey1AndKey2_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := field_Entity_findHelloMultiSingleKeysByKey1AndKey2_argsKey1(ctx, ec, rawArgs)
 	if err != nil {
 		return nil, err
@@ -923,7 +923,7 @@ func field_Entity_findHelloMultiSingleKeysByKey1AndKey2_args(ctx context.Context
 func field_Entity_findHelloMultiSingleKeysByKey1AndKey2_argsKey1(
 	ctx context.Context,
 	ec *executionContext,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
@@ -946,7 +946,7 @@ func field_Entity_findHelloMultiSingleKeysByKey1AndKey2_argsKey1(
 func field_Entity_findHelloMultiSingleKeysByKey1AndKey2_argsKey2(
 	ctx context.Context,
 	ec *executionContext,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
@@ -966,9 +966,9 @@ func field_Entity_findHelloMultiSingleKeysByKey1AndKey2_argsKey2(
 	return zeroVal, nil
 }
 
-func field_Entity_findHelloWithErrorsByName_args(ctx context.Context, ec *executionContext, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Entity_findHelloWithErrorsByName_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := field_Entity_findHelloWithErrorsByName_argsName(ctx, ec, rawArgs)
 	if err != nil {
 		return nil, err
@@ -979,7 +979,7 @@ func field_Entity_findHelloWithErrorsByName_args(ctx context.Context, ec *execut
 func field_Entity_findHelloWithErrorsByName_argsName(
 	ctx context.Context,
 	ec *executionContext,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
@@ -999,9 +999,9 @@ func field_Entity_findHelloWithErrorsByName_argsName(
 	return zeroVal, nil
 }
 
-func field_Entity_findManyMultiHelloByNames_args(ctx context.Context, ec *executionContext, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Entity_findManyMultiHelloByNames_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := field_Entity_findManyMultiHelloByNames_argsReps(ctx, ec, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1012,7 +1012,7 @@ func field_Entity_findManyMultiHelloByNames_args(ctx context.Context, ec *execut
 func field_Entity_findManyMultiHelloByNames_argsReps(
 	ctx context.Context,
 	ec *executionContext,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.MultiHelloByNamesInput, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
@@ -1032,9 +1032,9 @@ func field_Entity_findManyMultiHelloByNames_argsReps(
 	return zeroVal, nil
 }
 
-func field_Entity_findManyMultiHelloMultipleRequiresByNames_args(ctx context.Context, ec *executionContext, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Entity_findManyMultiHelloMultipleRequiresByNames_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := field_Entity_findManyMultiHelloMultipleRequiresByNames_argsReps(ctx, ec, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1045,7 +1045,7 @@ func field_Entity_findManyMultiHelloMultipleRequiresByNames_args(ctx context.Con
 func field_Entity_findManyMultiHelloMultipleRequiresByNames_argsReps(
 	ctx context.Context,
 	ec *executionContext,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.MultiHelloMultipleRequiresByNamesInput, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
@@ -1065,9 +1065,9 @@ func field_Entity_findManyMultiHelloMultipleRequiresByNames_argsReps(
 	return zeroVal, nil
 }
 
-func field_Entity_findManyMultiHelloRequiresByNames_args(ctx context.Context, ec *executionContext, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Entity_findManyMultiHelloRequiresByNames_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := field_Entity_findManyMultiHelloRequiresByNames_argsReps(ctx, ec, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1078,7 +1078,7 @@ func field_Entity_findManyMultiHelloRequiresByNames_args(ctx context.Context, ec
 func field_Entity_findManyMultiHelloRequiresByNames_argsReps(
 	ctx context.Context,
 	ec *executionContext,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.MultiHelloRequiresByNamesInput, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
@@ -1098,9 +1098,9 @@ func field_Entity_findManyMultiHelloRequiresByNames_argsReps(
 	return zeroVal, nil
 }
 
-func field_Entity_findManyMultiHelloWithErrorByNames_args(ctx context.Context, ec *executionContext, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Entity_findManyMultiHelloWithErrorByNames_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := field_Entity_findManyMultiHelloWithErrorByNames_argsReps(ctx, ec, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1111,7 +1111,7 @@ func field_Entity_findManyMultiHelloWithErrorByNames_args(ctx context.Context, e
 func field_Entity_findManyMultiHelloWithErrorByNames_argsReps(
 	ctx context.Context,
 	ec *executionContext,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.MultiHelloWithErrorByNamesInput, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
@@ -1131,9 +1131,9 @@ func field_Entity_findManyMultiHelloWithErrorByNames_argsReps(
 	return zeroVal, nil
 }
 
-func field_Entity_findManyMultiPlanetRequiresNestedByNames_args(ctx context.Context, ec *executionContext, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Entity_findManyMultiPlanetRequiresNestedByNames_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := field_Entity_findManyMultiPlanetRequiresNestedByNames_argsReps(ctx, ec, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1144,7 +1144,7 @@ func field_Entity_findManyMultiPlanetRequiresNestedByNames_args(ctx context.Cont
 func field_Entity_findManyMultiPlanetRequiresNestedByNames_argsReps(
 	ctx context.Context,
 	ec *executionContext,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) ([]*model.MultiPlanetRequiresNestedByNamesInput, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
@@ -1164,9 +1164,9 @@ func field_Entity_findManyMultiPlanetRequiresNestedByNames_argsReps(
 	return zeroVal, nil
 }
 
-func field_Entity_findPlanetMultipleRequiresByName_args(ctx context.Context, ec *executionContext, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Entity_findPlanetMultipleRequiresByName_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := field_Entity_findPlanetMultipleRequiresByName_argsName(ctx, ec, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1177,7 +1177,7 @@ func field_Entity_findPlanetMultipleRequiresByName_args(ctx context.Context, ec 
 func field_Entity_findPlanetMultipleRequiresByName_argsName(
 	ctx context.Context,
 	ec *executionContext,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
@@ -1197,9 +1197,9 @@ func field_Entity_findPlanetMultipleRequiresByName_argsName(
 	return zeroVal, nil
 }
 
-func field_Entity_findPlanetRequiresByName_args(ctx context.Context, ec *executionContext, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Entity_findPlanetRequiresByName_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := field_Entity_findPlanetRequiresByName_argsName(ctx, ec, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1210,7 +1210,7 @@ func field_Entity_findPlanetRequiresByName_args(ctx context.Context, ec *executi
 func field_Entity_findPlanetRequiresByName_argsName(
 	ctx context.Context,
 	ec *executionContext,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
@@ -1230,9 +1230,9 @@ func field_Entity_findPlanetRequiresByName_argsName(
 	return zeroVal, nil
 }
 
-func field_Entity_findPlanetRequiresNestedByName_args(ctx context.Context, ec *executionContext, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Entity_findPlanetRequiresNestedByName_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := field_Entity_findPlanetRequiresNestedByName_argsName(ctx, ec, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1243,7 +1243,7 @@ func field_Entity_findPlanetRequiresNestedByName_args(ctx context.Context, ec *e
 func field_Entity_findPlanetRequiresNestedByName_argsName(
 	ctx context.Context,
 	ec *executionContext,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
@@ -1263,9 +1263,9 @@ func field_Entity_findPlanetRequiresNestedByName_argsName(
 	return zeroVal, nil
 }
 
-func field_Entity_findWorldByHelloNameAndFoo_args(ctx context.Context, ec *executionContext, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Entity_findWorldByHelloNameAndFoo_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := field_Entity_findWorldByHelloNameAndFoo_argsHelloName(ctx, ec, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1281,7 +1281,7 @@ func field_Entity_findWorldByHelloNameAndFoo_args(ctx context.Context, ec *execu
 func field_Entity_findWorldByHelloNameAndFoo_argsHelloName(
 	ctx context.Context,
 	ec *executionContext,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
@@ -1304,7 +1304,7 @@ func field_Entity_findWorldByHelloNameAndFoo_argsHelloName(
 func field_Entity_findWorldByHelloNameAndFoo_argsFoo(
 	ctx context.Context,
 	ec *executionContext,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
@@ -1324,9 +1324,9 @@ func field_Entity_findWorldByHelloNameAndFoo_argsFoo(
 	return zeroVal, nil
 }
 
-func field_Entity_findWorldNameByName_args(ctx context.Context, ec *executionContext, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Entity_findWorldNameByName_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := field_Entity_findWorldNameByName_argsName(ctx, ec, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1337,7 +1337,7 @@ func field_Entity_findWorldNameByName_args(ctx context.Context, ec *executionCon
 func field_Entity_findWorldNameByName_argsName(
 	ctx context.Context,
 	ec *executionContext,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
@@ -1357,9 +1357,9 @@ func field_Entity_findWorldNameByName_argsName(
 	return zeroVal, nil
 }
 
-func field_Entity_findWorldWithMultipleKeysByBar_args(ctx context.Context, ec *executionContext, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Entity_findWorldWithMultipleKeysByBar_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := field_Entity_findWorldWithMultipleKeysByBar_argsBar(ctx, ec, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1370,7 +1370,7 @@ func field_Entity_findWorldWithMultipleKeysByBar_args(ctx context.Context, ec *e
 func field_Entity_findWorldWithMultipleKeysByBar_argsBar(
 	ctx context.Context,
 	ec *executionContext,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (int, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
@@ -1390,9 +1390,9 @@ func field_Entity_findWorldWithMultipleKeysByBar_argsBar(
 	return zeroVal, nil
 }
 
-func field_Entity_findWorldWithMultipleKeysByHelloNameAndFoo_args(ctx context.Context, ec *executionContext, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Entity_findWorldWithMultipleKeysByHelloNameAndFoo_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := field_Entity_findWorldWithMultipleKeysByHelloNameAndFoo_argsHelloName(ctx, ec, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1408,7 +1408,7 @@ func field_Entity_findWorldWithMultipleKeysByHelloNameAndFoo_args(ctx context.Co
 func field_Entity_findWorldWithMultipleKeysByHelloNameAndFoo_argsHelloName(
 	ctx context.Context,
 	ec *executionContext,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
@@ -1431,7 +1431,7 @@ func field_Entity_findWorldWithMultipleKeysByHelloNameAndFoo_argsHelloName(
 func field_Entity_findWorldWithMultipleKeysByHelloNameAndFoo_argsFoo(
 	ctx context.Context,
 	ec *executionContext,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
@@ -1451,9 +1451,9 @@ func field_Entity_findWorldWithMultipleKeysByHelloNameAndFoo_argsFoo(
 	return zeroVal, nil
 }
 
-func field_Query___type_args(ctx context.Context, ec *executionContext, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Query___type_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := field_Query___type_argsName(ctx, ec, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1464,7 +1464,7 @@ func field_Query___type_args(ctx context.Context, ec *executionContext, rawArgs 
 func field_Query___type_argsName(
 	ctx context.Context,
 	ec *executionContext,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
@@ -1484,9 +1484,9 @@ func field_Query___type_argsName(
 	return zeroVal, nil
 }
 
-func field_Query__entities_args(ctx context.Context, ec *executionContext, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Query__entities_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := field_Query__entities_argsRepresentations(ctx, ec, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1497,14 +1497,14 @@ func field_Query__entities_args(ctx context.Context, ec *executionContext, rawAr
 func field_Query__entities_argsRepresentations(
 	ctx context.Context,
 	ec *executionContext,
-	rawArgs map[string]interface{},
-) ([]map[string]interface{}, error) {
+	rawArgs map[string]any,
+) ([]map[string]any, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
 	// even if the argument is null.
 	_, ok := rawArgs["representations"]
 	if !ok {
-		var zeroVal []map[string]interface{}
+		var zeroVal []map[string]any
 		return zeroVal, nil
 	}
 
@@ -1513,13 +1513,13 @@ func field_Query__entities_argsRepresentations(
 		return unmarshalN_Any2ᚕmapᚄ(ctx, ec, tmp)
 	}
 
-	var zeroVal []map[string]interface{}
+	var zeroVal []map[string]any
 	return zeroVal, nil
 }
 
-func field___Type_enumValues_args(ctx context.Context, ec *executionContext, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field___Type_enumValues_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := field___Type_enumValues_argsIncludeDeprecated(ctx, ec, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1530,7 +1530,7 @@ func field___Type_enumValues_args(ctx context.Context, ec *executionContext, raw
 func field___Type_enumValues_argsIncludeDeprecated(
 	ctx context.Context,
 	ec *executionContext,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (bool, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
@@ -1550,9 +1550,9 @@ func field___Type_enumValues_argsIncludeDeprecated(
 	return zeroVal, nil
 }
 
-func field___Type_fields_args(ctx context.Context, ec *executionContext, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field___Type_fields_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := field___Type_fields_argsIncludeDeprecated(ctx, ec, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1563,7 +1563,7 @@ func field___Type_fields_args(ctx context.Context, ec *executionContext, rawArgs
 func field___Type_fields_argsIncludeDeprecated(
 	ctx context.Context,
 	ec *executionContext,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (bool, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
@@ -1603,7 +1603,7 @@ func _Entity_findHelloByName(ctx context.Context, ec *executionContext, field gr
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Entity().FindHelloByName(rctx, fc.Args["name"].(string))
 	})
@@ -1664,7 +1664,7 @@ func _Entity_findHelloMultiSingleKeysByKey1AndKey2(ctx context.Context, ec *exec
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Entity().FindHelloMultiSingleKeysByKey1AndKey2(rctx, fc.Args["key1"].(string), fc.Args["key2"].(string))
 	})
@@ -1725,7 +1725,7 @@ func _Entity_findHelloWithErrorsByName(ctx context.Context, ec *executionContext
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Entity().FindHelloWithErrorsByName(rctx, fc.Args["name"].(string))
 	})
@@ -1784,7 +1784,7 @@ func _Entity_findManyMultiHelloByNames(ctx context.Context, ec *executionContext
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Entity().FindManyMultiHelloByNames(rctx, fc.Args["reps"].([]*model.MultiHelloByNamesInput))
 	})
@@ -1840,7 +1840,7 @@ func _Entity_findManyMultiHelloMultipleRequiresByNames(ctx context.Context, ec *
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Entity().FindManyMultiHelloMultipleRequiresByNames(rctx, fc.Args["reps"].([]*model.MultiHelloMultipleRequiresByNamesInput))
 	})
@@ -1902,7 +1902,7 @@ func _Entity_findManyMultiHelloRequiresByNames(ctx context.Context, ec *executio
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Entity().FindManyMultiHelloRequiresByNames(rctx, fc.Args["reps"].([]*model.MultiHelloRequiresByNamesInput))
 	})
@@ -1962,7 +1962,7 @@ func _Entity_findManyMultiHelloWithErrorByNames(ctx context.Context, ec *executi
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Entity().FindManyMultiHelloWithErrorByNames(rctx, fc.Args["reps"].([]*model.MultiHelloWithErrorByNamesInput))
 	})
@@ -2018,7 +2018,7 @@ func _Entity_findManyMultiPlanetRequiresNestedByNames(ctx context.Context, ec *e
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Entity().FindManyMultiPlanetRequiresNestedByNames(rctx, fc.Args["reps"].([]*model.MultiPlanetRequiresNestedByNamesInput))
 	})
@@ -2078,7 +2078,7 @@ func _Entity_findPlanetMultipleRequiresByName(ctx context.Context, ec *execution
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Entity().FindPlanetMultipleRequiresByName(rctx, fc.Args["name"].(string))
 	})
@@ -2143,7 +2143,7 @@ func _Entity_findPlanetRequiresByName(ctx context.Context, ec *executionContext,
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Entity().FindPlanetRequiresByName(rctx, fc.Args["name"].(string))
 	})
@@ -2206,7 +2206,7 @@ func _Entity_findPlanetRequiresNestedByName(ctx context.Context, ec *executionCo
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Entity().FindPlanetRequiresNestedByName(rctx, fc.Args["name"].(string))
 	})
@@ -2269,7 +2269,7 @@ func _Entity_findWorldByHelloNameAndFoo(ctx context.Context, ec *executionContex
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Entity().FindWorldByHelloNameAndFoo(rctx, fc.Args["helloName"].(string), fc.Args["foo"].(string))
 	})
@@ -2332,7 +2332,7 @@ func _Entity_findWorldNameByName(ctx context.Context, ec *executionContext, fiel
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Entity().FindWorldNameByName(rctx, fc.Args["name"].(string))
 	})
@@ -2391,7 +2391,7 @@ func _Entity_findWorldWithMultipleKeysByHelloNameAndFoo(ctx context.Context, ec 
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Entity().FindWorldWithMultipleKeysByHelloNameAndFoo(rctx, fc.Args["helloName"].(string), fc.Args["foo"].(string))
 	})
@@ -2454,7 +2454,7 @@ func _Entity_findWorldWithMultipleKeysByBar(ctx context.Context, ec *executionCo
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Entity().FindWorldWithMultipleKeysByBar(rctx, fc.Args["bar"].(int))
 	})
@@ -2517,7 +2517,7 @@ func _Hello_name(ctx context.Context, ec *executionContext, field graphql.Collec
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
 	})
@@ -2561,7 +2561,7 @@ func _Hello_secondary(ctx context.Context, ec *executionContext, field graphql.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Secondary, nil
 	})
@@ -2605,7 +2605,7 @@ func _HelloMultiSingleKeys_key1(ctx context.Context, ec *executionContext, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Key1, nil
 	})
@@ -2649,7 +2649,7 @@ func _HelloMultiSingleKeys_key2(ctx context.Context, ec *executionContext, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Key2, nil
 	})
@@ -2693,7 +2693,7 @@ func _HelloWithErrors_name(ctx context.Context, ec *executionContext, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
 	})
@@ -2737,7 +2737,7 @@ func _MultiHello_name(ctx context.Context, ec *executionContext, field graphql.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
 	})
@@ -2781,7 +2781,7 @@ func _MultiHelloMultipleRequires_name(ctx context.Context, ec *executionContext,
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
 	})
@@ -2825,7 +2825,7 @@ func _MultiHelloMultipleRequires_key1(ctx context.Context, ec *executionContext,
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Key1, nil
 	})
@@ -2869,7 +2869,7 @@ func _MultiHelloMultipleRequires_key2(ctx context.Context, ec *executionContext,
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Key2, nil
 	})
@@ -2913,7 +2913,7 @@ func _MultiHelloMultipleRequires_key3(ctx context.Context, ec *executionContext,
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Key3, nil
 	})
@@ -2957,7 +2957,7 @@ func _MultiHelloRequires_name(ctx context.Context, ec *executionContext, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
 	})
@@ -3001,7 +3001,7 @@ func _MultiHelloRequires_key1(ctx context.Context, ec *executionContext, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Key1, nil
 	})
@@ -3045,7 +3045,7 @@ func _MultiHelloRequires_key2(ctx context.Context, ec *executionContext, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Key2, nil
 	})
@@ -3089,7 +3089,7 @@ func _MultiHelloWithError_name(ctx context.Context, ec *executionContext, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
 	})
@@ -3133,7 +3133,7 @@ func _MultiPlanetRequiresNested_name(ctx context.Context, ec *executionContext, 
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
 	})
@@ -3177,7 +3177,7 @@ func _MultiPlanetRequiresNested_world(ctx context.Context, ec *executionContext,
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.World, nil
 	})
@@ -3229,7 +3229,7 @@ func _MultiPlanetRequiresNested_size(ctx context.Context, ec *executionContext, 
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Size, nil
 	})
@@ -3273,7 +3273,7 @@ func _PlanetMultipleRequires_name(ctx context.Context, ec *executionContext, fie
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
 	})
@@ -3317,7 +3317,7 @@ func _PlanetMultipleRequires_diameter(ctx context.Context, ec *executionContext,
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Diameter, nil
 	})
@@ -3361,7 +3361,7 @@ func _PlanetMultipleRequires_density(ctx context.Context, ec *executionContext, 
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Density, nil
 	})
@@ -3405,7 +3405,7 @@ func _PlanetMultipleRequires_weight(ctx context.Context, ec *executionContext, f
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Weight, nil
 	})
@@ -3449,7 +3449,7 @@ func _PlanetRequires_name(ctx context.Context, ec *executionContext, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
 	})
@@ -3493,7 +3493,7 @@ func _PlanetRequires_size(ctx context.Context, ec *executionContext, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Size, nil
 	})
@@ -3537,7 +3537,7 @@ func _PlanetRequires_diameter(ctx context.Context, ec *executionContext, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Diameter, nil
 	})
@@ -3581,7 +3581,7 @@ func _PlanetRequiresNested_name(ctx context.Context, ec *executionContext, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
 	})
@@ -3625,7 +3625,7 @@ func _PlanetRequiresNested_world(ctx context.Context, ec *executionContext, fiel
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.World, nil
 	})
@@ -3677,7 +3677,7 @@ func _PlanetRequiresNested_size(ctx context.Context, ec *executionContext, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Size, nil
 	})
@@ -3721,9 +3721,9 @@ func _Query__entities(ctx context.Context, ec *executionContext, field graphql.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.__resolve_entities(ctx, fc.Args["representations"].([]map[string]interface{})), nil
+		return ec.__resolve_entities(ctx, fc.Args["representations"].([]map[string]any)), nil
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -3776,7 +3776,7 @@ func _Query__service(ctx context.Context, ec *executionContext, field graphql.Co
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.__resolve__service(ctx)
 	})
@@ -3824,7 +3824,7 @@ func _Query___type(ctx context.Context, ec *executionContext, field graphql.Coll
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.introspectType(fc.Args["name"].(string))
 	})
@@ -3898,7 +3898,7 @@ func _Query___schema(ctx context.Context, ec *executionContext, field graphql.Co
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.introspectSchema()
 	})
@@ -3953,7 +3953,7 @@ func _World_foo(ctx context.Context, ec *executionContext, field graphql.Collect
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Foo, nil
 	})
@@ -3997,7 +3997,7 @@ func _World_bar(ctx context.Context, ec *executionContext, field graphql.Collect
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Bar, nil
 	})
@@ -4041,7 +4041,7 @@ func _World_hello(ctx context.Context, ec *executionContext, field graphql.Colle
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Hello, nil
 	})
@@ -4088,7 +4088,7 @@ func _WorldName_name(ctx context.Context, ec *executionContext, field graphql.Co
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
 	})
@@ -4132,7 +4132,7 @@ func _WorldWithMultipleKeys_foo(ctx context.Context, ec *executionContext, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Foo, nil
 	})
@@ -4176,7 +4176,7 @@ func _WorldWithMultipleKeys_bar(ctx context.Context, ec *executionContext, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Bar, nil
 	})
@@ -4220,7 +4220,7 @@ func _WorldWithMultipleKeys_hello(ctx context.Context, ec *executionContext, fie
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Hello, nil
 	})
@@ -4267,7 +4267,7 @@ func __Service_sdl(ctx context.Context, ec *executionContext, field graphql.Coll
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.SDL, nil
 	})
@@ -4308,7 +4308,7 @@ func ___Directive_name(ctx context.Context, ec *executionContext, field graphql.
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
 	})
@@ -4352,7 +4352,7 @@ func ___Directive_description(ctx context.Context, ec *executionContext, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description(), nil
 	})
@@ -4393,7 +4393,7 @@ func ___Directive_locations(ctx context.Context, ec *executionContext, field gra
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Locations, nil
 	})
@@ -4437,7 +4437,7 @@ func ___Directive_args(ctx context.Context, ec *executionContext, field graphql.
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Args, nil
 	})
@@ -4491,7 +4491,7 @@ func ___Directive_isRepeatable(ctx context.Context, ec *executionContext, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.IsRepeatable, nil
 	})
@@ -4535,7 +4535,7 @@ func ___EnumValue_name(ctx context.Context, ec *executionContext, field graphql.
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
 	})
@@ -4579,7 +4579,7 @@ func ___EnumValue_description(ctx context.Context, ec *executionContext, field g
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description(), nil
 	})
@@ -4620,7 +4620,7 @@ func ___EnumValue_isDeprecated(ctx context.Context, ec *executionContext, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.IsDeprecated(), nil
 	})
@@ -4664,7 +4664,7 @@ func ___EnumValue_deprecationReason(ctx context.Context, ec *executionContext, f
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DeprecationReason(), nil
 	})
@@ -4705,7 +4705,7 @@ func ___Field_name(ctx context.Context, ec *executionContext, field graphql.Coll
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
 	})
@@ -4749,7 +4749,7 @@ func ___Field_description(ctx context.Context, ec *executionContext, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description(), nil
 	})
@@ -4790,7 +4790,7 @@ func ___Field_args(ctx context.Context, ec *executionContext, field graphql.Coll
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Args, nil
 	})
@@ -4844,7 +4844,7 @@ func ___Field_type(ctx context.Context, ec *executionContext, field graphql.Coll
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Type, nil
 	})
@@ -4910,7 +4910,7 @@ func ___Field_isDeprecated(ctx context.Context, ec *executionContext, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.IsDeprecated(), nil
 	})
@@ -4954,7 +4954,7 @@ func ___Field_deprecationReason(ctx context.Context, ec *executionContext, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DeprecationReason(), nil
 	})
@@ -4995,7 +4995,7 @@ func ___InputValue_name(ctx context.Context, ec *executionContext, field graphql
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
 	})
@@ -5039,7 +5039,7 @@ func ___InputValue_description(ctx context.Context, ec *executionContext, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description(), nil
 	})
@@ -5080,7 +5080,7 @@ func ___InputValue_type(ctx context.Context, ec *executionContext, field graphql
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Type, nil
 	})
@@ -5146,7 +5146,7 @@ func ___InputValue_defaultValue(ctx context.Context, ec *executionContext, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DefaultValue, nil
 	})
@@ -5187,7 +5187,7 @@ func ___Schema_description(ctx context.Context, ec *executionContext, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description(), nil
 	})
@@ -5228,7 +5228,7 @@ func ___Schema_types(ctx context.Context, ec *executionContext, field graphql.Co
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Types(), nil
 	})
@@ -5294,7 +5294,7 @@ func ___Schema_queryType(ctx context.Context, ec *executionContext, field graphq
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.QueryType(), nil
 	})
@@ -5360,7 +5360,7 @@ func ___Schema_mutationType(ctx context.Context, ec *executionContext, field gra
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.MutationType(), nil
 	})
@@ -5423,7 +5423,7 @@ func ___Schema_subscriptionType(ctx context.Context, ec *executionContext, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.SubscriptionType(), nil
 	})
@@ -5486,7 +5486,7 @@ func ___Schema_directives(ctx context.Context, ec *executionContext, field graph
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Directives(), nil
 	})
@@ -5542,7 +5542,7 @@ func ___Type_kind(ctx context.Context, ec *executionContext, field graphql.Colle
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Kind(), nil
 	})
@@ -5586,7 +5586,7 @@ func ___Type_name(ctx context.Context, ec *executionContext, field graphql.Colle
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name(), nil
 	})
@@ -5627,7 +5627,7 @@ func ___Type_description(ctx context.Context, ec *executionContext, field graphq
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Description(), nil
 	})
@@ -5668,7 +5668,7 @@ func ___Type_fields(ctx context.Context, ec *executionContext, field graphql.Col
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Fields(fc.Args["includeDeprecated"].(bool)), nil
 	})
@@ -5734,7 +5734,7 @@ func ___Type_interfaces(ctx context.Context, ec *executionContext, field graphql
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Interfaces(), nil
 	})
@@ -5797,7 +5797,7 @@ func ___Type_possibleTypes(ctx context.Context, ec *executionContext, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.PossibleTypes(), nil
 	})
@@ -5860,7 +5860,7 @@ func ___Type_enumValues(ctx context.Context, ec *executionContext, field graphql
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.EnumValues(fc.Args["includeDeprecated"].(bool)), nil
 	})
@@ -5922,7 +5922,7 @@ func ___Type_inputFields(ctx context.Context, ec *executionContext, field graphq
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.InputFields(), nil
 	})
@@ -5973,7 +5973,7 @@ func ___Type_ofType(ctx context.Context, ec *executionContext, field graphql.Col
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.OfType(), nil
 	})
@@ -6036,7 +6036,7 @@ func ___Type_specifiedByURL(ctx context.Context, ec *executionContext, field gra
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.SpecifiedByURL(), nil
 	})
@@ -6069,10 +6069,10 @@ func fieldContext___Type_specifiedByURL(_ context.Context, ec *executionContext,
 
 // region    **************************** input.gotpl *****************************
 
-func unmarshalInputMultiHelloByNamesInput(ctx context.Context, ec *executionContext, obj interface{}) (model.MultiHelloByNamesInput, error) {
+func unmarshalInputMultiHelloByNamesInput(ctx context.Context, ec *executionContext, obj any) (model.MultiHelloByNamesInput, error) {
 	var it model.MultiHelloByNamesInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -6096,10 +6096,10 @@ func unmarshalInputMultiHelloByNamesInput(ctx context.Context, ec *executionCont
 	return it, nil
 }
 
-func unmarshalInputMultiHelloMultipleRequiresByNamesInput(ctx context.Context, ec *executionContext, obj interface{}) (model.MultiHelloMultipleRequiresByNamesInput, error) {
+func unmarshalInputMultiHelloMultipleRequiresByNamesInput(ctx context.Context, ec *executionContext, obj any) (model.MultiHelloMultipleRequiresByNamesInput, error) {
 	var it model.MultiHelloMultipleRequiresByNamesInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -6123,10 +6123,10 @@ func unmarshalInputMultiHelloMultipleRequiresByNamesInput(ctx context.Context, e
 	return it, nil
 }
 
-func unmarshalInputMultiHelloRequiresByNamesInput(ctx context.Context, ec *executionContext, obj interface{}) (model.MultiHelloRequiresByNamesInput, error) {
+func unmarshalInputMultiHelloRequiresByNamesInput(ctx context.Context, ec *executionContext, obj any) (model.MultiHelloRequiresByNamesInput, error) {
 	var it model.MultiHelloRequiresByNamesInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -6150,10 +6150,10 @@ func unmarshalInputMultiHelloRequiresByNamesInput(ctx context.Context, ec *execu
 	return it, nil
 }
 
-func unmarshalInputMultiHelloWithErrorByNamesInput(ctx context.Context, ec *executionContext, obj interface{}) (model.MultiHelloWithErrorByNamesInput, error) {
+func unmarshalInputMultiHelloWithErrorByNamesInput(ctx context.Context, ec *executionContext, obj any) (model.MultiHelloWithErrorByNamesInput, error) {
 	var it model.MultiHelloWithErrorByNamesInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -6177,10 +6177,10 @@ func unmarshalInputMultiHelloWithErrorByNamesInput(ctx context.Context, ec *exec
 	return it, nil
 }
 
-func unmarshalInputMultiPlanetRequiresNestedByNamesInput(ctx context.Context, ec *executionContext, obj interface{}) (model.MultiPlanetRequiresNestedByNamesInput, error) {
+func unmarshalInputMultiPlanetRequiresNestedByNamesInput(ctx context.Context, ec *executionContext, obj any) (model.MultiPlanetRequiresNestedByNamesInput, error) {
 	var it model.MultiPlanetRequiresNestedByNamesInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -7772,7 +7772,7 @@ func ___Type(ctx context.Context, ec *executionContext, sel ast.SelectionSet, ob
 
 // region    ***************************** type.gotpl *****************************
 
-func unmarshalNBoolean2bool(ctx context.Context, ec *executionContext, v interface{}) (bool, error) {
+func unmarshalNBoolean2bool(ctx context.Context, ec *executionContext, v any) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -7829,7 +7829,7 @@ func marshalNHelloWithErrors2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfed
 	return _HelloWithErrors(ctx, ec, sel, v)
 }
 
-func unmarshalNInt2int(ctx context.Context, ec *executionContext, v interface{}) (int, error) {
+func unmarshalNInt2int(ctx context.Context, ec *executionContext, v any) (int, error) {
 	res, err := graphql.UnmarshalInt(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -7844,8 +7844,8 @@ func marshalNInt2int(ctx context.Context, ec *executionContext, sel ast.Selectio
 	return res
 }
 
-func unmarshalNMultiHelloByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiHelloByNamesInput(ctx context.Context, ec *executionContext, v interface{}) ([]*model.MultiHelloByNamesInput, error) {
-	var vSlice []interface{}
+func unmarshalNMultiHelloByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiHelloByNamesInput(ctx context.Context, ec *executionContext, v any) ([]*model.MultiHelloByNamesInput, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -7861,8 +7861,8 @@ func unmarshalNMultiHelloByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ
 	return res, nil
 }
 
-func unmarshalNMultiHelloMultipleRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiHelloMultipleRequiresByNamesInput(ctx context.Context, ec *executionContext, v interface{}) ([]*model.MultiHelloMultipleRequiresByNamesInput, error) {
-	var vSlice []interface{}
+func unmarshalNMultiHelloMultipleRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiHelloMultipleRequiresByNamesInput(ctx context.Context, ec *executionContext, v any) ([]*model.MultiHelloMultipleRequiresByNamesInput, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -7878,8 +7878,8 @@ func unmarshalNMultiHelloMultipleRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99des
 	return res, nil
 }
 
-func unmarshalNMultiHelloRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiHelloRequiresByNamesInput(ctx context.Context, ec *executionContext, v interface{}) ([]*model.MultiHelloRequiresByNamesInput, error) {
-	var vSlice []interface{}
+func unmarshalNMultiHelloRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiHelloRequiresByNamesInput(ctx context.Context, ec *executionContext, v any) ([]*model.MultiHelloRequiresByNamesInput, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -7895,8 +7895,8 @@ func unmarshalNMultiHelloRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋg
 	return res, nil
 }
 
-func unmarshalNMultiHelloWithErrorByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiHelloWithErrorByNamesInput(ctx context.Context, ec *executionContext, v interface{}) ([]*model.MultiHelloWithErrorByNamesInput, error) {
-	var vSlice []interface{}
+func unmarshalNMultiHelloWithErrorByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiHelloWithErrorByNamesInput(ctx context.Context, ec *executionContext, v any) ([]*model.MultiHelloWithErrorByNamesInput, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -7912,8 +7912,8 @@ func unmarshalNMultiHelloWithErrorByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋ
 	return res, nil
 }
 
-func unmarshalNMultiPlanetRequiresNestedByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiPlanetRequiresNestedByNamesInput(ctx context.Context, ec *executionContext, v interface{}) ([]*model.MultiPlanetRequiresNestedByNamesInput, error) {
-	var vSlice []interface{}
+func unmarshalNMultiPlanetRequiresNestedByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiPlanetRequiresNestedByNamesInput(ctx context.Context, ec *executionContext, v any) ([]*model.MultiPlanetRequiresNestedByNamesInput, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -7971,7 +7971,7 @@ func marshalNPlanetRequiresNested2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋplugin�
 	return _PlanetRequiresNested(ctx, ec, sel, v)
 }
 
-func unmarshalNString2string(ctx context.Context, ec *executionContext, v interface{}) (string, error) {
+func unmarshalNString2string(ctx context.Context, ec *executionContext, v any) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -8028,12 +8028,12 @@ func marshalNWorldWithMultipleKeys2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋplugin
 	return _WorldWithMultipleKeys(ctx, ec, sel, v)
 }
 
-func unmarshalN_Any2map(ctx context.Context, ec *executionContext, v interface{}) (map[string]interface{}, error) {
+func unmarshalN_Any2map(ctx context.Context, ec *executionContext, v any) (map[string]any, error) {
 	res, err := graphql.UnmarshalMap(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func marshalN_Any2map(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v map[string]interface{}) graphql.Marshaler {
+func marshalN_Any2map(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v map[string]any) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
@@ -8049,13 +8049,13 @@ func marshalN_Any2map(ctx context.Context, ec *executionContext, sel ast.Selecti
 	return res
 }
 
-func unmarshalN_Any2ᚕmapᚄ(ctx context.Context, ec *executionContext, v interface{}) ([]map[string]interface{}, error) {
-	var vSlice []interface{}
+func unmarshalN_Any2ᚕmapᚄ(ctx context.Context, ec *executionContext, v any) ([]map[string]any, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
 	var err error
-	res := make([]map[string]interface{}, len(vSlice))
+	res := make([]map[string]any, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
 		res[i], err = unmarshalN_Any2map(ctx, ec, vSlice[i])
@@ -8066,7 +8066,7 @@ func unmarshalN_Any2ᚕmapᚄ(ctx context.Context, ec *executionContext, v inter
 	return res, nil
 }
 
-func marshalN_Any2ᚕmapᚄ(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v []map[string]interface{}) graphql.Marshaler {
+func marshalN_Any2ᚕmapᚄ(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v []map[string]any) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
 	for i := range v {
 		ret[i] = marshalN_Any2map(ctx, ec, sel, v[i])
@@ -8119,7 +8119,7 @@ func marshalN_Entity2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederation�
 	return ret
 }
 
-func unmarshalN_FieldSet2string(ctx context.Context, ec *executionContext, v interface{}) (string, error) {
+func unmarshalN_FieldSet2string(ctx context.Context, ec *executionContext, v any) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -8186,7 +8186,7 @@ func marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintros
 	return ret
 }
 
-func unmarshalN__DirectiveLocation2string(ctx context.Context, ec *executionContext, v interface{}) (string, error) {
+func unmarshalN__DirectiveLocation2string(ctx context.Context, ec *executionContext, v any) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -8201,8 +8201,8 @@ func marshalN__DirectiveLocation2string(ctx context.Context, ec *executionContex
 	return res
 }
 
-func unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, ec *executionContext, v interface{}) ([]string, error) {
-	var vSlice []interface{}
+func unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, ec *executionContext, v any) ([]string, error) {
+	var vSlice []any
 	if v != nil {
 		vSlice = graphql.CoerceList(v)
 	}
@@ -8376,7 +8376,7 @@ func marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospecti
 	return ___Type(ctx, ec, sel, v)
 }
 
-func unmarshalN__TypeKind2string(ctx context.Context, ec *executionContext, v interface{}) (string, error) {
+func unmarshalN__TypeKind2string(ctx context.Context, ec *executionContext, v any) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -8391,7 +8391,7 @@ func marshalN__TypeKind2string(ctx context.Context, ec *executionContext, sel as
 	return res
 }
 
-func unmarshalOBoolean2bool(ctx context.Context, ec *executionContext, v interface{}) (bool, error) {
+func unmarshalOBoolean2bool(ctx context.Context, ec *executionContext, v any) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -8401,7 +8401,7 @@ func marshalOBoolean2bool(ctx context.Context, ec *executionContext, sel ast.Sel
 	return res
 }
 
-func unmarshalOBoolean2ᚖbool(ctx context.Context, ec *executionContext, v interface{}) (*bool, error) {
+func unmarshalOBoolean2ᚖbool(ctx context.Context, ec *executionContext, v any) (*bool, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -8472,7 +8472,7 @@ func marshalOMultiHello2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederati
 	return _MultiHello(ctx, ec, sel, v)
 }
 
-func unmarshalOMultiHelloByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiHelloByNamesInput(ctx context.Context, ec *executionContext, v interface{}) (*model.MultiHelloByNamesInput, error) {
+func unmarshalOMultiHelloByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiHelloByNamesInput(ctx context.Context, ec *executionContext, v any) (*model.MultiHelloByNamesInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -8528,7 +8528,7 @@ func marshalOMultiHelloMultipleRequires2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋp
 	return _MultiHelloMultipleRequires(ctx, ec, sel, v)
 }
 
-func unmarshalOMultiHelloMultipleRequiresByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiHelloMultipleRequiresByNamesInput(ctx context.Context, ec *executionContext, v interface{}) (*model.MultiHelloMultipleRequiresByNamesInput, error) {
+func unmarshalOMultiHelloMultipleRequiresByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiHelloMultipleRequiresByNamesInput(ctx context.Context, ec *executionContext, v any) (*model.MultiHelloMultipleRequiresByNamesInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -8584,7 +8584,7 @@ func marshalOMultiHelloRequires2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋ
 	return _MultiHelloRequires(ctx, ec, sel, v)
 }
 
-func unmarshalOMultiHelloRequiresByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiHelloRequiresByNamesInput(ctx context.Context, ec *executionContext, v interface{}) (*model.MultiHelloRequiresByNamesInput, error) {
+func unmarshalOMultiHelloRequiresByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiHelloRequiresByNamesInput(ctx context.Context, ec *executionContext, v any) (*model.MultiHelloRequiresByNamesInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -8640,7 +8640,7 @@ func marshalOMultiHelloWithError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋplugin�
 	return _MultiHelloWithError(ctx, ec, sel, v)
 }
 
-func unmarshalOMultiHelloWithErrorByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiHelloWithErrorByNamesInput(ctx context.Context, ec *executionContext, v interface{}) (*model.MultiHelloWithErrorByNamesInput, error) {
+func unmarshalOMultiHelloWithErrorByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiHelloWithErrorByNamesInput(ctx context.Context, ec *executionContext, v any) (*model.MultiHelloWithErrorByNamesInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -8696,7 +8696,7 @@ func marshalOMultiPlanetRequiresNested2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpl
 	return _MultiPlanetRequiresNested(ctx, ec, sel, v)
 }
 
-func unmarshalOMultiPlanetRequiresNestedByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiPlanetRequiresNestedByNamesInput(ctx context.Context, ec *executionContext, v interface{}) (*model.MultiPlanetRequiresNestedByNamesInput, error) {
+func unmarshalOMultiPlanetRequiresNestedByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiPlanetRequiresNestedByNamesInput(ctx context.Context, ec *executionContext, v any) (*model.MultiPlanetRequiresNestedByNamesInput, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -8704,7 +8704,7 @@ func unmarshalOMultiPlanetRequiresNestedByNamesInput2ᚖgithubᚗcomᚋ99designs
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func unmarshalOString2string(ctx context.Context, ec *executionContext, v interface{}) (string, error) {
+func unmarshalOString2string(ctx context.Context, ec *executionContext, v any) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
@@ -8714,7 +8714,7 @@ func marshalOString2string(ctx context.Context, ec *executionContext, sel ast.Se
 	return res
 }
 
-func unmarshalOString2ᚖstring(ctx context.Context, ec *executionContext, v interface{}) (*string, error) {
+func unmarshalOString2ᚖstring(ctx context.Context, ec *executionContext, v any) (*string, error) {
 	if v == nil {
 		return nil, nil
 	}

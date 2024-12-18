@@ -54,22 +54,22 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	Custom        func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
-	Defer         func(ctx context.Context, obj interface{}, next graphql.Resolver, ifArg *bool, label *string) (res interface{}, err error)
-	Directive1    func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
-	Directive2    func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
-	Directive3    func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
-	Length        func(ctx context.Context, obj interface{}, next graphql.Resolver, min int, max *int, message *string) (res interface{}, err error)
-	Logged        func(ctx context.Context, obj interface{}, next graphql.Resolver, id string) (res interface{}, err error)
-	MakeNil       func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
-	MakeTypedNil  func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
-	Noop          func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
-	Order1        func(ctx context.Context, obj interface{}, next graphql.Resolver, location string) (res interface{}, err error)
-	Order2        func(ctx context.Context, obj interface{}, next graphql.Resolver, location string) (res interface{}, err error)
-	Populate      func(ctx context.Context, obj interface{}, next graphql.Resolver, value string) (res interface{}, err error)
-	Range         func(ctx context.Context, obj interface{}, next graphql.Resolver, min *int, max *int) (res interface{}, err error)
-	ToNull        func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
-	Unimplemented func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
+	Custom        func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
+	Defer         func(ctx context.Context, obj any, next graphql.Resolver, ifArg *bool, label *string) (res any, err error)
+	Directive1    func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
+	Directive2    func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
+	Directive3    func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
+	Length        func(ctx context.Context, obj any, next graphql.Resolver, min int, max *int, message *string) (res any, err error)
+	Logged        func(ctx context.Context, obj any, next graphql.Resolver, id string) (res any, err error)
+	MakeNil       func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
+	MakeTypedNil  func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
+	Noop          func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
+	Order1        func(ctx context.Context, obj any, next graphql.Resolver, location string) (res any, err error)
+	Order2        func(ctx context.Context, obj any, next graphql.Resolver, location string) (res any, err error)
+	Populate      func(ctx context.Context, obj any, next graphql.Resolver, value string) (res any, err error)
+	Range         func(ctx context.Context, obj any, next graphql.Resolver, min *int, max *int) (res any, err error)
+	ToNull        func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
+	Unimplemented func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
 }
 
 type ComplexityRoot struct {
@@ -358,9 +358,9 @@ type ComplexityRoot struct {
 		Invalid                          func(childComplexity int) int
 		InvalidIdentifier                func(childComplexity int) int
 		Issue896a                        func(childComplexity int) int
-		MapInput                         func(childComplexity int, input map[string]interface{}) int
+		MapInput                         func(childComplexity int, input map[string]any) int
 		MapNestedStringInterface         func(childComplexity int, in *NestedMapInput) int
-		MapStringInterface               func(childComplexity int, in map[string]interface{}) int
+		MapStringInterface               func(childComplexity int, in map[string]any) int
 		ModelMethods                     func(childComplexity int) int
 		NestedInputs                     func(childComplexity int, input [][]*OuterInput) int
 		NestedOutputs                    func(childComplexity int) int
@@ -496,7 +496,7 @@ func (e *executableSchema) Schema() *ast.Schema {
 	return parsedSchema
 }
 
-func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
+func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]any) (int, bool) {
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
@@ -1575,7 +1575,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.MapInput(childComplexity, args["input"].(map[string]interface{})), true
+		return e.complexity.Query.MapInput(childComplexity, args["input"].(map[string]any)), true
 
 	case "Query.mapNestedStringInterface":
 		if e.complexity.Query.MapNestedStringInterface == nil {
@@ -1599,7 +1599,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.MapStringInterface(childComplexity, args["in"].(map[string]interface{})), true
+		return e.complexity.Query.MapStringInterface(childComplexity, args["in"].(map[string]any)), true
 
 	case "Query.modelMethods":
 		if e.complexity.Query.ModelMethods == nil {

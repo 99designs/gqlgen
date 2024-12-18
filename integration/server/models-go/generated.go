@@ -15,9 +15,9 @@ type DateFilter struct {
 }
 
 type ListCoercion struct {
-	EnumVal   []*ErrorType             `json:"enumVal,omitempty"`
-	StrVal    []*string                `json:"strVal,omitempty"`
-	IntVal    []*int                   `json:"intVal,omitempty"`
+	EnumVal   []*ErrorType     `json:"enumVal,omitempty"`
+	StrVal    []*string        `json:"strVal,omitempty"`
+	IntVal    []*int           `json:"intVal,omitempty"`
 	ScalarVal []map[string]any `json:"scalarVal,omitempty"`
 }
 

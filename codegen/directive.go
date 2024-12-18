@@ -168,13 +168,13 @@ func (d *Directive) CallName() string {
 }
 
 func (d *Directive) Declaration() string {
-	res := d.CallName() + " func(ctx context.Context, obj interface{}, next graphql.Resolver"
+	res := d.CallName() + " func(ctx context.Context, obj any, next graphql.Resolver"
 
 	for _, arg := range d.Args {
 		res += fmt.Sprintf(", %s %s", templates.ToGoPrivate(arg.Name), templates.CurrentImports.LookupType(arg.TypeReference.GO))
 	}
 
-	res += ") (res interface{}, err error)"
+	res += ") (res any, err error)"
 	return res
 }
 

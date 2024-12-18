@@ -123,7 +123,7 @@ func (r *queryResolver) Collision(ctx context.Context) (*introspection1.It, erro
 }
 
 // MapInput is the resolver for the mapInput field.
-func (r *queryResolver) MapInput(ctx context.Context, input map[string]interface{}) (*bool, error) {
+func (r *queryResolver) MapInput(ctx context.Context, input map[string]any) (*bool, error) {
 	panic("not implemented")
 }
 
@@ -328,12 +328,12 @@ func (r *queryResolver) Issue896a(ctx context.Context) ([]*CheckIssue896, error)
 }
 
 // MapStringInterface is the resolver for the mapStringInterface field.
-func (r *queryResolver) MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error) {
+func (r *queryResolver) MapStringInterface(ctx context.Context, in map[string]any) (map[string]any, error) {
 	panic("not implemented")
 }
 
 // MapNestedStringInterface is the resolver for the mapNestedStringInterface field.
-func (r *queryResolver) MapNestedStringInterface(ctx context.Context, in *NestedMapInput) (map[string]interface{}, error) {
+func (r *queryResolver) MapNestedStringInterface(ctx context.Context, in *NestedMapInput) (map[string]any, error) {
 	panic("not implemented")
 }
 

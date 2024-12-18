@@ -647,7 +647,7 @@ func (tm TypeMap) ReferencedPackages() []string {
 
 	for _, typ := range tm {
 		for _, model := range typ.Model {
-			if model == "map[string]interface{}" || model == "interface{}" {
+			if model == "map[string]any" || model == "any" {
 				continue
 			}
 			pkg, _ := code.PkgAndType(model)

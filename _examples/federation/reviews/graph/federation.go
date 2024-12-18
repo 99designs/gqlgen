@@ -37,7 +37,7 @@ func (ec *executionContext) __resolve__service(ctx context.Context) (fedruntime.
 	}, nil
 }
 
-func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]interface{}) []fedruntime.Entity {
+func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]any) []fedruntime.Entity {
 	list := make([]fedruntime.Entity, len(representations))
 
 	repsMap := ec.buildRepresentationGroups(ctx, representations)
@@ -207,7 +207,7 @@ func (ec *executionContext) resolveManyEntities(
 			typedReps := make([]*model.ProductByManufacturerIDAndIDsInput, len(reps))
 
 			for i, rep := range reps {
-				id0, err := ec.unmarshalNString2string(ctx, rep.entity["manufacturer"].(map[string]interface{})["id"])
+				id0, err := ec.unmarshalNString2string(ctx, rep.entity["manufacturer"].(map[string]any)["id"])
 				if err != nil {
 					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "manufacturerID"))
 				}
@@ -228,7 +228,7 @@ func (ec *executionContext) resolveManyEntities(
 			}
 
 			for i, entity := range entities {
-				entity.Manufacturer.ID, err = ec.unmarshalNString2string(ctx, reps[i].entity["manufacturer"].(map[string]interface{})["id"])
+				entity.Manufacturer.ID, err = ec.unmarshalNString2string(ctx, reps[i].entity["manufacturer"].(map[string]any)["id"])
 				if err != nil {
 					return err
 				}
@@ -252,7 +252,7 @@ func entityResolverNameForProduct(ctx context.Context, rep EntityRepresentation)
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -266,7 +266,7 @@ func entityResolverNameForProduct(ctx context.Context, rep EntityRepresentation)
 				fmt.Errorf("%w due to missing Key Field \"manufacturer\" for Product", ErrTypeNotFound))
 			break
 		}
-		if m, ok = val.(map[string]interface{}); !ok {
+		if m, ok = val.(map[string]any); !ok {
 			// nested field value is not a map[string]interface so don't use it
 			entityResolverErrs = append(entityResolverErrs,
 				fmt.Errorf("%w due to nested Key Field \"manufacturer\" value not matching map[string]any for Product", ErrTypeNotFound))
@@ -309,7 +309,7 @@ func entityResolverNameForUser(ctx context.Context, rep EntityRepresentation) (s
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val

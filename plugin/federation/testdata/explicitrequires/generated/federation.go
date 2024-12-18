@@ -36,7 +36,7 @@ func (ec *executionContext) __resolve__service(ctx context.Context) (fedruntime.
 	}, nil
 }
 
-func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]interface{}) []fedruntime.Entity {
+func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]any) []fedruntime.Entity {
 	list := make([]fedruntime.Entity, len(representations))
 
 	repsMap := ec.buildRepresentationGroups(ctx, representations)
@@ -320,7 +320,7 @@ func (ec *executionContext) resolveEntity(
 		switch resolverName {
 
 		case "findWorldByHelloNameAndFoo":
-			id0, err := ec.unmarshalNString2string(ctx, rep["hello"].(map[string]interface{})["name"])
+			id0, err := ec.unmarshalNString2string(ctx, rep["hello"].(map[string]any)["name"])
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findWorldByHelloNameAndFoo(): %w`, err)
 			}
@@ -362,7 +362,7 @@ func (ec *executionContext) resolveEntity(
 		switch resolverName {
 
 		case "findWorldWithMultipleKeysByHelloNameAndFoo":
-			id0, err := ec.unmarshalNString2string(ctx, rep["hello"].(map[string]interface{})["name"])
+			id0, err := ec.unmarshalNString2string(ctx, rep["hello"].(map[string]any)["name"])
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findWorldWithMultipleKeysByHelloNameAndFoo(): %w`, err)
 			}
@@ -588,7 +588,7 @@ func (ec *executionContext) resolveManyEntities(
 			}
 
 			for i, entity := range entities {
-				entity.World.Foo, err = ec.unmarshalNString2string(ctx, reps[i].entity["world"].(map[string]interface{})["foo"])
+				entity.World.Foo, err = ec.unmarshalNString2string(ctx, reps[i].entity["world"].(map[string]any)["foo"])
 				if err != nil {
 					return err
 				}
@@ -612,7 +612,7 @@ func entityResolverNameForHello(ctx context.Context, rep EntityRepresentation) (
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -647,7 +647,7 @@ func entityResolverNameForHelloMultiSingleKeys(ctx context.Context, rep EntityRe
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -692,7 +692,7 @@ func entityResolverNameForHelloWithErrors(ctx context.Context, rep EntityReprese
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -727,7 +727,7 @@ func entityResolverNameForMultiHello(ctx context.Context, rep EntityRepresentati
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -762,7 +762,7 @@ func entityResolverNameForMultiHelloMultipleRequires(ctx context.Context, rep En
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -797,7 +797,7 @@ func entityResolverNameForMultiHelloRequires(ctx context.Context, rep EntityRepr
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -832,7 +832,7 @@ func entityResolverNameForMultiHelloWithError(ctx context.Context, rep EntityRep
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -867,7 +867,7 @@ func entityResolverNameForMultiPlanetRequiresNested(ctx context.Context, rep Ent
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -902,7 +902,7 @@ func entityResolverNameForPerson(ctx context.Context, rep EntityRepresentation) 
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -937,7 +937,7 @@ func entityResolverNameForPlanetMultipleRequires(ctx context.Context, rep Entity
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -972,7 +972,7 @@ func entityResolverNameForPlanetRequires(ctx context.Context, rep EntityRepresen
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -1007,7 +1007,7 @@ func entityResolverNameForPlanetRequiresNested(ctx context.Context, rep EntityRe
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -1042,7 +1042,7 @@ func entityResolverNameForWorld(ctx context.Context, rep EntityRepresentation) (
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -1056,7 +1056,7 @@ func entityResolverNameForWorld(ctx context.Context, rep EntityRepresentation) (
 				fmt.Errorf("%w due to missing Key Field \"hello\" for World", ErrTypeNotFound))
 			break
 		}
-		if m, ok = val.(map[string]interface{}); !ok {
+		if m, ok = val.(map[string]any); !ok {
 			// nested field value is not a map[string]interface so don't use it
 			entityResolverErrs = append(entityResolverErrs,
 				fmt.Errorf("%w due to nested Key Field \"hello\" value not matching map[string]any for World", ErrTypeNotFound))
@@ -1099,7 +1099,7 @@ func entityResolverNameForWorldName(ctx context.Context, rep EntityRepresentatio
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -1134,7 +1134,7 @@ func entityResolverNameForWorldWithMultipleKeys(ctx context.Context, rep EntityR
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -1148,7 +1148,7 @@ func entityResolverNameForWorldWithMultipleKeys(ctx context.Context, rep EntityR
 				fmt.Errorf("%w due to missing Key Field \"hello\" for WorldWithMultipleKeys", ErrTypeNotFound))
 			break
 		}
-		if m, ok = val.(map[string]interface{}); !ok {
+		if m, ok = val.(map[string]any); !ok {
 			// nested field value is not a map[string]interface so don't use it
 			entityResolverErrs = append(entityResolverErrs,
 				fmt.Errorf("%w due to nested Key Field \"hello\" value not matching map[string]any for WorldWithMultipleKeys", ErrTypeNotFound))
@@ -1183,7 +1183,7 @@ func entityResolverNameForWorldWithMultipleKeys(ctx context.Context, rep EntityR
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val

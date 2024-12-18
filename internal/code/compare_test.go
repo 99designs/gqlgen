@@ -24,10 +24,10 @@ func TestCompatibleTypes(t *testing.T) {
 		{"*[]string", "[]string"},
 		{"*[]string", "[]*string"},
 		{"*[]*[]*[]string", "[][][]string"},
-		{"map[string]interface{}", "map[string]interface{}"},
+		{"map[string]any", "map[string]any"},
 		{"map[string]string", "map[string]string"},
 		{"Bar", "Bar"},
-		{"interface{}", "interface{}"},
+		{"any", "any"},
 		{"interface{Foo() bool}", "interface{Foo() bool}"},
 		{"struct{Foo bool}", "struct{Foo bool}"},
 	}
@@ -48,9 +48,9 @@ func TestCompatibleTypes(t *testing.T) {
 		{"*string", "[]string"},
 		{"[]string", "[][]string"},
 		{"Bar", "Baz"},
-		{"map[string]interface{}", "map[string]string"},
+		{"map[string]any", "map[string]string"},
 		{"map[string]string", "[]string"},
-		{"interface{Foo() bool}", "interface{}"},
+		{"interface{Foo() bool}", "any"},
 		{"struct{Foo bool}", "struct{Bar bool}"},
 	}
 

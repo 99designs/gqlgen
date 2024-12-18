@@ -36,8 +36,8 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	Noop     func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error)
-	Populate func(ctx context.Context, obj interface{}, next graphql.Resolver, value string) (res interface{}, err error)
+	Noop     func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
+	Populate func(ctx context.Context, obj any, next graphql.Resolver, value string) (res any, err error)
 }
 
 type ComplexityRoot struct {
@@ -60,7 +60,7 @@ func (e *executableSchema) Schema() *ast.Schema {
 	return parsedSchema
 }
 
-func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
+func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]any) (int, bool) {
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {

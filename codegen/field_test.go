@@ -159,11 +159,11 @@ func TestField_CallArgs(t *testing.T) {
 				},
 			},
 			Expected: `ctx, ` + `
-				func () interface{} {
+				func () any {
 					if fc.Args["test"] == nil {
 						return nil
 					}
-					return fc.Args["test"].(interface{})
+					return fc.Args["test"].(any)
 				}(), fc.Args["test2"].(TestInterface), fc.Args["test3"].(string)`,
 		},
 		{

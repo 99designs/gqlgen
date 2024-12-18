@@ -118,7 +118,7 @@
 		return parsedSchema
 	}
 
-	func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
+	func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]any) (int, bool) {
 		ec := executionContext{nil, e, 0, 0, nil}
 		_ = ec
 		{{ if not .Config.OmitComplexity -}}
@@ -182,10 +182,10 @@
 					ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
 					{{ if .Directives.LocationDirectives "QUERY" -}}
 						{{ if $useFunctionSyntaxForExecutionContext -}}
-						data = _queryMiddleware(ctx, &ec, opCtx.Operation, func(ctx context.Context) (interface{}, error){
+						data = _queryMiddleware(ctx, &ec, opCtx.Operation, func(ctx context.Context) (any, error){
 							return _{{.QueryRoot.Name}}(ctx, ec, opCtx.Operation.SelectionSet), nil
 						{{- else -}}
-						data = ec._queryMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (interface{}, error){
+						data = ec._queryMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (any, error){
 							return ec._{{.QueryRoot.Name}}(ctx, opCtx.Operation.SelectionSet), nil
 						{{- end }}
 						})
@@ -227,10 +227,10 @@
 				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
 				{{ if .Directives.LocationDirectives "MUTATION" -}}
 					{{ if $useFunctionSyntaxForExecutionContext -}}
-					data := _mutationMiddleware(ctx, &ec, opCtx.Operation, func(ctx context.Context) (interface{}, error){
+					data := _mutationMiddleware(ctx, &ec, opCtx.Operation, func(ctx context.Context) (any, error){
 						return _{{.MutationRoot.Name}}(ctx, ec, opCtx.Operation.SelectionSet), nil
 					{{- else -}}
-					data := ec._mutationMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (interface{}, error){
+					data := ec._mutationMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (any, error){
 						return ec._{{.MutationRoot.Name}}(ctx, opCtx.Operation.SelectionSet), nil
 					{{- end }}
 					})
@@ -253,10 +253,10 @@
 		{{- if .SubscriptionRoot }} case ast.Subscription:
 			{{ if .Directives.LocationDirectives "SUBSCRIPTION" -}}
 				{{ if $useFunctionSyntaxForExecutionContext -}}
-				next := _subscriptionMiddleware(ctx, &ec, opCtx.Operation, func(ctx context.Context) (interface{}, error){
+				next := _subscriptionMiddleware(ctx, &ec, opCtx.Operation, func(ctx context.Context) (any, error){
 					return _{{.SubscriptionRoot.Name}}(ctx, ec, opCtx.Operation.SelectionSet),nil
 				{{- else -}}
-				next := ec._subscriptionMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (interface{}, error){
+				next := ec._subscriptionMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (any, error){
 					return ec._{{.SubscriptionRoot.Name}}(ctx, opCtx.Operation.SelectionSet),nil
 				{{- end }}
 				})

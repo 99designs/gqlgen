@@ -12,7 +12,7 @@
 {{- else -}}
 // {{.FuncName}} is the requires populator for the {{.Entity.Def.Name}} entity.
 {{- end }}
-func (ec *executionContext) {{.FuncName}}(ctx context.Context, entity *{{.Entity.GetTypeInfo}}, reps map[string]interface{}) error {
+func (ec *executionContext) {{.FuncName}}(ctx context.Context, entity *{{.Entity.GetTypeInfo}}, reps map[string]any) error {
 	{{.Implementation}}
 }
 {{ end }}

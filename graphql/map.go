@@ -6,7 +6,7 @@ import (
 	"io"
 )
 
-func MarshalMap(val map[string]interface{}) Marshaler {
+func MarshalMap(val map[string]any) Marshaler {
 	return WriterFunc(func(w io.Writer) {
 		err := json.NewEncoder(w).Encode(val)
 		if err != nil {
@@ -15,8 +15,8 @@ func MarshalMap(val map[string]interface{}) Marshaler {
 	})
 }
 
-func UnmarshalMap(v interface{}) (map[string]interface{}, error) {
-	if m, ok := v.(map[string]interface{}); ok {
+func UnmarshalMap(v any) (map[string]any, error) {
+	if m, ok := v.(map[string]any); ok {
 		return m, nil
 	}
 

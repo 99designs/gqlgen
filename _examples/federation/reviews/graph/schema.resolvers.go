@@ -12,7 +12,7 @@ import (
 )
 
 // ManufacturerID is the resolver for the manufacturerID field.
-func (r *productResolver) ManufacturerID(ctx context.Context, obj *model.Product, federationRequires map[string]interface{}) (*string, error) {
+func (r *productResolver) ManufacturerID(ctx context.Context, obj *model.Product, federationRequires map[string]any) (*string, error) {
 	manufacturer, ok := federationRequires["manufacturer"].(map[string]any)
 	if !ok {
 		return nil, fmt.Errorf("manufacturer not provided or not an object")
@@ -32,7 +32,7 @@ func (r *userResolver) Username(ctx context.Context, obj *model.User) (string, e
 }
 
 // Reviews is the resolver for the reviews field.
-func (r *userResolver) Reviews(ctx context.Context, obj *model.User, federationRequires map[string]interface{}) ([]*model.Review, error) {
+func (r *userResolver) Reviews(ctx context.Context, obj *model.User, federationRequires map[string]any) ([]*model.Review, error) {
 	var productReviews []*model.Review
 	for _, review := range reviews {
 		if review.Author.ID == obj.ID {

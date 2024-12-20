@@ -14,31 +14,31 @@ import (
 )
 
 // Key3 is the resolver for the key3 field.
-func (r *multiHelloMultipleRequiresResolver) Key3(ctx context.Context, obj *model.MultiHelloMultipleRequires, federationRequires map[string]interface{}) (string, error) {
+func (r *multiHelloMultipleRequiresResolver) Key3(ctx context.Context, obj *model.MultiHelloMultipleRequires, federationRequires map[string]any) (string, error) {
 	key1 := federationRequires["key1"].(string)
 	key2 := federationRequires["key2"].(string)
 	return key1 + ":" + key2, nil
 }
 
 // Key2 is the resolver for the key2 field.
-func (r *multiHelloRequiresResolver) Key2(ctx context.Context, obj *model.MultiHelloRequires, federationRequires map[string]interface{}) (string, error) {
+func (r *multiHelloRequiresResolver) Key2(ctx context.Context, obj *model.MultiHelloRequires, federationRequires map[string]any) (string, error) {
 	key1 := federationRequires["key1"].(string)
 	return key1, nil
 }
 
 // Size is the resolver for the size field.
-func (r *multiPlanetRequiresNestedResolver) Size(ctx context.Context, obj *model.MultiPlanetRequiresNested, federationRequires map[string]interface{}) (int, error) {
-	foo := federationRequires["world"].(map[string]interface{})["foo"].(string)
+func (r *multiPlanetRequiresNestedResolver) Size(ctx context.Context, obj *model.MultiPlanetRequiresNested, federationRequires map[string]any) (int, error) {
+	foo := federationRequires["world"].(map[string]any)["foo"].(string)
 	return len(foo), nil
 }
 
 // WelcomeMessage is the resolver for the welcomeMessage field.
-func (r *personResolver) WelcomeMessage(ctx context.Context, obj *model.Person, federationRequires map[string]interface{}) (*string, error) {
+func (r *personResolver) WelcomeMessage(ctx context.Context, obj *model.Person, federationRequires map[string]any) (*string, error) {
 	panic(fmt.Errorf("not implemented: WelcomeMessage - welcomeMessage"))
 }
 
 // Weight is the resolver for the weight field.
-func (r *planetMultipleRequiresResolver) Weight(ctx context.Context, obj *model.PlanetMultipleRequires, foo *string, federationRequires map[string]interface{}) (int, error) {
+func (r *planetMultipleRequiresResolver) Weight(ctx context.Context, obj *model.PlanetMultipleRequires, foo *string, federationRequires map[string]any) (int, error) {
 	diameter, err := federationRequires["diameter"].(json.Number).Int64()
 	if err != nil {
 		return 0, err
@@ -53,7 +53,7 @@ func (r *planetMultipleRequiresResolver) Weight(ctx context.Context, obj *model.
 }
 
 // Size is the resolver for the size field.
-func (r *planetRequiresResolver) Size(ctx context.Context, obj *model.PlanetRequires, federationRequires map[string]interface{}) (int, error) {
+func (r *planetRequiresResolver) Size(ctx context.Context, obj *model.PlanetRequires, federationRequires map[string]any) (int, error) {
 	diameter, err := federationRequires["diameter"].(json.Number).Int64()
 	if err != nil {
 		return 0, err
@@ -63,14 +63,14 @@ func (r *planetRequiresResolver) Size(ctx context.Context, obj *model.PlanetRequ
 }
 
 // Size is the resolver for the size field.
-func (r *planetRequiresNestedResolver) Size(ctx context.Context, obj *model.PlanetRequiresNested, federationRequires map[string]interface{}) (int, error) {
-	foo := federationRequires["world"].(map[string]interface{})["foo"].(string)
+func (r *planetRequiresNestedResolver) Size(ctx context.Context, obj *model.PlanetRequiresNested, federationRequires map[string]any) (int, error) {
+	foo := federationRequires["world"].(map[string]any)["foo"].(string)
 	return len(foo), nil
 }
 
 // Sizes is the resolver for the sizes field.
-func (r *planetRequiresNestedResolver) Sizes(ctx context.Context, obj *model.PlanetRequiresNested, federationRequires map[string]interface{}) ([]int, error) {
-	foo := federationRequires["world"].(map[string]interface{})["foo"].(string)
+func (r *planetRequiresNestedResolver) Sizes(ctx context.Context, obj *model.PlanetRequiresNested, federationRequires map[string]any) ([]int, error) {
+	foo := federationRequires["world"].(map[string]any)["foo"].(string)
 	return []int{len(foo)}, nil
 }
 

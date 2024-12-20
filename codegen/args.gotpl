@@ -2,12 +2,12 @@
 
 {{ range $name, $args := .Args }}
 {{ if $useFunctionSyntaxForExecutionContext -}}
-func {{ $name }}(ctx context.Context, ec *executionContext, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func {{ $name }}(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 {{- else -}}
-func (ec *executionContext) {{ $name }}(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) {{ $name }}(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 {{- end }}
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 
 	{{- range $i, $arg := . }}
 		{{ if $useFunctionSyntaxForExecutionContext -}}
@@ -28,12 +28,12 @@ func (ec *executionContext) {{ $name }}(ctx context.Context, rawArgs map[string]
 		func {{ $name }}{{$arg.Name | go}}(
 			ctx context.Context,
 			ec *executionContext,
-			rawArgs map[string]interface{},
+			rawArgs map[string]any,
 		) ({{ $arg.TypeReference.GO | ref}}, error) {
 		{{- else -}}
 		func (ec *executionContext) {{ $name }}{{$arg.Name | go}}(
 			ctx context.Context,
-			rawArgs map[string]interface{},
+			rawArgs map[string]any,
 		) ({{ $arg.TypeReference.GO | ref}}, error) {
 		{{- end }}
 			{{- if not .CallArgumentDirectivesWithNull}}
@@ -48,7 +48,7 @@ func (ec *executionContext) {{ $name }}(ctx context.Context, rawArgs map[string]
 			{{end}}
 			ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField({{$arg.Name|quote}}))
 			{{- if $arg.ImplDirectives }}
-				directive0 := func(ctx context.Context) (interface{}, error) {
+				directive0 := func(ctx context.Context) (any, error) {
 					tmp, ok := rawArgs[{{$arg.Name|quote}}]
 					if !ok {
 						var zeroVal {{ $arg.TypeReference.GO | ref}}

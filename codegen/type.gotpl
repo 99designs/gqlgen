@@ -2,9 +2,9 @@
 {{- range $type := .ReferencedTypes }}
 	{{ with $type.UnmarshalFunc }}
 		{{ if $useFunctionSyntaxForExecutionContext -}}
-		func {{ . }}(ctx context.Context, ec *executionContext, v interface{}) ({{ $type.GO | ref }}, error) {
+		func {{ . }}(ctx context.Context, ec *executionContext, v any) ({{ $type.GO | ref }}, error) {
 		{{- else -}}
-		func (ec *executionContext) {{ . }}(ctx context.Context, v interface{}) ({{ $type.GO | ref }}, error) {
+		func (ec *executionContext) {{ . }}(ctx context.Context, v any) ({{ $type.GO | ref }}, error) {
 		{{- end -}}
 			{{- if and $type.IsNilable (not $type.GQL.NonNull) (not $type.IsPtrToPtr) }}
 				if v == nil { return nil, nil }
@@ -17,7 +17,7 @@
 				{{- end }}
 				return &res, graphql.ErrorOnPath(ctx, err)
 			{{- else if $type.IsSlice }}
-				var vSlice []interface{}
+				var vSlice []any
 				if v != nil {
 					vSlice = graphql.CoerceList(v)
 				}

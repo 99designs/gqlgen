@@ -135,7 +135,7 @@ func TestReferencedPackages(t *testing.T) {
 			"Foo": {Model: StringList{"github.com/test.Foo"}},
 			"Bar": {Model: StringList{"github.com/test.Bar"}},
 			"Baz": {Model: StringList{"github.com/otherpkg.Baz"}},
-			"Map": {Model: StringList{"map[string]interface{}"}},
+			"Map": {Model: StringList{"map[string]any"}},
 			"SkipResolver": {
 				Fields: map[string]TypeMapField{
 					"field": {Resolver: false},

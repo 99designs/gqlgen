@@ -7,17 +7,17 @@
 	  {{- $it = "&it" }}
 	{{- end }}
 	{{ if $useFunctionSyntaxForExecutionContext -}}
-	func unmarshalInput{{ .Name }}(ctx context.Context, ec *executionContext, obj interface{}) ({{ if .PointersInUnmarshalInput }}*{{ end }}{{.Type | ref}}, error) {
+	func unmarshalInput{{ .Name }}(ctx context.Context, ec *executionContext, obj any) ({{ if .PointersInUnmarshalInput }}*{{ end }}{{.Type | ref}}, error) {
 	{{- else -}}
-	func (ec *executionContext) unmarshalInput{{ .Name }}(ctx context.Context, obj interface{}) ({{ if .PointersInUnmarshalInput }}*{{ end }}{{.Type | ref}}, error) {
+	func (ec *executionContext) unmarshalInput{{ .Name }}(ctx context.Context, obj any) ({{ if .PointersInUnmarshalInput }}*{{ end }}{{.Type | ref}}, error) {
 	{{- end }}
 		{{- if $input.IsMap }}
-			it := make(map[string]interface{}, len(obj.(map[string]interface{})))
+			it := make(map[string]any, len(obj.(map[string]any)))
 		{{- else }}
 			var it {{.Type | ref}}
 		{{- end }}
-		asMap := map[string]interface{}{}
-		for k, v := range obj.(map[string]interface{}) {
+		asMap := map[string]any{}
+		for k, v := range obj.(map[string]any) {
 			asMap[k] = v
 		}
 		{{ range $field := .Fields}}
@@ -44,9 +44,9 @@
 				ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField({{$field.Name|quote}}))
 				{{- if $field.ImplDirectives }}
 					{{ if $useFunctionSyntaxForExecutionContext -}}
-					directive0 := func(ctx context.Context) (interface{}, error) { return {{ $field.TypeReference.UnmarshalFunc }}(ctx, ec, v) }
+					directive0 := func(ctx context.Context) (any, error) { return {{ $field.TypeReference.UnmarshalFunc }}(ctx, ec, v) }
 					{{- else -}}
-					directive0 := func(ctx context.Context) (interface{}, error) { return ec.{{ $field.TypeReference.UnmarshalFunc }}(ctx, v) }
+					directive0 := func(ctx context.Context) (any, error) { return ec.{{ $field.TypeReference.UnmarshalFunc }}(ctx, v) }
 					{{- end }}
 					{{ template "implDirectives" (dict "Field" $field "UseFunctionSyntaxForExecutionContext" $useFunctionSyntaxForExecutionContext) }}
 					tmp, err := directive{{$field.ImplDirectives|len}}(ctx)

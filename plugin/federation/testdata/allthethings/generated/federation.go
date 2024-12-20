@@ -37,7 +37,7 @@ func (ec *executionContext) __resolve__service(ctx context.Context) (fedruntime.
 	}, nil
 }
 
-func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]interface{}) []fedruntime.Entity {
+func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]any) []fedruntime.Entity {
 	list := make([]fedruntime.Entity, len(representations))
 
 	repsMap := ec.buildRepresentationGroups(ctx, representations)
@@ -206,7 +206,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findNestedKeyByIDAndHelloName(): %w`, err)
 			}
-			id1, err := ec.unmarshalNString2string(ctx, rep["hello"].(map[string]interface{})["name"])
+			id1, err := ec.unmarshalNString2string(ctx, rep["hello"].(map[string]any)["name"])
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 1 for findNestedKeyByIDAndHelloName(): %w`, err)
 			}
@@ -229,19 +229,19 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo(): %w`, err)
 			}
-			id1, err := ec.unmarshalNString2string(ctx, rep["hello"].(map[string]interface{})["name"])
+			id1, err := ec.unmarshalNString2string(ctx, rep["hello"].(map[string]any)["name"])
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 1 for findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo(): %w`, err)
 			}
-			id2, err := ec.unmarshalNString2string(ctx, rep["world"].(map[string]interface{})["foo"])
+			id2, err := ec.unmarshalNString2string(ctx, rep["world"].(map[string]any)["foo"])
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 2 for findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo(): %w`, err)
 			}
-			id3, err := ec.unmarshalNInt2int(ctx, rep["world"].(map[string]interface{})["bar"])
+			id3, err := ec.unmarshalNInt2int(ctx, rep["world"].(map[string]any)["bar"])
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 3 for findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo(): %w`, err)
 			}
-			id4, err := ec.unmarshalNString2string(ctx, rep["more"].(map[string]interface{})["world"].(map[string]interface{})["foo"])
+			id4, err := ec.unmarshalNString2string(ctx, rep["more"].(map[string]any)["world"].(map[string]any)["foo"])
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 4 for findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo(): %w`, err)
 			}
@@ -254,7 +254,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, err
 			}
-			entity.Hello.Secondary, err = ec.unmarshalNString2string(ctx, rep["hello"].(map[string]interface{})["secondary"])
+			entity.Hello.Secondary, err = ec.unmarshalNString2string(ctx, rep["hello"].(map[string]any)["secondary"])
 			if err != nil {
 				return nil, err
 			}
@@ -382,7 +382,7 @@ func entityResolverNameForExternalExtension(ctx context.Context, rep EntityRepre
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -417,7 +417,7 @@ func entityResolverNameForHello(ctx context.Context, rep EntityRepresentation) (
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -452,7 +452,7 @@ func entityResolverNameForMultiHelloMultiKey(ctx context.Context, rep EntityRepr
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -479,7 +479,7 @@ func entityResolverNameForMultiHelloMultiKey(ctx context.Context, rep EntityRepr
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -514,7 +514,7 @@ func entityResolverNameForNestedKey(ctx context.Context, rep EntityRepresentatio
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -538,7 +538,7 @@ func entityResolverNameForNestedKey(ctx context.Context, rep EntityRepresentatio
 				fmt.Errorf("%w due to missing Key Field \"hello\" for NestedKey", ErrTypeNotFound))
 			break
 		}
-		if m, ok = val.(map[string]interface{}); !ok {
+		if m, ok = val.(map[string]any); !ok {
 			// nested field value is not a map[string]interface so don't use it
 			entityResolverErrs = append(entityResolverErrs,
 				fmt.Errorf("%w due to nested Key Field \"hello\" value not matching map[string]any for NestedKey", ErrTypeNotFound))
@@ -571,7 +571,7 @@ func entityResolverNameForVeryNestedKey(ctx context.Context, rep EntityRepresent
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -595,7 +595,7 @@ func entityResolverNameForVeryNestedKey(ctx context.Context, rep EntityRepresent
 				fmt.Errorf("%w due to missing Key Field \"hello\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
-		if m, ok = val.(map[string]interface{}); !ok {
+		if m, ok = val.(map[string]any); !ok {
 			// nested field value is not a map[string]interface so don't use it
 			entityResolverErrs = append(entityResolverErrs,
 				fmt.Errorf("%w due to nested Key Field \"hello\" value not matching map[string]any for VeryNestedKey", ErrTypeNotFound))
@@ -617,7 +617,7 @@ func entityResolverNameForVeryNestedKey(ctx context.Context, rep EntityRepresent
 				fmt.Errorf("%w due to missing Key Field \"world\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
-		if m, ok = val.(map[string]interface{}); !ok {
+		if m, ok = val.(map[string]any); !ok {
 			// nested field value is not a map[string]interface so don't use it
 			entityResolverErrs = append(entityResolverErrs,
 				fmt.Errorf("%w due to nested Key Field \"world\" value not matching map[string]any for VeryNestedKey", ErrTypeNotFound))
@@ -639,7 +639,7 @@ func entityResolverNameForVeryNestedKey(ctx context.Context, rep EntityRepresent
 				fmt.Errorf("%w due to missing Key Field \"world\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
-		if m, ok = val.(map[string]interface{}); !ok {
+		if m, ok = val.(map[string]any); !ok {
 			// nested field value is not a map[string]interface so don't use it
 			entityResolverErrs = append(entityResolverErrs,
 				fmt.Errorf("%w due to nested Key Field \"world\" value not matching map[string]any for VeryNestedKey", ErrTypeNotFound))
@@ -661,7 +661,7 @@ func entityResolverNameForVeryNestedKey(ctx context.Context, rep EntityRepresent
 				fmt.Errorf("%w due to missing Key Field \"more\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
-		if m, ok = val.(map[string]interface{}); !ok {
+		if m, ok = val.(map[string]any); !ok {
 			// nested field value is not a map[string]interface so don't use it
 			entityResolverErrs = append(entityResolverErrs,
 				fmt.Errorf("%w due to nested Key Field \"more\" value not matching map[string]any for VeryNestedKey", ErrTypeNotFound))
@@ -673,7 +673,7 @@ func entityResolverNameForVeryNestedKey(ctx context.Context, rep EntityRepresent
 				fmt.Errorf("%w due to missing Key Field \"world\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
-		if m, ok = val.(map[string]interface{}); !ok {
+		if m, ok = val.(map[string]any); !ok {
 			// nested field value is not a map[string]interface so don't use it
 			entityResolverErrs = append(entityResolverErrs,
 				fmt.Errorf("%w due to nested Key Field \"world\" value not matching map[string]any for VeryNestedKey", ErrTypeNotFound))
@@ -706,7 +706,7 @@ func entityResolverNameForWorld(ctx context.Context, rep EntityRepresentation) (
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val
@@ -733,7 +733,7 @@ func entityResolverNameForWorld(ctx context.Context, rep EntityRepresentation) (
 	for {
 		var (
 			m   EntityRepresentation
-			val interface{}
+			val any
 			ok  bool
 		)
 		_ = val

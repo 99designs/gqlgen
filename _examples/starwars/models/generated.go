@@ -73,7 +73,7 @@ func (e Episode) String() string {
 	return string(e)
 }
 
-func (e *Episode) UnmarshalGQL(v interface{}) error {
+func (e *Episode) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -114,7 +114,7 @@ func (e LengthUnit) String() string {
 	return string(e)
 }
 
-func (e *LengthUnit) UnmarshalGQL(v interface{}) error {
+func (e *LengthUnit) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")

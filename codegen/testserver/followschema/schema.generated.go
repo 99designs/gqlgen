@@ -34,7 +34,7 @@ type PetResolver interface {
 type QueryResolver interface {
 	InvalidIdentifier(ctx context.Context) (*invalid_packagename.InvalidIdentifier, error)
 	Collision(ctx context.Context) (*introspection1.It, error)
-	MapInput(ctx context.Context, input map[string]any) (*bool, error)
+	MapInput(ctx context.Context, input map[string]interface{}) (*bool, error)
 	Recursive(ctx context.Context, input *RecursiveInputSlice) (*bool, error)
 	NestedInputs(ctx context.Context, input [][]*OuterInput) (*bool, error)
 	NestedOutputs(ctx context.Context) ([][]*OuterObject, error)
@@ -75,8 +75,8 @@ type QueryResolver interface {
 	NotAnInterface(ctx context.Context) (BackedByInterface, error)
 	Dog(ctx context.Context) (*Dog, error)
 	Issue896a(ctx context.Context) ([]*CheckIssue896, error)
-	MapStringInterface(ctx context.Context, in map[string]any) (map[string]any, error)
-	MapNestedStringInterface(ctx context.Context, in *NestedMapInput) (map[string]any, error)
+	MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
+	MapNestedStringInterface(ctx context.Context, in *NestedMapInput) (map[string]interface{}, error)
 	ErrorBubble(ctx context.Context) (*Error, error)
 	ErrorBubbleList(ctx context.Context) ([]*Error, error)
 	ErrorList(ctx context.Context) ([]*Error, error)
@@ -971,13 +971,13 @@ func (ec *executionContext) field_Query_mapInput_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Query_mapInput_argsInput(
 	ctx context.Context,
 	rawArgs map[string]any,
-) (map[string]any, error) {
+) (map[string]interface{}, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
 	// even if the argument is null.
 	_, ok := rawArgs["input"]
 	if !ok {
-		var zeroVal map[string]any
+		var zeroVal map[string]interface{}
 		return zeroVal, nil
 	}
 
@@ -986,7 +986,7 @@ func (ec *executionContext) field_Query_mapInput_argsInput(
 		return ec.unmarshalOChanges2map(ctx, tmp)
 	}
 
-	var zeroVal map[string]any
+	var zeroVal map[string]interface{}
 	return zeroVal, nil
 }
 
@@ -1035,13 +1035,13 @@ func (ec *executionContext) field_Query_mapStringInterface_args(ctx context.Cont
 func (ec *executionContext) field_Query_mapStringInterface_argsIn(
 	ctx context.Context,
 	rawArgs map[string]any,
-) (map[string]any, error) {
+) (map[string]interface{}, error) {
 	// We won't call the directive if the argument is null.
 	// Set call_argument_directives_with_null to true to call directives
 	// even if the argument is null.
 	_, ok := rawArgs["in"]
 	if !ok {
-		var zeroVal map[string]any
+		var zeroVal map[string]interface{}
 		return zeroVal, nil
 	}
 
@@ -1050,7 +1050,7 @@ func (ec *executionContext) field_Query_mapStringInterface_argsIn(
 		return ec.unmarshalOMapStringInterfaceInput2map(ctx, tmp)
 	}
 
-	var zeroVal map[string]any
+	var zeroVal map[string]interface{}
 	return zeroVal, nil
 }
 
@@ -2274,7 +2274,7 @@ func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.C
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().MapInput(rctx, fc.Args["input"].(map[string]any))
+		return ec.resolvers.Query().MapInput(rctx, fc.Args["input"].(map[string]interface{}))
 	})
 
 	if resTmp == nil {
@@ -4375,13 +4375,13 @@ func (ec *executionContext) _Query_mapStringInterface(ctx context.Context, field
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().MapStringInterface(rctx, fc.Args["in"].(map[string]any))
+		return ec.resolvers.Query().MapStringInterface(rctx, fc.Args["in"].(map[string]interface{}))
 	})
 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(map[string]any)
+	res := resTmp.(map[string]interface{})
 	fc.Result = res
 	return ec.marshalOMapStringInterfaceType2map(ctx, field.Selections, res)
 }
@@ -4440,7 +4440,7 @@ func (ec *executionContext) _Query_mapNestedStringInterface(ctx context.Context,
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(map[string]any)
+	res := resTmp.(map[string]interface{})
 	fc.Result = res
 	return ec.marshalOMapStringInterfaceType2map(ctx, field.Selections, res)
 }
@@ -6562,7 +6562,7 @@ func (ec *executionContext) fieldContext_User_pets(ctx context.Context, field gr
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputChanges(ctx context.Context, obj any) (map[string]any, error) {
+func (ec *executionContext) unmarshalInputChanges(ctx context.Context, obj any) (map[string]interface{}, error) {
 	it := make(map[string]any, len(obj.(map[string]any)))
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
@@ -9048,7 +9048,7 @@ func (ec *executionContext) marshalOAutobind2ᚖgithubᚗcomᚋ99designsᚋgqlge
 	return ec._Autobind(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOChanges2map(ctx context.Context, v any) (map[string]any, error) {
+func (ec *executionContext) unmarshalOChanges2map(ctx context.Context, v any) (map[string]interface{}, error) {
 	if v == nil {
 		return nil, nil
 	}

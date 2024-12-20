@@ -63,11 +63,11 @@ func (b *Binder) FindTypeFromName(name string) (types.Type, error) {
 
 func (b *Binder) FindType(pkgName, typeName string) (types.Type, error) {
 	if pkgName == "" {
-		if typeName == "map[string]any" {
+		if typeName == "map[string]any" || typeName == "map[string]interface{}" {
 			return MapType, nil
 		}
 
-		if typeName == "any" {
+		if typeName == "any" || typeName == "interface{}" {
 			return InterfaceType, nil
 		}
 	}
@@ -103,11 +103,11 @@ func (b *Binder) DefaultUserObject(name string) (types.Type, error) {
 		return nil, fmt.Errorf("%s not found in typemap", name)
 	}
 
-	if models[0] == "map[string]any" {
+	if models[0] == "map[string]any" || models[0] == "map[string]interface{}" {
 		return MapType, nil
 	}
 
-	if models[0] == "any" {
+	if models[0] == "any" || models[0] == "interface{}" {
 		return InterfaceType, nil
 	}
 
@@ -126,7 +126,7 @@ func (b *Binder) DefaultUserObject(name string) (types.Type, error) {
 
 func (b *Binder) FindObject(pkgName, typeName string) (types.Object, error) {
 	if pkgName == "" {
-		return nil, errors.New("package cannot be nil")
+		return nil, fmt.Errorf("package cannot be nil in FindObject for type: %s", typeName)
 	}
 
 	pkg := b.pkgs.LoadWithTypes(pkgName)
@@ -398,7 +398,7 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 	}
 
 	for _, model := range b.cfg.Models[schemaType.Name()].Model {
-		if model == "map[string]any" {
+		if model == "map[string]any" || model == "map[string]interface{}" {
 			if !isMap(bindTarget) {
 				continue
 			}
@@ -410,7 +410,7 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 			}, nil
 		}
 
-		if model == "any" {
+		if model == "any" || model == "interface{}" {
 			if !isIntf(bindTarget) {
 				continue
 			}

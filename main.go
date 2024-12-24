@@ -4,6 +4,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	_ "embed"
 	"errors"
 	"fmt"
@@ -14,7 +15,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v3"
 
 	"github.com/99designs/gqlgen/api"
 	"github.com/99designs/gqlgen/codegen/config"
@@ -92,10 +93,10 @@ var initCmd = &cli.Command{
 			Value: "graph/schema.graphqls",
 		},
 	},
-	Action: func(ctx *cli.Context) error {
-		configFilename := ctx.String("config")
-		serverFilename := ctx.String("server")
-		schemaFilename := ctx.String("schema")
+	Action: func(ctx context.Context, cmd *cli.Command) error {
+		configFilename := cmd.String("config")
+		serverFilename := cmd.String("server")
+		schemaFilename := cmd.String("schema")
 
 		cwd, err := os.Getwd()
 		if err != nil {
@@ -168,10 +169,10 @@ var generateCmd = &cli.Command{
 		&cli.BoolFlag{Name: "verbose, v", Usage: "show logs"},
 		&cli.StringFlag{Name: "config, c", Usage: "the config filename"},
 	},
-	Action: func(ctx *cli.Context) error {
+	Action: func(ctx context.Context, cmd *cli.Command) error {
 		var cfg *config.Config
 		var err error
-		if configFilename := ctx.String("config"); configFilename != "" {
+		if configFilename := cmd.String("config"); configFilename != "" {
 			cfg, err = config.LoadConfig(configFilename)
 			if err != nil {
 				return err
@@ -194,27 +195,27 @@ var generateCmd = &cli.Command{
 var versionCmd = &cli.Command{
 	Name:  "version",
 	Usage: "print the version string",
-	Action: func(ctx *cli.Context) error {
+	Action: func(ctx context.Context, cmd *cli.Command) error {
 		fmt.Println(graphql.Version)
 		return nil
 	},
 }
 
 func main() {
-	app := cli.NewApp()
+	app := cli.Command{}
 	app.Name = "gqlgen"
 	app.Usage = generateCmd.Usage
 	app.Description = "This is a library for quickly creating strictly typed graphql servers in golang. See https://gqlgen.com/ for a getting started guide."
 	app.HideVersion = true
 	app.Flags = generateCmd.Flags
 	app.Version = graphql.Version
-	app.Before = func(context *cli.Context) error {
-		if context.Bool("verbose") {
+	app.Before = func(ctx context.Context, cmd *cli.Command) (context.Context, error) {
+		if cmd.Bool("verbose") {
 			log.SetFlags(0)
 		} else {
 			log.SetOutput(io.Discard)
 		}
-		return nil
+		return ctx, nil
 	}
 
 	app.Action = generateCmd.Action
@@ -224,7 +225,7 @@ func main() {
 		versionCmd,
 	}
 
-	if err := app.Run(os.Args); err != nil {
+	if err := app.Run(context.Background(), os.Args); err != nil {
 		fmt.Fprint(os.Stderr, err.Error()+"\n")
 		os.Exit(1)
 	}

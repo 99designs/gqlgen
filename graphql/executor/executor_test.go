@@ -181,7 +181,14 @@ func TestExecutorDisableSuggestion(t *testing.T) {
 		exec.SetDisableSuggestion(true)
 		resp := query(exec, "", "{nam}")
 		assert.Equal(t, "", string(resp.Data))
+		assert.Equal(t, len(resp.Errors), 1)
 		assert.Equal(t, "input:1: Cannot query field \"nam\" on type \"Query\".\n", resp.Errors.Error())
+
+		// check if the error message is displayed correctly even if an error occurs multiple times
+		resp = query(exec, "", "{nam}")
+		assert.Equal(t, "", string(resp.Data))
+		assert.Equal(t, "input:1: Cannot query field \"nam\" on type \"Query\".\n", resp.Errors.Error())
+		assert.Equal(t, len(resp.Errors), 1)
 	})
 }
 

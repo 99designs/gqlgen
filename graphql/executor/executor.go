@@ -227,6 +227,8 @@ func (e *Executor) parseQuery(
 		validator.RemoveRule("FieldsOnCorrectType")
 
 		rule := rules.FieldsOnCorrectTypeRuleWithoutSuggestions
+		// remove the rule added when it was last executed
+		validator.RemoveRule(rule.Name)
 		validator.AddRule(rule.Name, rule.RuleFunc)
 	}
 

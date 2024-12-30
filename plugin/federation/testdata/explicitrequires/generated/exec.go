@@ -357,11 +357,7 @@ func (ec *executionContext) field_Entity_findHelloByName_argsName(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["name"]
-	if !ok {
+	if _, ok := rawArgs["name"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -394,11 +390,7 @@ func (ec *executionContext) field_Entity_findHelloMultiSingleKeysByKey1AndKey2_a
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["key1"]
-	if !ok {
+	if _, ok := rawArgs["key1"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -416,11 +408,7 @@ func (ec *executionContext) field_Entity_findHelloMultiSingleKeysByKey1AndKey2_a
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["key2"]
-	if !ok {
+	if _, ok := rawArgs["key2"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -448,11 +436,7 @@ func (ec *executionContext) field_Entity_findHelloWithErrorsByName_argsName(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["name"]
-	if !ok {
+	if _, ok := rawArgs["name"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -480,11 +464,7 @@ func (ec *executionContext) field_Entity_findManyMultiHelloByNames_argsReps(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) ([]*MultiHelloByNamesInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["reps"]
-	if !ok {
+	if _, ok := rawArgs["reps"]; !ok {
 		var zeroVal []*MultiHelloByNamesInput
 		return zeroVal, nil
 	}
@@ -512,11 +492,7 @@ func (ec *executionContext) field_Entity_findManyMultiHelloMultipleRequiresByNam
 	ctx context.Context,
 	rawArgs map[string]any,
 ) ([]*MultiHelloMultipleRequiresByNamesInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["reps"]
-	if !ok {
+	if _, ok := rawArgs["reps"]; !ok {
 		var zeroVal []*MultiHelloMultipleRequiresByNamesInput
 		return zeroVal, nil
 	}
@@ -544,11 +520,7 @@ func (ec *executionContext) field_Entity_findManyMultiHelloRequiresByNames_argsR
 	ctx context.Context,
 	rawArgs map[string]any,
 ) ([]*MultiHelloRequiresByNamesInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["reps"]
-	if !ok {
+	if _, ok := rawArgs["reps"]; !ok {
 		var zeroVal []*MultiHelloRequiresByNamesInput
 		return zeroVal, nil
 	}
@@ -576,11 +548,7 @@ func (ec *executionContext) field_Entity_findManyMultiHelloWithErrorByNames_args
 	ctx context.Context,
 	rawArgs map[string]any,
 ) ([]*MultiHelloWithErrorByNamesInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["reps"]
-	if !ok {
+	if _, ok := rawArgs["reps"]; !ok {
 		var zeroVal []*MultiHelloWithErrorByNamesInput
 		return zeroVal, nil
 	}
@@ -608,11 +576,7 @@ func (ec *executionContext) field_Entity_findManyMultiPlanetRequiresNestedByName
 	ctx context.Context,
 	rawArgs map[string]any,
 ) ([]*MultiPlanetRequiresNestedByNamesInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["reps"]
-	if !ok {
+	if _, ok := rawArgs["reps"]; !ok {
 		var zeroVal []*MultiPlanetRequiresNestedByNamesInput
 		return zeroVal, nil
 	}
@@ -640,11 +604,7 @@ func (ec *executionContext) field_Entity_findPersonByName_argsName(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["name"]
-	if !ok {
+	if _, ok := rawArgs["name"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -672,11 +632,7 @@ func (ec *executionContext) field_Entity_findPlanetMultipleRequiresByName_argsNa
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["name"]
-	if !ok {
+	if _, ok := rawArgs["name"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -704,11 +660,7 @@ func (ec *executionContext) field_Entity_findPlanetRequiresByName_argsName(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["name"]
-	if !ok {
+	if _, ok := rawArgs["name"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -736,11 +688,7 @@ func (ec *executionContext) field_Entity_findPlanetRequiresNestedByName_argsName
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["name"]
-	if !ok {
+	if _, ok := rawArgs["name"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -773,11 +721,7 @@ func (ec *executionContext) field_Entity_findWorldByHelloNameAndFoo_argsHelloNam
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["helloName"]
-	if !ok {
+	if _, ok := rawArgs["helloName"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -795,11 +739,7 @@ func (ec *executionContext) field_Entity_findWorldByHelloNameAndFoo_argsFoo(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["foo"]
-	if !ok {
+	if _, ok := rawArgs["foo"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -827,11 +767,7 @@ func (ec *executionContext) field_Entity_findWorldNameByName_argsName(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["name"]
-	if !ok {
+	if _, ok := rawArgs["name"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -859,11 +795,7 @@ func (ec *executionContext) field_Entity_findWorldWithMultipleKeysByBar_argsBar(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["bar"]
-	if !ok {
+	if _, ok := rawArgs["bar"]; !ok {
 		var zeroVal int
 		return zeroVal, nil
 	}
@@ -896,11 +828,7 @@ func (ec *executionContext) field_Entity_findWorldWithMultipleKeysByHelloNameAnd
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["helloName"]
-	if !ok {
+	if _, ok := rawArgs["helloName"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -918,11 +846,7 @@ func (ec *executionContext) field_Entity_findWorldWithMultipleKeysByHelloNameAnd
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["foo"]
-	if !ok {
+	if _, ok := rawArgs["foo"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -950,11 +874,7 @@ func (ec *executionContext) field_Query___type_argsName(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["name"]
-	if !ok {
+	if _, ok := rawArgs["name"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -982,11 +902,7 @@ func (ec *executionContext) field_Query__entities_argsRepresentations(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) ([]map[string]any, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["representations"]
-	if !ok {
+	if _, ok := rawArgs["representations"]; !ok {
 		var zeroVal []map[string]any
 		return zeroVal, nil
 	}
@@ -1014,11 +930,7 @@ func (ec *executionContext) field___Type_enumValues_argsIncludeDeprecated(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["includeDeprecated"]
-	if !ok {
+	if _, ok := rawArgs["includeDeprecated"]; !ok {
 		var zeroVal bool
 		return zeroVal, nil
 	}
@@ -1046,11 +958,7 @@ func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["includeDeprecated"]
-	if !ok {
+	if _, ok := rawArgs["includeDeprecated"]; !ok {
 		var zeroVal bool
 		return zeroVal, nil
 	}

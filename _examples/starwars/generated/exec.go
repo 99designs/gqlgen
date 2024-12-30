@@ -776,11 +776,7 @@ func (ec *executionContext) field_Droid_friendsConnection_argsFirst(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -798,11 +794,7 @@ func (ec *executionContext) field_Droid_friendsConnection_argsAfter(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -835,11 +827,7 @@ func (ec *executionContext) field_Human_friendsConnection_argsFirst(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["first"]
-	if !ok {
+	if _, ok := rawArgs["first"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -857,11 +845,7 @@ func (ec *executionContext) field_Human_friendsConnection_argsAfter(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["after"]
-	if !ok {
+	if _, ok := rawArgs["after"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -889,11 +873,7 @@ func (ec *executionContext) field_Human_height_argsUnit(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (models.LengthUnit, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["unit"]
-	if !ok {
+	if _, ok := rawArgs["unit"]; !ok {
 		var zeroVal models.LengthUnit
 		return zeroVal, nil
 	}
@@ -926,11 +906,7 @@ func (ec *executionContext) field_Mutation_createReview_argsEpisode(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (models.Episode, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["episode"]
-	if !ok {
+	if _, ok := rawArgs["episode"]; !ok {
 		var zeroVal models.Episode
 		return zeroVal, nil
 	}
@@ -948,11 +924,7 @@ func (ec *executionContext) field_Mutation_createReview_argsReview(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (models.Review, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["review"]
-	if !ok {
+	if _, ok := rawArgs["review"]; !ok {
 		var zeroVal models.Review
 		return zeroVal, nil
 	}
@@ -980,11 +952,7 @@ func (ec *executionContext) field_Query___type_argsName(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["name"]
-	if !ok {
+	if _, ok := rawArgs["name"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -1012,11 +980,7 @@ func (ec *executionContext) field_Query_character_argsID(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["id"]
-	if !ok {
+	if _, ok := rawArgs["id"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -1044,11 +1008,7 @@ func (ec *executionContext) field_Query_droid_argsID(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["id"]
-	if !ok {
+	if _, ok := rawArgs["id"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -1076,11 +1036,7 @@ func (ec *executionContext) field_Query_hero_argsEpisode(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*models.Episode, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["episode"]
-	if !ok {
+	if _, ok := rawArgs["episode"]; !ok {
 		var zeroVal *models.Episode
 		return zeroVal, nil
 	}
@@ -1108,11 +1064,7 @@ func (ec *executionContext) field_Query_human_argsID(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["id"]
-	if !ok {
+	if _, ok := rawArgs["id"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -1145,11 +1097,7 @@ func (ec *executionContext) field_Query_reviews_argsEpisode(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (models.Episode, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["episode"]
-	if !ok {
+	if _, ok := rawArgs["episode"]; !ok {
 		var zeroVal models.Episode
 		return zeroVal, nil
 	}
@@ -1167,11 +1115,7 @@ func (ec *executionContext) field_Query_reviews_argsSince(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*time.Time, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["since"]
-	if !ok {
+	if _, ok := rawArgs["since"]; !ok {
 		var zeroVal *time.Time
 		return zeroVal, nil
 	}
@@ -1199,11 +1143,7 @@ func (ec *executionContext) field_Query_search_argsText(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["text"]
-	if !ok {
+	if _, ok := rawArgs["text"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -1231,11 +1171,7 @@ func (ec *executionContext) field_Query_starship_argsID(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["id"]
-	if !ok {
+	if _, ok := rawArgs["id"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -1263,11 +1199,7 @@ func (ec *executionContext) field_Starship_length_argsUnit(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*models.LengthUnit, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["unit"]
-	if !ok {
+	if _, ok := rawArgs["unit"]; !ok {
 		var zeroVal *models.LengthUnit
 		return zeroVal, nil
 	}
@@ -1295,11 +1227,7 @@ func (ec *executionContext) field___Type_enumValues_argsIncludeDeprecated(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["includeDeprecated"]
-	if !ok {
+	if _, ok := rawArgs["includeDeprecated"]; !ok {
 		var zeroVal bool
 		return zeroVal, nil
 	}
@@ -1327,11 +1255,7 @@ func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["includeDeprecated"]
-	if !ok {
+	if _, ok := rawArgs["includeDeprecated"]; !ok {
 		var zeroVal bool
 		return zeroVal, nil
 	}

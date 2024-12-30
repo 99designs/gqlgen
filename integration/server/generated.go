@@ -379,11 +379,7 @@ func (ec *executionContext) dir_magic_argsKind(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["kind"]
-	if !ok {
+	if _, ok := rawArgs["kind"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -411,11 +407,7 @@ func (ec *executionContext) field_Query___type_argsName(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["name"]
-	if !ok {
+	if _, ok := rawArgs["name"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -443,11 +435,7 @@ func (ec *executionContext) field_Query_coercion_argsValue(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) ([]*models.ListCoercion, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["value"]
-	if !ok {
+	if _, ok := rawArgs["value"]; !ok {
 		var zeroVal []*models.ListCoercion
 		return zeroVal, nil
 	}
@@ -475,11 +463,7 @@ func (ec *executionContext) field_Query_complexity_argsValue(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["value"]
-	if !ok {
+	if _, ok := rawArgs["value"]; !ok {
 		var zeroVal int
 		return zeroVal, nil
 	}
@@ -507,11 +491,7 @@ func (ec *executionContext) field_Query_date_argsFilter(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (models.DateFilter, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["filter"]
-	if !ok {
+	if _, ok := rawArgs["filter"]; !ok {
 		var zeroVal models.DateFilter
 		return zeroVal, nil
 	}
@@ -539,11 +519,7 @@ func (ec *executionContext) field_Query_error_argsType(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*models.ErrorType, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["type"]
-	if !ok {
+	if _, ok := rawArgs["type"]; !ok {
 		var zeroVal *models.ErrorType
 		return zeroVal, nil
 	}
@@ -571,11 +547,7 @@ func (ec *executionContext) field___Type_enumValues_argsIncludeDeprecated(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["includeDeprecated"]
-	if !ok {
+	if _, ok := rawArgs["includeDeprecated"]; !ok {
 		var zeroVal bool
 		return zeroVal, nil
 	}
@@ -603,11 +575,7 @@ func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["includeDeprecated"]
-	if !ok {
+	if _, ok := rawArgs["includeDeprecated"]; !ok {
 		var zeroVal bool
 		return zeroVal, nil
 	}

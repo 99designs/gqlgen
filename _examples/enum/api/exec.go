@@ -467,11 +467,7 @@ func (ec *executionContext) field_Query___type_argsName(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["name"]
-	if !ok {
+	if _, ok := rawArgs["name"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -499,11 +495,7 @@ func (ec *executionContext) field_Query_boolTypedN_argsArg(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*model.BoolTyped, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
+	if _, ok := rawArgs["arg"]; !ok {
 		var zeroVal *model.BoolTyped
 		return zeroVal, nil
 	}
@@ -531,11 +523,7 @@ func (ec *executionContext) field_Query_boolTyped_argsArg(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (model.BoolTyped, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
+	if _, ok := rawArgs["arg"]; !ok {
 		var zeroVal model.BoolTyped
 		return zeroVal, nil
 	}
@@ -563,11 +551,7 @@ func (ec *executionContext) field_Query_boolUntypedN_argsArg(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
+	if _, ok := rawArgs["arg"]; !ok {
 		var zeroVal *bool
 		return zeroVal, nil
 	}
@@ -595,11 +579,7 @@ func (ec *executionContext) field_Query_boolUntyped_argsArg(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
+	if _, ok := rawArgs["arg"]; !ok {
 		var zeroVal bool
 		return zeroVal, nil
 	}
@@ -627,11 +607,7 @@ func (ec *executionContext) field_Query_inPackage_argsArg(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (InPackage, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
+	if _, ok := rawArgs["arg"]; !ok {
 		var zeroVal InPackage
 		return zeroVal, nil
 	}
@@ -659,11 +635,7 @@ func (ec *executionContext) field_Query_intTypedN_argsArg(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*model.IntTyped, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
+	if _, ok := rawArgs["arg"]; !ok {
 		var zeroVal *model.IntTyped
 		return zeroVal, nil
 	}
@@ -691,11 +663,7 @@ func (ec *executionContext) field_Query_intTyped_argsArg(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (model.IntTyped, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
+	if _, ok := rawArgs["arg"]; !ok {
 		var zeroVal model.IntTyped
 		return zeroVal, nil
 	}
@@ -723,11 +691,7 @@ func (ec *executionContext) field_Query_intUntypedN_argsArg(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
+	if _, ok := rawArgs["arg"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -755,11 +719,7 @@ func (ec *executionContext) field_Query_intUntyped_argsArg(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
+	if _, ok := rawArgs["arg"]; !ok {
 		var zeroVal int
 		return zeroVal, nil
 	}
@@ -787,11 +747,7 @@ func (ec *executionContext) field_Query_stringTypedN_argsArg(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*model.StringTyped, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
+	if _, ok := rawArgs["arg"]; !ok {
 		var zeroVal *model.StringTyped
 		return zeroVal, nil
 	}
@@ -819,11 +775,7 @@ func (ec *executionContext) field_Query_stringTyped_argsArg(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (model.StringTyped, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
+	if _, ok := rawArgs["arg"]; !ok {
 		var zeroVal model.StringTyped
 		return zeroVal, nil
 	}
@@ -851,11 +803,7 @@ func (ec *executionContext) field_Query_stringUntypedN_argsArg(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
+	if _, ok := rawArgs["arg"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -883,11 +831,7 @@ func (ec *executionContext) field_Query_stringUntyped_argsArg(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
+	if _, ok := rawArgs["arg"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -915,11 +859,7 @@ func (ec *executionContext) field_Query_varTyped_argsArg(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (model.VarTyped, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
+	if _, ok := rawArgs["arg"]; !ok {
 		var zeroVal model.VarTyped
 		return zeroVal, nil
 	}
@@ -947,11 +887,7 @@ func (ec *executionContext) field_Query_varUntyped_argsArg(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["arg"]
-	if !ok {
+	if _, ok := rawArgs["arg"]; !ok {
 		var zeroVal bool
 		return zeroVal, nil
 	}
@@ -979,11 +915,7 @@ func (ec *executionContext) field___Type_enumValues_argsIncludeDeprecated(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["includeDeprecated"]
-	if !ok {
+	if _, ok := rawArgs["includeDeprecated"]; !ok {
 		var zeroVal bool
 		return zeroVal, nil
 	}
@@ -1011,11 +943,7 @@ func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["includeDeprecated"]
-	if !ok {
+	if _, ok := rawArgs["includeDeprecated"]; !ok {
 		var zeroVal bool
 		return zeroVal, nil
 	}

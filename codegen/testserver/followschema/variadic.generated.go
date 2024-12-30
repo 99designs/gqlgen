@@ -32,11 +32,7 @@ func (ec *executionContext) field_VariadicModel_value_argsRank(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["rank"]
-	if !ok {
+	if _, ok := rawArgs["rank"]; !ok {
 		var zeroVal int
 		return zeroVal, nil
 	}

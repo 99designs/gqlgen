@@ -38,11 +38,7 @@ func (ec *executionContext) field_Panics_argUnmarshal_argsU(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) ([]MarshalPanic, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["u"]
-	if !ok {
+	if _, ok := rawArgs["u"]; !ok {
 		var zeroVal []MarshalPanic
 		return zeroVal, nil
 	}
@@ -70,11 +66,7 @@ func (ec *executionContext) field_Panics_fieldFuncMarshal_argsU(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) ([]MarshalPanic, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["u"]
-	if !ok {
+	if _, ok := rawArgs["u"]; !ok {
 		var zeroVal []MarshalPanic
 		return zeroVal, nil
 	}

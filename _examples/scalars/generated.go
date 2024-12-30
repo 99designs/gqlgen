@@ -355,11 +355,7 @@ func (ec *executionContext) field_Query___type_argsName(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["name"]
-	if !ok {
+	if _, ok := rawArgs["name"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -387,11 +383,7 @@ func (ec *executionContext) field_Query_search_argsInput(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*model.SearchArgs, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["input"]
-	if !ok {
+	if _, ok := rawArgs["input"]; !ok {
 		var zeroVal *model.SearchArgs
 		return zeroVal, nil
 	}
@@ -424,11 +416,7 @@ func (ec *executionContext) field_Query_userByTier_argsTier(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (model.Tier, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["tier"]
-	if !ok {
+	if _, ok := rawArgs["tier"]; !ok {
 		var zeroVal model.Tier
 		return zeroVal, nil
 	}
@@ -446,11 +434,7 @@ func (ec *executionContext) field_Query_userByTier_argsDarkMode(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*model.Prefs, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["darkMode"]
-	if !ok {
+	if _, ok := rawArgs["darkMode"]; !ok {
 		var zeroVal *model.Prefs
 		return zeroVal, nil
 	}
@@ -478,11 +462,7 @@ func (ec *executionContext) field_Query_user_argsID(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (external.ObjectID, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["id"]
-	if !ok {
+	if _, ok := rawArgs["id"]; !ok {
 		var zeroVal external.ObjectID
 		return zeroVal, nil
 	}
@@ -510,11 +490,7 @@ func (ec *executionContext) field___Type_enumValues_argsIncludeDeprecated(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["includeDeprecated"]
-	if !ok {
+	if _, ok := rawArgs["includeDeprecated"]; !ok {
 		var zeroVal bool
 		return zeroVal, nil
 	}
@@ -542,11 +518,7 @@ func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["includeDeprecated"]
-	if !ok {
+	if _, ok := rawArgs["includeDeprecated"]; !ok {
 		var zeroVal bool
 		return zeroVal, nil
 	}

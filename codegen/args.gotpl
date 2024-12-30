@@ -37,11 +37,12 @@ func (ec *executionContext) {{ $name }}(ctx context.Context, rawArgs map[string]
 		) ({{ $arg.TypeReference.GO | ref}}, error) {
 		{{- end }}
 			{{- if not .CallArgumentDirectivesWithNull}}
-				// We won't call the directive if the argument is null.
-				// Set call_argument_directives_with_null to true to call directives
-				// even if the argument is null.
-				_, ok := rawArgs[{{$arg.Name|quote}}]
-				if !ok {
+				{{- /*
+				We won't call the directive if the argument is null.
+				Set call_argument_directives_with_null to true to call directives
+				even if the argument is null.
+				*/ -}}
+				if _, ok := rawArgs[{{$arg.Name|quote}}]; !ok {
 					var zeroVal {{ $arg.TypeReference.GO | ref}}
 					return zeroVal, nil
 				}

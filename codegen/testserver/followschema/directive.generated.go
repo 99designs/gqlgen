@@ -43,11 +43,7 @@ func (ec *executionContext) dir_length_argsMin(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["min"]
-	if !ok {
+	if _, ok := rawArgs["min"]; !ok {
 		var zeroVal int
 		return zeroVal, nil
 	}
@@ -65,11 +61,7 @@ func (ec *executionContext) dir_length_argsMax(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["max"]
-	if !ok {
+	if _, ok := rawArgs["max"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -87,11 +79,7 @@ func (ec *executionContext) dir_length_argsMessage(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["message"]
-	if !ok {
+	if _, ok := rawArgs["message"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}
@@ -119,11 +107,7 @@ func (ec *executionContext) dir_logged_argsID(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["id"]
-	if !ok {
+	if _, ok := rawArgs["id"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -151,11 +135,7 @@ func (ec *executionContext) dir_order1_argsLocation(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["location"]
-	if !ok {
+	if _, ok := rawArgs["location"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -183,11 +163,7 @@ func (ec *executionContext) dir_order2_argsLocation(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["location"]
-	if !ok {
+	if _, ok := rawArgs["location"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -215,11 +191,7 @@ func (ec *executionContext) dir_populate_argsValue(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["value"]
-	if !ok {
+	if _, ok := rawArgs["value"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -252,11 +224,7 @@ func (ec *executionContext) dir_range_argsMin(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["min"]
-	if !ok {
+	if _, ok := rawArgs["min"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -274,11 +242,7 @@ func (ec *executionContext) dir_range_argsMax(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["max"]
-	if !ok {
+	if _, ok := rawArgs["max"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}

@@ -40,11 +40,7 @@ func (ec *executionContext) field_Mutation_defaultInput_argsInput(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (DefaultInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["input"]
-	if !ok {
+	if _, ok := rawArgs["input"]; !ok {
 		var zeroVal DefaultInput
 		return zeroVal, nil
 	}
@@ -72,11 +68,7 @@ func (ec *executionContext) field_Mutation_overrideValueViaInput_argsInput(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (FieldsOrderInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["input"]
-	if !ok {
+	if _, ok := rawArgs["input"]; !ok {
 		var zeroVal FieldsOrderInput
 		return zeroVal, nil
 	}
@@ -104,11 +96,7 @@ func (ec *executionContext) field_Mutation_updatePtrToPtr_argsInput(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (UpdatePtrToPtrOuter, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["input"]
-	if !ok {
+	if _, ok := rawArgs["input"]; !ok {
 		var zeroVal UpdatePtrToPtrOuter
 		return zeroVal, nil
 	}
@@ -136,11 +124,7 @@ func (ec *executionContext) field_Mutation_updateSomething_argsInput(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (SpecialInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["input"]
-	if !ok {
+	if _, ok := rawArgs["input"]; !ok {
 		var zeroVal SpecialInput
 		return zeroVal, nil
 	}

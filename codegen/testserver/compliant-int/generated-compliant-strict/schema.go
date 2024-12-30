@@ -286,11 +286,7 @@ func (ec *executionContext) field_Query___type_argsName(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["name"]
-	if !ok {
+	if _, ok := rawArgs["name"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -318,11 +314,7 @@ func (ec *executionContext) field_Query_echoInt64InputToInt64Object_argsInput(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (Input64, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["input"]
-	if !ok {
+	if _, ok := rawArgs["input"]; !ok {
 		var zeroVal Input64
 		return zeroVal, nil
 	}
@@ -350,11 +342,7 @@ func (ec *executionContext) field_Query_echoInt64ToInt64_argsN(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*int, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["n"]
-	if !ok {
+	if _, ok := rawArgs["n"]; !ok {
 		var zeroVal *int
 		return zeroVal, nil
 	}
@@ -382,11 +370,7 @@ func (ec *executionContext) field_Query_echoIntInputToIntObject_argsInput(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (Input, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["input"]
-	if !ok {
+	if _, ok := rawArgs["input"]; !ok {
 		var zeroVal Input
 		return zeroVal, nil
 	}
@@ -414,11 +398,7 @@ func (ec *executionContext) field_Query_echoIntToInt_argsN(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*int32, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["n"]
-	if !ok {
+	if _, ok := rawArgs["n"]; !ok {
 		var zeroVal *int32
 		return zeroVal, nil
 	}
@@ -446,11 +426,7 @@ func (ec *executionContext) field___Type_enumValues_argsIncludeDeprecated(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["includeDeprecated"]
-	if !ok {
+	if _, ok := rawArgs["includeDeprecated"]; !ok {
 		var zeroVal bool
 		return zeroVal, nil
 	}
@@ -478,11 +454,7 @@ func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["includeDeprecated"]
-	if !ok {
+	if _, ok := rawArgs["includeDeprecated"]; !ok {
 		var zeroVal bool
 		return zeroVal, nil
 	}

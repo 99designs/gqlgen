@@ -40,11 +40,7 @@ func (ec *executionContext) dir_defer_argsIf(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*bool, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["if"]
-	if !ok {
+	if _, ok := rawArgs["if"]; !ok {
 		var zeroVal *bool
 		return zeroVal, nil
 	}
@@ -62,11 +58,7 @@ func (ec *executionContext) dir_defer_argsLabel(
 	ctx context.Context,
 	rawArgs map[string]any,
 ) (*string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["label"]
-	if !ok {
+	if _, ok := rawArgs["label"]; !ok {
 		var zeroVal *string
 		return zeroVal, nil
 	}

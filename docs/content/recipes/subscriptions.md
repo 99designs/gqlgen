@@ -252,6 +252,18 @@ srv.AddTransport(transport.GET{})
 srv.AddTransport(transport.POST{})
 ```
 
+Optionally add `KeepAlivePingInterval` to send a periodic heartbeat over the SSE transport.
+```go
+srv.AddTransport(transport.SSE{
+	// Load balancers, proxies, or firewalls often have idle timeout
+	// settings that specify the maximum duration a connection can
+	// remain open without data being sent across it. If the idle
+	// timeout is exceeded without any data being transmitted, the
+	// connection may be closed.
+	KeepAlivePingInterval: 10 * time.Second,
+})
+```
+
 The GraphQL playground does not support SSE yet. You can try out the subscription via curl:
 
 ```bash

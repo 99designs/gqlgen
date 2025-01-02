@@ -1,6 +1,7 @@
 package transport
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,13 +9,25 @@ import (
 	"mime"
 	"net/http"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/99designs/gqlgen/graphql"
 )
 
-type SSE struct{}
+type (
+	SSE struct {
+		KeepAlivePingInterval time.Duration
+	}
+
+	sseConnection struct {
+		ctx             context.Context
+		mu              sync.Mutex
+		keepAliveTicker *time.Ticker
+	}
+)
 
 var _ graphql.Transport = SSE{}
 
@@ -80,6 +93,18 @@ func (t SSE) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 	fmt.Fprint(w, ":\n\n")
 	flusher.Flush()
 
+	c := &sseConnection{
+		ctx: ctx,
+	}
+
+	if t.KeepAlivePingInterval > 0 {
+		c.mu.Lock()
+		c.keepAliveTicker = time.NewTicker(t.KeepAlivePingInterval)
+		c.mu.Unlock()
+
+		go c.keepAlive(w, flusher)
+	}
+
 	if opErr != nil {
 		resp := exec.DispatchError(ctx, opErr)
 		writeJsonWithSSE(w, resp)
@@ -92,10 +117,33 @@ func (t SSE) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 			}
 			writeJsonWithSSE(w, response)
 			flusher.Flush()
+
+			c.resetTicker(t.KeepAlivePingInterval)
 		}
 	}
 
 	fmt.Fprint(w, "event: complete\n\n")
+}
+
+func (c *sseConnection) resetTicker(interval time.Duration) {
+	if interval != 0 {
+		c.mu.Lock()
+		c.keepAliveTicker.Reset(interval)
+		c.mu.Unlock()
+	}
+}
+
+func (c *sseConnection) keepAlive(w io.Writer, flusher http.Flusher) {
+	for {
+		select {
+		case <-c.ctx.Done():
+			c.keepAliveTicker.Stop()
+			return
+		case <-c.keepAliveTicker.C:
+			fmt.Fprintf(w, ": heartbeat\n\n")
+			flusher.Flush()
+		}
+	}
 }
 
 func writeJsonWithSSE(w io.Writer, response *graphql.Response) {

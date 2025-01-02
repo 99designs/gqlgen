@@ -19,13 +19,13 @@ import (
 
 type (
 	SSE struct {
-		HeartbeatInterval time.Duration
+		KeepAlivePingInterval time.Duration
 	}
 
 	sseConnection struct {
 		ctx             context.Context
 		mu              sync.Mutex
-		heartbeatTicker *time.Ticker
+		keepAliveTicker *time.Ticker
 	}
 )
 
@@ -97,9 +97,9 @@ func (t SSE) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 		ctx: ctx,
 	}
 
-	if t.HeartbeatInterval > 0 {
+	if t.KeepAlivePingInterval > 0 {
 		c.mu.Lock()
-		c.heartbeatTicker = time.NewTicker(t.HeartbeatInterval)
+		c.keepAliveTicker = time.NewTicker(t.KeepAlivePingInterval)
 		c.mu.Unlock()
 
 		go c.keepAlive(w, flusher)
@@ -118,7 +118,7 @@ func (t SSE) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 			writeJsonWithSSE(w, response)
 			flusher.Flush()
 
-			c.resetTicker(t.HeartbeatInterval)
+			c.resetTicker(t.KeepAlivePingInterval)
 		}
 	}
 
@@ -128,7 +128,7 @@ func (t SSE) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 func (c *sseConnection) resetTicker(interval time.Duration) {
 	if interval != 0 {
 		c.mu.Lock()
-		c.heartbeatTicker.Reset(interval)
+		c.keepAliveTicker.Reset(interval)
 		c.mu.Unlock()
 	}
 }
@@ -137,9 +137,9 @@ func (c *sseConnection) keepAlive(w io.Writer, flusher http.Flusher) {
 	for {
 		select {
 		case <-c.ctx.Done():
-			c.heartbeatTicker.Stop()
+			c.keepAliveTicker.Stop()
 			return
-		case <-c.heartbeatTicker.C:
+		case <-c.keepAliveTicker.C:
 			fmt.Fprintf(w, ": heartbeat\n\n")
 			flusher.Flush()
 		}

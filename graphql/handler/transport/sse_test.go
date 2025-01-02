@@ -16,7 +16,7 @@ import (
 )
 
 func TestSSE(t *testing.T) {
-	heartbeatInterval := time.Second * 1
+	pingInterval := time.Second * 1
 
 	initialize := func() *testserver.TestServer {
 		h := testserver.New()
@@ -32,7 +32,7 @@ func TestSSE(t *testing.T) {
 	initializeHeartbeatWithServer := func() (*testserver.TestServer, *httptest.Server) {
 		h := testserver.New()
 		h.AddTransport(transport.SSE{
-			HeartbeatInterval: heartbeatInterval,
+			KeepAlivePingInterval: pingInterval,
 		})
 		return h, httptest.NewServer(h)
 	}
@@ -166,7 +166,7 @@ func TestSSE(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			// Wait for heartbeat interval to trigger
-			time.Sleep(heartbeatInterval + time.Millisecond*500)
+			time.Sleep(pingInterval + time.Millisecond*500)
 		}()
 
 		client := &http.Client{}

@@ -22,6 +22,7 @@ type OperationContext struct {
 	Operation              *ast.OperationDefinition
 	DisableIntrospection   bool
 	RecoverFunc            RecoverFunc
+	SchedulerFunc          SchedulerFunc
 	ResolverMiddleware     FieldMiddleware
 	RootResolverMiddleware RootFieldMiddleware
 
@@ -46,6 +47,9 @@ func (c *OperationContext) Validate(ctx context.Context) error {
 	}
 	if c.RecoverFunc == nil {
 		c.RecoverFunc = DefaultRecover
+	}
+	if c.SchedulerFunc == nil {
+		c.SchedulerFunc = DefaultScheduler
 	}
 
 	return nil
@@ -122,4 +126,8 @@ func (c *OperationContext) Error(ctx context.Context, err error) {
 
 func (c *OperationContext) Recover(ctx context.Context, err any) error {
 	return ErrorOnPath(ctx, c.RecoverFunc(ctx, err))
+}
+
+func (c *OperationContext) Scheduler(ctx context.Context, n, limit int) Scheduler {
+	return c.SchedulerFunc(ctx, c, n, limit)
 }

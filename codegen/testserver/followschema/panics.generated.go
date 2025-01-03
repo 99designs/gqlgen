@@ -368,7 +368,7 @@ func (ec *executionContext) _Panics(ctx context.Context, sel ast.SelectionSet, o
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch(ctx)
+	out.Dispatch(ctx, ec.OperationContext)
 	if out.Invalids > 0 {
 		return graphql.Null
 	}

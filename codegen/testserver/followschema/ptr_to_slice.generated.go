@@ -93,7 +93,7 @@ func (ec *executionContext) _PtrToSliceContainer(ctx context.Context, sel ast.Se
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch(ctx)
+	out.Dispatch(ctx, ec.OperationContext)
 	if out.Invalids > 0 {
 		return graphql.Null
 	}

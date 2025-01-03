@@ -2261,7 +2261,7 @@ func (ec *executionContext) processDeferredGroup(dg graphql.DeferredGroup) {
 	atomic.AddInt32(&ec.pendingDeferred, 1)
 	go func() {
 		ctx := graphql.WithFreshResponseContext(dg.Context)
-		dg.FieldSet.Dispatch(ctx)
+		dg.FieldSet.Dispatch(ctx, ec.OperationContext)
 		ds := graphql.DeferredResult{
 			Path:   dg.Path,
 			Label:  dg.Label,

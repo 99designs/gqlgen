@@ -3,7 +3,6 @@ package graphql
 import (
 	"context"
 	"io"
-	"sync"
 )
 
 type FieldSet struct {
@@ -34,26 +33,14 @@ func (m *FieldSet) Concurrently(i int, f func(context.Context) Marshaler) {
 	m.delayed = append(m.delayed, delayedResult{i: i, f: f})
 }
 
-func (m *FieldSet) Dispatch(ctx context.Context) {
-	if len(m.delayed) == 1 {
-		// only one concurrent task, no need to spawn a goroutine or deal create waitgroups
-		d := m.delayed[0]
-		m.Values[d.i] = d.f(ctx)
-	} else if len(m.delayed) > 1 {
-		// more than one concurrent task, use the main goroutine to do one, only spawn goroutines for the others
-
-		var wg sync.WaitGroup
-		for _, d := range m.delayed[1:] {
-			wg.Add(1)
-			go func(d delayedResult) {
-				defer wg.Done()
-				m.Values[d.i] = d.f(ctx)
-			}(d)
-		}
-
-		m.Values[m.delayed[0].i] = m.delayed[0].f(ctx)
-		wg.Wait()
+func (m *FieldSet) Dispatch(ctx context.Context, oc *OperationContext) {
+	sched := oc.Scheduler(ctx, len(m.delayed), 0)
+	for _, d := range m.delayed {
+		d := d
+		f := func(gctx context.Context, i int) { m.Values[i] = d.f(gctx) }
+		sched.Go(f, d.i)
 	}
+	sched.Wait()
 }
 
 func (m *FieldSet) MarshalGQL(writer io.Writer) {

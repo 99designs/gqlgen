@@ -6,7 +6,6 @@ import (
 	"context"
 	"errors"
 	"strconv"
-	"sync"
 	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -94,7 +93,7 @@ func (ec *executionContext) _CheckIssue896(ctx context.Context, sel ast.Selectio
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch(ctx)
+	out.Dispatch(ctx, ec.OperationContext)
 	if out.Invalids > 0 {
 		return graphql.Null
 	}
@@ -132,38 +131,27 @@ func (ec *executionContext) marshalOCheckIssue8962ᚕᚖgithubᚗcomᚋ99designs
 		return graphql.Null
 	}
 	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
+	sched := ec.Scheduler(ctx, len(v), 0)
 	for i := range v {
 		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
+		f := func(fctx context.Context, i int) {
+			fc := &graphql.FieldContext{
+				Index:  &i,
+				Result: &v[i],
+			}
+			fctx = graphql.WithFieldContext(fctx, fc)
 			defer func() {
 				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
+					ec.Error(fctx, ec.Recover(fctx, r))
 					ret = nil
 				}
 			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOCheckIssue8962ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCheckIssue896(ctx, sel, v[i])
+			ret[i] = ec.marshalOCheckIssue8962ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCheckIssue896(fctx, sel, v[i])
 		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
+		sched.Go(f, i)
 
 	}
-	wg.Wait()
+	sched.Wait()
 
 	return ret
 }
@@ -173,38 +161,27 @@ func (ec *executionContext) marshalOCheckIssue8962ᚕᚖgithubᚗcomᚋ99designs
 		return graphql.Null
 	}
 	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
+	sched := ec.Scheduler(ctx, len(v), 0)
 	for i := range v {
 		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
+		f := func(fctx context.Context, i int) {
+			fc := &graphql.FieldContext{
+				Index:  &i,
+				Result: &v[i],
+			}
+			fctx = graphql.WithFieldContext(fctx, fc)
 			defer func() {
 				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
+					ec.Error(fctx, ec.Recover(fctx, r))
 					ret = nil
 				}
 			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNCheckIssue8962ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCheckIssue896(ctx, sel, v[i])
+			ret[i] = ec.marshalNCheckIssue8962ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCheckIssue896(fctx, sel, v[i])
 		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
+		sched.Go(f, i)
 
 	}
-	wg.Wait()
+	sched.Wait()
 
 	for _, e := range ret {
 		if e == graphql.Null {

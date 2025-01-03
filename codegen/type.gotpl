@@ -129,61 +129,32 @@
 				{{- end }}
 				ret := make(graphql.Array, len(v))
 				{{- if not $type.IsScalar }}
-					var wg sync.WaitGroup
-					{{- if gt $.Config.Exec.WorkerLimit 0 }}
-						sm := semaphore.NewWeighted({{ $.Config.Exec.WorkerLimit }})
-					{{- end }}
-					isLen1 := len(v) == 1
-					if !isLen1 {
-						wg.Add(len(v))
-					}
+					sched := ec.Scheduler(ctx, len(v), {{ $.Config.Exec.WorkerLimit }})
 				{{- end }}
 				for i := range v {
 					{{- if not $type.IsScalar }}
 						i := i
-						fc := &graphql.FieldContext{
-							Index: &i,
-							Result: &v[i],
-						}
-						ctx := graphql.WithFieldContext(ctx, fc)
-						f := func(i int) {
+						f := func(fctx context.Context, i int) {
+							fc := &graphql.FieldContext{
+								Index: &i,
+								Result: &v[i],
+							}
+							fctx = graphql.WithFieldContext(fctx, fc)
 							{{- if not $.Config.OmitPanicHandler }}
 							defer func() {
 								if r := recover(); r != nil {
-									ec.Error(ctx, ec.Recover(ctx, r))
+									ec.Error(fctx, ec.Recover(fctx, r))
 									ret = nil
 								}
 							}()
 							{{- end }}
-							if !isLen1 {
-								{{- if gt $.Config.Exec.WorkerLimit 0 }}
-									defer func(){
-										sm.Release(1)
-										wg.Done()
-									}()
-								{{- else }}
-									defer wg.Done()
-								{{- end }}
-							}
 							{{ if $useFunctionSyntaxForExecutionContext -}}
-							ret[i] = {{ $type.Elem.MarshalFunc }}(ctx, ec, sel, v[i])
+							ret[i] = {{ $type.Elem.MarshalFunc }}(fctx, ec, sel, v[i])
 							{{- else -}}
-							ret[i] = ec.{{ $type.Elem.MarshalFunc }}(ctx, sel, v[i])
+							ret[i] = ec.{{ $type.Elem.MarshalFunc }}(fctx, sel, v[i])
 							{{- end }}
 						}
-						if isLen1 {
-							f(i)
-						} else {
-							{{- if gt $.Config.Exec.WorkerLimit 0 }}
-								if err := sm.Acquire(ctx, 1); err != nil {
-									ec.Error(ctx, ctx.Err())
-								} else {
-									go f(i)
-								}
-							{{- else }}
-								go f(i)
-							{{- end }}
-						}
+						sched.Go(f, i)
 					{{ else }}
 						{{ if $useFunctionSyntaxForExecutionContext -}}
 						ret[i] = {{ $type.Elem.MarshalFunc }}(ctx, ec, sel, v[i])
@@ -192,7 +163,7 @@
 						{{- end }}
 					{{- end }}
 				}
-				{{ if not $type.IsScalar }} wg.Wait() {{ end }}
+				{{ if not $type.IsScalar }} sched.Wait() {{ end }}
 				{{ if $type.Elem.GQL.NonNull }}
 					for _, e := range ret {
 						if e == graphql.Null {
@@ -277,7 +248,6 @@
 			{{- end }}
 		}
 	{{- end }}
-
 	{{- if $type.HasEnumValues }}
 	{{- $enum := $type.GO }}
 	{{- if $type.IsNilable }}

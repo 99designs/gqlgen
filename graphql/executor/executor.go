@@ -23,6 +23,7 @@ type Executor struct {
 
 	errorPresenter graphql.ErrorPresenterFunc
 	recoverFunc    graphql.RecoverFunc
+	schedulerFunc  graphql.SchedulerFunc
 	queryCache     graphql.Cache[*ast.QueryDocument]
 
 	parserTokenLimit  int
@@ -38,6 +39,7 @@ func New(es graphql.ExecutableSchema) *Executor {
 		es:               es,
 		errorPresenter:   graphql.DefaultErrorPresenter,
 		recoverFunc:      graphql.DefaultRecover,
+		schedulerFunc:    graphql.DefaultScheduler,
 		queryCache:       graphql.NoCache[*ast.QueryDocument]{},
 		ext:              processExtensions(nil),
 		parserTokenLimit: parserTokenNoLimit,
@@ -52,6 +54,7 @@ func (e *Executor) CreateOperationContext(
 	opCtx := &graphql.OperationContext{
 		DisableIntrospection:   true,
 		RecoverFunc:            e.recoverFunc,
+		SchedulerFunc:          e.schedulerFunc,
 		ResolverMiddleware:     e.ext.fieldMiddleware,
 		RootResolverMiddleware: e.ext.rootFieldMiddleware,
 		Stats: graphql.Stats{
@@ -173,6 +176,10 @@ func (e *Executor) SetErrorPresenter(f graphql.ErrorPresenterFunc) {
 
 func (e *Executor) SetRecoverFunc(f graphql.RecoverFunc) {
 	e.recoverFunc = f
+}
+
+func (e *Executor) SetSchedulerFunc(f graphql.SchedulerFunc) {
+	e.schedulerFunc = f
 }
 
 func (e *Executor) SetParserTokenLimit(limit int) {

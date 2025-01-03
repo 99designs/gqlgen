@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"sync"
 	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -496,7 +495,7 @@ func (ec *executionContext) _Error(ctx context.Context, sel ast.SelectionSet, ob
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch(ctx)
+	out.Dispatch(ctx, ec.OperationContext)
 	if out.Invalids > 0 {
 		return graphql.Null
 	}
@@ -710,7 +709,7 @@ func (ec *executionContext) _Errors(ctx context.Context, sel ast.SelectionSet, o
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch(ctx)
+	out.Dispatch(ctx, ec.OperationContext)
 	if out.Invalids > 0 {
 		return graphql.Null
 	}
@@ -752,38 +751,27 @@ func (ec *executionContext) marshalOError2ᚕᚖgithubᚗcomᚋ99designsᚋgqlge
 		return graphql.Null
 	}
 	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
+	sched := ec.Scheduler(ctx, len(v), 0)
 	for i := range v {
 		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
+		f := func(fctx context.Context, i int) {
+			fc := &graphql.FieldContext{
+				Index:  &i,
+				Result: &v[i],
+			}
+			fctx = graphql.WithFieldContext(fctx, fc)
 			defer func() {
 				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
+					ec.Error(fctx, ec.Recover(fctx, r))
 					ret = nil
 				}
 			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError(ctx, sel, v[i])
+			ret[i] = ec.marshalOError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError(fctx, sel, v[i])
 		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
+		sched.Go(f, i)
 
 	}
-	wg.Wait()
+	sched.Wait()
 
 	return ret
 }
@@ -793,38 +781,27 @@ func (ec *executionContext) marshalOError2ᚕᚖgithubᚗcomᚋ99designsᚋgqlge
 		return graphql.Null
 	}
 	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
+	sched := ec.Scheduler(ctx, len(v), 0)
 	for i := range v {
 		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
+		f := func(fctx context.Context, i int) {
+			fc := &graphql.FieldContext{
+				Index:  &i,
+				Result: &v[i],
+			}
+			fctx = graphql.WithFieldContext(fctx, fc)
 			defer func() {
 				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
+					ec.Error(fctx, ec.Recover(fctx, r))
 					ret = nil
 				}
 			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError(ctx, sel, v[i])
+			ret[i] = ec.marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError(fctx, sel, v[i])
 		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
+		sched.Go(f, i)
 
 	}
-	wg.Wait()
+	sched.Wait()
 
 	for _, e := range ret {
 		if e == graphql.Null {

@@ -1,14 +1,14 @@
 {{/* Context object: codegen.Data */}}
-{{ reserveImport "context"  }}
-{{ reserveImport "fmt"  }}
-{{ reserveImport "io"  }}
-{{ reserveImport "strconv"  }}
-{{ reserveImport "time"  }}
-{{ reserveImport "sync"  }}
+{{ reserveImport "context" }}
+{{ reserveImport "fmt" }}
+{{ reserveImport "io" }}
+{{ reserveImport "strconv" }}
+{{ reserveImport "time" }}
+{{ reserveImport "sync" }}
 {{ reserveImport "sync/atomic" }}
-{{ reserveImport "errors"  }}
-{{ reserveImport "bytes"  }}
-{{ reserveImport "embed"  }}
+{{ reserveImport "errors" }}
+{{ reserveImport "bytes" }}
+{{ reserveImport "embed" }}
 
 {{ reserveImport "github.com/vektah/gqlparser/v2" "gqlparser" }}
 {{ reserveImport "github.com/vektah/gqlparser/v2/ast" }}
@@ -20,15 +20,15 @@
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 	return &executableSchema{
-		schema: cfg.Schema,
-		resolvers: cfg.Resolvers,
+		schema:     cfg.Schema,
+		resolvers:  cfg.Resolvers,
 		directives: cfg.Directives,
 		complexity: cfg.Complexity,
 	}
 }
 
 type Config struct {
-	Schema    *ast.Schema
+	Schema     *ast.Schema
 	Resolvers  ResolverRoot
 	Directives DirectiveRoot
 	Complexity ComplexityRoot
@@ -77,7 +77,7 @@ type ComplexityRoot struct {
 {{ end }}
 
 type executableSchema struct {
-	schema    *ast.Schema
+	schema     *ast.Schema
 	resolvers  ResolverRoot
 	directives DirectiveRoot
 	complexity ComplexityRoot
@@ -85,7 +85,7 @@ type executableSchema struct {
 
 func (e *executableSchema) Schema() *ast.Schema {
 	if e.schema != nil {
-			return e.schema
+		return e.schema
 	}
 	return parsedSchema
 }
@@ -217,7 +217,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			data.MarshalGQL(&buf)
 
 			return &graphql.Response{
-				Data:       buf.Bytes(),
+				Data: buf.Bytes(),
 			}
 		}
 	{{ end }}
@@ -251,7 +251,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			data.MarshalGQL(&buf)
 
 			return &graphql.Response{
-				Data:       buf.Bytes(),
+				Data: buf.Bytes(),
 			}
 		}
 	{{ end }}
@@ -272,7 +272,7 @@ func (ec *executionContext) processDeferredGroup(dg graphql.DeferredGroup) {
 	atomic.AddInt32(&ec.pendingDeferred, 1)
 	go func () {
 		ctx := graphql.WithFreshResponseContext(dg.Context)
-		dg.FieldSet.Dispatch(ctx)
+		dg.FieldSet.Dispatch(ctx, ec.OperationContext)
 		ds := graphql.DeferredResult{
 			Path:   dg.Path,
 			Label:  dg.Label,

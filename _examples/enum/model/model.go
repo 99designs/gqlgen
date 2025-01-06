@@ -6,7 +6,7 @@ import (
 )
 
 // this file is provided as an example for int-based enums
-// but if you instead wanted to support arbitrary 
+// but if you instead wanted to support arbitrary
 // english words for numbers to integers, consider
 // github.com/will-lol/numberconverter/etoi or a similar library
 type IntTyped int

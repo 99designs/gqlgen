@@ -279,7 +279,7 @@ func (ref *TypeReference) IsScalar() bool {
 }
 
 func (ref *TypeReference) IsMap() bool {
-	return ref.GO == MapType
+	return types.Unalias(ref.GO) == MapType
 }
 
 func (ref *TypeReference) UniquenessKey() string {

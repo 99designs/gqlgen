@@ -138,21 +138,21 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 	case b.Config.Models[obj.Name].Fields[f.Name].Resolver:
 		f.IsResolver = true
 		return nil
-	case obj.Type == config.MapType:
+	case types.Unalias(obj.Type) == config.MapType:
 		f.GoFieldType = GoFieldMap
 		return nil
 	case b.Config.Models[obj.Name].Fields[f.Name].FieldName != "":
 		f.GoFieldName = b.Config.Models[obj.Name].Fields[f.Name].FieldName
 	}
 
-	target, err := b.findBindTarget(obj.Type, f.GoFieldName)
+	target, err := b.findBindTarget(types.Unalias(obj.Type), f.GoFieldName)
 	if err != nil {
 		return err
 	}
 
 	pos := b.Binder.ObjectPosition(target)
 
-	switch target := target.(type) {
+	switch targetType := target.(type) {
 	case nil:
 		// Skips creating a resolver for any root types
 		if b.Config.IsRoot(b.Schema.Types[f.Type.Name()]) {
@@ -169,7 +169,7 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		)
 
 	case *types.Func:
-		sig := target.Type().(*types.Signature)
+		sig := targetType.Type().(*types.Signature)
 		if sig.Results().Len() == 1 {
 			f.NoErr = true
 		} else if s := sig.Results(); s.Len() == 2 && s.At(1).Type().String() == "bool" {
@@ -189,13 +189,13 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 			params = types.NewTuple(vars...)
 		}
 
-		// Try to match target function's arguments with GraphQL field arguments.
+		// Try to match targetType function's arguments with GraphQL field arguments.
 		newArgs, err := b.bindArgs(f, sig, params)
 		if err != nil {
 			return fmt.Errorf("%s:%d: %w", pos.Filename, pos.Line, err)
 		}
 
-		// Try to match target function's return types with GraphQL field return type
+		// Try to match targetType function's return types with GraphQL field return type
 		result := sig.Results().At(0)
 		tr, err := b.Binder.TypeReference(f.Type, result.Type())
 		if err != nil {
@@ -205,14 +205,14 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		// success, args and return type match. Bind to method
 		f.GoFieldType = GoFieldMethod
 		f.GoReceiverName = "obj"
-		f.GoFieldName = target.Name()
+		f.GoFieldName = targetType.Name()
 		f.Args = newArgs
 		f.TypeReference = tr
 
 		return nil
 
 	case *types.Var:
-		tr, err := b.Binder.TypeReference(f.Type, target.Type())
+		tr, err := b.Binder.TypeReference(f.Type, targetType.Type())
 		if err != nil {
 			return err
 		}
@@ -220,12 +220,12 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		// success, bind to var
 		f.GoFieldType = GoFieldVariable
 		f.GoReceiverName = "obj"
-		f.GoFieldName = target.Name()
+		f.GoFieldName = targetType.Name()
 		f.TypeReference = tr
 
 		return nil
 	default:
-		panic(fmt.Errorf("unknown bind target %T for %s", target, f.Name))
+		panic(fmt.Errorf("unknown bind targetType %T for %s", targetType, f.Name))
 	}
 }
 
@@ -275,7 +275,7 @@ func (b *builder) findBindStructTagTarget(in types.Type, name string) (types.Obj
 		return nil, nil
 	}
 
-	switch t := in.(type) {
+	switch t := types.Unalias(in).(type) {
 	case *types.Named:
 		return b.findBindStructTagTarget(t.Underlying(), name)
 	case *types.Struct:
@@ -302,7 +302,7 @@ func (b *builder) findBindStructTagTarget(in types.Type, name string) (types.Obj
 }
 
 func (b *builder) findBindMethodTarget(in types.Type, name string) (types.Object, error) {
-	switch t := in.(type) {
+	switch t := types.Unalias(in).(type) {
 	case *types.Named:
 		if _, ok := t.Underlying().(*types.Interface); ok {
 			return b.findBindMethodTarget(t.Underlying(), name)
@@ -336,7 +336,7 @@ func (b *builder) findBindMethoderTarget(methodFunc func(i int) *types.Func, met
 }
 
 func (b *builder) findBindFieldTarget(in types.Type, name string) (types.Object, error) {
-	switch t := in.(type) {
+	switch t := types.Unalias(in).(type) {
 	case *types.Named:
 		return b.findBindFieldTarget(t.Underlying(), name)
 	case *types.Struct:
@@ -361,7 +361,7 @@ func (b *builder) findBindFieldTarget(in types.Type, name string) (types.Object,
 }
 
 func (b *builder) findBindEmbedsTarget(in types.Type, name string) (types.Object, error) {
-	switch t := in.(type) {
+	switch t := types.Unalias(in).(type) {
 	case *types.Named:
 		return b.findBindEmbedsTarget(t.Underlying(), name)
 	case *types.Struct:

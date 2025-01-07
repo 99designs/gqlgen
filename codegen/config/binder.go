@@ -344,7 +344,7 @@ func isIntf(t types.Type) bool {
 	if t == nil {
 		return true
 	}
-	_, ok := t.(*types.Interface)
+	_, ok := types.Unalias(t).(*types.Interface)
 	return ok
 }
 
@@ -528,11 +528,11 @@ func IsNilable(t types.Type) bool {
 		return IsNilable(namedType.Underlying())
 	}
 	_, isPtr := t.(*types.Pointer)
-	_, isMap := t.(*types.Map)
+	_, isNilableMap := t.(*types.Map)
 	_, isInterface := t.(*types.Interface)
 	_, isSlice := t.(*types.Slice)
 	_, isChan := t.(*types.Chan)
-	return isPtr || isMap || isInterface || isSlice || isChan
+	return isPtr || isNilableMap || isInterface || isSlice || isChan
 }
 
 func hasMethod(it types.Type, name string) bool {

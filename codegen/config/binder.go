@@ -344,7 +344,7 @@ func isIntf(t types.Type) bool {
 	if t == nil {
 		return true
 	}
-	_, ok := t.(*types.Interface)
+	_, ok := types.Unalias(t).(*types.Interface)
 	return ok
 }
 
@@ -499,6 +499,7 @@ func isValid(t types.Type) bool {
 }
 
 func (b *Binder) CopyModifiersFromAst(t *ast.Type, base types.Type) types.Type {
+	base = types.Unalias(base)
 	if t.Elem != nil {
 		child := b.CopyModifiersFromAst(t.Elem, base)
 		if _, isStruct := child.Underlying().(*types.Struct); isStruct && !b.cfg.OmitSliceElementPointers {
@@ -528,11 +529,11 @@ func IsNilable(t types.Type) bool {
 		return IsNilable(namedType.Underlying())
 	}
 	_, isPtr := t.(*types.Pointer)
-	_, isMap := t.(*types.Map)
+	_, isNilableMap := t.(*types.Map)
 	_, isInterface := t.(*types.Interface)
 	_, isSlice := t.(*types.Slice)
 	_, isChan := t.(*types.Chan)
-	return isPtr || isMap || isInterface || isSlice || isChan
+	return isPtr || isNilableMap || isInterface || isSlice || isChan
 }
 
 func hasMethod(it types.Type, name string) bool {
@@ -553,8 +554,9 @@ func hasMethod(it types.Type, name string) bool {
 }
 
 func basicUnderlying(it types.Type) *types.Basic {
+	it = types.Unalias(it)
 	if ptr, isPtr := it.(*types.Pointer); isPtr {
-		it = ptr.Elem()
+		it = types.Unalias(ptr.Elem())
 	}
 	namedType, ok := it.(*types.Named)
 	if !ok {

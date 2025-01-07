@@ -258,7 +258,7 @@ func (ref *TypeReference) IsPtrToSlice() bool {
 
 func (ref *TypeReference) IsPtrToIntf() bool {
 	if ref.IsPtr() {
-		_, isPointerToInterface := ref.GO.(*types.Pointer).Elem().(*types.Interface)
+		_, isPointerToInterface := types.Unalias(ref.GO.(*types.Pointer).Elem()).(*types.Interface)
 		return isPointerToInterface
 	}
 	return false

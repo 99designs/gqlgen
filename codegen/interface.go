@@ -32,7 +32,7 @@ func (b *builder) buildInterface(typ *ast.Definition) (*Interface, error) {
 
 	i := &Interface{
 		Definition: typ,
-		Type:       obj,
+		Type:       types.Unalias(obj),
 		InTypemap:  b.Config.Models.UserDefined(typ.Name),
 	}
 
@@ -48,16 +48,17 @@ func (b *builder) buildInterface(typ *ast.Definition) (*Interface, error) {
 	})
 
 	for _, implementor := range implementors {
-		obj, err := b.Binder.DefaultUserObject(implementor.Name)
+		implObj, err := b.Binder.DefaultUserObject(implementor.Name)
 		if err != nil {
 			return nil, fmt.Errorf("%s has no backing go type", implementor.Name)
 		}
+		implObj = types.Unalias(implObj)
 
-		implementorType, err := findGoNamedType(obj)
+		implementorType, err := findGoNamedType(implObj)
 		if err != nil {
-			return nil, fmt.Errorf("can not find backing go type %s: %w", obj.String(), err)
+			return nil, fmt.Errorf("can not find backing go type %s: %w", implObj.String(), err)
 		} else if implementorType == nil {
-			return nil, fmt.Errorf("can not find backing go type %s", obj.String())
+			return nil, fmt.Errorf("can not find backing go type %s", implObj.String())
 		}
 
 		anyValid := false
@@ -66,8 +67,8 @@ func (b *builder) buildInterface(typ *ast.Definition) (*Interface, error) {
 		if types.Implements(implementorType, interfaceType) {
 			i.Implementors = append(i.Implementors, InterfaceImplementor{
 				Definition: implementor,
-				Type:       obj,
-				TakeRef:    !types.IsInterface(obj),
+				Type:       implObj,
+				TakeRef:    !types.IsInterface(implObj),
 			})
 			anyValid = true
 		}
@@ -76,7 +77,7 @@ func (b *builder) buildInterface(typ *ast.Definition) (*Interface, error) {
 		if types.Implements(types.NewPointer(implementorType), interfaceType) {
 			i.Implementors = append(i.Implementors, InterfaceImplementor{
 				Definition: implementor,
-				Type:       types.NewPointer(obj),
+				Type:       types.NewPointer(implObj),
 			})
 			anyValid = true
 		}

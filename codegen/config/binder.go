@@ -293,7 +293,7 @@ func (ref *TypeReference) UniquenessKey() string {
 		// Fix for #896
 		elemNullability = "ᚄ"
 	}
-	return nullability + ref.Definition.Name + "2" + templates.TypeIdentifier(ref.GO) + elemNullability
+	return nullability + ref.Definition.Name + "2" + templates.TypeIdentifier(types.Unalias(ref.GO)) + elemNullability
 }
 
 func (ref *TypeReference) MarshalFunc() string {
@@ -449,11 +449,11 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 			ref.Marshaler = fun
 			ref.Unmarshaler = types.NewFunc(0, fun.Pkg(), "Unmarshal"+typeName, nil)
 		} else if hasMethod(t, "MarshalGQLContext") && hasMethod(t, "UnmarshalGQLContext") {
-			ref.GO = t
+			ref.GO = types.Unalias(t)
 			ref.IsContext = true
 			ref.IsMarshaler = true
 		} else if hasMethod(t, "MarshalGQL") && hasMethod(t, "UnmarshalGQL") {
-			ref.GO = t
+			ref.GO = types.Unalias(t)
 			ref.IsMarshaler = true
 		} else if underlying := basicUnderlying(t); def.IsLeafType() && underlying != nil && underlying.Kind() == types.String {
 			// TODO delete before v1. Backwards compatibility case for named types wrapping strings (see #595)
@@ -469,7 +469,7 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 			ref.Marshaler = underlyingRef.Marshaler
 			ref.Unmarshaler = underlyingRef.Unmarshaler
 		} else {
-			ref.GO = t
+			ref.GO = types.Unalias(t)
 		}
 
 		ref.Target = ref.GO

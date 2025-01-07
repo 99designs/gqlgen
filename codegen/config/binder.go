@@ -499,6 +499,7 @@ func isValid(t types.Type) bool {
 }
 
 func (b *Binder) CopyModifiersFromAst(t *ast.Type, base types.Type) types.Type {
+	base = types.Unalias(base)
 	if t.Elem != nil {
 		child := b.CopyModifiersFromAst(t.Elem, base)
 		if _, isStruct := child.Underlying().(*types.Struct); isStruct && !b.cfg.OmitSliceElementPointers {
@@ -553,8 +554,9 @@ func hasMethod(it types.Type, name string) bool {
 }
 
 func basicUnderlying(it types.Type) *types.Basic {
+	it = types.Unalias(it)
 	if ptr, isPtr := it.(*types.Pointer); isPtr {
-		it = ptr.Elem()
+		it = types.Unalias(ptr.Elem())
 	}
 	namedType, ok := it.(*types.Named)
 	if !ok {

@@ -248,7 +248,11 @@ func isDelimiter(c rune) bool {
 }
 
 func ref(p types.Type) string {
-	return CurrentImports.LookupType(p)
+	typeString := CurrentImports.LookupType(p)
+	if typeString == "interface{}" {
+		return "any"
+	}
+	return typeString
 }
 
 func obj(obj types.Object) string {

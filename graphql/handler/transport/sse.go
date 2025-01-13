@@ -1,6 +1,7 @@
 package transport
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -8,13 +9,26 @@ import (
 	"mime"
 	"net/http"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/99designs/gqlgen/graphql"
 )
 
-type SSE struct{}
+type (
+	SSE struct {
+		KeepAlivePingInterval time.Duration
+	}
+
+	sseConnection struct {
+		ctx             context.Context
+		mu              sync.Mutex
+		f               http.Flusher
+		keepAliveTicker *time.Ticker
+	}
+)
 
 var _ graphql.Transport = SSE{}
 
@@ -36,7 +50,13 @@ func (t SSE) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 		SendErrorf(w, http.StatusInternalServerError, "streaming unsupported")
 		return
 	}
-	defer flusher.Flush()
+
+	c := &sseConnection{
+		ctx: ctx,
+		f:   flusher,
+	}
+
+	defer c.flush()
 
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
@@ -75,10 +95,19 @@ func (t SSE) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 
 	rc, opErr := exec.CreateOperationContext(ctx, params)
 	ctx = graphql.WithOperationContext(ctx, rc)
+	c.ctx = ctx
 
 	w.Header().Set("Content-Type", "text/event-stream")
 	fmt.Fprint(w, ":\n\n")
-	flusher.Flush()
+	c.flush()
+
+	if t.KeepAlivePingInterval > 0 {
+		c.mu.Lock()
+		c.keepAliveTicker = time.NewTicker(t.KeepAlivePingInterval)
+		c.mu.Unlock()
+
+		go c.keepAlive(w)
+	}
 
 	if opErr != nil {
 		resp := exec.DispatchError(ctx, opErr)
@@ -91,11 +120,40 @@ func (t SSE) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 				break
 			}
 			writeJsonWithSSE(w, response)
-			flusher.Flush()
+			c.flush()
+
+			c.resetTicker(t.KeepAlivePingInterval)
 		}
 	}
 
 	fmt.Fprint(w, "event: complete\n\n")
+}
+
+func (c *sseConnection) resetTicker(interval time.Duration) {
+	if interval != 0 {
+		c.mu.Lock()
+		c.keepAliveTicker.Reset(interval)
+		c.mu.Unlock()
+	}
+}
+
+func (c *sseConnection) keepAlive(w io.Writer) {
+	for {
+		select {
+		case <-c.ctx.Done():
+			c.keepAliveTicker.Stop()
+			return
+		case <-c.keepAliveTicker.C:
+			fmt.Fprintf(w, ": ping\n\n")
+			c.flush()
+		}
+	}
+}
+
+func (c *sseConnection) flush() {
+	c.mu.Lock()
+	c.f.Flush()
+	c.mu.Unlock()
 }
 
 func writeJsonWithSSE(w io.Writer, response *graphql.Response) {

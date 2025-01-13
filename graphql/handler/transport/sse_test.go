@@ -158,7 +158,7 @@ func TestSSE(t *testing.T) {
 	})
 
 	t.Run("subscribe with keep alive", func(t *testing.T) {
-		_, srv := initializeKeepAliveWithServer()
+		handler, srv := initializeKeepAliveWithServer()
 		defer srv.Close()
 
 		var wg sync.WaitGroup
@@ -166,7 +166,7 @@ func TestSSE(t *testing.T) {
 		go func() {
 			defer wg.Done()
 			// Wait for ping interval to trigger
-			time.Sleep(pingInterval + time.Millisecond*500)
+			time.Sleep(pingInterval + time.Millisecond*100)
 		}()
 
 		client := &http.Client{}
@@ -185,8 +185,20 @@ func TestSSE(t *testing.T) {
 
 		assert.Equal(t, ":\n", readLine(br))
 		assert.Equal(t, "\n", readLine(br))
-		assert.Equal(t, ": heartbeat\n", readLine(br))
+		assert.Equal(t, ": ping\n", readLine(br))
 		assert.Equal(t, "\n", readLine(br))
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			handler.SendCompleteSubscriptionMessage()
+		}()
+
+		assert.Equal(t, "event: complete\n", readLine(br))
+		assert.Equal(t, "\n", readLine(br))
+
+		_, err = br.ReadByte()
+		assert.Equal(t, err, io.EOF)
 
 		wg.Wait()
 	})

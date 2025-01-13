@@ -25,6 +25,7 @@ type (
 	sseConnection struct {
 		ctx             context.Context
 		mu              sync.Mutex
+		f               http.Flusher
 		keepAliveTicker *time.Ticker
 	}
 )
@@ -49,7 +50,13 @@ func (t SSE) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 		SendErrorf(w, http.StatusInternalServerError, "streaming unsupported")
 		return
 	}
-	defer flusher.Flush()
+
+	c := &sseConnection{
+		ctx: ctx,
+		f:   flusher,
+	}
+
+	defer c.flush()
 
 	w.Header().Set("Cache-Control", "no-cache")
 	w.Header().Set("Connection", "keep-alive")
@@ -88,21 +95,18 @@ func (t SSE) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 
 	rc, opErr := exec.CreateOperationContext(ctx, params)
 	ctx = graphql.WithOperationContext(ctx, rc)
+	c.ctx = ctx
 
 	w.Header().Set("Content-Type", "text/event-stream")
 	fmt.Fprint(w, ":\n\n")
-	flusher.Flush()
-
-	c := &sseConnection{
-		ctx: ctx,
-	}
+	c.flush()
 
 	if t.KeepAlivePingInterval > 0 {
 		c.mu.Lock()
 		c.keepAliveTicker = time.NewTicker(t.KeepAlivePingInterval)
 		c.mu.Unlock()
 
-		go c.keepAlive(w, flusher)
+		go c.keepAlive(w)
 	}
 
 	if opErr != nil {
@@ -116,7 +120,7 @@ func (t SSE) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 				break
 			}
 			writeJsonWithSSE(w, response)
-			flusher.Flush()
+			c.flush()
 
 			c.resetTicker(t.KeepAlivePingInterval)
 		}
@@ -133,17 +137,23 @@ func (c *sseConnection) resetTicker(interval time.Duration) {
 	}
 }
 
-func (c *sseConnection) keepAlive(w io.Writer, flusher http.Flusher) {
+func (c *sseConnection) keepAlive(w io.Writer) {
 	for {
 		select {
 		case <-c.ctx.Done():
 			c.keepAliveTicker.Stop()
 			return
 		case <-c.keepAliveTicker.C:
-			fmt.Fprintf(w, ": heartbeat\n\n")
-			flusher.Flush()
+			fmt.Fprintf(w, ": ping\n\n")
+			c.flush()
 		}
 	}
+}
+
+func (c *sseConnection) flush() {
+	c.mu.Lock()
+	c.f.Flush()
+	c.mu.Unlock()
 }
 
 func writeJsonWithSSE(w io.Writer, response *graphql.Response) {

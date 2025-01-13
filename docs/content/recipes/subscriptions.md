@@ -259,7 +259,10 @@ srv.AddTransport(transport.SSE{
 	// settings that specify the maximum duration a connection can
 	// remain open without data being sent across it. If the idle
 	// timeout is exceeded without any data being transmitted, the
-	// connection may be closed.
+	// connection may be closed when connecting SSE over HTTP/1.
+	//
+	// End-to-end HTTP/2 connections do not require a ping interval
+	// to keep the connection open.
 	KeepAlivePingInterval: 10 * time.Second,
 })
 ```

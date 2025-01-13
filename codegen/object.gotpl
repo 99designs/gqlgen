@@ -155,7 +155,7 @@ func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.Selec
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch(ctx)
+	out.Dispatch(ctx, ec.OperationContext)
 	if out.Invalids > 0 { return graphql.Null }
 
 	atomic.AddInt32(&ec.deferred, int32(len(deferred)))

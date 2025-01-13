@@ -181,7 +181,7 @@ func (ec *executionContext) _EmbeddedCase1(ctx context.Context, sel ast.Selectio
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch(ctx)
+	out.Dispatch(ctx, ec.OperationContext)
 	if out.Invalids > 0 {
 		return graphql.Null
 	}
@@ -220,7 +220,7 @@ func (ec *executionContext) _EmbeddedCase2(ctx context.Context, sel ast.Selectio
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch(ctx)
+	out.Dispatch(ctx, ec.OperationContext)
 	if out.Invalids > 0 {
 		return graphql.Null
 	}
@@ -259,7 +259,7 @@ func (ec *executionContext) _EmbeddedCase3(ctx context.Context, sel ast.Selectio
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
 	}
-	out.Dispatch(ctx)
+	out.Dispatch(ctx, ec.OperationContext)
 	if out.Invalids > 0 {
 		return graphql.Null
 	}

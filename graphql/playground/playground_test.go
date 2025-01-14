@@ -11,7 +11,7 @@ import (
 func TestHandler_createsAbsoluteURLs(t *testing.T) {
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "https://example.org/query", http.NoBody)
-	h := Handler("example.org API", "https://example.org/query")
+	h := Handler("example.org API", "https://example.org/query", nil)
 	h.ServeHTTP(rec, req)
 
 	res := rec.Result()
@@ -44,7 +44,7 @@ func TestHandler_createsAbsoluteURLs(t *testing.T) {
 func TestHandler_createsRelativeURLs(t *testing.T) {
 	rec := httptest.NewRecorder()
 	req := httptest.NewRequest(http.MethodGet, "http://localhost:8080/query", http.NoBody)
-	h := Handler("example.org API", "/customquery")
+	h := Handler("example.org API", "/customquery", nil)
 	h.ServeHTTP(rec, req)
 
 	res := rec.Result()

@@ -14,10 +14,10 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func testResourceIntegrity(t *testing.T, handler func(title, endpoint string) http.HandlerFunc) {
+func testResourceIntegrity(t *testing.T, handler func(title, endpoint string, options map[string]any) http.HandlerFunc) {
 	recorder := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", http.NoBody)
-	handler("example.org API", "/query").ServeHTTP(recorder, request)
+	handler("example.org API", "/query", nil).ServeHTTP(recorder, request)
 
 	res := recorder.Result()
 	defer require.NoError(t, res.Body.Close())

@@ -85,7 +85,7 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 `))
 
 // Handler responsible for setting up the playground
-func Handler(title, endpoint string) http.HandlerFunc {
+func Handler(title, endpoint string, options map[string]any) http.HandlerFunc {
 	return HandlerWithHeaders(title, endpoint, nil, nil)
 }
 

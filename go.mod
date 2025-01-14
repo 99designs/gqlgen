@@ -1,4 +1,4 @@
-module github.com/reginbald/gqlgen
+module github.com/99designs/gqlgen
 
 go 1.22.5
 

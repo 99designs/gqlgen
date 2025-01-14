@@ -67,9 +67,9 @@ var altairPage = template.Must(template.New("altair").Parse(`<!doctype html>
 
 // AltairHandler responsible for setting up the altair playground
 func AltairHandler(title, endpoint string, options map[string]interface{}) http.HandlerFunc {
-	jsonEnv, err := json.Marshal(options)
+	jsonOptions, err := json.Marshal(options)
 	if err != nil {
-		jsonEnv = []byte("{}")
+		jsonOptions = []byte("{}")
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -83,7 +83,7 @@ func AltairHandler(title, endpoint string, options map[string]interface{}) http.
 			"mainSRI":              "sha256-bjpcMy7w3aaX8Cjuyv5hPE9FlkJRys0kxooPRtbGd8c=",
 			"polyfillsSRI":         "sha256-+hQzPqfWEkAfOfKytrW7hLceq0mUR3pHXn+UzwhrWQ0=",
 			"runtimeSRI":           "sha256-2SHK1nFbucnnM02VXrl4CAKDYQbJEF9HVZstRkVbkJM=",
-			"options":              string(jsonEnv),
+			"options":              string(jsonOptions),
 		})
 		if err != nil {
 			panic(err)

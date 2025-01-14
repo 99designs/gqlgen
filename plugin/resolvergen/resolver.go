@@ -159,6 +159,7 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 				continue
 			}
 			structName := templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type)
+			// TODO(steve): Why do we need to trimLeft "\" here? Some bazel thing?
 			comment := strings.TrimSpace(strings.TrimLeft(rewriter.GetMethodComment(structName, f.GoFieldName), `\`))
 			implementation := strings.TrimSpace(rewriter.GetMethodBody(structName, f.GoFieldName))
 			resolver := Resolver{o, f, rewriter.GetPrevDecl(structName, f.GoFieldName), comment, implementation, nil}

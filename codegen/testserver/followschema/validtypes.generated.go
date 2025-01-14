@@ -19,9 +19,9 @@ import (
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_ValidType_validArgs_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_ValidType_validArgs_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_ValidType_validArgs_argsBreak(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -156,13 +156,9 @@ func (ec *executionContext) field_ValidType_validArgs_args(ctx context.Context, 
 }
 func (ec *executionContext) field_ValidType_validArgs_argsBreak(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["break"]
-	if !ok {
+	if _, ok := rawArgs["break"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -178,13 +174,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsBreak(
 
 func (ec *executionContext) field_ValidType_validArgs_argsDefault(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["default"]
-	if !ok {
+	if _, ok := rawArgs["default"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -200,13 +192,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsDefault(
 
 func (ec *executionContext) field_ValidType_validArgs_argsFunc(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["func"]
-	if !ok {
+	if _, ok := rawArgs["func"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -222,13 +210,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsFunc(
 
 func (ec *executionContext) field_ValidType_validArgs_argsInterface(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["interface"]
-	if !ok {
+	if _, ok := rawArgs["interface"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -244,13 +228,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsInterface(
 
 func (ec *executionContext) field_ValidType_validArgs_argsSelect(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["select"]
-	if !ok {
+	if _, ok := rawArgs["select"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -266,13 +246,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsSelect(
 
 func (ec *executionContext) field_ValidType_validArgs_argsCase(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["case"]
-	if !ok {
+	if _, ok := rawArgs["case"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -288,13 +264,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsCase(
 
 func (ec *executionContext) field_ValidType_validArgs_argsDefer(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["defer"]
-	if !ok {
+	if _, ok := rawArgs["defer"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -310,13 +282,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsDefer(
 
 func (ec *executionContext) field_ValidType_validArgs_argsGo(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["go"]
-	if !ok {
+	if _, ok := rawArgs["go"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -332,13 +300,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsGo(
 
 func (ec *executionContext) field_ValidType_validArgs_argsMap(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["map"]
-	if !ok {
+	if _, ok := rawArgs["map"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -354,13 +318,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsMap(
 
 func (ec *executionContext) field_ValidType_validArgs_argsStruct(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["struct"]
-	if !ok {
+	if _, ok := rawArgs["struct"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -376,13 +336,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsStruct(
 
 func (ec *executionContext) field_ValidType_validArgs_argsChan(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["chan"]
-	if !ok {
+	if _, ok := rawArgs["chan"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -398,13 +354,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsChan(
 
 func (ec *executionContext) field_ValidType_validArgs_argsElse(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["else"]
-	if !ok {
+	if _, ok := rawArgs["else"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -420,13 +372,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsElse(
 
 func (ec *executionContext) field_ValidType_validArgs_argsGoto(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["goto"]
-	if !ok {
+	if _, ok := rawArgs["goto"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -442,13 +390,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsGoto(
 
 func (ec *executionContext) field_ValidType_validArgs_argsPackage(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["package"]
-	if !ok {
+	if _, ok := rawArgs["package"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -464,13 +408,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsPackage(
 
 func (ec *executionContext) field_ValidType_validArgs_argsSwitch(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["switch"]
-	if !ok {
+	if _, ok := rawArgs["switch"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -486,13 +426,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsSwitch(
 
 func (ec *executionContext) field_ValidType_validArgs_argsConst(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["const"]
-	if !ok {
+	if _, ok := rawArgs["const"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -508,13 +444,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsConst(
 
 func (ec *executionContext) field_ValidType_validArgs_argsFallthrough(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["fallthrough"]
-	if !ok {
+	if _, ok := rawArgs["fallthrough"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -530,13 +462,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsFallthrough(
 
 func (ec *executionContext) field_ValidType_validArgs_argsIf(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["if"]
-	if !ok {
+	if _, ok := rawArgs["if"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -552,13 +480,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsIf(
 
 func (ec *executionContext) field_ValidType_validArgs_argsRange(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["range"]
-	if !ok {
+	if _, ok := rawArgs["range"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -574,13 +498,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsRange(
 
 func (ec *executionContext) field_ValidType_validArgs_argsType(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["type"]
-	if !ok {
+	if _, ok := rawArgs["type"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -596,13 +516,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsType(
 
 func (ec *executionContext) field_ValidType_validArgs_argsContinue(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["continue"]
-	if !ok {
+	if _, ok := rawArgs["continue"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -618,13 +534,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsContinue(
 
 func (ec *executionContext) field_ValidType_validArgs_argsFor(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["for"]
-	if !ok {
+	if _, ok := rawArgs["for"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -640,13 +552,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsFor(
 
 func (ec *executionContext) field_ValidType_validArgs_argsImport(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["import"]
-	if !ok {
+	if _, ok := rawArgs["import"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -662,13 +570,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsImport(
 
 func (ec *executionContext) field_ValidType_validArgs_argsReturn(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["return"]
-	if !ok {
+	if _, ok := rawArgs["return"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -684,13 +588,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsReturn(
 
 func (ec *executionContext) field_ValidType_validArgs_argsVar(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["var"]
-	if !ok {
+	if _, ok := rawArgs["var"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -706,13 +606,9 @@ func (ec *executionContext) field_ValidType_validArgs_argsVar(
 
 func (ec *executionContext) field_ValidType_validArgs_args_(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["_"]
-	if !ok {
+	if _, ok := rawArgs["_"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -726,9 +622,9 @@ func (ec *executionContext) field_ValidType_validArgs_args_(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_ValidType_validInputKeywords_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_ValidType_validInputKeywords_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_ValidType_validInputKeywords_argsInput(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -738,13 +634,9 @@ func (ec *executionContext) field_ValidType_validInputKeywords_args(ctx context.
 }
 func (ec *executionContext) field_ValidType_validInputKeywords_argsInput(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*ValidInput, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["input"]
-	if !ok {
+	if _, ok := rawArgs["input"]; !ok {
 		var zeroVal *ValidInput
 		return zeroVal, nil
 	}
@@ -778,7 +670,7 @@ func (ec *executionContext) _Content_Post_foo(ctx context.Context, field graphql
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Foo, nil
 	})
@@ -816,7 +708,7 @@ func (ec *executionContext) _Content_User_foo(ctx context.Context, field graphql
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Foo, nil
 	})
@@ -854,7 +746,7 @@ func (ec *executionContext) _ValidType_differentCase(ctx context.Context, field 
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DifferentCase, nil
 	})
@@ -895,7 +787,7 @@ func (ec *executionContext) _ValidType_different_case(ctx context.Context, field
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.DifferentCaseOld, nil
 	})
@@ -936,7 +828,7 @@ func (ec *executionContext) _ValidType_validInputKeywords(ctx context.Context, f
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ValidInputKeywords, nil
 	})
@@ -988,7 +880,7 @@ func (ec *executionContext) _ValidType_validArgs(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.ValidArgs, nil
 	})
@@ -1032,10 +924,10 @@ func (ec *executionContext) fieldContext_ValidType_validArgs(ctx context.Context
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj interface{}) (ValidInput, error) {
+func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj any) (ValidInput, error) {
 	var it ValidInput
-	asMap := map[string]interface{}{}
-	for k, v := range obj.(map[string]interface{}) {
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
@@ -1395,7 +1287,7 @@ func (ec *executionContext) _ValidType(ctx context.Context, sel ast.SelectionSet
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalOValidInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐValidInput(ctx context.Context, v interface{}) (*ValidInput, error) {
+func (ec *executionContext) unmarshalOValidInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐValidInput(ctx context.Context, v any) (*ValidInput, error) {
 	if v == nil {
 		return nil, nil
 	}

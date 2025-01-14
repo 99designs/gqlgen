@@ -205,6 +205,7 @@ func Funcs() template.FuncMap {
 		"obj":                obj,
 		"ts":                 TypeIdentifier,
 		"call":               Call,
+		"dict":               dict,
 		"prefixLines":        prefixLines,
 		"notNil":             notNil,
 		"strSplit":           StrSplit,
@@ -247,7 +248,13 @@ func isDelimiter(c rune) bool {
 }
 
 func ref(p types.Type) string {
-	return CurrentImports.LookupType(p)
+	typeString := CurrentImports.LookupType(p)
+	// TODO(steve): figure out why this is needed
+	// otherwise inconsistent sometimes
+	if typeString == "interface{}" {
+		return "any"
+	}
+	return typeString
 }
 
 func obj(obj types.Object) string {
@@ -272,6 +279,21 @@ func Call(p *types.Func) string {
 	}
 
 	return pkg + p.Name()
+}
+
+func dict(values ...any) (map[string]any, error) {
+	if len(values)%2 != 0 {
+		return nil, errors.New("invalid dict call: arguments must be key-value pairs")
+	}
+	m := make(map[string]any, len(values)/2)
+	for i := 0; i < len(values); i += 2 {
+		key, ok := values[i].(string)
+		if !ok {
+			return nil, errors.New("dict keys must be strings")
+		}
+		m[key] = values[i+1]
+	}
+	return m, nil
 }
 
 func resetModelNames() {
@@ -606,10 +628,10 @@ func Dump(val any) string {
 		for _, part := range val {
 			parts = append(parts, Dump(part))
 		}
-		return "[]interface{}{" + strings.Join(parts, ",") + "}"
+		return "[]any{" + strings.Join(parts, ",") + "}"
 	case map[string]any:
 		buf := bytes.Buffer{}
-		buf.WriteString("map[string]interface{}{")
+		buf.WriteString("map[string]any{")
 		var keys []string
 		for key := range val {
 			keys = append(keys, key)

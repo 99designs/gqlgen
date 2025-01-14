@@ -51,6 +51,9 @@ func AddErrorf(ctx context.Context, format string, args ...any) {
 
 // AddError sends an error to the client, first passing it through the error presenter.
 func AddError(ctx context.Context, err error) {
+	if err == nil {
+		return
+	}
 	c := getResponseContext(ctx)
 
 	presentedError := c.errorPresenter(ctx, ErrorOnPath(ctx, err))

@@ -24,9 +24,9 @@ type QueryResolver interface {
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) dir_populate_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) dir_populate_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.dir_populate_argsValue(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -36,13 +36,9 @@ func (ec *executionContext) dir_populate_args(ctx context.Context, rawArgs map[s
 }
 func (ec *executionContext) dir_populate_argsValue(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
-	// We won't call the directive if the argument is null.
-	// Set call_argument_directives_with_null to true to call directives
-	// even if the argument is null.
-	_, ok := rawArgs["value"]
-	if !ok {
+	if _, ok := rawArgs["value"]; !ok {
 		var zeroVal string
 		return zeroVal, nil
 	}
@@ -56,9 +52,9 @@ func (ec *executionContext) dir_populate_argsValue(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query___type_argsName(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -68,7 +64,7 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 }
 func (ec *executionContext) field_Query___type_argsName(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (string, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
 	if tmp, ok := rawArgs["name"]; ok {
@@ -79,9 +75,9 @@ func (ec *executionContext) field_Query___type_argsName(
 	return zeroVal, nil
 }
 
-func (ec *executionContext) field_Query_directiveSingleNullableArg_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_Query_directiveSingleNullableArg_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 	arg0, err := ec.field_Query_directiveSingleNullableArg_argsArg1(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -91,10 +87,10 @@ func (ec *executionContext) field_Query_directiveSingleNullableArg_args(ctx cont
 }
 func (ec *executionContext) field_Query_directiveSingleNullableArg_argsArg1(
 	ctx context.Context,
-	rawArgs map[string]interface{},
+	rawArgs map[string]any,
 ) (*string, error) {
 	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg1"))
-	directive0 := func(ctx context.Context) (interface{}, error) {
+	directive0 := func(ctx context.Context) (any, error) {
 		tmp, ok := rawArgs["arg1"]
 		if !ok {
 			var zeroVal *string
@@ -103,7 +99,7 @@ func (ec *executionContext) field_Query_directiveSingleNullableArg_argsArg1(
 		return ec.unmarshalOString2ᚖstring(ctx, tmp)
 	}
 
-	directive1 := func(ctx context.Context) (interface{}, error) {
+	directive1 := func(ctx context.Context) (any, error) {
 		value, err := ec.unmarshalNString2string(ctx, "test")
 		if err != nil {
 			var zeroVal *string
@@ -115,7 +111,7 @@ func (ec *executionContext) field_Query_directiveSingleNullableArg_argsArg1(
 		}
 		return ec.directives.Populate(ctx, rawArgs, directive0, value)
 	}
-	directive2 := func(ctx context.Context) (interface{}, error) {
+	directive2 := func(ctx context.Context) (any, error) {
 		if ec.directives.Noop == nil {
 			var zeroVal *string
 			return zeroVal, errors.New("directive noop is not implemented")
@@ -159,7 +155,7 @@ func (ec *executionContext) _Query_directiveSingleNullableArg(ctx context.Contex
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.Query().DirectiveSingleNullableArg(rctx, fc.Args["arg1"].(*string))
 	})
@@ -211,7 +207,7 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.introspectType(fc.Args["name"].(string))
 	})
@@ -285,7 +281,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 			ret = graphql.Null
 		}
 	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.introspectSchema()
 	})

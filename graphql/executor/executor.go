@@ -7,6 +7,7 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"github.com/vektah/gqlparser/v2/parser"
 	"github.com/vektah/gqlparser/v2/validator"
+	"github.com/vektah/gqlparser/v2/validator/rules"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/errcode"
@@ -24,7 +25,8 @@ type Executor struct {
 	recoverFunc    graphql.RecoverFunc
 	queryCache     graphql.Cache[*ast.QueryDocument]
 
-	parserTokenLimit int
+	parserTokenLimit  int
+	disableSuggestion bool
 }
 
 var _ graphql.GraphExecutor = &Executor{}
@@ -177,6 +179,10 @@ func (e *Executor) SetParserTokenLimit(limit int) {
 	e.parserTokenLimit = limit
 }
 
+func (e *Executor) SetDisableSuggestion(value bool) {
+	e.disableSuggestion = value
+}
+
 // parseQuery decodes the incoming query and validates it, pulling from cache if present.
 //
 // NOTE: This should NOT look at variables, they will change per request. It should only parse and
@@ -214,6 +220,15 @@ func (e *Executor) parseQuery(
 		gqlErr, _ := err.(*gqlerror.Error)
 		errcode.Set(err, errcode.ValidationFailed)
 		return nil, gqlerror.List{gqlErr}
+	}
+
+	// swap out the FieldsOnCorrectType rule with one that doesn't provide suggestions
+	if e.disableSuggestion {
+		validator.RemoveRule("FieldsOnCorrectType")
+
+		rule := rules.FieldsOnCorrectTypeRuleWithoutSuggestions
+		// rule may already have been added
+		validator.ReplaceRule(rule.Name, rule.RuleFunc)
 	}
 
 	listErr := validator.Validate(e.es.Schema(), doc)

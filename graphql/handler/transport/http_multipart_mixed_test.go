@@ -52,7 +52,7 @@ func TestMultipartMixed(t *testing.T) {
 		resp := doRequest(handler, srv.URL, "notjson")
 		assert.Equal(t, http.StatusBadRequest, resp.Code, resp.Body.String())
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
-		assert.Equal(
+		assert.JSONEq(
 			t,
 			`{"errors":[{"message":"json request body could not be decoded: invalid character 'o' in literal null (expecting 'u') body:notjson"}],"data":null}`,
 			resp.Body.String(),
@@ -64,7 +64,7 @@ func TestMultipartMixed(t *testing.T) {
 		resp := doRequest(handler, srv.URL, `{"query": "!"}`)
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
-		assert.Equal(
+		assert.JSONEq(
 			t,
 			`{"errors":[{"message":"Unexpected !","locations":[{"line":1,"column":1}],"extensions":{"code":"GRAPHQL_PARSE_FAILED"}}],"data":null}`,
 			resp.Body.String(),
@@ -76,7 +76,7 @@ func TestMultipartMixed(t *testing.T) {
 		resp := doRequest(handler, srv.URL, `{"query": "{ title }"}`)
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
-		assert.Equal(
+		assert.JSONEq(
 			t,
 			`{"errors":[{"message":"Cannot query field \"title\" on type \"Query\".","locations":[{"line":1,"column":3}],"extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`,
 			resp.Body.String(),
@@ -90,7 +90,7 @@ func TestMultipartMixed(t *testing.T) {
 		)
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
-		assert.Equal(
+		assert.JSONEq(
 			t,
 			`{"errors":[{"message":"cannot use bool as Int","path":["variable","id"],"extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`,
 			resp.Body.String(),
@@ -135,7 +135,7 @@ func TestMultipartMixed(t *testing.T) {
 		assert.Equal(t, "--graphql\r\n", readLine(br))
 		assert.Equal(t, "Content-Type: application/json\r\n", readLine(br))
 		assert.Equal(t, "\r\n", readLine(br))
-		assert.Equal(t,
+		assert.JSONEq(t,
 			"{\"data\":{\"name\":null},\"hasNext\":true}\r\n",
 			readLine(br),
 		)
@@ -149,7 +149,7 @@ func TestMultipartMixed(t *testing.T) {
 		assert.Equal(t, "--graphql\r\n", readLine(br))
 		assert.Equal(t, "Content-Type: application/json\r\n", readLine(br))
 		assert.Equal(t, "\r\n", readLine(br))
-		assert.Equal(
+		assert.JSONEq(
 			t,
 			"{\"incremental\":[{\"data\":{\"name\":\"test\"},\"hasNext\":false}],\"hasNext\":false}\r\n",
 			readLine(br),
@@ -213,7 +213,7 @@ func TestMultipartMixed(t *testing.T) {
 		assert.Equal(t, "--graphql\r\n", readLine(br))
 		assert.Equal(t, "Content-Type: application/json\r\n", readLine(br))
 		assert.Equal(t, "\r\n", readLine(br))
-		assert.Equal(t,
+		assert.JSONEq(t,
 			"{\"data\":{\"name\":null},\"hasNext\":true}\r\n",
 			readLine(br),
 		)
@@ -221,7 +221,7 @@ func TestMultipartMixed(t *testing.T) {
 		assert.Equal(t, "--graphql\r\n", readLine(br))
 		assert.Equal(t, "Content-Type: application/json\r\n", readLine(br))
 		assert.Equal(t, "\r\n", readLine(br))
-		assert.Equal(
+		assert.JSONEq(
 			t,
 			"{\"incremental\":[{\"data\":{\"name\":\"test\"},\"hasNext\":false}],\"hasNext\":false}\r\n",
 			readLine(br),

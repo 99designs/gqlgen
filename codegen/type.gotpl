@@ -1,14 +1,23 @@
+{{ $useFunctionSyntaxForExecutionContext := .Config.UseFunctionSyntaxForExecutionContext }}
 {{- range $type := .ReferencedTypes }}
 	{{ with $type.UnmarshalFunc }}
-		func (ec *executionContext) {{ . }}(ctx context.Context, v interface{}) ({{ $type.GO | ref }}, error) {
+		{{ if $useFunctionSyntaxForExecutionContext -}}
+		func {{ . }}(ctx context.Context, ec *executionContext, v any) ({{ $type.GO | ref }}, error) {
+		{{- else -}}
+		func (ec *executionContext) {{ . }}(ctx context.Context, v any) ({{ $type.GO | ref }}, error) {
+		{{- end -}}
 			{{- if and $type.IsNilable (not $type.GQL.NonNull) (not $type.IsPtrToPtr) }}
 				if v == nil { return nil, nil }
 			{{- end }}
 			{{- if or $type.IsPtrToSlice $type.IsPtrToIntf }}
+				{{ if $useFunctionSyntaxForExecutionContext -}}
+				res, err := {{ $type.Elem.UnmarshalFunc }}(ctx, ec, v)
+				{{- else -}}
 				res, err := ec.{{ $type.Elem.UnmarshalFunc }}(ctx, v)
+				{{- end }}
 				return &res, graphql.ErrorOnPath(ctx, err)
 			{{- else if $type.IsSlice }}
-				var vSlice []interface{}
+				var vSlice []any
 				if v != nil {
 					vSlice = graphql.CoerceList(v)
 				}
@@ -16,7 +25,11 @@
 				res := make([]{{$type.GO.Elem | ref}}, len(vSlice))
 				for i := range vSlice {
 					ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+					{{ if $useFunctionSyntaxForExecutionContext -}}
+					res[i], err = {{ $type.Elem.UnmarshalFunc }}(ctx, ec, vSlice[i])
+					{{- else -}}
 					res[i], err = ec.{{ $type.Elem.UnmarshalFunc }}(ctx, vSlice[i])
+					{{- end }}
 					if err != nil {
 						return nil, err
 					}
@@ -25,7 +38,11 @@
 			{{- else if and $type.IsPtrToPtr (not $type.Unmarshaler) (not $type.IsMarshaler) }}
 				var pres {{ $type.Elem.GO | ref }}
 				if v != nil {
+					{{ if $useFunctionSyntaxForExecutionContext -}}
+					res, err := {{ $type.Elem.UnmarshalFunc }}(ctx, ec, v)
+					{{- else -}}
 					res, err := ec.{{ $type.Elem.UnmarshalFunc }}(ctx, v)
+					{{- end }}
 					if err != nil {
 						return nil, graphql.ErrorOnPath(ctx, err)
 					}
@@ -75,7 +92,11 @@
 					{{- end }}
 					return res, graphql.ErrorOnPath(ctx, err)
 				{{- else }}
+					{{ if $useFunctionSyntaxForExecutionContext -}}
+					res, err := unmarshalInput{{ $type.GQL.Name }}(ctx, ec, v)
+					{{- else -}}
 					res, err := ec.unmarshalInput{{ $type.GQL.Name }}(ctx, v)
+					{{- end }}
 					{{- if and $type.IsNilable (not $type.IsMap) (not $type.PointersInUnmarshalInput) }}
 						return &res, graphql.ErrorOnPath(ctx, err)
 					{{- else if and (not $type.IsNilable) $type.PointersInUnmarshalInput }}
@@ -89,9 +110,17 @@
 	{{- end }}
 
 	{{ with $type.MarshalFunc }}
+		{{ if $useFunctionSyntaxForExecutionContext -}}
+		func {{ . }}(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v {{ $type.GO | ref }}) graphql.Marshaler {
+		{{- else -}}
 		func (ec *executionContext) {{ . }}(ctx context.Context, sel ast.SelectionSet, v {{ $type.GO | ref }}) graphql.Marshaler {
+		{{- end -}}
 			{{- if or $type.IsPtrToSlice $type.IsPtrToIntf }}
+				{{ if $useFunctionSyntaxForExecutionContext -}}
+				return {{ $type.Elem.MarshalFunc }}(ctx, ec, sel, *v)
+				{{- else -}}
 				return ec.{{ $type.Elem.MarshalFunc }}(ctx, sel, *v)
+				{{- end }}
 			{{- else if $type.IsSlice }}
 				{{- if not $type.GQL.NonNull }}
 					if v == nil {
@@ -136,7 +165,11 @@
 									defer wg.Done()
 								{{- end }}
 							}
+							{{ if $useFunctionSyntaxForExecutionContext -}}
+							ret[i] = {{ $type.Elem.MarshalFunc }}(ctx, ec, sel, v[i])
+							{{- else -}}
 							ret[i] = ec.{{ $type.Elem.MarshalFunc }}(ctx, sel, v[i])
+							{{- end }}
 						}
 						if isLen1 {
 							f(i)
@@ -152,7 +185,11 @@
 							{{- end }}
 						}
 					{{ else }}
+						{{ if $useFunctionSyntaxForExecutionContext -}}
+						ret[i] = {{ $type.Elem.MarshalFunc }}(ctx, ec, sel, v[i])
+						{{- else -}}
 						ret[i] = ec.{{ $type.Elem.MarshalFunc }}(ctx, sel, v[i])
+						{{- end }}
 					{{- end }}
 				}
 				{{ if not $type.IsScalar }} wg.Wait() {{ end }}
@@ -168,7 +205,11 @@
 				if v == nil {
 					return graphql.Null
 				}
+				{{ if $useFunctionSyntaxForExecutionContext -}}
+				return {{ $type.Elem.MarshalFunc }}(ctx, ec, sel, *v)
+				{{- else -}}
 				return ec.{{ $type.Elem.MarshalFunc }}(ctx, sel, *v)
+				{{- end }}
 			{{- else }}
 				{{- if $type.IsNilable }}
 					if v == nil {
@@ -213,13 +254,25 @@
 					{{- end }}
 				{{- else if $type.IsRoot }}
 					{{- if eq $type.Definition.Name "Subscription" }}
+						{{ if $useFunctionSyntaxForExecutionContext -}}
+						res := _{{$type.Definition.Name}}(ctx, ec, sel)
+						{{- else -}}
 						res := ec._{{$type.Definition.Name}}(ctx, sel)
+						{{- end }}
 						return res(ctx)
 					{{- else }}
+						{{ if $useFunctionSyntaxForExecutionContext -}}
+						return _{{$type.Definition.Name}}(ctx, ec, sel)
+						{{- else -}}
 						return ec._{{$type.Definition.Name}}(ctx, sel)
+						{{- end }}
 					{{- end }}
 				{{- else }}
+					{{ if $useFunctionSyntaxForExecutionContext -}}
+					return _{{$type.Definition.Name}}(ctx, ec, sel, {{ if not $type.IsNilable}}&{{end}} v)
+					{{- else -}}
 					return ec._{{$type.Definition.Name}}(ctx, sel, {{ if not $type.IsNilable}}&{{end}} v)
+					{{- end }}
 				{{- end }}
 			{{- end }}
 		}

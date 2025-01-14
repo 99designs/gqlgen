@@ -8,19 +8,19 @@
         "gen": "graphql-codegen --config codegen.ts"
     },
     "devDependencies": {
-        "@apollo/client": "^3.11.10",
+        "@apollo/client": "^3.12.5",
         "@graphql-codegen/cli": "^5.0.3",
         "@graphql-codegen/client-preset": "^4.5.1",
         "@graphql-codegen/introspection": "^4.0.3",
         "@graphql-codegen/schema-ast": "^4.1.0",
-        "cross-fetch": "^4.0.0",
-        "graphql": "^16.9.0",
+        "cross-fetch": "^4.1.0",
+        "graphql": "^16.10.0",
         "graphql-codegen": "^0.4.0",
-        "graphql-sse": "^2.5.3",
-        "graphql-ws": "^5.16.0",
-        "typescript": "^5.7.2",
+        "graphql-sse": "^2.5.4",
+        "graphql-ws": "^5.16.2",
+        "typescript": "^5.7.3",
         "urql": "^4.2.1",
-        "vite": "^6.0.2",
-        "vitest": "^2.1.7"
+        "vite": "^6.0.7",
+        "vitest": "^2.1.8"
     }
 }

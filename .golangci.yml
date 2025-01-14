@@ -65,6 +65,7 @@ linters-settings:
       - bool-compare
       - compares
       - empty
+      - encoded-compare
       - error-is-as
       - error-nil
       - expected-actual

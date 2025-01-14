@@ -7,8 +7,17 @@ menu: { main: { parent: "reference", weight: 10 } }
 
 ## Built-in helpers
 
-gqlgen ships with some built-in helpers for common custom scalar use-cases, `Time`, `Any`, `Upload` and `Map`.
+gqlgen ships with some built-in helpers for common custom scalar use-cases, `Int64`, `Time`, `Any`, `Upload` and `Map`.
 Adding any of these to a schema will automatically add the marshalling behaviour to Go types.
+
+### Int64
+
+Since the GraphQL spec identifies `Int` as a signed 32-bit integer, gqlgen provides an `Int64` scalar to represent 64-bit integers.
+Anywhere you want to use a Go `int` and not deal with overflows, use `Int64` in your schema.
+
+```graphql
+scalar Int64
+```
 
 ### Time
 
@@ -27,6 +36,7 @@ scalar UUID
 This maps a `UUID` scalar value to a `uuid.UUID` type.
 
 If you add to gqlgen.yml:
+
 ```yaml
 models:
   UUID:
@@ -76,9 +86,11 @@ Maps an arbitrary GraphQL value to a `interface{}` Go type.
 ```graphql
 scalar Duration
 ```
+
 This maps a `Duration` scalar value conforming to the `ISO8601` standard (ex.: `P1Y2D`)  to a `time.Duration` type.
 
 If you add to gqlgen.yml:
+
 ```yaml
 models:
   Duration:

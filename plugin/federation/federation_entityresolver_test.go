@@ -173,12 +173,12 @@ func TestEntityResolver(t *testing.T) {
 				Bar int `json:"bar"`
 			} `json:"_entities"`
 		}
-
+		eq := entityQuery([]string{
+			"WorldWithMultipleKeys {foo hello {name}}",
+			"WorldWithMultipleKeys {bar}",
+		})
 		err := c.Post(
-			entityQuery([]string{
-				"WorldWithMultipleKeys {foo hello {name}}",
-				"WorldWithMultipleKeys {bar}",
-			}),
+			eq,
 			&resp,
 			client.Var("representations", representations),
 		)

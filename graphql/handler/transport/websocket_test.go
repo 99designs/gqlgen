@@ -40,7 +40,7 @@ func TestWebsocket(t *testing.T) {
 
 		msg := readOp(c)
 		assert.Equal(t, "connection_error", msg.Type)
-		assert.Equal(t, `{"message":"invalid json"}`, string(msg.Payload))
+		assert.JSONEq(t, `{"message":"invalid json"}`, string(msg.Payload))
 	})
 
 	t.Run("client can terminate before init", func(t *testing.T) {
@@ -61,7 +61,7 @@ func TestWebsocket(t *testing.T) {
 
 		msg := readOp(c)
 		assert.Equal(t, connectionErrorMsg, msg.Type)
-		assert.Equal(t, `{"message":"unexpected message start"}`, string(msg.Payload))
+		assert.JSONEq(t, `{"message":"unexpected message start"}`, string(msg.Payload))
 	})
 
 	t.Run("server acks init", func(t *testing.T) {
@@ -104,7 +104,7 @@ func TestWebsocket(t *testing.T) {
 
 		msg := readOp(c)
 		assert.Equal(t, errorMsg, msg.Type)
-		assert.Equal(t, `[{"message":"Unexpected !","locations":[{"line":1,"column":1}],"extensions":{"code":"GRAPHQL_PARSE_FAILED"}}]`, string(msg.Payload))
+		assert.JSONEq(t, `[{"message":"Unexpected !","locations":[{"line":1,"column":1}],"extensions":{"code":"GRAPHQL_PARSE_FAILED"}}]`, string(msg.Payload))
 	})
 
 	t.Run("client can receive data", func(t *testing.T) {
@@ -125,13 +125,13 @@ func TestWebsocket(t *testing.T) {
 		msg := readOp(c)
 		require.Equal(t, dataMsg, msg.Type, string(msg.Payload))
 		require.Equal(t, "test_1", msg.ID, string(msg.Payload))
-		require.Equal(t, `{"data":{"name":"test"}}`, string(msg.Payload))
+		require.JSONEq(t, `{"data":{"name":"test"}}`, string(msg.Payload))
 
 		handler.SendNextSubscriptionMessage()
 		msg = readOp(c)
 		require.Equal(t, dataMsg, msg.Type, string(msg.Payload))
 		require.Equal(t, "test_1", msg.ID, string(msg.Payload))
-		require.Equal(t, `{"data":{"name":"test"}}`, string(msg.Payload))
+		require.JSONEq(t, `{"data":{"name":"test"}}`, string(msg.Payload))
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: stopMsg, ID: "test_1"}))
 
@@ -283,7 +283,7 @@ func TestWebsocketInitFunc(t *testing.T) {
 
 		msg := readOp(c)
 		assert.Equal(t, connectionErrorMsg, msg.Type)
-		assert.Equal(t, `{"message":"invalid init payload"}`, string(msg.Payload))
+		assert.JSONEq(t, `{"message":"invalid init payload"}`, string(msg.Payload))
 	})
 
 	t.Run("can return context for request from WebsocketInitFunc", func(t *testing.T) {
@@ -344,7 +344,7 @@ func TestWebsocketInitFunc(t *testing.T) {
 		time.Sleep(time.Millisecond * 10)
 		m := readOp(c)
 		assert.Equal(t, connectionErrorMsg, m.Type)
-		assert.Equal(t, `{"message":"beep boop"}`, string(m.Payload))
+		assert.JSONEq(t, `{"message":"beep boop"}`, string(m.Payload))
 	})
 	t.Run("accept connection if WebsocketInitFunc is provided and is accepting connection", func(t *testing.T) {
 		h := testserver.New()
@@ -611,7 +611,7 @@ func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {
 		_, srv := initialize(transport.Websocket{})
 		defer srv.Close()
 
-		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
+		c := wsConnectWithSubprotocol(srv.URL, graphqltransportwsSubprotocol)
 		defer c.Close()
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
@@ -622,7 +622,7 @@ func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {
 		handler, srv := initialize(transport.Websocket{})
 		defer srv.Close()
 
-		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
+		c := wsConnectWithSubprotocol(srv.URL, graphqltransportwsSubprotocol)
 		defer c.Close()
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
@@ -638,13 +638,13 @@ func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {
 		msg := readOp(c)
 		require.Equal(t, graphqltransportwsNextMsg, msg.Type, string(msg.Payload))
 		require.Equal(t, "test_1", msg.ID, string(msg.Payload))
-		require.Equal(t, `{"data":{"name":"test"}}`, string(msg.Payload))
+		require.JSONEq(t, `{"data":{"name":"test"}}`, string(msg.Payload))
 
 		handler.SendNextSubscriptionMessage()
 		msg = readOp(c)
 		require.Equal(t, graphqltransportwsNextMsg, msg.Type, string(msg.Payload))
 		require.Equal(t, "test_1", msg.ID, string(msg.Payload))
-		require.Equal(t, `{"data":{"name":"test"}}`, string(msg.Payload))
+		require.JSONEq(t, `{"data":{"name":"test"}}`, string(msg.Payload))
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsCompleteMsg, ID: "test_1"}))
 
@@ -657,7 +657,7 @@ func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {
 		_, srv := initialize(transport.Websocket{KeepAlivePingInterval: 5 * time.Millisecond})
 		defer srv.Close()
 
-		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
+		c := wsConnectWithSubprotocol(srv.URL, graphqltransportwsSubprotocol)
 		defer c.Close()
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
@@ -683,7 +683,7 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 		_, srv := initialize(transport.Websocket{PingPongInterval: 20 * time.Millisecond})
 		defer srv.Close()
 
-		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
+		c := wsConnectWithSubprotocol(srv.URL, graphqltransportwsSubprotocol)
 		defer c.Close()
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
@@ -703,7 +703,7 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 		_, srv := initialize(transport.Websocket{PingPongInterval: 10 * time.Millisecond})
 		defer srv.Close()
 
-		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
+		c := wsConnectWithSubprotocol(srv.URL, graphqltransportwsSubprotocol)
 		defer c.Close()
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
@@ -727,7 +727,7 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 		srv := httptest.NewServer(h)
 		defer srv.Close()
 
-		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
+		c := wsConnectWithSubprotocol(srv.URL, graphqltransportwsSubprotocol)
 		defer c.Close()
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
@@ -758,7 +758,7 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 		srv := httptest.NewServer(h)
 		defer srv.Close()
 
-		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
+		c := wsConnectWithSubprotocol(srv.URL, graphqltransportwsSubprotocol)
 		defer c.Close()
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
@@ -804,7 +804,7 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 		h, srv := initialize(transport.Websocket{PongOnlyInterval: 10 * time.Millisecond})
 		defer srv.Close()
 
-		c := wsConnectWithSubprocotol(srv.URL, graphqltransportwsSubprotocol)
+		c := wsConnectWithSubprotocol(srv.URL, graphqltransportwsSubprotocol)
 		defer c.Close()
 
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}))
@@ -827,7 +827,7 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 		msg = readOp(c)
 		require.Equal(t, graphqltransportwsNextMsg, msg.Type, string(msg.Payload))
 		require.Equal(t, "test_1", msg.ID, string(msg.Payload))
-		require.Equal(t, `{"data":{"name":"test"}}`, string(msg.Payload))
+		require.JSONEq(t, `{"data":{"name":"test"}}`, string(msg.Payload))
 
 		// keepalive
 		msg = readOp(c)
@@ -836,13 +836,13 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 }
 
 func wsConnect(url string) *websocket.Conn {
-	return wsConnectWithSubprocotol(url, "")
+	return wsConnectWithSubprotocol(url, "")
 }
 
-func wsConnectWithSubprocotol(url, subprocotol string) *websocket.Conn {
+func wsConnectWithSubprotocol(url, subprotocol string) *websocket.Conn {
 	h := make(http.Header)
-	if subprocotol != "" {
-		h.Add("Sec-WebSocket-Protocol", subprocotol)
+	if subprotocol != "" {
+		h.Add("Sec-WebSocket-Protocol", subprotocol)
 	}
 
 	c, resp, err := websocket.DefaultDialer.Dial(strings.ReplaceAll(url, "http://", "ws://"), h)

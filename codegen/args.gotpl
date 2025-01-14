@@ -1,10 +1,20 @@
+{{ $useFunctionSyntaxForExecutionContext := .Config.UseFunctionSyntaxForExecutionContext }}
+
 {{ range $name, $args := .Args }}
-func (ec *executionContext) {{ $name }}(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+{{ if $useFunctionSyntaxForExecutionContext -}}
+func {{ $name }}(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
+{{- else -}}
+func (ec *executionContext) {{ $name }}(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+{{- end }}
 	var err error
-	args := map[string]interface{}{}
+	args := map[string]any{}
 
 	{{- range $i, $arg := . }}
+		{{ if $useFunctionSyntaxForExecutionContext -}}
+		arg{{$i}}, err := {{ $name }}{{$arg.Name | go}}(ctx, ec, rawArgs)
+		{{- else -}}
 		arg{{$i}}, err := ec.{{ $name }}{{$arg.Name | go}}(ctx, rawArgs)
+		{{- end }}
 		if err != nil {
 			return nil, err
 		}
@@ -14,31 +24,44 @@ func (ec *executionContext) {{ $name }}(ctx context.Context, rawArgs map[string]
 }
 
 	{{- range $i, $arg := . }}
+		{{ if $useFunctionSyntaxForExecutionContext -}}
+		func {{ $name }}{{$arg.Name | go}}(
+			ctx context.Context,
+			ec *executionContext,
+			rawArgs map[string]any,
+		) ({{ $arg.TypeReference.GO | ref}}, error) {
+		{{- else -}}
 		func (ec *executionContext) {{ $name }}{{$arg.Name | go}}(
 			ctx context.Context,
-			rawArgs map[string]interface{},
+			rawArgs map[string]any,
 		) ({{ $arg.TypeReference.GO | ref}}, error) {
+		{{- end }}
 			{{- if not .CallArgumentDirectivesWithNull}}
-				// We won't call the directive if the argument is null.
-				// Set call_argument_directives_with_null to true to call directives
-				// even if the argument is null.
-				_, ok := rawArgs[{{$arg.Name|quote}}]
-				if !ok {
+				{{- /*
+				We won't call the directive if the argument is null.
+				Set call_argument_directives_with_null to true to call directives
+				even if the argument is null.
+				*/ -}}
+				if _, ok := rawArgs[{{$arg.Name|quote}}]; !ok {
 					var zeroVal {{ $arg.TypeReference.GO | ref}}
 					return zeroVal, nil
 				}
 			{{end}}
 			ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField({{$arg.Name|quote}}))
 			{{- if $arg.ImplDirectives }}
-				directive0 := func(ctx context.Context) (interface{}, error) {
+				directive0 := func(ctx context.Context) (any, error) {
 					tmp, ok := rawArgs[{{$arg.Name|quote}}]
 					if !ok {
 						var zeroVal {{ $arg.TypeReference.GO | ref}}
 						return zeroVal, nil
 					}
+					{{ if $useFunctionSyntaxForExecutionContext -}}
+					return {{ $arg.TypeReference.UnmarshalFunc }}(ctx, ec, tmp)
+					{{- else -}}
 					return ec.{{ $arg.TypeReference.UnmarshalFunc }}(ctx, tmp)
+					{{- end }}
 				}
-				{{ template "implDirectives" $arg }}
+				{{ template "implDirectives" (dict "Field" $arg "UseFunctionSyntaxForExecutionContext" $useFunctionSyntaxForExecutionContext) }}
 				tmp, err := directive{{$arg.ImplDirectives|len}}(ctx)
 				if err != nil {
 					var zeroVal {{ $arg.TypeReference.GO | ref}}
@@ -57,7 +80,11 @@ func (ec *executionContext) {{ $name }}(ctx context.Context, rawArgs map[string]
 				}
 			{{- else }}
 				if tmp, ok := rawArgs[{{$arg.Name|quote}}]; ok {
+					{{ if $useFunctionSyntaxForExecutionContext -}}
+					return {{ $arg.TypeReference.UnmarshalFunc }}(ctx, ec, tmp)
+					{{- else -}}
 					return ec.{{ $arg.TypeReference.UnmarshalFunc }}(ctx, tmp)
+					{{- end }}
 				}
 
 				var zeroVal {{ $arg.TypeReference.GO | ref}}

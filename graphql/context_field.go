@@ -34,7 +34,7 @@ type FieldContext struct {
 	// Note that, the returned child FieldContext represents the context as it was
 	// before the execution of the field resolver. For example:
 	//
-	//	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (interface{}, error) {
+	//	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (any, error) {
 	//		fc := graphql.GetFieldContext(ctx)
 	//		opCtx := graphql.GetOperationContext(ctx)
 	//		collected := graphql.CollectFields(opCtx, fc.Field.Selections, []string{"User"})

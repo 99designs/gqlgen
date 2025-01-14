@@ -63,11 +63,11 @@ func (b *Binder) FindTypeFromName(name string) (types.Type, error) {
 
 func (b *Binder) FindType(pkgName, typeName string) (types.Type, error) {
 	if pkgName == "" {
-		if typeName == "map[string]interface{}" {
+		if typeName == "map[string]any" || typeName == "map[string]interface{}" {
 			return MapType, nil
 		}
 
-		if typeName == "interface{}" {
+		if typeName == "any" || typeName == "interface{}" {
 			return InterfaceType, nil
 		}
 	}
@@ -103,11 +103,11 @@ func (b *Binder) DefaultUserObject(name string) (types.Type, error) {
 		return nil, fmt.Errorf("%s not found in typemap", name)
 	}
 
-	if models[0] == "map[string]interface{}" {
+	if models[0] == "map[string]any" || models[0] == "map[string]interface{}" {
 		return MapType, nil
 	}
 
-	if models[0] == "interface{}" {
+	if models[0] == "any" || models[0] == "interface{}" {
 		return InterfaceType, nil
 	}
 
@@ -126,7 +126,7 @@ func (b *Binder) DefaultUserObject(name string) (types.Type, error) {
 
 func (b *Binder) FindObject(pkgName, typeName string) (types.Object, error) {
 	if pkgName == "" {
-		return nil, errors.New("package cannot be nil")
+		return nil, fmt.Errorf("package cannot be nil in FindObject for type: %s", typeName)
 	}
 
 	pkg := b.pkgs.LoadWithTypes(pkgName)
@@ -258,7 +258,7 @@ func (ref *TypeReference) IsPtrToSlice() bool {
 
 func (ref *TypeReference) IsPtrToIntf() bool {
 	if ref.IsPtr() {
-		_, isPointerToInterface := ref.GO.(*types.Pointer).Elem().(*types.Interface)
+		_, isPointerToInterface := types.Unalias(ref.GO.(*types.Pointer).Elem()).(*types.Interface)
 		return isPointerToInterface
 	}
 	return false
@@ -344,7 +344,7 @@ func isIntf(t types.Type) bool {
 	if t == nil {
 		return true
 	}
-	_, ok := t.(*types.Interface)
+	_, ok := types.Unalias(t).(*types.Interface)
 	return ok
 }
 
@@ -398,7 +398,7 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 	}
 
 	for _, model := range b.cfg.Models[schemaType.Name()].Model {
-		if model == "map[string]interface{}" {
+		if model == "map[string]any" || model == "map[string]interface{}" {
 			if !isMap(bindTarget) {
 				continue
 			}
@@ -410,7 +410,7 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 			}, nil
 		}
 
-		if model == "interface{}" {
+		if model == "any" || model == "interface{}" {
 			if !isIntf(bindTarget) {
 				continue
 			}
@@ -499,6 +499,7 @@ func isValid(t types.Type) bool {
 }
 
 func (b *Binder) CopyModifiersFromAst(t *ast.Type, base types.Type) types.Type {
+	base = types.Unalias(base)
 	if t.Elem != nil {
 		child := b.CopyModifiersFromAst(t.Elem, base)
 		if _, isStruct := child.Underlying().(*types.Struct); isStruct && !b.cfg.OmitSliceElementPointers {
@@ -528,11 +529,11 @@ func IsNilable(t types.Type) bool {
 		return IsNilable(namedType.Underlying())
 	}
 	_, isPtr := t.(*types.Pointer)
-	_, isMap := t.(*types.Map)
+	_, isNilableMap := t.(*types.Map)
 	_, isInterface := t.(*types.Interface)
 	_, isSlice := t.(*types.Slice)
 	_, isChan := t.(*types.Chan)
-	return isPtr || isMap || isInterface || isSlice || isChan
+	return isPtr || isNilableMap || isInterface || isSlice || isChan
 }
 
 func hasMethod(it types.Type, name string) bool {
@@ -553,8 +554,9 @@ func hasMethod(it types.Type, name string) bool {
 }
 
 func basicUnderlying(it types.Type) *types.Basic {
+	it = types.Unalias(it)
 	if ptr, isPtr := it.(*types.Pointer); isPtr {
-		it = ptr.Elem()
+		it = types.Unalias(ptr.Elem())
 	}
 	namedType, ok := it.(*types.Named)
 	if !ok {

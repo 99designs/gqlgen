@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"strconv"
 )
 
@@ -62,24 +63,62 @@ func MarshalInt32(i int32) Marshaler {
 func UnmarshalInt32(v any) (int32, error) {
 	switch v := v.(type) {
 	case string:
-		iv, err := strconv.ParseInt(v, 10, 32)
+		iv, err := strconv.ParseInt(v, 10, 64)
 		if err != nil {
 			return 0, err
 		}
-		return int32(iv), nil
+		return safeCastInt32(iv)
 	case int:
-		return int32(v), nil
+		return safeCastInt32(int64(v))
 	case int64:
-		return int32(v), nil
+		return safeCastInt32(v)
 	case json.Number:
-		iv, err := strconv.ParseInt(string(v), 10, 32)
+		iv, err := strconv.ParseInt(string(v), 10, 64)
 		if err != nil {
 			return 0, err
 		}
-		return int32(iv), nil
+		return safeCastInt32(iv)
 	case nil:
 		return 0, nil
 	default:
 		return 0, fmt.Errorf("%T is not an int", v)
 	}
+}
+
+// IntegerError is an error type that allows users to identify errors associated
+// with receiving an integer value that is not valid for the specific integer
+// type designated by the API. IntegerErrors designate otherwise valid unsigned
+// or signed 64-bit integers that are invalid in a specific context: they do not
+// designate integers that overflow 64-bit versions of the current type.
+type IntegerError struct {
+	Message string
+}
+
+func (e IntegerError) Error() string {
+	return e.Message
+}
+
+type Int32OverflowError struct {
+	Value int64
+	*IntegerError
+}
+
+func newInt32OverflowError(i int64) *Int32OverflowError {
+	return &Int32OverflowError{
+		Value: i,
+		IntegerError: &IntegerError{
+			Message: fmt.Sprintf("%d overflows signed 32-bit integer", i),
+		},
+	}
+}
+
+func (e *Int32OverflowError) Unwrap() error {
+	return e.IntegerError
+}
+
+func safeCastInt32(i int64) (int32, error) {
+	if i > math.MaxInt32 || i < math.MinInt32 {
+		return 0, newInt32OverflowError(i)
+	}
+	return int32(i), nil
 }

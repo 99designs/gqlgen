@@ -20,7 +20,7 @@
 
 {{ range $resolver := .Resolvers -}}
 	{{ if $resolver.Comment -}}
-		// {{ $resolver.Comment }}
+		{{with $resolver.Comment}}{{.|prefixLines "// "}}{{end}}
 	{{- else if not $.OmitTemplateComment -}}
 		// {{ $resolver.Field.GoFieldName }} is the resolver for the {{ $resolver.Field.Name }} field.
 	{{- end }}

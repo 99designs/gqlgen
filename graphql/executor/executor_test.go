@@ -20,7 +20,7 @@ func TestExecutor(t *testing.T) {
 
 	t.Run("calls query on executable schema", func(t *testing.T) {
 		resp := query(exec, "", "{name}")
-		assert.Equal(t, `{"name":"test"}`, string(resp.Data))
+		assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 	})
 
 	t.Run("validates operation", func(t *testing.T) {
@@ -51,7 +51,7 @@ func TestExecutor(t *testing.T) {
 		})
 
 		resp := query(exec, "", "{name}")
-		assert.Equal(t, `{"name":"test"}`, string(resp.Data))
+		assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 		assert.Equal(t, []string{"first", "second"}, calls)
 	})
 
@@ -67,7 +67,7 @@ func TestExecutor(t *testing.T) {
 		})
 
 		resp := query(exec, "", "{name}")
-		assert.Equal(t, `{"name":"test"}`, string(resp.Data))
+		assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 		assert.Equal(t, []string{"first", "second"}, calls)
 	})
 
@@ -83,7 +83,7 @@ func TestExecutor(t *testing.T) {
 		})
 
 		resp := query(exec, "", "{name}")
-		assert.Equal(t, `{"name":"test"}`, string(resp.Data))
+		assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 		assert.Equal(t, []string{"first", "second"}, calls)
 	})
 
@@ -99,7 +99,7 @@ func TestExecutor(t *testing.T) {
 		})
 
 		resp := query(exec, "", "{name}")
-		assert.Equal(t, `{"name":"test"}`, string(resp.Data))
+		assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 		assert.Equal(t, []string{"first", "second"}, calls)
 	})
 
@@ -118,7 +118,7 @@ func TestExecutor(t *testing.T) {
 			},
 		})
 		resp := query(exec, "", "{name}")
-		assert.Equal(t, `{"name":"test"}`, string(resp.Data))
+		assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 		assert.Equal(t, []string{"param", "context"}, calls)
 	})
 
@@ -147,7 +147,7 @@ func TestExecutor(t *testing.T) {
 
 		t.Run("cache miss populates cache", func(t *testing.T) {
 			resp := query(exec, "Foo", qry)
-			assert.Equal(t, `{"name":"test"}`, string(resp.Data))
+			assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 
 			cacheDoc, ok := cache.Get(ctx, qry)
 			require.True(t, ok)
@@ -160,12 +160,35 @@ func TestExecutor(t *testing.T) {
 			cache.Add(ctx, qry, doc)
 
 			resp := query(exec, "Bar", qry)
-			assert.Equal(t, `{"name":"test"}`, string(resp.Data))
+			assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 
 			cacheDoc, ok := cache.Get(ctx, qry)
 			require.True(t, ok)
 			require.Equal(t, "Bar", cacheDoc.Operations[0].Name)
 		})
+	})
+}
+
+func TestExecutorDisableSuggestion(t *testing.T) {
+	exec := testexecutor.New()
+	t.Run("by default, the error message will include suggestions", func(t *testing.T) {
+		resp := query(exec, "", "{nam}")
+		assert.Equal(t, "", string(resp.Data))
+		assert.Equal(t, "input:1: Cannot query field \"nam\" on type \"Query\". Did you mean \"name\"?\n", resp.Errors.Error())
+	})
+
+	t.Run("disable suggestion, the error message will not include suggestions", func(t *testing.T) {
+		exec.SetDisableSuggestion(true)
+		resp := query(exec, "", "{nam}")
+		assert.Equal(t, "", string(resp.Data))
+		assert.Len(t, resp.Errors, 1)
+		assert.Equal(t, "input:1: Cannot query field \"nam\" on type \"Query\".\n", resp.Errors.Error())
+
+		// check if the error message is displayed correctly even if an error occurs multiple times
+		resp = query(exec, "", "{nam}")
+		assert.Equal(t, "", string(resp.Data))
+		assert.Len(t, resp.Errors, 1)
+		assert.Equal(t, "input:1: Cannot query field \"nam\" on type \"Query\".\n", resp.Errors.Error())
 	})
 }
 

@@ -66,7 +66,7 @@ var altairPage = template.Must(template.New("altair").Parse(`<!doctype html>
 </html>`))
 
 // AltairHandler responsible for setting up the altair playground
-func AltairHandler(title, endpoint string, options map[string]interface{}) http.HandlerFunc {
+func AltairHandler(title, endpoint string, options map[string]any) http.HandlerFunc {
 	jsonOptions, err := json.Marshal(options)
 	if err != nil {
 		jsonOptions = []byte("{}")

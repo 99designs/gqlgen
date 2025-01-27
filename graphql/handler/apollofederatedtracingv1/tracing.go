@@ -19,17 +19,17 @@ const (
 
 type (
 	Tracer struct {
-		ClientName string
-		Version    string
-		Hostname   string
-		Errors     TraceErrors
+		ClientName   string
+		Version      string
+		Hostname     string
+		ErrorOptions *ErrorOptions
 	}
 
 	treeBuilderKey string
 )
 
-type TraceErrors struct {
-	// ErrorOption is the option to handle errors in the trace, it can be one of the following:
+type ErrorOptions struct {
+	// ErrorOptions is the option to handle errors in the trace, it can be one of the following:
 	// - "masked": masks all errors
 	// - "all": includes all errors
 	// - "transform": includes all errors but transforms them using TransformFunction, which can allow users to redact sensitive information
@@ -80,7 +80,7 @@ func (t *Tracer) InterceptOperation(ctx context.Context, next graphql.OperationH
 		return next(ctx)
 	}
 
-	return next(context.WithValue(ctx, key, NewTreeBuilder(t.Errors)))
+	return next(context.WithValue(ctx, key, NewTreeBuilder(t.ErrorOptions)))
 }
 
 // InterceptField is called on each field's resolution, including information about the path and parent node.

@@ -200,6 +200,7 @@ func (tb *TreeBuilder) addProtobufError(
 		nodeRef = tb.nodes[gqlError.Path.String()].self
 	} else {
 		fmt.Println("Error: Path not found in node map")
+		tb.mu.Unlock()
 		return
 	}
 
@@ -218,6 +219,7 @@ func (tb *TreeBuilder) addProtobufError(
 	gqlJson, err := json.Marshal(gqlError)
 	if err != nil {
 		fmt.Println(err)
+		tb.mu.Unlock()
 		return
 	}
 

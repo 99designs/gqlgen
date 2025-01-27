@@ -2,6 +2,7 @@ package apollofederatedtracingv1
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"sync"
@@ -11,12 +12,14 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler/apollofederatedtracingv1/generated"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 type TreeBuilder struct {
-	Trace    *generated.Trace
-	rootNode generated.Trace_Node
-	nodes    map[string]NodeMap // nodes is used to store a pointer map using the node path (e.g. todo[0].id) to itself as well as it's parent
+	Trace        *generated.Trace
+	rootNode     generated.Trace_Node
+	nodes        map[string]NodeMap // nodes is used to store a pointer map using the node path (e.g. todo[0].id) to itself as well as it's parent
+	errorOptions TraceErrors
 
 	startTime *time.Time
 	stopped   bool
@@ -29,9 +32,10 @@ type NodeMap struct {
 }
 
 // NewTreeBuilder is used to start the node tree with a default root node, along with the related tree nodes map entry
-func NewTreeBuilder() *TreeBuilder {
+func NewTreeBuilder(errorOptions TraceErrors) *TreeBuilder {
 	tb := TreeBuilder{
-		rootNode: generated.Trace_Node{},
+		rootNode:     generated.Trace_Node{},
+		errorOptions: errorOptions,
 	}
 
 	t := generated.Trace{
@@ -99,6 +103,23 @@ func (tb *TreeBuilder) WillResolveField(ctx context.Context) {
 	node.ParentType = fc.Object
 }
 
+func (tb *TreeBuilder) DidEncounterErrors(ctx context.Context, gqlErrors gqlerror.List) {
+	if tb.startTime == nil {
+		fmt.Println(errors.New("DidEncounterErrors called before StartTimer"))
+		return
+	}
+	if tb.stopped {
+		fmt.Println(errors.New("DidEncounterErrors called after StopTimer"))
+		return
+	}
+
+	for _, err := range gqlErrors {
+		if err != nil {
+			tb.addProtobufError(*err)
+		}
+	}
+}
+
 // newNode is called on each new node within the AST and sets related values such as the entry in the tree.node map and ID attribute
 func (tb *TreeBuilder) newNode(path *graphql.FieldContext) *generated.Trace_Node {
 	// if the path is empty, it is the root node of the operation
@@ -143,4 +164,52 @@ func (tb *TreeBuilder) ensureParentNode(path *graphql.FieldContext) *generated.T
 	}
 
 	return tb.newNode(path.Parent)
+}
+
+func (tb *TreeBuilder) addProtobufError(
+	gqlError gqlerror.Error,
+) {
+	if tb.startTime == nil {
+		fmt.Println(errors.New("addProtobufError called before StartTimer"))
+		return
+	}
+	if tb.stopped {
+		fmt.Println(errors.New("addProtobufError called after StopTimer"))
+		return
+	}
+	tb.mu.Lock()
+	var nodeRef *generated.Trace_Node
+
+	if tb.nodes[gqlError.Path.String()].self != nil {
+		nodeRef = tb.nodes[gqlError.Path.String()].self
+	} else {
+		fmt.Println("Error: Path not found in node map")
+		return
+	}
+
+	println(tb.errorOptions.ErrorOption, tb.errorOptions.TransformFunction)
+	if tb.errorOptions.ErrorOption != ERROR_UNMODIFIED && tb.errorOptions.TransformFunction != nil {
+		gqlError = tb.errorOptions.TransformFunction(gqlError)
+	}
+
+	errorLocations := make([]*generated.Trace_Location, len(gqlError.Locations))
+	for i, loc := range gqlError.Locations {
+		errorLocations[i] = &generated.Trace_Location{
+			Line:   uint32(loc.Line),
+			Column: uint32(loc.Column),
+		}
+	}
+
+	gqlJson, err := json.Marshal(gqlError)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+
+	nodeRef.Error = append(nodeRef.Error, &generated.Trace_Error{
+		Message:  gqlError.Message,
+		Location: errorLocations,
+		Json:     string(gqlJson),
+	})
+	tb.mu.Unlock()
 }

@@ -79,6 +79,28 @@ func (t *Tracer) InterceptOperation(ctx context.Context, next graphql.OperationH
 	if !t.shouldTrace(ctx) {
 		return next(ctx)
 	}
+	if t.Errors == nil {
+		t.Errors = &TraceErrors{
+			ErrorOption:       ERROR_MASKED,
+			TransformFunction: defaultErrorTransform,
+		}
+	}
+
+	switch t.Errors.ErrorOption {
+	case ERROR_MASKED:
+		t.Errors.TransformFunction = defaultErrorTransform
+	case ERROR_UNMODIFIED:
+		t.Errors.TransformFunction = nil
+	case ERROR_TRANSFORM:
+		if t.Errors.TransformFunction == nil {
+			t.Errors.TransformFunction = defaultErrorTransform
+		}
+	default:
+		t.Errors = &TraceErrors{
+			ErrorOption:       ERROR_MASKED,
+			TransformFunction: defaultErrorTransform,
+		}
+	}
 	if t.Errors == nil || t.Errors.ErrorOption == ERROR_MASKED {
 		t.Errors = &TraceErrors{
 			ErrorOption:       ERROR_MASKED,

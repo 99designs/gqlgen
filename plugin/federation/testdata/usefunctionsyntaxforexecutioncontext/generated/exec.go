@@ -1437,6 +1437,64 @@ func field_Query__entities_argsRepresentations(
 	return zeroVal, nil
 }
 
+func field___Directive_args_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := field___Directive_args_argsIncludeDeprecated(ctx, ec, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+}
+func field___Directive_args_argsIncludeDeprecated(
+	ctx context.Context,
+	ec *executionContext,
+	rawArgs map[string]any,
+) (*bool, error) {
+	if _, ok := rawArgs["includeDeprecated"]; !ok {
+		var zeroVal *bool
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		return unmarshalOBoolean2ᚖbool(ctx, ec, tmp)
+	}
+
+	var zeroVal *bool
+	return zeroVal, nil
+}
+
+func field___Field_args_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := field___Field_args_argsIncludeDeprecated(ctx, ec, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+}
+func field___Field_args_argsIncludeDeprecated(
+	ctx context.Context,
+	ec *executionContext,
+	rawArgs map[string]any,
+) (*bool, error) {
+	if _, ok := rawArgs["includeDeprecated"]; !ok {
+		var zeroVal *bool
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
+	if tmp, ok := rawArgs["includeDeprecated"]; ok {
+		return unmarshalOBoolean2ᚖbool(ctx, ec, tmp)
+	}
+
+	var zeroVal *bool
+	return zeroVal, nil
+}
+
 func field___Type_enumValues_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -3780,6 +3838,8 @@ func fieldContext_Query___type(ctx context.Context, ec *executionContext, field 
 				return fieldContext___Type_ofType(ctx, ec, field)
 			case "specifiedByURL":
 				return fieldContext___Type_specifiedByURL(ctx, ec, field)
+			case "isOneOf":
+				return fieldContext___Type_isOneOf(ctx, ec, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 		},
@@ -4368,7 +4428,7 @@ func ___Directive_args(ctx context.Context, ec *executionContext, field graphql.
 	return marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx, ec, field.Selections, res)
 }
 
-func fieldContext___Directive_args(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func fieldContext___Directive_args(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Directive",
 		Field:      field,
@@ -4384,9 +4444,24 @@ func fieldContext___Directive_args(_ context.Context, ec *executionContext, fiel
 				return fieldContext___InputValue_type(ctx, ec, field)
 			case "defaultValue":
 				return fieldContext___InputValue_defaultValue(ctx, ec, field)
+			case "isDeprecated":
+				return fieldContext___InputValue_isDeprecated(ctx, ec, field)
+			case "deprecationReason":
+				return fieldContext___InputValue_deprecationReason(ctx, ec, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __InputValue", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = field___Directive_args_args(ctx, ec, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -4721,7 +4796,7 @@ func ___Field_args(ctx context.Context, ec *executionContext, field graphql.Coll
 	return marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx, ec, field.Selections, res)
 }
 
-func fieldContext___Field_args(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func fieldContext___Field_args(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Field",
 		Field:      field,
@@ -4737,9 +4812,24 @@ func fieldContext___Field_args(_ context.Context, ec *executionContext, field gr
 				return fieldContext___InputValue_type(ctx, ec, field)
 			case "defaultValue":
 				return fieldContext___InputValue_defaultValue(ctx, ec, field)
+			case "isDeprecated":
+				return fieldContext___InputValue_isDeprecated(ctx, ec, field)
+			case "deprecationReason":
+				return fieldContext___InputValue_deprecationReason(ctx, ec, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __InputValue", field.Name)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = field___Field_args_args(ctx, ec, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -4803,6 +4893,8 @@ func fieldContext___Field_type(_ context.Context, ec *executionContext, field gr
 				return fieldContext___Type_ofType(ctx, ec, field)
 			case "specifiedByURL":
 				return fieldContext___Type_specifiedByURL(ctx, ec, field)
+			case "isOneOf":
+				return fieldContext___Type_isOneOf(ctx, ec, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 		},
@@ -5039,6 +5131,8 @@ func fieldContext___InputValue_type(_ context.Context, ec *executionContext, fie
 				return fieldContext___Type_ofType(ctx, ec, field)
 			case "specifiedByURL":
 				return fieldContext___Type_specifiedByURL(ctx, ec, field)
+			case "isOneOf":
+				return fieldContext___Type_isOneOf(ctx, ec, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 		},
@@ -5079,6 +5173,91 @@ func fieldContext___InputValue_defaultValue(_ context.Context, ec *executionCont
 		Object:     "__InputValue",
 		Field:      field,
 		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func ___InputValue_isDeprecated(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.InputValue) (ret graphql.Marshaler) {
+	fc, err := fieldContext___InputValue_isDeprecated(ctx, ec, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsDeprecated(), nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return marshalNBoolean2bool(ctx, ec, field.Selections, res)
+}
+
+func fieldContext___InputValue_isDeprecated(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "__InputValue",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func ___InputValue_deprecationReason(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.InputValue) (ret graphql.Marshaler) {
+	fc, err := fieldContext___InputValue_deprecationReason(ctx, ec, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DeprecationReason(), nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return marshalOString2ᚖstring(ctx, ec, field.Selections, res)
+}
+
+func fieldContext___InputValue_deprecationReason(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "__InputValue",
+		Field:      field,
+		IsMethod:   true,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
@@ -5187,6 +5366,8 @@ func fieldContext___Schema_types(_ context.Context, ec *executionContext, field 
 				return fieldContext___Type_ofType(ctx, ec, field)
 			case "specifiedByURL":
 				return fieldContext___Type_specifiedByURL(ctx, ec, field)
+			case "isOneOf":
+				return fieldContext___Type_isOneOf(ctx, ec, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 		},
@@ -5253,6 +5434,8 @@ func fieldContext___Schema_queryType(_ context.Context, ec *executionContext, fi
 				return fieldContext___Type_ofType(ctx, ec, field)
 			case "specifiedByURL":
 				return fieldContext___Type_specifiedByURL(ctx, ec, field)
+			case "isOneOf":
+				return fieldContext___Type_isOneOf(ctx, ec, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 		},
@@ -5316,6 +5499,8 @@ func fieldContext___Schema_mutationType(_ context.Context, ec *executionContext,
 				return fieldContext___Type_ofType(ctx, ec, field)
 			case "specifiedByURL":
 				return fieldContext___Type_specifiedByURL(ctx, ec, field)
+			case "isOneOf":
+				return fieldContext___Type_isOneOf(ctx, ec, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 		},
@@ -5379,6 +5564,8 @@ func fieldContext___Schema_subscriptionType(_ context.Context, ec *executionCont
 				return fieldContext___Type_ofType(ctx, ec, field)
 			case "specifiedByURL":
 				return fieldContext___Type_specifiedByURL(ctx, ec, field)
+			case "isOneOf":
+				return fieldContext___Type_isOneOf(ctx, ec, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 		},
@@ -5690,6 +5877,8 @@ func fieldContext___Type_interfaces(_ context.Context, ec *executionContext, fie
 				return fieldContext___Type_ofType(ctx, ec, field)
 			case "specifiedByURL":
 				return fieldContext___Type_specifiedByURL(ctx, ec, field)
+			case "isOneOf":
+				return fieldContext___Type_isOneOf(ctx, ec, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 		},
@@ -5753,6 +5942,8 @@ func fieldContext___Type_possibleTypes(_ context.Context, ec *executionContext, 
 				return fieldContext___Type_ofType(ctx, ec, field)
 			case "specifiedByURL":
 				return fieldContext___Type_specifiedByURL(ctx, ec, field)
+			case "isOneOf":
+				return fieldContext___Type_isOneOf(ctx, ec, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 		},
@@ -5866,6 +6057,10 @@ func fieldContext___Type_inputFields(_ context.Context, ec *executionContext, fi
 				return fieldContext___InputValue_type(ctx, ec, field)
 			case "defaultValue":
 				return fieldContext___InputValue_defaultValue(ctx, ec, field)
+			case "isDeprecated":
+				return fieldContext___InputValue_isDeprecated(ctx, ec, field)
+			case "deprecationReason":
+				return fieldContext___InputValue_deprecationReason(ctx, ec, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __InputValue", field.Name)
 		},
@@ -5929,6 +6124,8 @@ func fieldContext___Type_ofType(_ context.Context, ec *executionContext, field g
 				return fieldContext___Type_ofType(ctx, ec, field)
 			case "specifiedByURL":
 				return fieldContext___Type_specifiedByURL(ctx, ec, field)
+			case "isOneOf":
+				return fieldContext___Type_isOneOf(ctx, ec, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 		},
@@ -5972,6 +6169,47 @@ func fieldContext___Type_specifiedByURL(_ context.Context, ec *executionContext,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func ___Type_isOneOf(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
+	fc, err := fieldContext___Type_isOneOf(ctx, ec, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsOneOf(), nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return marshalOBoolean2bool(ctx, ec, field.Selections, res)
+}
+
+func fieldContext___Type_isOneOf(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "__Type",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
 		},
 	}
 	return fc, nil
@@ -7545,6 +7783,13 @@ func ___InputValue(ctx context.Context, ec *executionContext, sel ast.SelectionS
 			}
 		case "defaultValue":
 			out.Values[i] = ___InputValue_defaultValue(ctx, ec, field, obj)
+		case "isDeprecated":
+			out.Values[i] = ___InputValue_isDeprecated(ctx, ec, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "deprecationReason":
+			out.Values[i] = ___InputValue_deprecationReason(ctx, ec, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -7657,6 +7902,8 @@ func ___Type(ctx context.Context, ec *executionContext, sel ast.SelectionSet, ob
 			out.Values[i] = ___Type_ofType(ctx, ec, field, obj)
 		case "specifiedByURL":
 			out.Values[i] = ___Type_specifiedByURL(ctx, ec, field, obj)
+		case "isOneOf":
+			out.Values[i] = ___Type_isOneOf(ctx, ec, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

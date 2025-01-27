@@ -131,7 +131,7 @@ func (tb *TreeBuilder) DidEncounterErrors(ctx context.Context, gqlErrors gqlerro
 
 	for _, err := range gqlErrors {
 		if err != nil {
-			tb.addProtobufError(*err)
+			tb.addProtobufError(err)
 		}
 	}
 }
@@ -183,7 +183,7 @@ func (tb *TreeBuilder) ensureParentNode(path *graphql.FieldContext) *generated.T
 }
 
 func (tb *TreeBuilder) addProtobufError(
-	gqlError gqlerror.Error,
+	gqlError *gqlerror.Error,
 ) {
 	if tb.startTime == nil {
 		fmt.Println(errors.New("addProtobufError called before StartTimer"))
@@ -231,6 +231,6 @@ func (tb *TreeBuilder) addProtobufError(
 	tb.mu.Unlock()
 }
 
-func defaultErrorTransform(_ gqlerror.Error) gqlerror.Error {
-	return *gqlerror.Errorf("<masked>")
+func defaultErrorTransform(_ *gqlerror.Error) *gqlerror.Error {
+	return gqlerror.Errorf("<masked>")
 }

@@ -34,7 +34,7 @@ type TraceErrors struct {
 	// - "all": includes all errors
 	// - "transform": includes all errors but transforms them using TransformFunction, which can allow users to redact sensitive information
 	ErrorOption       string
-	TransformFunction func(gqlerror.Error) gqlerror.Error
+	TransformFunction func(g *gqlerror.Error) *gqlerror.Error
 }
 
 const (

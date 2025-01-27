@@ -157,6 +157,7 @@ func CompleteConfig(config *Config) error {
 		"include":     {SkipRuntime: true},
 		"deprecated":  {SkipRuntime: true},
 		"specifiedBy": {SkipRuntime: true},
+		"oneOf":       {SkipRuntime: true},
 	}
 
 	for key, value := range defaultDirectives {

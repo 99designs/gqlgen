@@ -81,6 +81,7 @@ func (t *Type) Fields(includeDeprecated bool) []Field {
 				Name:         arg.Name,
 				description:  arg.Description,
 				DefaultValue: defaultValue(arg.DefaultValue),
+				deprecation:  f.Directives.ForName("deprecated"),
 			})
 		}
 
@@ -107,6 +108,7 @@ func (t *Type) InputFields() []InputValue {
 			description:  f.Description,
 			Type:         WrapTypeFromType(t.schema, f.Type),
 			DefaultValue: defaultValue(f.DefaultValue),
+			deprecation:  f.Directives.ForName("deprecated"),
 		})
 	}
 	return res

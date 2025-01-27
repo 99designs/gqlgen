@@ -33,6 +33,22 @@ type NodeMap struct {
 
 // NewTreeBuilder is used to start the node tree with a default root node, along with the related tree nodes map entry
 func NewTreeBuilder(errorOptions TraceErrors) *TreeBuilder {
+	switch errorOptions.ErrorOption {
+	case ERROR_MASKED:
+		errorOptions.TransformFunction = defaultErrorTransform
+	case ERROR_UNMODIFIED:
+		errorOptions.TransformFunction = nil
+	case ERROR_TRANSFORM:
+		if errorOptions.TransformFunction == nil {
+			errorOptions.TransformFunction = defaultErrorTransform
+		}
+	default:
+		errorOptions = TraceErrors{
+			ErrorOption:       ERROR_MASKED,
+			TransformFunction: defaultErrorTransform,
+		}
+	}
+
 	tb := TreeBuilder{
 		rootNode:     generated.Trace_Node{},
 		errorOptions: errorOptions,
@@ -187,7 +203,6 @@ func (tb *TreeBuilder) addProtobufError(
 		return
 	}
 
-	println(tb.errorOptions.ErrorOption, tb.errorOptions.TransformFunction)
 	if tb.errorOptions.ErrorOption != ERROR_UNMODIFIED && tb.errorOptions.TransformFunction != nil {
 		gqlError = tb.errorOptions.TransformFunction(gqlError)
 	}
@@ -212,4 +227,8 @@ func (tb *TreeBuilder) addProtobufError(
 		Json:     string(gqlJson),
 	})
 	tb.mu.Unlock()
+}
+
+func defaultErrorTransform(_ gqlerror.Error) gqlerror.Error {
+	return *gqlerror.Errorf("<masked>")
 }

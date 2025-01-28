@@ -3,6 +3,7 @@ package apollofederatedtracingv1
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"sync"
 	"time"
 
@@ -10,18 +11,21 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler/apollofederatedtracingv1/generated"
+	tracing_logger "github.com/99designs/gqlgen/graphql/handler/apollofederatedtracingv1/logger"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 type TreeBuilder struct {
-	Trace        *generated.Trace
-	rootNode     generated.Trace_Node
-	nodes        map[string]NodeMap // nodes is used to store a pointer map using the node path (e.g. todo[0].id) to itself as well as it's parent
-	errorOptions *ErrorOptions
+	Trace    *generated.Trace
+	rootNode generated.Trace_Node
+	nodes    map[string]NodeMap // nodes is used to store a pointer map using the node path (e.g. todo[0].id) to itself as well as it's parent
 
 	startTime *time.Time
 	stopped   bool
 	mu        sync.Mutex
+
+	errorOptions *ErrorOptions
+	logger       tracing_logger.Logger
 }
 
 type NodeMap struct {
@@ -30,12 +34,17 @@ type NodeMap struct {
 }
 
 // NewTreeBuilder is used to start the node tree with a default root node, along with the related tree nodes map entry
-func NewTreeBuilder(errorOptions *ErrorOptions) *TreeBuilder {
+func NewTreeBuilder(errorOptions *ErrorOptions, logger tracing_logger.Logger) *TreeBuilder {
 	if errorOptions == nil {
 		errorOptions = &ErrorOptions{
 			ErrorOption:       ERROR_MASKED,
 			TransformFunction: defaultErrorTransform,
 		}
+	}
+
+	if logger == nil {
+		// defaults to a noop logger
+		logger = tracing_logger.New()
 	}
 
 	switch errorOptions.ErrorOption {
@@ -57,6 +66,7 @@ func NewTreeBuilder(errorOptions *ErrorOptions) *TreeBuilder {
 	tb := TreeBuilder{
 		rootNode:     generated.Trace_Node{},
 		errorOptions: errorOptions,
+		logger:       logger,
 	}
 
 	t := generated.Trace{
@@ -72,12 +82,12 @@ func NewTreeBuilder(errorOptions *ErrorOptions) *TreeBuilder {
 
 // StartTimer marks the time using protobuf timestamp format for use in timing calculations
 func (tb *TreeBuilder) StartTimer(ctx context.Context) {
-	// if tb.startTime != nil {
-	// 	fmt.Println(errors.New("StartTimer called twice"))
-	// }
-	// if tb.stopped {
-	// 	fmt.Println(errors.New("StartTimer called after StopTimer"))
-	// }
+	if tb.startTime != nil {
+		tb.logger.Println(errors.New("StartTimer called twice"))
+	}
+	if tb.stopped {
+		tb.logger.Println(errors.New("StartTimer called after StopTimer"))
+	}
 
 	opCtx := graphql.GetOperationContext(ctx)
 	start := opCtx.Stats.OperationStart
@@ -88,12 +98,13 @@ func (tb *TreeBuilder) StartTimer(ctx context.Context) {
 
 // StopTimer marks the end of the timer, along with setting the related fields in the protobuf representation
 func (tb *TreeBuilder) StopTimer(ctx context.Context) {
-	// if tb.startTime == nil {
-	// 	fmt.Println(errors.New("StopTimer called before StartTimer"))
-	// }
-	// if tb.stopped {
-	// 	fmt.Println(errors.New("StopTimer called twice"))
-	// }
+	tb.logger.Print("StopTimer called")
+	if tb.startTime == nil {
+		tb.logger.Println(errors.New("StopTimer called before StartTimer"))
+	}
+	if tb.stopped {
+		tb.logger.Println(errors.New("StopTimer called twice"))
+	}
 
 	ts := graphql.Now().UTC()
 	tb.Trace.DurationNs = uint64(ts.Sub(*tb.startTime).Nanoseconds())
@@ -104,14 +115,14 @@ func (tb *TreeBuilder) StopTimer(ctx context.Context) {
 // On each field, it calculates the time started at as now - tree.StartTime, as well as a deferred function upon full resolution of the
 // field as now - tree.StartTime; these are used by Apollo to calculate how fields are being resolved in the AST
 func (tb *TreeBuilder) WillResolveField(ctx context.Context) {
-	// if tb.startTime == nil {
-	// 	fmt.Println(errors.New("WillResolveField called before StartTimer"))
-	// 	return
-	// }
-	// if tb.stopped {
-	// 	fmt.Println(errors.New("WillResolveField called after StopTimer"))
-	//	return
-	// }
+	if tb.startTime == nil {
+		tb.logger.Println(errors.New("WillResolveField called before StartTimer"))
+		return
+	}
+	if tb.stopped {
+		tb.logger.Println(errors.New("WillResolveField called after StopTimer"))
+		return
+	}
 	fc := graphql.GetFieldContext(ctx)
 
 	node := tb.newNode(fc)
@@ -126,11 +137,11 @@ func (tb *TreeBuilder) WillResolveField(ctx context.Context) {
 
 func (tb *TreeBuilder) DidEncounterErrors(ctx context.Context, gqlErrors gqlerror.List) {
 	if tb.startTime == nil {
-		// 	fmt.Println(errors.New("DidEncounterErrors called before StartTimer"))
+		tb.logger.Println(errors.New("DidEncounterErrors called before StartTimer"))
 		return
 	}
 	if tb.stopped {
-		//	fmt.Println(errors.New("DidEncounterErrors called after StopTimer"))
+		tb.logger.Println(errors.New("DidEncounterErrors called after StopTimer"))
 		return
 	}
 
@@ -191,11 +202,11 @@ func (tb *TreeBuilder) addProtobufError(
 	gqlError *gqlerror.Error,
 ) {
 	if tb.startTime == nil {
-		// fmt.Println(errors.New("addProtobufError called before StartTimer"))
+		tb.logger.Println(errors.New("addProtobufError called before StartTimer"))
 		return
 	}
 	if tb.stopped {
-		// fmt.Println(errors.New("addProtobufError called after StopTimer"))
+		tb.logger.Println(errors.New("addProtobufError called after StopTimer"))
 		return
 	}
 	tb.mu.Lock()
@@ -204,7 +215,7 @@ func (tb *TreeBuilder) addProtobufError(
 	if tb.nodes[gqlError.Path.String()].self != nil {
 		nodeRef = tb.nodes[gqlError.Path.String()].self
 	} else {
-		// fmt.Println("Error: Path not found in node map")
+		tb.logger.Println("Error: Path not found in node map")
 		tb.mu.Unlock()
 		return
 	}
@@ -223,7 +234,7 @@ func (tb *TreeBuilder) addProtobufError(
 
 	gqlJson, err := json.Marshal(gqlError)
 	if err != nil {
-		// fmt.Println(err)
+		tb.logger.Println(err)
 		tb.mu.Unlock()
 		return
 	}

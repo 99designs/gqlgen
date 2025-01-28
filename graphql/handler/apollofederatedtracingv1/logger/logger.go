@@ -1,4 +1,4 @@
-package tracing_logger
+package logger
 
 import "log"
 
@@ -10,7 +10,7 @@ type Logger interface {
 	Printf(format string, args any)
 }
 
-func New() *NoopLogger {
+func NewNoopLogger() *NoopLogger {
 	return &NoopLogger{
 		log.New(NullWriter(1), "", log.LstdFlags),
 	}

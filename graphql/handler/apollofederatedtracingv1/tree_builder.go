@@ -44,7 +44,7 @@ func NewTreeBuilder(errorOptions *ErrorOptions, logger tracing_logger.Logger) *T
 
 	if logger == nil {
 		// defaults to a noop logger
-		logger = tracing_logger.New()
+		logger = tracing_logger.NewNoopLogger()
 	}
 
 	switch errorOptions.ErrorOption {

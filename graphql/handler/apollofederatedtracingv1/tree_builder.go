@@ -127,11 +127,11 @@ func (tb *TreeBuilder) WillResolveField(ctx context.Context) {
 
 func (tb *TreeBuilder) DidEncounterErrors(ctx context.Context, gqlErrors gqlerror.List) {
 	if tb.startTime == nil {
-	// 	fmt.Println(errors.New("DidEncounterErrors called before StartTimer"))
+		// 	fmt.Println(errors.New("DidEncounterErrors called before StartTimer"))
 		return
 	}
 	if tb.stopped {
-	//	fmt.Println(errors.New("DidEncounterErrors called after StopTimer"))
+		//	fmt.Println(errors.New("DidEncounterErrors called after StopTimer"))
 		return
 	}
 

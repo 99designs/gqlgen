@@ -5,9 +5,9 @@ import "log"
 // Logger is an interface that can be implemented to log errors that occur during the tracing process
 // This can use the default Go logger or a custom logger (e.g. logrus or zap)
 type Logger interface {
-	Print(args ...interface{})
-	Println(args ...interface{})
-	Printf(format string, args ...interface{})
+	Print(args any)
+	Println(args any)
+	Printf(format string, args any)
 }
 
 func New() *NoopLogger {
@@ -24,8 +24,8 @@ type NoopLogger struct {
 	*log.Logger
 }
 
-func (l *NoopLogger) Print(args ...interface{}) {}
+func (l *NoopLogger) Print(args any) {}
 
-func (l *NoopLogger) Printf(format string, args ...interface{}) {}
+func (l *NoopLogger) Printf(format string, args any) {}
 
-func (l *NoopLogger) Println(v ...interface{}) {}
+func (l *NoopLogger) Println(v any) {}

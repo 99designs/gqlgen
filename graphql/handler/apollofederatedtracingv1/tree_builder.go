@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"sync"
 	"time"
 
@@ -74,12 +73,12 @@ func NewTreeBuilder(errorOptions *ErrorOptions) *TreeBuilder {
 
 // StartTimer marks the time using protobuf timestamp format for use in timing calculations
 func (tb *TreeBuilder) StartTimer(ctx context.Context) {
-	if tb.startTime != nil {
-		fmt.Println(errors.New("StartTimer called twice"))
-	}
-	if tb.stopped {
-		fmt.Println(errors.New("StartTimer called after StopTimer"))
-	}
+	// if tb.startTime != nil {
+	// 	fmt.Println(errors.New("StartTimer called twice"))
+	// }
+	// if tb.stopped {
+	// 	fmt.Println(errors.New("StartTimer called after StopTimer"))
+	// }
 
 	opCtx := graphql.GetOperationContext(ctx)
 	start := opCtx.Stats.OperationStart
@@ -90,12 +89,12 @@ func (tb *TreeBuilder) StartTimer(ctx context.Context) {
 
 // StopTimer marks the end of the timer, along with setting the related fields in the protobuf representation
 func (tb *TreeBuilder) StopTimer(ctx context.Context) {
-	if tb.startTime == nil {
-		fmt.Println(errors.New("StopTimer called before StartTimer"))
-	}
-	if tb.stopped {
-		fmt.Println(errors.New("StopTimer called twice"))
-	}
+	// if tb.startTime == nil {
+	// 	fmt.Println(errors.New("StopTimer called before StartTimer"))
+	// }
+	// if tb.stopped {
+	// 	fmt.Println(errors.New("StopTimer called twice"))
+	// }
 
 	ts := graphql.Now().UTC()
 	tb.Trace.DurationNs = uint64(ts.Sub(*tb.startTime).Nanoseconds())
@@ -106,14 +105,14 @@ func (tb *TreeBuilder) StopTimer(ctx context.Context) {
 // On each field, it calculates the time started at as now - tree.StartTime, as well as a deferred function upon full resolution of the
 // field as now - tree.StartTime; these are used by Apollo to calculate how fields are being resolved in the AST
 func (tb *TreeBuilder) WillResolveField(ctx context.Context) {
-	if tb.startTime == nil {
-		fmt.Println(errors.New("WillResolveField called before StartTimer"))
-		return
-	}
-	if tb.stopped {
-		fmt.Println(errors.New("WillResolveField called after StopTimer"))
-		return
-	}
+	// if tb.startTime == nil {
+	// 	fmt.Println(errors.New("WillResolveField called before StartTimer"))
+	// 	return
+	// }
+	// if tb.stopped {
+	// 	fmt.Println(errors.New("WillResolveField called after StopTimer"))
+	//	return
+	// }
 	fc := graphql.GetFieldContext(ctx)
 
 	node := tb.newNode(fc)
@@ -128,11 +127,11 @@ func (tb *TreeBuilder) WillResolveField(ctx context.Context) {
 
 func (tb *TreeBuilder) DidEncounterErrors(ctx context.Context, gqlErrors gqlerror.List) {
 	if tb.startTime == nil {
-		fmt.Println(errors.New("DidEncounterErrors called before StartTimer"))
+	// 	fmt.Println(errors.New("DidEncounterErrors called before StartTimer"))
 		return
 	}
 	if tb.stopped {
-		fmt.Println(errors.New("DidEncounterErrors called after StopTimer"))
+	//	fmt.Println(errors.New("DidEncounterErrors called after StopTimer"))
 		return
 	}
 
@@ -193,11 +192,11 @@ func (tb *TreeBuilder) addProtobufError(
 	gqlError *gqlerror.Error,
 ) {
 	if tb.startTime == nil {
-		fmt.Println(errors.New("addProtobufError called before StartTimer"))
+		// fmt.Println(errors.New("addProtobufError called before StartTimer"))
 		return
 	}
 	if tb.stopped {
-		fmt.Println(errors.New("addProtobufError called after StopTimer"))
+		// fmt.Println(errors.New("addProtobufError called after StopTimer"))
 		return
 	}
 	tb.mu.Lock()
@@ -206,7 +205,7 @@ func (tb *TreeBuilder) addProtobufError(
 	if tb.nodes[gqlError.Path.String()].self != nil {
 		nodeRef = tb.nodes[gqlError.Path.String()].self
 	} else {
-		fmt.Println("Error: Path not found in node map")
+		// fmt.Println("Error: Path not found in node map")
 		tb.mu.Unlock()
 		return
 	}
@@ -225,7 +224,7 @@ func (tb *TreeBuilder) addProtobufError(
 
 	gqlJson, err := json.Marshal(gqlError)
 	if err != nil {
-		fmt.Println(err)
+		// fmt.Println(err)
 		tb.mu.Unlock()
 		return
 	}

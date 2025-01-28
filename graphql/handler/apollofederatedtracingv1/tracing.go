@@ -8,17 +8,34 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/vektah/gqlparser/v2/gqlerror"
+)
+
+const (
+	ERROR_MASKED     = "masked"
+	ERROR_UNMODIFIED = "all"
+	ERROR_TRANSFORM  = "transform"
 )
 
 type (
 	Tracer struct {
-		ClientName string
-		Version    string
-		Hostname   string
+		ClientName   string
+		Version      string
+		Hostname     string
+		ErrorOptions *ErrorOptions
 	}
 
 	treeBuilderKey string
 )
+
+type ErrorOptions struct {
+	// ErrorOptions is the option to handle errors in the trace, it can be one of the following:
+	// - "masked": masks all errors
+	// - "all": includes all errors
+	// - "transform": includes all errors but transforms them using TransformFunction, which can allow users to redact sensitive information
+	ErrorOption       string
+	TransformFunction func(g *gqlerror.Error) *gqlerror.Error
+}
 
 const (
 	key = treeBuilderKey("treeBuilder")
@@ -62,7 +79,8 @@ func (t *Tracer) InterceptOperation(ctx context.Context, next graphql.OperationH
 	if !t.shouldTrace(ctx) {
 		return next(ctx)
 	}
-	return next(context.WithValue(ctx, key, NewTreeBuilder()))
+
+	return next(context.WithValue(ctx, key, NewTreeBuilder(t.ErrorOptions)))
 }
 
 // InterceptField is called on each field's resolution, including information about the path and parent node.
@@ -96,8 +114,12 @@ func (t *Tracer) InterceptResponse(ctx context.Context, next graphql.ResponseHan
 
 	// now that fields have finished resolving, it stops the timer to calculate trace duration
 	defer func(val *string) {
-		tb.StopTimer(ctx)
+		errors := graphql.GetErrors(ctx)
+		if len(errors) > 0 {
+			tb.DidEncounterErrors(ctx, errors)
+		}
 
+		tb.StopTimer(ctx)
 		// marshal the protobuf ...
 		p, err := proto.Marshal(tb.Trace)
 		if err != nil {

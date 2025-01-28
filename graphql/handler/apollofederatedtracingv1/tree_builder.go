@@ -3,7 +3,6 @@ package apollofederatedtracingv1
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"sync"
 	"time"
 

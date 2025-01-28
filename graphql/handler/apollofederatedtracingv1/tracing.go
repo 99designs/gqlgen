@@ -8,6 +8,7 @@ import (
 	"google.golang.org/protobuf/proto"
 
 	"github.com/99designs/gqlgen/graphql"
+	tracing_logger "github.com/99designs/gqlgen/graphql/handler/apollofederatedtracingv1/logger"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
@@ -23,6 +24,10 @@ type (
 		Version      string
 		Hostname     string
 		ErrorOptions *ErrorOptions
+
+		// Logger is used to log errors that occur during the tracing process; if nil, no logging will occur
+		// This can use the default Go logger or a custom logger (e.g. logrus or zap)
+		Logger tracing_logger.Logger
 	}
 
 	treeBuilderKey string
@@ -80,7 +85,7 @@ func (t *Tracer) InterceptOperation(ctx context.Context, next graphql.OperationH
 		return next(ctx)
 	}
 
-	return next(context.WithValue(ctx, key, NewTreeBuilder(t.ErrorOptions)))
+	return next(context.WithValue(ctx, key, NewTreeBuilder(t.ErrorOptions, t.Logger)))
 }
 
 // InterceptField is called on each field's resolution, including information about the path and parent node.

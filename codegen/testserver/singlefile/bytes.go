@@ -13,7 +13,7 @@ func MarshalBytes(b []byte) graphql.Marshaler {
 	})
 }
 
-func UnmarshalBytes(v interface{}) ([]byte, error) {
+func UnmarshalBytes(v any) ([]byte, error) {
 	switch v := v.(type) {
 	case string:
 		return []byte(v), nil

@@ -3,7 +3,10 @@ query viewer {
         user {
             name
             phoneNumber
-            ... userFragment @defer
+            query {
+                jsonEncoding
+            }
+            ...userFragment @defer
         }
     }
 }

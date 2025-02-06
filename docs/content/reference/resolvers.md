@@ -94,7 +94,7 @@ context is required, the model method will also be run in parallel.
 
 ## Bind when the field names do not match
 
-There are two ways you can bind to fields when the the Go struct and the graphQL type do not match.
+There are two ways you can bind to fields when the Go struct and the graphQL type do not match.
 
 
 The first way is you can bind resolvers to a struct based off of struct tags like the following:

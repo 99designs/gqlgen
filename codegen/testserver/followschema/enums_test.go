@@ -4,9 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
+
+	"github.com/99designs/gqlgen/client"
 )
 
 func TestEnumsResolver(t *testing.T) {
@@ -15,7 +17,9 @@ func TestEnumsResolver(t *testing.T) {
 		return input.Enum, nil
 	}
 
-	c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv.AddTransport(transport.POST{})
+	c := client.New(srv)
 
 	t.Run("input with valid enum value", func(t *testing.T) {
 		var resp struct {
@@ -25,7 +29,7 @@ func TestEnumsResolver(t *testing.T) {
 			enumInInput(input: {enum: OK})
 		}
 		`, &resp)
-		require.Equal(t, resp.EnumInInput, EnumTestOk)
+		require.Equal(t, EnumTestOk, resp.EnumInInput)
 	})
 
 	t.Run("input with invalid enum value", func(t *testing.T) {
@@ -46,7 +50,7 @@ func TestEnumsResolver(t *testing.T) {
 		err := c.Post(`query ($input: InputWithEnumValue) {
 			enumInInput(input: $input)
 		}
-		`, &resp, client.Var("input", map[string]interface{}{"enum": "INVALID"}))
+		`, &resp, client.Var("input", map[string]any{"enum": "INVALID"}))
 		require.EqualError(t, err, `http 422: {"errors":[{"message":"INVALID is not a valid EnumTest","path":["variable","input","enum"],"extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`)
 	})
 }

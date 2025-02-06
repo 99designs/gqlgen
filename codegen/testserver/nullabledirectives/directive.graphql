@@ -1,0 +1,8 @@
+directive @populate(value: String!) on ARGUMENT_DEFINITION
+directive @noop on ARGUMENT_DEFINITION
+
+type Query {
+    directiveSingleNullableArg(
+        arg1: String @populate(value: "test") @noop,
+    ): String
+}

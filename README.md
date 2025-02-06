@@ -20,15 +20,17 @@ Still not convinced enough to use **gqlgen**? Compare **gqlgen** with other Go g
        cd example
        go mod init example
 
-2. Add `github.com/99designs/gqlgen` to your [project's tools.go](https://github.com/golang/go/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module)
+2. Add `github.com/99designs/gqlgen` to your [project's tools.go](https://go.dev/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module)
 
-       printf '// +build tools\npackage tools\nimport (_ "github.com/99designs/gqlgen"\n _ "github.com/99designs/gqlgen/graphql/introspection")' | gofmt > tools.go
+       printf '//go:build tools\npackage tools\nimport (_ "github.com/99designs/gqlgen"\n _ "github.com/99designs/gqlgen/graphql/introspection")' | gofmt > tools.go
 
        go mod tidy
 
 3. Initialise gqlgen config and generate models
 
        go run github.com/99designs/gqlgen init
+
+       go mod tidy
 
 4. Start the graphql server
 
@@ -60,9 +62,9 @@ type User {
 }
 ```
 
-You need to tell gqlgen that it should only fetch friends if the user requested it. There are two ways to do this;
+You need to tell gqlgen that it should only fetch friends if the user requested it. There are two ways to do this:
 
-- #### Using Custom Models
+### Using Custom Models
 
 Write a custom model that omits the friends field:
 
@@ -82,9 +84,9 @@ models:
     model: github.com/you/pkg/model.User # go import path to the User struct above
 ```
 
-- #### Using Explicit Resolvers
+### Using Explicit Resolvers
 
-If you want to Keep using the generated model, mark the field as requiring a resolver explicitly in `gqlgen.yml` like this:
+If you want to keep using the generated model, mark the field as requiring a resolver explicitly in `gqlgen.yml` like this:
 
 ```yaml
 # gqlgen.yml
@@ -133,6 +135,7 @@ models:
     model:
       - github.com/99designs/gqlgen/graphql.IntID # a go integer
       - github.com/99designs/gqlgen/graphql.ID # or a go string
+      - github.com/99designs/gqlgen/graphql.UintID # or a go uint
 ```
 
 This means gqlgen will be able to automatically bind to strings or ints for models you have written yourself, but the

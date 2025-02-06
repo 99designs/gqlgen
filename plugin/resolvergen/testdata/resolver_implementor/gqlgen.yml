@@ -1,0 +1,17 @@
+schema:
+  - "testdata/schema.graphql"
+
+exec:
+  filename: testdata/resolver_implementor/out/ignored.go
+model:
+  filename: testdata/resolver_implementor/out/generated.go
+resolver:
+  type: CustomResolverType
+  layout: follow-schema
+  dir: testdata/resolver_implementor/out
+
+models:
+  Resolver:
+    model: github.com/99designs/gqlgen/plugin/resolvergen/testdata/resolver_implementor/out.Resolver
+
+omit_gqlgen_version_in_file_notice: true

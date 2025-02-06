@@ -1,10 +1,35 @@
 #!/bin/bash
 
 set -euo pipefail
-GO111MODULE=off go get github.com/mattn/goveralls
+go install github.com/mattn/goveralls@latest
 
 go test -covermode atomic -coverprofile=/tmp/coverage.out.tmp -coverpkg=./... $(go list github.com/99designs/gqlgen/... | grep -v _examples)
 # ignore protobuf files
 cat /tmp/coverage.out.tmp | grep -v ".pb.go" > /tmp/coverage.out
 
-goveralls -coverprofile=/tmp/coverage.out -service=github -ignore='_examples/*/*,_examples/*/*/*,integration/*,integration/*/*,codegen/testserver/*/*,plugin/federation/testdata/*/*/*,*/generated.go,*/*/generated.go,*/*/*/generated.go,graphql/executable_schema_mock.go'
+join () {
+  local IFS="$1"
+  shift
+  echo "$*"
+}
+
+ignore_list=(
+  '_examples/*/*'
+  '_examples/*/*/*'
+  'integration/*'
+  'integration/*/*'
+  'codegen/testserver/**/*generated*'
+  'codegen/testserver/**/*generated*/**'
+  'codegen/testserver/**/models-gen.go'
+  'codegen/testserver/**/resolver.go'
+  'plugin/resolvergen/testdata/*/*'
+  'plugin/modelgen/*/*'
+  'plugin/federation/testdata/*/*/*'
+  '*/generated.go'
+  '*/*/generated.go'
+  '*/*/*/generated.go'
+  'graphql/executable_schema_mock.go'
+)
+ignore=$(join , "${ignore_list[@]}")
+
+goveralls -coverprofile=/tmp/coverage.out -service=github "-ignore=$ignore"

@@ -7,6 +7,7 @@ import (
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 )
 
@@ -31,7 +32,9 @@ func TestNullBubbling(t *testing.T) {
 		return []*Error{nil}, nil
 	}
 
-	c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv.AddTransport(transport.POST{})
+	c := client.New(srv)
 
 	t.Run("when function errors on non required field", func(t *testing.T) {
 		var resp struct {
@@ -84,8 +87,8 @@ func TestNullBubbling(t *testing.T) {
 		}
 		err := c.Post(`query { valid, errorList { id } }`, &resp)
 
-		require.Nil(t, err)
-		require.Equal(t, len(resp.ErrorList), 1)
+		require.NoError(t, err)
+		require.Len(t, resp.ErrorList, 1)
 		require.Nil(t, resp.ErrorList[0])
 		require.Equal(t, "Ok", resp.Valid)
 	})
@@ -113,12 +116,12 @@ func TestNullBubbling(t *testing.T) {
 		}
 
 		err := c.Post(`query { nullableArg(arg: null) }`, &resp)
-		require.Nil(t, err)
+		require.NoError(t, err)
 		require.Equal(t, "Ok", *resp.NullableArg)
 	})
 
 	t.Run("concurrent null detection", func(t *testing.T) {
-		var resp interface{}
+		var resp any
 		resolvers.ErrorsResolver.A = func(ctx context.Context, obj *Errors) (i *Error, e error) { return nil, nil }
 		resolvers.ErrorsResolver.B = func(ctx context.Context, obj *Errors) (i *Error, e error) { return nil, nil }
 		resolvers.ErrorsResolver.C = func(ctx context.Context, obj *Errors) (i *Error, e error) { return nil, nil }
@@ -141,7 +144,7 @@ func TestNullBubbling(t *testing.T) {
 		var resp any
 		err := c.Post(`query { invalid }`, &resp)
 		require.Nil(t, resp)
-		require.NotNil(t, err)
+		require.Error(t, err)
 		require.Contains(t, err.Error(), `{"message":"ERROR","path":["invalid"]}`)
 	})
 }

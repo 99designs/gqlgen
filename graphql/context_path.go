@@ -34,7 +34,6 @@ func (fic *PathContext) Path() ast.Path {
 	if fic.ParentField != nil {
 		fieldPath := fic.ParentField.Path()
 		return append(fieldPath, path...)
-
 	}
 
 	return path

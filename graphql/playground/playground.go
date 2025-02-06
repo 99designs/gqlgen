@@ -24,12 +24,12 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 		}
 	</style>
 	<script
-		src="https://cdn.jsdelivr.net/npm/react@17.0.2/umd/react.production.min.js"
+		src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"
 		integrity="{{.reactSRI}}"
 		crossorigin="anonymous"
 	></script>
 	<script
-		src="https://cdn.jsdelivr.net/npm/react-dom@17.0.2/umd/react-dom.production.min.js"
+		src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"
 		integrity="{{.reactDOMSRI}}"
 		crossorigin="anonymous"
 	></script>
@@ -58,13 +58,24 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
       const wsProto = location.protocol == 'https:' ? 'wss:' : 'ws:';
       const subscriptionUrl = wsProto + '//' + location.host + {{.endpoint}};
 {{- end}}
+{{- if .fetcherHeaders}}
+      const fetcherHeaders = {{.fetcherHeaders}};
+{{- else}}
+      const fetcherHeaders = undefined;
+{{- end}}
+{{- if .uiHeaders}}
+      const uiHeaders = {{.uiHeaders}};
+{{- else}}
+      const uiHeaders = undefined;
+{{- end}}
 
-      const fetcher = GraphiQL.createFetcher({ url, subscriptionUrl });
+      const fetcher = GraphiQL.createFetcher({ url, subscriptionUrl, headers: fetcherHeaders });
       ReactDOM.render(
         React.createElement(GraphiQL, {
           fetcher: fetcher,
           isHeadersEditorEnabled: true,
-          shouldPersistHeaders: true
+          shouldPersistHeaders: true,
+		  headers: JSON.stringify(uiHeaders, null, 2)
         }),
         document.getElementById('graphiql'),
       );
@@ -74,19 +85,31 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 `))
 
 // Handler responsible for setting up the playground
-func Handler(title string, endpoint string) http.HandlerFunc {
+func Handler(title, endpoint string) http.HandlerFunc {
+	return HandlerWithHeaders(title, endpoint, nil, nil)
+}
+
+// HandlerWithHeaders sets up the playground.
+// fetcherHeaders are used by the playground's fetcher instance and will not be visible in the UI.
+// uiHeaders are default headers that will show up in the UI headers editor.
+func HandlerWithHeaders(
+	title, endpoint string,
+	fetcherHeaders, uiHeaders map[string]string,
+) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "text/html; charset=UTF-8")
-		err := page.Execute(w, map[string]interface{}{
+		err := page.Execute(w, map[string]any{
 			"title":                title,
 			"endpoint":             endpoint,
+			"fetcherHeaders":       fetcherHeaders,
+			"uiHeaders":            uiHeaders,
 			"endpointIsAbsolute":   endpointHasScheme(endpoint),
 			"subscriptionEndpoint": getSubscriptionEndpoint(endpoint),
-			"version":              "2.0.7",
-			"cssSRI":               "sha256-gQryfbGYeYFxnJYnfPStPYFt0+uv8RP8Dm++eh00G9c=",
-			"jsSRI":                "sha256-qQ6pw7LwTLC+GfzN+cJsYXfVWRKH9O5o7+5H96gTJhQ=",
-			"reactSRI":             "sha256-Ipu/TQ50iCCVZBUsZyNJfxrDk0E2yhaEIz0vqI+kFG8=",
-			"reactDOMSRI":          "sha256-nbMykgB6tsOFJ7OdVmPpdqMFVk4ZsqWocT6issAPUF0=",
+			"version":              "3.7.0",
+			"cssSRI":               "sha256-Dbkv2LUWis+0H4Z+IzxLBxM2ka1J133lSjqqtSu49o8=",
+			"jsSRI":                "sha256-qsScAZytFdTAEOM8REpljROHu8DvdvxXBK7xhoq5XD0=",
+			"reactSRI":             "sha256-S0lp+k7zWUMk2ixteM6HZvu8L9Eh//OVrt+ZfbCpmgY=",
+			"reactDOMSRI":          "sha256-IXWO0ITNDjfnNXIu5POVfqlgYoop36bDzhodR6LW5Pc=",
 		})
 		if err != nil {
 			panic(err)

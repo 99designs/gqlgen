@@ -14,7 +14,7 @@ type RequestContext = OperationContext
 
 type OperationContext struct {
 	RawQuery      string
-	Variables     map[string]interface{}
+	Variables     map[string]any
 	OperationName string
 	Doc           *ast.QueryDocument
 	Headers       http.Header
@@ -36,7 +36,7 @@ func (c *OperationContext) Validate(ctx context.Context) error {
 		return errors.New("field 'RawQuery' is required")
 	}
 	if c.Variables == nil {
-		c.Variables = make(map[string]interface{})
+		c.Variables = make(map[string]any)
 	}
 	if c.ResolverMiddleware == nil {
 		return errors.New("field 'ResolverMiddleware' is required")
@@ -65,19 +65,19 @@ func GetOperationContext(ctx context.Context) *OperationContext {
 	panic("missing operation context")
 }
 
-func WithOperationContext(ctx context.Context, rc *OperationContext) context.Context {
-	return context.WithValue(ctx, operationCtx, rc)
+func WithOperationContext(ctx context.Context, opCtx *OperationContext) context.Context {
+	return context.WithValue(ctx, operationCtx, opCtx)
 }
 
 // HasOperationContext checks if the given context is part of an ongoing operation
 //
 // Some errors can happen outside of an operation, eg json unmarshal errors.
 func HasOperationContext(ctx context.Context) bool {
-	_, ok := ctx.Value(operationCtx).(*OperationContext)
-	return ok
+	val, ok := ctx.Value(operationCtx).(*OperationContext)
+	return ok && val != nil
 }
 
-// This is just a convenient wrapper method for CollectFields
+// CollectFieldsCtx is just a convenient wrapper method for CollectFields.
 func CollectFieldsCtx(ctx context.Context, satisfies []string) []CollectedField {
 	resctx := GetFieldContext(ctx)
 	return CollectFields(GetOperationContext(ctx), resctx.Field.Selections, satisfies)
@@ -103,7 +103,7 @@ Next:
 
 // Errorf sends an error string to the client, passing it through the formatter.
 // Deprecated: use graphql.AddErrorf(ctx, err) instead
-func (c *OperationContext) Errorf(ctx context.Context, format string, args ...interface{}) {
+func (c *OperationContext) Errorf(ctx context.Context, format string, args ...any) {
 	AddErrorf(ctx, format, args...)
 }
 
@@ -120,6 +120,6 @@ func (c *OperationContext) Error(ctx context.Context, err error) {
 	AddError(ctx, err)
 }
 
-func (c *OperationContext) Recover(ctx context.Context, err interface{}) error {
+func (c *OperationContext) Recover(ctx context.Context, err any) error {
 	return ErrorOnPath(ctx, c.RecoverFunc(ctx, err))
 }

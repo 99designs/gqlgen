@@ -4,14 +4,13 @@ import (
 	"embed"
 	"errors"
 	"fmt"
-	"os"
 	"path/filepath"
-	"runtime"
 	"strings"
+
+	"github.com/vektah/gqlparser/v2/ast"
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
-	"github.com/vektah/gqlparser/v2/ast"
 )
 
 //go:embed *.gotpl
@@ -19,7 +18,7 @@ var codegenTemplates embed.FS
 
 func GenerateCode(data *Data) error {
 	if !data.Config.Exec.IsDefined() {
-		return fmt.Errorf("missing exec config")
+		return errors.New("missing exec config")
 	}
 
 	switch data.Config.Exec.Layout {
@@ -128,24 +127,18 @@ func addBuild(filename string, p *ast.Position, data *Data, builds *map[string]*
 	}
 }
 
+//go:embed root_.gotpl
+var rootTemplate string
+
 // Root file contains top-level definitions that should not be duplicated across the generated
 // files for each schema file.
 func generateRootFile(data *Data) error {
 	dir := data.Config.Exec.DirName
 	path := filepath.Join(dir, "root_.generated.go")
 
-	_, thisFile, _, _ := runtime.Caller(0)
-	rootDir := filepath.Dir(thisFile)
-	templatePath := filepath.Join(rootDir, "root_.gotpl")
-	templateBytes, err := os.ReadFile(templatePath)
-	if err != nil {
-		return err
-	}
-	template := string(templateBytes)
-
 	return templates.Render(templates.Options{
 		PackageName:     data.Config.Exec.Package,
-		Template:        template,
+		Template:        rootTemplate,
 		Filename:        path,
 		Data:            data,
 		RegionTags:      false,

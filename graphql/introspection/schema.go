@@ -2,7 +2,6 @@ package introspection
 
 import (
 	"sort"
-	"strings"
 
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -22,9 +21,6 @@ func (s *Schema) Types() []Type {
 	typeIndex := map[string]Type{}
 	typeNames := make([]string, 0, len(s.schema.Types))
 	for _, typ := range s.schema.Types {
-		if strings.HasPrefix(typ.Name, "__") {
-			continue
-		}
 		typeNames = append(typeNames, typ.Name)
 		typeIndex[typ.Name] = *WrapTypeFromDef(s.schema, typ)
 	}

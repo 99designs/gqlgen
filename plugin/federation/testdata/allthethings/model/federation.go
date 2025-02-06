@@ -16,6 +16,13 @@ type World struct {
 
 func (World) IsEntity() {}
 
+type MultiHelloMultiKey struct {
+	Name string
+	Key2 int
+}
+
+func (MultiHelloMultiKey) IsEntity() {}
+
 type ExternalExtension struct {
 	UPC     string
 	Reviews []*World
@@ -46,3 +53,11 @@ type VeryNestedKey struct {
 }
 
 func (VeryNestedKey) IsEntity() {}
+
+type MultiHelloMultiKeyByNamesInput struct {
+	Names []string `json:"Names"`
+}
+
+type MultiHelloMultiKeyByKey2sInput struct {
+	Key2s []string `json:"Key2s"`
+}

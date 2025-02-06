@@ -5,18 +5,17 @@ import (
 	"path/filepath"
 	"syscall"
 
-	"github.com/99designs/gqlgen/internal/code"
-
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
+	"github.com/99designs/gqlgen/internal/code"
 	"github.com/99designs/gqlgen/plugin"
 )
 
 //go:embed stubs.gotpl
 var stubsTemplate string
 
-func New(filename string, typename string) plugin.Plugin {
+func New(filename, typename string) plugin.Plugin {
 	return &Plugin{filename: filename, typeName: typename}
 }
 

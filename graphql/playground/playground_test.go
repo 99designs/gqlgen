@@ -1,7 +1,6 @@
 package playground
 
 import (
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -11,7 +10,7 @@ import (
 
 func TestHandler_createsAbsoluteURLs(t *testing.T) {
 	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "https://example.org/query", nil)
+	req := httptest.NewRequest(http.MethodGet, "https://example.org/query", http.NoBody)
 	h := Handler("example.org API", "https://example.org/query")
 	h.ServeHTTP(rec, req)
 
@@ -23,7 +22,7 @@ func TestHandler_createsAbsoluteURLs(t *testing.T) {
 
 	b, err := io.ReadAll(res.Body)
 	if err != nil {
-		panic(fmt.Errorf("reading res.Body: %w", err))
+		t.Fatalf("reading res.Body: %v", err)
 	}
 
 	want := regexp.MustCompile(`(?m)^.*url\s*=\s*['"]https:\/\/example\.org\/query["'].*$`)
@@ -44,7 +43,7 @@ func TestHandler_createsAbsoluteURLs(t *testing.T) {
 
 func TestHandler_createsRelativeURLs(t *testing.T) {
 	rec := httptest.NewRecorder()
-	req := httptest.NewRequest(http.MethodGet, "http://localhost:8080/query", nil)
+	req := httptest.NewRequest(http.MethodGet, "http://localhost:8080/query", http.NoBody)
 	h := Handler("example.org API", "/customquery")
 	h.ServeHTTP(rec, req)
 
@@ -59,7 +58,7 @@ func TestHandler_createsRelativeURLs(t *testing.T) {
 
 	b, err := io.ReadAll(res.Body)
 	if err != nil {
-		panic(fmt.Errorf("reading res.Body: %w", err))
+		t.Fatalf("reading res.Body: %v", err)
 	}
 
 	wantURL := regexp.MustCompile(`(?m)^.*url\s*=\s*location\.protocol.*$`)
@@ -70,4 +69,8 @@ func TestHandler_createsRelativeURLs(t *testing.T) {
 	if !wantSubURL.Match(b) {
 		t.Errorf("no match for %s in response body", wantSubURL.String())
 	}
+}
+
+func TestHandler_Integrity(t *testing.T) {
+	testResourceIntegrity(t, Handler)
 }

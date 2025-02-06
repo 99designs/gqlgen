@@ -9,6 +9,8 @@ import (
 	"github.com/99designs/gqlgen/_examples/federation/products/graph"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/debug"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 )
 
@@ -20,7 +22,12 @@ func main() {
 		port = defaultPort
 	}
 
-	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+	srv := handler.New(
+		graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}),
+	)
+	srv.AddTransport(transport.GET{})
+	srv.AddTransport(transport.POST{})
+	srv.Use(extension.Introspection{})
 	srv.Use(&debug.Tracer{})
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))

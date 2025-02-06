@@ -8,6 +8,13 @@ type World @key(fields: " foo   ") @key(fields: "bar") {
     bar: Int!
 }
 
+directive @entityResolver(multi: Boolean) on OBJECT
+
+type MultiHelloMultiKey @key(fields: "name") @key(fields:"key2") @entityResolver(multi: true) {
+    name: String!
+    key2: String!
+}
+
 extend type ExternalExtension @key(fields: "  upc    ") {
     upc: String! @external
     reviews: [World]

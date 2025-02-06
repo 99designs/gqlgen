@@ -1,0 +1,8 @@
+schema:
+  - "testdata/multi/multi.graphqls"
+exec:
+  filename: testdata/multi/generated/exec.go
+federation:
+  version: 2
+  filename: testdata/multi/generated/federation.go
+omit_slice_element_pointers: true

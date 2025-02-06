@@ -8,15 +8,17 @@ import (
 	"strings"
 	"sync"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql/handler/testserver"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSSE(t *testing.T) {
+	pingInterval := time.Second * 1
+
 	initialize := func() *testserver.TestServer {
 		h := testserver.New()
 		h.AddTransport(transport.SSE{})
@@ -25,6 +27,14 @@ func TestSSE(t *testing.T) {
 
 	initializeWithServer := func() (*testserver.TestServer, *httptest.Server) {
 		h := initialize()
+		return h, httptest.NewServer(h)
+	}
+
+	initializeKeepAliveWithServer := func() (*testserver.TestServer, *httptest.Server) {
+		h := testserver.New()
+		h.AddTransport(transport.SSE{
+			KeepAlivePingInterval: pingInterval,
+		})
 		return h, httptest.NewServer(h)
 	}
 
@@ -56,7 +66,7 @@ func TestSSE(t *testing.T) {
 		w := httptest.NewRecorder()
 		h.ServeHTTP(w, req)
 		assert.Equal(t, 400, w.Code, "Request return wrong status -> %d", w.Code)
-		assert.Equal(t, `{"errors":[{"message":"transport not supported"}],"data":null}`, w.Body.String())
+		assert.JSONEq(t, `{"errors":[{"message":"transport not supported"}],"data":null}`, w.Body.String())
 	})
 
 	t.Run("decode failure", func(t *testing.T) {
@@ -65,7 +75,7 @@ func TestSSE(t *testing.T) {
 		w := httptest.NewRecorder()
 		h.ServeHTTP(w, req)
 		assert.Equal(t, 400, w.Code, "Request return wrong status -> %d", w.Code)
-		assert.Equal(t, `{"errors":[{"message":"json request body could not be decoded: invalid character 'o' in literal null (expecting 'u') body:notjson"}],"data":null}`, w.Body.String())
+		assert.JSONEq(t, `{"errors":[{"message":"json request body could not be decoded: invalid character 'o' in literal null (expecting 'u') body:notjson"}],"data":null}`, w.Body.String())
 	})
 
 	t.Run("parse failure", func(t *testing.T) {
@@ -131,6 +141,52 @@ func TestSSE(t *testing.T) {
 
 		assert.Equal(t, "event: next\n", readLine(br))
 		assert.Equal(t, "data: {\"data\":{\"name\":\"test\"}}\n", readLine(br))
+		assert.Equal(t, "\n", readLine(br))
+
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			handler.SendCompleteSubscriptionMessage()
+		}()
+
+		assert.Equal(t, "event: complete\n", readLine(br))
+		assert.Equal(t, "\n", readLine(br))
+
+		_, err = br.ReadByte()
+		assert.Equal(t, err, io.EOF)
+
+		wg.Wait()
+	})
+
+	t.Run("subscribe with keep alive", func(t *testing.T) {
+		handler, srv := initializeKeepAliveWithServer()
+		defer srv.Close()
+
+		var wg sync.WaitGroup
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			// Wait for ping interval to trigger
+			time.Sleep(pingInterval + time.Millisecond*100)
+		}()
+
+		client := &http.Client{}
+		req := createHTTPRequest(srv.URL, `{"query":"subscription { name }"}`)
+		res, err := client.Do(req)
+		require.NoError(t, err, "Request threw error -> %s", err)
+		defer func() {
+			require.NoError(t, res.Body.Close())
+		}()
+
+		assert.Equal(t, 200, res.StatusCode, "Request return wrong status -> %d", res.Status)
+		assert.Equal(t, "keep-alive", res.Header.Get("Connection"))
+		assert.Equal(t, "text/event-stream", res.Header.Get("Content-Type"))
+
+		br := bufio.NewReader(res.Body)
+
+		assert.Equal(t, ":\n", readLine(br))
+		assert.Equal(t, "\n", readLine(br))
+		assert.Equal(t, ": ping\n", readLine(br))
 		assert.Equal(t, "\n", readLine(br))
 
 		wg.Add(1)

@@ -14,7 +14,7 @@ type Stats struct {
 
 	// Stats collected by handler extensions. Don't use directly, the extension should provide a type safe way to
 	// access this.
-	extension map[string]interface{}
+	extension map[string]any
 }
 
 type TraceTiming struct {
@@ -42,14 +42,14 @@ func GetStartTime(ctx context.Context) time.Time {
 	return t
 }
 
-func (c *Stats) SetExtension(name string, data interface{}) {
+func (c *Stats) SetExtension(name string, data any) {
 	if c.extension == nil {
-		c.extension = map[string]interface{}{}
+		c.extension = map[string]any{}
 	}
 	c.extension[name] = data
 }
 
-func (c *Stats) GetExtension(name string) interface{} {
+func (c *Stats) GetExtension(name string) any {
 	if c.extension == nil {
 		return nil
 	}

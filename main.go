@@ -1,5 +1,7 @@
 package main
 
+//go:generate sh -c "cd _examples && go generate ./..."
+
 import (
 	"bytes"
 	_ "embed"
@@ -12,12 +14,13 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/urfave/cli/v2"
+
 	"github.com/99designs/gqlgen/api"
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/internal/code"
 	"github.com/99designs/gqlgen/plugin/servergen"
-	"github.com/urfave/cli/v2"
 )
 
 //go:embed init-templates/schema.graphqls
@@ -97,17 +100,17 @@ var initCmd = &cli.Command{
 		cwd, err := os.Getwd()
 		if err != nil {
 			log.Println(err)
-			return fmt.Errorf("unable to determine current directory:%w", err)
+			return fmt.Errorf("unable to determine current directory: %w", err)
 		}
 		pkgName := code.ImportPathForDir(cwd)
 		if pkgName == "" {
-			return fmt.Errorf(
+			return errors.New(
 				"unable to determine import path for current directory, you probably need to run 'go mod init' first",
 			)
 		}
 		modRoot := findModuleRoot(cwd)
 		if modRoot == "" {
-			return fmt.Errorf("go.mod is missing. Please, do 'go mod init' first\n")
+			return errors.New("go.mod is missing. Please, do 'go mod init' first\n")
 		}
 
 		// check schema and config don't already exist
@@ -118,7 +121,7 @@ var initCmd = &cli.Command{
 		}
 		_, err = config.LoadConfigFromDefaultLocations()
 		if err == nil {
-			return fmt.Errorf("gqlgen.yml already exists in a parent directory\n")
+			return errors.New("gqlgen.yml already exists in a parent directory\n")
 		}
 
 		// create config
@@ -184,10 +187,7 @@ var generateCmd = &cli.Command{
 			}
 		}
 
-		if err = api.Generate(cfg); err != nil {
-			return err
-		}
-		return nil
+		return api.Generate(cfg)
 	},
 }
 

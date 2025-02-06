@@ -1,0 +1,26 @@
+schema: "*.graphql"
+
+exec:
+  filename: generated.go
+
+model:
+  filename: models_gen.go
+
+resolver:
+  layout: follow-schema
+  dir: .
+  filename_template: "{name}.resolvers.go"
+
+call_argument_directives_with_null: true
+
+models:
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.ID
+  Todo:
+    fields:
+      user:
+        resolver: true
+    extraFields:
+      userID:
+        type: "string"

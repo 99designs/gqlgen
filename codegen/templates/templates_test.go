@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/99designs/gqlgen/internal/code"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/99designs/gqlgen/internal/code"
 )
 
 //go:embed *.gotpl
@@ -53,6 +53,9 @@ func TestToGo(t *testing.T) {
 	require.Equal(t, "Identities", ToGo("identities"))
 	require.Equal(t, "Iphone", ToGo("IPHONE"))
 	require.Equal(t, "IPhone", ToGo("iPHONE"))
+	require.Equal(t, "UserIdentity", ToGo("USER_IDENTITY"))
+	require.Equal(t, "UserIdentity", ToGo("UserIdentity"))
+	require.Equal(t, "UserIdentity", ToGo("userIdentity"))
 }
 
 func TestToGoPrivate(t *testing.T) {
@@ -301,6 +304,10 @@ func Test_wordWalker(t *testing.T) {
 			expected: []*wordInfo{{Word: "Related"}, {WordOffset: 1, Word: "Urls"}},
 		},
 		{
+			input:    makeInput("USER_IDENTITY"),
+			expected: []*wordInfo{{Word: "USER"}, {WordOffset: 1, Word: "IDENTITY"}},
+		},
+		{
 			input:    makeInput("ITicket"),
 			expected: []*wordInfo{{Word: "ITicket"}},
 		},
@@ -308,7 +315,7 @@ func Test_wordWalker(t *testing.T) {
 
 	for i, at := range theTests {
 		t.Run(fmt.Sprintf("wordWalker-%d", i), func(t *testing.T) {
-			require.Equal(t, at.input, at.expected)
+			require.Equal(t, at.expected, at.input)
 		})
 	}
 }
@@ -320,20 +327,18 @@ func TestCenter(t *testing.T) {
 }
 
 func TestTemplateOverride(t *testing.T) {
-	f, err := os.CreateTemp("", "gqlgen")
+	f, err := os.CreateTemp(t.TempDir(), "gqlgen")
 	if err != nil {
 		t.Fatal(err)
 	}
 	defer f.Close()
-	defer os.RemoveAll(f.Name())
-	err = Render(Options{Template: "hello", Filename: f.Name(), Packages: &code.Packages{}})
+	err = Render(Options{Template: "hello", Filename: f.Name(), Packages: code.NewPackages()})
 	if err != nil {
 		t.Fatal(err)
 	}
 }
 
 func TestRenderFS(t *testing.T) {
-
 	tempDir := t.TempDir()
 
 	outDir := filepath.Join(tempDir, "output")
@@ -345,8 +350,7 @@ func TestRenderFS(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer f.Close()
-	defer os.RemoveAll(f.Name())
-	err = Render(Options{TemplateFS: templateFS, Filename: f.Name(), Packages: &code.Packages{}})
+	err = Render(Options{TemplateFS: templateFS, Filename: f.Name(), Packages: code.NewPackages()})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -357,4 +361,50 @@ func TestRenderFS(t *testing.T) {
 
 	// don't look at last character since it's \n on Linux and \r\n on Windows
 	assert.Equal(t, expectedString, actualContentsStr[:len(expectedString)])
+}
+
+func TestDict(t *testing.T) {
+	tests := []struct {
+		name      string
+		input     []any
+		expected  map[string]any
+		expectErr bool
+	}{
+		{
+			name:      "valid key-value pairs",
+			input:     []any{"key1", "value1", "key2", "value2"},
+			expected:  map[string]any{"key1": "value1", "key2": "value2"},
+			expectErr: false,
+		},
+		{
+			name:      "odd number of arguments",
+			input:     []any{"key1", "value1", "key2"},
+			expected:  nil,
+			expectErr: true,
+		},
+		{
+			name:      "non-string key",
+			input:     []any{"key1", "value1", 123, "value2"},
+			expected:  nil,
+			expectErr: true,
+		},
+		{
+			name:      "empty input",
+			input:     []any{},
+			expected:  map[string]any{},
+			expectErr: false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result, err := dict(tt.input...)
+			if tt.expectErr {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+				assert.Equal(t, tt.expected, result)
+			}
+		})
+	}
 }

@@ -9,6 +9,7 @@ exec:
 
 federation:
   filename: graph/federation.go
+  version: 2
   package: graph
 
 # Where should any generated models go?
@@ -66,3 +67,5 @@ models:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
+
+omit_complexity: true

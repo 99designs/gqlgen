@@ -13,7 +13,7 @@ type Mutation {
 	updateUser(id: ID!, changes: UserChanges!): User
 }
 
-type UserChanges {
+input UserChanges {
 	name: String
 	email: String
 }
@@ -35,6 +35,9 @@ func (r *mutationResolver) UpdateUser(ctx context.Context, id int, changes map[s
 	return u, nil
 }
 ```
+
+Please note that map values are automatically coerced to the types defined in the schema.
+This means that optional, nested inputs or scalars will conform to their expected types.
 
 We often use the mapstructure library to directly apply these changesets directly to the object using reflection:
 ```go

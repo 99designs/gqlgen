@@ -6,6 +6,7 @@ import (
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 )
 
@@ -16,7 +17,9 @@ type UpdatePtrToPtrResults struct {
 func TestPtrToPtr(t *testing.T) {
 	resolvers := &Stub{}
 
-	c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv.AddTransport(transport.POST{})
+	c := client.New(srv)
 
 	resolvers.MutationResolver.UpdatePtrToPtr = func(ctx context.Context, in UpdatePtrToPtrOuter) (ret *PtrToPtrOuter, err error) {
 		ret = &PtrToPtrOuter{
@@ -76,14 +79,14 @@ func TestPtrToPtr(t *testing.T) {
 		err := c.Post(`mutation { updatePtrToPtr(input: { name: "newName" }) { name, inner { key, value }, stupidInner { key, value }}}`, &resp)
 		require.NoError(t, err)
 
-		require.Equal(t, resp.UpdatedPtrToPtr.Name, "newName")
+		require.Equal(t, "newName", resp.UpdatedPtrToPtr.Name)
 		require.NotNil(t, resp.UpdatedPtrToPtr.Inner)
-		require.Equal(t, resp.UpdatedPtrToPtr.Inner.Key, "oldKey")
-		require.Equal(t, resp.UpdatedPtrToPtr.Inner.Value, "oldValue")
+		require.Equal(t, "oldKey", resp.UpdatedPtrToPtr.Inner.Key)
+		require.Equal(t, "oldValue", resp.UpdatedPtrToPtr.Inner.Value)
 		require.NotNil(t, resp.UpdatedPtrToPtr.StupidInner)
 		require.NotNil(t, ******resp.UpdatedPtrToPtr.StupidInner)
-		require.Equal(t, (******resp.UpdatedPtrToPtr.StupidInner).Key, "oldStupidKey")
-		require.Equal(t, (******resp.UpdatedPtrToPtr.StupidInner).Value, "oldStupidValue")
+		require.Equal(t, "oldStupidKey", (******resp.UpdatedPtrToPtr.StupidInner).Key)
+		require.Equal(t, "oldStupidValue", (******resp.UpdatedPtrToPtr.StupidInner).Value)
 	})
 
 	t.Run("pointer to pointer input non-null", func(t *testing.T) {
@@ -100,14 +103,14 @@ func TestPtrToPtr(t *testing.T) {
 		}`, &resp)
 		require.NoError(t, err)
 
-		require.Equal(t, resp.UpdatedPtrToPtr.Name, "oldName")
+		require.Equal(t, "oldName", resp.UpdatedPtrToPtr.Name)
 		require.NotNil(t, resp.UpdatedPtrToPtr.Inner)
-		require.Equal(t, resp.UpdatedPtrToPtr.Inner.Key, "newKey")
-		require.Equal(t, resp.UpdatedPtrToPtr.Inner.Value, "newValue")
+		require.Equal(t, "newKey", resp.UpdatedPtrToPtr.Inner.Key)
+		require.Equal(t, "newValue", resp.UpdatedPtrToPtr.Inner.Value)
 		require.NotNil(t, resp.UpdatedPtrToPtr.StupidInner)
 		require.NotNil(t, ******resp.UpdatedPtrToPtr.StupidInner)
-		require.Equal(t, (******resp.UpdatedPtrToPtr.StupidInner).Key, "oldStupidKey")
-		require.Equal(t, (******resp.UpdatedPtrToPtr.StupidInner).Value, "oldStupidValue")
+		require.Equal(t, "oldStupidKey", (******resp.UpdatedPtrToPtr.StupidInner).Key)
+		require.Equal(t, "oldStupidValue", (******resp.UpdatedPtrToPtr.StupidInner).Value)
 	})
 
 	t.Run("pointer to pointer input null", func(t *testing.T) {
@@ -116,12 +119,12 @@ func TestPtrToPtr(t *testing.T) {
 		err := c.Post(`mutation { updatePtrToPtr(input: { inner: null }) { name, inner { key, value }, stupidInner { key, value }}}`, &resp)
 		require.NoError(t, err)
 
-		require.Equal(t, resp.UpdatedPtrToPtr.Name, "oldName")
+		require.Equal(t, "oldName", resp.UpdatedPtrToPtr.Name)
 		require.Nil(t, resp.UpdatedPtrToPtr.Inner)
 		require.NotNil(t, resp.UpdatedPtrToPtr.StupidInner)
 		require.NotNil(t, ******resp.UpdatedPtrToPtr.StupidInner)
-		require.Equal(t, (******resp.UpdatedPtrToPtr.StupidInner).Key, "oldStupidKey")
-		require.Equal(t, (******resp.UpdatedPtrToPtr.StupidInner).Value, "oldStupidValue")
+		require.Equal(t, "oldStupidKey", (******resp.UpdatedPtrToPtr.StupidInner).Key)
+		require.Equal(t, "oldStupidValue", (******resp.UpdatedPtrToPtr.StupidInner).Value)
 	})
 
 	t.Run("many pointers input non-null", func(t *testing.T) {
@@ -138,14 +141,14 @@ func TestPtrToPtr(t *testing.T) {
 		}`, &resp)
 		require.NoError(t, err)
 
-		require.Equal(t, resp.UpdatedPtrToPtr.Name, "oldName")
+		require.Equal(t, "oldName", resp.UpdatedPtrToPtr.Name)
 		require.NotNil(t, resp.UpdatedPtrToPtr.Inner)
-		require.Equal(t, resp.UpdatedPtrToPtr.Inner.Key, "oldKey")
-		require.Equal(t, resp.UpdatedPtrToPtr.Inner.Value, "oldValue")
+		require.Equal(t, "oldKey", resp.UpdatedPtrToPtr.Inner.Key)
+		require.Equal(t, "oldValue", resp.UpdatedPtrToPtr.Inner.Value)
 		require.NotNil(t, resp.UpdatedPtrToPtr.StupidInner)
 		require.NotNil(t, ******resp.UpdatedPtrToPtr.StupidInner)
-		require.Equal(t, (******resp.UpdatedPtrToPtr.StupidInner).Key, "newKey")
-		require.Equal(t, (******resp.UpdatedPtrToPtr.StupidInner).Value, "newValue")
+		require.Equal(t, "newKey", (******resp.UpdatedPtrToPtr.StupidInner).Key)
+		require.Equal(t, "newValue", (******resp.UpdatedPtrToPtr.StupidInner).Value)
 	})
 
 	t.Run("many pointers input null", func(t *testing.T) {
@@ -154,10 +157,10 @@ func TestPtrToPtr(t *testing.T) {
 		err := c.Post(`mutation { updatePtrToPtr(input: { stupidInner: null }) { name, inner { key, value }, stupidInner { key, value }}}`, &resp)
 		require.NoError(t, err)
 
-		require.Equal(t, resp.UpdatedPtrToPtr.Name, "oldName")
+		require.Equal(t, "oldName", resp.UpdatedPtrToPtr.Name)
 		require.NotNil(t, resp.UpdatedPtrToPtr.Inner)
-		require.Equal(t, resp.UpdatedPtrToPtr.Inner.Key, "oldKey")
-		require.Equal(t, resp.UpdatedPtrToPtr.Inner.Value, "oldValue")
+		require.Equal(t, "oldKey", resp.UpdatedPtrToPtr.Inner.Key)
+		require.Equal(t, "oldValue", resp.UpdatedPtrToPtr.Inner.Value)
 		require.Nil(t, resp.UpdatedPtrToPtr.StupidInner)
 	})
 }

@@ -3,21 +3,22 @@
   "version": "1.0.0",
   "description": "",
   "main": "gateway/index.js",
+  "type": "module",
   "scripts": {
+    "start-gateway": "node gateway/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@apollo/gateway": "^0.42.0",
-    "apollo-server": "^3.3.0",
-    "graphql": "^15.6.1"
+    "@apollo/gateway": "^2.7.1",
+    "@apollo/server": "^4.10.0",
+    "graphql": "^16.8.1"
   },
   "devDependencies": {
-    "apollo-cache-inmemory": "^1.6.5",
-    "apollo-client": "^2.6.8",
-    "apollo-link-http": "^1.5.16",
-    "jest": "^25.1.0",
-    "node-fetch": "^2.6.0"
+    "@apollo/client": "^3.9.4",
+    "cross-fetch": "^4.0.0",
+    "jest": "^29.7.0",
+    "node-fetch": "^3.3.2"
   }
 }

@@ -3,15 +3,21 @@ package starwars
 import (
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/stretchr/testify/require"
+
 	"github.com/99designs/gqlgen/_examples/starwars/generated"
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/stretchr/testify/require"
 )
 
 func TestStarwars(t *testing.T) {
-	c := client.New(handler.NewDefaultServer(generated.NewExecutableSchema(NewResolver())))
+	srv := handler.New(generated.NewExecutableSchema(NewResolver()))
+	srv.AddTransport(transport.POST{})
+	srv.Use(extension.Introspection{})
+	c := client.New(srv)
 
 	t.Run("Lukes starships", func(t *testing.T) {
 		var resp struct {
@@ -66,10 +72,10 @@ func TestStarwars(t *testing.T) {
 		c.MustPost(`{ human(id:"1000") { starships { name length(unit:FOOT) } } }`, &resp)
 
 		require.Equal(t, "X-Wing", resp.Human.Starships[0].Name)
-		require.Equal(t, 41.0105, resp.Human.Starships[0].Length)
+		require.InDelta(t, 41.0105, resp.Human.Starships[0].Length, 0.0001)
 
 		require.Equal(t, "Imperial shuttle", resp.Human.Starships[1].Name)
-		require.Equal(t, 65.6168, resp.Human.Starships[1].Length)
+		require.InDelta(t, 65.6168, resp.Human.Starships[1].Length, 0.0001)
 	})
 
 	t.Run("hero height", func(t *testing.T) {
@@ -80,7 +86,7 @@ func TestStarwars(t *testing.T) {
 		}
 		c.MustPost(`{ hero(episode:EMPIRE) { ... on Human { height(unit:METER) } } }`, &resp)
 
-		require.Equal(t, 1.72, resp.Hero.Height)
+		require.InDelta(t, 1.72, resp.Hero.Height, 0.001)
 	})
 
 	t.Run("default hero episode", func(t *testing.T) {
@@ -219,7 +225,7 @@ func TestStarwars(t *testing.T) {
 
 	t.Run("introspection", func(t *testing.T) {
 		// Make sure we can run the graphiql introspection query without errors
-		var resp interface{}
+		var resp any
 		c.MustPost(introspection.Query, &resp)
 	})
 

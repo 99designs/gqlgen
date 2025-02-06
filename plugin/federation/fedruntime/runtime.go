@@ -13,4 +13,4 @@ type Entity interface {
 }
 
 // Used for the Link directive
-type Link interface{}
+type Link any

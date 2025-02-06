@@ -1,0 +1,13 @@
+extend schema
+  @link(url: "https://specs.apollo.dev/federation/v2.3",
+        import: ["@key"])
+
+interface Hello @key(fields: "id"){
+  id: String!
+  title: String!
+}
+
+type World implements Hello @key(fields: "id") {
+  id: String!
+  title: String!
+}

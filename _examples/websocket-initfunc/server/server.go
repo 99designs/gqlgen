@@ -8,22 +8,23 @@ import (
 	"os"
 	"time"
 
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/handler/extension"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
 	"github.com/gorilla/websocket"
 	"github.com/gqlgen/_examples/websocket-initfunc/server/graph"
 	"github.com/rs/cors"
+
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/99designs/gqlgen/graphql/playground"
 )
 
-func webSocketInit(ctx context.Context, initPayload transport.InitPayload) (context.Context, error) {
+func webSocketInit(ctx context.Context, initPayload transport.InitPayload) (context.Context, *transport.InitPayload, error) {
 	// Get the token from payload
 	payload := initPayload["authToken"]
 	token, ok := payload.(string)
 	if !ok || token == "" {
-		return nil, errors.New("authToken not found in transport payload")
+		return nil, nil, errors.New("authToken not found in transport payload")
 	}
 
 	// Perform token verification and authentication...
@@ -32,7 +33,7 @@ func webSocketInit(ctx context.Context, initPayload transport.InitPayload) (cont
 	// put it in context
 	ctxNew := context.WithValue(ctx, "username", userId)
 
-	return ctxNew, nil
+	return ctxNew, nil, nil
 }
 
 const defaultPort = "8080"
@@ -62,7 +63,7 @@ func main() {
 				return true
 			},
 		},
-		InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, error) {
+		InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, *transport.InitPayload, error) {
 			return webSocketInit(ctx, initPayload)
 		},
 	})
@@ -73,5 +74,4 @@ func main() {
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))
-
 }

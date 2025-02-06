@@ -188,6 +188,9 @@ func (MissingTypeNullable) IsMissingUnion() {}
 
 func (MissingTypeNullable) IsExistingUnion() {}
 
+type Mutation struct {
+}
+
 type NotCyclicalA struct {
 	FieldOne string `json:"FieldOne" database:"NotCyclicalAFieldOne"`
 	FieldTwo int    `json:"FieldTwo" database:"NotCyclicalAFieldTwo"`
@@ -203,6 +206,9 @@ type OmitEmptyJSONTagTest struct {
 	Value       *string `json:"Value,omitempty" database:"OmitEmptyJsonTagTestValue"`
 }
 
+type Query struct {
+}
+
 type Recursive struct {
 	FieldOne   *Recursive `json:"FieldOne" database:"RecursiveFieldOne"`
 	FieldTwo   *Recursive `json:"FieldTwo" database:"RecursiveFieldTwo"`
@@ -213,6 +219,9 @@ type Recursive struct {
 type RenameFieldTest struct {
 	BadName    string `json:"badName" database:"RenameFieldTestbadName"`
 	OtherField string `json:"otherField" database:"RenameFieldTestotherField"`
+}
+
+type Subscription struct {
 }
 
 // TypeWithDescription is a type with a description
@@ -262,7 +271,7 @@ func (e EnumWithDescription) String() string {
 	return string(e)
 }
 
-func (e *EnumWithDescription) UnmarshalGQL(v interface{}) error {
+func (e *EnumWithDescription) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -303,7 +312,7 @@ func (e MissingEnum) String() string {
 	return string(e)
 }
 
-func (e *MissingEnum) UnmarshalGQL(v interface{}) error {
+func (e *MissingEnum) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")

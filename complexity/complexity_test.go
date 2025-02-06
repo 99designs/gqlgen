@@ -4,10 +4,11 @@ import (
 	"math"
 	"testing"
 
-	"github.com/99designs/gqlgen/graphql"
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 var schema = gqlparser.MustLoadSchema(
@@ -51,7 +52,7 @@ func requireComplexity(t *testing.T, source string, complexity int) {
 	query := gqlparser.MustLoadQuery(schema, source)
 
 	es := &graphql.ExecutableSchemaMock{
-		ComplexityFunc: func(typeName, field string, childComplexity int, args map[string]interface{}) (int, bool) {
+		ComplexityFunc: func(typeName, field string, childComplexity int, args map[string]any) (int, bool) {
 			switch typeName + "." + field {
 			case "ExpensiveItem.name":
 				return 5, true

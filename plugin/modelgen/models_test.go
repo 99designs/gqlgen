@@ -14,6 +14,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/plugin/modelgen/internal/extrafields"
@@ -23,8 +26,6 @@ import (
 	"github.com/99designs/gqlgen/plugin/modelgen/out_enable_model_json_omitempty_tag_true"
 	"github.com/99designs/gqlgen/plugin/modelgen/out_nullable_input_omittable"
 	"github.com/99designs/gqlgen/plugin/modelgen/out_struct_pointers"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestModelGeneration(t *testing.T) {
@@ -62,7 +63,7 @@ func TestModelGeneration(t *testing.T) {
 		for _, commentGroup := range node.Comments {
 			text := commentGroup.Text()
 			words := strings.Split(text, " ")
-			require.True(t, len(words) > 1, "expected description %q to have more than one word", text)
+			require.Greaterf(t, len(words), 1, "expected description %q to have more than one word", text)
 		}
 	})
 
@@ -80,7 +81,7 @@ func TestModelGeneration(t *testing.T) {
 		}
 
 		for _, tag := range expectedTags {
-			require.True(t, strings.Contains(fileText, tag), "\nexpected:\n"+tag+"\ngot\n"+fileText)
+			require.Contains(t, fileText, tag, "\nexpected:\n"+tag+"\ngot\n"+fileText)
 		}
 	})
 
@@ -98,7 +99,7 @@ func TestModelGeneration(t *testing.T) {
 		}
 
 		for _, tag := range expectedTags {
-			require.True(t, strings.Contains(fileText, tag), "\nexpected:\n"+tag+"\ngot\n"+fileText)
+			require.Contains(t, fileText, tag, "\nexpected:\n"+tag+"\ngot\n"+fileText)
 		}
 	})
 
@@ -199,7 +200,6 @@ func TestModelGeneration(t *testing.T) {
 			},
 		}
 		for _, tc := range cases {
-			tc := tc
 			t.Run(tc.name, func(t *testing.T) {
 				typeSpec, ok := generated.Scope.Lookup(tc.name).Decl.(*ast.TypeSpec)
 				require.True(t, ok)
@@ -282,19 +282,53 @@ func TestModelGeneration(t *testing.T) {
 	})
 
 	t.Run("nullable input fields can be made omittable with goField", func(t *testing.T) {
-		require.IsType(t, out.MissingInput{}.NullString, graphql.Omittable[*string]{})
-		require.IsType(t, out.MissingInput{}.NullEnum, graphql.Omittable[*out.MissingEnum]{})
-		require.IsType(t, out.MissingInput{}.NullObject, graphql.Omittable[*out.ExistingInput]{})
+		require.IsType(t, graphql.Omittable[*string]{}, out.MissingInput{}.NullString)
+		require.IsType(t, graphql.Omittable[*out.MissingEnum]{}, out.MissingInput{}.NullEnum)
+		require.IsType(t, graphql.Omittable[*out.ExistingInput]{}, out.MissingInput{}.NullObject)
 	})
 
 	t.Run("extra fields are present", func(t *testing.T) {
 		var m out.ExtraFieldsTest
 
-		require.IsType(t, m.FieldInt, int64(0))
-		require.IsType(t, m.FieldInternalType, extrafields.Type{})
+		require.IsType(t, int64(0), m.FieldInt)
+		require.IsType(t, extrafields.Type{}, m.FieldInternalType)
 		require.IsType(t, m.FieldStringPtr, new(string))
-		require.IsType(t, m.FieldIntSlice, []int64{})
+		require.IsType(t, []int64{}, m.FieldIntSlice)
 	})
+}
+
+func TestModelGenerationOmitRootModels(t *testing.T) {
+	cfg, err := config.LoadConfig("testdata/gqlgen_omit_root_models.yml")
+	require.NoError(t, err)
+	require.NoError(t, cfg.Init())
+	p := Plugin{
+		MutateHook: mutateHook,
+		FieldHook:  DefaultFieldMutateHook,
+	}
+	require.NoError(t, p.MutateConfig(cfg))
+	require.NoError(t, goBuild(t, "./out/"))
+	generated, err := os.ReadFile("./out/generated_omit_root_models.go")
+	require.NoError(t, err)
+	require.NotContains(t, string(generated), "type Mutation struct")
+	require.NotContains(t, string(generated), "type Query struct")
+	require.NotContains(t, string(generated), "type Subscription struct")
+}
+
+func TestModelGenerationOmitResolverFields(t *testing.T) {
+	cfg, err := config.LoadConfig("testdata/gqlgen_omit_resolver_fields.yml")
+	require.NoError(t, err)
+	require.NoError(t, cfg.Init())
+	p := Plugin{
+		MutateHook: mutateHook,
+		FieldHook:  DefaultFieldMutateHook,
+	}
+	require.NoError(t, p.MutateConfig(cfg))
+	require.NoError(t, goBuild(t, "./out_omit_resolver_fields/"))
+	generated, err := os.ReadFile("./out_omit_resolver_fields/generated.go")
+	require.NoError(t, err)
+	require.Contains(t, string(generated), "type Base struct")
+	require.Contains(t, string(generated), "StandardField")
+	require.NotContains(t, string(generated), "ResolverField")
 }
 
 func TestModelGenerationStructFieldPointers(t *testing.T) {
@@ -355,15 +389,15 @@ func TestModelGenerationNullableInputOmittable(t *testing.T) {
 	require.NoError(t, p.MutateConfig(cfg))
 
 	t.Run("nullable input fields are omittable", func(t *testing.T) {
-		require.IsType(t, out_nullable_input_omittable.MissingInput{}.Name, graphql.Omittable[*string]{})
-		require.IsType(t, out_nullable_input_omittable.MissingInput{}.Enum, graphql.Omittable[*out_nullable_input_omittable.MissingEnum]{})
-		require.IsType(t, out_nullable_input_omittable.MissingInput{}.NullString, graphql.Omittable[*string]{})
-		require.IsType(t, out_nullable_input_omittable.MissingInput{}.NullEnum, graphql.Omittable[*out_nullable_input_omittable.MissingEnum]{})
-		require.IsType(t, out_nullable_input_omittable.MissingInput{}.NullObject, graphql.Omittable[*out_nullable_input_omittable.ExistingInput]{})
+		require.IsType(t, graphql.Omittable[*string]{}, out_nullable_input_omittable.MissingInput{}.Name)
+		require.IsType(t, graphql.Omittable[*out_nullable_input_omittable.MissingEnum]{}, out_nullable_input_omittable.MissingInput{}.Enum)
+		require.IsType(t, graphql.Omittable[*string]{}, out_nullable_input_omittable.MissingInput{}.NullString)
+		require.IsType(t, graphql.Omittable[*out_nullable_input_omittable.MissingEnum]{}, out_nullable_input_omittable.MissingInput{}.NullEnum)
+		require.IsType(t, graphql.Omittable[*out_nullable_input_omittable.ExistingInput]{}, out_nullable_input_omittable.MissingInput{}.NullObject)
 	})
 
 	t.Run("non-nullable input fields are not omittable", func(t *testing.T) {
-		require.IsType(t, out_nullable_input_omittable.MissingInput{}.NonNullString, "")
+		require.IsType(t, "", out_nullable_input_omittable.MissingInput{}.NonNullString)
 	})
 }
 
@@ -534,6 +568,22 @@ func TestRemoveDuplicate(t *testing.T) {
 			want:      "gorm:\"unique;not null\" json:\"name,name2\"",
 			wantPanic: false,
 		},
+		{
+			name: "Test gorm tag with colon",
+			args: args{
+				t: "gorm:\"type:varchar(63);unique_index\"",
+			},
+			want:      "gorm:\"type:varchar(63);unique_index\"",
+			wantPanic: false,
+		},
+		{
+			name: "Test mix use of gorm and duplicate json tags with colon",
+			args: args{
+				t: "json:\"name0\" gorm:\"type:varchar(63);unique_index\" json:\"name,name2\"",
+			},
+			want:      "gorm:\"type:varchar(63);unique_index\" json:\"name,name2\"",
+			wantPanic: false,
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -636,4 +686,15 @@ func Test_splitTagsBySpace(t *testing.T) {
 			assert.Equalf(t, tt.want, splitTagsBySpace(tt.args.tagsString), "splitTagsBySpace(%v)", tt.args.tagsString)
 		})
 	}
+}
+
+func TestCustomTemplate(t *testing.T) {
+	cfg, err := config.LoadConfig("testdata/gqlgen_custom_model_template.yml")
+	require.NoError(t, err)
+	require.NoError(t, cfg.Init())
+	p := Plugin{
+		MutateHook: mutateHook,
+		FieldHook:  DefaultFieldMutateHook,
+	}
+	require.NoError(t, p.MutateConfig(cfg))
 }

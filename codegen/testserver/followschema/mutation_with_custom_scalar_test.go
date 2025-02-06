@@ -4,9 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
+
+	"github.com/99designs/gqlgen/client"
 )
 
 func TestErrorInsideMutationArgument(t *testing.T) {
@@ -15,12 +17,14 @@ func TestErrorInsideMutationArgument(t *testing.T) {
 		return "Hello world", nil
 	}
 
-	c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv.AddTransport(transport.POST{})
+	c := client.New(srv)
 
 	t.Run("mutation with correct input doesn't return error", func(t *testing.T) {
-		var resp map[string]interface{}
-		input := map[string]interface{}{
-			"nesting": map[string]interface{}{
+		var resp map[string]any
+		input := map[string]any{
+			"nesting": map[string]any{
 				"field": "email@example.com",
 			},
 		}
@@ -29,14 +33,14 @@ func TestErrorInsideMutationArgument(t *testing.T) {
 			&resp,
 			client.Var("input", input),
 		)
-		require.Equal(t, resp["updateSomething"], "Hello world")
+		require.Equal(t, "Hello world", resp["updateSomething"])
 		require.NoError(t, err)
 	})
 
 	t.Run("mutation with incorrect input returns full path", func(t *testing.T) {
-		var resp map[string]interface{}
-		input := map[string]interface{}{
-			"nesting": map[string]interface{}{
+		var resp map[string]any
+		input := map[string]any{
+			"nesting": map[string]any{
 				"field": "not-an-email",
 			},
 		}

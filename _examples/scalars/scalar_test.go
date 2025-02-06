@@ -4,10 +4,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/stretchr/testify/require"
+
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/stretchr/testify/require"
 )
 
 type RawUser struct {
@@ -21,7 +24,10 @@ type RawUser struct {
 }
 
 func TestScalars(t *testing.T) {
-	c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: &Resolver{}})))
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: &Resolver{}}))
+	srv.AddTransport(transport.POST{})
+	srv.Use(extension.Introspection{})
+	c := client.New(srv)
 
 	t.Run("marshaling", func(t *testing.T) {
 		var resp struct {
@@ -72,7 +78,7 @@ func TestScalars(t *testing.T) {
 
 	t.Run("introspection", func(t *testing.T) {
 		// Make sure we can run the graphiql introspection query without errors
-		var resp interface{}
+		var resp any
 		c.MustPost(introspection.Query, &resp)
 	})
 }

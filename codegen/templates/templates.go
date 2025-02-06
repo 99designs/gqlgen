@@ -2,6 +2,7 @@ package templates
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"go/types"
 	"io/fs"
@@ -17,7 +18,6 @@ import (
 	"text/template"
 	"unicode"
 
-	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/internal/code"
 	"github.com/99designs/gqlgen/internal/imports"
 )
@@ -53,7 +53,7 @@ type Options struct {
 	// FileNotice is notice written below the package line
 	FileNotice string
 	// Data will be passed to the template execution.
-	Data  interface{}
+	Data  any
 	Funcs template.FuncMap
 
 	// Packages cache, you can find me on config.Config
@@ -72,7 +72,7 @@ var (
 // files inside the directory where you wrote the plugin.
 func Render(cfg Options) error {
 	if CurrentImports != nil {
-		panic(fmt.Errorf("recursive or concurrent call to RenderToFile detected"))
+		panic(errors.New("recursive or concurrent call to RenderToFile detected"))
 	}
 	CurrentImports = &Imports{packages: cfg.Packages, destDir: filepath.Dir(cfg.Filename)}
 
@@ -172,7 +172,7 @@ func parseTemplates(cfg Options, t *template.Template) (*template.Template, erro
 		fileSystem = cfg.TemplateFS
 	} else {
 		// load path relative to calling source file
-		_, callerFile, _, _ := runtime.Caller(1)
+		_, callerFile, _, _ := runtime.Caller(2)
 		rootDir := filepath.Dir(callerFile)
 		fileSystem = os.DirFS(rootDir)
 	}
@@ -185,7 +185,7 @@ func parseTemplates(cfg Options, t *template.Template) (*template.Template, erro
 	return t, nil
 }
 
-func center(width int, pad string, s string) string {
+func center(width int, pad, s string) string {
 	if len(s)+2 > width {
 		return s
 	}
@@ -202,10 +202,13 @@ func Funcs() template.FuncMap {
 		"rawQuote":           rawQuote,
 		"dump":               Dump,
 		"ref":                ref,
-		"ts":                 config.TypeIdentifier,
+		"obj":                obj,
+		"ts":                 TypeIdentifier,
 		"call":               Call,
+		"dict":               dict,
 		"prefixLines":        prefixLines,
 		"notNil":             notNil,
+		"strSplit":           StrSplit,
 		"reserveImport":      CurrentImports.Reserve,
 		"lookupImport":       CurrentImports.Lookup,
 		"go":                 ToGo,
@@ -215,7 +218,7 @@ func Funcs() template.FuncMap {
 		"add": func(a, b int) int {
 			return a + b
 		},
-		"render": func(filename string, tpldata interface{}) (*bytes.Buffer, error) {
+		"render": func(filename string, tpldata any) (*bytes.Buffer, error) {
 			return render(resolveName(filename, 0), tpldata)
 		},
 	}
@@ -245,7 +248,22 @@ func isDelimiter(c rune) bool {
 }
 
 func ref(p types.Type) string {
-	return CurrentImports.LookupType(p)
+	typeString := CurrentImports.LookupType(p)
+	// TODO(steve): figure out why this is needed
+	// otherwise inconsistent sometimes
+	if typeString == "interface{}" {
+		return "any"
+	}
+	return typeString
+}
+
+func obj(obj types.Object) string {
+	pkg := CurrentImports.Lookup(obj.Pkg().Path())
+	if pkg != "" {
+		pkg += "."
+	}
+
+	return pkg + obj.Name()
 }
 
 func Call(p *types.Func) string {
@@ -261,6 +279,21 @@ func Call(p *types.Func) string {
 	}
 
 	return pkg + p.Name()
+}
+
+func dict(values ...any) (map[string]any, error) {
+	if len(values)%2 != 0 {
+		return nil, errors.New("invalid dict call: arguments must be key-value pairs")
+	}
+	m := make(map[string]any, len(values)/2)
+	for i := 0; i < len(values); i += 2 {
+		key, ok := values[i].(string)
+		if !ok {
+			return nil, errors.New("dict keys must be strings")
+		}
+		m[key] = values[i+1]
+	}
+	return m, nil
 }
 
 func resetModelNames() {
@@ -465,7 +498,7 @@ func wordWalker(str string, f func(*wordInfo)) {
 		}
 		i++
 
-		initialisms := config.GetInitialisms()
+		initialisms := GetInitialisms()
 		// [w,i) is a word.
 		word := string(runes[w:i])
 		if !eow && initialisms[word] && !unicode.IsLower(runes[i]) {
@@ -484,18 +517,18 @@ func wordWalker(str string, f func(*wordInfo)) {
 		if initialisms[upperWord] {
 			// If the uppercase word (string(runes[w:i]) is "ID" or "IP"
 			// AND
-			// the word is the first two characters of the str
+			// the word is the first two characters of the current word
 			// AND
 			// that is not the end of the word
 			// AND
-			// the length of the string is greater than 3
+			// the length of the remaining string is greater than 3
 			// AND
 			// the third rune is an uppercase one
 			// THEN
 			// do NOT count this as an initialism.
 			switch upperWord {
 			case "ID", "IP":
-				if word == str[:2] && !eow && len(str) > 3 && unicode.IsUpper(runes[3]) {
+				if remainingRunes := runes[w:]; word == string(remainingRunes[:2]) && !eow && len(remainingRunes) > 3 && unicode.IsUpper(remainingRunes[3]) {
 					continue
 				}
 			}
@@ -558,7 +591,7 @@ func rawQuote(s string) string {
 	return "`" + strings.ReplaceAll(s, "`", "`+\"`\"+`") + "`"
 }
 
-func notNil(field string, data interface{}) bool {
+func notNil(field string, data any) bool {
 	v := reflect.ValueOf(data)
 
 	if v.Kind() == reflect.Ptr {
@@ -572,12 +605,16 @@ func notNil(field string, data interface{}) bool {
 	return val.IsValid() && !val.IsNil()
 }
 
-func Dump(val interface{}) string {
+func StrSplit(s, sep string) []string {
+	return strings.Split(s, sep)
+}
+
+func Dump(val any) string {
 	switch val := val.(type) {
 	case int:
 		return strconv.Itoa(val)
 	case int64:
-		return fmt.Sprintf("%d", val)
+		return strconv.FormatInt(val, 10)
 	case float64:
 		return fmt.Sprintf("%f", val)
 	case string:
@@ -586,15 +623,15 @@ func Dump(val interface{}) string {
 		return strconv.FormatBool(val)
 	case nil:
 		return "nil"
-	case []interface{}:
+	case []any:
 		var parts []string
 		for _, part := range val {
 			parts = append(parts, Dump(part))
 		}
-		return "[]interface{}{" + strings.Join(parts, ",") + "}"
-	case map[string]interface{}:
+		return "[]any{" + strings.Join(parts, ",") + "}"
+	case map[string]any:
 		buf := bytes.Buffer{}
-		buf.WriteString("map[string]interface{}{")
+		buf.WriteString("map[string]any{")
 		var keys []string
 		for key := range val {
 			keys = append(keys, key)
@@ -632,7 +669,7 @@ func resolveName(name string, skip int) string {
 	return filepath.Join(filepath.Dir(callerFile), name)
 }
 
-func render(filename string, tpldata interface{}) (*bytes.Buffer, error) {
+func render(filename string, tpldata any) (*bytes.Buffer, error) {
 	t := template.New("").Funcs(Funcs())
 
 	b, err := os.ReadFile(filename)
@@ -667,4 +704,100 @@ func write(filename string, b []byte, packages *code.Packages) error {
 	}
 
 	return nil
+}
+
+var pkgReplacer = strings.NewReplacer(
+	"/", "ᚋ",
+	".", "ᚗ",
+	"-", "ᚑ",
+	"~", "א",
+)
+
+func TypeIdentifier(t types.Type) string {
+	res := ""
+	for {
+		switch it := code.Unalias(t).(type) {
+		case *types.Pointer:
+			t.Underlying()
+			res += "ᚖ"
+			t = it.Elem()
+		case *types.Slice:
+			res += "ᚕ"
+			t = it.Elem()
+		case *types.Named:
+			res += pkgReplacer.Replace(it.Obj().Pkg().Path())
+			res += "ᚐ"
+			res += it.Obj().Name()
+			return res
+		case *types.Basic:
+			res += it.Name()
+			return res
+		case *types.Map:
+			res += "map"
+			return res
+		case *types.Interface:
+			res += "interface"
+			return res
+		default:
+			panic(fmt.Errorf("unexpected type %T", it))
+		}
+	}
+}
+
+// CommonInitialisms is a set of common initialisms.
+// Only add entries that are highly unlikely to be non-initialisms.
+// For instance, "ID" is fine (Freudian code is rare), but "AND" is not.
+var CommonInitialisms = map[string]bool{
+	"ACL":   true,
+	"API":   true,
+	"ASCII": true,
+	"CPU":   true,
+	"CSS":   true,
+	"CSV":   true,
+	"DNS":   true,
+	"EOF":   true,
+	"GUID":  true,
+	"HTML":  true,
+	"HTTP":  true,
+	"HTTPS": true,
+	"ICMP":  true,
+	"ID":    true,
+	"IP":    true,
+	"JSON":  true,
+	"KVK":   true,
+	"LHS":   true,
+	"PDF":   true,
+	"PGP":   true,
+	"QPS":   true,
+	"QR":    true,
+	"RAM":   true,
+	"RHS":   true,
+	"RPC":   true,
+	"SLA":   true,
+	"SMTP":  true,
+	"SQL":   true,
+	"SSH":   true,
+	"SVG":   true,
+	"TCP":   true,
+	"TLS":   true,
+	"TTL":   true,
+	"UDP":   true,
+	"UI":    true,
+	"UID":   true,
+	"URI":   true,
+	"URL":   true,
+	"UTF8":  true,
+	"UUID":  true,
+	"VM":    true,
+	"XML":   true,
+	"XMPP":  true,
+	"XSRF":  true,
+	"XSS":   true,
+	"AWS":   true,
+	"GCP":   true,
+}
+
+// GetInitialisms returns the initialisms to capitalize in Go names. If unchanged, default initialisms will be returned
+var GetInitialisms = func() map[string]bool {
+	return CommonInitialisms
 }

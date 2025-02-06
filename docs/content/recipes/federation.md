@@ -124,14 +124,16 @@ npm install --save @apollo/gateway apollo-server graphql
 
 ```typescript
 const { ApolloServer } = require('apollo-server');
-const { ApolloGateway } = require("@apollo/gateway");
+const { ApolloGateway, IntrospectAndCompose } = require("@apollo/gateway");
 
 const gateway = new ApolloGateway({
-    serviceList: [
-        { name: 'accounts', url: 'http://localhost:4001/query' },
-        { name: 'products', url: 'http://localhost:4002/query' },
-        { name: 'reviews', url: 'http://localhost:4003/query' }
-    ],
+    supergraphSdl: new IntrospectAndCompose({
+        subgraphs: [
+            { name: 'accounts', url: 'http://localhost:4001/query' },
+            { name: 'products', url: 'http://localhost:4002/query' },
+            { name: 'reviews', url: 'http://localhost:4003/query' }
+        ]
+    })
 });
 
 const server = new ApolloServer({
@@ -199,5 +201,114 @@ should return
       ]
     }
   }
+}
+```
+
+## Using @requires
+
+`@requires` enables you to [define computed fields](https://www.apollographql.com/docs/federation/federated-schemas/federated-directives/#requires). In order for this to work, you need to be able to reference the values injected by the selection set inside the `fields` property of `@requires`.
+
+In order to do this, you need to enable the `federation.options.computed_requires` flag. You also
+need to enable `call_argument_directives_with_null`.
+
+```yml
+federation:
+  filename: graph/federation.go
+  package: graph
+  version: 2
+  options:
+    computed_requires: true
+
+call_argument_directives_with_null: true
+```
+
+Once you do this, if you have `@requires` declared anywhere on your schema, you'll see updates to the
+genrated resolver functions that include a new argument, `federationRequires`, that will contain the
+fields you requested in your `@requires.fields` selection set.
+
+> Note: currently it's represented as a map[string]any where the contained values are encoded with
+`encoding/json`. Eventually we will generate a typesafe model that represents these models,
+however that is a large lift. This typesafe support will be added in the future.
+
+### Example
+
+Take a simple todo app schema that needs to provide a formatted status text to be used across all clients by referencing the assignee's name.
+
+```graphql
+type Todo @key(fields:"id") {
+  id: ID!
+  text: String!
+  statusText: String! @requires(fields: "assignee { name }")
+  status: String!
+  owner: User!
+  assignee: User! @external
+}
+
+type User @key(fields:"id") {
+  id: ID!
+  name: String! @external
+}
+```
+
+The `statusText` resolver function is updated and can be modified accordingly to use the todo representation with the assignee name.
+
+```golang
+func (r *todoResolver) StatusText(ctx context.Context, entity *model.Todo, federationRequires map[string]interface{} /* new argument generated onto your resolver function */) (string, error) {
+  if federationRequires["assignee"] == nil {
+    return "", nil
+  }
+
+  // federationRequires will contain the "assignee.name" field provided by the Federation router
+  statusText := entity.Status + " by " + federationRequires["assignee"].(map[string]interface{})["name"].(string)
+  return statusText, nil
+}
+```
+
+### [DEPRECATED] Alternate API
+
+> Note: it's not recommended to use this API anymore. See the `Using @requires` section for the recommend API.
+
+If you need to support **nested** or **array** fields in the `@requires` directive, this can be enabled in the configuration by setting `federation.options.explicit_requires` to true.
+
+```yml
+federation:
+  filename: graph/federation.go
+  package: graph
+  version: 2
+  options:
+    explicit_requires: true
+```
+
+Enabling this will generate corresponding functions with the entity representations received in the request. This allows for the entity model to be explicitly populated with the required data provided.
+
+#### Example
+
+Take a simple todo app schema that needs to provide a formatted status text to be used across all clients by referencing the assignee's name.
+
+```graphql
+type Todo @key(fields:"id") {
+  id: ID!
+  text: String!
+  statusText: String! @requires(fields: "assignee { name }")
+  status: String!
+  owner: User!
+  assignee: User!
+}
+
+type User @key(fields:"id") {
+  id: ID!
+  name: String! @external
+}
+```
+
+A `PopulateTodoRequires` function is generated, and can be modified accordingly to use the todo representation with the assignee name.
+
+```golang
+// PopulateTodoRequires is the requires populator for the Todo entity.
+func (ec *executionContext) PopulateTodoRequires(ctx context.Context, entity *model.Todo, reps map[string]interface{}) error {
+	if reps["assignee"] != nil {
+		entity.StatusText = entity.Status + " by " + reps["assignee"].(map[string]interface{})["name"].(string)
+	}
+	return nil
 }
 ```

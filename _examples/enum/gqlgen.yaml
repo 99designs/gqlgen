@@ -1,0 +1,39 @@
+schema: ./*.graphqls
+
+exec:
+  filename: ./api/exec.go
+  package: api
+
+resolver:
+  layout: follow-schema
+  package: api
+  dir: api
+  filename_template: "{name}.go"
+
+omit_slice_element_pointers: true
+resolvers_always_return_pointers: false
+struct_fields_always_pointers: false
+omit_root_models: true
+
+models:
+  BoolTyped:
+    model: github.com/99designs/gqlgen/_examples/enum/model.BoolTyped
+    enum_values:
+      TRUE:
+        value: github.com/99designs/gqlgen/_examples/enum/model.BoolTypedTrue
+      FALSE:
+        value: github.com/99designs/gqlgen/_examples/enum/model.BoolTypedFalse
+  BoolUntyped:
+    model: github.com/99designs/gqlgen/graphql.Boolean
+    enum_values:
+      TRUE:
+        value: github.com/99designs/gqlgen/_examples/enum/model.BoolUntypedTrue
+      FALSE:
+        value: github.com/99designs/gqlgen/_examples/enum/model.BoolUntypedFalse
+  InPackage:
+    model: github.com/99designs/gqlgen/_examples/enum/api.InPackage
+    enum_values:
+      TRUE:
+        value: github.com/99designs/gqlgen/_examples/enum/api.InPackageTrue
+      FALSE:
+        value: github.com/99designs/gqlgen/_examples/enum/api.InPackageFalse

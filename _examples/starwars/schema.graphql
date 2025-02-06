@@ -59,6 +59,10 @@ type Human implements Character {
     appearsIn: [Episode!]!
     # A list of starships this person has piloted, or an empty list if none
     starships: [Starship!]
+    # Root level query
+    query: Query!
+    # Root level mutation
+    mutation: Mutation!
 }
 # An autonomous mechanical character in the Star Wars universe
 type Droid implements Character {

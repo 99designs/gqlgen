@@ -8,12 +8,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/stretchr/testify/require"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
 
 func TestSubscriptions(t *testing.T) {
@@ -86,15 +86,14 @@ func TestSubscriptions(t *testing.T) {
 		return res, nil
 	}
 
-	srv := handler.NewDefaultServer(
-		NewExecutableSchema(Config{Resolvers: resolvers}),
-	)
-	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv.AddTransport(transport.Websocket{KeepAlivePingInterval: time.Second})
+	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res any, err error) {
 		path, _ := ctx.Value(ckey("path")).([]int)
 		return next(context.WithValue(ctx, ckey("path"), append(path, 1)))
 	})
 
-	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res interface{}, err error) {
+	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res any, err error) {
 		path, _ := ctx.Value(ckey("path")).([]int)
 		return next(context.WithValue(ctx, ckey("path"), append(path, 2)))
 	})
@@ -130,7 +129,10 @@ func TestSubscriptions(t *testing.T) {
 	})
 
 	t.Run("will parse init payload", func(t *testing.T) {
-		sub := c.WebsocketWithPayload(`subscription { initPayload }`, map[string]interface{}{
+		runtime.GC() // ensure no go-routines left from preceding tests
+		initialGoroutineCount := runtime.NumGoroutine()
+
+		sub := c.WebsocketWithPayload(`subscription { initPayload }`, map[string]any{
 			"Authorization": "Bearer of the curse",
 			"number":        32,
 			"strings":       []string{"hello", "world"},
@@ -155,6 +157,14 @@ func TestSubscriptions(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, "strings = []interface {}{\"hello\", \"world\"}", msg.resp.InitPayload)
 		sub.Close()
+
+		// need a little bit of time for goroutines to settle
+		start := time.Now()
+		for time.Since(start).Seconds() < 2 && initialGoroutineCount != runtime.NumGoroutine() {
+			time.Sleep(5 * time.Millisecond)
+		}
+
+		require.Equal(t, initialGoroutineCount, runtime.NumGoroutine())
 	})
 
 	t.Run("websocket gets errors", func(t *testing.T) {

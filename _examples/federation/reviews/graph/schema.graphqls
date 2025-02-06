@@ -1,26 +1,31 @@
-type Review {
-    body: String!
-    author: User! @provides(fields: "username")
-    product: Product!
-}
+directive @entityResolver(multi: Boolean) on OBJECT
 
 extend type EmailHost @key(fields: "id") {
     id: String! @external
-}
-
-extend type User @key(fields: "id") {
-    id: ID! @external
-    host: EmailHost! @external
-    email: String! @external
-    reviews: [Review] @requires(fields: "host {id} email")
 }
 
 extend type Manufacturer @key(fields: "id") {
     id: String! @external
 }
 
-extend type Product @key(fields: " manufacturer{  id} id") {
+extend type Product @key(fields: "manufacturer { id } id") @entityResolver(multi: true) {
     id: String! @external
     manufacturer: Manufacturer! @external
+    manufacturerID: String @requires(fields: "manufacturer { id }")
     reviews: [Review]
+}
+
+extend type User @key(fields: "id") {
+    id: ID! @external
+    host: EmailHost! @external
+    email: String! @external
+    username: String! @external
+    reviews: [Review] @requires(fields: "host { id } email")
+}
+
+type Review {
+    body: String!
+    author: User! @provides(fields: "username")
+    product: Product!
+    hostIDEmail: String
 }

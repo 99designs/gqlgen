@@ -5,16 +5,16 @@
   "dependencies": {
     "@apollo/client": "^3.2.3",
     "apollo-utilities": "^1.0.26",
-    "graphql": "^14.0.2",
+    "graphql": "^16.8.1",
     "graphql-sse": "^2.0.0",
     "graphql-tag": "^2.10.0",
-    "graphql-ws": "^5.8.1",
-    "react": "^16.6.3",
-    "react-dom": "^16.6.3",
-    "react-scripts": "^2.1.1",
-    "styled-components": "^5.2.0",
-    "subscriptions-transport-ws": "^0.9.5",
-    "typescript": "^4.9.4"
+    "graphql-ws": "^6.0.1",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-scripts": "^5.0.1",
+    "styled-components": "^6.1.8",
+    "subscriptions-transport-ws": "^0.11.0",
+    "typescript": "^5.3.3"
   },
   "scripts": {
     "start": "react-scripts start",

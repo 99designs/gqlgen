@@ -104,13 +104,6 @@ srv.Use(extension.AutomaticPersistedQuery{
 srv.Use(apollotracing.Tracer{})
 ```
 
-### Default server
-
-We provide a set of default extensions and transports if you aren't ready to customize them yet. Simply:
-```go
-handler.NewDefaultServer(es)
-```
-
 ### More consistent naming
 
 As part of cleaning up the names the RequestContext has been renamed to OperationContext, as there can be multiple created during the lifecycle of a request. A new ResponseContext has also been created and error handling has been moved here. This allows each response in a subscription to have its own errors. I'm not sure what bugs this might have been causing before...

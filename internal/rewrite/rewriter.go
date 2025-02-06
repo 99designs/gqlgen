@@ -10,8 +10,9 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/99designs/gqlgen/internal/code"
 	"golang.org/x/tools/go/packages"
+
+	"github.com/99designs/gqlgen/internal/code"
 )
 
 type Rewriter struct {
@@ -62,7 +63,6 @@ func (r *Rewriter) getFile(filename string) string {
 		}
 
 		r.files[filename] = string(b)
-
 	}
 
 	return r.files[filename]

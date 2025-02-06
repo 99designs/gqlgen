@@ -4,9 +4,11 @@ import (
 	"context"
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/stretchr/testify/require"
+
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/stretchr/testify/require"
 )
 
 type fakeUnexportedEmbeddedInterface struct{}
@@ -27,9 +29,9 @@ func TestEmbedded(t *testing.T) {
 		return &EmbeddedCase3{&fakeUnexportedEmbeddedInterface{}}, nil
 	}
 
-	c := client.New(handler.NewDefaultServer(
-		NewExecutableSchema(Config{Resolvers: resolver}),
-	))
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolver}))
+	srv.AddTransport(transport.POST{})
+	c := client.New(srv)
 
 	t.Run("embedded case 1", func(t *testing.T) {
 		var resp struct {
@@ -39,7 +41,7 @@ func TestEmbedded(t *testing.T) {
 		}
 		err := c.Post(`query { embeddedCase1 { exportedEmbeddedPointerExportedMethod } }`, &resp)
 		require.NoError(t, err)
-		require.Equal(t, resp.EmbeddedCase1.ExportedEmbeddedPointerExportedMethod, "ExportedEmbeddedPointerExportedMethodResponse")
+		require.Equal(t, "ExportedEmbeddedPointerExportedMethodResponse", resp.EmbeddedCase1.ExportedEmbeddedPointerExportedMethod)
 	})
 
 	t.Run("embedded case 2", func(t *testing.T) {
@@ -50,7 +52,7 @@ func TestEmbedded(t *testing.T) {
 		}
 		err := c.Post(`query { embeddedCase2 { unexportedEmbeddedPointerExportedMethod } }`, &resp)
 		require.NoError(t, err)
-		require.Equal(t, resp.EmbeddedCase2.UnexportedEmbeddedPointerExportedMethod, "UnexportedEmbeddedPointerExportedMethodResponse")
+		require.Equal(t, "UnexportedEmbeddedPointerExportedMethodResponse", resp.EmbeddedCase2.UnexportedEmbeddedPointerExportedMethod)
 	})
 
 	t.Run("embedded case 3", func(t *testing.T) {
@@ -61,6 +63,6 @@ func TestEmbedded(t *testing.T) {
 		}
 		err := c.Post(`query { embeddedCase3 { unexportedEmbeddedInterfaceExportedMethod } }`, &resp)
 		require.NoError(t, err)
-		require.Equal(t, resp.EmbeddedCase3.UnexportedEmbeddedInterfaceExportedMethod, "UnexportedEmbeddedInterfaceExportedMethod")
+		require.Equal(t, "UnexportedEmbeddedInterfaceExportedMethod", resp.EmbeddedCase3.UnexportedEmbeddedInterfaceExportedMethod)
 	})
 }

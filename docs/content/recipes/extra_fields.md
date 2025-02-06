@@ -2,21 +2,22 @@
 title: "Generation of additional extra fields for internal use"
 description: Pass implementation specific fields to the children resolvers without being forced to define your own types for a GraphQL model.
 linkTitle: Generated Model Extra Fields
-menu: { main: { parent: 'recipes' } }
+menu: { main: { parent: "recipes" } }
 ---
 
 Extra fields allows you to generate additional fields for your models.
 These fields can be used at runtime when implementing field resolvers.
 
 ## Extending your models
+
 Imagine you have a model named User and you want to extend a generated struct with additional data used in your service.
 
 The schema is:
 
 ```graphql
 type User {
-  id: ID!
-  name: String!
+	id: ID!
+	name: String!
 }
 ```
 
@@ -29,6 +30,7 @@ models:
       Session:
         description: "A Session used by this user"
         type: "github.com/author/mypkg.Session"
+        overrideTags: 'xml:"session"'
 ```
 
 The generated code would look like:
@@ -40,8 +42,54 @@ type User struct {
 	ID   string
 	Name string
 	// A Session used by this user.
-	Session mypkg.Session
+	Session mypkg.Session `xml:"session"`
 }
 ```
 
 After these steps you have an extra field for your server implementation and the field is not being exposed to a caller.
+
+### Inline config with directive
+
+To start using it you first need to define it:
+
+```graphql
+directive @goExtraField(
+	name: String
+	type: String!
+	overrideTags: String
+	description: String
+) repeatable on OBJECT | INPUT_OBJECT
+```
+
+Now you can use these directive when defining types in your schema:
+
+```graphql
+type User
+	@goExtraField(
+		name: "Session"
+		type: "github.com/author/mypkg.Session"
+		description: "A Session used by this user"
+		overrideTags: "xml:\"session\""
+	)
+	@goExtraField(name: "Activated", type: "bool")
+	@goExtraField(
+		type: "time.Time"
+		description: "type without name will be embedded"
+	) {
+	id: ID
+	name: String
+}
+```
+
+The generated code would look like:
+
+```go
+type User struct {
+  ID   string
+  Name string
+  // A Session used by this user.
+  Session   mypkg.Session `xml:"session"`
+  Activated bool
+  time.Time
+}
+```

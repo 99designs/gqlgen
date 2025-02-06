@@ -35,7 +35,7 @@ func New() Config {
 			Rooms: sync.Map{},
 		},
 		Directives: DirectiveRoot{
-			User: func(ctx context.Context, obj interface{}, next graphql.Resolver, username string) (res interface{}, err error) {
+			User: func(ctx context.Context, obj any, next graphql.Resolver, username string) (res any, err error) {
 				return next(context.WithValue(ctx, ckey("username"), username))
 			},
 		},
@@ -62,7 +62,7 @@ type Chatroom struct {
 
 type mutationResolver struct{ *resolver }
 
-func (r *mutationResolver) Post(ctx context.Context, text string, username string, roomName string) (*Message, error) {
+func (r *mutationResolver) Post(ctx context.Context, text, username, roomName string) (*Message, error) {
 	room := r.getRoom(roomName)
 
 	message := &Message{
@@ -73,7 +73,7 @@ func (r *mutationResolver) Post(ctx context.Context, text string, username strin
 	}
 
 	room.Messages = append(room.Messages, *message)
-	room.Observers.Range(func(_, v interface{}) bool {
+	room.Observers.Range(func(_, v any) bool {
 		observer := v.(*Observer)
 		if observer.Username == "" || observer.Username == message.CreatedBy {
 			observer.Message <- message

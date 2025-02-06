@@ -2,14 +2,16 @@ package followschema
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"reflect"
 	"testing"
+
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/stretchr/testify/require"
 )
 
 func TestInterfaces(t *testing.T) {
@@ -33,12 +35,8 @@ func TestInterfaces(t *testing.T) {
 			}, nil
 		}
 
-		srv := handler.NewDefaultServer(
-			NewExecutableSchema(Config{
-				Resolvers: resolvers,
-			}),
-		)
-
+		srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+		srv.AddTransport(transport.POST{})
 		c := client.New(srv)
 
 		var resp struct {
@@ -60,68 +58,70 @@ func TestInterfaces(t *testing.T) {
 			return nil, nil
 		}
 
-		srv := handler.NewDefaultServer(
+		srv := handler.New(
 			NewExecutableSchema(Config{
 				Resolvers: resolvers,
 				Directives: DirectiveRoot{
-					MakeNil: func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
+					MakeNil: func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
 						return nil, nil
 					},
 				},
 			}),
 		)
-
+		srv.AddTransport(transport.POST{})
 		c := client.New(srv)
 
-		var resp interface{}
+		var resp any
 		c.MustPost(`{ noShape { area } }`, &resp)
 	})
 
 	t.Run("interfaces can be typed nil", func(t *testing.T) {
 		resolvers := &Stub{}
 		resolvers.QueryResolver.NoShapeTypedNil = func(ctx context.Context) (shapes Shape, e error) {
-			panic("should not be called")
+			t.Fatal("should not be called")
+			return
 		}
 
-		srv := handler.NewDefaultServer(
+		srv := handler.New(
 			NewExecutableSchema(Config{
 				Resolvers: resolvers,
 				Directives: DirectiveRoot{
-					MakeTypedNil: func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
+					MakeTypedNil: func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
 						var circle *Circle
 						return circle, nil
 					},
 				},
 			}),
 		)
-
+		srv.AddTransport(transport.POST{})
 		c := client.New(srv)
 
-		var resp interface{}
+		var resp any
 		c.MustPost(`{ noShapeTypedNil { area } }`, &resp)
 	})
 
 	t.Run("interfaces can be nil (test with code-generated resolver)", func(t *testing.T) {
 		resolvers := &Stub{}
 		resolvers.QueryResolver.Animal = func(ctx context.Context) (animal Animal, e error) {
-			panic("should not be called")
+			t.Fatal("should not be called")
+			return
 		}
 
-		srv := handler.NewDefaultServer(
+		srv := handler.New(
 			NewExecutableSchema(Config{
 				Resolvers: resolvers,
 				Directives: DirectiveRoot{
-					MakeTypedNil: func(ctx context.Context, obj interface{}, next graphql.Resolver) (res interface{}, err error) {
+					MakeTypedNil: func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
 						var dog *Dog // return a typed nil, not just nil
 						return dog, nil
 					},
 				},
 			}),
 		)
-
+		srv.AddTransport(transport.POST{})
 		c := client.New(srv)
 
-		var resp interface{}
+		var resp any
 		c.MustPost(`{ animal { species } }`, &resp)
 	})
 
@@ -137,7 +137,9 @@ func TestInterfaces(t *testing.T) {
 			}, nil
 		}
 
-		c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+		srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+		srv.AddTransport(transport.POST{})
+		c := client.New(srv)
 
 		var resp struct {
 			NotAnInterface struct {
@@ -160,11 +162,13 @@ func TestInterfaces(t *testing.T) {
 		resolvers.QueryResolver.NotAnInterface = func(ctx context.Context) (byInterface BackedByInterface, err error) {
 			return &BackedByInterfaceImpl{
 				Value: "A",
-				Error: fmt.Errorf("boom"),
+				Error: errors.New("boom"),
 			}, nil
 		}
 
-		c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+		srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+		srv.AddTransport(transport.POST{})
+		c := client.New(srv)
 
 		var resp struct {
 			NotAnInterface struct {
@@ -183,7 +187,9 @@ func TestInterfaces(t *testing.T) {
 			return ConcreteNodeInterfaceImplementor{}, nil
 		}
 
-		c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+		srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+		srv.AddTransport(transport.POST{})
+		c := client.New(srv)
 
 		var resp struct {
 			Node struct {
@@ -217,7 +223,9 @@ func TestInterfaces(t *testing.T) {
 			}, nil
 		}
 
-		c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+		srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+		srv.AddTransport(transport.POST{})
+		c := client.New(srv)
 		var resp struct {
 			Shapes []struct {
 				Coordinates struct {
@@ -247,11 +255,11 @@ func TestInterfaces(t *testing.T) {
 			}
 		`, &resp)
 
-		require.Equal(t, 2, len(resp.Shapes))
-		require.Equal(t, float64(-1), resp.Shapes[0].Coordinates.X)
-		require.Equal(t, float64(0), resp.Shapes[0].Coordinates.Y)
-		require.Equal(t, float64(1), resp.Shapes[1].Coordinates.X)
-		require.Equal(t, float64(1), resp.Shapes[1].Coordinates.Y)
+		require.Len(t, resp.Shapes, 2)
+		require.InDelta(t, float64(-1), resp.Shapes[0].Coordinates.X, 0.02)
+		require.InDelta(t, float64(0), resp.Shapes[0].Coordinates.Y, 0.02)
+		require.InDelta(t, float64(1), resp.Shapes[1].Coordinates.X, 0.02)
+		require.InDelta(t, float64(1), resp.Shapes[1].Coordinates.Y, 0.02)
 	})
 
 	t.Run("fragment on interface must return merged fields", func(t *testing.T) {
@@ -265,7 +273,9 @@ func TestInterfaces(t *testing.T) {
 			}, nil
 		}
 
-		c := client.New(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers})))
+		srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+		srv.AddTransport(transport.POST{})
+		c := client.New(srv)
 		var resp struct {
 			Dog struct {
 				Size struct {

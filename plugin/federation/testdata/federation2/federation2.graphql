@@ -1,13 +1,13 @@
 extend schema
-  @link(url: "https://specs.apollo.dev/federation/v2.3",
-        import: ["@key", "@shareable", "@provides", "@external", "@tag", "@extends", "@override", "@inaccessible"])
+  @link(url: "https://specs.apollo.dev/federation/v2.7",
+        import: ["@key", "@shareable", "@provides", "@external", "@tag", "@extends", "@override", "@inaccessible", "@interfaceObject", "@policy"])
 
 schema {
     query: CustomQuery
 }
 
 type Hello @key(fields:"name", resolvable: false) {
-  name: String!
+    name: String! @override(from: "old-service", label: "percent(5)")
 }
 
 type World @key(fields: "foo bar", resolvable: false) {
@@ -21,6 +21,5 @@ extend type ExternalExtension @key(fields: "  upc    ") {
 }
 
 type CustomQuery {
-  hello: Hello!
+    hello: Hello!
 }
-

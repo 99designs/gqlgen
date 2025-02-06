@@ -1,6 +1,12 @@
+{{ $useFunctionSyntaxForExecutionContext := .Config.UseFunctionSyntaxForExecutionContext }}
+
 {{- range $interface := .Interfaces }}
 
+{{ if $useFunctionSyntaxForExecutionContext -}}
+func _{{$interface.Name}}(ctx context.Context, ec *executionContext, sel ast.SelectionSet, obj {{$interface.Type | ref}}) graphql.Marshaler {
+{{- else -}}
 func (ec *executionContext) _{{$interface.Name}}(ctx context.Context, sel ast.SelectionSet, obj {{$interface.Type | ref}}) graphql.Marshaler {
+{{- end }}
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
@@ -11,7 +17,11 @@ func (ec *executionContext) _{{$interface.Name}}(ctx context.Context, sel ast.Se
 					return graphql.Null
 				}
 			{{- end }}
+			{{ if $useFunctionSyntaxForExecutionContext -}}
+			return _{{$implementor.Name}}(ctx, ec, sel, {{ if $implementor.TakeRef }}&{{ end }}obj)
+			{{- else -}}
 			return ec._{{$implementor.Name}}(ctx, sel, {{ if $implementor.TakeRef }}&{{ end }}obj)
+			{{- end }}
 	{{- end }}
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))

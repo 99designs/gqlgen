@@ -10,6 +10,3 @@ exec:
   filename: generated.go
 model:
   filename: models_gen.go
-resolver:
-  filename: resolver.go
-  type: Resolver

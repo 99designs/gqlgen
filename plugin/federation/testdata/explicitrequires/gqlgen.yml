@@ -1,0 +1,16 @@
+schema:
+  - "testdata/explicitrequires/schema.graphql"
+exec:
+  filename: testdata/explicitrequires/generated/exec.go
+federation:
+  filename: testdata/explicitrequires/generated/federation.go
+  options:
+    explicit_requires: true
+model:
+  filename: testdata/explicitrequires/generated/models.go
+resolver:
+  filename: testdata/explicitrequires/resolver.go
+  layout: follow-schema
+  dir: testdata/explicitrequires
+  package: explicitrequires
+omit_complexity: true

@@ -33,8 +33,7 @@ func TestBytesRead(t *testing.T) {
 	t.Run("fail to read if pointer is nil", func(t *testing.T) {
 		n, err := (&bytesReader{}).Read(nil)
 		require.Equal(t, 0, n)
-		require.NotNil(t, err)
-		require.Equal(t, "byte slice pointer is nil", err.Error())
+		require.EqualError(t, err, "byte slice pointer is nil")
 	})
 
 	t.Run("read using buffer", func(t *testing.T) {

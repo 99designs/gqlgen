@@ -7,18 +7,19 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/testserver"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/stretchr/testify/require"
 )
 
 func TestHandlerComplexity(t *testing.T) {
 	h := testserver.New()
 	h.Use(&extension.ComplexityLimit{
-		Func: func(ctx context.Context, rc *graphql.OperationContext) int {
-			if rc.RawQuery == "{ ok: name }" {
+		Func: func(ctx context.Context, opCtx *graphql.OperationContext) int {
+			if opCtx.RawQuery == "{ ok: name }" {
 				return 4
 			}
 			return 2
@@ -36,7 +37,7 @@ func TestHandlerComplexity(t *testing.T) {
 		h.SetCalculatedComplexity(2)
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
-		require.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+		require.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 
 		require.Equal(t, 2, stats.ComplexityLimit)
 		require.Equal(t, 2, stats.Complexity)
@@ -47,7 +48,7 @@ func TestHandlerComplexity(t *testing.T) {
 		h.SetCalculatedComplexity(4)
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
-		require.Equal(t, `{"errors":[{"message":"operation has complexity 4, which exceeds the limit of 2","extensions":{"code":"COMPLEXITY_LIMIT_EXCEEDED"}}],"data":null}`, resp.Body.String())
+		require.JSONEq(t, `{"errors":[{"message":"operation has complexity 4, which exceeds the limit of 2","extensions":{"code":"COMPLEXITY_LIMIT_EXCEEDED"}}],"data":null}`, resp.Body.String())
 
 		require.Equal(t, 2, stats.ComplexityLimit)
 		require.Equal(t, 4, stats.Complexity)
@@ -58,7 +59,7 @@ func TestHandlerComplexity(t *testing.T) {
 		h.SetCalculatedComplexity(4)
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ ok: name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
-		require.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+		require.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 
 		require.Equal(t, 4, stats.ComplexityLimit)
 		require.Equal(t, 4, stats.Complexity)
@@ -80,7 +81,7 @@ func TestFixedComplexity(t *testing.T) {
 		h.SetCalculatedComplexity(2)
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
-		require.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+		require.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 
 		require.Equal(t, 2, stats.ComplexityLimit)
 		require.Equal(t, 2, stats.Complexity)
@@ -90,7 +91,7 @@ func TestFixedComplexity(t *testing.T) {
 		h.SetCalculatedComplexity(4)
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
-		require.Equal(t, `{"errors":[{"message":"operation has complexity 4, which exceeds the limit of 2","extensions":{"code":"COMPLEXITY_LIMIT_EXCEEDED"}}],"data":null}`, resp.Body.String())
+		require.JSONEq(t, `{"errors":[{"message":"operation has complexity 4, which exceeds the limit of 2","extensions":{"code":"COMPLEXITY_LIMIT_EXCEEDED"}}],"data":null}`, resp.Body.String())
 
 		require.Equal(t, 2, stats.ComplexityLimit)
 		require.Equal(t, 4, stats.Complexity)
@@ -100,14 +101,14 @@ func TestFixedComplexity(t *testing.T) {
 		h.SetCalculatedComplexity(4)
 		resp := doRequest(h, "POST", "/graphql", `{ "operationName":"IntrospectionQuery", "query":"query IntrospectionQuery { __schema { queryType { name } mutationType { name }}}"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
-		require.Equal(t, `{"data":{"name":"test"}}`, resp.Body.String())
+		require.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 
 		require.Equal(t, 2, stats.ComplexityLimit)
 		require.Equal(t, 0, stats.Complexity)
 	})
 }
 
-func doRequest(handler http.Handler, method string, target string, body string) *httptest.ResponseRecorder {
+func doRequest(handler http.Handler, method, target, body string) *httptest.ResponseRecorder {
 	r := httptest.NewRequest(method, target, strings.NewReader(body))
 	r.Header.Set("Content-Type", "application/json")
 	w := httptest.NewRecorder()

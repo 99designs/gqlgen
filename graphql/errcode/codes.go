@@ -40,7 +40,7 @@ func Set(err error, value string) {
 	}
 
 	if gqlErr.Extensions == nil {
-		gqlErr.Extensions = map[string]interface{}{}
+		gqlErr.Extensions = map[string]any{}
 	}
 
 	gqlErr.Extensions["code"] = value

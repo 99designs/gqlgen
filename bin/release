@@ -10,7 +10,7 @@ fi
 VERSION=$1
 
 if ! git diff-index --quiet HEAD -- ; then
-    echo "uncommited changes on HEAD, aborting"
+    echo "uncommitted changes on HEAD, aborting"
     exit 1
 fi
 
@@ -27,7 +27,7 @@ package graphql
 
 const Version = "$VERSION"
 EOF
-go generate ./...; cd _examples; go generate ./...; cd ..
+go generate ./...
 git add .
 
 git commit -m "release $VERSION"
@@ -40,7 +40,7 @@ package graphql
 
 const Version = "$VERSION-dev"
 EOF
-go generate ./...; cd _examples; go generate ./...; cd ..
+go generate ./...
 git add .
 git commit -m "$VERSION postrelease bump"
 git push origin HEAD:master

@@ -1,20 +1,19 @@
-const {InMemoryCache} = require("apollo-cache-inmemory");
-const {HttpLink} = require("apollo-link-http");
-const {ApolloClient} = require("apollo-client");
-const fetch = require("node-fetch");
-const gql = require('graphql-tag');
+import {jest} from '@jest/globals';
+import { InMemoryCache, ApolloClient} from '@apollo/client/core';
+import { gql } from '@apollo/client/core';
 
 var uri = process.env.SERVER_URL || 'http://localhost:4000/';
 
 const client = new ApolloClient({
-    link: new HttpLink({uri, fetch}),
+    uri: uri,
     cache: new InMemoryCache(),
 });
 
 describe('Json', () => {
     it('can join across services', async () => {
+        console.log(uri)
         let res = await client.query({
-            query: gql`query {
+            query: gql(`query {
                 me {
                     username
                     reviews {
@@ -25,7 +24,7 @@ describe('Json', () => {
                         }
                     }
                 }
-            }`,
+            }`),
         });
 
         expect(res.data).toEqual({

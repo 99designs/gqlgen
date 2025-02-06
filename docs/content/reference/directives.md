@@ -51,12 +51,23 @@ The arguments are:
 ## Implement the directive
 
 Now we must implement the directive. The directive function is assigned to the Config object before registering the GraphQL handler.
+
 ```go
 package main
 
+import (
+	"context"
+	"log"
+	"net/http"
+
+	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+)
+
 func main() {
-	c := generated.Config{ Resolvers: &resolvers{} }
-	c.Directives.HasRole = func(ctx context.Context, obj interface{}, next graphql.Resolver, role model.Role) (interface{}, error) {
+	c := Config{ Resolvers: &resolvers{} }
+	c.Directives.HasRole = func(ctx context.Context, obj interface{}, next graphql.Resolver, role Role) (interface{}, error) {
 		if !getCurrentUser(ctx).HasRole(role) {
 			// block calling the next resolver
 			return nil, fmt.Errorf("Access denied")
@@ -66,7 +77,10 @@ func main() {
 		return next(ctx)
 	}
 
-	http.Handle("/query", handler.NewDefaultServer(generated.NewExecutableSchema(c), ))
+	srv := handler.New(NewExecutableSchema(c))
+	srv.AddTransport(transport.POST{})
+
+	http.Handle("/query", srv)
 	log.Fatal(http.ListenAndServe(":8081", nil))
 }
 ```

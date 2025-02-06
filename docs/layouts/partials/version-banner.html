@@ -5,10 +5,10 @@
 
 {{ if (eq $currentVersion "master") }}
 	<div class="alert-warning">
-		You are looking at the docs for the unreleased <code>master</code> branch. The latest version is <a href="/{{$latestVersion}}">{{ $latestVersion }}</a>.
+		You are looking at the docs for the unreleased <code>master</code> branch. The latest version is <a href="../{{$latestVersion}}/">{{ $latestVersion }}</a>.
 	</div>
 {{ else if not (eq $latestVersion $currentVersion) }}
 	<div class="alert-warning">
-		You are looking at the docs for an older version ({{ $currentVersion }}). The latest version is <a href="/{{$latestVersion}}">{{ $latestVersion }}</a>.
+		You are looking at the docs for an older version ({{ $currentVersion }}). The latest version is <a href="../{{$latestVersion}}/">{{ $latestVersion }}</a>.
 	</div>
 {{ end }}

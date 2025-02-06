@@ -15,10 +15,13 @@ type DateFilter struct {
 }
 
 type ListCoercion struct {
-	EnumVal   []*ErrorType             `json:"enumVal,omitempty"`
-	StrVal    []*string                `json:"strVal,omitempty"`
-	IntVal    []*int                   `json:"intVal,omitempty"`
-	ScalarVal []map[string]interface{} `json:"scalarVal,omitempty"`
+	EnumVal   []*ErrorType     `json:"enumVal,omitempty"`
+	StrVal    []*string        `json:"strVal,omitempty"`
+	IntVal    []*int           `json:"intVal,omitempty"`
+	ScalarVal []map[string]any `json:"scalarVal,omitempty"`
+}
+
+type Query struct {
 }
 
 type DateFilterOp string
@@ -53,7 +56,7 @@ func (e DateFilterOp) String() string {
 	return string(e)
 }
 
-func (e *DateFilterOp) UnmarshalGQL(v interface{}) error {
+func (e *DateFilterOp) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")
@@ -94,7 +97,7 @@ func (e ErrorType) String() string {
 	return string(e)
 }
 
-func (e *ErrorType) UnmarshalGQL(v interface{}) error {
+func (e *ErrorType) UnmarshalGQL(v any) error {
 	str, ok := v.(string)
 	if !ok {
 		return fmt.Errorf("enums must be strings")

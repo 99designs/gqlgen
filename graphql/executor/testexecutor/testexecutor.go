@@ -4,21 +4,23 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"time"
 
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/executor"
 	"github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
+
+	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/executor"
 )
 
 type MockResponse struct {
 	Name string `json:"name"`
 }
 
-func (mr *MockResponse) UnmarshalGQL(v interface{}) error {
+func (mr *MockResponse) UnmarshalGQL(v any) error {
 	return nil
 }
 
@@ -58,8 +60,8 @@ func New() *TestExecutor {
 
 	exec.schema = &graphql.ExecutableSchemaMock{
 		ExecFunc: func(ctx context.Context) graphql.ResponseHandler {
-			rc := graphql.GetOperationContext(ctx)
-			switch rc.Operation.Operation {
+			opCtx := graphql.GetOperationContext(ctx)
+			switch opCtx.Operation.Operation {
 			case ast.Query:
 				ran := false
 				return func(ctx context.Context) *graphql.Response {
@@ -79,7 +81,7 @@ func New() *TestExecutor {
 						},
 					})
 					data := graphql.GetOperationContext(ctx).RootResolverMiddleware(ctx, func(ctx context.Context) graphql.Marshaler {
-						res, err := graphql.GetOperationContext(ctx).ResolverMiddleware(ctx, func(ctx context.Context) (interface{}, error) {
+						res, err := graphql.GetOperationContext(ctx).ResolverMiddleware(ctx, func(ctx context.Context) (any, error) {
 							// return &graphql.Response{Data: []byte(`{"name":"test"}`)}, nil
 							return &MockResponse{Name: "test"}, nil
 						})
@@ -115,7 +117,7 @@ func New() *TestExecutor {
 		SchemaFunc: func() *ast.Schema {
 			return schema
 		},
-		ComplexityFunc: func(typeName string, fieldName string, childComplexity int, args map[string]interface{}) (i int, b bool) {
+		ComplexityFunc: func(typeName string, fieldName string, childComplexity int, args map[string]any) (i int, b bool) {
 			return exec.complexity, true
 		},
 	}
@@ -141,8 +143,8 @@ func NewError() *TestExecutor {
 
 	exec.schema = &graphql.ExecutableSchemaMock{
 		ExecFunc: func(ctx context.Context) graphql.ResponseHandler {
-			rc := graphql.GetOperationContext(ctx)
-			switch rc.Operation.Operation {
+			opCtx := graphql.GetOperationContext(ctx)
+			switch opCtx.Operation.Operation {
 			case ast.Query:
 				ran := false
 				return func(ctx context.Context) *graphql.Response {
@@ -151,7 +153,7 @@ func NewError() *TestExecutor {
 					}
 					ran = true
 
-					graphql.AddError(ctx, fmt.Errorf("resolver error"))
+					graphql.AddError(ctx, errors.New("resolver error"))
 
 					return &graphql.Response{
 						Data: []byte(`null`),
@@ -168,7 +170,7 @@ func NewError() *TestExecutor {
 		SchemaFunc: func() *ast.Schema {
 			return schema
 		},
-		ComplexityFunc: func(typeName string, fieldName string, childComplexity int, args map[string]interface{}) (i int, b bool) {
+		ComplexityFunc: func(typeName string, fieldName string, childComplexity int, args map[string]any) (i int, b bool) {
 			return exec.complexity, true
 		},
 	}

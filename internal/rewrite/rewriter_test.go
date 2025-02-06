@@ -27,12 +27,12 @@ func TestRewriter(t *testing.T) {
 		require.Len(t, imps, 2)
 		assert.Equal(t, []Import{
 			{
-				Alias:      "",
-				ImportPath: "fmt",
-			},
-			{
 				Alias:      "lol",
 				ImportPath: "bytes",
+			},
+			{
+				Alias:      "",
+				ImportPath: "fmt",
 			},
 		}, imps)
 	})

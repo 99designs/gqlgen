@@ -50,7 +50,7 @@ const apolloClient = new ApolloClient({
 
 if (module.hot) {
     module.hot.accept('./App', () => {
-        const NextApp = require('./App').default;
+        const NextApp = import('./App').default;
         render(<NextApp/>);
     })
 }

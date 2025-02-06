@@ -22,7 +22,7 @@ func (StringFromContextInterface) MarshalGQLContext(ctx context.Context, w io.Wr
 	return nil
 }
 
-func (i *StringFromContextInterface) UnmarshalGQLContext(ctx context.Context, v interface{}) error {
+func (i *StringFromContextInterface) UnmarshalGQLContext(ctx context.Context, v any) error {
 	i.OperationName = graphql.GetFieldContext(ctx).Field.Name
 	return nil
 }
@@ -34,6 +34,6 @@ func MarshalStringFromContextFunction(v string) graphql.ContextMarshaler {
 	})
 }
 
-func UnmarshalStringFromContextFunction(ctx context.Context, v interface{}) (string, error) {
+func UnmarshalStringFromContextFunction(ctx context.Context, v any) (string, error) {
 	return graphql.GetFieldContext(ctx).Field.Name, nil
 }

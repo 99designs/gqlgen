@@ -3,6 +3,7 @@ package codegen
 import (
 	"fmt"
 	"go/types"
+	"sort"
 
 	"github.com/vektah/gqlparser/v2/ast"
 
@@ -40,7 +41,13 @@ func (b *builder) buildInterface(typ *ast.Definition) (*Interface, error) {
 		return nil, fmt.Errorf("%s is not an interface", i.Type)
 	}
 
-	for _, implementor := range b.Schema.GetPossibleTypes(typ) {
+	// Sort so that more specific types are evaluated first.
+	implementors := b.Schema.GetPossibleTypes(typ)
+	sort.Slice(implementors, func(i, j int) bool {
+		return len(implementors[i].Interfaces) > len(implementors[j].Interfaces)
+	})
+
+	for _, implementor := range implementors {
 		obj, err := b.Binder.DefaultUserObject(implementor.Name)
 		if err != nil {
 			return nil, fmt.Errorf("%s has no backing go type", implementor.Name)

@@ -8,9 +8,10 @@ import (
 	"go/types"
 	"testing"
 
-	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/stretchr/testify/require"
 	ast2 "github.com/vektah/gqlparser/v2/ast"
+
+	"github.com/99designs/gqlgen/codegen/config"
 )
 
 func TestFindField(t *testing.T) {
@@ -59,7 +60,7 @@ type Embed struct {
 		{"Finds a field by name when passed tag but tag not used", std, "name", "gqlgen", "Name", false},
 		{"Ignores tags when not passed a tag", tags, "foo", "", "Foo", false},
 		{"Picks field with tag over field name when passed a tag", tags, "foo", "gqlgen", "Bar", false},
-		{"Errors when ambigious", amb, "foo", "gqlgen", "", true},
+		{"Errors when ambiguous", amb, "foo", "gqlgen", "", true},
 		{"Finds a field that is in embedded struct", anon, "bar", "", "Bar", false},
 		{"Finds field that is not in embedded struct", embed, "test", "", "Test", false},
 	}
@@ -77,7 +78,7 @@ type Embed struct {
 	}
 }
 
-func parseScope(input interface{}, packageName string) (*types.Scope, error) {
+func parseScope(input any, packageName string) (*types.Scope, error) {
 	// test setup to parse the types
 	fset := token.NewFileSet()
 	f, err := parser.ParseFile(fset, "test.go", input, 0)
@@ -158,11 +159,11 @@ func TestField_CallArgs(t *testing.T) {
 				},
 			},
 			Expected: `ctx, ` + `
-				func () interface{} {
+				func () any {
 					if fc.Args["test"] == nil {
 						return nil
 					}
-					return fc.Args["test"].(interface{})
+					return fc.Args["test"].(any)
 				}(), fc.Args["test2"].(TestInterface), fc.Args["test3"].(string)`,
 		},
 		{
@@ -189,7 +190,7 @@ func TestField_CallArgs(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.Name, func(t *testing.T) {
-			require.Equal(t, tc.CallArgs(), tc.Expected)
+			require.Equal(t, tc.Expected, tc.CallArgs())
 		})
 	}
 }

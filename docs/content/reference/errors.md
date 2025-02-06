@@ -80,7 +80,7 @@ var errSomethingWrong = errors.New("some validation failed")
 // DoThingsReturnMultipleErrors collect errors and returns it if any.
 func (r Query) DoThingsReturnMultipleErrors(ctx context.Context) (bool, error) {
 	errList := gqlerror.List{}
-		
+
 	// Add existing error
 	errList = append(errList, gqlerror.Wrap(errSomethingWrong))
 
@@ -95,7 +95,7 @@ func (r Query) DoThingsReturnMultipleErrors(ctx context.Context) (bool, error) {
 			"code": "10-4",
 		},
 	})
-	
+
 	return false, errList
 }
 ```
@@ -137,7 +137,10 @@ import (
 )
 
 func main() {
-	server := handler.NewDefaultServer(MakeExecutableSchema(resolvers))
+	server := handler.New(MakeExecutableSchema(resolvers))
+
+	// Server setup...
+
 	server.SetErrorPresenter(func(ctx context.Context, e error) *gqlerror.Error {
 		err := graphql.DefaultErrorPresenter(ctx, e)
 
@@ -164,11 +167,21 @@ returned from here will also go through the error presenter.
 
 You change this when creating the server:
 ```go
-server := handler.NewDefaultServer(MakeExecutableSchema(resolvers))
+server := handler.New(MakeExecutableSchema(resolvers))
+
+// Server setup...
+
 server.SetRecoverFunc(func(ctx context.Context, err interface{}) error {
-    // notify bug tracker...
+    // Notify bug tracker...
 
 		return gqlerror.Errorf("Internal server error!")
 })
 ```
 
+While these handlers are useful in production to make sure the program does not crash, even if a user finds an issue that causes a crash-condition. During development, it can sometimes be more useful to properly crash, potentially generating a coredump to [enable further debugging](https://go.dev/wiki/CoreDumpDebugging).
+
+To allow your program to crash on a panic, add this to your config file:
+
+```yaml
+omit_panic_handler: true
+```

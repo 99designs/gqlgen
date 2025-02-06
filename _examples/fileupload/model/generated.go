@@ -14,6 +14,14 @@ type File struct {
 	ContentType string `json:"contentType"`
 }
 
+// The `Mutation` type, represents all updates we can make to our data.
+type Mutation struct {
+}
+
+// The `Query` type, represents all of the entry points into our object graph.
+type Query struct {
+}
+
 // The `UploadFile` type, represents the request for uploading a file with certain payload.
 type UploadFile struct {
 	ID   int            `json:"id"`

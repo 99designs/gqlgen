@@ -1,9 +1,8 @@
 #!/bin/bash
-
-set -euo pipefail
-
+set -exuo pipefail
+export GO111MODULE=on
+echo Generating code
 go generate ./...
-cd _examples && go generate ./...
 if [[ $(git --no-pager diff) ]] ; then
     echo "you need to run "go generate ./..." and commit the changes"
     git --no-pager diff

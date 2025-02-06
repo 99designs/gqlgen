@@ -2,7 +2,7 @@
 #
 # https://gqlgen.com/getting-started/
 extend schema
-  @link(url: "https://specs.apollo.dev/federation/v2.0",
+  @link(url: "https://specs.apollo.dev/federation/v2.7",
         import: ["@key", "@shareable", "@provides", "@external", "@tag", "@extends", "@override", "@inaccessible"])
 
 type Todo {

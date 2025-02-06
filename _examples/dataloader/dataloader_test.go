@@ -3,17 +3,23 @@ package dataloader
 import (
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/stretchr/testify/require"
+
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/introspection"
-	"github.com/stretchr/testify/require"
 )
 
 func TestTodo(t *testing.T) {
-	c := client.New(LoaderMiddleware(handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: &Resolver{}}))))
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: &Resolver{}}))
+	srv.AddTransport(transport.POST{})
+	srv.Use(extension.Introspection{})
+	c := client.New(LoaderMiddleware(srv))
 
 	t.Run("create a new todo", func(t *testing.T) {
-		var resp interface{}
+		var resp any
 		c.MustPost(`{
 		  customers {
 			name
@@ -72,7 +78,7 @@ func TestTodo(t *testing.T) {
 
 	t.Run("introspection", func(t *testing.T) {
 		// Make sure we can run the graphiql introspection query without errors
-		var resp interface{}
+		var resp any
 		c.MustPost(introspection.Query, &resp)
 	})
 

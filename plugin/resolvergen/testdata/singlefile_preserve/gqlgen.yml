@@ -1,0 +1,17 @@
+schema:
+  - "testdata/schema.graphql"
+
+exec:
+  filename: testdata/singlefile_preserve/out/ignored.go
+model:
+  filename: testdata/singlefile_preserve/out/generated.go
+resolver:
+  filename: testdata/singlefile_preserve/out/resolver.go
+  type: CustomResolverType
+  preserve_resolver: true
+
+models:
+  Resolver:
+    model: github.com/99designs/gqlgen/plugin/resolvergen/testdata/singlefile_preserve/out.Resolver
+
+omit_gqlgen_version_in_file_notice: true

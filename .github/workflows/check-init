@@ -1,11 +1,11 @@
 #!/bin/bash
 
 set -euo pipefail
-
+export GO111MODULE=on
 gqlgen_dir=$(pwd)
 cd $(mktemp -d)
 go mod init inittest
-printf '// +build tools\npackage tools\nimport _ "github.com/99designs/gqlgen"' | gofmt > tools.go
+printf '//go:build tools\npackage tools\nimport _ "github.com/99designs/gqlgen"' | gofmt > tools.go
 go mod tidy
 go mod edit -replace=github.com/99designs/gqlgen="$gqlgen_dir"
 go mod tidy

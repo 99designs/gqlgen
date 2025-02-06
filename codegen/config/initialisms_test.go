@@ -5,6 +5,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/99designs/gqlgen/codegen/templates"
 )
 
 func TestGoInitialismsConfig(t *testing.T) {
@@ -17,21 +19,21 @@ func TestGoInitialismsConfig(t *testing.T) {
 	t.Run("empty initialism config doesn't change anything", func(t *testing.T) {
 		tt := GoInitialismsConfig{}
 		result := tt.determineGoInitialisms()
-		assert.Equal(t, len(commonInitialisms), len(result))
+		assert.Equal(t, len(templates.CommonInitialisms), len(result))
 	})
 	t.Run("initialism config appends if desired", func(t *testing.T) {
 		tt := GoInitialismsConfig{ReplaceDefaults: false, Initialisms: []string{"ASDF"}}
 		result := tt.determineGoInitialisms()
-		assert.Equal(t, len(commonInitialisms)+1, len(result))
+		assert.Len(t, result, len(templates.CommonInitialisms)+1)
 		assert.True(t, result["ASDF"])
 	})
 	t.Run("initialism config replaces if desired", func(t *testing.T) {
 		tt := GoInitialismsConfig{ReplaceDefaults: true, Initialisms: []string{"ASDF"}}
 		result := tt.determineGoInitialisms()
-		assert.Equal(t, 1, len(result))
+		assert.Len(t, result, 1)
 		assert.True(t, result["ASDF"])
 	})
-	t.Run("initialism config uppercases the initialsms", func(t *testing.T) {
+	t.Run("initialism config uppercases the initialisms", func(t *testing.T) {
 		tt := GoInitialismsConfig{Initialisms: []string{"asdf"}}
 		result := tt.determineGoInitialisms()
 		assert.True(t, result["ASDF"])

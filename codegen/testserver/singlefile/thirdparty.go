@@ -21,7 +21,7 @@ func MarshalThirdParty(tp ThirdParty) graphql.Marshaler {
 	})
 }
 
-func UnmarshalThirdParty(input interface{}) (ThirdParty, error) {
+func UnmarshalThirdParty(input any) (ThirdParty, error) {
 	switch input := input.(type) {
 	case string:
 		return ThirdParty{str: input}, nil

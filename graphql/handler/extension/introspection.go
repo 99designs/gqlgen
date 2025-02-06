@@ -3,8 +3,9 @@ package extension
 import (
 	"context"
 
-	"github.com/99designs/gqlgen/graphql"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 // EnableIntrospection enables clients to reflect all of the types available on the graph.
@@ -23,7 +24,7 @@ func (c Introspection) Validate(schema graphql.ExecutableSchema) error {
 	return nil
 }
 
-func (c Introspection) MutateOperationContext(ctx context.Context, rc *graphql.OperationContext) *gqlerror.Error {
-	rc.DisableIntrospection = false
+func (c Introspection) MutateOperationContext(ctx context.Context, opCtx *graphql.OperationContext) *gqlerror.Error {
+	opCtx.DisableIntrospection = false
 	return nil
 }

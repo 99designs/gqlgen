@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
@@ -19,9 +20,9 @@ func TestOk(t *testing.T) {
 		return &VOkCaseNil{}, nil
 	}
 
-	c := client.New(handler.NewDefaultServer(
-		NewExecutableSchema(Config{Resolvers: resolver}),
-	))
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolver}))
+	srv.AddTransport(transport.POST{})
+	c := client.New(srv)
 
 	t.Run("v ok case value", func(t *testing.T) {
 		var resp struct {
@@ -31,7 +32,7 @@ func TestOk(t *testing.T) {
 		}
 		err := c.Post(`query { vOkCaseValue { value } }`, &resp)
 		require.NoError(t, err)
-		require.Equal(t, resp.VOkCaseValue.Value, "hi")
+		require.Equal(t, "hi", resp.VOkCaseValue.Value)
 	})
 
 	t.Run("v ok case nil", func(t *testing.T) {
@@ -42,6 +43,6 @@ func TestOk(t *testing.T) {
 		}
 		err := c.Post(`query { vOkCaseNil { value } }`, &resp)
 		require.NoError(t, err)
-		require.Equal(t, true, resp.VOkCaseNil.Value == nil)
+		require.Nil(t, resp.VOkCaseNil.Value)
 	})
 }

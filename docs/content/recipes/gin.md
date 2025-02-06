@@ -12,6 +12,7 @@ Gin is an excellent alternative for the `net/http` router. From their official [
 Here are the steps to setup Gin and gqlgen together:
 
 Install Gin:
+
 ```bash
 $ go get github.com/gin-gonic/gin
 ```
@@ -22,8 +23,12 @@ In your router file, define the handlers for the GraphQL and Playground endpoint
 import (
 	"github.com/[username]/gqlgen-todos/graph"	// Replace username with your github username
 	"github.com/gin-gonic/gin"
+	"github.com/vektah/gqlparser/v2/ast"
 
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/lru"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 )
 
@@ -31,7 +36,19 @@ import (
 func graphqlHandler() gin.HandlerFunc {
 	// NewExecutableSchema and Config are in the generated.go file
 	// Resolver is in the resolver.go file
-	h := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+	h := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}}))
+
+	// Server setup:
+	srv.AddTransport(transport.Options{})
+	srv.AddTransport(transport.GET{})
+	srv.AddTransport(transport.POST{})
+
+	srv.SetQueryCache(lru.New[*ast.QueryDocument](1000))
+
+	srv.Use(extension.Introspection{})
+	srv.Use(extension.AutomaticPersistedQuery{
+		Cache: lru.New[string](100),
+	})
 
 	return func(c *gin.Context) {
 		h.ServeHTTP(c.Writer, c.Request)
@@ -58,9 +75,11 @@ func main() {
 ```
 
 ## Accessing gin.Context
+
 At the Resolver level, `gqlgen` gives you access to the `context.Context` object. One way to access the `gin.Context` is to add it to the context and retrieve it again.
 
 First, create a `gin` middleware to add its context to the `context.Context`:
+
 ```go
 func GinContextToContextMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
@@ -72,11 +91,13 @@ func GinContextToContextMiddleware() gin.HandlerFunc {
 ```
 
 In the router definition, use the middleware:
+
 ```go
 r.Use(GinContextToContextMiddleware())
 ```
 
 Define a function to recover the `gin.Context` from the `context.Context` struct:
+
 ```go
 func GinContextFromContext(ctx context.Context) (*gin.Context, error) {
 	ginContext := ctx.Value("GinContextKey")

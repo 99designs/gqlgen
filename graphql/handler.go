@@ -16,25 +16,25 @@ type (
 	ResponseHandler    func(ctx context.Context) *Response
 	ResponseMiddleware func(ctx context.Context, next ResponseHandler) *Response
 
-	Resolver        func(ctx context.Context) (res interface{}, err error)
-	FieldMiddleware func(ctx context.Context, next Resolver) (res interface{}, err error)
+	Resolver        func(ctx context.Context) (res any, err error)
+	FieldMiddleware func(ctx context.Context, next Resolver) (res any, err error)
 
 	RootResolver        func(ctx context.Context) Marshaler
 	RootFieldMiddleware func(ctx context.Context, next RootResolver) Marshaler
 
 	RawParams struct {
-		Query         string                 `json:"query"`
-		OperationName string                 `json:"operationName"`
-		Variables     map[string]interface{} `json:"variables"`
-		Extensions    map[string]interface{} `json:"extensions"`
-		Headers       http.Header            `json:"headers"`
+		Query         string         `json:"query"`
+		OperationName string         `json:"operationName"`
+		Variables     map[string]any `json:"variables"`
+		Extensions    map[string]any `json:"extensions"`
+		Headers       http.Header    `json:"headers"`
 
 		ReadTime TraceTiming `json:"-"`
 	}
 
 	GraphExecutor interface {
 		CreateOperationContext(ctx context.Context, params *RawParams) (*OperationContext, gqlerror.List)
-		DispatchOperation(ctx context.Context, rc *OperationContext) (ResponseHandler, context.Context)
+		DispatchOperation(ctx context.Context, opCtx *OperationContext) (ResponseHandler, context.Context)
 		DispatchError(ctx context.Context, list gqlerror.List) *Response
 	}
 
@@ -65,7 +65,7 @@ type (
 
 	// OperationContextMutator is called after creating the request context, but before executing the root resolver.
 	OperationContextMutator interface {
-		MutateOperationContext(ctx context.Context, rc *OperationContext) *gqlerror.Error
+		MutateOperationContext(ctx context.Context, opCtx *OperationContext) *gqlerror.Error
 	}
 
 	// OperationInterceptor is called for each incoming query, for basic requests the writer will be invoked once,
@@ -86,7 +86,7 @@ type (
 
 	// FieldInterceptor called around each field
 	FieldInterceptor interface {
-		InterceptField(ctx context.Context, next Resolver) (res interface{}, err error)
+		InterceptField(ctx context.Context, next Resolver) (res any, err error)
 	}
 
 	// Transport provides support for different wire level encodings of graphql requests, eg Form, Get, Post, Websocket
@@ -103,7 +103,7 @@ func (p *RawParams) AddUpload(upload Upload, key, path string) *gqlerror.Error {
 		return gqlerror.Errorf("invalid operations paths for key %s", key)
 	}
 
-	var ptr interface{} = p.Variables
+	var ptr any = p.Variables
 	parts := strings.Split(path, ".")
 
 	// skip the first part (variables) because we started there
@@ -114,15 +114,15 @@ func (p *RawParams) AddUpload(upload Upload, key, path string) *gqlerror.Error {
 		}
 		if index, parseNbrErr := strconv.Atoi(p); parseNbrErr == nil {
 			if last {
-				ptr.([]interface{})[index] = upload
+				ptr.([]any)[index] = upload
 			} else {
-				ptr = ptr.([]interface{})[index]
+				ptr = ptr.([]any)[index]
 			}
 		} else {
 			if last {
-				ptr.(map[string]interface{})[p] = upload
+				ptr.(map[string]any)[p] = upload
 			} else {
-				ptr = ptr.(map[string]interface{})[p]
+				ptr = ptr.(map[string]any)[p]
 			}
 		}
 	}

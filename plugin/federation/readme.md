@@ -18,7 +18,7 @@ TODO(miguel): add details.
 
 # Entity resolvers - GetMany entities
 
-The federation plugin implements `GetMany` semantics in which entity resolvers get the entire list of representations that need to be resolved. This functionality is currently optin tho, and to enable it you need to specify the directive `@entityResolver` in the federated entity you want this feature for.  E.g.
+The federation plugin implements `GetMany` semantics in which entity resolvers get the entire list of representations that need to be resolved. This functionality is currently option tho, and to enable it you need to specify the directive `@entityResolver` in the federated entity you want this feature for.  E.g.
 
 ```
 directive @entityResolver(multi: Boolean) on OBJECT
@@ -37,3 +37,6 @@ func (r *entityResolver) FindManyMultiHellosByName(ctx context.Context, reps []*
   /// <Your code to resolve the list of items>
 }
 ```
+
+**Note:**
+If you are using `omit_slice_element_pointers: true` option in your config yaml, your `GetMany` resolver will still generate in the example above the same signature `FindManyMultiHellosByName(ctx context.Context, reps []*generated.ManyMultiHellosByNameInput) ([]*generated.MultiHello, error)`. But all other instances will continue to honor `omit_slice_element_pointers: true`

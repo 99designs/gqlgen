@@ -10,3 +10,13 @@ type Message struct {
 	CreatedBy string    `json:"createdBy"`
 	CreatedAt time.Time `json:"createdAt"`
 }
+
+type ProductSku string
+
+const (
+	ProductSkuTrial ProductSku = "Trial"
+)
+
+type ChatAPI struct {
+	ID string `json:"id"`
+}

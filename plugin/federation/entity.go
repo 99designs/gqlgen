@@ -3,10 +3,11 @@ package federation
 import (
 	"go/types"
 
+	"github.com/vektah/gqlparser/v2/ast"
+
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/99designs/gqlgen/plugin/federation/fieldset"
-	"github.com/vektah/gqlparser/v2/ast"
 )
 
 // Entity represents a federated type
@@ -17,13 +18,16 @@ type Entity struct {
 	Resolvers []*EntityResolver
 	Requires  []*Requires
 	Multi     bool
+	Type      types.Type
 }
 
 type EntityResolver struct {
-	ResolverName  string      // The resolver name, such as FindUserByID
-	KeyFields     []*KeyField // The fields declared in @key.
-	InputType     types.Type  // The Go generated input type for multi entity resolvers
-	InputTypeName string
+	ResolverName   string      // The resolver name, such as FindUserByID
+	KeyFields      []*KeyField // The fields declared in @key.
+	InputType      types.Type  // The Go generated input type for multi entity resolvers
+	InputTypeName  string
+	ReturnType     types.Type // The Go generated return type for the entity
+	ReturnTypeName string
 }
 
 func (e *EntityResolver) LookupInputType() string {
@@ -58,7 +62,7 @@ func (e *Entity) isFieldImplicitlyExternal(field *ast.FieldDefinition, federatio
 	if federationVersion != 2 {
 		return false
 	}
-	// TODO: From the spec, it seems like if an entity is not resolvable then it should not only not have a resolver, but should not appear in the _Entitiy union.
+	// TODO: From the spec, it seems like if an entity is not resolvable then it should not only not have a resolver, but should not appear in the _Entity union.
 	// The current implementation is a less drastic departure from the previous behavior, but should probably be reviewed.
 	// See https://www.apollographql.com/docs/federation/subgraph-spec/
 	if e.isResolvable() {
@@ -74,7 +78,7 @@ func (e *Entity) isFieldImplicitlyExternal(field *ast.FieldDefinition, federatio
 
 // Determine if the entity is resolvable.
 func (e *Entity) isResolvable() bool {
-	key := e.Def.Directives.ForName("key")
+	key := e.Def.Directives.ForName(dirNameKey)
 	if key == nil {
 		// If there is no key directive, the entity is resolvable.
 		return true
@@ -100,11 +104,11 @@ func (e *Entity) isKeyField(field *ast.FieldDefinition) bool {
 
 // Get the key fields for this entity.
 func (e *Entity) keyFields() []string {
-	key := e.Def.Directives.ForName("key")
+	key := e.Def.Directives.ForName(dirNameKey)
 	if key == nil {
 		return []string{}
 	}
-	fields := key.Arguments.ForName("fields")
+	fields := key.Arguments.ForName(DirArgFields)
 	if fields == nil {
 		return []string{}
 	}
@@ -114,4 +118,9 @@ func (e *Entity) keyFields() []string {
 		keyFields[i] = field[0]
 	}
 	return keyFields
+}
+
+// GetTypeInfo - get the imported package & type name combo.  package.TypeName
+func (e Entity) GetTypeInfo() string {
+	return templates.CurrentImports.LookupType(e.Type)
 }

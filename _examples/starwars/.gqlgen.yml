@@ -2,6 +2,7 @@ exec:
   filename: generated/exec.go
 model:
   filename: models/generated.go
+  package: models
 
 autobind:
   - github.com/99designs/gqlgen/_examples/starwars/models

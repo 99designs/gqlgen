@@ -7,15 +7,13 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/99designs/gqlgen/graphql/handler/extension"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
-
-	"github.com/99designs/gqlgen/graphql/playground"
-
 	"github.com/99designs/gqlgen/_examples/fileupload"
 	"github.com/99designs/gqlgen/_examples/fileupload/model"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/99designs/gqlgen/graphql/playground"
 )
 
 func main() {
@@ -24,7 +22,7 @@ func main() {
 
 	var mb int64 = 1 << 20
 
-	srv := handler.NewDefaultServer(fileupload.NewExecutableSchema(fileupload.Config{Resolvers: resolver}))
+	srv := handler.New(fileupload.NewExecutableSchema(fileupload.Config{Resolvers: resolver}))
 	srv.AddTransport(transport.POST{})
 	srv.AddTransport(transport.MultipartForm{
 		MaxMemory:     32 * mb,

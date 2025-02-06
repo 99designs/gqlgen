@@ -2,6 +2,7 @@ package client
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net/http/httptest"
@@ -28,13 +29,13 @@ type operationMessage struct {
 
 type Subscription struct {
 	Close func() error
-	Next  func(response interface{}) error
+	Next  func(response any) error
 }
 
 func errorSubscription(err error) *Subscription {
 	return &Subscription{
 		Close: func() error { return nil },
-		Next: func(response interface{}) error {
+		Next: func(response any) error {
 			return err
 		},
 	}
@@ -45,9 +46,9 @@ func (p *Client) Websocket(query string, options ...Option) *Subscription {
 }
 
 // Grab a single response from a websocket based query
-func (p *Client) WebsocketOnce(query string, resp interface{}, options ...Option) error {
+func (p *Client) WebsocketOnce(query string, resp any, options ...Option) error {
 	sock := p.Websocket(query, options...)
-	defer sock.Close()
+	defer func() { _ = sock.Close() }()
 	if reflect.ValueOf(resp).Kind() == reflect.Ptr {
 		return sock.Next(resp)
 	}
@@ -55,7 +56,7 @@ func (p *Client) WebsocketOnce(query string, resp interface{}, options ...Option
 	return sock.Next(&resp)
 }
 
-func (p *Client) WebsocketWithPayload(query string, initPayload map[string]interface{}, options ...Option) *Subscription {
+func (p *Client) WebsocketWithPayload(query string, initPayload map[string]any, options ...Option) *Subscription {
 	r, err := p.newRequest(query, options...)
 	if err != nil {
 		return errorSubscription(fmt.Errorf("request: %w", err))
@@ -113,7 +114,7 @@ func (p *Client) WebsocketWithPayload(query string, initPayload map[string]inter
 			srv.Close()
 			return c.Close()
 		},
-		Next: func(response interface{}) error {
+		Next: func(response any) error {
 			for {
 				var op operationMessage
 				err := c.ReadJSON(&op)
@@ -127,7 +128,7 @@ func (p *Client) WebsocketWithPayload(query string, initPayload map[string]inter
 				case connectionKaMsg:
 					continue
 				case errorMsg:
-					return fmt.Errorf(string(op.Payload))
+					return errors.New(string(op.Payload))
 				default:
 					return fmt.Errorf("expected data message, got %#v", op)
 				}

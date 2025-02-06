@@ -1,4 +1,5 @@
-module.exports = {
+export default {
+    transform: {},
     testEnvironment: "node",
     testMatch: ["<rootDir>/**/*-test.js"],
     testPathIgnorePatterns: ["<rootDir>/node_modules/"],

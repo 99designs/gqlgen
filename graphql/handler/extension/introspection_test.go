@@ -4,14 +4,17 @@ import (
 	"context"
 	"testing"
 
-	"github.com/99designs/gqlgen/graphql"
 	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlparser/v2/gqlerror"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 func TestIntrospection(t *testing.T) {
-	rc := &graphql.OperationContext{
+	opCtx := &graphql.OperationContext{
 		DisableIntrospection: true,
 	}
-	require.Nil(t, Introspection{}.MutateOperationContext(context.Background(), rc))
-	require.Equal(t, false, rc.DisableIntrospection)
+	err := Introspection{}.MutateOperationContext(context.Background(), opCtx)
+	require.Equal(t, (*gqlerror.Error)(nil), err)
+	require.False(t, opCtx.DisableIntrospection)
 }

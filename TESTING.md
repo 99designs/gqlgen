@@ -1,7 +1,7 @@
 How to write tests for gqlgen
 ===
 
-Testing generated code is a little tricky, heres how its currently set up.
+Testing generated code is a little tricky, here's how its currently set up.
 
 ### Testing responses from a server
 
@@ -25,7 +25,7 @@ Setting up the integration environment is a little tricky:
 ```bash
 cd integration
 go generate ./...
-go run ./server/server.go
+go run ./server/cmd/integration/server.go
 ```
 in another terminal
 ```bash

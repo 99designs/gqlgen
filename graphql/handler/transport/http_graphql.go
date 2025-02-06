@@ -64,10 +64,10 @@ func (h GRAPHQL) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphEx
 		return
 	}
 
-	rc, OpErr := exec.CreateOperationContext(ctx, params)
-	if OpErr != nil {
-		w.WriteHeader(statusFor(OpErr))
-		resp := exec.DispatchError(graphql.WithOperationContext(ctx, rc), OpErr)
+	rc, opErr := exec.CreateOperationContext(ctx, params)
+	if opErr != nil {
+		w.WriteHeader(statusFor(opErr))
+		resp := exec.DispatchError(graphql.WithOperationContext(ctx, rc), opErr)
 		writeJson(w, resp)
 		return
 	}
@@ -88,7 +88,6 @@ func cleanupBody(body string) (out string, err error) {
 	// is where query starts. If it is, query is url encoded.
 	if strings.HasPrefix(body, "%7B") {
 		body, err = url.QueryUnescape(body)
-
 		if err != nil {
 			return body, err
 		}

@@ -19,7 +19,7 @@ require (
 	github.com/vektah/gqlparser/v2 v2.5.22
 	golang.org/x/text v0.21.0
 	golang.org/x/tools v0.24.0
-	google.golang.org/protobuf v1.36.4
+	google.golang.org/protobuf v1.36.5
 	gopkg.in/yaml.v3 v3.0.1
 )
 

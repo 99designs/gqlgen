@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/gorilla/websocket"
+	"github.com/john-markham/websocket"
 )
 
 // https://github.com/apollographql/subscriptions-transport-ws/blob/master/PROTOCOL.md

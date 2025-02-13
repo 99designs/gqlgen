@@ -137,7 +137,7 @@ import (
 	"github.com/john-markham/gqlgen/graphql/handler/transport"
 	"github.com/john-markham/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
-	"github.com/gorilla/websocket"
+	"github.com/john-markham/websocket"
 	"github.com/gqlgen/_examples/websocket-initfunc/server/graph"
 	"github.com/gqlgen/_examples/websocket-initfunc/server/graph/generated"
 	"github.com/rs/cors"

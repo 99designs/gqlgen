@@ -16,7 +16,7 @@ updates:
     schedule:
       interval: "weekly"
     ignore:
-      - dependency-name: "github.com/gorilla/websocket"
+      - dependency-name: "github.com/john-markham/websocket"
         # For websocket, v1.5.1 has serious bugs
         versions: ["v1.5.1"]
   - package-ecosystem: "gomod" # See documentation for possible values
@@ -24,7 +24,7 @@ updates:
     schedule:
       interval: "weekly"
     ignore:
-      - dependency-name: "github.com/gorilla/websocket"
+      - dependency-name: "github.com/john-markham/websocket"
         # For websocket, v1.5.1 has serious bugs
         versions: ["v1.5.1"]
   # Maintain dependencies for npm

@@ -22,7 +22,7 @@ import (
 	"github.com/john-markham/gqlgen/graphql/handler"
 	"github.com/go-chi/chi"
 	"github.com/rs/cors"
-	"github.com/gorilla/websocket"
+	"github.com/john-markham/websocket"
 	"github.com/john-markham/gqlgen/graphql/playground"
 )
 

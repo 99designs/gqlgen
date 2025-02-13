@@ -11,7 +11,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/gorilla/websocket"
+	"github.com/john-markham/websocket"
 	"github.com/rs/cors"
 )
 

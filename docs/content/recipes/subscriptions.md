@@ -75,7 +75,7 @@ The WebSocket transport is complex, and for any non-trivial application you will
 configure it. The transport handles this configuration by setting fields on the `transport.Websocket`
 struct. For an in-depth look at all configuration options, [explore the implementation][code].
 
-At it's most basic, the transport uses [`github.com/gorilla/websocket`][gorilla] to implement
+At it's most basic, the transport uses [`github.com/john-markham/websocket`][gorilla] to implement
 a WebSocket connection that sets up the subscription and then sends data to the client from
 the Go channel returned by the resolver. The initial handshake and the structure of the data
 payloads are defined by one of two protocols: `graphql-ws` or `graphql-transport-ws` Which
@@ -97,7 +97,7 @@ srv.AddTransport(transport.Websocket{
 	// long since walked to the kitchen to make a sandwich instead.
 	KeepAlivePingInterval: 10 * time.Second,
 
-	// The `github.com/gorilla/websocket.Upgrader` is used to handle the transition
+	// The `github.com/john-markham/websocket.Upgrader` is used to handle the transition
 	// from an HTTP connection to a WebSocket connection. Among other options, here
 	// you must check the origin of the request to prevent cross-site request forgery
 	// attacks.
@@ -117,7 +117,7 @@ srv.AddTransport(transport.Websocket{
 ```
 
 [code]: https://github.com/john-markham/gqlgen/blob/master/graphql/handler/transport/websocket.go
-[gorilla]: https://pkg.go.dev/github.com/gorilla/websocket
+[gorilla]: https://pkg.go.dev/github.com/john-markham/websocket
 [graphql-ws]: https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md
 
 ## Adding Subscriptions to your Schema
@@ -293,7 +293,7 @@ import (
 	"slices"
 	"time"
 
-	"github.com/gorilla/websocket"
+	"github.com/john-markham/websocket"
 	"github.com/john-markham/gqlgen/graphql/handler"
 	"github.com/john-markham/gqlgen/graphql/handler/transport"
 	"github.com/john-markham/gqlgen/graphql/playground"

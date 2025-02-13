@@ -7,7 +7,7 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.2.1
 	github.com/google/uuid v1.6.0
 	github.com/hashicorp/golang-lru/v2 v2.0.7
-	github.com/john-markham/websocket v0.0.1
+	github.com/john-markham/websocket v0.0.2
 	github.com/kevinmbeaulieu/eq-go v1.0.0
 	github.com/logrusorgru/aurora/v4 v4.0.0
 	github.com/matryer/moq v0.4.0
@@ -32,7 +32,7 @@ require (
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	golang.org/x/mod v0.20.0 // indirect
-	golang.org/x/net v0.33.0 // indirect
+	golang.org/x/net v0.35.0 // indirect
 	golang.org/x/sync v0.11.0 // indirect
-	golang.org/x/sys v0.29.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
 )

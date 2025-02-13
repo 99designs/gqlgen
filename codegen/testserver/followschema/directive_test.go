@@ -8,12 +8,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/john-markham/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
-	"github.com/99designs/gqlgen/client"
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/john-markham/gqlgen/client"
+	"github.com/john-markham/gqlgen/graphql"
+	"github.com/john-markham/gqlgen/graphql/handler"
 )
 
 // isNil checks if the given value is nil

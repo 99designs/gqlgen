@@ -11,11 +11,11 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/executor"
-	"github.com/99designs/gqlgen/graphql/handler/extension"
-	"github.com/99designs/gqlgen/graphql/handler/lru"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/john-markham/gqlgen/graphql"
+	"github.com/john-markham/gqlgen/graphql/executor"
+	"github.com/john-markham/gqlgen/graphql/handler/extension"
+	"github.com/john-markham/gqlgen/graphql/handler/lru"
+	"github.com/john-markham/gqlgen/graphql/handler/transport"
 )
 
 type (

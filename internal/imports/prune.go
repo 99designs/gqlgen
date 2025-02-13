@@ -13,7 +13,7 @@ import (
 	"golang.org/x/tools/go/ast/astutil"
 	"golang.org/x/tools/imports"
 
-	"github.com/99designs/gqlgen/internal/code"
+	"github.com/john-markham/gqlgen/internal/code"
 )
 
 type visitFn func(node ast.Node)

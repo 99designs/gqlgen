@@ -7,8 +7,8 @@ import (
 
 	"google.golang.org/protobuf/proto"
 
-	"github.com/99designs/gqlgen/graphql"
-	tracing_logger "github.com/99designs/gqlgen/graphql/handler/apollofederatedtracingv1/logger"
+	"github.com/john-markham/gqlgen/graphql"
+	tracing_logger "github.com/john-markham/gqlgen/graphql/handler/apollofederatedtracingv1/logger"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 

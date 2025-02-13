@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/99designs/gqlgen/graphql"
+	"github.com/john-markham/gqlgen/graphql"
 )
 
 // MultipartForm the Multipart request spec https://github.com/jaydenseric/graphql-multipart-request-spec

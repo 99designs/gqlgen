@@ -3,7 +3,7 @@ package logger_test
 import (
 	"testing"
 
-	"github.com/99designs/gqlgen/graphql/handler/apollofederatedtracingv1/logger"
+	"github.com/john-markham/gqlgen/graphql/handler/apollofederatedtracingv1/logger"
 	"github.com/stretchr/testify/assert"
 )
 

@@ -9,7 +9,7 @@ import (
 
 	"github.com/go-viper/mapstructure/v2"
 
-	"github.com/99designs/gqlgen/graphql"
+	"github.com/john-markham/gqlgen/graphql"
 )
 
 var (

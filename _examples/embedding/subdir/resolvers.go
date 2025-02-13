@@ -6,7 +6,7 @@ package subdir
 import (
 	"context"
 
-	"github.com/99designs/gqlgen/_examples/embedding/subdir/gendir"
+	"github.com/john-markham/gqlgen/_examples/embedding/subdir/gendir"
 )
 
 type Resolver struct{ *Resolver }

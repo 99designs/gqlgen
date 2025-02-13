@@ -5,7 +5,7 @@ package resolver
 import (
 	"context"
 
-	nullabledirectives "github.com/99designs/gqlgen/codegen/testserver/nullabledirectives/generated"
+	nullabledirectives "github.com/john-markham/gqlgen/codegen/testserver/nullabledirectives/generated"
 )
 
 type Resolver struct{}

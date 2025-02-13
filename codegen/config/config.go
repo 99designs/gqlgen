@@ -17,8 +17,8 @@ import (
 	"golang.org/x/tools/go/packages"
 	"gopkg.in/yaml.v3"
 
-	"github.com/99designs/gqlgen/codegen/templates"
-	"github.com/99designs/gqlgen/internal/code"
+	"github.com/john-markham/gqlgen/codegen/templates"
+	"github.com/john-markham/gqlgen/internal/code"
 )
 
 type Config struct {
@@ -230,7 +230,7 @@ func (c *Config) Init() error {
 	if c.Packages == nil {
 		c.Packages = code.NewPackages(
 			code.WithBuildTags(c.GoBuildTags...),
-			code.PackagePrefixToCache("github.com/99designs/gqlgen/graphql"),
+			code.PackagePrefixToCache("github.com/john-markham/gqlgen/graphql"),
 		)
 	}
 
@@ -265,8 +265,8 @@ func (c *Config) Init() error {
 
 func (c *Config) packageList() []string {
 	pkgs := []string{
-		"github.com/99designs/gqlgen/graphql",
-		"github.com/99designs/gqlgen/graphql/introspection",
+		"github.com/john-markham/gqlgen/graphql",
+		"github.com/john-markham/gqlgen/graphql/introspection",
 	}
 	pkgs = append(pkgs, c.Models.ReferencedPackages()...)
 	pkgs = append(pkgs, c.AutoBind...)
@@ -802,30 +802,30 @@ func (c *Config) lookupAutobindType(p *packages.Package, schemaType *ast.Definit
 
 func (c *Config) injectBuiltins() {
 	builtins := TypeMap{
-		"__Directive":         {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.Directive"}},
-		"__DirectiveLocation": {Model: StringList{"github.com/99designs/gqlgen/graphql.String"}},
-		"__Type":              {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.Type"}},
-		"__TypeKind":          {Model: StringList{"github.com/99designs/gqlgen/graphql.String"}},
-		"__Field":             {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.Field"}},
-		"__EnumValue":         {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.EnumValue"}},
-		"__InputValue":        {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.InputValue"}},
-		"__Schema":            {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.Schema"}},
-		"Float":               {Model: StringList{"github.com/99designs/gqlgen/graphql.FloatContext"}},
-		"String":              {Model: StringList{"github.com/99designs/gqlgen/graphql.String"}},
-		"Boolean":             {Model: StringList{"github.com/99designs/gqlgen/graphql.Boolean"}},
+		"__Directive":         {Model: StringList{"github.com/john-markham/gqlgen/graphql/introspection.Directive"}},
+		"__DirectiveLocation": {Model: StringList{"github.com/john-markham/gqlgen/graphql.String"}},
+		"__Type":              {Model: StringList{"github.com/john-markham/gqlgen/graphql/introspection.Type"}},
+		"__TypeKind":          {Model: StringList{"github.com/john-markham/gqlgen/graphql.String"}},
+		"__Field":             {Model: StringList{"github.com/john-markham/gqlgen/graphql/introspection.Field"}},
+		"__EnumValue":         {Model: StringList{"github.com/john-markham/gqlgen/graphql/introspection.EnumValue"}},
+		"__InputValue":        {Model: StringList{"github.com/john-markham/gqlgen/graphql/introspection.InputValue"}},
+		"__Schema":            {Model: StringList{"github.com/john-markham/gqlgen/graphql/introspection.Schema"}},
+		"Float":               {Model: StringList{"github.com/john-markham/gqlgen/graphql.FloatContext"}},
+		"String":              {Model: StringList{"github.com/john-markham/gqlgen/graphql.String"}},
+		"Boolean":             {Model: StringList{"github.com/john-markham/gqlgen/graphql.Boolean"}},
 		"Int": {
 			// FIXME: using int / int64 for Int is not spec compliant and introduces
 			// security risks. We should default to int32.
 			Model: StringList{
-				"github.com/99designs/gqlgen/graphql.Int",
-				"github.com/99designs/gqlgen/graphql.Int32",
-				"github.com/99designs/gqlgen/graphql.Int64",
+				"github.com/john-markham/gqlgen/graphql.Int",
+				"github.com/john-markham/gqlgen/graphql.Int32",
+				"github.com/john-markham/gqlgen/graphql.Int64",
 			},
 		},
 		"ID": {
 			Model: StringList{
-				"github.com/99designs/gqlgen/graphql.ID",
-				"github.com/99designs/gqlgen/graphql.IntID",
+				"github.com/john-markham/gqlgen/graphql.ID",
+				"github.com/john-markham/gqlgen/graphql.IntID",
 			},
 		},
 	}
@@ -840,14 +840,14 @@ func (c *Config) injectBuiltins() {
 	extraBuiltins := TypeMap{
 		"Int64": {
 			Model: StringList{
-				"github.com/99designs/gqlgen/graphql.Int",
-				"github.com/99designs/gqlgen/graphql.Int64",
+				"github.com/john-markham/gqlgen/graphql.Int",
+				"github.com/john-markham/gqlgen/graphql.Int64",
 			},
 		},
-		"Time":   {Model: StringList{"github.com/99designs/gqlgen/graphql.Time"}},
-		"Map":    {Model: StringList{"github.com/99designs/gqlgen/graphql.Map"}},
-		"Upload": {Model: StringList{"github.com/99designs/gqlgen/graphql.Upload"}},
-		"Any":    {Model: StringList{"github.com/99designs/gqlgen/graphql.Any"}},
+		"Time":   {Model: StringList{"github.com/john-markham/gqlgen/graphql.Time"}},
+		"Map":    {Model: StringList{"github.com/john-markham/gqlgen/graphql.Map"}},
+		"Upload": {Model: StringList{"github.com/john-markham/gqlgen/graphql.Upload"}},
+		"Any":    {Model: StringList{"github.com/john-markham/gqlgen/graphql.Any"}},
 	}
 
 	for typeName, entry := range extraBuiltins {
@@ -861,7 +861,7 @@ func (c *Config) LoadSchema() error {
 	if c.Packages != nil {
 		c.Packages = code.NewPackages(
 			code.WithBuildTags(c.GoBuildTags...),
-			code.PackagePrefixToCache("github.com/99designs/gqlgen/graphql"),
+			code.PackagePrefixToCache("github.com/john-markham/gqlgen/graphql"),
 		)
 	}
 

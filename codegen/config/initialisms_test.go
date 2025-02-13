@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
-	"github.com/99designs/gqlgen/codegen/templates"
+	"github.com/john-markham/gqlgen/codegen/templates"
 )
 
 func TestGoInitialismsConfig(t *testing.T) {

@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
-	"github.com/99designs/gqlgen/graphql"
+	"github.com/john-markham/gqlgen/graphql"
 )
 
 func TestIntrospection(t *testing.T) {

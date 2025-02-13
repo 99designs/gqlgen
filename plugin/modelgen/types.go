@@ -24,7 +24,7 @@ func buildType(typeString string) types.Type {
 // package -- gqlgen doesn't give us the package-map we'd need to do so.
 // Instead we construct a placeholder type that has all the fields gqlgen
 // wants. This is roughly what gqlgen itself does, anyway:
-// https://github.com/99designs/gqlgen/blob/master/plugin/modelgen/models.go#L119
+// https://github.com/john-markham/gqlgen/blob/master/plugin/modelgen/models.go#L119
 func buildNamedType(fullName string) types.Type {
 	dotIndex := strings.LastIndex(fullName, ".")
 	if dotIndex == -1 { // builtinType

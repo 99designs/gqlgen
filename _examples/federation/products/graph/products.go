@@ -1,6 +1,6 @@
 package graph
 
-import "github.com/99designs/gqlgen/_examples/federation/products/graph/model"
+import "github.com/john-markham/gqlgen/_examples/federation/products/graph/model"
 
 var hats = []*model.Product{
 	{

@@ -16,13 +16,13 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 	"google.golang.org/protobuf/proto"
 
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/handler/apollofederatedtracingv1"
-	"github.com/99designs/gqlgen/graphql/handler/apollofederatedtracingv1/generated"
-	"github.com/99designs/gqlgen/graphql/handler/extension"
-	"github.com/99designs/gqlgen/graphql/handler/lru"
-	"github.com/99designs/gqlgen/graphql/handler/testserver"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/john-markham/gqlgen/graphql"
+	"github.com/john-markham/gqlgen/graphql/handler/apollofederatedtracingv1"
+	"github.com/john-markham/gqlgen/graphql/handler/apollofederatedtracingv1/generated"
+	"github.com/john-markham/gqlgen/graphql/handler/extension"
+	"github.com/john-markham/gqlgen/graphql/handler/lru"
+	"github.com/john-markham/gqlgen/graphql/handler/testserver"
+	"github.com/john-markham/gqlgen/graphql/handler/transport"
 )
 
 type alwaysError struct{}

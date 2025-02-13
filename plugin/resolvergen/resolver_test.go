@@ -9,8 +9,8 @@ import (
 	"github.com/stretchr/testify/require"
 	"golang.org/x/tools/go/packages"
 
-	"github.com/99designs/gqlgen/codegen"
-	"github.com/99designs/gqlgen/codegen/config"
+	"github.com/john-markham/gqlgen/codegen"
+	"github.com/john-markham/gqlgen/codegen/config"
 )
 
 func TestLayoutSingleFile(t *testing.T) {
@@ -26,7 +26,7 @@ func TestLayoutSingleFile(t *testing.T) {
 	require.NoError(t, err)
 
 	require.NoError(t, p.GenerateCode(data))
-	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/testdata/singlefile/out")
+	assertNoErrors(t, "github.com/john-markham/gqlgen/plugin/resolvergen/testdata/singlefile/out")
 }
 
 func TestLayoutSingleFileWithEnableRewrite(t *testing.T) {
@@ -48,7 +48,7 @@ func TestLayoutSingleFileWithEnableRewrite(t *testing.T) {
 	require.NoError(t, err)
 
 	require.NoError(t, p.GenerateCode(data))
-	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/testdata/singlefile_preserve/out")
+	assertNoErrors(t, "github.com/john-markham/gqlgen/plugin/resolvergen/testdata/singlefile_preserve/out")
 }
 
 func TestLayoutFollowSchema(t *testing.T) {
@@ -104,7 +104,7 @@ func TestOmitTemplateComment(t *testing.T) {
 	require.NoError(t, err)
 
 	require.NoError(t, p.GenerateCode(data))
-	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/testdata/omit_template_comment/out")
+	assertNoErrors(t, "github.com/john-markham/gqlgen/plugin/resolvergen/testdata/omit_template_comment/out")
 }
 
 func TestResolver_Implementation(t *testing.T) {
@@ -120,7 +120,7 @@ func TestResolver_Implementation(t *testing.T) {
 	require.NoError(t, err)
 
 	require.NoError(t, p.GenerateCode(data))
-	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/testdata/resolver_implementor/out")
+	assertNoErrors(t, "github.com/john-markham/gqlgen/plugin/resolvergen/testdata/resolver_implementor/out")
 }
 
 func TestCustomResolverTemplate(t *testing.T) {
@@ -150,7 +150,7 @@ func testFollowSchemaPersistence(t *testing.T, dir string) {
 	require.NoError(t, err)
 
 	require.NoError(t, p.GenerateCode(data))
-	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/"+dir+"/out")
+	assertNoErrors(t, "github.com/john-markham/gqlgen/plugin/resolvergen/"+dir+"/out")
 }
 
 func overWriteFile(t *testing.T, sourceFile, destinationFile string) {

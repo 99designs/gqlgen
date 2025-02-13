@@ -5,7 +5,7 @@ import (
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
-	"github.com/99designs/gqlgen/graphql"
+	"github.com/john-markham/gqlgen/graphql"
 )
 
 // EnableIntrospection enables clients to reflect all of the types available on the graph.

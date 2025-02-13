@@ -17,13 +17,13 @@ package main
 import (
 	"net/http"
 
-	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/99designs/gqlgen/_examples/starwars"
-	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/john-markham/gqlgen/graphql/handler/transport"
+	"github.com/john-markham/gqlgen/_examples/starwars"
+	"github.com/john-markham/gqlgen/graphql/handler"
 	"github.com/go-chi/chi"
 	"github.com/rs/cors"
 	"github.com/gorilla/websocket"
-	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/john-markham/gqlgen/graphql/playground"
 )
 
 func main() {

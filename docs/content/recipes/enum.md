@@ -10,10 +10,10 @@ Both typed and untyped binding are supported.
 - For typed:\
   Set model to const/var type. Set enum values to specific const/var.
 - For untyped:\
-  Set model to predefined gqlgen type (e.g. for int use `github.com/99designs/gqlgen/graphql.Int`).
+  Set model to predefined gqlgen type (e.g. for int use `github.com/john-markham/gqlgen/graphql.Int`).
   Set enum values to specific const/var.
 
-More examples can be found in [_examples/enum](https://github.com/99designs/gqlgen/tree/master/_examples/enum).
+More examples can be found in [_examples/enum](https://github.com/john-markham/gqlgen/tree/master/_examples/enum).
 
 ## Binding Targets
 
@@ -57,7 +57,7 @@ enum EnumTyped @goModel(model: "./model.EnumTyped") {
     TWO @goEnum(value: "./model.EnumTypedTwo")
 }
 
-enum EnumUntyped @goModel(model: "github.com/99designs/gqlgen/graphql.Int") {
+enum EnumUntyped @goModel(model: "github.com/john-markham/gqlgen/graphql.Int") {
     ONE @goEnum(value: "./model.EnumUntypedOne")
     TWO @goEnum(value: "./model.EnumUntypedTwo")
 }
@@ -76,7 +76,7 @@ models:
       TWO:
         value: ./model.EnumTypedTwo
   EnumUntyped:
-    model: github.com/99designs/gqlgen/graphql.Int
+    model: github.com/john-markham/gqlgen/graphql.Int
     enum_values:
       ONE:
         value: ./model.EnumUntypedOne

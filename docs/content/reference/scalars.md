@@ -41,7 +41,7 @@ If you add to gqlgen.yml:
 models:
   UUID:
     model:
-      - github.com/99designs/gqlgen/graphql.UUID
+      - github.com/john-markham/gqlgen/graphql.UUID
 ```
 
 And then add `scalar UUID` to `schema.graphql`
@@ -95,14 +95,14 @@ If you add to gqlgen.yml:
 models:
   Duration:
     model:
-      - github.com/99designs/gqlgen/graphql.Duration
+      - github.com/john-markham/gqlgen/graphql.Duration
 ```
 
 And then add `scalar Duration` to `schema.graphql`
 
 ## Custom scalars with user defined types
 
-For user defined types you can implement the [graphql.Marshaler](https://pkg.go.dev/github.com/99designs/gqlgen/graphql#Marshaler) and [graphql.Unmarshaler](https://pkg.go.dev/github.com/99designs/gqlgen/graphql#Unmarshaler) or implement the [graphql.ContextMarshaler](https://pkg.go.dev/github.com/99designs/gqlgen/graphql#ContextMarshaler) and [graphql.ContextUnmarshaler](https://pkg.go.dev/github.com/99designs/gqlgen/graphql#ContextUnmarshaler) interfaces and they will be called.
+For user defined types you can implement the [graphql.Marshaler](https://pkg.go.dev/github.com/john-markham/gqlgen/graphql#Marshaler) and [graphql.Unmarshaler](https://pkg.go.dev/github.com/john-markham/gqlgen/graphql#Unmarshaler) or implement the [graphql.ContextMarshaler](https://pkg.go.dev/github.com/john-markham/gqlgen/graphql#ContextMarshaler) and [graphql.ContextUnmarshaler](https://pkg.go.dev/github.com/john-markham/gqlgen/graphql#ContextUnmarshaler) interfaces and they will be called.
 
 ```go
 package mypkg
@@ -202,7 +202,7 @@ import (
 	"io"
 	"strings"
 
-	"github.com/99designs/gqlgen/graphql"
+	"github.com/john-markham/gqlgen/graphql"
 )
 
 
@@ -244,7 +244,7 @@ models:
 **Note:** You can also (un)marshal with a context by having your custom marshal function return a
 `graphql.ContextMarshaler` _and_ your unmarshal function take a `context.Context` as the first argument.
 
-See the [_examples/scalars](https://github.com/99designs/gqlgen/tree/master/_examples/scalars) package for more examples.
+See the [_examples/scalars](https://github.com/john-markham/gqlgen/tree/master/_examples/scalars) package for more examples.
 
 ## Marshaling/Unmarshaling Errors
 

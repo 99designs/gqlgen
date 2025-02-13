@@ -5,17 +5,17 @@ export GO111MODULE=on
 gqlgen_dir=$(pwd)
 cd $(mktemp -d)
 go mod init inittest
-printf '//go:build tools\npackage tools\nimport _ "github.com/99designs/gqlgen"' | gofmt > tools.go
+printf '//go:build tools\npackage tools\nimport _ "github.com/john-markham/gqlgen"' | gofmt > tools.go
 go mod tidy
-go mod edit -replace=github.com/99designs/gqlgen="$gqlgen_dir"
+go mod edit -replace=github.com/john-markham/gqlgen="$gqlgen_dir"
 go mod tidy
 
-if ! go run github.com/99designs/gqlgen init ; then
+if ! go run github.com/john-markham/gqlgen init ; then
     echo "gqlgen init failed"
     exit 125
 fi
 
-if ! go run github.com/99designs/gqlgen generate ; then
+if ! go run github.com/john-markham/gqlgen generate ; then
     echo "gqlgen generate failed"
     exit 125
 fi

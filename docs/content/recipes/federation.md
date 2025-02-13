@@ -6,7 +6,7 @@ menu: { main: { parent: 'recipes' } }
 ---
 
 In this quick guide we are going to implement the example [Apollo Federation](https://www.apollographql.com/docs/apollo-server/federation/introduction/)
-server in gqlgen. You can find the finished result in the [examples directory](https://github.com/99designs/gqlgen/tree/master/_examples/federation).
+server in gqlgen. You can find the finished result in the [examples directory](https://github.com/john-markham/gqlgen/tree/master/_examples/federation).
 
 ## Enable federation
 
@@ -35,7 +35,7 @@ federation:
 For each server to be federated we will create a new gqlgen project.
 
 ```bash
-go run github.com/99designs/gqlgen
+go run github.com/john-markham/gqlgen
 ```
 
 Update the schema to reflect the federated example
@@ -60,7 +60,7 @@ extend type Product @key(fields: "upc") {
 
 and regenerate
 ```bash
-go run github.com/99designs/gqlgen
+go run github.com/john-markham/gqlgen
 ```
 
 then implement the resolvers

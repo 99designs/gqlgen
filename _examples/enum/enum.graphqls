@@ -29,24 +29,24 @@ type Query {
     inPackage(arg: InPackage!): InPackage!
 }
 
-enum IntTyped @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.IntTyped") {
-    ONE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.IntTypedOne")
-    TWO @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.IntTypedTwo")
+enum IntTyped @goModel(model: "github.com/john-markham/gqlgen/_examples/enum/model.IntTyped") {
+    ONE @goEnum(value: "github.com/john-markham/gqlgen/_examples/enum/model.IntTypedOne")
+    TWO @goEnum(value: "github.com/john-markham/gqlgen/_examples/enum/model.IntTypedTwo")
 }
 
-enum IntUntyped @goModel(model: "github.com/99designs/gqlgen/graphql.Int") {
-    ONE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.IntUntypedOne")
-    TWO @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.IntUntypedTwo")
+enum IntUntyped @goModel(model: "github.com/john-markham/gqlgen/graphql.Int") {
+    ONE @goEnum(value: "github.com/john-markham/gqlgen/_examples/enum/model.IntUntypedOne")
+    TWO @goEnum(value: "github.com/john-markham/gqlgen/_examples/enum/model.IntUntypedTwo")
 }
 
-enum StringTyped @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.StringTyped") {
-    ONE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.StringTypedOne")
-    TWO @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.StringTypedTwo")
+enum StringTyped @goModel(model: "github.com/john-markham/gqlgen/_examples/enum/model.StringTyped") {
+    ONE @goEnum(value: "github.com/john-markham/gqlgen/_examples/enum/model.StringTypedOne")
+    TWO @goEnum(value: "github.com/john-markham/gqlgen/_examples/enum/model.StringTypedTwo")
 }
 
-enum StringUntyped @goModel(model: "github.com/99designs/gqlgen/graphql.String") {
-    ONE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.StringUntypedOne")
-    TWO @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.StringUntypedTwo")
+enum StringUntyped @goModel(model: "github.com/john-markham/gqlgen/graphql.String") {
+    ONE @goEnum(value: "github.com/john-markham/gqlgen/_examples/enum/model.StringUntypedOne")
+    TWO @goEnum(value: "github.com/john-markham/gqlgen/_examples/enum/model.StringUntypedTwo")
 }
 
 enum BoolTyped {
@@ -59,14 +59,14 @@ enum BoolUntyped {
     FALSE
 }
 
-enum VarTyped @goModel(model: "github.com/99designs/gqlgen/_examples/enum/model.VarTyped") {
-    TRUE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.VarTypedTrue")
-    FALSE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.VarTypedFalse")
+enum VarTyped @goModel(model: "github.com/john-markham/gqlgen/_examples/enum/model.VarTyped") {
+    TRUE @goEnum(value: "github.com/john-markham/gqlgen/_examples/enum/model.VarTypedTrue")
+    FALSE @goEnum(value: "github.com/john-markham/gqlgen/_examples/enum/model.VarTypedFalse")
 }
 
-enum VarUntyped @goModel(model: "github.com/99designs/gqlgen/graphql.Boolean") {
-    TRUE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.VarUntypedTrue")
-    FALSE @goEnum(value: "github.com/99designs/gqlgen/_examples/enum/model.VarUntypedFalse")
+enum VarUntyped @goModel(model: "github.com/john-markham/gqlgen/graphql.Boolean") {
+    TRUE @goEnum(value: "github.com/john-markham/gqlgen/_examples/enum/model.VarUntypedTrue")
+    FALSE @goEnum(value: "github.com/john-markham/gqlgen/_examples/enum/model.VarUntypedFalse")
 }
 
 enum InPackage {

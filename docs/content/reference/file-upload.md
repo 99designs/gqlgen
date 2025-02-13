@@ -139,7 +139,7 @@ That invokes the following operation:
 }
 ```
 
-See the [_examples/fileupload](https://github.com/99designs/gqlgen/tree/master/_examples/fileupload) package for more examples.
+See the [_examples/fileupload](https://github.com/john-markham/gqlgen/tree/master/_examples/fileupload) package for more examples.
 
 # Usage with Apollo
 

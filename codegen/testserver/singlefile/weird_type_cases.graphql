@@ -1,4 +1,4 @@
-# regression test for https://github.com/99designs/gqlgen/issues/583
+# regression test for https://github.com/john-markham/gqlgen/issues/583
 
 type asdfIt { id: ID! }
 type iIt { id: ID! }

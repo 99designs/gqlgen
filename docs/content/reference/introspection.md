@@ -9,7 +9,7 @@ One of the best features of GraphQL is it's powerful discoverability, known as [
 
 ## Enabling introspection
 
-To enable introspection for the whole server, you use the bundled middleware extension `github.com/99designs/gqlgen/graphql/handler/extension.Introspection`:
+To enable introspection for the whole server, you use the bundled middleware extension `github.com/john-markham/gqlgen/graphql/handler/extension.Introspection`:
 
 ```go
 srv := handler.New(es)

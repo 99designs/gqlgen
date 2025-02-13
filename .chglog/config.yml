@@ -2,7 +2,7 @@ style: github
 template: CHANGELOG-full-history.tpl.md
 info:
   title: CHANGELOG
-  repository_url: https://github.com/99designs/gqlgen
+  repository_url: https://github.com/john-markham/gqlgen
 options:
   commits:
     # filters:

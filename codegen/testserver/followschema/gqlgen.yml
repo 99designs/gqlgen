@@ -14,13 +14,13 @@ resolver:
   type: Resolver
 
 autobind:
-  - "github.com/99designs/gqlgen/codegen/testserver"
-  - "github.com/99designs/gqlgen/codegen/testserver/followschema"
-  - "github.com/99designs/gqlgen/codegen/testserver/followschema/introspection"
-  - "github.com/99designs/gqlgen/codegen/testserver/followschema/invalid-packagename"
+  - "github.com/john-markham/gqlgen/codegen/testserver"
+  - "github.com/john-markham/gqlgen/codegen/testserver/followschema"
+  - "github.com/john-markham/gqlgen/codegen/testserver/followschema/introspection"
+  - "github.com/john-markham/gqlgen/codegen/testserver/followschema/invalid-packagename"
 
 models:
   Email:
-    model: "github.com/99designs/gqlgen/codegen/testserver/followschema.Email"
+    model: "github.com/john-markham/gqlgen/codegen/testserver/followschema.Email"
   StringFromContextFunction:
-    model: "github.com/99designs/gqlgen/codegen/testserver/followschema.StringFromContextFunction"
+    model: "github.com/john-markham/gqlgen/codegen/testserver/followschema.StringFromContextFunction"

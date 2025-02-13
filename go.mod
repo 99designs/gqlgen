@@ -6,8 +6,8 @@ require (
 	github.com/PuerkitoBio/goquery v1.9.3
 	github.com/go-viper/mapstructure/v2 v2.2.1
 	github.com/google/uuid v1.6.0
-	github.com/gorilla/websocket v1.5.0 // do not upgrade to v1.5.1 as it has serious bugs
 	github.com/hashicorp/golang-lru/v2 v2.0.7
+	github.com/john-markham/websocket v0.0.1
 	github.com/kevinmbeaulieu/eq-go v1.0.0
 	github.com/logrusorgru/aurora/v4 v4.0.0
 	github.com/matryer/moq v0.4.0

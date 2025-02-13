@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/websocket"
+	"github.com/john-markham/websocket"
 	"github.com/vektah/gqlparser/v2/ast"
 
 	"github.com/99designs/gqlgen/graphql"

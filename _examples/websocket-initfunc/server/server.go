@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
-	"github.com/gorilla/websocket"
 	"github.com/gqlgen/_examples/websocket-initfunc/server/graph"
+	"github.com/john-markham/websocket"
 	"github.com/rs/cors"
 
 	"github.com/99designs/gqlgen/graphql/handler"

@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"strings"
 
-	"github.com/gorilla/websocket"
+	"github.com/john-markham/websocket"
 )
 
 const (

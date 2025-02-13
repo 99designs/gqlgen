@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/websocket"
+	"github.com/john-markham/websocket"
 	"github.com/rs/cors"
 
 	"github.com/99designs/gqlgen/_examples/chat"

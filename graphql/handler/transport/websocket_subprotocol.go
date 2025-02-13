@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 
-	"github.com/gorilla/websocket"
+	"github.com/john-markham/websocket"
 )
 
 const (

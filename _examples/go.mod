@@ -8,7 +8,7 @@ require (
 	github.com/john-markham/gqlgen v0.17.57
 	github.com/go-viper/mapstructure/v2 v2.2.1
 	github.com/google/uuid v1.6.0
-	github.com/gorilla/websocket v1.5.1
+	github.com/john-markham/websocket v1.5.1
 	github.com/rs/cors v1.11.1
 	github.com/stretchr/testify v1.10.0
 	github.com/vektah/dataloaden v0.3.0
@@ -36,4 +36,4 @@ require (
 	golang.org/x/text v0.22.0
 )
 
-replace github.com/gorilla/websocket => github.com/gorilla/websocket v1.5.0
+replace github.com/john-markham/websocket => github.com/john-markham/websocket v1.5.0

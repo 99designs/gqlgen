@@ -1246,7 +1246,7 @@ Link: https://github.com/vikstrous/dataloadgen/blob/7de6ebe3d882737607ce2ba646e8
 
 - <a href="https://github.com/john-markham/gqlgen/commit/834d832c05dd4a023b9f0a2d98eacba43a718f6b"><tt>834d832c</tt></a> refactor: avoid panic in tests (<a href="https://github.com/john-markham/gqlgen/pull/3098">#3098</a>)
 
-- <a href="https://github.com/john-markham/gqlgen/commit/71845858bdc47fa4cf8ff8abb36672e7af079206"><tt>71845858</tt></a> Ignore gorilla/websocket 1.5.1 in dependabot (<a href="https://github.com/john-markham/gqlgen/pull/3097">#3097</a>)
+- <a href="https://github.com/john-markham/gqlgen/commit/71845858bdc47fa4cf8ff8abb36672e7af079206"><tt>71845858</tt></a> Ignore john-markham/websocket 1.5.1 in dependabot (<a href="https://github.com/john-markham/gqlgen/pull/3097">#3097</a>)
 
 - <a href="https://github.com/john-markham/gqlgen/commit/4ecfec907bffde2e50f4a96e7556bafaa6b5a241"><tt>4ecfec90</tt></a> Fix go install gqlgen binary (<a href="https://github.com/john-markham/gqlgen/pull/3095">#3095</a>)
 
@@ -2998,15 +2998,15 @@ updated-dependencies:
 
 </details></dd></dl>
 
-<dl><dd><details><summary><a href="https://github.com/john-markham/gqlgen/commit/96c064c46d4e998563835cf9ea40a81d348a86cf"><tt>96c064c4</tt></a> Bump github.com/gorilla/websocket from 1.5.0 to 1.5.1 in /_examples (<a href="https://github.com/john-markham/gqlgen/pull/2901">#2901</a>)</summary>
+<dl><dd><details><summary><a href="https://github.com/john-markham/gqlgen/commit/96c064c46d4e998563835cf9ea40a81d348a86cf"><tt>96c064c4</tt></a> Bump github.com/john-markham/websocket from 1.5.0 to 1.5.1 in /_examples (<a href="https://github.com/john-markham/gqlgen/pull/2901">#2901</a>)</summary>
 
-Bumps [github.com/gorilla/websocket](https://github.com/gorilla/websocket) from 1.5.0 to 1.5.1.
-- [Release notes](https://github.com/gorilla/websocket/releases)
-- [Commits](https://github.com/gorilla/websocket/compare/v1.5.0...v1.5.1)
+Bumps [github.com/john-markham/websocket](https://github.com/john-markham/websocket) from 1.5.0 to 1.5.1.
+- [Release notes](https://github.com/john-markham/websocket/releases)
+- [Commits](https://github.com/john-markham/websocket/compare/v1.5.0...v1.5.1)
 
 ---
 updated-dependencies:
-- dependency-name: github.com/gorilla/websocket
+- dependency-name: github.com/john-markham/websocket
   dependency-type: direct:production
   update-type: version-update:semver-patch
 ...
@@ -8154,11 +8154,11 @@ doc: fix typo in embedded struct example
 
 <dl><dd><details><summary><a href="https://github.com/john-markham/gqlgen/commit/b6ce42a7a218c33e327e68d7ebe5e49017dbe223"><tt>b6ce42a7</tt></a> Merge pull request <a href="https://github.com/john-markham/gqlgen/pull/1207">#1207</a> from k-yomo/update-gorilla-websocket</summary>
 
-Update gorilla/websocket to v1.4.2 to resolve vulnerability
+Update john-markham/websocket to v1.4.2 to resolve vulnerability
 
 </details></dd></dl>
 
-- <a href="https://github.com/john-markham/gqlgen/commit/c5bfe9d3d9341a23d1254a38200a6d957c52e21c"><tt>c5bfe9d3</tt></a> Update gorilla/websocket to v1.4.2 to resolve vulnerability
+- <a href="https://github.com/john-markham/gqlgen/commit/c5bfe9d3d9341a23d1254a38200a6d957c52e21c"><tt>c5bfe9d3</tt></a> Update john-markham/websocket to v1.4.2 to resolve vulnerability
 
 - <a href="https://github.com/john-markham/gqlgen/commit/55c16e93ed6d5e63eb34d6d99f3a2db9830ad822"><tt>55c16e93</tt></a> doc: fix typo in embedded struct example
 

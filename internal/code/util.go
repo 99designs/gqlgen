@@ -22,8 +22,8 @@ var modsRegex = regexp.MustCompile(`^(\*|\[\])*`)
 
 // NormalizeVendor takes a qualified package path and turns it into normal one.
 // eg .
-// github.com/foo/vendor/github.com/99designs/gqlgen/graphql becomes
-// github.com/99designs/gqlgen/graphql
+// github.com/foo/vendor/github.com/john-markham/gqlgen/graphql becomes
+// github.com/john-markham/gqlgen/graphql
 func NormalizeVendor(pkg string) string {
 	modifiers := modsRegex.FindAllString(pkg, 1)[0]
 	pkg = strings.TrimPrefix(pkg, modifiers)
@@ -33,8 +33,8 @@ func NormalizeVendor(pkg string) string {
 
 // QualifyPackagePath takes an import and fully qualifies it with a vendor dir, if one is required.
 // eg .
-// github.com/99designs/gqlgen/graphql becomes
-// github.com/foo/vendor/github.com/99designs/gqlgen/graphql
+// github.com/john-markham/gqlgen/graphql becomes
+// github.com/foo/vendor/github.com/john-markham/gqlgen/graphql
 //
 // x/tools/packages only supports 'qualified package paths' so this will need to be done prior to calling it
 // See https://github.com/golang/go/issues/30289

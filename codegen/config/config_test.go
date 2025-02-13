@@ -13,7 +13,7 @@ import (
 	"github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 
-	"github.com/99designs/gqlgen/internal/code"
+	"github.com/john-markham/gqlgen/internal/code"
 )
 
 func TestLoadConfig(t *testing.T) {
@@ -158,7 +158,7 @@ func TestConfigCheck(t *testing.T) {
 					Model: PackageConfig{Filename: "generated/models.go"},
 				}
 
-				require.EqualError(t, config.check(), "exec and model define the same import path (github.com/99designs/gqlgen/codegen/config/generated) with different package names (graphql vs generated)")
+				require.EqualError(t, config.check(), "exec and model define the same import path (github.com/john-markham/gqlgen/codegen/config/generated) with different package names (graphql vs generated)")
 			})
 
 			t.Run("federation must be in exec package", func(t *testing.T) {
@@ -176,7 +176,7 @@ func TestConfigCheck(t *testing.T) {
 					Federation: PackageConfig{Filename: "generated/federation.go", Package: "federation"},
 				}
 
-				require.EqualError(t, config.check(), "exec and federation define the same import path (github.com/99designs/gqlgen/codegen/config/generated) with different package names (generated vs federation)")
+				require.EqualError(t, config.check(), "exec and federation define the same import path (github.com/john-markham/gqlgen/codegen/config/generated) with different package names (generated vs federation)")
 			})
 
 			t.Run("deprecated federated flag raises an error", func(t *testing.T) {
@@ -196,8 +196,8 @@ func TestAutobinding(t *testing.T) {
 		cfg := Config{
 			Models: TypeMap{},
 			AutoBind: []string{
-				"github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat",
-				"github.com/99designs/gqlgen/codegen/config/testdata/autobinding/scalars/model",
+				"github.com/john-markham/gqlgen/codegen/config/testdata/autobinding/chat",
+				"github.com/john-markham/gqlgen/codegen/config/testdata/autobinding/scalars/model",
 			},
 			Packages: code.NewPackages(),
 		}
@@ -209,16 +209,16 @@ func TestAutobinding(t *testing.T) {
 
 		require.NoError(t, cfg.autobind())
 
-		require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata/autobinding/scalars/model.Banned", cfg.Models["Banned"].Model[0])
-		require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat.Message", cfg.Models["Message"].Model[0])
+		require.Equal(t, "github.com/john-markham/gqlgen/codegen/config/testdata/autobinding/scalars/model.Banned", cfg.Models["Banned"].Model[0])
+		require.Equal(t, "github.com/john-markham/gqlgen/codegen/config/testdata/autobinding/chat.Message", cfg.Models["Message"].Model[0])
 	})
 
 	t.Run("normalized type names", func(t *testing.T) {
 		cfg := Config{
 			Models: TypeMap{},
 			AutoBind: []string{
-				"github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat",
-				"github.com/99designs/gqlgen/codegen/config/testdata/autobinding/scalars/model",
+				"github.com/john-markham/gqlgen/codegen/config/testdata/autobinding/chat",
+				"github.com/john-markham/gqlgen/codegen/config/testdata/autobinding/scalars/model",
 			},
 			Packages: code.NewPackages(),
 		}
@@ -232,10 +232,10 @@ func TestAutobinding(t *testing.T) {
 
 		require.NoError(t, cfg.autobind())
 
-		require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata/autobinding/scalars/model.Banned", cfg.Models["Banned"].Model[0])
-		require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat.Message", cfg.Models["Message"].Model[0])
-		require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat.ProductSku", cfg.Models["ProductSKU"].Model[0])
-		require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat.ChatAPI", cfg.Models["ChatAPI"].Model[0])
+		require.Equal(t, "github.com/john-markham/gqlgen/codegen/config/testdata/autobinding/scalars/model.Banned", cfg.Models["Banned"].Model[0])
+		require.Equal(t, "github.com/john-markham/gqlgen/codegen/config/testdata/autobinding/chat.Message", cfg.Models["Message"].Model[0])
+		require.Equal(t, "github.com/john-markham/gqlgen/codegen/config/testdata/autobinding/chat.ProductSku", cfg.Models["ProductSKU"].Model[0])
+		require.Equal(t, "github.com/john-markham/gqlgen/codegen/config/testdata/autobinding/chat.ChatAPI", cfg.Models["ChatAPI"].Model[0])
 	})
 
 	t.Run("with file path", func(t *testing.T) {

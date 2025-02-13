@@ -3,7 +3,7 @@ package federation
 import (
 	"github.com/vektah/gqlparser/v2/ast"
 
-	"github.com/99designs/gqlgen/codegen/config"
+	"github.com/john-markham/gqlgen/codegen/config"
 )
 
 // The name of the field argument that is injected into the resolver to support @requires.
@@ -125,27 +125,27 @@ const federationVersion2Schema = `
 var builtins = config.TypeMap{
 	"_Service": {
 		Model: config.StringList{
-			"github.com/99designs/gqlgen/plugin/federation/fedruntime.Service",
+			"github.com/john-markham/gqlgen/plugin/federation/fedruntime.Service",
 		},
 	},
 	"_Entity": {
 		Model: config.StringList{
-			"github.com/99designs/gqlgen/plugin/federation/fedruntime.Entity",
+			"github.com/john-markham/gqlgen/plugin/federation/fedruntime.Entity",
 		},
 	},
 	"Entity": {
 		Model: config.StringList{
-			"github.com/99designs/gqlgen/plugin/federation/fedruntime.Entity",
+			"github.com/john-markham/gqlgen/plugin/federation/fedruntime.Entity",
 		},
 	},
 	"_Any": {
-		Model: config.StringList{"github.com/99designs/gqlgen/graphql.Map"},
+		Model: config.StringList{"github.com/john-markham/gqlgen/graphql.Map"},
 	},
 	"federation__Scope": {
-		Model: config.StringList{"github.com/99designs/gqlgen/graphql.String"},
+		Model: config.StringList{"github.com/john-markham/gqlgen/graphql.String"},
 	},
 	"federation__Policy": {
-		Model: config.StringList{"github.com/99designs/gqlgen/graphql.String"},
+		Model: config.StringList{"github.com/john-markham/gqlgen/graphql.String"},
 	},
 }
 

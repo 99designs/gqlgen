@@ -9,7 +9,7 @@ import (
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
-	"github.com/99designs/gqlgen/graphql"
+	"github.com/john-markham/gqlgen/graphql"
 )
 
 // FORM implements the application/x-www-form-urlencoded side of the default HTTP transport

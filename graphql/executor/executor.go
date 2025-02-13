@@ -9,8 +9,8 @@ import (
 	"github.com/vektah/gqlparser/v2/validator"
 	"github.com/vektah/gqlparser/v2/validator/rules"
 
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/99designs/gqlgen/graphql/errcode"
+	"github.com/john-markham/gqlgen/graphql"
+	"github.com/john-markham/gqlgen/graphql/errcode"
 )
 
 const parserTokenNoLimit = 0

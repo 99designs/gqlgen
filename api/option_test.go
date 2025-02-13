@@ -5,11 +5,11 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/99designs/gqlgen/plugin"
-	"github.com/99designs/gqlgen/plugin/federation"
-	"github.com/99designs/gqlgen/plugin/modelgen"
-	"github.com/99designs/gqlgen/plugin/resolvergen"
+	"github.com/john-markham/gqlgen/codegen/config"
+	"github.com/john-markham/gqlgen/plugin"
+	"github.com/john-markham/gqlgen/plugin/federation"
+	"github.com/john-markham/gqlgen/plugin/modelgen"
+	"github.com/john-markham/gqlgen/plugin/resolvergen"
 )
 
 type testPlugin struct{}

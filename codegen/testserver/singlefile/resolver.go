@@ -5,9 +5,9 @@ package singlefile
 import (
 	"context"
 
-	introspection1 "github.com/99designs/gqlgen/codegen/testserver/singlefile/introspection"
-	invalid_packagename "github.com/99designs/gqlgen/codegen/testserver/singlefile/invalid-packagename"
-	"github.com/99designs/gqlgen/codegen/testserver/singlefile/otherpkg"
+	introspection1 "github.com/john-markham/gqlgen/codegen/testserver/singlefile/introspection"
+	invalid_packagename "github.com/john-markham/gqlgen/codegen/testserver/singlefile/invalid-packagename"
+	"github.com/john-markham/gqlgen/codegen/testserver/singlefile/otherpkg"
 )
 
 type Resolver struct{}

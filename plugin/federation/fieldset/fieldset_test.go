@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2/ast"
 
-	"github.com/99designs/gqlgen/codegen"
+	"github.com/john-markham/gqlgen/codegen"
 )
 
 func TestUnnestedWithoutPrefix(t *testing.T) {

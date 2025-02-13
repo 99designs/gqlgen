@@ -17,10 +17,10 @@ func TestResolverConfig(t *testing.T) {
 			require.NoError(t, p.Check())
 
 			require.Equal(t, "config_test_data", p.Package)
-			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.ImportPath())
+			require.Equal(t, "github.com/john-markham/gqlgen/codegen/config/testdata", p.ImportPath())
 
 			require.Equal(t, "config_test_data", p.Pkg().Name())
-			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.Pkg().Path())
+			require.Equal(t, "github.com/john-markham/gqlgen/codegen/config/testdata", p.Pkg().Path())
 
 			require.Contains(t, filepath.ToSlash(p.Filename), "codegen/config/testdata/example.go")
 			require.Contains(t, filepath.ToSlash(p.Dir()), "codegen/config/testdata")
@@ -34,10 +34,10 @@ func TestResolverConfig(t *testing.T) {
 			require.NoError(t, p.Check())
 
 			require.Equal(t, "wololo", p.Package)
-			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.ImportPath())
+			require.Equal(t, "github.com/john-markham/gqlgen/codegen/config/testdata", p.ImportPath())
 
 			require.Equal(t, "wololo", p.Pkg().Name())
-			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.Pkg().Path())
+			require.Equal(t, "github.com/john-markham/gqlgen/codegen/config/testdata", p.Pkg().Path())
 
 			require.Contains(t, filepath.ToSlash(p.Filename), "codegen/config/testdata/example.go")
 			require.Contains(t, filepath.ToSlash(p.Dir()), "codegen/config/testdata")
@@ -82,10 +82,10 @@ func TestResolverConfig(t *testing.T) {
 			require.NoError(t, p.Check())
 
 			require.Equal(t, "config_test_data", p.Package)
-			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.ImportPath())
+			require.Equal(t, "github.com/john-markham/gqlgen/codegen/config/testdata", p.ImportPath())
 
 			require.Equal(t, "config_test_data", p.Pkg().Name())
-			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.Pkg().Path())
+			require.Equal(t, "github.com/john-markham/gqlgen/codegen/config/testdata", p.Pkg().Path())
 
 			require.Contains(t, filepath.ToSlash(p.Filename), "codegen/config/testdata/resolver.go")
 			require.Contains(t, p.Dir(), "codegen/config/testdata")
@@ -99,10 +99,10 @@ func TestResolverConfig(t *testing.T) {
 			require.NoError(t, p.Check())
 
 			require.Equal(t, "wololo", p.Package)
-			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.ImportPath())
+			require.Equal(t, "github.com/john-markham/gqlgen/codegen/config/testdata", p.ImportPath())
 
 			require.Equal(t, "wololo", p.Pkg().Name())
-			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.Pkg().Path())
+			require.Equal(t, "github.com/john-markham/gqlgen/codegen/config/testdata", p.Pkg().Path())
 
 			require.Contains(t, filepath.ToSlash(p.Filename), "codegen/config/testdata/resolver.go")
 			require.Contains(t, p.Dir(), "codegen/config/testdata")
@@ -116,10 +116,10 @@ func TestResolverConfig(t *testing.T) {
 			require.NoError(t, p.Check())
 
 			require.Equal(t, "config_test_data", p.Package)
-			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.ImportPath())
+			require.Equal(t, "github.com/john-markham/gqlgen/codegen/config/testdata", p.ImportPath())
 
 			require.Equal(t, "config_test_data", p.Pkg().Name())
-			require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata", p.Pkg().Path())
+			require.Equal(t, "github.com/john-markham/gqlgen/codegen/config/testdata", p.Pkg().Path())
 
 			require.Contains(t, filepath.ToSlash(p.Filename), "codegen/config/testdata/asdf.go")
 			require.Contains(t, p.Dir(), "codegen/config/testdata")

@@ -6,8 +6,8 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/99designs/gqlgen/graphql/handler/testserver"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/john-markham/gqlgen/graphql/handler/testserver"
+	"github.com/john-markham/gqlgen/graphql/handler/transport"
 )
 
 func TestGET(t *testing.T) {

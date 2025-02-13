@@ -1,7 +1,7 @@
 package schema
 
 import (
-	"github.com/99designs/gqlgen/_examples/federation/products/graph"
+	"github.com/john-markham/gqlgen/_examples/federation/products/graph"
 )
 
 const DefaultPort = "4002"

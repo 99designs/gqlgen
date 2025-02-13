@@ -3,13 +3,13 @@ package dataloader
 import (
 	"testing"
 
-	"github.com/99designs/gqlgen/graphql/handler/extension"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/john-markham/gqlgen/graphql/handler/extension"
+	"github.com/john-markham/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
-	"github.com/99designs/gqlgen/client"
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/introspection"
+	"github.com/john-markham/gqlgen/client"
+	"github.com/john-markham/gqlgen/graphql/handler"
+	"github.com/john-markham/gqlgen/graphql/introspection"
 )
 
 func TestTodo(t *testing.T) {

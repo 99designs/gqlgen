@@ -9,7 +9,7 @@ import (
 
 	"github.com/vektah/gqlparser/v2/ast"
 
-	"github.com/99designs/gqlgen/graphql"
+	"github.com/john-markham/gqlgen/graphql"
 )
 
 type Resolver struct{}

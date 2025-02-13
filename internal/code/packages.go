@@ -66,7 +66,7 @@ func (p *Packages) CleanupUserPackages() {
 		// Cleanup all packages if we don't know which ones to keep
 		p.packages = nil
 	} else {
-		// Don't clean up github.com/99designs/gqlgen prefixed packages,
+		// Don't clean up github.com/john-markham/gqlgen prefixed packages,
 		// they haven't changed and do not need to be reloaded
 		// if you are using a fork, then you need to have customized
 		// the prefix using PackagePrefixToCache

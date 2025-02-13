@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/99designs/gqlgen/internal/code"
+	"github.com/john-markham/gqlgen/internal/code"
 )
 
 func TestPrune(t *testing.T) {

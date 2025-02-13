@@ -6,7 +6,7 @@ package graph
 import (
 	"context"
 
-	"github.com/99designs/gqlgen/_examples/federation/reviews/graph/model"
+	"github.com/john-markham/gqlgen/_examples/federation/reviews/graph/model"
 )
 
 type Resolver struct{}

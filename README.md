@@ -1,7 +1,7 @@
 ![gqlgen](https://user-images.githubusercontent.com/980499/133180111-d064b38c-6eb9-444b-a60f-7005a6e68222.png)
 
 
-# gqlgen [![Integration](https://github.com/john-markham/gqlgen/actions/workflows/integration.yml/badge.svg)](https://github.com/john-markham/gqlgen/actions) [![Coverage Status](https://coveralls.io/repos/github/99designs/gqlgen/badge.svg?branch=master)](https://coveralls.io/github/99designs/gqlgen?branch=master) [![Go Report Card](https://goreportcard.com/badge/github.com/john-markham/gqlgen)](https://goreportcard.com/report/github.com/john-markham/gqlgen) [![Go Reference](https://pkg.go.dev/badge/github.com/john-markham/gqlgen.svg)](https://pkg.go.dev/github.com/john-markham/gqlgen) [![Read the Docs](https://badgen.net/badge/docs/available/green)](http://gqlgen.com/)
+# gqlgen [![Integration](https://github.com/john-markham/gqlgen/actions/workflows/integration.yml/badge.svg)](https://github.com/john-markham/gqlgen/actions) [![Coverage Status](https://coveralls.io/repos/github/john-markham/gqlgen/badge.svg?branch=master)](https://coveralls.io/github/john-markham/gqlgen?branch=master) [![Go Report Card](https://goreportcard.com/badge/github.com/john-markham/gqlgen)](https://goreportcard.com/report/github.com/john-markham/gqlgen) [![Go Reference](https://pkg.go.dev/badge/github.com/john-markham/gqlgen.svg)](https://pkg.go.dev/github.com/john-markham/gqlgen) [![Read the Docs](https://badgen.net/badge/docs/available/green)](http://gqlgen.com/)
 
 ## What is gqlgen?
 

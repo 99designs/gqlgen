@@ -5358,7 +5358,7 @@ This reverts commits 64b882c3c9901f25edc0684ce2a1f9b63443416b and 670cf22272b490
 
 - <a href="https://github.com/john-markham/gqlgen/commit/656045d3fa643b898932c3f5332544b0baed1af4"><tt>656045d3</tt></a> This works on Windows too! (<a href="https://github.com/john-markham/gqlgen/pull/2197">#2197</a>)
 
-- <a href="https://github.com/john-markham/gqlgen/commit/f6aeed60a508dae102b2b821d3a947e24e5e0826"><tt>f6aeed60</tt></a> Merge branch 'master' of github.com:99designs/gqlgen
+- <a href="https://github.com/john-markham/gqlgen/commit/f6aeed60a508dae102b2b821d3a947e24e5e0826"><tt>f6aeed60</tt></a> Merge branch 'master' of github.com:john-markham/gqlgen
 
 - <a href="https://github.com/john-markham/gqlgen/commit/d91080be396af96266941499d369d0f8279761b0"><tt>d91080be</tt></a> Update changelog
 
@@ -6045,7 +6045,7 @@ updated-dependencies:
 <!-- end of If NoteGroups -->
 <a name="v0.16.0"></a>
 ## [v0.16.0](https://github.com/john-markham/gqlgen/compare/v0.15.1...v0.16.0) - 2022-01-24
-- <a href="https://github.com/john-markham/gqlgen/commit/b90f9750f40583823a3e875d6bbe1538ce50f527"><tt>b90f9750</tt></a> Merge branch 'master' of github.com:99designs/gqlgen
+- <a href="https://github.com/john-markham/gqlgen/commit/b90f9750f40583823a3e875d6bbe1538ce50f527"><tt>b90f9750</tt></a> Merge branch 'master' of github.com:john-markham/gqlgen
 
 - <a href="https://github.com/john-markham/gqlgen/commit/99523e44ae67633ecfa714794a209191d3519017"><tt>99523e44</tt></a> Prepare for v0.16.0 release (<a href="https://github.com/john-markham/gqlgen/pull/1842">#1842</a>)
 
@@ -11989,7 +11989,7 @@ Also ran `dep ensure` to add the new dependency to `Gopkg.lock`.
 
 - <a href="https://github.com/john-markham/gqlgen/commit/02873495e1f85ae83e38cf79e52a2122a845986f"><tt>02873495</tt></a> use goroutine about processing each array elements
 
-- <a href="https://github.com/john-markham/gqlgen/commit/40f904a6a3e07145532db7ef08b09d8ec221cbd9"><tt>40f904a6</tt></a> Merge branch 'master' of github.com:99designs/gqlgen into tags
+- <a href="https://github.com/john-markham/gqlgen/commit/40f904a6a3e07145532db7ef08b09d8ec221cbd9"><tt>40f904a6</tt></a> Merge branch 'master' of github.com:john-markham/gqlgen into tags
 
 - <a href="https://github.com/john-markham/gqlgen/commit/56768d6ba53088c47390944813b0c13cb97e4ae4"><tt>56768d6b</tt></a> adds tests for findField
 
@@ -12001,7 +12001,7 @@ Add obj to Directives
 
 </details></dd></dl>
 
-- <a href="https://github.com/john-markham/gqlgen/commit/0e2aaa9ec6e6be2cafe04b878f42444275056a41"><tt>0e2aaa9e</tt></a> Merge branch 'master' of github.com:99designs/gqlgen into tags
+- <a href="https://github.com/john-markham/gqlgen/commit/0e2aaa9ec6e6be2cafe04b878f42444275056a41"><tt>0e2aaa9e</tt></a> Merge branch 'master' of github.com:john-markham/gqlgen into tags
 
 - <a href="https://github.com/john-markham/gqlgen/commit/7cfd9772cb10bb4cb75cef188c0c4635aecb8663"><tt>7cfd9772</tt></a> fixes field selection priority
 

@@ -125,6 +125,7 @@ func (t Websocket) Do(w http.ResponseWriter, r *http.Request, exec graphql.Graph
 	}
 
 	if !conn.init() {
+		fmt.Println("[GQLGEN] Failed to initialize websocket connection")
 		return
 	}
 
@@ -444,6 +445,7 @@ func (c *wsConnection) subscribe(start time.Time, msg *message) {
 		responses, ctx := c.exec.DispatchOperation(ctx, rc)
 		for {
 			response := responses(ctx)
+			fmt.Println("[GQLGEN] Response:", response)
 			if response == nil {
 				break
 			}

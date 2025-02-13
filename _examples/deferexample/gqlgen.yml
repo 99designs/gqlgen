@@ -16,7 +16,7 @@ call_argument_directives_with_null: true
 models:
   ID:
     model:
-      - github.com/99designs/gqlgen/graphql.ID
+      - github.com/john-markham/gqlgen/graphql.ID
   Todo:
     fields:
       user:

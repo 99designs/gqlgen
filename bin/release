@@ -48,4 +48,4 @@ git checkout master
 git pull
 
 
-echo "Now go write some release notes! https://github.com/99designs/gqlgen/releases"
+echo "Now go write some release notes! https://github.com/john-markham/gqlgen/releases"

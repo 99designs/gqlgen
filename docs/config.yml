@@ -23,7 +23,7 @@ menu:
       weight: 10
     - name: pkg.go.dev →
       parent: reference
-      url: https://pkg.go.dev/github.com/99designs/gqlgen
+      url: https://pkg.go.dev/github.com/john-markham/gqlgen
 
 security:
   funcs:

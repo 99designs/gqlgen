@@ -27,9 +27,9 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/99designs/gqlgen/api"
-	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/99designs/gqlgen/plugin/modelgen"
+	"github.com/john-markham/gqlgen/api"
+	"github.com/john-markham/gqlgen/codegen/config"
+	"github.com/john-markham/gqlgen/plugin/modelgen"
 )
 
 // Defining mutation function
@@ -64,7 +64,7 @@ func main() {
 }
 ```
 
-In `resolver.go`, add `//go:generate go run generate.go` (or replace `//go:generate go run github.com/99designs/gqlgen generate` if you have it there). 
+In `resolver.go`, add `//go:generate go run generate.go` (or replace `//go:generate go run github.com/john-markham/gqlgen generate` if you have it there). 
 
 Now you can run `go generate ./...` to generate the code.
 
@@ -100,9 +100,9 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 	"os"
 
-	"github.com/99designs/gqlgen/api"
-	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/99designs/gqlgen/plugin/modelgen"
+	"github.com/john-markham/gqlgen/api"
+	"github.com/john-markham/gqlgen/codegen/config"
+	"github.com/john-markham/gqlgen/plugin/modelgen"
 )
 
 // Defining mutation function

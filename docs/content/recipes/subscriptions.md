@@ -39,9 +39,9 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/john-markham/gqlgen/graphql/handler"
+	"github.com/john-markham/gqlgen/graphql/handler/transport"
+	"github.com/john-markham/gqlgen/graphql/playground"
 	"github.com/example/test/graph"
 	"github.com/example/test/graph/generated"
 )
@@ -116,7 +116,7 @@ srv.AddTransport(transport.Websocket{
 })
 ```
 
-[code]: https://github.com/99designs/gqlgen/blob/master/graphql/handler/transport/websocket.go
+[code]: https://github.com/john-markham/gqlgen/blob/master/graphql/handler/transport/websocket.go
 [gorilla]: https://pkg.go.dev/github.com/gorilla/websocket
 [graphql-ws]: https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md
 
@@ -158,7 +158,7 @@ type Subscription {
 
 ## Implementing your Resolver
 
-After regenerating your code with `go run github.com/99designs/gqlgen generate` you'll find a
+After regenerating your code with `go run github.com/john-markham/gqlgen generate` you'll find a
 new resolver for your subscription. It will look like any other resolver, except it expects
 a `<-chan *model.Time` (or whatever your type is). This is a
 [channel](https://go.dev/tour/concurrency/2). Channels in Go are used to send objects to a
@@ -294,9 +294,9 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/john-markham/gqlgen/graphql/handler"
+	"github.com/john-markham/gqlgen/graphql/handler/transport"
+	"github.com/john-markham/gqlgen/graphql/playground"
 	"github.com/example/test/graph"
 	"github.com/example/test/graph/generated"
 )

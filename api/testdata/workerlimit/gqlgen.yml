@@ -49,7 +49,7 @@ resolver:
 # gqlgen will search for any type names in the schema in these go packages
 # if they match it will use them, otherwise it will generate them.
 autobind:
-  - "github.com/99designs/gqlgen/api/testdata/default/graph/model"
+  - "github.com/john-markham/gqlgen/api/testdata/default/graph/model"
 
 # This section declares type mapping between the GraphQL and go type systems
 #
@@ -59,12 +59,12 @@ autobind:
 models:
   ID:
     model:
-      - github.com/99designs/gqlgen/graphql.ID
-      - github.com/99designs/gqlgen/graphql.Int
-      - github.com/99designs/gqlgen/graphql.Int64
-      - github.com/99designs/gqlgen/graphql.Int32
+      - github.com/john-markham/gqlgen/graphql.ID
+      - github.com/john-markham/gqlgen/graphql.Int
+      - github.com/john-markham/gqlgen/graphql.Int64
+      - github.com/john-markham/gqlgen/graphql.Int32
   Int:
     model:
-      - github.com/99designs/gqlgen/graphql.Int
-      - github.com/99designs/gqlgen/graphql.Int64
-      - github.com/99designs/gqlgen/graphql.Int32
+      - github.com/john-markham/gqlgen/graphql.Int
+      - github.com/john-markham/gqlgen/graphql.Int64
+      - github.com/john-markham/gqlgen/graphql.Int32

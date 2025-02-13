@@ -1,4 +1,4 @@
-# regression test for https://github.com/99designs/gqlgen/issues/721
+# regression test for https://github.com/john-markham/gqlgen/issues/721
 
 extend type Query {
     wrappedStruct: WrappedStruct!

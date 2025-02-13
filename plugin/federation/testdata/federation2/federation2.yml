@@ -7,4 +7,4 @@ federation:
   version: 2
 
 autobind:
-  - "github.com/99designs/gqlgen/plugin/federation/test_data/model2"
+  - "github.com/john-markham/gqlgen/plugin/federation/test_data/model2"

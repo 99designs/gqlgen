@@ -4,7 +4,7 @@
 {{ reserveImport "strings"  }}
 {{ reserveImport "sync"  }}
 
-{{ reserveImport "github.com/99designs/gqlgen/plugin/federation/fedruntime" }}
+{{ reserveImport "github.com/john-markham/gqlgen/plugin/federation/fedruntime" }}
 {{ $options := .PackageOptions }}
 {{ $usePointers := .UsePointers }}
 

@@ -5,7 +5,7 @@ model:
   package: models
 
 autobind:
-  - github.com/99designs/gqlgen/_examples/starwars/models
+  - github.com/john-markham/gqlgen/_examples/starwars/models
 
 models:
   ReviewInput:

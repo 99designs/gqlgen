@@ -6,4 +6,4 @@ federation:
   filename: testdata/entities/generated/federation.go
 
 autobind:
-  - "github.com/99designs/gqlgen/plugin/federation/test_data/model"
+  - "github.com/john-markham/gqlgen/plugin/federation/test_data/model"

@@ -94,7 +94,8 @@ func (p *Client) IncrementalHTTP(ctx context.Context, query string, options ...O
 	w := httptest.NewRecorder()
 	p.h.ServeHTTP(w, r)
 
-	res := w.Result() //nolint:bodyclose // Remains open since we are reading from it incrementally.
+	// Remains open since we are reading from it incrementally.
+	res := w.Result()
 	if res.StatusCode >= http.StatusBadRequest {
 		return errorIncremental(fmt.Errorf("http %d: %s", w.Code, w.Body.String()))
 	}

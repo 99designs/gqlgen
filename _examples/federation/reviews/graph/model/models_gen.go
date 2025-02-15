@@ -13,6 +13,9 @@ type EmailHost struct {
 
 func (EmailHost) IsEntity() {}
 
+func (EmailHost) IsThing()           {}
+func (this EmailHost) GetID() string { return this.ID }
+
 type Manufacturer struct {
 	ID string `json:"id"`
 }

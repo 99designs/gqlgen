@@ -3687,6 +3687,13 @@ func (ec *executionContext) _Thing(ctx context.Context, sel ast.SelectionSet, ob
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
+	case model.EmailHost:
+		return ec._EmailHost(ctx, sel, &obj)
+	case *model.EmailHost:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._EmailHost(ctx, sel, obj)
 	case model.Product:
 		return ec._Product(ctx, sel, &obj)
 	case *model.Product:
@@ -3703,13 +3710,6 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
-	case model.Product:
-		return ec._Product(ctx, sel, &obj)
-	case *model.Product:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Product(ctx, sel, obj)
 	case model.EmailHost:
 		return ec._EmailHost(ctx, sel, &obj)
 	case *model.EmailHost:
@@ -3717,6 +3717,13 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 			return graphql.Null
 		}
 		return ec._EmailHost(ctx, sel, obj)
+	case model.Product:
+		return ec._Product(ctx, sel, &obj)
+	case *model.Product:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Product(ctx, sel, obj)
 	case model.Manufacturer:
 		return ec._Manufacturer(ctx, sel, &obj)
 	case *model.Manufacturer:
@@ -3740,7 +3747,7 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 
 // region    **************************** object.gotpl ****************************
 
-var emailHostImplementors = []string{"EmailHost", "_Entity"}
+var emailHostImplementors = []string{"EmailHost", "_Entity", "Thing"}
 
 func (ec *executionContext) _EmailHost(ctx context.Context, sel ast.SelectionSet, obj *model.EmailHost) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, emailHostImplementors)

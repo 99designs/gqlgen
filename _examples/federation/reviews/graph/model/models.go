@@ -6,7 +6,9 @@ type Product struct {
 	Reviews      []*Review     `json:"reviews"`
 }
 
-func (Product) IsEntity() {}
+func (Product) IsEntity()       {}
+func (Product) IsThing()        {}
+func (p Product) GetID() string { return p.ID }
 
 type Review struct {
 	Body        string

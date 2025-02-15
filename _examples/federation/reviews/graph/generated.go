@@ -3683,10 +3683,33 @@ func (ec *executionContext) unmarshalInputProductByManufacturerIDAndIDsInput(ctx
 
 // region    ************************** interface.gotpl ***************************
 
+func (ec *executionContext) _Thing(ctx context.Context, sel ast.SelectionSet, obj model.Thing) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case model.Product:
+		return ec._Product(ctx, sel, &obj)
+	case *model.Product:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Product(ctx, sel, obj)
+	default:
+		panic(fmt.Errorf("unexpected type %T", obj))
+	}
+}
+
 func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, obj fedruntime.Entity) graphql.Marshaler {
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
+	case model.Product:
+		return ec._Product(ctx, sel, &obj)
+	case *model.Product:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Product(ctx, sel, obj)
 	case model.EmailHost:
 		return ec._EmailHost(ctx, sel, &obj)
 	case *model.EmailHost:
@@ -3701,13 +3724,6 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 			return graphql.Null
 		}
 		return ec._Manufacturer(ctx, sel, obj)
-	case model.Product:
-		return ec._Product(ctx, sel, &obj)
-	case *model.Product:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Product(ctx, sel, obj)
 	case model.User:
 		return ec._User(ctx, sel, &obj)
 	case *model.User:
@@ -3885,7 +3901,7 @@ func (ec *executionContext) _Manufacturer(ctx context.Context, sel ast.Selection
 	return out
 }
 
-var productImplementors = []string{"Product", "_Entity"}
+var productImplementors = []string{"Product", "_Entity", "Thing"}
 
 func (ec *executionContext) _Product(ctx context.Context, sel ast.SelectionSet, obj *model.Product) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, productImplementors)

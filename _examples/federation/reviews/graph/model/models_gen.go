@@ -2,6 +2,11 @@
 
 package model
 
+type Thing interface {
+	IsThing()
+	GetID() string
+}
+
 type EmailHost struct {
 	ID string `json:"id"`
 }

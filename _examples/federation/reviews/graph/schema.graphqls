@@ -1,5 +1,9 @@
 directive @entityResolver(multi: Boolean) on OBJECT
 
+interface Thing {
+    id: String!
+}
+
 extend type EmailHost @key(fields: "id") {
     id: String! @external
 }
@@ -8,7 +12,7 @@ extend type Manufacturer @key(fields: "id") {
     id: String! @external
 }
 
-extend type Product @key(fields: "manufacturer { id } id") @entityResolver(multi: true) {
+extend type Product implements Thing @key(fields: "manufacturer { id } id") @entityResolver(multi: true) {
     id: String! @external
     manufacturer: Manufacturer! @external
     manufacturerID: String @requires(fields: "manufacturer { id }")

@@ -11,15 +11,16 @@ import (
 	"net/http/httptest"
 	"regexp"
 
-	"github.com/mitchellh/mapstructure"
+	"github.com/go-viper/mapstructure/v2"
 )
 
 type (
 	// Client used for testing GraphQL servers. Not for production use.
 	Client struct {
-		h    http.Handler
-		dc   *mapstructure.DecoderConfig
-		opts []Option
+		h      http.Handler
+		dc     *mapstructure.DecoderConfig
+		opts   []Option
+		target string
 	}
 
 	// Option implements a visitor that mutates an outgoing GraphQL request
@@ -48,8 +49,9 @@ type (
 // Options can be set that should be applied to all requests made with this client
 func New(h http.Handler, opts ...Option) *Client {
 	p := &Client{
-		h:    h,
-		opts: opts,
+		h:      h,
+		opts:   opts,
+		target: "/",
 	}
 
 	return p
@@ -111,7 +113,7 @@ var boundaryRegex = regexp.MustCompile(`multipart/form-data; ?boundary=.*`)
 func (p *Client) newRequest(query string, options ...Option) (*http.Request, error) {
 	bd := &Request{
 		Query: query,
-		HTTP:  httptest.NewRequest(http.MethodPost, "/", http.NoBody),
+		HTTP:  httptest.NewRequest(http.MethodPost, p.target, http.NoBody),
 	}
 	bd.HTTP.Header.Set("Content-Type", "application/json")
 
@@ -144,6 +146,11 @@ func (p *Client) newRequest(query string, options ...Option) (*http.Request, err
 // SetCustomDecodeConfig sets a custom decode hook for the client
 func (p *Client) SetCustomDecodeConfig(dc *mapstructure.DecoderConfig) {
 	p.dc = dc
+}
+
+// SetCustomTarget sets a custom target path for the client
+func (p *Client) SetCustomTarget(target string) {
+	p.target = target
 }
 
 func unpack(data, into any, customDc *mapstructure.DecoderConfig) error {

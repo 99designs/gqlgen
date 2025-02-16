@@ -5,6 +5,8 @@ on:
       - master
   pull_request:
     types: [ opened, synchronize ]
+env:
+  GOTOOLCHAIN: local
 # When a new revision is pushed to a PR, cancel all in-progress CI runs for that
 # PR. See https://docs.github.com/en/actions/using-jobs/using-concurrency
 concurrency:
@@ -13,10 +15,10 @@ concurrency:
 jobs:
   golangci-lint:
     env:
-      GOLANGCI_LINT_VERSION: v1.59.1
+      GOLANGCI_LINT_VERSION: v1.64.5
     strategy:
       matrix:
-        go: ["1.21", "1.22"]
+        go: ["1.22", "1.23", "1.24"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,11 +26,11 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6.0.1
+        uses: golangci/golangci-lint-action@v6.4.1
         with:
           version: ${{ env.GOLANGCI_LINT_VERSION }}
       - name: golangci-lint examples
-        uses: golangci/golangci-lint-action@v6.0.1
+        uses: golangci/golangci-lint-action@v6.3.1
         with:
           version: ${{ env.GOLANGCI_LINT_VERSION }}
           working-directory: _examples

@@ -37,325 +37,352 @@ func (ec *executionContext) __resolve__service(ctx context.Context) (fedruntime.
 	}, nil
 }
 
-func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]interface{}) []fedruntime.Entity {
+func (ec *executionContext) __resolve_entities(ctx context.Context, representations []map[string]any) []fedruntime.Entity {
 	list := make([]fedruntime.Entity, len(representations))
 
-	repsMap := map[string]struct {
-		i []int
-		r []map[string]interface{}
-	}{}
-
-	// We group entities by typename so that we can parallelize their resolution.
-	// This is particularly helpful when there are entity groups in multi mode.
-	buildRepresentationGroups := func(reps []map[string]interface{}) {
-		for i, rep := range reps {
-			typeName, ok := rep["__typename"].(string)
-			if !ok {
-				// If there is no __typename, we just skip the representation;
-				// we just won't be resolving these unknown types.
-				ec.Error(ctx, errors.New("__typename must be an existing string"))
-				continue
-			}
-
-			_r := repsMap[typeName]
-			_r.i = append(_r.i, i)
-			_r.r = append(_r.r, rep)
-			repsMap[typeName] = _r
-		}
-	}
-
-	isMulti := func(typeName string) bool {
-		switch typeName {
-		case "MultiHelloMultiKey":
-			return true
-		default:
-			return false
-		}
-	}
-
-	resolveEntity := func(ctx context.Context, typeName string, rep map[string]interface{}, idx []int, i int) (err error) {
-		// we need to do our own panic handling, because we may be called in a
-		// goroutine, where the usual panic handling can't catch us
-		defer func() {
-			if r := recover(); r != nil {
-				err = ec.Recover(ctx, r)
-			}
-		}()
-
-		switch typeName {
-		case "ExternalExtension":
-			resolverName, err := entityResolverNameForExternalExtension(ctx, rep)
-			if err != nil {
-				return fmt.Errorf(`finding resolver for Entity "ExternalExtension": %w`, err)
-			}
-			switch resolverName {
-
-			case "findExternalExtensionByUpc":
-				id0, err := ec.unmarshalNString2string(ctx, rep["upc"])
-				if err != nil {
-					return fmt.Errorf(`unmarshalling param 0 for findExternalExtensionByUpc(): %w`, err)
-				}
-				entity, err := ec.resolvers.Entity().FindExternalExtensionByUpc(ctx, id0)
-				if err != nil {
-					return fmt.Errorf(`resolving Entity "ExternalExtension": %w`, err)
-				}
-
-				list[idx[i]] = entity
-				return nil
-			}
-		case "Hello":
-			resolverName, err := entityResolverNameForHello(ctx, rep)
-			if err != nil {
-				return fmt.Errorf(`finding resolver for Entity "Hello": %w`, err)
-			}
-			switch resolverName {
-
-			case "findHelloByName":
-				id0, err := ec.unmarshalNString2string(ctx, rep["name"])
-				if err != nil {
-					return fmt.Errorf(`unmarshalling param 0 for findHelloByName(): %w`, err)
-				}
-				entity, err := ec.resolvers.Entity().FindHelloByName(ctx, id0)
-				if err != nil {
-					return fmt.Errorf(`resolving Entity "Hello": %w`, err)
-				}
-
-				list[idx[i]] = entity
-				return nil
-			}
-		case "NestedKey":
-			resolverName, err := entityResolverNameForNestedKey(ctx, rep)
-			if err != nil {
-				return fmt.Errorf(`finding resolver for Entity "NestedKey": %w`, err)
-			}
-			switch resolverName {
-
-			case "findNestedKeyByIDAndHelloName":
-				id0, err := ec.unmarshalNString2string(ctx, rep["id"])
-				if err != nil {
-					return fmt.Errorf(`unmarshalling param 0 for findNestedKeyByIDAndHelloName(): %w`, err)
-				}
-				id1, err := ec.unmarshalNString2string(ctx, rep["hello"].(map[string]interface{})["name"])
-				if err != nil {
-					return fmt.Errorf(`unmarshalling param 1 for findNestedKeyByIDAndHelloName(): %w`, err)
-				}
-				entity, err := ec.resolvers.Entity().FindNestedKeyByIDAndHelloName(ctx, id0, id1)
-				if err != nil {
-					return fmt.Errorf(`resolving Entity "NestedKey": %w`, err)
-				}
-
-				list[idx[i]] = entity
-				return nil
-			}
-		case "VeryNestedKey":
-			resolverName, err := entityResolverNameForVeryNestedKey(ctx, rep)
-			if err != nil {
-				return fmt.Errorf(`finding resolver for Entity "VeryNestedKey": %w`, err)
-			}
-			switch resolverName {
-
-			case "findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo":
-				id0, err := ec.unmarshalNString2string(ctx, rep["id"])
-				if err != nil {
-					return fmt.Errorf(`unmarshalling param 0 for findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo(): %w`, err)
-				}
-				id1, err := ec.unmarshalNString2string(ctx, rep["hello"].(map[string]interface{})["name"])
-				if err != nil {
-					return fmt.Errorf(`unmarshalling param 1 for findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo(): %w`, err)
-				}
-				id2, err := ec.unmarshalNString2string(ctx, rep["world"].(map[string]interface{})["foo"])
-				if err != nil {
-					return fmt.Errorf(`unmarshalling param 2 for findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo(): %w`, err)
-				}
-				id3, err := ec.unmarshalNInt2int(ctx, rep["world"].(map[string]interface{})["bar"])
-				if err != nil {
-					return fmt.Errorf(`unmarshalling param 3 for findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo(): %w`, err)
-				}
-				id4, err := ec.unmarshalNString2string(ctx, rep["more"].(map[string]interface{})["world"].(map[string]interface{})["foo"])
-				if err != nil {
-					return fmt.Errorf(`unmarshalling param 4 for findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo(): %w`, err)
-				}
-				entity, err := ec.resolvers.Entity().FindVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo(ctx, id0, id1, id2, id3, id4)
-				if err != nil {
-					return fmt.Errorf(`resolving Entity "VeryNestedKey": %w`, err)
-				}
-
-				entity.ID, err = ec.unmarshalNString2string(ctx, rep["id"])
-				if err != nil {
-					return err
-				}
-				entity.Hello.Secondary, err = ec.unmarshalNString2string(ctx, rep["hello"].(map[string]interface{})["secondary"])
-				if err != nil {
-					return err
-				}
-				list[idx[i]] = entity
-				return nil
-			}
-		case "World":
-			resolverName, err := entityResolverNameForWorld(ctx, rep)
-			if err != nil {
-				return fmt.Errorf(`finding resolver for Entity "World": %w`, err)
-			}
-			switch resolverName {
-
-			case "findWorldByFoo":
-				id0, err := ec.unmarshalNString2string(ctx, rep["foo"])
-				if err != nil {
-					return fmt.Errorf(`unmarshalling param 0 for findWorldByFoo(): %w`, err)
-				}
-				entity, err := ec.resolvers.Entity().FindWorldByFoo(ctx, id0)
-				if err != nil {
-					return fmt.Errorf(`resolving Entity "World": %w`, err)
-				}
-
-				list[idx[i]] = entity
-				return nil
-			case "findWorldByBar":
-				id0, err := ec.unmarshalNInt2int(ctx, rep["bar"])
-				if err != nil {
-					return fmt.Errorf(`unmarshalling param 0 for findWorldByBar(): %w`, err)
-				}
-				entity, err := ec.resolvers.Entity().FindWorldByBar(ctx, id0)
-				if err != nil {
-					return fmt.Errorf(`resolving Entity "World": %w`, err)
-				}
-
-				list[idx[i]] = entity
-				return nil
-			}
-
-		}
-		return fmt.Errorf("%w: %s", ErrUnknownType, typeName)
-	}
-
-	resolveManyEntities := func(ctx context.Context, typeName string, reps []map[string]interface{}, idx []int) (err error) {
-		// we need to do our own panic handling, because we may be called in a
-		// goroutine, where the usual panic handling can't catch us
-		defer func() {
-			if r := recover(); r != nil {
-				err = ec.Recover(ctx, r)
-			}
-		}()
-
-		switch typeName {
-
-		case "MultiHelloMultiKey":
-			resolverName, err := entityResolverNameForMultiHelloMultiKey(ctx, reps[0])
-			if err != nil {
-				return fmt.Errorf(`finding resolver for Entity "MultiHelloMultiKey": %w`, err)
-			}
-			switch resolverName {
-
-			case "findManyMultiHelloMultiKeyByNames":
-				_reps := make([]*model.MultiHelloMultiKeyByNamesInput, len(reps))
-
-				for i, rep := range reps {
-					id0, err := ec.unmarshalNString2string(ctx, rep["name"])
-					if err != nil {
-						return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
-					}
-
-					_reps[i] = &model.MultiHelloMultiKeyByNamesInput{
-						Name: id0,
-					}
-				}
-
-				entities, err := ec.resolvers.Entity().FindManyMultiHelloMultiKeyByNames(ctx, _reps)
-				if err != nil {
-					return err
-				}
-
-				for i, entity := range entities {
-					list[idx[i]] = entity
-				}
-				return nil
-
-			case "findManyMultiHelloMultiKeyByKey2s":
-				_reps := make([]*model.MultiHelloMultiKeyByKey2sInput, len(reps))
-
-				for i, rep := range reps {
-					id0, err := ec.unmarshalNString2string(ctx, rep["key2"])
-					if err != nil {
-						return errors.New(fmt.Sprintf("Field %s undefined in schema.", "key2"))
-					}
-
-					_reps[i] = &model.MultiHelloMultiKeyByKey2sInput{
-						Key2: id0,
-					}
-				}
-
-				entities, err := ec.resolvers.Entity().FindManyMultiHelloMultiKeyByKey2s(ctx, _reps)
-				if err != nil {
-					return err
-				}
-
-				for i, entity := range entities {
-					list[idx[i]] = entity
-				}
-				return nil
-
-			default:
-				return fmt.Errorf("unknown resolver: %s", resolverName)
-			}
-
-		default:
-			return errors.New("unknown type: " + typeName)
-		}
-	}
-
-	resolveEntityGroup := func(typeName string, reps []map[string]interface{}, idx []int) {
-		if isMulti(typeName) {
-			err := resolveManyEntities(ctx, typeName, reps, idx)
-			if err != nil {
-				ec.Error(ctx, err)
-			}
-		} else {
-			// if there are multiple entities to resolve, parallelize (similar to
-			// graphql.FieldSet.Dispatch)
-			var e sync.WaitGroup
-			e.Add(len(reps))
-			for i, rep := range reps {
-				i, rep := i, rep
-				go func(i int, rep map[string]interface{}) {
-					err := resolveEntity(ctx, typeName, rep, idx, i)
-					if err != nil {
-						ec.Error(ctx, err)
-					}
-					e.Done()
-				}(i, rep)
-			}
-			e.Wait()
-		}
-	}
-	buildRepresentationGroups(representations)
+	repsMap := ec.buildRepresentationGroups(ctx, representations)
 
 	switch len(repsMap) {
 	case 0:
 		return list
 	case 1:
 		for typeName, reps := range repsMap {
-			resolveEntityGroup(typeName, reps.r, reps.i)
+			ec.resolveEntityGroup(ctx, typeName, reps, list)
 		}
 		return list
 	default:
 		var g sync.WaitGroup
 		g.Add(len(repsMap))
 		for typeName, reps := range repsMap {
-			go func(typeName string, reps []map[string]interface{}, idx []int) {
-				resolveEntityGroup(typeName, reps, idx)
+			go func(typeName string, reps []EntityWithIndex) {
+				ec.resolveEntityGroup(ctx, typeName, reps, list)
 				g.Done()
-			}(typeName, reps.r, reps.i)
+			}(typeName, reps)
 		}
 		g.Wait()
 		return list
 	}
 }
 
-func entityResolverNameForExternalExtension(ctx context.Context, rep map[string]interface{}) (string, error) {
+type EntityWithIndex struct {
+	// The index in the original representation array
+	index  int
+	entity EntityRepresentation
+}
+
+// EntityRepresentation is the JSON representation of an entity sent by the Router
+// used as the inputs for us to resolve.
+//
+// We make it a map because we know the top level JSON is always an object.
+type EntityRepresentation map[string]any
+
+// We group entities by typename so that we can parallelize their resolution.
+// This is particularly helpful when there are entity groups in multi mode.
+func (ec *executionContext) buildRepresentationGroups(
+	ctx context.Context,
+	representations []map[string]any,
+) map[string][]EntityWithIndex {
+	repsMap := make(map[string][]EntityWithIndex)
+	for i, rep := range representations {
+		typeName, ok := rep["__typename"].(string)
+		if !ok {
+			// If there is no __typename, we just skip the representation;
+			// we just won't be resolving these unknown types.
+			ec.Error(ctx, errors.New("__typename must be an existing string"))
+			continue
+		}
+
+		repsMap[typeName] = append(repsMap[typeName], EntityWithIndex{
+			index:  i,
+			entity: rep,
+		})
+	}
+
+	return repsMap
+}
+
+func (ec *executionContext) resolveEntityGroup(
+	ctx context.Context,
+	typeName string,
+	reps []EntityWithIndex,
+	list []fedruntime.Entity,
+) {
+	if isMulti(typeName) {
+		err := ec.resolveManyEntities(ctx, typeName, reps, list)
+		if err != nil {
+			ec.Error(ctx, err)
+		}
+	} else {
+		// if there are multiple entities to resolve, parallelize (similar to
+		// graphql.FieldSet.Dispatch)
+		var e sync.WaitGroup
+		e.Add(len(reps))
+		for i, rep := range reps {
+			i, rep := i, rep
+			go func(i int, rep EntityWithIndex) {
+				entity, err := ec.resolveEntity(ctx, typeName, rep.entity)
+				if err != nil {
+					ec.Error(ctx, err)
+				} else {
+					list[rep.index] = entity
+				}
+				e.Done()
+			}(i, rep)
+		}
+		e.Wait()
+	}
+}
+
+func isMulti(typeName string) bool {
+	switch typeName {
+	case "MultiHelloMultiKey":
+		return true
+	default:
+		return false
+	}
+}
+
+func (ec *executionContext) resolveEntity(
+	ctx context.Context,
+	typeName string,
+	rep EntityRepresentation,
+) (e fedruntime.Entity, err error) {
+	// we need to do our own panic handling, because we may be called in a
+	// goroutine, where the usual panic handling can't catch us
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+		}
+	}()
+
+	switch typeName {
+	case "ExternalExtension":
+		resolverName, err := entityResolverNameForExternalExtension(ctx, rep)
+		if err != nil {
+			return nil, fmt.Errorf(`finding resolver for Entity "ExternalExtension": %w`, err)
+		}
+		switch resolverName {
+
+		case "findExternalExtensionByUpc":
+			id0, err := ec.unmarshalNString2string(ctx, rep["upc"])
+			if err != nil {
+				return nil, fmt.Errorf(`unmarshalling param 0 for findExternalExtensionByUpc(): %w`, err)
+			}
+			entity, err := ec.resolvers.Entity().FindExternalExtensionByUpc(ctx, id0)
+			if err != nil {
+				return nil, fmt.Errorf(`resolving Entity "ExternalExtension": %w`, err)
+			}
+
+			return entity, nil
+		}
+	case "Hello":
+		resolverName, err := entityResolverNameForHello(ctx, rep)
+		if err != nil {
+			return nil, fmt.Errorf(`finding resolver for Entity "Hello": %w`, err)
+		}
+		switch resolverName {
+
+		case "findHelloByName":
+			id0, err := ec.unmarshalNString2string(ctx, rep["name"])
+			if err != nil {
+				return nil, fmt.Errorf(`unmarshalling param 0 for findHelloByName(): %w`, err)
+			}
+			entity, err := ec.resolvers.Entity().FindHelloByName(ctx, id0)
+			if err != nil {
+				return nil, fmt.Errorf(`resolving Entity "Hello": %w`, err)
+			}
+
+			return entity, nil
+		}
+	case "NestedKey":
+		resolverName, err := entityResolverNameForNestedKey(ctx, rep)
+		if err != nil {
+			return nil, fmt.Errorf(`finding resolver for Entity "NestedKey": %w`, err)
+		}
+		switch resolverName {
+
+		case "findNestedKeyByIDAndHelloName":
+			id0, err := ec.unmarshalNString2string(ctx, rep["id"])
+			if err != nil {
+				return nil, fmt.Errorf(`unmarshalling param 0 for findNestedKeyByIDAndHelloName(): %w`, err)
+			}
+			id1, err := ec.unmarshalNString2string(ctx, rep["hello"].(map[string]any)["name"])
+			if err != nil {
+				return nil, fmt.Errorf(`unmarshalling param 1 for findNestedKeyByIDAndHelloName(): %w`, err)
+			}
+			entity, err := ec.resolvers.Entity().FindNestedKeyByIDAndHelloName(ctx, id0, id1)
+			if err != nil {
+				return nil, fmt.Errorf(`resolving Entity "NestedKey": %w`, err)
+			}
+
+			return entity, nil
+		}
+	case "VeryNestedKey":
+		resolverName, err := entityResolverNameForVeryNestedKey(ctx, rep)
+		if err != nil {
+			return nil, fmt.Errorf(`finding resolver for Entity "VeryNestedKey": %w`, err)
+		}
+		switch resolverName {
+
+		case "findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo":
+			id0, err := ec.unmarshalNString2string(ctx, rep["id"])
+			if err != nil {
+				return nil, fmt.Errorf(`unmarshalling param 0 for findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo(): %w`, err)
+			}
+			id1, err := ec.unmarshalNString2string(ctx, rep["hello"].(map[string]any)["name"])
+			if err != nil {
+				return nil, fmt.Errorf(`unmarshalling param 1 for findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo(): %w`, err)
+			}
+			id2, err := ec.unmarshalNString2string(ctx, rep["world"].(map[string]any)["foo"])
+			if err != nil {
+				return nil, fmt.Errorf(`unmarshalling param 2 for findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo(): %w`, err)
+			}
+			id3, err := ec.unmarshalNInt2int(ctx, rep["world"].(map[string]any)["bar"])
+			if err != nil {
+				return nil, fmt.Errorf(`unmarshalling param 3 for findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo(): %w`, err)
+			}
+			id4, err := ec.unmarshalNString2string(ctx, rep["more"].(map[string]any)["world"].(map[string]any)["foo"])
+			if err != nil {
+				return nil, fmt.Errorf(`unmarshalling param 4 for findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo(): %w`, err)
+			}
+			entity, err := ec.resolvers.Entity().FindVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo(ctx, id0, id1, id2, id3, id4)
+			if err != nil {
+				return nil, fmt.Errorf(`resolving Entity "VeryNestedKey": %w`, err)
+			}
+
+			entity.ID, err = ec.unmarshalNString2string(ctx, rep["id"])
+			if err != nil {
+				return nil, err
+			}
+			entity.Hello.Secondary, err = ec.unmarshalNString2string(ctx, rep["hello"].(map[string]any)["secondary"])
+			if err != nil {
+				return nil, err
+			}
+			return entity, nil
+		}
+	case "World":
+		resolverName, err := entityResolverNameForWorld(ctx, rep)
+		if err != nil {
+			return nil, fmt.Errorf(`finding resolver for Entity "World": %w`, err)
+		}
+		switch resolverName {
+
+		case "findWorldByFoo":
+			id0, err := ec.unmarshalNString2string(ctx, rep["foo"])
+			if err != nil {
+				return nil, fmt.Errorf(`unmarshalling param 0 for findWorldByFoo(): %w`, err)
+			}
+			entity, err := ec.resolvers.Entity().FindWorldByFoo(ctx, id0)
+			if err != nil {
+				return nil, fmt.Errorf(`resolving Entity "World": %w`, err)
+			}
+
+			return entity, nil
+		case "findWorldByBar":
+			id0, err := ec.unmarshalNInt2int(ctx, rep["bar"])
+			if err != nil {
+				return nil, fmt.Errorf(`unmarshalling param 0 for findWorldByBar(): %w`, err)
+			}
+			entity, err := ec.resolvers.Entity().FindWorldByBar(ctx, id0)
+			if err != nil {
+				return nil, fmt.Errorf(`resolving Entity "World": %w`, err)
+			}
+
+			return entity, nil
+		}
+
+	}
+	return nil, fmt.Errorf("%w: %s", ErrUnknownType, typeName)
+}
+
+func (ec *executionContext) resolveManyEntities(
+	ctx context.Context,
+	typeName string,
+	reps []EntityWithIndex,
+	list []fedruntime.Entity,
+) (err error) {
+	// we need to do our own panic handling, because we may be called in a
+	// goroutine, where the usual panic handling can't catch us
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+		}
+	}()
+
+	switch typeName {
+
+	case "MultiHelloMultiKey":
+		resolverName, err := entityResolverNameForMultiHelloMultiKey(ctx, reps[0].entity)
+		if err != nil {
+			return fmt.Errorf(`finding resolver for Entity "MultiHelloMultiKey": %w`, err)
+		}
+		switch resolverName {
+
+		case "findManyMultiHelloMultiKeyByNames":
+			typedReps := make([]*model.MultiHelloMultiKeyByNamesInput, len(reps))
+
+			for i, rep := range reps {
+				id0, err := ec.unmarshalNString2string(ctx, rep.entity["name"])
+				if err != nil {
+					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
+				}
+
+				typedReps[i] = &model.MultiHelloMultiKeyByNamesInput{
+					Name: id0,
+				}
+			}
+
+			entities, err := ec.resolvers.Entity().FindManyMultiHelloMultiKeyByNames(ctx, typedReps)
+			if err != nil {
+				return err
+			}
+
+			for i, entity := range entities {
+				list[reps[i].index] = entity
+			}
+			return nil
+
+		case "findManyMultiHelloMultiKeyByKey2s":
+			typedReps := make([]*model.MultiHelloMultiKeyByKey2sInput, len(reps))
+
+			for i, rep := range reps {
+				id0, err := ec.unmarshalNString2string(ctx, rep.entity["key2"])
+				if err != nil {
+					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "key2"))
+				}
+
+				typedReps[i] = &model.MultiHelloMultiKeyByKey2sInput{
+					Key2: id0,
+				}
+			}
+
+			entities, err := ec.resolvers.Entity().FindManyMultiHelloMultiKeyByKey2s(ctx, typedReps)
+			if err != nil {
+				return err
+			}
+
+			for i, entity := range entities {
+				list[reps[i].index] = entity
+			}
+			return nil
+
+		default:
+			return fmt.Errorf("unknown resolver: %s", resolverName)
+		}
+
+	default:
+		return errors.New("unknown type: " + typeName)
+	}
+}
+
+func entityResolverNameForExternalExtension(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
-			m   map[string]interface{}
-			val interface{}
+			m   EntityRepresentation
+			val any
 			ok  bool
 		)
 		_ = val
@@ -365,24 +392,32 @@ func entityResolverNameForExternalExtension(ctx context.Context, rep map[string]
 		m = rep
 		val, ok = m["upc"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"upc\" for ExternalExtension", ErrTypeNotFound))
 			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for ExternalExtension", ErrTypeNotFound))
 			break
 		}
 		return "findExternalExtensionByUpc", nil
 	}
-	return "", fmt.Errorf("%w for ExternalExtension", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for ExternalExtension due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
-func entityResolverNameForHello(ctx context.Context, rep map[string]interface{}) (string, error) {
+func entityResolverNameForHello(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
-			m   map[string]interface{}
-			val interface{}
+			m   EntityRepresentation
+			val any
 			ok  bool
 		)
 		_ = val
@@ -392,24 +427,32 @@ func entityResolverNameForHello(ctx context.Context, rep map[string]interface{})
 		m = rep
 		val, ok = m["name"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"name\" for Hello", ErrTypeNotFound))
 			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for Hello", ErrTypeNotFound))
 			break
 		}
 		return "findHelloByName", nil
 	}
-	return "", fmt.Errorf("%w for Hello", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for Hello due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
-func entityResolverNameForMultiHelloMultiKey(ctx context.Context, rep map[string]interface{}) (string, error) {
+func entityResolverNameForMultiHelloMultiKey(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
-			m   map[string]interface{}
-			val interface{}
+			m   EntityRepresentation
+			val any
 			ok  bool
 		)
 		_ = val
@@ -419,20 +462,24 @@ func entityResolverNameForMultiHelloMultiKey(ctx context.Context, rep map[string
 		m = rep
 		val, ok = m["name"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"name\" for MultiHelloMultiKey", ErrTypeNotFound))
 			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for MultiHelloMultiKey", ErrTypeNotFound))
 			break
 		}
 		return "findManyMultiHelloMultiKeyByNames", nil
 	}
 	for {
 		var (
-			m   map[string]interface{}
-			val interface{}
+			m   EntityRepresentation
+			val any
 			ok  bool
 		)
 		_ = val
@@ -442,24 +489,32 @@ func entityResolverNameForMultiHelloMultiKey(ctx context.Context, rep map[string
 		m = rep
 		val, ok = m["key2"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"key2\" for MultiHelloMultiKey", ErrTypeNotFound))
 			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for MultiHelloMultiKey", ErrTypeNotFound))
 			break
 		}
 		return "findManyMultiHelloMultiKeyByKey2s", nil
 	}
-	return "", fmt.Errorf("%w for MultiHelloMultiKey", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for MultiHelloMultiKey due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
-func entityResolverNameForNestedKey(ctx context.Context, rep map[string]interface{}) (string, error) {
+func entityResolverNameForNestedKey(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
-			m   map[string]interface{}
-			val interface{}
+			m   EntityRepresentation
+			val any
 			ok  bool
 		)
 		_ = val
@@ -469,6 +524,8 @@ func entityResolverNameForNestedKey(ctx context.Context, rep map[string]interfac
 		m = rep
 		val, ok = m["id"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"id\" for NestedKey", ErrTypeNotFound))
 			break
 		}
 		if allNull {
@@ -477,31 +534,44 @@ func entityResolverNameForNestedKey(ctx context.Context, rep map[string]interfac
 		m = rep
 		val, ok = m["hello"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"hello\" for NestedKey", ErrTypeNotFound))
 			break
 		}
-		if m, ok = val.(map[string]interface{}); !ok {
+		if m, ok = val.(map[string]any); !ok {
+			// nested field value is not a map[string]interface so don't use it
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to nested Key Field \"hello\" value not matching map[string]any for NestedKey", ErrTypeNotFound))
 			break
 		}
 		val, ok = m["name"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"name\" for NestedKey", ErrTypeNotFound))
 			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for NestedKey", ErrTypeNotFound))
 			break
 		}
 		return "findNestedKeyByIDAndHelloName", nil
 	}
-	return "", fmt.Errorf("%w for NestedKey", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for NestedKey due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
-func entityResolverNameForVeryNestedKey(ctx context.Context, rep map[string]interface{}) (string, error) {
+func entityResolverNameForVeryNestedKey(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
-			m   map[string]interface{}
-			val interface{}
+			m   EntityRepresentation
+			val any
 			ok  bool
 		)
 		_ = val
@@ -511,6 +581,8 @@ func entityResolverNameForVeryNestedKey(ctx context.Context, rep map[string]inte
 		m = rep
 		val, ok = m["id"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"id\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		if allNull {
@@ -519,13 +591,20 @@ func entityResolverNameForVeryNestedKey(ctx context.Context, rep map[string]inte
 		m = rep
 		val, ok = m["hello"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"hello\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
-		if m, ok = val.(map[string]interface{}); !ok {
+		if m, ok = val.(map[string]any); !ok {
+			// nested field value is not a map[string]interface so don't use it
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to nested Key Field \"hello\" value not matching map[string]any for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		val, ok = m["name"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"name\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		if allNull {
@@ -534,13 +613,20 @@ func entityResolverNameForVeryNestedKey(ctx context.Context, rep map[string]inte
 		m = rep
 		val, ok = m["world"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"world\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
-		if m, ok = val.(map[string]interface{}); !ok {
+		if m, ok = val.(map[string]any); !ok {
+			// nested field value is not a map[string]interface so don't use it
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to nested Key Field \"world\" value not matching map[string]any for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		val, ok = m["foo"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"foo\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		if allNull {
@@ -549,13 +635,20 @@ func entityResolverNameForVeryNestedKey(ctx context.Context, rep map[string]inte
 		m = rep
 		val, ok = m["world"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"world\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
-		if m, ok = val.(map[string]interface{}); !ok {
+		if m, ok = val.(map[string]any); !ok {
+			// nested field value is not a map[string]interface so don't use it
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to nested Key Field \"world\" value not matching map[string]any for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		val, ok = m["bar"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"bar\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		if allNull {
@@ -564,38 +657,56 @@ func entityResolverNameForVeryNestedKey(ctx context.Context, rep map[string]inte
 		m = rep
 		val, ok = m["more"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"more\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
-		if m, ok = val.(map[string]interface{}); !ok {
+		if m, ok = val.(map[string]any); !ok {
+			// nested field value is not a map[string]interface so don't use it
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to nested Key Field \"more\" value not matching map[string]any for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		val, ok = m["world"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"world\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
-		if m, ok = val.(map[string]interface{}); !ok {
+		if m, ok = val.(map[string]any); !ok {
+			// nested field value is not a map[string]interface so don't use it
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to nested Key Field \"world\" value not matching map[string]any for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		val, ok = m["foo"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"foo\" for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for VeryNestedKey", ErrTypeNotFound))
 			break
 		}
 		return "findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo", nil
 	}
-	return "", fmt.Errorf("%w for VeryNestedKey", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for VeryNestedKey due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
-func entityResolverNameForWorld(ctx context.Context, rep map[string]interface{}) (string, error) {
+func entityResolverNameForWorld(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
 	for {
 		var (
-			m   map[string]interface{}
-			val interface{}
+			m   EntityRepresentation
+			val any
 			ok  bool
 		)
 		_ = val
@@ -605,20 +716,24 @@ func entityResolverNameForWorld(ctx context.Context, rep map[string]interface{})
 		m = rep
 		val, ok = m["foo"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"foo\" for World", ErrTypeNotFound))
 			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for World", ErrTypeNotFound))
 			break
 		}
 		return "findWorldByFoo", nil
 	}
 	for {
 		var (
-			m   map[string]interface{}
-			val interface{}
+			m   EntityRepresentation
+			val any
 			ok  bool
 		)
 		_ = val
@@ -628,15 +743,20 @@ func entityResolverNameForWorld(ctx context.Context, rep map[string]interface{})
 		m = rep
 		val, ok = m["bar"]
 		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"bar\" for World", ErrTypeNotFound))
 			break
 		}
 		if allNull {
 			allNull = val == nil
 		}
 		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for World", ErrTypeNotFound))
 			break
 		}
 		return "findWorldByBar", nil
 	}
-	return "", fmt.Errorf("%w for World", ErrTypeNotFound)
+	return "", fmt.Errorf("%w for World due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }

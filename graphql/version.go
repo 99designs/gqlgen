@@ -1,3 +1,3 @@
 package graphql
 
-const Version = "v0.17.49"
+const Version = "v0.17.66-dev"

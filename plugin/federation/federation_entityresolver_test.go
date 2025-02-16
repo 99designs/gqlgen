@@ -7,6 +7,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
@@ -16,11 +17,13 @@ import (
 )
 
 func TestEntityResolver(t *testing.T) {
-	c := client.New(handler.NewDefaultServer(
+	srv := handler.New(
 		generated.NewExecutableSchema(generated.Config{
 			Resolvers: &entityresolver.Resolver{},
 		}),
-	))
+	)
+	srv.AddTransport(transport.POST{})
+	c := client.New(srv)
 
 	t.Run("Hello entities", func(t *testing.T) {
 		representations := []map[string]any{
@@ -170,12 +173,12 @@ func TestEntityResolver(t *testing.T) {
 				Bar int `json:"bar"`
 			} `json:"_entities"`
 		}
-
+		eq := entityQuery([]string{
+			"WorldWithMultipleKeys {foo hello {name}}",
+			"WorldWithMultipleKeys {bar}",
+		})
 		err := c.Post(
-			entityQuery([]string{
-				"WorldWithMultipleKeys {foo hello {name}}",
-				"WorldWithMultipleKeys {bar}",
-			}),
+			eq,
 			&resp,
 			client.Var("representations", representations),
 		)
@@ -391,11 +394,13 @@ func TestEntityResolver(t *testing.T) {
 }
 
 func TestMultiEntityResolver(t *testing.T) {
-	c := client.New(handler.NewDefaultServer(
+	srv := handler.New(
 		generated.NewExecutableSchema(generated.Config{
 			Resolvers: &entityresolver.Resolver{},
 		}),
-	))
+	)
+	srv.AddTransport(transport.POST{})
+	c := client.New(srv)
 
 	t.Run("MultiHello entities", func(t *testing.T) {
 		itemCount := 10

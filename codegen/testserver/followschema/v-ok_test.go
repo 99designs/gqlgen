@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
@@ -19,9 +20,9 @@ func TestOk(t *testing.T) {
 		return &VOkCaseNil{}, nil
 	}
 
-	c := client.New(handler.NewDefaultServer(
-		NewExecutableSchema(Config{Resolvers: resolver}),
-	))
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolver}))
+	srv.AddTransport(transport.POST{})
+	c := client.New(srv)
 
 	t.Run("v ok case value", func(t *testing.T) {
 		var resp struct {

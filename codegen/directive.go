@@ -2,11 +2,11 @@ package codegen
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/ast"
 
+	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
 )
 
@@ -19,9 +19,10 @@ func (dl DirectiveList) LocationDirectives(location string) DirectiveList {
 
 type Directive struct {
 	*ast.DirectiveDefinition
-	Name    string
-	Args    []*FieldArgument
-	Builtin bool
+	Name string
+	Args []*FieldArgument
+
+	config.DirectiveConfig
 }
 
 // IsLocation check location directive
@@ -82,7 +83,7 @@ func (b *builder) buildDirectives() (map[string]*Directive, error) {
 			DirectiveDefinition: dir,
 			Name:                name,
 			Args:                args,
-			Builtin:             b.Config.Directives[name].SkipRuntime,
+			DirectiveConfig:     b.Config.Directives[name],
 		}
 	}
 
@@ -122,7 +123,7 @@ func (b *builder) getDirectives(list ast.DirectiveList) ([]*Directive, error) {
 			Name:                d.Name,
 			Args:                args,
 			DirectiveDefinition: list[i].Definition,
-			Builtin:             b.Config.Directives[d.Name].SkipRuntime,
+			DirectiveConfig:     b.Config.Directives[d.Name],
 		}
 	}
 
@@ -141,7 +142,7 @@ func (d *Directive) CallArgs() string {
 	args := []string{"ctx", "obj", "n"}
 
 	for _, arg := range d.Args {
-		args = append(args, "args["+strconv.Quote(arg.Name)+"].("+templates.CurrentImports.LookupType(arg.TypeReference.GO)+")")
+		args = append(args, fmt.Sprintf("args[%q].(%s)", arg.Name, templates.CurrentImports.LookupType(arg.TypeReference.GO)))
 	}
 
 	return strings.Join(args, ", ")
@@ -162,13 +163,37 @@ func (d *Directive) ResolveArgs(obj string, next int) string {
 	return strings.Join(args, ", ")
 }
 
+func (d *Directive) CallName() string {
+	return ucFirst(d.Name)
+}
+
 func (d *Directive) Declaration() string {
-	res := ucFirst(d.Name) + " func(ctx context.Context, obj interface{}, next graphql.Resolver"
+	res := d.CallName() + " func(ctx context.Context, obj any, next graphql.Resolver"
 
 	for _, arg := range d.Args {
 		res += fmt.Sprintf(", %s %s", templates.ToGoPrivate(arg.Name), templates.CurrentImports.LookupType(arg.TypeReference.GO))
 	}
 
-	res += ") (res interface{}, err error)"
+	res += ") (res any, err error)"
 	return res
+}
+
+func (d *Directive) IsBuiltIn() bool {
+	return d.Implementation != nil
+}
+
+func (d *Directive) CallPath() string {
+	if d.IsBuiltIn() {
+		return "builtInDirective" + d.CallName()
+	}
+
+	return "ec.directives." + d.CallName()
+}
+
+func (d *Directive) FunctionImpl() string {
+	if d.Implementation == nil {
+		return ""
+	}
+
+	return d.CallPath() + " = " + *d.Implementation
 }

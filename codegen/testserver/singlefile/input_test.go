@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
@@ -14,7 +15,8 @@ import (
 
 func TestInput(t *testing.T) {
 	resolvers := &Stub{}
-	srv := handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv.AddTransport(transport.POST{})
 	c := client.New(srv)
 
 	t.Run("when function errors on directives", func(t *testing.T) {
@@ -73,7 +75,8 @@ func TestInput(t *testing.T) {
 
 func TestInputOmittable(t *testing.T) {
 	resolvers := &Stub{}
-	srv := handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv.AddTransport(transport.POST{})
 	c := client.New(srv)
 
 	t.Run("id field", func(t *testing.T) {

@@ -2,6 +2,16 @@
 
 package generated
 
+type Gender interface {
+	IsGender()
+}
+
+type Female struct {
+	Description string `json:"description"`
+}
+
+func (Female) IsGender() {}
+
 type Hello struct {
 	Name      string `json:"name"`
 	Secondary string `json:"secondary"`
@@ -21,6 +31,12 @@ type HelloWithErrors struct {
 }
 
 func (HelloWithErrors) IsEntity() {}
+
+type Male struct {
+	Description string `json:"description"`
+}
+
+func (Male) IsGender() {}
 
 type MultiHello struct {
 	Name string `json:"name"`
@@ -78,6 +94,14 @@ func (MultiPlanetRequiresNested) IsEntity() {}
 type MultiPlanetRequiresNestedByNamesInput struct {
 	Name string `json:"Name"`
 }
+
+type Person struct {
+	Name           string  `json:"name"`
+	Gender         Gender  `json:"gender"`
+	WelcomeMessage *string `json:"welcomeMessage,omitempty"`
+}
+
+func (Person) IsEntity() {}
 
 type PlanetMultipleRequires struct {
 	Name     string `json:"name"`

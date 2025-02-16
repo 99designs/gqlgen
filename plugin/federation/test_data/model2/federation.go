@@ -1,6 +1,6 @@
 package model2
 
-type FieldSet string //nolint:deadcode,unused
+type FieldSet string //nolint:deadcode
 
 type Hello struct {
 	Name      string

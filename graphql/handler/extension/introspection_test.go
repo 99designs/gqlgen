@@ -11,10 +11,10 @@ import (
 )
 
 func TestIntrospection(t *testing.T) {
-	rc := &graphql.OperationContext{
+	opCtx := &graphql.OperationContext{
 		DisableIntrospection: true,
 	}
-	err := Introspection{}.MutateOperationContext(context.Background(), rc)
+	err := Introspection{}.MutateOperationContext(context.Background(), opCtx)
 	require.Equal(t, (*gqlerror.Error)(nil), err)
-	require.False(t, rc.DisableIntrospection)
+	require.False(t, opCtx.DisableIntrospection)
 }

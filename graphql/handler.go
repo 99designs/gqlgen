@@ -34,7 +34,7 @@ type (
 
 	GraphExecutor interface {
 		CreateOperationContext(ctx context.Context, params *RawParams) (*OperationContext, gqlerror.List)
-		DispatchOperation(ctx context.Context, rc *OperationContext) (ResponseHandler, context.Context)
+		DispatchOperation(ctx context.Context, opCtx *OperationContext) (ResponseHandler, context.Context)
 		DispatchError(ctx context.Context, list gqlerror.List) *Response
 	}
 
@@ -65,7 +65,7 @@ type (
 
 	// OperationContextMutator is called after creating the request context, but before executing the root resolver.
 	OperationContextMutator interface {
-		MutateOperationContext(ctx context.Context, rc *OperationContext) *gqlerror.Error
+		MutateOperationContext(ctx context.Context, opCtx *OperationContext) *gqlerror.Error
 	}
 
 	// OperationInterceptor is called for each incoming query, for basic requests the writer will be invoked once,

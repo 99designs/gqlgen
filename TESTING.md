@@ -1,7 +1,7 @@
 How to write tests for gqlgen
 ===
 
-Testing generated code is a little tricky, heres how its currently set up.
+Testing generated code is a little tricky, here's how its currently set up.
 
 ### Testing responses from a server
 

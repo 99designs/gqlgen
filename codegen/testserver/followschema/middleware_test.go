@@ -5,6 +5,7 @@ import (
 	"sync"
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -34,9 +35,8 @@ func TestMiddleware(t *testing.T) {
 	var mu sync.Mutex
 	areMethods := map[string]bool{}
 	areResolvers := map[string]bool{}
-	srv := handler.NewDefaultServer(
-		NewExecutableSchema(Config{Resolvers: resolvers}),
-	)
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv.AddTransport(transport.POST{})
 	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res any, err error) {
 		path, _ := ctx.Value(ckey("path")).([]int)
 		return next(context.WithValue(ctx, ckey("path"), append(path, 1)))

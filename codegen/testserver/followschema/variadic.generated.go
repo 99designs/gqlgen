@@ -18,19 +18,32 @@ import (
 
 // region    ***************************** args.gotpl *****************************
 
-func (ec *executionContext) field_VariadicModel_value_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func (ec *executionContext) field_VariadicModel_value_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
-	args := map[string]interface{}{}
-	var arg0 int
-	if tmp, ok := rawArgs["rank"]; ok {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("rank"))
-		arg0, err = ec.unmarshalNInt2int(ctx, tmp)
-		if err != nil {
-			return nil, err
-		}
+	args := map[string]any{}
+	arg0, err := ec.field_VariadicModel_value_argsRank(ctx, rawArgs)
+	if err != nil {
+		return nil, err
 	}
 	args["rank"] = arg0
 	return args, nil
+}
+func (ec *executionContext) field_VariadicModel_value_argsRank(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (int, error) {
+	if _, ok := rawArgs["rank"]; !ok {
+		var zeroVal int
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("rank"))
+	if tmp, ok := rawArgs["rank"]; ok {
+		return ec.unmarshalNInt2int(ctx, tmp)
+	}
+
+	var zeroVal int
+	return zeroVal, nil
 }
 
 // endregion ***************************** args.gotpl *****************************
@@ -53,7 +66,7 @@ func (ec *executionContext) _VariadicModel_value(ctx context.Context, field grap
 			ret = graphql.Null
 		}
 	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Value(ctx, fc.Args["rank"].(int))
 	})

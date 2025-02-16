@@ -62,9 +62,9 @@ type User {
 }
 ```
 
-You need to tell gqlgen that it should only fetch friends if the user requested it. There are two ways to do this;
+You need to tell gqlgen that it should only fetch friends if the user requested it. There are two ways to do this:
 
-- #### Using Custom Models
+### Using Custom Models
 
 Write a custom model that omits the friends field:
 
@@ -84,7 +84,7 @@ models:
     model: github.com/you/pkg/model.User # go import path to the User struct above
 ```
 
-- #### Using Explicit Resolvers
+### Using Explicit Resolvers
 
 If you want to keep using the generated model, mark the field as requiring a resolver explicitly in `gqlgen.yml` like this:
 

@@ -1,10 +1,12 @@
 package code
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/tools/go/packages"
 )
 
 func TestPackages(t *testing.T) {
@@ -38,6 +40,22 @@ func TestPackages(t *testing.T) {
 		require.Equal(t, "p", p.Load("github.com/99designs/gqlgen/internal/code/testdata/p").Name)
 		require.Equal(t, 3, p.numLoadCalls)
 	})
+}
+
+func TestPackagesErrors(t *testing.T) {
+	loadFirstErr := errors.New("first")
+	loadSecondErr := errors.New("second")
+	packageErr := packages.Error{Msg: "package"}
+	p := &Packages{
+		loadErrors: []error{loadFirstErr, loadSecondErr},
+		packages: map[string]*packages.Package{"github.com/99designs/gqlgen/internal/code/testdata/a": {
+			Errors: []packages.Error{packageErr},
+		}},
+	}
+
+	errs := p.Errors()
+
+	assert.Equal(t, PkgErrors([]error{loadFirstErr, loadSecondErr, packageErr}), errs)
 }
 
 func TestNameForPackage(t *testing.T) {

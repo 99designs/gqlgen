@@ -3,6 +3,8 @@ package todo
 import (
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
@@ -11,7 +13,10 @@ import (
 )
 
 func TestTodo(t *testing.T) {
-	c := client.New(handler.NewDefaultServer(NewExecutableSchema(New())))
+	srv := handler.New(NewExecutableSchema(New()))
+	srv.AddTransport(transport.POST{})
+	srv.Use(extension.Introspection{})
+	c := client.New(srv)
 
 	var resp struct {
 		CreateTodo struct{ ID string }
@@ -181,7 +186,9 @@ func TestTodo(t *testing.T) {
 }
 
 func TestSkipAndIncludeDirectives(t *testing.T) {
-	c := client.New(handler.NewDefaultServer(NewExecutableSchema(New())))
+	srv := handler.New(NewExecutableSchema(New()))
+	srv.AddTransport(transport.POST{})
+	c := client.New(srv)
 
 	t.Run("skip on field", func(t *testing.T) {
 		var resp map[string]any

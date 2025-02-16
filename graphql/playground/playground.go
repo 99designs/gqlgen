@@ -92,7 +92,10 @@ func Handler(title, endpoint string) http.HandlerFunc {
 // HandlerWithHeaders sets up the playground.
 // fetcherHeaders are used by the playground's fetcher instance and will not be visible in the UI.
 // uiHeaders are default headers that will show up in the UI headers editor.
-func HandlerWithHeaders(title, endpoint string, fetcherHeaders, uiHeaders map[string]string) http.HandlerFunc {
+func HandlerWithHeaders(
+	title, endpoint string,
+	fetcherHeaders, uiHeaders map[string]string,
+) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "text/html; charset=UTF-8")
 		err := page.Execute(w, map[string]any{
@@ -102,9 +105,9 @@ func HandlerWithHeaders(title, endpoint string, fetcherHeaders, uiHeaders map[st
 			"uiHeaders":            uiHeaders,
 			"endpointIsAbsolute":   endpointHasScheme(endpoint),
 			"subscriptionEndpoint": getSubscriptionEndpoint(endpoint),
-			"version":              "3.0.6",
-			"cssSRI":               "sha256-wTzfn13a+pLMB5rMeysPPR1hO7x0SwSeQI+cnw7VdbE=",
-			"jsSRI":                "sha256-eNxH+Ah7Z9up9aJYTQycgyNuy953zYZwE9Rqf5rH+r4=",
+			"version":              "3.7.0",
+			"cssSRI":               "sha256-Dbkv2LUWis+0H4Z+IzxLBxM2ka1J133lSjqqtSu49o8=",
+			"jsSRI":                "sha256-qsScAZytFdTAEOM8REpljROHu8DvdvxXBK7xhoq5XD0=",
 			"reactSRI":             "sha256-S0lp+k7zWUMk2ixteM6HZvu8L9Eh//OVrt+ZfbCpmgY=",
 			"reactDOMSRI":          "sha256-IXWO0ITNDjfnNXIu5POVfqlgYoop36bDzhodR6LW5Pc=",
 		})

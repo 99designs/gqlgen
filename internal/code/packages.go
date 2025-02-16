@@ -7,16 +7,9 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime/debug"
 	"strings"
-	"sync"
 
 	"golang.org/x/tools/go/packages"
-)
-
-var (
-	once    = sync.Once{}
-	modInfo *debug.BuildInfo
 )
 
 var mode = packages.NeedName |
@@ -30,10 +23,11 @@ type (
 	// Packages is a wrapper around x/tools/go/packages that maintains a (hopefully prewarmed) cache of packages
 	// that can be invalidated as writes are made and packages are known to change.
 	Packages struct {
-		packages     map[string]*packages.Package
-		importToName map[string]string
-		loadErrors   []error
-		buildFlags   []string
+		packages              map[string]*packages.Package
+		importToName          map[string]string
+		loadErrors            []error
+		buildFlags            []string
+		packagesToCachePrefix string
 
 		numLoadCalls int // stupid test steam. ignore.
 		numNameCalls int // stupid test steam. ignore.
@@ -42,10 +36,18 @@ type (
 	Option func(p *Packages)
 )
 
-// WithBuildTags adds build tags to the packages.Load call
+// WithBuildTags option for NewPackages adds build tags to the packages.Load call
 func WithBuildTags(tags ...string) func(p *Packages) {
 	return func(p *Packages) {
 		p.buildFlags = append(p.buildFlags, "-tags", strings.Join(tags, ","))
+	}
+}
+
+// PackagePrefixToCache option for NewPackages
+// will not reset gqlgen packages in packages.Load call
+func PackagePrefixToCache(prefixPath string) func(p *Packages) {
+	return func(p *Packages) {
+		p.packagesToCachePrefix = prefixPath
 	}
 }
 
@@ -60,27 +62,23 @@ func NewPackages(opts ...Option) *Packages {
 }
 
 func (p *Packages) CleanupUserPackages() {
-	once.Do(func() {
-		var ok bool
-		modInfo, ok = debug.ReadBuildInfo()
-		if !ok {
-			modInfo = nil
-		}
-	})
-	// Don't cleanup github.com/99designs/gqlgen prefixed packages,
-	// they haven't changed and do not need to be reloaded
-	if modInfo != nil {
+	if p.packagesToCachePrefix == "" {
+		// Cleanup all packages if we don't know which ones to keep
+		p.packages = nil
+	} else {
+		// Don't clean up github.com/99designs/gqlgen prefixed packages,
+		// they haven't changed and do not need to be reloaded
+		// if you are using a fork, then you need to have customized
+		// the prefix using PackagePrefixToCache
 		var toRemove []string
 		for k := range p.packages {
-			if !strings.HasPrefix(k, modInfo.Main.Path) {
+			if !strings.HasPrefix(k, p.packagesToCachePrefix) {
 				toRemove = append(toRemove, k)
 			}
 		}
 		for _, k := range toRemove {
 			delete(p.packages, k)
 		}
-	} else {
-		p.packages = nil // Cleanup all packages if we don't know for some reason which ones to keep
 	}
 }
 
@@ -231,8 +229,7 @@ func (p *Packages) ModTidy() error {
 
 // Errors returns any errors that were returned by Load, either from the call itself or any of the loaded packages.
 func (p *Packages) Errors() PkgErrors {
-	var res []error //nolint:prealloc
-	res = append(res, p.loadErrors...)
+	res := append([]error{}, p.loadErrors...)
 	for _, pkg := range p.packages {
 		for _, err := range pkg.Errors {
 			res = append(res, err)

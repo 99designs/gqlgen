@@ -5,17 +5,26 @@ on:
       - master
   pull_request:
     types: [ opened, synchronize ]
+env:
+  GOTOOLCHAIN: local
 # When a new revision is pushed to a PR, cancel all in-progress CI runs for that
 # PR. See https://docs.github.com/en/actions/using-jobs/using-concurrency
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
+permissions:
+  # Required: allow read access to the content for analysis.
+  contents: read
+  # Optional: allow read access to pull request. Use with `only-new-issues` option.
+  pull-requests: read
+  # Optional: allow write access to checks to allow the action to annotate code in the PR.
+  checks: write
 jobs:
   test:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        go: ["1.21", "1.22"]
+        go: ["1.22", "1.23", "1.24"]
     runs-on: ${{ matrix.os }}
     continue-on-error: true
     steps:
@@ -23,20 +32,72 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go }}
+      # Install gotestsum on the VM running the action.
+      - name: Setup gotestsum
+        run: go install gotest.tools/gotestsum@latest
       - name: Core tests
-        uses: nick-fields/retry@v3
-        with:
-          max_attempts: 3
-          timeout_minutes: 20
-          command: |
-            go mod download
-            go test -race ./...
+        shell: bash
+        run: |
+          set -euo pipefail
+          go mod download
+          gotestsum --jsonfile go_test.json --junitfile report.xml --format-icons=hivis --format=pkgname-and-test-fails -- -race ./... -trimpath
       - name: Example tests
-        uses: nick-fields/retry@v3
+        shell: bash
+        if: success() || failure() # always run even if the previous step fails
+        run: |
+          cd _examples
+          go mod download
+          gotestsum --junitfile ../go_examples_report.xml --format-icons=hivis --format=pkgname-and-test-fails -- -race ./... -trimpath
+      - name: Upload Test Report
+        uses: actions/upload-artifact@v4.6.0
+        if: always() # always run even if the previous step fails
         with:
-          max_attempts: 3
-          timeout_minutes: 20
-          command: |
-            cd _examples
-            go mod download
-            go test -race ./...
+          name: test-junit-${{ matrix.os }}-${{ matrix.go }}
+          path: '*.xml'
+          retention-days: 1
+      - name: action-junit-report
+        shell: bash
+        if: success() || failure() # always run even if the previous step fails
+        run: |
+          echo "### mikepenz/action-junit-report! :rocket:" >> $GITHUB_STEP_SUMMARY
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v5
+        if: success() || failure() # always run even if the previous step fails
+        with:
+          report_paths: |
+            report.xml
+            go_examples_report.xml
+      - name: robherley/go-test-action announcement
+        shell: bash
+        if: success() || failure() # always run even if the previous step fails
+        run: |
+          echo "### robherley/go-test-action! :rocket:" >> $GITHUB_STEP_SUMMARY
+#      - name: Annotate tests does not work on pull-requests for security
+#        if: success() || failure() # always run even if the previous step fails
+#        uses: guyarb/golang-test-annotations@v0.8.0
+#        with:
+#          test-results: go_test.json
+      - name: Publish go-test-action Report
+        if: success() || failure() # always run even if the previous step fails
+        uses: robherley/go-test-action@v0.6.0
+        with:
+          # Parse an exisiting [test2json](https://pkg.go.dev/cmd/test2json) file, instead of executing go test.
+          # Will always exit(0) on successful test file parse.
+          # Optional. No default
+          fromJSONFile: go_test.json
+          omit: |
+            untested
+            successful
+      - name: test-summary/action announcement
+        shell: bash
+        if: success() || failure() # always run even if the previous step fails
+        run: |
+          echo "### test-summary/action! :rocket:" >> $GITHUB_STEP_SUMMARY
+      - name: Publish Test Summary Report
+        uses: test-summary/action@v2.4
+        if: success() || failure() # always run even if the previous step fails
+        with:
+          show: "fail, skip"
+          paths: |
+            report.xml
+            go_examples_report.xml

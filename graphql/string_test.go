@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestString(t *testing.T) {
@@ -22,21 +23,19 @@ func TestString(t *testing.T) {
 	})
 
 	t.Run("unmarshal", func(t *testing.T) {
-		assert.Equal(t, "123", mustUnmarshalString("123"))
-		assert.Equal(t, "123", mustUnmarshalString(123))
-		assert.Equal(t, "123", mustUnmarshalString(int64(123)))
-		assert.Equal(t, "123", mustUnmarshalString(float64(123)))
-		assert.Equal(t, "123", mustUnmarshalString(json.Number("123")))
-		assert.Equal(t, "true", mustUnmarshalString(true))
-		assert.Equal(t, "false", mustUnmarshalString(false))
-		assert.Equal(t, "null", mustUnmarshalString(nil))
+		assert.Equal(t, "123", mustUnmarshalString(t, "123"))
+		assert.Equal(t, "123", mustUnmarshalString(t, 123))
+		assert.Equal(t, "123", mustUnmarshalString(t, int64(123)))
+		assert.Equal(t, "123", mustUnmarshalString(t, float64(123)))
+		assert.Equal(t, "123", mustUnmarshalString(t, json.Number("123")))
+		assert.Equal(t, "true", mustUnmarshalString(t, true))
+		assert.Equal(t, "false", mustUnmarshalString(t, false))
+		assert.Equal(t, "", mustUnmarshalString(t, nil))
 	})
 }
 
-func mustUnmarshalString(v any) string {
+func mustUnmarshalString(t *testing.T, v any) string {
 	res, err := UnmarshalString(v)
-	if err != nil {
-		panic(err)
-	}
+	require.NoError(t, err)
 	return res
 }

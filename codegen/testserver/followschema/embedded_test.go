@@ -4,6 +4,7 @@ import (
 	"context"
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
@@ -28,9 +29,9 @@ func TestEmbedded(t *testing.T) {
 		return &EmbeddedCase3{&fakeUnexportedEmbeddedInterface{}}, nil
 	}
 
-	c := client.New(handler.NewDefaultServer(
-		NewExecutableSchema(Config{Resolvers: resolver}),
-	))
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolver}))
+	srv.AddTransport(transport.POST{})
+	c := client.New(srv)
 
 	t.Run("embedded case 1", func(t *testing.T) {
 		var resp struct {

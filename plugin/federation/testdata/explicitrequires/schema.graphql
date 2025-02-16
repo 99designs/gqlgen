@@ -11,6 +11,22 @@ type World @key(fields: "hello { name } foo   ") {
     hello: Hello
 }
 
+type Person @key(fields: "name"){
+    name: String!
+    gender: Gender!
+    welcomeMessage: String @requires(fields:"gender { ... on Male {description} ... on Female {description}}")
+}
+
+union Gender = Male | Female
+
+type Male {
+    description: String!
+}
+
+type Female {
+    description: String!
+}
+
 type WorldWithMultipleKeys @key(fields: "hello { name } foo   ") @key(fields: "bar") {
     foo: String!
     bar: Int!

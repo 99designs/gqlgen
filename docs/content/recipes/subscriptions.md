@@ -16,20 +16,20 @@ to be careful to configure routing correctly.
 
 In this recipe you will learn how to
 
-1. add WebSocket Transport to your server
+1. add a WebSocket Transport to your server
 2. add the `Subscription` type to your schema
 3. implement a real-time resolver.
 
-## Adding WebSocket Transport
+## Adding a WebSocket Transport
 
 To send real-time data to clients, your GraphQL server needs to have an open connection
 with the client. This is done using WebSockets.
 
-To add the WebSocket transport change your `main.go` by calling `AddTransport(&transport.Websocket{})`
+To add the WebSocket transport change your `main.go` by calling `AddTransport(transport.Websocket{})`
 on your query handler.
 
-**If you are using an external router, remember to send *ALL* `/query`-requests to your handler!**
-**Not just POST requests!**
+> If you are using an external router, remember to send *ALL* requests go to your handler (at `/query`),
+> not just POST requests!
 
 ```go
 package main
@@ -54,9 +54,12 @@ func main() {
 		port = defaultPort
 	}
 
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
+	srv := handler.New(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 
-	srv.AddTransport(&transport.Websocket{}) // <---- This is the important part!
+	srv.AddTransport(transport.Websocket{}) // Add WebSocket first. Here there is no config, see below for examples.
+	srv.AddTransport(transport.Options{})   // If you are using the playground, it's smart to add Options and GET.
+	srv.AddTransport(transport.GET{})       // ...
+	srv.AddTransport(transport.POST{})      // ... Make sure this is after the WebSocket transport!
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
@@ -65,6 +68,57 @@ func main() {
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 ```
+
+## Configuring WebSockets
+
+The WebSocket transport is complex, and for any non-trivial application you will need to
+configure it. The transport handles this configuration by setting fields on the `transport.Websocket`
+struct. For an in-depth look at all configuration options, [explore the implementation][code].
+
+At it's most basic, the transport uses [`github.com/gorilla/websocket`][gorilla] to implement
+a WebSocket connection that sets up the subscription and then sends data to the client from
+the Go channel returned by the resolver. The initial handshake and the structure of the data
+payloads are defined by one of two protocols: `graphql-ws` or `graphql-transport-ws` Which
+one is used is negotiated by the client, defaulting to [`graphql-ws`][graphql-ws].
+
+A minimal WebSocket configuration will handle two basic things: keep-alives and security
+checks that are normally handled by HTTP middleware that may not be available or compatible
+with WebSockets:
+
+```go
+srv.AddTransport(transport.Websocket{
+	// Keep-alives are important for WebSockets to detect dead connections. This is
+	// not unlike asking a partner who seems to have zoned out while you tell them
+	// a story crucial to understanding the dynamics of your workplace: "Are you
+	// listening to me?"
+	//
+	// Failing to set a keep-alive interval can result in the connection being held
+	// open and the server expending resources to communicate with a client that has
+	// long since walked to the kitchen to make a sandwich instead.
+	KeepAlivePingInterval: 10 * time.Second,
+
+	// The `github.com/gorilla/websocket.Upgrader` is used to handle the transition
+	// from an HTTP connection to a WebSocket connection. Among other options, here
+	// you must check the origin of the request to prevent cross-site request forgery
+	// attacks.
+	Upgrader: websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+				// Allow exact match on host.
+				origin := r.Header.Get("Origin")
+				if origin == "" || origin == r.Header.Get("Host") {
+					return true
+				}
+
+				// Match on allow-listed origins.
+				return slices.Contains([]string{":3000", "https://ui.mysite.com"}, origin)
+		},
+	},
+})
+```
+
+[code]: https://github.com/99designs/gqlgen/blob/master/graphql/handler/transport/websocket.go
+[gorilla]: https://pkg.go.dev/github.com/gorilla/websocket
+[graphql-ws]: https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md
 
 ## Adding Subscriptions to your Schema
 
@@ -122,7 +176,7 @@ func (r *subscriptionResolver) CurrentTime(ctx context.Context) (<-chan *model.T
 	// For this example we'll simply use a Goroutine with a simple loop.
 	go func() {
 		// Handle deregistration of the channel here. Note the `defer`
-    defer close(ch)
+		defer close(ch)
 
 		for {
 			// In our example we'll send the current time every second.
@@ -144,9 +198,9 @@ func (r *subscriptionResolver) CurrentTime(ctx context.Context) (<-chan *model.T
 				fmt.Println("Subscription Closed")
 				// Handle deregistration of the channel here. `close(ch)`
 				return // Remember to return to end the routine.
-			
+
 			case ch <- t: // This is the actual send.
-				// Our message went through, do nothing	
+				// Our message went through, do nothing
 			}
 		}
 	}()
@@ -177,6 +231,7 @@ second. To gracefully stop the connection click the `Execute query` button again
 
 
 ## Adding Server-Sent Events transport
+
 You can use instead of WebSocket (or in addition) [Server-Sent Events](https://en.wikipedia.org/wiki/Server-sent_events)
 as transport for subscriptions. This can have advantages and disadvantages over transport via WebSocket and requires a
 compatible client library, for instance [graphql-sse](https://github.com/enisdenjo/graphql-sse). The connection between
@@ -184,25 +239,36 @@ server and client should be HTTP/2+. The client must send the subscription reque
 the header `accept: text/event-stream` and `content-type: application/json` in order to be accepted by the SSE transport.
 The underling protocol is documented at [distinct connections mode](https://github.com/enisdenjo/graphql-sse/blob/master/PROTOCOL.md).
 
-Add the SSE transport as first of all other transports, as the order is important. For that reason, `New` instead of
-`NewDefaultServer` will be used.
+Add the SSE transport as first of all other transports, as the order is important.
+
 ```go
 srv := handler.New(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
-srv.AddTransport(transport.SSE{}) // <---- This is the important
 
-// default server
+srv.AddTransport(transport.SSE{}) // Add SSE first.
+
+// Continue server setup:
 srv.AddTransport(transport.Options{})
 srv.AddTransport(transport.GET{})
 srv.AddTransport(transport.POST{})
-srv.AddTransport(transport.MultipartForm{})
-srv.SetQueryCache(lru.New(1000))
-srv.Use(extension.Introspection{})
-srv.Use(extension.AutomaticPersistedQuery{
-	Cache: lru.New(100),
+```
+
+Optionally add `KeepAlivePingInterval` to send a periodic heartbeat over the SSE transport.
+```go
+srv.AddTransport(transport.SSE{
+	// Load balancers, proxies, or firewalls often have idle timeout
+	// settings that specify the maximum duration a connection can
+	// remain open without data being sent across it. If the idle
+	// timeout is exceeded without any data being transmitted, the
+	// connection may be closed when connecting SSE over HTTP/1.
+	//
+	// End-to-end HTTP/2 connections do not require a ping interval
+	// to keep the connection open.
+	KeepAlivePingInterval: 10 * time.Second,
 })
 ```
 
 The GraphQL playground does not support SSE yet. You can try out the subscription via curl:
+
 ```bash
 curl -N --request POST --url http://localhost:8080/query \
 --data '{"query":"subscription { currentTime { unixTime timeStamp } }"}' \
@@ -224,7 +290,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"slices"
+	"time"
 
+	"github.com/gorilla/websocket"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -240,9 +309,27 @@ func main() {
 		port = defaultPort
 	}
 
-	srv := handler.NewDefaultServer(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
-
-	srv.AddTransport(&transport.Websocket{})
+	srv := handler.New(
+		generated.NewExecutableSchema(
+			generated.Config{Resolvers: &graph.Resolver{}},
+		),
+	)
+	srv.AddTransport(transport.SSE{})
+	srv.AddTransport(transport.Websocket{
+		KeepAlivePingInterval: 10 * time.Second,
+		Upgrader: websocket.Upgrader{
+			CheckOrigin: func(r *http.Request) bool {
+					origin := r.Header.Get("Origin")
+					if origin == "" || origin == r.Header.Get("Host") {
+						return true
+					}
+					return slices.Contains([]string{":3000", "https://ui.mysite.com"}, origin)
+			},
+		},
+	})
+	srv.AddTransport(transport.Options{})
+	srv.AddTransport(transport.GET{})
+	srv.AddTransport(transport.POST{})
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
@@ -312,10 +399,10 @@ func (r *subscriptionResolver) CurrentTime(ctx context.Context) (<-chan *model.T
 
 			select {
 			case <-ctx.Done():
-				// Exit on cancellation 
+				// Exit on cancellation
 				fmt.Println("Subscription closed.")
 				return
-			
+
 			case ch <- t:
 				// Our message went through, do nothing
 			}

@@ -28,6 +28,8 @@ func UnmarshalFloat(v any) (float64, error) {
 		return v, nil
 	case json.Number:
 		return strconv.ParseFloat(string(v), 64)
+	case nil:
+		return 0, nil
 	default:
 		return 0, fmt.Errorf("%T is not an float", v)
 	}

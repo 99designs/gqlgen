@@ -24,7 +24,7 @@ func (c Introspection) Validate(schema graphql.ExecutableSchema) error {
 	return nil
 }
 
-func (c Introspection) MutateOperationContext(ctx context.Context, rc *graphql.OperationContext) *gqlerror.Error {
-	rc.DisableIntrospection = false
+func (c Introspection) MutateOperationContext(ctx context.Context, opCtx *graphql.OperationContext) *gqlerror.Error {
+	opCtx.DisableIntrospection = false
 	return nil
 }

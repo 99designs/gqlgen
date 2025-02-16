@@ -1,11 +1,21 @@
+{{ $useFunctionSyntaxForExecutionContext := .Config.UseFunctionSyntaxForExecutionContext }}
+
 {{- range $object := .Objects }}{{- range $field := $object.Fields }}
 
+{{ if $useFunctionSyntaxForExecutionContext -}}
+func _{{$object.Name}}_{{$field.Name}}(ctx context.Context, ec *executionContext, field graphql.CollectedField{{ if not $object.Root }}, obj {{$object.Reference | ref}}{{end}}) (ret {{ if $object.Stream }}func(ctx context.Context){{ end }}graphql.Marshaler) {
+{{- else -}}
 func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Context, field graphql.CollectedField{{ if not $object.Root }}, obj {{$object.Reference | ref}}{{end}}) (ret {{ if $object.Stream }}func(ctx context.Context){{ end }}graphql.Marshaler) {
+{{- end }}
 	{{- $null := "graphql.Null" }}
 	{{- if $object.Stream }}
 		{{- $null = "nil" }}
 	{{- end }}
+	{{ if $useFunctionSyntaxForExecutionContext -}}
+	fc, err := {{ $field.FieldContextFunc }}(ctx, ec, field)
+	{{- else -}}
 	fc, err := ec.{{ $field.FieldContextFunc }}(ctx, field)
+	{{- end }}
 	if err != nil {
 		return {{ $null }}
 	}
@@ -25,15 +35,23 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 			res := {{ $field.TypeReference.GO | ref }}{}
 		{{- end }}
 		fc.Result = res
+		{{ if $useFunctionSyntaxForExecutionContext -}}
+		return {{ $field.TypeReference.MarshalFunc }}(ctx, ec, field.Selections, res)
+		{{- else -}}
 		return ec.{{ $field.TypeReference.MarshalFunc }}(ctx, field.Selections, res)
+		{{- end }}
 	{{- else}}
 		{{- if  $.AllDirectives.LocationDirectives "FIELD" }}
-			resTmp := ec._fieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(rctx context.Context) (interface{}, error) {
-				{{ template "field" $field }}
+			{{ if $useFunctionSyntaxForExecutionContext -}}
+			resTmp := _fieldMiddleware(ctx, ec, {{if $object.Root}}nil{{else}}obj{{end}}, func(rctx context.Context) (any, error) {
+			{{- else -}}
+			resTmp := ec._fieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, func(rctx context.Context) (any, error) {
+			{{- end }}
+				{{ template "field" (dict "Field" $field "UseFunctionSyntaxForExecutionContext" $useFunctionSyntaxForExecutionContext) }}
 			})
 		{{ else }}
-			resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
-				{{ template "field" $field }}
+			resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+				{{ template "field" (dict "Field" $field "UseFunctionSyntaxForExecutionContext" $useFunctionSyntaxForExecutionContext) }}
 			})
 			if err != nil {
 				ec.Error(ctx, err)
@@ -59,7 +77,11 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 						w.Write([]byte{'{'})
 						graphql.MarshalString(field.Alias).MarshalGQL(w)
 						w.Write([]byte{':'})
+						{{ if $useFunctionSyntaxForExecutionContext -}}
+						{{ $field.TypeReference.MarshalFunc }}(ctx, ec, field.Selections, res).MarshalGQL(w)
+						{{- else -}}
 						ec.{{ $field.TypeReference.MarshalFunc }}(ctx, field.Selections, res).MarshalGQL(w)
+						{{- end }}
 						w.Write([]byte{'}'})
 					})
 				case <-ctx.Done():
@@ -69,12 +91,20 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 		{{- else }}
 			res := resTmp.({{$field.TypeReference.GO | ref}})
 			fc.Result = res
+			{{ if $useFunctionSyntaxForExecutionContext -}}
+			return {{ $field.TypeReference.MarshalFunc }}(ctx, ec, field.Selections, res)
+			{{- else -}}
 			return ec.{{ $field.TypeReference.MarshalFunc }}(ctx, field.Selections, res)
+			{{- end }}
 		{{- end }}
 	{{- end }}
 }
 
+{{ if $useFunctionSyntaxForExecutionContext -}}
+func {{ $field.FieldContextFunc }}({{ if not $field.Args }}_{{ else }}ctx{{ end }} context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+{{- else -}}
 func (ec *executionContext) {{ $field.FieldContextFunc }}({{ if not $field.Args }}_{{ else }}ctx{{ end }} context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+{{- end }}
 	fc = &graphql.FieldContext{
 		Object: {{quote $field.Object.Name}},
 		Field: field,
@@ -89,7 +119,11 @@ func (ec *executionContext) {{ $field.FieldContextFunc }}({{ if not $field.Args 
 				switch field.Name {
 					{{- range $f := $field.TypeReference.Definition.Fields }}
 						case "{{ $f.Name }}":
+							{{ if $useFunctionSyntaxForExecutionContext -}}
+							return {{ $field.ChildFieldContextFunc $f.Name }}(ctx, ec, field)
+							{{- else -}}
 							return ec.{{ $field.ChildFieldContextFunc $f.Name }}(ctx, field)
+							{{- end }}
 					{{- end }}
 				}
 				return nil, fmt.Errorf("no field named %q was found under type {{ $field.TypeReference.Definition.Name }}", field.Name)
@@ -106,7 +140,11 @@ func (ec *executionContext) {{ $field.FieldContextFunc }}({{ if not $field.Args 
 		}()
 		{{- end }}
 		ctx = graphql.WithFieldContext(ctx, fc)
+		{{ if $useFunctionSyntaxForExecutionContext -}}
+		if fc.Args, err = {{ $field.ArgsFunc }}(ctx, ec, field.ArgumentMap(ec.Variables)); err != nil {
+		{{- else -}}
 		if fc.Args, err = ec.{{ $field.ArgsFunc }}(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		{{- end }}
 			ec.Error(ctx, err)
 			return fc, err
 		}
@@ -117,26 +155,27 @@ func (ec *executionContext) {{ $field.FieldContextFunc }}({{ if not $field.Args 
 {{- end }}{{- end}}
 
 {{ define "field" }}
-	{{- if .HasDirectives -}}
-		directive0 := func(rctx context.Context) (interface{}, error) {
+	{{- $useFunctionSyntaxForExecutionContext := .UseFunctionSyntaxForExecutionContext -}}
+	{{- if .Field.HasDirectives -}}
+		directive0 := func(rctx context.Context) (any, error) {
 			ctx = rctx  // use context from middleware stack in children
-			{{ template "fieldDefinition" . }}
+			{{ template "fieldDefinition" .Field }}
 		}
-		{{ template "implDirectives" . }}
-		tmp, err := directive{{.ImplDirectives|len}}(rctx)
+		{{ template "implDirectives" (dict "Field" .Field "UseFunctionSyntaxForExecutionContext" $useFunctionSyntaxForExecutionContext) }}
+		tmp, err := directive{{.Field.ImplDirectives|len}}(rctx)
 		if err != nil {
 			return nil, graphql.ErrorOnPath(ctx, err)
 		}
 		if tmp == nil {
 		    return nil, nil
 		}
-		if data, ok := tmp.({{if .Stream}}<-chan {{end}}{{ .TypeReference.GO | ref }}) ; ok {
+		if data, ok := tmp.({{if .Field.Stream}}<-chan {{end}}{{ .Field.TypeReference.GO | ref }}) ; ok {
 			return data, nil
 		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be {{if .Stream}}<-chan {{end}}{{ .TypeReference.GO }}`, tmp)
+		return nil, fmt.Errorf(`unexpected type %T from directive, should be {{if .Field.Stream}}<-chan {{end}}{{ .Field.TypeReference.GO }}`, tmp)
 	{{- else -}}
 		ctx = rctx  // use context from middleware stack in children
-		{{ template "fieldDefinition" . }}
+		{{ template "fieldDefinition" .Field }}
 	{{- end -}}
 {{ end }}
 

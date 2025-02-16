@@ -5,7 +5,9 @@ import (
 	"runtime"
 	"sync"
 	"testing"
+	"time"
 
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -14,7 +16,12 @@ import (
 )
 
 func TestChatSubscriptions(t *testing.T) {
-	c := client.New(handler.NewDefaultServer(NewExecutableSchema(New())))
+	srv := handler.New(NewExecutableSchema(New()))
+	srv.AddTransport(transport.Websocket{
+		KeepAlivePingInterval: time.Second,
+	})
+	srv.AddTransport(transport.POST{})
+	c := client.New(srv)
 
 	const batchSize = 128
 	var wg sync.WaitGroup

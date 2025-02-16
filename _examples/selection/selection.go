@@ -23,7 +23,7 @@ type queryResolver struct{ *Resolver }
 func (r *queryResolver) Events(ctx context.Context) ([]Event, error) {
 	var sels []string
 
-	reqCtx := graphql.GetOperationContext(ctx)
+	opCtx := graphql.GetOperationContext(ctx)
 	fieldSelections := graphql.GetFieldContext(ctx).Field.Selections
 	for _, sel := range fieldSelections {
 		switch sel := sel.(type) {
@@ -32,7 +32,7 @@ func (r *queryResolver) Events(ctx context.Context) ([]Event, error) {
 		case *ast.InlineFragment:
 			sels = append(sels, fmt.Sprintf("inline fragment on %s", sel.TypeCondition))
 		case *ast.FragmentSpread:
-			fragment := reqCtx.Doc.Fragments.ForName(sel.Name)
+			fragment := opCtx.Doc.Fragments.ForName(sel.Name)
 			sels = append(sels, fmt.Sprintf("named fragment %s on %s", sel.Name, fragment.TypeCondition))
 		}
 	}

@@ -1,0 +1,25 @@
+name: test report
+on:
+  workflow_run:
+    workflows: ["Test"]
+    types:
+      - completed
+
+permissions:
+  checks: write
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Test Report
+        uses: dawidd6/action-download-artifact@v8
+        with:
+          name: junit-test-results
+          workflow: ${{ github.event.workflow.id }}
+          run_id: ${{ github.event.workflow_run.id }}
+      - name: Publish Test Report
+        uses: mikepenz/action-junit-report@v5
+        with:
+          commit: ${{github.event.workflow_run.head_sha}}
+          report_paths: '**/*.xml'

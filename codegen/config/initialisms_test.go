@@ -33,7 +33,7 @@ func TestGoInitialismsConfig(t *testing.T) {
 		assert.Len(t, result, 1)
 		assert.True(t, result["ASDF"])
 	})
-	t.Run("initialism config uppercases the initialsms", func(t *testing.T) {
+	t.Run("initialism config uppercases the initialisms", func(t *testing.T) {
 		tt := GoInitialismsConfig{Initialisms: []string{"asdf"}}
 		result := tt.determineGoInitialisms()
 		assert.True(t, result["ASDF"])

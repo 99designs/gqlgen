@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
@@ -38,7 +39,8 @@ func TestUnionFragments(t *testing.T) {
 		return &Circle{Radius: 32}, nil
 	}
 
-	srv := handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv.AddTransport(transport.POST{})
 	c := client.New(srv)
 
 	t.Run("inline fragment on union", func(t *testing.T) {

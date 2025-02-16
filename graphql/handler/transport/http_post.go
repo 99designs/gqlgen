@@ -1,11 +1,12 @@
 package transport
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"mime"
 	"net/http"
-	"strings"
+	"sync"
 
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
@@ -46,32 +47,49 @@ func getRequestBody(r *http.Request) (string, error) {
 	return string(body), nil
 }
 
+var pool = sync.Pool{
+	New: func() any {
+		return &graphql.RawParams{}
+	},
+}
+
 func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
 	ctx := r.Context()
 	writeHeaders(w, h.ResponseHeaders)
-	params := &graphql.RawParams{}
-	start := graphql.Now()
+	params := pool.Get().(*graphql.RawParams)
+	defer func() {
+		params.Headers = nil
+		params.ReadTime = graphql.TraceTiming{}
+		params.Extensions = nil
+		params.OperationName = ""
+		params.Query = ""
+		params.Variables = nil
+
+		pool.Put(params)
+	}()
 	params.Headers = r.Header
+
+	start := graphql.Now()
 	params.ReadTime = graphql.TraceTiming{
 		Start: start,
 		End:   graphql.Now(),
 	}
 
-	bodyString, err := getRequestBody(r)
+	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
-		gqlErr := gqlerror.Errorf("could not get json request body: %+v", err)
+		gqlErr := gqlerror.Errorf("could not read request body: %+v", err)
 		resp := exec.DispatchError(ctx, gqlerror.List{gqlErr})
 		writeJson(w, resp)
 		return
 	}
 
-	bodyReader := io.NopCloser(strings.NewReader(bodyString))
-	if err = jsonDecode(bodyReader, &params); err != nil {
+	bodyReader := bytes.NewReader(bodyBytes)
+	if err := jsonDecode(bodyReader, &params); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		gqlErr := gqlerror.Errorf(
 			"json request body could not be decoded: %+v body:%s",
 			err,
-			bodyString,
+			string(bodyBytes),
 		)
 		resp := exec.DispatchError(ctx, gqlerror.List{gqlErr})
 		writeJson(w, resp)

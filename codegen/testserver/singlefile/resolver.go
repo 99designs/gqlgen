@@ -1,6 +1,6 @@
 package singlefile
 
-// THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
+// THIS CODE WILL BE UPDATED WITH SCHEMA CHANGES. PREVIOUS IMPLEMENTATION FOR SCHEMA CHANGES WILL BE KEPT IN THE COMMENT SECTION. IMPLEMENTATION FOR UNCHANGED SCHEMA WILL BE KEPT.
 
 import (
 	"context"
@@ -197,13 +197,13 @@ func (r *queryResolver) DefaultParameters(ctx context.Context, falsyBoolean *boo
 	panic("not implemented")
 }
 
-// DeferCase1 is the resolver for the deferCase1 field.
-func (r *queryResolver) DeferCase1(ctx context.Context) (*DeferModel, error) {
+// DeferSingle is the resolver for the deferSingle field.
+func (r *queryResolver) DeferSingle(ctx context.Context) (*DeferModel, error) {
 	panic("not implemented")
 }
 
-// DeferCase2 is the resolver for the deferCase2 field.
-func (r *queryResolver) DeferCase2(ctx context.Context) ([]*DeferModel, error) {
+// DeferMultiple is the resolver for the deferMultiple field.
+func (r *queryResolver) DeferMultiple(ctx context.Context) ([]*DeferModel, error) {
 	panic("not implemented")
 }
 
@@ -214,6 +214,11 @@ func (r *queryResolver) DirectiveArg(ctx context.Context, arg string) (*string, 
 
 // DirectiveNullableArg is the resolver for the directiveNullableArg field.
 func (r *queryResolver) DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int, arg3 *string) (*string, error) {
+	panic("not implemented")
+}
+
+// DirectiveSingleNullableArg is the resolver for the directiveSingleNullableArg field.
+func (r *queryResolver) DirectiveSingleNullableArg(ctx context.Context, arg1 *string) (*string, error) {
 	panic("not implemented")
 }
 

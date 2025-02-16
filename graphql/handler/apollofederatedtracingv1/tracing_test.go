@@ -101,13 +101,12 @@ func TestApolloTracing_Concurrent(t *testing.T) {
 func TestApolloTracing_withFail(t *testing.T) {
 	h := testserver.New()
 	h.AddTransport(transport.POST{})
-	h.Use(extension.AutomaticPersistedQuery{Cache: lru.New(100)})
+	h.Use(extension.AutomaticPersistedQuery{Cache: lru.New[string](100)})
 	h.Use(&apollofederatedtracingv1.Tracer{})
 
 	resp := doRequest(h, http.MethodPost, "/graphql", `{"operationName":"A","extensions":{"persistedQuery":{"version":1,"sha256Hash":"338bbc16ac780daf81845339fbf0342061c1e9d2b702c96d3958a13a557083a6"}}}`)
 	assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 	b := resp.Body.Bytes()
-	t.Log(string(b))
 	var respData struct {
 		Errors gqlerror.List
 	}
@@ -124,7 +123,7 @@ func TestApolloTracing_withFail(t *testing.T) {
 func TestApolloTracing_withMissingOp(t *testing.T) {
 	h := testserver.New()
 	h.AddTransport(transport.POST{})
-	h.Use(extension.AutomaticPersistedQuery{Cache: lru.New(100)})
+	h.Use(extension.AutomaticPersistedQuery{Cache: lru.New[string](100)})
 	h.Use(&apollofederatedtracingv1.Tracer{})
 
 	resp := doRequest(h, http.MethodPost, "/graphql", `{}`)

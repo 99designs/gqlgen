@@ -4,14 +4,28 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"reflect"
 	"testing"
+	"time"
 
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 )
+
+// isNil checks if the given value is nil
+func isNil(input any) bool {
+	if input == nil {
+		return true
+	}
+	// Using reflect to check if the value is nil. This is necessary for
+	// any types that are not nil types but have a nil value (e.g. *string).
+	value := reflect.ValueOf(input)
+	return value.IsNil()
+}
 
 type ckey string
 
@@ -31,6 +45,14 @@ func TestDirectives(t *testing.T) {
 	}
 
 	resolvers.QueryResolver.DirectiveNullableArg = func(ctx context.Context, arg *int, arg2 *int, arg3 *string) (*string, error) {
+		return &ok, nil
+	}
+
+	resolvers.QueryResolver.DirectiveSingleNullableArg = func(ctx context.Context, arg1 *string) (*string, error) {
+		if arg1 != nil {
+			return arg1, nil
+		}
+
 		return &ok, nil
 	}
 
@@ -89,9 +111,10 @@ func TestDirectives(t *testing.T) {
 	resolvers.SubscriptionResolver.DirectiveUnimplemented = func(ctx context.Context) (<-chan *string, error) {
 		return okchan()
 	}
-	srv := handler.NewDefaultServer(NewExecutableSchema(Config{
+	srv := handler.New(NewExecutableSchema(Config{
 		Resolvers: resolvers,
 		Directives: DirectiveRoot{
+			//nolint:revive // can't rename min, max because it's generated code
 			Length: func(ctx context.Context, obj any, next graphql.Resolver, min int, max *int, message *string) (any, error) {
 				e := func(msg string) error {
 					if message == nil {
@@ -113,6 +136,7 @@ func TestDirectives(t *testing.T) {
 				}
 				return res, nil
 			},
+			//nolint:revive // can't rename min, max because it's generated code
 			Range: func(ctx context.Context, obj any, next graphql.Resolver, min *int, max *int) (any, error) {
 				res, err := next(ctx)
 				if err != nil {
@@ -158,6 +182,21 @@ func TestDirectives(t *testing.T) {
 			ToNull: func(ctx context.Context, obj any, next graphql.Resolver) (any, error) {
 				return nil, nil
 			},
+			Populate: func(ctx context.Context, obj any, next graphql.Resolver, value string) (any, error) {
+				res, err := next(ctx)
+				if err != nil {
+					return nil, err
+				}
+
+				if !isNil(res) {
+					return res, err
+				}
+
+				return &value, nil
+			},
+			Noop: func(ctx context.Context, obj any, next graphql.Resolver) (any, error) {
+				return next(ctx)
+			},
 			Directive1: func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
 				return next(ctx)
 			},
@@ -184,7 +223,8 @@ func TestDirectives(t *testing.T) {
 			Unimplemented: nil,
 		},
 	}))
-
+	srv.AddTransport(transport.Websocket{KeepAlivePingInterval: time.Second})
+	srv.AddTransport(transport.POST{})
 	srv.AroundFields(func(ctx context.Context, next graphql.Resolver) (res any, err error) {
 		path, _ := ctx.Value(ckey("path")).([]int)
 		return next(context.WithValue(ctx, ckey("path"), append(path, 1)))
@@ -247,6 +287,17 @@ func TestDirectives(t *testing.T) {
 
 			require.NoError(t, err)
 			require.Equal(t, "Ok", *resp.DirectiveArg)
+		})
+
+		t.Run("directive is not called with null arguments", func(t *testing.T) {
+			var resp struct {
+				DirectiveSingleNullableArg *string
+			}
+
+			err := c.Post(`query { directiveSingleNullableArg }`, &resp)
+
+			require.NoError(t, err)
+			require.Equal(t, "Ok", *resp.DirectiveSingleNullableArg)
 		})
 	})
 	t.Run("field definition directives", func(t *testing.T) {

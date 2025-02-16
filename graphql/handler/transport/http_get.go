@@ -66,21 +66,21 @@ func (h GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 
 	raw.ReadTime.End = graphql.Now()
 
-	rc, gqlError := exec.CreateOperationContext(r.Context(), raw)
+	opCtx, gqlError := exec.CreateOperationContext(r.Context(), raw)
 	if gqlError != nil {
 		w.WriteHeader(statusFor(gqlError))
-		resp := exec.DispatchError(graphql.WithOperationContext(r.Context(), rc), gqlError)
+		resp := exec.DispatchError(graphql.WithOperationContext(r.Context(), opCtx), gqlError)
 		writeJson(w, resp)
 		return
 	}
-	op := rc.Doc.Operations.ForName(rc.OperationName)
+	op := opCtx.Doc.Operations.ForName(opCtx.OperationName)
 	if op.Operation != ast.Query {
 		w.WriteHeader(http.StatusNotAcceptable)
 		writeJsonError(w, "GET requests only allow query operations")
 		return
 	}
 
-	responses, ctx := exec.DispatchOperation(r.Context(), rc)
+	responses, ctx := exec.DispatchOperation(r.Context(), opCtx)
 	writeJson(w, responses(ctx))
 }
 

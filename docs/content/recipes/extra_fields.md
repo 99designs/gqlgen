@@ -58,7 +58,7 @@ directive @goExtraField(
 	type: String!
 	overrideTags: String
 	description: String
-) on OBJECT | INPUT_OBJECT
+) repeatable on OBJECT | INPUT_OBJECT
 ```
 
 Now you can use these directive when defining types in your schema:

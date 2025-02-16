@@ -5,6 +5,7 @@
   "main": "gateway/index.js",
   "type": "module",
   "scripts": {
+    "start-gateway": "node gateway/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

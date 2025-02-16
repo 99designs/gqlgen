@@ -16,6 +16,7 @@ import (
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
+	"github.com/99designs/gqlgen/internal/code"
 )
 
 type Field struct {
@@ -29,7 +30,7 @@ type Field struct {
 	Args             []*FieldArgument // A list of arguments to be passed to this field
 	MethodHasContext bool             // If this is bound to a go method, does the method also take a context
 	NoErr            bool             // If this is bound to a go method, does that method have an error as the second argument
-	VOkFunc          bool             // If this is bound to a go method, is it of shape (interface{}, bool)
+	VOkFunc          bool             // If this is bound to a go method, is it of shape (any, bool)
 	Object           *Object          // A link back to the parent object
 	Default          any              // The default value
 	Stream           bool             // does this field return a channel?
@@ -144,7 +145,7 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		f.GoFieldName = b.Config.Models[obj.Name].Fields[f.Name].FieldName
 	}
 
-	target, err := b.findBindTarget(obj.Type.(*types.Named), f.GoFieldName)
+	target, err := b.findBindTarget(obj.Type, f.GoFieldName)
 	if err != nil {
 		return err
 	}
@@ -229,7 +230,7 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 }
 
 // findBindTarget attempts to match the name to a field or method on a Type
-// with the following priorites:
+// with the following priorities:
 // 1. Any Fields with a struct tag (see config.StructTag). Errors if more than one match is found
 // 2. Any method or field with a matching name. Errors if more than one match is found
 // 3. Same logic again for embedded fields
@@ -380,7 +381,7 @@ func (b *builder) findBindStructEmbedsTarget(strukt *types.Struct, name string) 
 			continue
 		}
 
-		fieldType := field.Type()
+		fieldType := code.Unalias(field.Type())
 		if ptr, ok := fieldType.(*types.Pointer); ok {
 			fieldType = ptr.Elem()
 		}
@@ -442,7 +443,7 @@ func (f *Field) ImplDirectives() []*Directive {
 		loc = ast.LocationInputFieldDefinition
 	}
 	for i := range f.Directives {
-		if !f.Directives[i].Builtin &&
+		if !f.Directives[i].SkipRuntime &&
 			(f.Directives[i].IsLocation(loc, ast.LocationObject) || f.Directives[i].IsLocation(loc, ast.LocationInputObject)) {
 			d = append(d, f.Directives[i])
 		}
@@ -601,11 +602,11 @@ func (f *Field) CallArgs() string {
 
 		if iface, ok := arg.TypeReference.GO.(*types.Interface); ok && iface.Empty() {
 			tmp = fmt.Sprintf(`
-				func () interface{} {
+				func () any {
 					if fc.Args["%s"] == nil {
 						return nil
 					}
-					return fc.Args["%s"].(interface{})
+					return fc.Args["%s"].(any)
 				}()`, arg.Name, arg.Name,
 			)
 		}

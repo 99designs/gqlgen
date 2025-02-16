@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+	"github.com/vektah/gqlparser/v2/ast"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -41,7 +42,7 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 	})
 
 	if cfg.cacheSize != 0 {
-		srv.SetQueryCache(lru.New(cfg.cacheSize))
+		srv.SetQueryCache(lru.New[*ast.QueryDocument](cfg.cacheSize))
 	}
 	if cfg.recover != nil {
 		srv.SetRecoverFunc(cfg.recover)
@@ -59,8 +60,8 @@ func GraphQL(exec graphql.ExecutableSchema, options ...Option) http.HandlerFunc 
 		srv.Use(extension.FixedComplexityLimit(cfg.complexityLimit))
 	} else if cfg.complexityLimitFunc != nil {
 		srv.Use(&extension.ComplexityLimit{
-			Func: func(ctx context.Context, rc *graphql.OperationContext) int {
-				return cfg.complexityLimitFunc(graphql.WithOperationContext(ctx, rc))
+			Func: func(ctx context.Context, opCtx *graphql.OperationContext) int {
+				return cfg.complexityLimitFunc(graphql.WithOperationContext(ctx, opCtx))
 			},
 		})
 	}
@@ -103,9 +104,9 @@ func WebsocketUpgrader(upgrader websocket.Upgrader) Option {
 }
 
 // Deprecated: switch to graphql/handler.New
-func RecoverFunc(recover graphql.RecoverFunc) Option {
+func RecoverFunc(recoverFn graphql.RecoverFunc) Option {
 	return func(cfg *Config) {
-		cfg.recover = recover
+		cfg.recover = recoverFn
 	}
 }
 
@@ -235,12 +236,12 @@ type apqAdapter struct {
 	PersistedQueryCache
 }
 
-func (a apqAdapter) Get(ctx context.Context, key string) (value any, ok bool) {
+func (a apqAdapter) Get(ctx context.Context, key string) (value string, ok bool) {
 	return a.PersistedQueryCache.Get(ctx, key)
 }
 
-func (a apqAdapter) Add(ctx context.Context, key string, value any) {
-	a.PersistedQueryCache.Add(ctx, key, value.(string))
+func (a apqAdapter) Add(ctx context.Context, key, value string) {
+	a.PersistedQueryCache.Add(ctx, key, value)
 }
 
 type PersistedQueryCache interface {

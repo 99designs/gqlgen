@@ -9,6 +9,7 @@ exec:
 
 federation:
   filename: graph/federation.go
+  version: 2
   package: graph
 
 # Where should any generated models go?

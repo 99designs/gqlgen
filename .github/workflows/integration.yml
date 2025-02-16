@@ -5,6 +5,8 @@ on:
       - master
   pull_request:
     types: [ opened, synchronize ]
+env:
+  GOTOOLCHAIN: local
 # When a new revision is pushed to a PR, cancel all in-progress CI runs for that
 # PR. See https://docs.github.com/en/actions/using-jobs/using-concurrency
 concurrency:
@@ -14,8 +16,8 @@ jobs:
   integration:
     strategy:
       matrix:
-        go: ["1.21", "1.22"]
-        node: [18]
+        go: ["1.22", "1.23", "1.24"]
+        node: [22]
     runs-on: ubuntu-latest
     timeout-minutes: 3
     steps:
@@ -33,8 +35,8 @@ jobs:
   federation:
     strategy:
       matrix:
-        go: ["1.21", "1.22"]
-        node: [18]
+        go: ["1.22", "1.23", "1.24"]
+        node: [22]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -51,7 +53,7 @@ jobs:
   init:
     strategy:
       matrix:
-        go: ["1.21", "1.22"]
+        go: ["1.22", "1.23", "1.24"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

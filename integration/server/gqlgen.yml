@@ -5,9 +5,6 @@ exec:
   filename: generated.go
 model:
   filename: models-go/generated.go
-resolver:
-  filename: resolver.go
-  type: Resolver
 
 struct_tag: json
 

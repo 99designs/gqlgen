@@ -22,7 +22,7 @@ func main() {
 
 	var mb int64 = 1 << 20
 
-	srv := handler.NewDefaultServer(fileupload.NewExecutableSchema(fileupload.Config{Resolvers: resolver}))
+	srv := handler.New(fileupload.NewExecutableSchema(fileupload.Config{Resolvers: resolver}))
 	srv.AddTransport(transport.POST{})
 	srv.AddTransport(transport.MultipartForm{
 		MaxMemory:     32 * mb,

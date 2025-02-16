@@ -28,9 +28,11 @@ func TestData_Directives(t *testing.T) {
 						},
 					},
 				},
-				Name:    "includeDirective",
-				Args:    nil,
-				Builtin: false,
+				Name: "includeDirective",
+				Args: nil,
+				DirectiveConfig: config.DirectiveConfig{
+					SkipRuntime: false,
+				},
 			},
 			"excludeDirective": {
 				DirectiveDefinition: &ast.DirectiveDefinition{
@@ -41,9 +43,11 @@ func TestData_Directives(t *testing.T) {
 						},
 					},
 				},
-				Name:    "excludeDirective",
-				Args:    nil,
-				Builtin: false,
+				Name: "excludeDirective",
+				Args: nil,
+				DirectiveConfig: config.DirectiveConfig{
+					SkipRuntime: false,
+				},
 			},
 		},
 	}
@@ -58,9 +62,11 @@ func TestData_Directives(t *testing.T) {
 					},
 				},
 			},
-			Name:    "includeDirective",
-			Args:    nil,
-			Builtin: false,
+			Name: "includeDirective",
+			Args: nil,
+			DirectiveConfig: config.DirectiveConfig{
+				SkipRuntime: false,
+			},
 		},
 	}
 

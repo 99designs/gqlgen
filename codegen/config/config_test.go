@@ -135,7 +135,7 @@ func TestReferencedPackages(t *testing.T) {
 			"Foo": {Model: StringList{"github.com/test.Foo"}},
 			"Bar": {Model: StringList{"github.com/test.Bar"}},
 			"Baz": {Model: StringList{"github.com/otherpkg.Baz"}},
-			"Map": {Model: StringList{"map[string]interface{}"}},
+			"Map": {Model: StringList{"map[string]any"}},
 			"SkipResolver": {
 				Fields: map[string]TypeMapField{
 					"field": {Resolver: false},
@@ -253,5 +253,56 @@ func TestAutobinding(t *testing.T) {
 		`})
 
 		require.EqualError(t, cfg.autobind(), "unable to load ../chat - make sure you're using an import path to a package that exists")
+	})
+}
+
+func TestLoadSchema(t *testing.T) {
+	t.Parallel()
+
+	getConfig := func(t *testing.T) *Config {
+		t.Helper()
+
+		cfgFile, err := os.Open("testdata/cfg/glob.yml")
+		require.NoError(t, err)
+		t.Cleanup(func() { _ = cfgFile.Close() })
+		c, err := ReadConfig(cfgFile)
+		require.NoError(t, err)
+		return c
+	}
+
+	t.Run("valid schema", func(t *testing.T) {
+		cfg := getConfig(t)
+
+		cfg.Sources = []*ast.Source{
+			{
+				Input: `
+					type Query {
+					  message: Message
+					}
+					type Message { id: ID }
+				`,
+			},
+		}
+		err := cfg.LoadSchema()
+		require.NoError(t, err)
+		require.NotNil(t, cfg.Schema)
+	})
+
+	t.Run("invalid schema", func(t *testing.T) {
+		cfg := getConfig(t)
+
+		cfg.Sources = []*ast.Source{
+			{
+				Input: `
+					type Query {
+						// should have fields here
+					}
+					type Message { id: ID }
+				`,
+			},
+		}
+		err := cfg.LoadSchema()
+		require.Error(t, err)
+		require.Nil(t, cfg.Schema)
 	})
 }

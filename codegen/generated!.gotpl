@@ -1,3 +1,4 @@
+{{/* Context object: codegen.Data */}}
 {{ reserveImport "context"  }}
 {{ reserveImport "fmt"  }}
 {{ reserveImport "io"  }}
@@ -9,10 +10,13 @@
 {{ reserveImport "bytes"  }}
 {{ reserveImport "embed"  }}
 
+{{ reserveImport "golang.org/x/sync/semaphore"}}
 {{ reserveImport "github.com/vektah/gqlparser/v2" "gqlparser" }}
 {{ reserveImport "github.com/vektah/gqlparser/v2/ast" }}
 {{ reserveImport "github.com/99designs/gqlgen/graphql" }}
 {{ reserveImport "github.com/99designs/gqlgen/graphql/introspection" }}
+
+{{ $useFunctionSyntaxForExecutionContext := .Config.UseFunctionSyntaxForExecutionContext }}
 
 {{ if eq .Config.Exec.Layout "single-file" }}
 	// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
@@ -46,7 +50,7 @@
 }
 
 	type DirectiveRoot struct {
-	{{ range $directive := .Directives }}
+	{{ range $directive := .UserDirectives }}
 		{{- $directive.Declaration }}
 	{{ end }}
 	}
@@ -93,6 +97,12 @@
 	{{- end }}
 {{- end }}
 
+{{ range $directive := .BuiltInDirectives }}
+	var (
+		{{- $directive.FunctionImpl }}
+	)
+{{ end }}
+
 {{ if eq .Config.Exec.Layout "single-file" }}
 	type executableSchema struct {
 		schema    *ast.Schema
@@ -108,7 +118,7 @@
 		return parsedSchema
 	}
 
-	func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]interface{}) (int, bool) {
+	func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]any) (int, bool) {
 		ec := executionContext{nil, e, 0, 0, nil}
 		_ = ec
 		{{ if not .Config.OmitComplexity -}}
@@ -125,7 +135,11 @@
 									break
 								}
 								{{ if $field.Args }}
+									{{ if $useFunctionSyntaxForExecutionContext -}}
+									args, err := {{ $field.ArgsFunc }}(context.TODO(), &ec, rawArgs)
+									{{- else -}}
 									args, err := ec.{{ $field.ArgsFunc }}(context.TODO(),rawArgs)
+									{{- end }}
 									if err != nil {
 										return 0, false
 									}
@@ -143,18 +157,22 @@
 	}
 
 	func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
-		rc := graphql.GetOperationContext(ctx)
-		ec := executionContext{rc, e, 0, 0, make(chan graphql.DeferredResult)}
+		opCtx := graphql.GetOperationContext(ctx)
+		ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 		inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 			{{- range $input := .Inputs -}}
 				{{ if not $input.HasUnmarshal }}
+					{{ if $useFunctionSyntaxForExecutionContext -}}
+					unmarshalInput{{ $input.Name }},
+					{{- else -}}
 					ec.unmarshalInput{{ $input.Name }},
+					{{- end }}
 				{{- end }}
 			{{- end }}
 		)
 		first := true
 
-		switch rc.Operation.Operation {
+		switch opCtx.Operation.Operation {
 		{{- if .QueryRoot }} case ast.Query:
 			return func(ctx context.Context) *graphql.Response {
 				var response graphql.Response
@@ -163,11 +181,20 @@
 					first = false
 					ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
 					{{ if .Directives.LocationDirectives "QUERY" -}}
-						data = ec._queryMiddleware(ctx, rc.Operation, func(ctx context.Context) (interface{}, error){
-							return ec._{{.QueryRoot.Name}}(ctx, rc.Operation.SelectionSet), nil
+						{{ if $useFunctionSyntaxForExecutionContext -}}
+						data = _queryMiddleware(ctx, &ec, opCtx.Operation, func(ctx context.Context) (any, error){
+							return _{{.QueryRoot.Name}}(ctx, ec, opCtx.Operation.SelectionSet), nil
+						{{- else -}}
+						data = ec._queryMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (any, error){
+							return ec._{{.QueryRoot.Name}}(ctx, opCtx.Operation.SelectionSet), nil
+						{{- end }}
 						})
 					{{- else -}}
-						data = ec._{{.QueryRoot.Name}}(ctx, rc.Operation.SelectionSet)
+						{{ if $useFunctionSyntaxForExecutionContext -}}
+						data = _{{.QueryRoot.Name}}(ctx, &ec, opCtx.Operation.SelectionSet)
+						{{- else -}}
+						data = ec._{{.QueryRoot.Name}}(ctx, opCtx.Operation.SelectionSet)
+						{{- end }}
 					{{- end }}
 				} else {
 					if atomic.LoadInt32(&ec.pendingDeferred) > 0 {
@@ -199,11 +226,20 @@
 				first = false
 				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
 				{{ if .Directives.LocationDirectives "MUTATION" -}}
-					data := ec._mutationMiddleware(ctx, rc.Operation, func(ctx context.Context) (interface{}, error){
-						return ec._{{.MutationRoot.Name}}(ctx, rc.Operation.SelectionSet), nil
+					{{ if $useFunctionSyntaxForExecutionContext -}}
+					data := _mutationMiddleware(ctx, &ec, opCtx.Operation, func(ctx context.Context) (any, error){
+						return _{{.MutationRoot.Name}}(ctx, ec, opCtx.Operation.SelectionSet), nil
+					{{- else -}}
+					data := ec._mutationMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (any, error){
+						return ec._{{.MutationRoot.Name}}(ctx, opCtx.Operation.SelectionSet), nil
+					{{- end }}
 					})
 				{{- else -}}
-					data := ec._{{.MutationRoot.Name}}(ctx, rc.Operation.SelectionSet)
+					{{ if $useFunctionSyntaxForExecutionContext -}}
+					data := _{{.MutationRoot.Name}}(ctx, &ec, opCtx.Operation.SelectionSet)
+					{{- else -}}
+					data := ec._{{.MutationRoot.Name}}(ctx, opCtx.Operation.SelectionSet)
+					{{- end }}
 				{{- end }}
 				var buf bytes.Buffer
 				data.MarshalGQL(&buf)
@@ -216,11 +252,20 @@
 
 		{{- if .SubscriptionRoot }} case ast.Subscription:
 			{{ if .Directives.LocationDirectives "SUBSCRIPTION" -}}
-				next := ec._subscriptionMiddleware(ctx, rc.Operation, func(ctx context.Context) (interface{}, error){
-					return ec._{{.SubscriptionRoot.Name}}(ctx, rc.Operation.SelectionSet),nil
+				{{ if $useFunctionSyntaxForExecutionContext -}}
+				next := _subscriptionMiddleware(ctx, &ec, opCtx.Operation, func(ctx context.Context) (any, error){
+					return _{{.SubscriptionRoot.Name}}(ctx, ec, opCtx.Operation.SelectionSet),nil
+				{{- else -}}
+				next := ec._subscriptionMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (any, error){
+					return ec._{{.SubscriptionRoot.Name}}(ctx, opCtx.Operation.SelectionSet),nil
+				{{- end }}
 				})
 			{{- else -}}
-				next := ec._{{.SubscriptionRoot.Name}}(ctx, rc.Operation.SelectionSet)
+				{{ if $useFunctionSyntaxForExecutionContext -}}
+				next := _{{.SubscriptionRoot.Name}}(ctx, &ec, opCtx.Operation.SelectionSet)
+				{{- else -}}
+				next := ec._{{.SubscriptionRoot.Name}}(ctx, opCtx.Operation.SelectionSet)
+				{{- end }}
 			{{- end }}
 
 			var buf bytes.Buffer

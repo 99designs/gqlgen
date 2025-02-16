@@ -31,7 +31,7 @@ func TestOmittable_MarshalJSON(t *testing.T) {
 			expectedJSON: `{"Value": null}`,
 		},
 		{
-			name:         "omittable omittable",
+			name:         "omittable omittable", //nolint:dupword
 			input:        struct{ Value Omittable[Omittable[uint64]] }{Value: OmittableOf(OmittableOf(uint64(42)))},
 			expectedJSON: `{"Value": 42}`,
 		},

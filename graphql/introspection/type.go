@@ -81,6 +81,7 @@ func (t *Type) Fields(includeDeprecated bool) []Field {
 				Name:         arg.Name,
 				description:  arg.Description,
 				DefaultValue: defaultValue(arg.DefaultValue),
+				deprecation:  f.Directives.ForName("deprecated"),
 			})
 		}
 
@@ -107,6 +108,7 @@ func (t *Type) InputFields() []InputValue {
 			description:  f.Description,
 			Type:         WrapTypeFromType(t.schema, f.Type),
 			DefaultValue: defaultValue(f.DefaultValue),
+			deprecation:  f.Directives.ForName("deprecated"),
 		})
 	}
 	return res
@@ -180,6 +182,9 @@ func (t *Type) OfType() *Type {
 }
 
 func (t *Type) SpecifiedByURL() *string {
+	if t.def == nil {
+		return nil
+	}
 	directive := t.def.Directives.ForName("specifiedBy")
 	if t.def.Kind != ast.Scalar || directive == nil {
 		return nil
@@ -188,4 +193,15 @@ func (t *Type) SpecifiedByURL() *string {
 	// the argument "url" is required.
 	url := directive.Arguments.ForName("url")
 	return &url.Value.Raw
+}
+
+func (t *Type) IsOneOf() bool {
+	if t.def == nil {
+		return false
+	}
+	directive := t.def.Directives.ForName("oneOf")
+	if t.def.Kind != ast.InputObject || directive == nil {
+		return false
+	}
+	return true
 }

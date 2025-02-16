@@ -9,7 +9,7 @@ import (
 
 func TestMapCache(t *testing.T) {
 	t.Run("Add and Get", func(t *testing.T) {
-		cache := MapCache{}
+		cache := MapCache[string]{}
 		ctx := context.Background()
 		key := "testKey"
 		value := "testValue"
@@ -29,7 +29,7 @@ func TestMapCache(t *testing.T) {
 
 func TestMapCacheMultipleEntries(t *testing.T) {
 	t.Run("Multiple Add and Get", func(t *testing.T) {
-		cache := MapCache{}
+		cache := MapCache[string]{}
 		ctx := context.Background()
 
 		// Define multiple key-value pairs
@@ -93,7 +93,7 @@ func TestMapCacheEdgeCases(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			cache := MapCache{}
+			cache := MapCache[string]{}
 			ctx := context.Background()
 
 			// Set initial value if needed
@@ -114,13 +114,13 @@ func TestMapCacheEdgeCases(t *testing.T) {
 
 func TestNoCache(t *testing.T) {
 	t.Run("Add and Get", func(t *testing.T) {
-		cache := NoCache{}
+		cache := NoCache[*string]{}
 		ctx := context.Background()
 		key := "testKey"
 		value := "testValue"
 
 		// Test Add
-		cache.Add(ctx, key, value) // Should do nothing
+		cache.Add(ctx, key, &value) // Should do nothing
 
 		// Test Get
 		gotValue, ok := cache.Get(ctx, key)
@@ -131,7 +131,7 @@ func TestNoCache(t *testing.T) {
 
 func TestNoCacheMultipleEntries(t *testing.T) {
 	t.Run("Multiple Add and Get", func(t *testing.T) {
-		cache := NoCache{}
+		cache := NoCache[*string]{}
 		ctx := context.Background()
 
 		// Define multiple key-value pairs
@@ -143,7 +143,7 @@ func TestNoCacheMultipleEntries(t *testing.T) {
 
 		// Test Add for multiple entries
 		for key, value := range entries {
-			cache.Add(ctx, key, value) // Should do nothing
+			cache.Add(ctx, key, &value) // Should do nothing
 		}
 
 		// Test Get for multiple entries
@@ -161,7 +161,7 @@ func TestNoCacheEdgeCases(t *testing.T) {
 		key       string
 		value     string
 		wantOk    bool
-		wantValue any
+		wantValue *string
 	}
 
 	tests := []testCase{
@@ -190,11 +190,11 @@ func TestNoCacheEdgeCases(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			cache := NoCache{}
+			cache := NoCache[*string]{}
 			ctx := context.Background()
 
 			// Test Add
-			cache.Add(ctx, tc.key, tc.value)
+			cache.Add(ctx, tc.key, &tc.value)
 
 			// Test Get
 			gotValue, ok := cache.Get(ctx, tc.key)

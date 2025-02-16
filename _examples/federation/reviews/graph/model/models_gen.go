@@ -14,5 +14,10 @@ type Manufacturer struct {
 
 func (Manufacturer) IsEntity() {}
 
+type ProductByManufacturerIDAndIDsInput struct {
+	ManufacturerID string `json:"ManufacturerID"`
+	ID             string `json:"ID"`
+}
+
 type Query struct {
 }

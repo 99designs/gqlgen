@@ -10,6 +10,9 @@ import (
 type ErrorPresenterFunc func(ctx context.Context, err error) *gqlerror.Error
 
 func DefaultErrorPresenter(ctx context.Context, err error) *gqlerror.Error {
+	if err == nil {
+		return nil
+	}
 	var gqlErr *gqlerror.Error
 	if errors.As(err, &gqlErr) {
 		return gqlErr

@@ -38,7 +38,9 @@ func main() {
 	}).Handler)
 
 
-	srv := handler.NewDefaultServer(starwars.NewExecutableSchema(starwars.NewResolver()))
+	srv := handler.New(starwars.NewExecutableSchema(starwars.NewResolver()))
+
+	// Handle cross-origin checks in for websocket upgrade requests:
 	srv.AddTransport(&transport.Websocket{
 		Upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
@@ -49,6 +51,7 @@ func main() {
 			WriteBufferSize: 1024,
 		},
 	})
+	srv.AddTransport(transport.POST{})
 
 	router.Handle("/", playground.Handler("Starwars", "/query"))
 	router.Handle("/query", srv)

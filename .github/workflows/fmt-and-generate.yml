@@ -5,6 +5,8 @@ on:
       - master
   pull_request:
     types: [ opened, synchronize ]
+env:
+  GOTOOLCHAIN: local
 # When a new revision is pushed to a PR, cancel all in-progress CI runs for that
 # PR. See https://docs.github.com/en/actions/using-jobs/using-concurrency
 concurrency:
@@ -14,7 +16,7 @@ jobs:
   fmt-and-lint:
     strategy:
       matrix:
-        go: ["1.21", "1.22", "1.24"]
+        go: ["1.22", "1.23", "1.24"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

@@ -8,7 +8,7 @@ weight: -5
 
 gqlgen can be configured using a `gqlgen.yml` file, by default it will be loaded from the current directory, or any parent directory.
 
-Example:
+As an example, here is the default configuration file generated with `gqlgen init`:
 
 ```yml
 # Where are all the schema files located? globs are supported eg  src/**/*.graphqls
@@ -17,32 +17,53 @@ schema:
 
 # Where should the generated server code go?
 exec:
-  layout: follow-schema
-  dir: graph/generated
-  package: generated
+  package: graph
+  layout: single-file # Only other option is "follow-schema," ie multi-file.
 
-# Enable Apollo federation support
+  # Only for single-file layout:
+  filename: graph/generated.go
+
+  # Only for follow-schema layout:
+  # dir: graph
+  # filename_template: "{name}.generated.go"
+
+  # Optional: Maximum number of goroutines in concurrency to use per child resolvers(default: unlimited)
+  # worker_limit: 1000
+
+# Comment or remove this section to skip Apollo Federation support
 federation:
   filename: graph/federation.go
   package: graph
+  version: 2
+  options:
+    computed_requires: true
 
 # Where should any generated models go?
 model:
   filename: graph/model/models_gen.go
   package: model
+
   # Optional: Pass in a path to a new gotpl template to use for generating the models
   # model_template: [your/path/model.gotpl]
 
 # Where should the resolver implementations go?
 resolver:
-  layout: follow-schema
-  dir: graph
   package: graph
+  layout: follow-schema # Only other option is "single-file."
+
+  # Only for single-file layout:
+  # filename: graph/resolver.go
+
+  # Only for follow-schema layout:
+  dir: graph
   filename_template: "{name}.resolvers.go"
+
   # Optional: turn on to not generate template comments above resolvers
   # omit_template_comment: false
   # Optional: Pass in a path to a new gotpl template to use for generating resolvers
   # resolver_template: [your/path/resolver.gotpl]
+  # Optional: turn on to avoid rewriting existing resolver(s) when generating
+  # preserve_resolver: false
 
 # Optional: turn on use ` + "`" + `gqlgen:"fieldName"` + "`" + ` tags in your models
 # struct_tag: json
@@ -87,6 +108,17 @@ resolver:
 # Optional: set to skip running `go mod tidy` when generating server code
 # skip_mod_tidy: true
 
+# Optional: if this is set to true, argument directives that
+# decorate a field with a null value will still be called.
+#
+# This enables argumment directives to not just mutate
+# argument values but to set them even if they're null.
+call_argument_directives_with_null: true
+
+# This enables gql server to use function syntax for execution context
+# instead of generating receiver methods of the execution context.
+# use_function_syntax_for_execution_context: true
+
 # Optional: set build tags that will be used to load packages
 # go_build_tags:
 #  - private
@@ -101,8 +133,8 @@ resolver:
 
 # gqlgen will search for any type names in the schema in these go packages
 # if they match it will use them, otherwise it will generate them.
-# autobind:
-#   - "github.com/[YOUR_APP_DIR]/graph/model"
+autobind:
+#  - "{{.}}/graph/model"
 
 # This section declares type mapping between the GraphQL and go type systems
 #
@@ -116,14 +148,28 @@ models:
       - github.com/99designs/gqlgen/graphql.Int
       - github.com/99designs/gqlgen/graphql.Int64
       - github.com/99designs/gqlgen/graphql.Int32
-  Int:
-    model:
-      - github.com/99designs/gqlgen/graphql.Int
-      - github.com/99designs/gqlgen/graphql.Int64
-      - github.com/99designs/gqlgen/graphql.Int32
+  # gqlgen provides a default GraphQL UUID convenience wrapper for github.com/google/uuid
+  # but you can override this to provide your own GraphQL UUID implementation
   UUID:
     model:
       - github.com/99designs/gqlgen/graphql.UUID
+
+  # The GraphQL spec explicitly states that the Int type is a signed 32-bit
+  # integer. Using Go int or int64 to represent it can lead to unexpected
+  # behavior, and some GraphQL tools like Apollo Router will fail when
+  # communicating numbers that overflow 32-bits.
+  #
+  # You may choose to use the custom, built-in Int64 scalar to represent 64-bit
+  # integers, or ignore the spec and bind Int to graphql.Int / graphql.Int64
+  # (the default behavior of gqlgen). This is fine in simple use cases when you
+  # do not need to worry about interoperability and only expect small numbers.
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int32
+  Int64:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
 ```
 
 Everything has defaults, so add things as you need.

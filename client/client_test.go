@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mitchellh/mapstructure"
+	"github.com/go-viper/mapstructure/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
@@ -23,7 +23,7 @@ func TestClient(t *testing.T) {
 	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		b, err := io.ReadAll(r.Body)
 		if assert.NoError(t, err) {
-			assert.Equal(t, `{"query":"user(id:$id){name}","variables":{"id":1}}`, string(b))
+			assert.JSONEq(t, `{"query":"user(id:$id){name}","variables":{"id":1}}`, string(b))
 
 			err = json.NewEncoder(w).Encode(map[string]any{
 				"data": map[string]any{
@@ -157,7 +157,7 @@ func TestAddExtensions(t *testing.T) {
 		if !assert.NoError(t, err) {
 			return
 		}
-		assert.Equal(t, `{"query":"user(id:1){name}","extensions":{"persistedQuery":{"sha256Hash":"ceec2897e2da519612279e63f24658c3e91194cbb2974744fa9007a7e1e9f9e7","version":1}}}`, string(b))
+		assert.JSONEq(t, `{"query":"user(id:1){name}","extensions":{"persistedQuery":{"sha256Hash":"ceec2897e2da519612279e63f24658c3e91194cbb2974744fa9007a7e1e9f9e7","version":1}}}`, string(b))
 		err = json.NewEncoder(w).Encode(map[string]any{
 			"data": map[string]any{
 				"Name": "Bob",
@@ -216,4 +216,34 @@ func TestSetCustomDecodeConfig(t *testing.T) {
 
 	c.MustPost("user(id: 1) {created_at}", &resp)
 	require.WithinDuration(t, now, resp.CreatedAt, time.Second)
+}
+
+func TestClientWithCustomTarget(t *testing.T) {
+	h := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		b, err := io.ReadAll(r.Body)
+		if assert.NoError(t, err) {
+			assert.JSONEq(t, `{"query":"user(id:$id){name}","variables":{"id":1}}`, string(b))
+
+			err = json.NewEncoder(w).Encode(map[string]any{
+				"data": map[string]any{
+					"name": "bob",
+				},
+			})
+			assert.NoError(t, err)
+		}
+	})
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/test", h)
+
+	c := client.New(mux)
+	c.SetCustomTarget("/test")
+
+	var resp struct {
+		Name string
+	}
+
+	c.MustPost("user(id:$id){name}", &resp, client.Var("id", 1))
+
+	require.Equal(t, "bob", resp.Name)
 }

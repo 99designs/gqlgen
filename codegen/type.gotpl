@@ -18,9 +18,7 @@
 				return &res, graphql.ErrorOnPath(ctx, err)
 			{{- else if $type.IsSlice }}
 				var vSlice []any
-				if v != nil {
-					vSlice = graphql.CoerceList(v)
-				}
+				vSlice = graphql.CoerceList(v)
 				var err error
 				res := make([]{{$type.GO.Elem | ref}}, len(vSlice))
 				for i := range vSlice {

@@ -127,7 +127,7 @@ func TestApolloTracing_withMissingOp(t *testing.T) {
 	h.Use(&apollofederatedtracingv1.Tracer{})
 
 	resp := doRequest(h, http.MethodPost, "/graphql", `{}`)
-	assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
+	assert.Equal(t, http.StatusBadRequest, resp.Code, resp.Body.String())
 	b := resp.Body.Bytes()
 	t.Log(string(b))
 	var respData struct {

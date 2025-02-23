@@ -30,7 +30,7 @@ func TestInput(t *testing.T) {
 
 		err := c.Post(`query { inputSlice(arg: ["ok", 1, 2, "ok"]) }`, &resp)
 
-		require.EqualError(t, err, `http 422: {"errors":[{"message":"String cannot represent a non string value: 1","locations":[{"line":1,"column":32}],"extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}},{"message":"String cannot represent a non string value: 2","locations":[{"line":1,"column":35}],"extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`)
+		require.EqualError(t, err, `http 400: {"errors":[{"message":"String cannot represent a non string value: 1","locations":[{"line":1,"column":32}],"extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}},{"message":"String cannot represent a non string value: 2","locations":[{"line":1,"column":35}],"extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`)
 		require.Nil(t, resp.DirectiveArg)
 	})
 

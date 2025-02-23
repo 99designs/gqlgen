@@ -100,6 +100,15 @@ func Generate(cfg *config.Config, option ...Option) error {
 	}
 
 	for _, p := range plugins {
+		if mut, ok := p.(plugin.SchemaMutator); ok {
+			err := mut.MutateSchema(cfg.Schema)
+			if err != nil {
+				return fmt.Errorf("%s: %w", p.Name(), err)
+			}
+		}
+	}
+
+	for _, p := range plugins {
 		if mut, ok := p.(plugin.ConfigMutator); ok {
 			err := mut.MutateConfig(cfg)
 			if err != nil {

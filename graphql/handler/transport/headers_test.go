@@ -22,10 +22,10 @@ func TestHeadersWithPOST(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.POST{})
 
-		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`, "application/json")
+		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`, "", "application/json")
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Len(t, resp.Header(), 1)
-		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
+		assert.Equal(t, "application/graphql-response+json", resp.Header().Get("Content-Type"))
 	})
 
 	t.Run("Headers set", func(t *testing.T) {
@@ -37,7 +37,7 @@ func TestHeadersWithPOST(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.POST{ResponseHeaders: headers})
 
-		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`, "application/json")
+		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`, "", "application/json")
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Len(t, resp.Header(), 2)
 		assert.Equal(t, "application/json; charset: utf8", resp.Header().Get("Content-Type"))
@@ -51,10 +51,10 @@ func TestHeadersWithGET(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.GET{})
 
-		resp := doRequest(h, "GET", "/graphql?query={name}", "", "application/json")
+		resp := doRequest(h, "GET", "/graphql?query={name}", "", "", "application/json")
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Len(t, resp.Header(), 1)
-		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
+		assert.Equal(t, "application/graphql-response+json", resp.Header().Get("Content-Type"))
 	})
 
 	t.Run("Headers set", func(t *testing.T) {
@@ -66,7 +66,7 @@ func TestHeadersWithGET(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.GET{ResponseHeaders: headers})
 
-		resp := doRequest(h, "GET", "/graphql?query={name}", "", "application/json")
+		resp := doRequest(h, "GET", "/graphql?query={name}", "", "", "application/json")
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Len(t, resp.Header(), 2)
 		assert.Equal(t, "application/json; charset: utf8", resp.Header().Get("Content-Type"))
@@ -79,7 +79,7 @@ func TestHeadersWithGRAPHQL(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.GRAPHQL{})
 
-		resp := doRequest(h, "POST", "/graphql", `{ name }`, "application/graphql")
+		resp := doRequest(h, "POST", "/graphql", `{ name }`, "", "application/graphql")
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Len(t, resp.Header(), 1)
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
@@ -94,7 +94,7 @@ func TestHeadersWithGRAPHQL(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.GRAPHQL{ResponseHeaders: headers})
 
-		resp := doRequest(h, "POST", "/graphql", `{ name }`, "application/graphql")
+		resp := doRequest(h, "POST", "/graphql", `{ name }`, "", "application/graphql")
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Len(t, resp.Header(), 2)
 		assert.Equal(t, "application/json; charset: utf8", resp.Header().Get("Content-Type"))
@@ -107,7 +107,7 @@ func TestHeadersWithFormUrlEncoded(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.UrlEncodedForm{})
 
-		resp := doRequest(h, "POST", "/graphql", `{ name }`, "application/x-www-form-urlencoded")
+		resp := doRequest(h, "POST", "/graphql", `{ name }`, "", "application/x-www-form-urlencoded")
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Len(t, resp.Header(), 1)
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
@@ -122,7 +122,7 @@ func TestHeadersWithFormUrlEncoded(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.UrlEncodedForm{ResponseHeaders: headers})
 
-		resp := doRequest(h, "POST", "/graphql", `{ name }`, "application/x-www-form-urlencoded")
+		resp := doRequest(h, "POST", "/graphql", `{ name }`, "", "application/x-www-form-urlencoded")
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Len(t, resp.Header(), 2)
 		assert.Equal(t, "application/json; charset: utf8", resp.Header().Get("Content-Type"))

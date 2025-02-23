@@ -220,7 +220,7 @@ func TestStarwars(t *testing.T) {
 		  }
 		}`, &resp, client.Var("episode", "INVALID"))
 
-		require.EqualError(t, err, `http 422: {"errors":[{"message":"INVALID is not a valid Episode","path":["variable","episode"],"extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`)
+		require.EqualError(t, err, `http 400: {"errors":[{"message":"INVALID is not a valid Episode","path":["variable","episode"],"extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`)
 	})
 
 	t.Run("introspection", func(t *testing.T) {

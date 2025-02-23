@@ -17,7 +17,7 @@ import (
 // defined in https://github.com/APIs-guru/graphql-over-http#post
 type POST struct {
 	// Map of all headers that are added to graphql response. If not
-	// set, only one header: Content-Type: application/json will be set.
+	// set, only one header: Content-Type: application/graphql-response+json will be set.
 	ResponseHeaders map[string][]string
 }
 
@@ -55,7 +55,14 @@ var pool = sync.Pool{
 
 func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
 	ctx := r.Context()
-	writeHeaders(w, h.ResponseHeaders)
+	contentType := determineResponseContentType(h.ResponseHeaders, r)
+	responseHeaders := mergeHeaders(
+		map[string][]string{
+			"Content-Type": {contentType},
+		},
+		h.ResponseHeaders,
+	)
+	writeHeaders(w, responseHeaders)
 	params := pool.Get().(*graphql.RawParams)
 	defer func() {
 		params.Headers = nil
@@ -98,7 +105,11 @@ func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecu
 
 	rc, opErr := exec.CreateOperationContext(ctx, params)
 	if opErr != nil {
-		w.WriteHeader(statusFor(opErr))
+		if contentType == acceptApplicationGraphqlResponseJson {
+			w.WriteHeader(statusForGraphQLResponse(opErr))
+		} else {
+			w.WriteHeader(statusFor(opErr))
+		}
 		resp := exec.DispatchError(graphql.WithOperationContext(ctx, rc), opErr)
 		writeJson(w, resp)
 		return

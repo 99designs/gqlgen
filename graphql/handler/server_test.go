@@ -106,7 +106,7 @@ func TestServer(t *testing.T) {
 		})
 
 		resp := get(srv, "/foo?query=invalid")
-		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
+		assert.Equal(t, http.StatusBadRequest, resp.Code, resp.Body.String())
 		assert.Len(t, errors1, 1)
 		assert.Len(t, errors2, 1)
 	})

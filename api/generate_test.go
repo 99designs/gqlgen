@@ -1,13 +1,12 @@
 package api
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-
-	"fmt"
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -69,7 +68,7 @@ func (t *testSchemaMutator) Name() string {
 
 func (t *testSchemaMutator) MutateSchema(schema *ast.Schema) error {
 	if t.shouldError {
-		return fmt.Errorf("deliberate schema mutation error")
+		return errors.New("deliberate schema mutation error")
 	}
 	schema.Types["TestType"] = &ast.Definition{
 		Kind: ast.Object,

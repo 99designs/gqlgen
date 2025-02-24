@@ -13,6 +13,13 @@ type Plugin interface {
 	Name() string
 }
 
+// SchemaMutator is used to modify the schema before it is used to generate code
+// Similarly to [ConfigMutator] that is also triggered before code generation, SchemaMutator
+// can be used to modify the schema even before the models are generated.
+type SchemaMutator interface {
+	MutateSchema(schema *ast.Schema) error
+}
+
 type ConfigMutator interface {
 	MutateConfig(cfg *config.Config) error
 }

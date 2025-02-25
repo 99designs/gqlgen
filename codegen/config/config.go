@@ -334,41 +334,39 @@ func (c *Config) injectTypesFromSchema() error {
 			schemaType.Kind == ast.Interface {
 			for _, field := range schemaType.Fields {
 				if fd := field.Directives.ForName("goField"); fd != nil {
-					forceResolver := c.Models[schemaType.Name].Fields[field.Name].Resolver
+					// First, copy map entry for type and field to do modifications
+					typeMapEntry := c.Models[schemaType.Name]
+					typeMapFieldEntry := typeMapEntry.Fields[field.Name]
+
 					if ra := fd.Arguments.ForName("forceResolver"); ra != nil {
 						if fr, err := ra.Value.Value(nil); err == nil {
-							forceResolver = fr.(bool)
+							typeMapFieldEntry.Resolver = fr.(bool)
 						}
 					}
 
-					fieldName := c.Models[schemaType.Name].Fields[field.Name].FieldName
 					if na := fd.Arguments.ForName("name"); na != nil {
 						if fr, err := na.Value.Value(nil); err == nil {
-							fieldName = fr.(string)
+							typeMapFieldEntry.FieldName = fr.(string)
 						}
 					}
 
-					omittable := c.Models[schemaType.Name].Fields[field.Name].Omittable
 					if arg := fd.Arguments.ForName("omittable"); arg != nil {
 						if k, err := arg.Value.Value(nil); err == nil {
 							val := k.(bool)
-							omittable = &val
+							typeMapFieldEntry.Omittable = &val
 						}
 					}
 
-					if c.Models[schemaType.Name].Fields == nil {
-						c.Models[schemaType.Name] = TypeMapEntry{
-							Model:       c.Models[schemaType.Name].Model,
-							ExtraFields: c.Models[schemaType.Name].ExtraFields,
-							Fields:      map[string]TypeMapField{},
-						}
+					// May be uninitialized, so do it now.
+					if typeMapEntry.Fields == nil {
+						typeMapEntry.Fields = make(map[string]TypeMapField)
 					}
 
-					c.Models[schemaType.Name].Fields[field.Name] = TypeMapField{
-						FieldName: fieldName,
-						Resolver:  forceResolver,
-						Omittable: omittable,
-					}
+					// First, copy back probably modificated field settings
+					typeMapEntry.Fields[field.Name] = typeMapFieldEntry
+
+					// And final copy back probably modificated all type map
+					c.Models[schemaType.Name] = typeMapEntry
 				}
 			}
 
@@ -408,21 +406,22 @@ func (c *Config) injectTypesFromSchema() error {
 							}
 						}
 
+						// First copy, then modify map entry.
+						typeMapEntry := c.Models[schemaType.Name]
+
 						if extraFieldName == "" {
 							// Embeddable fields
-							typeMapEntry := c.Models[schemaType.Name]
 							typeMapEntry.EmbedExtraFields = append(typeMapEntry.EmbedExtraFields, extraField)
-							c.Models[schemaType.Name] = typeMapEntry
 						} else {
 							// Regular fields
-							typeMapEntry := c.Models[schemaType.Name]
 							if typeMapEntry.ExtraFields == nil {
 								typeMapEntry.ExtraFields = make(map[string]ModelExtraField)
 							}
-
-							c.Models[schemaType.Name] = typeMapEntry
-							c.Models[schemaType.Name].ExtraFields[extraFieldName] = extraField
+							typeMapEntry.ExtraFields[extraFieldName] = extraField
 						}
+
+						// Copy back modified map entry
+						c.Models[schemaType.Name] = typeMapEntry
 					}
 				}
 			}

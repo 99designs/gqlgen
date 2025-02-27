@@ -16,7 +16,7 @@ require (
 	github.com/sosodev/duration v1.3.1
 	github.com/stretchr/testify v1.10.0
 	github.com/urfave/cli/v2 v2.27.5
-	github.com/vektah/gqlparser/v2 v2.5.22
+	github.com/vektah/gqlparser/v2 v2.5.23
 	golang.org/x/text v0.22.0
 	golang.org/x/tools v0.30.0
 	google.golang.org/protobuf v1.36.5
@@ -24,7 +24,7 @@ require (
 )
 
 require (
-	github.com/agnivade/levenshtein v1.2.0 // indirect
+	github.com/agnivade/levenshtein v1.2.1 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.5 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect

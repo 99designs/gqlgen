@@ -3824,6 +3824,8 @@ func fieldContext_Query___type(ctx context.Context, ec *executionContext, field 
 				return fieldContext___Type_name(ctx, ec, field)
 			case "description":
 				return fieldContext___Type_description(ctx, ec, field)
+			case "specifiedByURL":
+				return fieldContext___Type_specifiedByURL(ctx, ec, field)
 			case "fields":
 				return fieldContext___Type_fields(ctx, ec, field)
 			case "interfaces":
@@ -3836,8 +3838,6 @@ func fieldContext_Query___type(ctx context.Context, ec *executionContext, field 
 				return fieldContext___Type_inputFields(ctx, ec, field)
 			case "ofType":
 				return fieldContext___Type_ofType(ctx, ec, field)
-			case "specifiedByURL":
-				return fieldContext___Type_specifiedByURL(ctx, ec, field)
 			case "isOneOf":
 				return fieldContext___Type_isOneOf(ctx, ec, field)
 			}
@@ -4353,6 +4353,50 @@ func fieldContext___Directive_description(_ context.Context, ec *executionContex
 	return fc, nil
 }
 
+func ___Directive_isRepeatable(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
+	fc, err := fieldContext___Directive_isRepeatable(ctx, ec, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsRepeatable, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return marshalNBoolean2bool(ctx, ec, field.Selections, res)
+}
+
+func fieldContext___Directive_isRepeatable(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "__Directive",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func ___Directive_locations(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
 	fc, err := fieldContext___Directive_locations(ctx, ec, field)
 	if err != nil {
@@ -4462,50 +4506,6 @@ func fieldContext___Directive_args(ctx context.Context, ec *executionContext, fi
 	if fc.Args, err = field___Directive_args_args(ctx, ec, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
-	}
-	return fc, nil
-}
-
-func ___Directive_isRepeatable(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
-	fc, err := fieldContext___Directive_isRepeatable(ctx, ec, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.IsRepeatable, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	fc.Result = res
-	return marshalNBoolean2bool(ctx, ec, field.Selections, res)
-}
-
-func fieldContext___Directive_isRepeatable(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__Directive",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
 	}
 	return fc, nil
 }
@@ -4879,6 +4879,8 @@ func fieldContext___Field_type(_ context.Context, ec *executionContext, field gr
 				return fieldContext___Type_name(ctx, ec, field)
 			case "description":
 				return fieldContext___Type_description(ctx, ec, field)
+			case "specifiedByURL":
+				return fieldContext___Type_specifiedByURL(ctx, ec, field)
 			case "fields":
 				return fieldContext___Type_fields(ctx, ec, field)
 			case "interfaces":
@@ -4891,8 +4893,6 @@ func fieldContext___Field_type(_ context.Context, ec *executionContext, field gr
 				return fieldContext___Type_inputFields(ctx, ec, field)
 			case "ofType":
 				return fieldContext___Type_ofType(ctx, ec, field)
-			case "specifiedByURL":
-				return fieldContext___Type_specifiedByURL(ctx, ec, field)
 			case "isOneOf":
 				return fieldContext___Type_isOneOf(ctx, ec, field)
 			}
@@ -5117,6 +5117,8 @@ func fieldContext___InputValue_type(_ context.Context, ec *executionContext, fie
 				return fieldContext___Type_name(ctx, ec, field)
 			case "description":
 				return fieldContext___Type_description(ctx, ec, field)
+			case "specifiedByURL":
+				return fieldContext___Type_specifiedByURL(ctx, ec, field)
 			case "fields":
 				return fieldContext___Type_fields(ctx, ec, field)
 			case "interfaces":
@@ -5129,8 +5131,6 @@ func fieldContext___InputValue_type(_ context.Context, ec *executionContext, fie
 				return fieldContext___Type_inputFields(ctx, ec, field)
 			case "ofType":
 				return fieldContext___Type_ofType(ctx, ec, field)
-			case "specifiedByURL":
-				return fieldContext___Type_specifiedByURL(ctx, ec, field)
 			case "isOneOf":
 				return fieldContext___Type_isOneOf(ctx, ec, field)
 			}
@@ -5352,6 +5352,8 @@ func fieldContext___Schema_types(_ context.Context, ec *executionContext, field 
 				return fieldContext___Type_name(ctx, ec, field)
 			case "description":
 				return fieldContext___Type_description(ctx, ec, field)
+			case "specifiedByURL":
+				return fieldContext___Type_specifiedByURL(ctx, ec, field)
 			case "fields":
 				return fieldContext___Type_fields(ctx, ec, field)
 			case "interfaces":
@@ -5364,8 +5366,6 @@ func fieldContext___Schema_types(_ context.Context, ec *executionContext, field 
 				return fieldContext___Type_inputFields(ctx, ec, field)
 			case "ofType":
 				return fieldContext___Type_ofType(ctx, ec, field)
-			case "specifiedByURL":
-				return fieldContext___Type_specifiedByURL(ctx, ec, field)
 			case "isOneOf":
 				return fieldContext___Type_isOneOf(ctx, ec, field)
 			}
@@ -5420,6 +5420,8 @@ func fieldContext___Schema_queryType(_ context.Context, ec *executionContext, fi
 				return fieldContext___Type_name(ctx, ec, field)
 			case "description":
 				return fieldContext___Type_description(ctx, ec, field)
+			case "specifiedByURL":
+				return fieldContext___Type_specifiedByURL(ctx, ec, field)
 			case "fields":
 				return fieldContext___Type_fields(ctx, ec, field)
 			case "interfaces":
@@ -5432,8 +5434,6 @@ func fieldContext___Schema_queryType(_ context.Context, ec *executionContext, fi
 				return fieldContext___Type_inputFields(ctx, ec, field)
 			case "ofType":
 				return fieldContext___Type_ofType(ctx, ec, field)
-			case "specifiedByURL":
-				return fieldContext___Type_specifiedByURL(ctx, ec, field)
 			case "isOneOf":
 				return fieldContext___Type_isOneOf(ctx, ec, field)
 			}
@@ -5485,6 +5485,8 @@ func fieldContext___Schema_mutationType(_ context.Context, ec *executionContext,
 				return fieldContext___Type_name(ctx, ec, field)
 			case "description":
 				return fieldContext___Type_description(ctx, ec, field)
+			case "specifiedByURL":
+				return fieldContext___Type_specifiedByURL(ctx, ec, field)
 			case "fields":
 				return fieldContext___Type_fields(ctx, ec, field)
 			case "interfaces":
@@ -5497,8 +5499,6 @@ func fieldContext___Schema_mutationType(_ context.Context, ec *executionContext,
 				return fieldContext___Type_inputFields(ctx, ec, field)
 			case "ofType":
 				return fieldContext___Type_ofType(ctx, ec, field)
-			case "specifiedByURL":
-				return fieldContext___Type_specifiedByURL(ctx, ec, field)
 			case "isOneOf":
 				return fieldContext___Type_isOneOf(ctx, ec, field)
 			}
@@ -5550,6 +5550,8 @@ func fieldContext___Schema_subscriptionType(_ context.Context, ec *executionCont
 				return fieldContext___Type_name(ctx, ec, field)
 			case "description":
 				return fieldContext___Type_description(ctx, ec, field)
+			case "specifiedByURL":
+				return fieldContext___Type_specifiedByURL(ctx, ec, field)
 			case "fields":
 				return fieldContext___Type_fields(ctx, ec, field)
 			case "interfaces":
@@ -5562,8 +5564,6 @@ func fieldContext___Schema_subscriptionType(_ context.Context, ec *executionCont
 				return fieldContext___Type_inputFields(ctx, ec, field)
 			case "ofType":
 				return fieldContext___Type_ofType(ctx, ec, field)
-			case "specifiedByURL":
-				return fieldContext___Type_specifiedByURL(ctx, ec, field)
 			case "isOneOf":
 				return fieldContext___Type_isOneOf(ctx, ec, field)
 			}
@@ -5616,12 +5616,12 @@ func fieldContext___Schema_directives(_ context.Context, ec *executionContext, f
 				return fieldContext___Directive_name(ctx, ec, field)
 			case "description":
 				return fieldContext___Directive_description(ctx, ec, field)
+			case "isRepeatable":
+				return fieldContext___Directive_isRepeatable(ctx, ec, field)
 			case "locations":
 				return fieldContext___Directive_locations(ctx, ec, field)
 			case "args":
 				return fieldContext___Directive_args(ctx, ec, field)
-			case "isRepeatable":
-				return fieldContext___Directive_isRepeatable(ctx, ec, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Directive", field.Name)
 		},
@@ -5755,6 +5755,47 @@ func fieldContext___Type_description(_ context.Context, ec *executionContext, fi
 	return fc, nil
 }
 
+func ___Type_specifiedByURL(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
+	fc, err := fieldContext___Type_specifiedByURL(ctx, ec, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.SpecifiedByURL(), nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return marshalOString2ᚖstring(ctx, ec, field.Selections, res)
+}
+
+func fieldContext___Type_specifiedByURL(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "__Type",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func ___Type_fields(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
 	fc, err := fieldContext___Type_fields(ctx, ec, field)
 	if err != nil {
@@ -5863,6 +5904,8 @@ func fieldContext___Type_interfaces(_ context.Context, ec *executionContext, fie
 				return fieldContext___Type_name(ctx, ec, field)
 			case "description":
 				return fieldContext___Type_description(ctx, ec, field)
+			case "specifiedByURL":
+				return fieldContext___Type_specifiedByURL(ctx, ec, field)
 			case "fields":
 				return fieldContext___Type_fields(ctx, ec, field)
 			case "interfaces":
@@ -5875,8 +5918,6 @@ func fieldContext___Type_interfaces(_ context.Context, ec *executionContext, fie
 				return fieldContext___Type_inputFields(ctx, ec, field)
 			case "ofType":
 				return fieldContext___Type_ofType(ctx, ec, field)
-			case "specifiedByURL":
-				return fieldContext___Type_specifiedByURL(ctx, ec, field)
 			case "isOneOf":
 				return fieldContext___Type_isOneOf(ctx, ec, field)
 			}
@@ -5928,6 +5969,8 @@ func fieldContext___Type_possibleTypes(_ context.Context, ec *executionContext, 
 				return fieldContext___Type_name(ctx, ec, field)
 			case "description":
 				return fieldContext___Type_description(ctx, ec, field)
+			case "specifiedByURL":
+				return fieldContext___Type_specifiedByURL(ctx, ec, field)
 			case "fields":
 				return fieldContext___Type_fields(ctx, ec, field)
 			case "interfaces":
@@ -5940,8 +5983,6 @@ func fieldContext___Type_possibleTypes(_ context.Context, ec *executionContext, 
 				return fieldContext___Type_inputFields(ctx, ec, field)
 			case "ofType":
 				return fieldContext___Type_ofType(ctx, ec, field)
-			case "specifiedByURL":
-				return fieldContext___Type_specifiedByURL(ctx, ec, field)
 			case "isOneOf":
 				return fieldContext___Type_isOneOf(ctx, ec, field)
 			}
@@ -6110,6 +6151,8 @@ func fieldContext___Type_ofType(_ context.Context, ec *executionContext, field g
 				return fieldContext___Type_name(ctx, ec, field)
 			case "description":
 				return fieldContext___Type_description(ctx, ec, field)
+			case "specifiedByURL":
+				return fieldContext___Type_specifiedByURL(ctx, ec, field)
 			case "fields":
 				return fieldContext___Type_fields(ctx, ec, field)
 			case "interfaces":
@@ -6122,53 +6165,10 @@ func fieldContext___Type_ofType(_ context.Context, ec *executionContext, field g
 				return fieldContext___Type_inputFields(ctx, ec, field)
 			case "ofType":
 				return fieldContext___Type_ofType(ctx, ec, field)
-			case "specifiedByURL":
-				return fieldContext___Type_specifiedByURL(ctx, ec, field)
 			case "isOneOf":
 				return fieldContext___Type_isOneOf(ctx, ec, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func ___Type_specifiedByURL(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
-	fc, err := fieldContext___Type_specifiedByURL(ctx, ec, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.SpecifiedByURL(), nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return marshalOString2ᚖstring(ctx, ec, field.Selections, res)
-}
-
-func fieldContext___Type_specifiedByURL(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__Type",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -7614,6 +7614,11 @@ func ___Directive(ctx context.Context, ec *executionContext, sel ast.SelectionSe
 			}
 		case "description":
 			out.Values[i] = ___Directive_description(ctx, ec, field, obj)
+		case "isRepeatable":
+			out.Values[i] = ___Directive_isRepeatable(ctx, ec, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		case "locations":
 			out.Values[i] = ___Directive_locations(ctx, ec, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -7621,11 +7626,6 @@ func ___Directive(ctx context.Context, ec *executionContext, sel ast.SelectionSe
 			}
 		case "args":
 			out.Values[i] = ___Directive_args(ctx, ec, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "isRepeatable":
-			out.Values[i] = ___Directive_isRepeatable(ctx, ec, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -7888,6 +7888,8 @@ func ___Type(ctx context.Context, ec *executionContext, sel ast.SelectionSet, ob
 			out.Values[i] = ___Type_name(ctx, ec, field, obj)
 		case "description":
 			out.Values[i] = ___Type_description(ctx, ec, field, obj)
+		case "specifiedByURL":
+			out.Values[i] = ___Type_specifiedByURL(ctx, ec, field, obj)
 		case "fields":
 			out.Values[i] = ___Type_fields(ctx, ec, field, obj)
 		case "interfaces":
@@ -7900,8 +7902,6 @@ func ___Type(ctx context.Context, ec *executionContext, sel ast.SelectionSet, ob
 			out.Values[i] = ___Type_inputFields(ctx, ec, field, obj)
 		case "ofType":
 			out.Values[i] = ___Type_ofType(ctx, ec, field, obj)
-		case "specifiedByURL":
-			out.Values[i] = ___Type_specifiedByURL(ctx, ec, field, obj)
 		case "isOneOf":
 			out.Values[i] = ___Type_isOneOf(ctx, ec, field, obj)
 		default:

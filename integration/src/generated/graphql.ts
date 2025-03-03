@@ -9,7 +9,7 @@ export type MakeEmpty<T extends { [key: string]: unknown }, K extends keyof T> =
 export type Incremental<T> = T | { [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: { input: string | number; output: string; }
+  ID: { input: string; output: string; }
   String: { input: string; output: string; }
   Boolean: { input: boolean; output: boolean; }
   Int: { input: number; output: number; }
@@ -142,10 +142,10 @@ export type PathQuery = { __typename?: 'Query', path?: Array<{ __typename?: 'Ele
 export type ViewerQueryVariables = Exact<{ [key: string]: never; }>;
 
 
-export type ViewerQuery = { __typename?: 'Query', viewer?: { __typename?: 'Viewer', user?: ( { __typename?: 'User', name: string, phoneNumber?: string | null, query: { __typename?: 'Query', jsonEncoding: string } } & (
+export type ViewerQuery = { __typename?: 'Query', viewer?: { __typename?: 'Viewer', user?: { __typename?: 'User', name: string, phoneNumber?: string | null, query: { __typename?: 'Query', jsonEncoding: string } } & (
       { __typename?: 'User' }
       & { ' $fragmentRefs'?: { 'UserFragmentFragment': Incremental<UserFragmentFragment> } }
-    ) ) | null } | null };
+    ) | null } | null };
 
 export type UserFragmentFragment = { __typename?: 'User', likes: Array<string> } & { ' $fragmentName'?: 'UserFragmentFragment' };
 

@@ -69,6 +69,7 @@ func (e *Executor) CreateOperationContext(
 
 	opCtx.RawQuery = params.Query
 	opCtx.OperationName = params.OperationName
+	opCtx.Extensions = params.Extensions
 	opCtx.Headers = params.Headers
 
 	var listErr gqlerror.List

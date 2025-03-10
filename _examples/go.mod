@@ -1,6 +1,7 @@
 module github.com/99designs/gqlgen/_examples
 
 go 1.22.12
+toolchain go1.23.7
 
 replace github.com/99designs/gqlgen => ../
 
@@ -13,7 +14,7 @@ require (
 	github.com/stretchr/testify v1.10.0
 	github.com/vektah/dataloaden v0.3.0
 	github.com/vektah/gqlparser/v2 v2.5.23
-	golang.org/x/sync v0.11.0
+	golang.org/x/sync v0.12.0
 )
 
 require (
@@ -33,7 +34,7 @@ require (
 
 require (
 	github.com/pkg/errors v0.9.1 // indirect
-	golang.org/x/text v0.22.0
+	golang.org/x/text v0.23.0
 )
 
 replace github.com/gorilla/websocket => github.com/gorilla/websocket v1.5.0

@@ -31,6 +31,8 @@ func TestString(t *testing.T) {
 		assert.Equal(t, "true", mustUnmarshalString(t, true))
 		assert.Equal(t, "false", mustUnmarshalString(t, false))
 		assert.Equal(t, "", mustUnmarshalString(t, nil))
+		assert.Equal(t, `{"hello":"world"}`, mustUnmarshalString(t, map[string]interface{}{"hello": "world"}))
+		assert.Equal(t, `{"hello":123}`, mustUnmarshalString(t, map[string]interface{}{"hello": 123}))
 	})
 }
 

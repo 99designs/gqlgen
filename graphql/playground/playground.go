@@ -155,9 +155,12 @@ type GraphiqlConfig struct {
 	EndpointIsAbsolute   bool
 	SubscriptionEndpoint string
 	Version              string
+	// https://www.jsdelivr.com/package/npm/graphiql?tab=files
 	CssSRI               string
 	JsSRI                string
+	// https://www.jsdelivr.com/package/npm/react?tab=files
 	ReactSRI             string
+	// https://www.jsdelivr.com/package/npm/react-dom?tab=files
 	ReactDOMSRI          string
 }
 type GraphiqlConfigOption func(*GraphiqlConfig)

@@ -1,6 +1,7 @@
 module github.com/gqlgen/_examples/websocket-initfunc/server
 
 go 1.22.12
+toolchain go1.23.7
 
 require (
 	github.com/99designs/gqlgen v0.17.63
@@ -16,5 +17,5 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/sosodev/duration v1.3.1 // indirect
-	golang.org/x/net v0.35.0 // indirect
+	golang.org/x/net v0.36.0 // indirect
 )

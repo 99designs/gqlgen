@@ -10,7 +10,7 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 <html>
   <head>
   	<meta charset="utf-8">
-  	<title>{{.title}}</title>
+  	<title>{{.Title}}</title>
 	<style>
 		body {
 			height: 100%;
@@ -25,18 +25,18 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 	</style>
 	<script
 		src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"
-		integrity="{{.reactSRI}}"
+		integrity="{{.ReactSRI}}"
 		crossorigin="anonymous"
 	></script>
 	<script
 		src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"
-		integrity="{{.reactDOMSRI}}"
+		integrity="{{.ReactDOMSRI}}"
 		crossorigin="anonymous"
 	></script>
     <link
 		rel="stylesheet"
-		href="https://cdn.jsdelivr.net/npm/graphiql@{{.version}}/graphiql.min.css"
-		integrity="{{.cssSRI}}"
+		href="https://cdn.jsdelivr.net/npm/graphiql@{{.Version}}/graphiql.min.css"
+		integrity="{{.CssSRI}}"
 		crossorigin="anonymous"
 	/>
   </head>
@@ -44,27 +44,88 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
     <div id="graphiql">Loading...</div>
 
 	<script
-		src="https://cdn.jsdelivr.net/npm/graphiql@{{.version}}/graphiql.min.js"
-		integrity="{{.jsSRI}}"
+		src="https://cdn.jsdelivr.net/npm/graphiql@{{.Version}}/graphiql.min.js"
+		integrity="{{.JsSRI}}"
 		crossorigin="anonymous"
 	></script>
 
     <script>
-{{- if .endpointIsAbsolute}}
-      const url = {{.endpoint}};
-      const subscriptionUrl = {{.subscriptionEndpoint}};
+      class PrefixedStorage {
+        constructor(prefix = '') {
+          this.prefix = prefix;
+        }
+
+        _addPrefix(key) {
+          return this.prefix + key;
+        }
+
+        _removePrefix(prefixedKey) {
+          return prefixedKey.substring(this.prefix.length);
+        }
+
+        setItem(key, value) {
+          const prefixedKey = this._addPrefix(key);
+          localStorage.setItem(prefixedKey, value);
+        }
+
+        getItem(key) {
+          const prefixedKey = this._addPrefix(key);
+          return localStorage.getItem(prefixedKey);
+        }
+
+        removeItem(key) {
+          const prefixedKey = this._addPrefix(key);
+          localStorage.removeItem(prefixedKey);
+        }
+
+        clear() {
+          const keysToRemove = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith(this.prefix)) {
+              keysToRemove.push(key);
+            }
+          }
+          keysToRemove.forEach(key => localStorage.removeItem(key));
+        }
+
+        get length() {
+          let count = 0;
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith(this.prefix)) {
+              count++;
+            }
+          }
+          return count;
+        }
+
+        key(index) {
+          const keys = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key.startsWith(this.prefix)) {
+              keys.push(this._removePrefix(key));
+            }
+          }
+          return index >= 0 && index < keys.length ? keys[index] : null;
+        }
+      }
+{{- if .EndpointIsAbsolute}}
+      const url = {{.Endpoint}};
+      const subscriptionUrl = {{.SubscriptionEndpoint}};
 {{- else}}
-      const url = location.protocol + '//' + location.host + {{.endpoint}};
+      const url = location.protocol + '//' + location.host + {{.Endpoint}};
       const wsProto = location.protocol == 'https:' ? 'wss:' : 'ws:';
-      const subscriptionUrl = wsProto + '//' + location.host + {{.endpoint}};
+      const subscriptionUrl = wsProto + '//' + location.host + {{.Endpoint}};
 {{- end}}
-{{- if .fetcherHeaders}}
-      const fetcherHeaders = {{.fetcherHeaders}};
+{{- if .FetcherHeaders}}
+      const fetcherHeaders = {{.FetcherHeaders}};
 {{- else}}
       const fetcherHeaders = undefined;
 {{- end}}
-{{- if .uiHeaders}}
-      const uiHeaders = {{.uiHeaders}};
+{{- if .UiHeaders}}
+      const uiHeaders = {{.UiHeaders}};
 {{- else}}
       const uiHeaders = undefined;
 {{- end}}
@@ -75,7 +136,8 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
           fetcher: fetcher,
           isHeadersEditorEnabled: true,
           shouldPersistHeaders: true,
-		  headers: JSON.stringify(uiHeaders, null, 2)
+		  headers: JSON.stringify(uiHeaders, null, 2),
+          storage: new PrefixedStorage('{{.StoragePrefix}}')
         }),
         document.getElementById('graphiql'),
       );
@@ -84,9 +146,63 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 </html>
 `))
 
+type GraphiqlConfig struct {
+	Title                string
+	StoragePrefix        string
+	Endpoint             string
+	FetcherHeaders       map[string]string
+	UiHeaders            map[string]string
+	EndpointIsAbsolute   bool
+	SubscriptionEndpoint string
+	Version              string
+	CssSRI               string
+	JsSRI                string
+	ReactSRI             string
+	ReactDOMSRI          string
+}
+type GraphiqlConfigOption func(*GraphiqlConfig)
+
+func WithGraphiqlFetcherHeaders(headers map[string]string) GraphiqlConfigOption {
+	return func(config *GraphiqlConfig) {
+		config.FetcherHeaders = headers
+	}
+}
+
+func WithGraphiqlUiHeaders(headers map[string]string) GraphiqlConfigOption {
+	return func(config *GraphiqlConfig) {
+		config.UiHeaders = headers
+	}
+}
+
+func WithStoragePrefix(prefix string) GraphiqlConfigOption {
+	return func(config *GraphiqlConfig) {
+		config.StoragePrefix = prefix
+	}
+}
+
 // Handler responsible for setting up the playground
-func Handler(title, endpoint string) http.HandlerFunc {
-	return HandlerWithHeaders(title, endpoint, nil, nil)
+func Handler(title, endpoint string, opts ...GraphiqlConfigOption) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("Content-Type", "text/html; charset=UTF-8")
+		var data = GraphiqlConfig{
+			Title:                title,
+			Endpoint:             endpoint,
+			EndpointIsAbsolute:   endpointHasScheme(endpoint),
+			SubscriptionEndpoint: getSubscriptionEndpoint(endpoint),
+			Version:              "3.7.0",
+			CssSRI:               "sha256-Dbkv2LUWis+0H4Z+IzxLBxM2ka1J133lSjqqtSu49o8=",
+			JsSRI:                "sha256-qsScAZytFdTAEOM8REpljROHu8DvdvxXBK7xhoq5XD0=",
+			ReactSRI:             "sha256-S0lp+k7zWUMk2ixteM6HZvu8L9Eh//OVrt+ZfbCpmgY=",
+			ReactDOMSRI:          "sha256-IXWO0ITNDjfnNXIu5POVfqlgYoop36bDzhodR6LW5Pc=",
+		}
+		for _, opt := range opts {
+			opt(&data)
+		}
+		err := page.Execute(w, data)
+		if err != nil {
+			panic(err)
+		}
+	}
 }
 
 // HandlerWithHeaders sets up the playground.
@@ -96,25 +212,7 @@ func HandlerWithHeaders(
 	title, endpoint string,
 	fetcherHeaders, uiHeaders map[string]string,
 ) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Content-Type", "text/html; charset=UTF-8")
-		err := page.Execute(w, map[string]any{
-			"title":                title,
-			"endpoint":             endpoint,
-			"fetcherHeaders":       fetcherHeaders,
-			"uiHeaders":            uiHeaders,
-			"endpointIsAbsolute":   endpointHasScheme(endpoint),
-			"subscriptionEndpoint": getSubscriptionEndpoint(endpoint),
-			"version":              "3.7.0",
-			"cssSRI":               "sha256-Dbkv2LUWis+0H4Z+IzxLBxM2ka1J133lSjqqtSu49o8=",
-			"jsSRI":                "sha256-qsScAZytFdTAEOM8REpljROHu8DvdvxXBK7xhoq5XD0=",
-			"reactSRI":             "sha256-S0lp+k7zWUMk2ixteM6HZvu8L9Eh//OVrt+ZfbCpmgY=",
-			"reactDOMSRI":          "sha256-IXWO0ITNDjfnNXIu5POVfqlgYoop36bDzhodR6LW5Pc=",
-		})
-		if err != nil {
-			panic(err)
-		}
-	}
+	return Handler(title, endpoint, WithGraphiqlFetcherHeaders(fetcherHeaders), WithGraphiqlUiHeaders(uiHeaders))
 }
 
 // endpointHasScheme checks if the endpoint has a scheme.

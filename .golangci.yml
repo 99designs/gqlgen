@@ -99,7 +99,6 @@ linters:
     - revive
     - staticcheck
     - testifylint
-    - typecheck
     - unconvert
     - unused
 

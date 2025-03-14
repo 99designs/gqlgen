@@ -1,6 +1,7 @@
 module github.com/gqlgen/_examples/websocket-initfunc/server
 
-go 1.22.12
+go 1.23.0
+
 toolchain go1.23.7
 
 require (

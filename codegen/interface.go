@@ -43,8 +43,15 @@ func (b *builder) buildInterface(typ *ast.Definition) (*Interface, error) {
 
 	// Sort so that more specific types are evaluated first.
 	implementors := b.Schema.GetPossibleTypes(typ)
+
 	sort.SliceStable(implementors, func(i, j int) bool {
-		return len(implementors[i].Interfaces) > len(implementors[j].Interfaces)
+		if len(implementors[i].Interfaces) != len(implementors[j].Interfaces) {
+			return len(implementors[i].Interfaces) > len(implementors[j].Interfaces)
+		}
+		// if they have the same name, they probably ARE the same
+		// so we need to rely on SliceStable or else order is
+		// non-deterministic and causes test failures
+		return implementors[i].Name > implementors[j].Name
 	})
 
 	for _, implementor := range implementors {

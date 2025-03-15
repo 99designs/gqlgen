@@ -88,26 +88,31 @@ func Render(cfg Options) error {
 	}
 
 	roots := make([]string, 0, len(t.Templates()))
-	for _, template := range t.Templates() {
+	for _, templ := range t.Templates() {
 		// templates that end with _.gotpl are special files we don't want to include
-		if strings.HasSuffix(template.Name(), "_.gotpl") ||
+		if strings.HasSuffix(templ.Name(), "_.gotpl") ||
 			// filter out templates added with {{ template xxx }} syntax inside the template file
-			!strings.HasSuffix(template.Name(), ".gotpl") {
+			!strings.HasSuffix(templ.Name(), ".gotpl") {
 			continue
 		}
 
-		roots = append(roots, template.Name())
+		roots = append(roots, templ.Name())
 	}
 
 	// then execute all the important looking ones in order, adding them to the same file
 	sort.SliceStable(roots, func(i, j int) bool {
 		// important files go first
-		if strings.HasSuffix(roots[i], "!.gotpl") {
+		if strings.HasSuffix(roots[i], "!.gotpl") &&
+			!strings.HasSuffix(roots[j], "!.gotpl") {
 			return true
 		}
-		if strings.HasSuffix(roots[j], "!.gotpl") {
+		if strings.HasSuffix(roots[j], "!.gotpl") &&
+			!strings.HasSuffix(roots[i], "!.gotpl") {
 			return false
 		}
+		// files that have identical names are sorted dependent on input order
+		// so we rely on SliceStable here to ensure deterministic results
+		// to avoid test failures
 		return roots[i] < roots[j]
 	})
 

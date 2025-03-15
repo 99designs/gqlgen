@@ -235,3 +235,19 @@ directives:
   constraint:
     skip_runtime: true
 ```
+
+## Configuring for a big projects
+Big projects usually divided into a separate domains, keeping all related files and resources under one folder such as 
+```
+DomainA
+- schema
+- resolver
+- service
+DomainB
+- schema
+- resolver
+- service
+```
+
+In order to achieve such behavior, after first generate `resolvers` section should be commented out from `config.yaml`, so resolvers are not auto-generated and you can design any desired resolvers architecture.
+Idea is from a discussion [https://github.com/99designs/gqlgen/issues/1253](https://github.com/99designs/gqlgen/issues/1253#issuecomment-664448226)

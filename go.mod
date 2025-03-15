@@ -5,14 +5,14 @@ go 1.23.0
 toolchain go1.23.6
 
 require (
-	github.com/PuerkitoBio/goquery v1.9.3
+	github.com/PuerkitoBio/goquery v1.10.2
 	github.com/go-viper/mapstructure/v2 v2.2.1
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.0 // do not upgrade to v1.5.1 as it has serious bugs
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/kevinmbeaulieu/eq-go v1.0.0
 	github.com/logrusorgru/aurora/v4 v4.0.0
-	github.com/matryer/moq v0.4.0
+	github.com/matryer/moq v0.5.2
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
 	github.com/sosodev/duration v1.3.1
@@ -27,7 +27,7 @@ require (
 
 require (
 	github.com/agnivade/levenshtein v1.2.1 // indirect
-	github.com/andybalholm/cascadia v1.3.2 // indirect
+	github.com/andybalholm/cascadia v1.3.3 // indirect
 	github.com/cpuguy83/go-md2man/v2 v2.0.5 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

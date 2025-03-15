@@ -6792,104 +6792,6 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
-	case model.Hello:
-		return ec._Hello(ctx, sel, &obj)
-	case *model.Hello:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Hello(ctx, sel, obj)
-	case model.HelloMultiSingleKeys:
-		return ec._HelloMultiSingleKeys(ctx, sel, &obj)
-	case *model.HelloMultiSingleKeys:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._HelloMultiSingleKeys(ctx, sel, obj)
-	case model.HelloWithErrors:
-		return ec._HelloWithErrors(ctx, sel, &obj)
-	case *model.HelloWithErrors:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._HelloWithErrors(ctx, sel, obj)
-	case model.MultiHello:
-		return ec._MultiHello(ctx, sel, &obj)
-	case *model.MultiHello:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._MultiHello(ctx, sel, obj)
-	case model.MultiHelloMultipleRequires:
-		return ec._MultiHelloMultipleRequires(ctx, sel, &obj)
-	case *model.MultiHelloMultipleRequires:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._MultiHelloMultipleRequires(ctx, sel, obj)
-	case model.MultiHelloRequires:
-		return ec._MultiHelloRequires(ctx, sel, &obj)
-	case *model.MultiHelloRequires:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._MultiHelloRequires(ctx, sel, obj)
-	case model.MultiHelloWithError:
-		return ec._MultiHelloWithError(ctx, sel, &obj)
-	case *model.MultiHelloWithError:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._MultiHelloWithError(ctx, sel, obj)
-	case model.MultiPlanetRequiresNested:
-		return ec._MultiPlanetRequiresNested(ctx, sel, &obj)
-	case *model.MultiPlanetRequiresNested:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._MultiPlanetRequiresNested(ctx, sel, obj)
-	case model.Person:
-		return ec._Person(ctx, sel, &obj)
-	case *model.Person:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Person(ctx, sel, obj)
-	case model.PlanetMultipleRequires:
-		return ec._PlanetMultipleRequires(ctx, sel, &obj)
-	case *model.PlanetMultipleRequires:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._PlanetMultipleRequires(ctx, sel, obj)
-	case model.PlanetRequires:
-		return ec._PlanetRequires(ctx, sel, &obj)
-	case *model.PlanetRequires:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._PlanetRequires(ctx, sel, obj)
-	case model.PlanetRequiresNested:
-		return ec._PlanetRequiresNested(ctx, sel, &obj)
-	case *model.PlanetRequiresNested:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._PlanetRequiresNested(ctx, sel, obj)
-	case model.World:
-		return ec._World(ctx, sel, &obj)
-	case *model.World:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._World(ctx, sel, obj)
-	case model.WorldName:
-		return ec._WorldName(ctx, sel, &obj)
-	case *model.WorldName:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._WorldName(ctx, sel, obj)
 	case model.WorldWithMultipleKeys:
 		return ec._WorldWithMultipleKeys(ctx, sel, &obj)
 	case *model.WorldWithMultipleKeys:
@@ -6897,6 +6799,104 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 			return graphql.Null
 		}
 		return ec._WorldWithMultipleKeys(ctx, sel, obj)
+	case model.WorldName:
+		return ec._WorldName(ctx, sel, &obj)
+	case *model.WorldName:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._WorldName(ctx, sel, obj)
+	case model.World:
+		return ec._World(ctx, sel, &obj)
+	case *model.World:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._World(ctx, sel, obj)
+	case model.PlanetRequiresNested:
+		return ec._PlanetRequiresNested(ctx, sel, &obj)
+	case *model.PlanetRequiresNested:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._PlanetRequiresNested(ctx, sel, obj)
+	case model.PlanetRequires:
+		return ec._PlanetRequires(ctx, sel, &obj)
+	case *model.PlanetRequires:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._PlanetRequires(ctx, sel, obj)
+	case model.PlanetMultipleRequires:
+		return ec._PlanetMultipleRequires(ctx, sel, &obj)
+	case *model.PlanetMultipleRequires:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._PlanetMultipleRequires(ctx, sel, obj)
+	case model.Person:
+		return ec._Person(ctx, sel, &obj)
+	case *model.Person:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Person(ctx, sel, obj)
+	case model.MultiPlanetRequiresNested:
+		return ec._MultiPlanetRequiresNested(ctx, sel, &obj)
+	case *model.MultiPlanetRequiresNested:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._MultiPlanetRequiresNested(ctx, sel, obj)
+	case model.MultiHelloWithError:
+		return ec._MultiHelloWithError(ctx, sel, &obj)
+	case *model.MultiHelloWithError:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._MultiHelloWithError(ctx, sel, obj)
+	case model.MultiHelloRequires:
+		return ec._MultiHelloRequires(ctx, sel, &obj)
+	case *model.MultiHelloRequires:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._MultiHelloRequires(ctx, sel, obj)
+	case model.MultiHelloMultipleRequires:
+		return ec._MultiHelloMultipleRequires(ctx, sel, &obj)
+	case *model.MultiHelloMultipleRequires:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._MultiHelloMultipleRequires(ctx, sel, obj)
+	case model.MultiHello:
+		return ec._MultiHello(ctx, sel, &obj)
+	case *model.MultiHello:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._MultiHello(ctx, sel, obj)
+	case model.HelloWithErrors:
+		return ec._HelloWithErrors(ctx, sel, &obj)
+	case *model.HelloWithErrors:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._HelloWithErrors(ctx, sel, obj)
+	case model.HelloMultiSingleKeys:
+		return ec._HelloMultiSingleKeys(ctx, sel, &obj)
+	case *model.HelloMultiSingleKeys:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._HelloMultiSingleKeys(ctx, sel, obj)
+	case model.Hello:
+		return ec._Hello(ctx, sel, &obj)
+	case *model.Hello:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Hello(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}

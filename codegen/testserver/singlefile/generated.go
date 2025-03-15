@@ -17659,6 +17659,11 @@ func (ec *executionContext) _Animal(ctx context.Context, sel ast.SelectionSet, o
 			return graphql.Null
 		}
 		return ec._Horse(ctx, sel, obj)
+	case Mammalian:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Mammalian(ctx, sel, obj)
 	case Dog:
 		return ec._Dog(ctx, sel, &obj)
 	case *Dog:
@@ -17673,11 +17678,6 @@ func (ec *executionContext) _Animal(ctx context.Context, sel ast.SelectionSet, o
 			return graphql.Null
 		}
 		return ec._Cat(ctx, sel, obj)
-	case Mammalian:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Mammalian(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -17726,16 +17726,16 @@ func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
-	case *ConcreteNodeA:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._ConcreteNodeA(ctx, sel, obj)
 	case ConcreteNodeInterface:
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._ConcreteNodeInterface(ctx, sel, obj)
+	case *ConcreteNodeA:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._ConcreteNodeA(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -17745,16 +17745,16 @@ func (ec *executionContext) _Shape(ctx context.Context, sel ast.SelectionSet, ob
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
-	case *Circle:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Circle(ctx, sel, obj)
 	case *Rectangle:
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._Rectangle(ctx, sel, obj)
+	case *Circle:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Circle(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -17764,16 +17764,16 @@ func (ec *executionContext) _ShapeUnion(ctx context.Context, sel ast.SelectionSe
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
-	case *Circle:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Circle(ctx, sel, obj)
 	case *Rectangle:
 		if obj == nil {
 			return graphql.Null
 		}
 		return ec._Rectangle(ctx, sel, obj)
+	case *Circle:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Circle(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}
@@ -17783,13 +17783,6 @@ func (ec *executionContext) _TestUnion(ctx context.Context, sel ast.SelectionSet
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
-	case A:
-		return ec._A(ctx, sel, &obj)
-	case *A:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._A(ctx, sel, obj)
 	case B:
 		return ec._B(ctx, sel, &obj)
 	case *B:
@@ -17797,6 +17790,13 @@ func (ec *executionContext) _TestUnion(ctx context.Context, sel ast.SelectionSet
 			return graphql.Null
 		}
 		return ec._B(ctx, sel, obj)
+	case A:
+		return ec._A(ctx, sel, &obj)
+	case *A:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._A(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}

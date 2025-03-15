@@ -6234,104 +6234,6 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
-	case Hello:
-		return ec._Hello(ctx, sel, &obj)
-	case *Hello:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Hello(ctx, sel, obj)
-	case HelloMultiSingleKeys:
-		return ec._HelloMultiSingleKeys(ctx, sel, &obj)
-	case *HelloMultiSingleKeys:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._HelloMultiSingleKeys(ctx, sel, obj)
-	case HelloWithErrors:
-		return ec._HelloWithErrors(ctx, sel, &obj)
-	case *HelloWithErrors:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._HelloWithErrors(ctx, sel, obj)
-	case MultiHello:
-		return ec._MultiHello(ctx, sel, &obj)
-	case *MultiHello:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._MultiHello(ctx, sel, obj)
-	case MultiHelloMultipleRequires:
-		return ec._MultiHelloMultipleRequires(ctx, sel, &obj)
-	case *MultiHelloMultipleRequires:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._MultiHelloMultipleRequires(ctx, sel, obj)
-	case MultiHelloRequires:
-		return ec._MultiHelloRequires(ctx, sel, &obj)
-	case *MultiHelloRequires:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._MultiHelloRequires(ctx, sel, obj)
-	case MultiHelloWithError:
-		return ec._MultiHelloWithError(ctx, sel, &obj)
-	case *MultiHelloWithError:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._MultiHelloWithError(ctx, sel, obj)
-	case MultiPlanetRequiresNested:
-		return ec._MultiPlanetRequiresNested(ctx, sel, &obj)
-	case *MultiPlanetRequiresNested:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._MultiPlanetRequiresNested(ctx, sel, obj)
-	case Person:
-		return ec._Person(ctx, sel, &obj)
-	case *Person:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Person(ctx, sel, obj)
-	case PlanetMultipleRequires:
-		return ec._PlanetMultipleRequires(ctx, sel, &obj)
-	case *PlanetMultipleRequires:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._PlanetMultipleRequires(ctx, sel, obj)
-	case PlanetRequires:
-		return ec._PlanetRequires(ctx, sel, &obj)
-	case *PlanetRequires:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._PlanetRequires(ctx, sel, obj)
-	case PlanetRequiresNested:
-		return ec._PlanetRequiresNested(ctx, sel, &obj)
-	case *PlanetRequiresNested:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._PlanetRequiresNested(ctx, sel, obj)
-	case World:
-		return ec._World(ctx, sel, &obj)
-	case *World:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._World(ctx, sel, obj)
-	case WorldName:
-		return ec._WorldName(ctx, sel, &obj)
-	case *WorldName:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._WorldName(ctx, sel, obj)
 	case WorldWithMultipleKeys:
 		return ec._WorldWithMultipleKeys(ctx, sel, &obj)
 	case *WorldWithMultipleKeys:
@@ -6339,6 +6241,104 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 			return graphql.Null
 		}
 		return ec._WorldWithMultipleKeys(ctx, sel, obj)
+	case WorldName:
+		return ec._WorldName(ctx, sel, &obj)
+	case *WorldName:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._WorldName(ctx, sel, obj)
+	case World:
+		return ec._World(ctx, sel, &obj)
+	case *World:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._World(ctx, sel, obj)
+	case PlanetRequiresNested:
+		return ec._PlanetRequiresNested(ctx, sel, &obj)
+	case *PlanetRequiresNested:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._PlanetRequiresNested(ctx, sel, obj)
+	case PlanetRequires:
+		return ec._PlanetRequires(ctx, sel, &obj)
+	case *PlanetRequires:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._PlanetRequires(ctx, sel, obj)
+	case PlanetMultipleRequires:
+		return ec._PlanetMultipleRequires(ctx, sel, &obj)
+	case *PlanetMultipleRequires:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._PlanetMultipleRequires(ctx, sel, obj)
+	case Person:
+		return ec._Person(ctx, sel, &obj)
+	case *Person:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Person(ctx, sel, obj)
+	case MultiPlanetRequiresNested:
+		return ec._MultiPlanetRequiresNested(ctx, sel, &obj)
+	case *MultiPlanetRequiresNested:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._MultiPlanetRequiresNested(ctx, sel, obj)
+	case MultiHelloWithError:
+		return ec._MultiHelloWithError(ctx, sel, &obj)
+	case *MultiHelloWithError:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._MultiHelloWithError(ctx, sel, obj)
+	case MultiHelloRequires:
+		return ec._MultiHelloRequires(ctx, sel, &obj)
+	case *MultiHelloRequires:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._MultiHelloRequires(ctx, sel, obj)
+	case MultiHelloMultipleRequires:
+		return ec._MultiHelloMultipleRequires(ctx, sel, &obj)
+	case *MultiHelloMultipleRequires:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._MultiHelloMultipleRequires(ctx, sel, obj)
+	case MultiHello:
+		return ec._MultiHello(ctx, sel, &obj)
+	case *MultiHello:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._MultiHello(ctx, sel, obj)
+	case HelloWithErrors:
+		return ec._HelloWithErrors(ctx, sel, &obj)
+	case *HelloWithErrors:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._HelloWithErrors(ctx, sel, obj)
+	case HelloMultiSingleKeys:
+		return ec._HelloMultiSingleKeys(ctx, sel, &obj)
+	case *HelloMultiSingleKeys:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._HelloMultiSingleKeys(ctx, sel, obj)
+	case Hello:
+		return ec._Hello(ctx, sel, &obj)
+	case *Hello:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Hello(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}

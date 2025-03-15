@@ -6362,97 +6362,6 @@ func __Entity(ctx context.Context, ec *executionContext, sel ast.SelectionSet, o
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
-	case model.Hello:
-		return _Hello(ctx, ec, sel, &obj)
-	case *model.Hello:
-		if obj == nil {
-			return graphql.Null
-		}
-		return _Hello(ctx, ec, sel, obj)
-	case model.HelloMultiSingleKeys:
-		return _HelloMultiSingleKeys(ctx, ec, sel, &obj)
-	case *model.HelloMultiSingleKeys:
-		if obj == nil {
-			return graphql.Null
-		}
-		return _HelloMultiSingleKeys(ctx, ec, sel, obj)
-	case model.HelloWithErrors:
-		return _HelloWithErrors(ctx, ec, sel, &obj)
-	case *model.HelloWithErrors:
-		if obj == nil {
-			return graphql.Null
-		}
-		return _HelloWithErrors(ctx, ec, sel, obj)
-	case model.MultiHello:
-		return _MultiHello(ctx, ec, sel, &obj)
-	case *model.MultiHello:
-		if obj == nil {
-			return graphql.Null
-		}
-		return _MultiHello(ctx, ec, sel, obj)
-	case model.MultiHelloMultipleRequires:
-		return _MultiHelloMultipleRequires(ctx, ec, sel, &obj)
-	case *model.MultiHelloMultipleRequires:
-		if obj == nil {
-			return graphql.Null
-		}
-		return _MultiHelloMultipleRequires(ctx, ec, sel, obj)
-	case model.MultiHelloRequires:
-		return _MultiHelloRequires(ctx, ec, sel, &obj)
-	case *model.MultiHelloRequires:
-		if obj == nil {
-			return graphql.Null
-		}
-		return _MultiHelloRequires(ctx, ec, sel, obj)
-	case model.MultiHelloWithError:
-		return _MultiHelloWithError(ctx, ec, sel, &obj)
-	case *model.MultiHelloWithError:
-		if obj == nil {
-			return graphql.Null
-		}
-		return _MultiHelloWithError(ctx, ec, sel, obj)
-	case model.MultiPlanetRequiresNested:
-		return _MultiPlanetRequiresNested(ctx, ec, sel, &obj)
-	case *model.MultiPlanetRequiresNested:
-		if obj == nil {
-			return graphql.Null
-		}
-		return _MultiPlanetRequiresNested(ctx, ec, sel, obj)
-	case model.PlanetMultipleRequires:
-		return _PlanetMultipleRequires(ctx, ec, sel, &obj)
-	case *model.PlanetMultipleRequires:
-		if obj == nil {
-			return graphql.Null
-		}
-		return _PlanetMultipleRequires(ctx, ec, sel, obj)
-	case model.PlanetRequires:
-		return _PlanetRequires(ctx, ec, sel, &obj)
-	case *model.PlanetRequires:
-		if obj == nil {
-			return graphql.Null
-		}
-		return _PlanetRequires(ctx, ec, sel, obj)
-	case model.PlanetRequiresNested:
-		return _PlanetRequiresNested(ctx, ec, sel, &obj)
-	case *model.PlanetRequiresNested:
-		if obj == nil {
-			return graphql.Null
-		}
-		return _PlanetRequiresNested(ctx, ec, sel, obj)
-	case model.World:
-		return _World(ctx, ec, sel, &obj)
-	case *model.World:
-		if obj == nil {
-			return graphql.Null
-		}
-		return _World(ctx, ec, sel, obj)
-	case model.WorldName:
-		return _WorldName(ctx, ec, sel, &obj)
-	case *model.WorldName:
-		if obj == nil {
-			return graphql.Null
-		}
-		return _WorldName(ctx, ec, sel, obj)
 	case model.WorldWithMultipleKeys:
 		return _WorldWithMultipleKeys(ctx, ec, sel, &obj)
 	case *model.WorldWithMultipleKeys:
@@ -6460,6 +6369,97 @@ func __Entity(ctx context.Context, ec *executionContext, sel ast.SelectionSet, o
 			return graphql.Null
 		}
 		return _WorldWithMultipleKeys(ctx, ec, sel, obj)
+	case model.WorldName:
+		return _WorldName(ctx, ec, sel, &obj)
+	case *model.WorldName:
+		if obj == nil {
+			return graphql.Null
+		}
+		return _WorldName(ctx, ec, sel, obj)
+	case model.World:
+		return _World(ctx, ec, sel, &obj)
+	case *model.World:
+		if obj == nil {
+			return graphql.Null
+		}
+		return _World(ctx, ec, sel, obj)
+	case model.PlanetRequiresNested:
+		return _PlanetRequiresNested(ctx, ec, sel, &obj)
+	case *model.PlanetRequiresNested:
+		if obj == nil {
+			return graphql.Null
+		}
+		return _PlanetRequiresNested(ctx, ec, sel, obj)
+	case model.PlanetRequires:
+		return _PlanetRequires(ctx, ec, sel, &obj)
+	case *model.PlanetRequires:
+		if obj == nil {
+			return graphql.Null
+		}
+		return _PlanetRequires(ctx, ec, sel, obj)
+	case model.PlanetMultipleRequires:
+		return _PlanetMultipleRequires(ctx, ec, sel, &obj)
+	case *model.PlanetMultipleRequires:
+		if obj == nil {
+			return graphql.Null
+		}
+		return _PlanetMultipleRequires(ctx, ec, sel, obj)
+	case model.MultiPlanetRequiresNested:
+		return _MultiPlanetRequiresNested(ctx, ec, sel, &obj)
+	case *model.MultiPlanetRequiresNested:
+		if obj == nil {
+			return graphql.Null
+		}
+		return _MultiPlanetRequiresNested(ctx, ec, sel, obj)
+	case model.MultiHelloWithError:
+		return _MultiHelloWithError(ctx, ec, sel, &obj)
+	case *model.MultiHelloWithError:
+		if obj == nil {
+			return graphql.Null
+		}
+		return _MultiHelloWithError(ctx, ec, sel, obj)
+	case model.MultiHelloRequires:
+		return _MultiHelloRequires(ctx, ec, sel, &obj)
+	case *model.MultiHelloRequires:
+		if obj == nil {
+			return graphql.Null
+		}
+		return _MultiHelloRequires(ctx, ec, sel, obj)
+	case model.MultiHelloMultipleRequires:
+		return _MultiHelloMultipleRequires(ctx, ec, sel, &obj)
+	case *model.MultiHelloMultipleRequires:
+		if obj == nil {
+			return graphql.Null
+		}
+		return _MultiHelloMultipleRequires(ctx, ec, sel, obj)
+	case model.MultiHello:
+		return _MultiHello(ctx, ec, sel, &obj)
+	case *model.MultiHello:
+		if obj == nil {
+			return graphql.Null
+		}
+		return _MultiHello(ctx, ec, sel, obj)
+	case model.HelloWithErrors:
+		return _HelloWithErrors(ctx, ec, sel, &obj)
+	case *model.HelloWithErrors:
+		if obj == nil {
+			return graphql.Null
+		}
+		return _HelloWithErrors(ctx, ec, sel, obj)
+	case model.HelloMultiSingleKeys:
+		return _HelloMultiSingleKeys(ctx, ec, sel, &obj)
+	case *model.HelloMultiSingleKeys:
+		if obj == nil {
+			return graphql.Null
+		}
+		return _HelloMultiSingleKeys(ctx, ec, sel, obj)
+	case model.Hello:
+		return _Hello(ctx, ec, sel, &obj)
+	case *model.Hello:
+		if obj == nil {
+			return graphql.Null
+		}
+		return _Hello(ctx, ec, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}

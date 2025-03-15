@@ -3687,27 +3687,6 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
-	case model.EmailHost:
-		return ec._EmailHost(ctx, sel, &obj)
-	case *model.EmailHost:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._EmailHost(ctx, sel, obj)
-	case model.Manufacturer:
-		return ec._Manufacturer(ctx, sel, &obj)
-	case *model.Manufacturer:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Manufacturer(ctx, sel, obj)
-	case model.Product:
-		return ec._Product(ctx, sel, &obj)
-	case *model.Product:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Product(ctx, sel, obj)
 	case model.User:
 		return ec._User(ctx, sel, &obj)
 	case *model.User:
@@ -3715,6 +3694,27 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 			return graphql.Null
 		}
 		return ec._User(ctx, sel, obj)
+	case model.Product:
+		return ec._Product(ctx, sel, &obj)
+	case *model.Product:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Product(ctx, sel, obj)
+	case model.Manufacturer:
+		return ec._Manufacturer(ctx, sel, &obj)
+	case *model.Manufacturer:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Manufacturer(ctx, sel, obj)
+	case model.EmailHost:
+		return ec._EmailHost(ctx, sel, &obj)
+	case *model.EmailHost:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._EmailHost(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}

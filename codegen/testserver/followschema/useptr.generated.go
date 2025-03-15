@@ -121,13 +121,6 @@ func (ec *executionContext) _TestUnion(ctx context.Context, sel ast.SelectionSet
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
-	case A:
-		return ec._A(ctx, sel, &obj)
-	case *A:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._A(ctx, sel, obj)
 	case B:
 		return ec._B(ctx, sel, &obj)
 	case *B:
@@ -135,6 +128,13 @@ func (ec *executionContext) _TestUnion(ctx context.Context, sel ast.SelectionSet
 			return graphql.Null
 		}
 		return ec._B(ctx, sel, obj)
+	case A:
+		return ec._A(ctx, sel, &obj)
+	case *A:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._A(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}

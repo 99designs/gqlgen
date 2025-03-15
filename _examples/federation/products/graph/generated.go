@@ -3373,13 +3373,6 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
-	case model.Manufacturer:
-		return ec._Manufacturer(ctx, sel, &obj)
-	case *model.Manufacturer:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._Manufacturer(ctx, sel, obj)
 	case model.Product:
 		return ec._Product(ctx, sel, &obj)
 	case *model.Product:
@@ -3387,6 +3380,13 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 			return graphql.Null
 		}
 		return ec._Product(ctx, sel, obj)
+	case model.Manufacturer:
+		return ec._Manufacturer(ctx, sel, &obj)
+	case *model.Manufacturer:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Manufacturer(ctx, sel, obj)
 	default:
 		panic(fmt.Errorf("unexpected type %T", obj))
 	}

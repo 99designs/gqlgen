@@ -43,7 +43,7 @@ func (b *builder) buildInterface(typ *ast.Definition) (*Interface, error) {
 
 	// Sort so that more specific types are evaluated first.
 	implementors := b.Schema.GetPossibleTypes(typ)
-	sort.Slice(implementors, func(i, j int) bool {
+	sort.SliceStable(implementors, func(i, j int) bool {
 		return len(implementors[i].Interfaces) > len(implementors[j].Interfaces)
 	})
 

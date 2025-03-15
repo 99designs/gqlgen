@@ -100,7 +100,7 @@ func Render(cfg Options) error {
 	}
 
 	// then execute all the important looking ones in order, adding them to the same file
-	sort.Slice(roots, func(i, j int) bool {
+	sort.SliceStable(roots, func(i, j int) bool {
 		// important files go first
 		if strings.HasSuffix(roots[i], "!.gotpl") {
 			return true

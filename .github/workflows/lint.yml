@@ -26,11 +26,11 @@ jobs:
         with:
           go-version: ${{ matrix.go }}
       - name: golangci-lint
-        uses: golangci/golangci-lint-action@v6.5.0
+        uses: golangci/golangci-lint-action@v6.5.1
         with:
           version: ${{ env.GOLANGCI_LINT_VERSION }}
       - name: golangci-lint examples
-        uses: golangci/golangci-lint-action@v6.5.0
+        uses: golangci/golangci-lint-action@v6.5.1
         with:
           version: ${{ env.GOLANGCI_LINT_VERSION }}
           working-directory: _examples

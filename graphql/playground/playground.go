@@ -33,19 +33,19 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 		integrity="{{.ReactDOMSRI}}"
 		crossorigin="anonymous"
 	></script>
-    <link
+	<link
 		rel="stylesheet"
 		href="https://cdn.jsdelivr.net/npm/graphiql@{{.Version}}/graphiql.min.css"
 		integrity="{{.CssSRI}}"
 		crossorigin="anonymous"
 	/>
 {{- if .EnablePluginExplorer}}
-    <link
-    	rel="stylesheet"
+	<link
+		rel="stylesheet"
 		href="https://cdn.jsdelivr.net/npm/@graphiql/plugin-explorer@{{.PluginExplorerVersion}}/dist/style.css"
 		integrity="{{.PluginExplorerCssSRI}}"
 		crossorigin="anonymous"
-    />
+	/>
 {{- end}}
   </head>
   <body>
@@ -57,11 +57,11 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 		crossorigin="anonymous"
 	></script>
 {{- if .EnablePluginExplorer}}
-    <script
+	<script
 		src="https://cdn.jsdelivr.net/npm/@graphiql/plugin-explorer@{{.PluginExplorerVersion}}/dist/index.umd.js"
 		integrity="{{.PluginExplorerJsSRI}}"
 		crossorigin="anonymous"
-    ></script>
+	></script>
 {{- end}}
 
     <script>

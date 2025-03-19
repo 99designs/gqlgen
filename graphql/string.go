@@ -64,6 +64,11 @@ func UnmarshalString(v any) (string, error) {
 	case nil:
 		return "", nil
 	default:
-		return "", fmt.Errorf("%T is not a string", v)
+		payload, err := json.Marshal(v)
+		if err != nil {
+			return "", fmt.Errorf("failed to marshal value of type %T: %w", v, err)
+		}
+
+		return string(payload), nil
 	}
 }

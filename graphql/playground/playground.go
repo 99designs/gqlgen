@@ -33,12 +33,20 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 		integrity="{{.ReactDOMSRI}}"
 		crossorigin="anonymous"
 	></script>
-    <link
+	<link
 		rel="stylesheet"
 		href="https://cdn.jsdelivr.net/npm/graphiql@{{.Version}}/graphiql.min.css"
 		integrity="{{.CssSRI}}"
 		crossorigin="anonymous"
 	/>
+{{- if .EnablePluginExplorer}}
+	<link
+		rel="stylesheet"
+		href="https://cdn.jsdelivr.net/npm/@graphiql/plugin-explorer@{{.PluginExplorerVersion}}/dist/style.css"
+		integrity="{{.PluginExplorerCssSRI}}"
+		crossorigin="anonymous"
+	/>
+{{- end}}
   </head>
   <body>
     <div id="graphiql">Loading...</div>
@@ -48,6 +56,13 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 		integrity="{{.JsSRI}}"
 		crossorigin="anonymous"
 	></script>
+{{- if .EnablePluginExplorer}}
+	<script
+		src="https://cdn.jsdelivr.net/npm/@graphiql/plugin-explorer@{{.PluginExplorerVersion}}/dist/index.umd.js"
+		integrity="{{.PluginExplorerJsSRI}}"
+		crossorigin="anonymous"
+	></script>
+{{- end}}
 
     <script>
       class PrefixedStorage {
@@ -130,6 +145,12 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
       const uiHeaders = undefined;
 {{- end}}
 
+      let plugins = [];
+{{- if .PluginExplorerVersion}}
+      const explorerPlugin = GraphiQLPluginExplorer.explorerPlugin();
+      plugins.push(explorerPlugin);
+{{- end}}
+
       const fetcher = GraphiQL.createFetcher({ url, subscriptionUrl, headers: fetcherHeaders });
       ReactDOM.render(
         React.createElement(GraphiQL, {
@@ -137,6 +158,7 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
           isHeadersEditorEnabled: true,
           shouldPersistHeaders: true,
 		  headers: JSON.stringify(uiHeaders, null, 2),
+		  plugins: plugins,
           storage: new PrefixedStorage('{{.StoragePrefix}}')
         }),
         document.getElementById('graphiql'),
@@ -147,18 +169,26 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 `))
 
 type GraphiqlConfig struct {
-	Title                string
-	StoragePrefix        string
-	Endpoint             string
-	FetcherHeaders       map[string]string
-	UiHeaders            map[string]string
-	EndpointIsAbsolute   bool
-	SubscriptionEndpoint string
-	Version              string
-	CssSRI               string
-	JsSRI                string
-	ReactSRI             string
-	ReactDOMSRI          string
+	Title                 string
+	StoragePrefix         string
+	Endpoint              string
+	FetcherHeaders        map[string]string
+	UiHeaders             map[string]string
+	EndpointIsAbsolute    bool
+	SubscriptionEndpoint  string
+	Version               string
+	EnablePluginExplorer  bool
+	PluginExplorerVersion string
+	// https://www.jsdelivr.com/package/npm/@graphiql/plugin-explorer?tab=files
+	PluginExplorerCssSRI string
+	PluginExplorerJsSRI  string
+	// https://www.jsdelivr.com/package/npm/graphiql?tab=files
+	CssSRI string
+	JsSRI  string
+	// https://www.jsdelivr.com/package/npm/react?tab=files
+	ReactSRI string
+	// https://www.jsdelivr.com/package/npm/react-dom?tab=files
+	ReactDOMSRI string
 }
 type GraphiqlConfigOption func(*GraphiqlConfig)
 
@@ -174,6 +204,12 @@ func WithGraphiqlUiHeaders(headers map[string]string) GraphiqlConfigOption {
 	}
 }
 
+func WithGraphiqlEnablePluginExplorer(enable bool) GraphiqlConfigOption {
+	return func(config *GraphiqlConfig) {
+		config.EnablePluginExplorer = enable
+	}
+}
+
 func WithStoragePrefix(prefix string) GraphiqlConfigOption {
 	return func(config *GraphiqlConfig) {
 		config.StoragePrefix = prefix
@@ -185,15 +221,18 @@ func Handler(title, endpoint string, opts ...GraphiqlConfigOption) http.HandlerF
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "text/html; charset=UTF-8")
 		var data = GraphiqlConfig{
-			Title:                title,
-			Endpoint:             endpoint,
-			EndpointIsAbsolute:   endpointHasScheme(endpoint),
-			SubscriptionEndpoint: getSubscriptionEndpoint(endpoint),
-			Version:              "3.7.0",
-			CssSRI:               "sha256-Dbkv2LUWis+0H4Z+IzxLBxM2ka1J133lSjqqtSu49o8=",
-			JsSRI:                "sha256-qsScAZytFdTAEOM8REpljROHu8DvdvxXBK7xhoq5XD0=",
-			ReactSRI:             "sha256-S0lp+k7zWUMk2ixteM6HZvu8L9Eh//OVrt+ZfbCpmgY=",
-			ReactDOMSRI:          "sha256-IXWO0ITNDjfnNXIu5POVfqlgYoop36bDzhodR6LW5Pc=",
+			Title:                 title,
+			Endpoint:              endpoint,
+			EndpointIsAbsolute:    endpointHasScheme(endpoint),
+			SubscriptionEndpoint:  getSubscriptionEndpoint(endpoint),
+			Version:               "3.7.0",
+			CssSRI:                "sha256-Dbkv2LUWis+0H4Z+IzxLBxM2ka1J133lSjqqtSu49o8=",
+			JsSRI:                 "sha256-qsScAZytFdTAEOM8REpljROHu8DvdvxXBK7xhoq5XD0=",
+			ReactSRI:              "sha256-S0lp+k7zWUMk2ixteM6HZvu8L9Eh//OVrt+ZfbCpmgY=",
+			ReactDOMSRI:           "sha256-IXWO0ITNDjfnNXIu5POVfqlgYoop36bDzhodR6LW5Pc=",
+			PluginExplorerVersion: "3.2.5",
+			PluginExplorerCssSRI:  "sha256-+fdus37Qf3cEIKiD3VvTvgMdc8qOAT1NGUKEevz5l6k=",
+			PluginExplorerJsSRI:   "sha256-minamf9GZIDrlzoMXDvU55DKk6DC5D6pNctIDWFMxS0=",
 		}
 		for _, opt := range opts {
 			opt(&data)

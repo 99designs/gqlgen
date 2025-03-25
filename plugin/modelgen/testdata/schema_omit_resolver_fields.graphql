@@ -4,9 +4,10 @@ directive @goTag(
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 directive @goField(
-	forceResolver: Boolean
-	name: String
+    forceResolver: Boolean
+    name: String
     omittable: Boolean
+    type: String
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION | INTERFACE
 
 type Base {

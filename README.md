@@ -1,6 +1,5 @@
 ![gqlgen](https://user-images.githubusercontent.com/980499/133180111-d064b38c-6eb9-444b-a60f-7005a6e68222.png)
 
-
 # gqlgen [![Integration](https://github.com/99designs/gqlgen/actions/workflows/integration.yml/badge.svg)](https://github.com/99designs/gqlgen/actions) [![Coverage Status](https://coveralls.io/repos/github/99designs/gqlgen/badge.svg?branch=master)](https://coveralls.io/github/99designs/gqlgen?branch=master) [![Go Report Card](https://goreportcard.com/badge/github.com/99designs/gqlgen)](https://goreportcard.com/report/github.com/99designs/gqlgen) [![Go Reference](https://pkg.go.dev/badge/github.com/99designs/gqlgen.svg)](https://pkg.go.dev/github.com/99designs/gqlgen) [![Read the Docs](https://badgen.net/badge/docs/available/green)](http://gqlgen.com/)
 
 ## What is gqlgen?
@@ -14,32 +13,34 @@
 Still not convinced enough to use **gqlgen**? Compare **gqlgen** with other Go graphql [implementations](https://gqlgen.com/feature-comparison/)
 
 ## Quick start
+
 1. [Initialise a new go module](https://golang.org/doc/tutorial/create-module)
 
-       mkdir example
-       cd example
-       go mod init example
+   mkdir example
+   cd example
+   go mod init example
 
 2. Add `github.com/99designs/gqlgen` to your [project's tools.go](https://go.dev/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module)
 
-       printf '//go:build tools\npackage tools\nimport (_ "github.com/99designs/gqlgen"\n _ "github.com/99designs/gqlgen/graphql/introspection")' | gofmt > tools.go
+   printf '//go:build tools\npackage tools\nimport (_ "github.com/99designs/gqlgen"\n _ "github.com/99designs/gqlgen/graphql/introspection")' | gofmt > tools.go
 
-       go mod tidy
+   go mod tidy
 
 3. Initialise gqlgen config and generate models
 
-       go run github.com/99designs/gqlgen init
+   go run github.com/99designs/gqlgen init
 
-       go mod tidy
+   go mod tidy
 
 4. Start the graphql server
 
-       go run server.go
+   go run server.go
 
 More help to get started:
- - [Getting started tutorial](https://gqlgen.com/getting-started/) - a comprehensive guide to help you get started
- - [Real-world examples](https://github.com/99designs/gqlgen/tree/master/_examples) show how to create GraphQL applications
- - [Reference docs](https://pkg.go.dev/github.com/99designs/gqlgen) for the APIs
+
+- [Getting started tutorial](https://gqlgen.com/getting-started/) - a comprehensive guide to help you get started
+- [Real-world examples](https://github.com/99designs/gqlgen/tree/master/_examples) show how to create GraphQL applications
+- [Reference docs](https://pkg.go.dev/github.com/99designs/gqlgen) for the APIs
 
 ## Reporting Issues
 
@@ -48,6 +49,7 @@ If you think you've found a bug, or something isn't behaving the way you think i
 ## Contributing
 
 We welcome contributions, Read our [Contribution Guidelines](https://github.com/99designs/gqlgen/blob/master/CONTRIBUTING.md) to learn more about contributing to **gqlgen**
+
 ## Frequently asked questions
 
 ### How do I prevent fetching child objects that might not be used?
@@ -56,9 +58,9 @@ When you have nested or recursive schema like this:
 
 ```graphql
 type User {
-  id: ID!
-  name: String!
-  friends: [User!]!
+	id: ID!
+	name: String!
+	friends: [User!]!
 }
 ```
 
@@ -109,19 +111,21 @@ func (r *userResolver) Friends(ctx context.Context, obj *User) ([]*User, error) 
 You can also use inline config with directives to achieve the same result
 
 ```graphql
-directive @goModel(model: String, models: [String!]) on OBJECT
-    | INPUT_OBJECT
-    | SCALAR
-    | ENUM
-    | INTERFACE
-    | UNION
+directive @goModel(
+	model: String
+	models: [String!]
+) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
 
-directive @goField(forceResolver: Boolean, name: String, omittable: Boolean) on INPUT_FIELD_DEFINITION
-    | FIELD_DEFINITION
+directive @goField(
+	forceResolver: Boolean
+	name: String
+	omittable: Boolean
+	type: String
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 type User @goModel(model: "github.com/you/pkg/model.User") {
-    id: ID!         @goField(name: "todoId")
-    friends: [User!]!   @goField(forceResolver: true)
+	id: ID! @goField(name: "todoId")
+	friends: [User!]! @goField(forceResolver: true)
 }
 ```
 
@@ -147,10 +151,12 @@ first model in this list is used as the default type and it will always be used 
 There isn't any way around this, gqlgen has no way to know what you want in a given context.
 
 ### Why do my interfaces have getters? Can I disable these?
+
 These were added in v0.17.14 to allow accessing common interface fields without casting to a concrete type.
 However, certain fields, like Relay-style Connections, cannot be implemented with simple getters.
 
 If you'd prefer to not have getters generated in your interfaces, you can add the following in your `gqlgen.yml`:
+
 ```yaml
 # gqlgen.yml
 omit_getters: true

@@ -4,9 +4,10 @@ directive @goTag(
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 directive @goField(
-	forceResolver: Boolean
-	name: String
+    forceResolver: Boolean
+    name: String
     omittable: Boolean
+    type: String
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION | INTERFACE
 
 type Query {
@@ -70,11 +71,12 @@ input ExistingInput {
 }
 
 type FieldMutationHook {
-    name: String @goTag(key :"anotherTag", value: "tag")
+    name: String @goTag(key: "anotherTag", value: "tag")
     enum: ExistingEnum @goTag(key: "yetAnotherTag", value: "12")
-    noVal: String @goTag(key: "yaml") @goTag(key : "repeated", value: "true")
-    repeated: String @goTag(key: "someTag", value: "value") @goTag(key : "repeated", value: "true")
-
+    noVal: String @goTag(key: "yaml") @goTag(key: "repeated", value: "true")
+    repeated: String
+        @goTag(key: "someTag", value: "value")
+        @goTag(key: "repeated", value: "true")
 }
 
 enum ExistingEnum {
@@ -86,7 +88,7 @@ interface ExistingInterface {
     name: String
 }
 
-union ExistingUnion = MissingTypeNotNull | MissingTypeNullable  | ExistingType
+union ExistingUnion = MissingTypeNotNull | MissingTypeNullable | ExistingType
 
 "TypeWithDescription is a type with a description"
 type TypeWithDescription {
@@ -107,12 +109,11 @@ interface InterfaceWithDescription {
 "UnionWithDescription is an union with a description"
 union UnionWithDescription = TypeWithDescription | ExistingType
 
-
 interface Foo_Barer {
     name: String!
 }
 
-type _Foo_Barr implements  Foo_Barer {
+type _Foo_Barr implements Foo_Barer {
     name: String!
 }
 
@@ -200,7 +201,7 @@ type Xer implements X {
 }
 
 type ExtraFieldsTest {
-  SchemaField: String!
+    SchemaField: String!
 }
 
 type OmitEmptyJsonTagTest {

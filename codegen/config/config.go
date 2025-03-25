@@ -338,6 +338,20 @@ func (c *Config) injectTypesFromSchema() error {
 					typeMapEntry := c.Models[schemaType.Name]
 					typeMapFieldEntry := typeMapEntry.Fields[field.Name]
 
+					if ta := fd.Arguments.ForName("type"); ta != nil {
+						if c.Models.UserDefined(schemaType.Name) {
+							return fmt.Errorf(
+								"argument 'type' for directive @goField (src: %s, line: %d) not applicable for user-defined models",
+								fd.Position.Src.Name,
+								fd.Position.Line,
+							)
+						}
+
+						if ft, err := ta.Value.Value(nil); err == nil {
+							typeMapFieldEntry.Type = ft.(string)
+						}
+					}
+
 					if ra := fd.Arguments.ForName("forceResolver"); ra != nil {
 						if fr, err := ra.Value.Value(nil); err == nil {
 							typeMapFieldEntry.Resolver = fr.(bool)
@@ -465,6 +479,24 @@ type TypeMapEntry struct {
 }
 
 type TypeMapField struct {
+	// Type is the Go type of the field.
+	//
+	// It supports the builtin basic types (like string or int64), named types
+	// (qualified by the full package path), pointers to those types (prefixed
+	// with `*`), and slices of those types (prefixed with `[]`).
+	//
+	// For example, the following are valid types:
+	//  string
+	//  *github.com/author/package.Type
+	//  []string
+	//  []*github.com/author/package.Type
+	//
+	// Note that the type will be referenced from the generated/graphql, which
+	// means the package it lives in must not reference the generated/graphql
+	// package to avoid circular imports.
+	// restrictions.
+	Type string `yaml:"type"`
+
 	Resolver        bool   `yaml:"resolver"`
 	FieldName       string `yaml:"fieldName"`
 	Omittable       *bool  `yaml:"omittable"`

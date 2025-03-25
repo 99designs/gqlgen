@@ -417,6 +417,11 @@ func (m *Plugin) generateField(
 		}
 	}
 
+	// Replace to user-defined field type if provided.
+	if userDefinedType := cfg.Models[schemaType.Name].Fields[field.Name].Type; userDefinedType != "" {
+		typ = buildType(userDefinedType)
+	}
+
 	f := &Field{
 		Name:        field.Name,
 		GoName:      name,

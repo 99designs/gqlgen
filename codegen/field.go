@@ -481,9 +481,9 @@ func (f *Field) GoNameUnexported() string {
 func (f *Field) ShortInvocation() string {
 	caser := cases.Title(language.English, cases.NoLower)
 	if f.Object.Kind == ast.InputObject {
-		return fmt.Sprintf("%s().%s(ctx, &it, data)", caser.String(f.Object.Definition.Name), f.GoFieldName)
+		return fmt.Sprintf("%s().%s(ctx, &it, data)", caser.String(f.Object.Name), f.GoFieldName)
 	}
-	return fmt.Sprintf("%s().%s(%s)", caser.String(f.Object.Definition.Name), f.GoFieldName, f.CallArgs())
+	return fmt.Sprintf("%s().%s(%s)", caser.String(f.Object.Name), f.GoFieldName, f.CallArgs())
 }
 
 func (f *Field) ArgsFunc() string {
@@ -491,11 +491,11 @@ func (f *Field) ArgsFunc() string {
 		return ""
 	}
 
-	return "field_" + f.Object.Definition.Name + "_" + f.Name + "_args"
+	return "field_" + f.Object.Name + "_" + f.Name + "_args"
 }
 
 func (f *Field) FieldContextFunc() string {
-	return "fieldContext_" + f.Object.Definition.Name + "_" + f.Name
+	return "fieldContext_" + f.Object.Name + "_" + f.Name
 }
 
 func (f *Field) ChildFieldContextFunc(name string) string {
@@ -507,7 +507,7 @@ func (f *Field) ResolverType() string {
 		return ""
 	}
 
-	return fmt.Sprintf("%s().%s(%s)", f.Object.Definition.Name, f.GoFieldName, f.CallArgs())
+	return fmt.Sprintf("%s().%s(%s)", f.Object.Name, f.GoFieldName, f.CallArgs())
 }
 
 func (f *Field) IsInputObject() bool {

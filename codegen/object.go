@@ -147,7 +147,7 @@ func (o *Object) IsConcurrent() bool {
 }
 
 func (o *Object) IsReserved() bool {
-	return strings.HasPrefix(o.Definition.Name, "__")
+	return strings.HasPrefix(o.Name, "__")
 }
 
 func (o *Object) IsMap() bool {
@@ -170,7 +170,7 @@ func (o *Object) HasField(name string) bool {
 
 func (os Objects) ByName(name string) *Object {
 	for i, o := range os {
-		if strings.EqualFold(o.Definition.Name, name) {
+		if strings.EqualFold(o.Name, name) {
 			return os[i]
 		}
 	}

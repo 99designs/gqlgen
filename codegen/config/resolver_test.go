@@ -49,13 +49,13 @@ func TestResolverConfig(t *testing.T) {
 
 			require.EqualError(t, p.Check(), "filename must be specified with layout=single-file")
 
-			require.Equal(t, "", p.Package)
-			require.Equal(t, "", p.ImportPath())
+			require.Empty(t, p.Package)
+			require.Empty(t, p.ImportPath())
 
 			require.Nil(t, p.Pkg())
 
-			require.Equal(t, "", p.Filename)
-			require.Equal(t, "", p.Dir())
+			require.Empty(t, p.Filename)
+			require.Empty(t, p.Dir())
 		})
 
 		t.Run("when given invalid filename", func(t *testing.T) {
@@ -131,13 +131,13 @@ func TestResolverConfig(t *testing.T) {
 
 			require.EqualError(t, p.Check(), "dirname must be specified with layout=follow-schema")
 
-			require.Equal(t, "", p.Package)
-			require.Equal(t, "", p.ImportPath())
+			require.Empty(t, p.Package)
+			require.Empty(t, p.ImportPath())
 
 			require.Nil(t, p.Pkg())
 
-			require.Equal(t, "", p.Filename)
-			require.Equal(t, "", p.Dir())
+			require.Empty(t, p.Filename)
+			require.Empty(t, p.Dir())
 		})
 	})
 

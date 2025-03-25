@@ -53,7 +53,7 @@ linters:
       enable-all-rules: false
       rules:
         - name: empty-lines
-        - name: use-any
+#        - name: use-any # this causes problems in some generated files
         - name: struct-tag
         - name: blank-imports
         - name: context-as-argument

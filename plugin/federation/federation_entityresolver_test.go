@@ -104,9 +104,9 @@ func TestEntityResolver(t *testing.T) {
 		require.Len(t, resp.Entities, 5)
 		require.Equal(t, "first name - 1", resp.Entities[0].Name)
 		require.Equal(t, "first name - 2", resp.Entities[1].Name)
-		require.Equal(t, "", resp.Entities[2].Name)
+		require.Empty(t, resp.Entities[2].Name)
 		require.Equal(t, "first name - 3", resp.Entities[3].Name)
-		require.Equal(t, "", resp.Entities[4].Name)
+		require.Empty(t, resp.Entities[4].Name)
 	})
 
 	t.Run("World entities with nested key", func(t *testing.T) {

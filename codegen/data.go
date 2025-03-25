@@ -180,11 +180,11 @@ func BuildData(cfg *config.Config, plugins ...any) (*Data, error) {
 	s.ReferencedTypes = b.buildTypes()
 
 	sort.Slice(s.Objects, func(i, j int) bool {
-		return s.Objects[i].Definition.Name < s.Objects[j].Definition.Name
+		return s.Objects[i].Name < s.Objects[j].Name
 	})
 
 	sort.Slice(s.Inputs, func(i, j int) bool {
-		return s.Inputs[i].Definition.Name < s.Inputs[j].Definition.Name
+		return s.Inputs[i].Name < s.Inputs[j].Name
 	})
 
 	if b.Binder.SawInvalid {

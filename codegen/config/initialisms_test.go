@@ -19,7 +19,7 @@ func TestGoInitialismsConfig(t *testing.T) {
 	t.Run("empty initialism config doesn't change anything", func(t *testing.T) {
 		tt := GoInitialismsConfig{}
 		result := tt.determineGoInitialisms()
-		assert.Equal(t, len(templates.CommonInitialisms), len(result))
+		assert.Len(t, result, len(templates.CommonInitialisms))
 	})
 	t.Run("initialism config appends if desired", func(t *testing.T) {
 		tt := GoInitialismsConfig{ReplaceDefaults: false, Initialisms: []string{"ASDF"}}

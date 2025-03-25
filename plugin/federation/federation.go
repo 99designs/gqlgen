@@ -142,9 +142,10 @@ func (f *Federation) InjectSourcesEarly() ([]*ast.Source, error) {
 	input := ``
 
 	// add version-specific changes on key directive, as well as adding the new directives for federation 2
-	if f.version == 1 {
+	switch f.version {
+	case 1:
 		input += federationVersion1Schema
-	} else if f.version == 2 {
+	case 2:
 		input += federationVersion2Schema
 	}
 

@@ -66,9 +66,11 @@ func findModuleRoot(dir string) (roots string) {
 
 func initFile(filename, contents string) error {
 	if err := os.MkdirAll(filepath.Dir(filename), 0o755); err != nil {
+		//nolint:staticcheck // yes, it is bad to end in newline here
 		return fmt.Errorf("unable to create directory for file '%s': %w\n", filename, err)
 	}
 	if err := os.WriteFile(filename, []byte(contents), 0o644); err != nil {
+		//nolint:staticcheck // yes, it is bad to end in newline here
 		return fmt.Errorf("unable to write file '%s': %w\n", filename, err)
 	}
 
@@ -110,6 +112,7 @@ var initCmd = &cli.Command{
 		}
 		modRoot := findModuleRoot(cwd)
 		if modRoot == "" {
+			//nolint:staticcheck // yes, it is bad to end in newline here
 			return errors.New("go.mod is missing. Please, do 'go mod init' first\n")
 		}
 
@@ -121,6 +124,7 @@ var initCmd = &cli.Command{
 		}
 		_, err = config.LoadConfigFromDefaultLocations()
 		if err == nil {
+			//nolint:staticcheck // yes, it is bad to end in newline here
 			return errors.New("gqlgen.yml already exists in a parent directory\n")
 		}
 

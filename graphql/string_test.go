@@ -30,7 +30,7 @@ func TestString(t *testing.T) {
 		assert.Equal(t, "123", mustUnmarshalString(t, json.Number("123")))
 		assert.Equal(t, "true", mustUnmarshalString(t, true))
 		assert.Equal(t, "false", mustUnmarshalString(t, false))
-		assert.Equal(t, "", mustUnmarshalString(t, nil))
+		assert.Empty(t, mustUnmarshalString(t, nil))
 	})
 }
 

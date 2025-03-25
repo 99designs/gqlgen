@@ -26,14 +26,14 @@ func TestExecutor(t *testing.T) {
 	t.Run("validates operation", func(t *testing.T) {
 		t.Run("no operation", func(t *testing.T) {
 			resp := query(exec, "", "")
-			assert.Equal(t, "", string(resp.Data))
+			assert.Empty(t, string(resp.Data))
 			assert.Len(t, resp.Errors, 1)
 			assert.Equal(t, errcode.ValidationFailed, resp.Errors[0].Extensions["code"])
 		})
 
 		t.Run("bad operation", func(t *testing.T) {
 			resp := query(exec, "badOp", "query test { name }")
-			assert.Equal(t, "", string(resp.Data))
+			assert.Empty(t, string(resp.Data))
 			assert.Len(t, resp.Errors, 1)
 			assert.Equal(t, errcode.ValidationFailed, resp.Errors[0].Extensions["code"])
 		})
@@ -133,7 +133,7 @@ func TestExecutor(t *testing.T) {
 		})
 
 		resp := query(exec, "", "invalid")
-		assert.Equal(t, "", string(resp.Data))
+		assert.Empty(t, string(resp.Data))
 		assert.Len(t, resp.Errors, 1)
 		assert.Len(t, errors1, 1)
 		assert.Len(t, errors2, 1)
@@ -173,20 +173,20 @@ func TestExecutorDisableSuggestion(t *testing.T) {
 	exec := testexecutor.New()
 	t.Run("by default, the error message will include suggestions", func(t *testing.T) {
 		resp := query(exec, "", "{nam}")
-		assert.Equal(t, "", string(resp.Data))
+		assert.Empty(t, string(resp.Data))
 		assert.Equal(t, "input:1: Cannot query field \"nam\" on type \"Query\". Did you mean \"name\"?\n", resp.Errors.Error())
 	})
 
 	t.Run("disable suggestion, the error message will not include suggestions", func(t *testing.T) {
 		exec.SetDisableSuggestion(true)
 		resp := query(exec, "", "{nam}")
-		assert.Equal(t, "", string(resp.Data))
+		assert.Empty(t, string(resp.Data))
 		assert.Len(t, resp.Errors, 1)
 		assert.Equal(t, "input:1: Cannot query field \"nam\" on type \"Query\".\n", resp.Errors.Error())
 
 		// check if the error message is displayed correctly even if an error occurs multiple times
 		resp = query(exec, "", "{nam}")
-		assert.Equal(t, "", string(resp.Data))
+		assert.Empty(t, string(resp.Data))
 		assert.Len(t, resp.Errors, 1)
 		assert.Equal(t, "input:1: Cannot query field \"nam\" on type \"Query\".\n", resp.Errors.Error())
 	})

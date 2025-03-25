@@ -12,6 +12,7 @@ func findGoNamedType(def types.Type) (*types.Named, error) {
 	}
 
 	namedType, ok := def.(*types.Named)
+	//nolint:staticcheck // yes, it is bad to end in newline here
 	if !ok {
 		return nil, fmt.Errorf("expected %s to be a named type, instead found %T\n", def.String(), def)
 	}

@@ -39,7 +39,7 @@ func TestToGo(t *testing.T) {
 	require.Equal(t, "A", ToGo("A"))
 	require.Equal(t, "ID", ToGo("ID"))
 	require.Equal(t, "ID", ToGo("id"))
-	require.Equal(t, "", ToGo(""))
+	require.Empty(t, ToGo(""))
 
 	require.Equal(t, "RelatedUrls", ToGo("RelatedUrls"))
 	require.Equal(t, "ITicket", ToGo("ITicket"))
@@ -83,7 +83,7 @@ func TestToGoPrivate(t *testing.T) {
 	require.Equal(t, "a", ToGoPrivate("A"))
 	require.Equal(t, "id", ToGoPrivate("ID"))
 	require.Equal(t, "id", ToGoPrivate("id"))
-	require.Equal(t, "", ToGoPrivate(""))
+	require.Empty(t, ToGoPrivate(""))
 	require.Equal(t, "_", ToGoPrivate("_"))
 
 	require.Equal(t, "idle", ToGoPrivate("IDLE"))

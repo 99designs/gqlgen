@@ -46,9 +46,10 @@ func assertNodesIntegrity(t *testing.T, baseUrl string, doc *goquery.Document, s
 		var url string
 		var integrity string
 		for _, attribute := range node.Attr {
-			if attribute.Key == urlAttrKey {
+			switch attribute.Key {
+			case urlAttrKey:
 				url = attribute.Val
-			} else if attribute.Key == integrityAttrKey {
+			case integrityAttrKey:
 				integrity = attribute.Val
 			}
 		}

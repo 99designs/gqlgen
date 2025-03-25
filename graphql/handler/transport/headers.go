@@ -19,8 +19,10 @@ func determineResponseContentType(explicitHeaders map[string][]string, r *http.R
 	}
 
 	accept := r.Header.Get("Accept")
+	// TODO(steve): Consider adding config option to opt-in to
+	// default "application/graphql-response+json"
 	if accept == "" {
-		return acceptApplicationGraphqlResponseJson
+		return acceptApplicationJson
 	}
 
 	for _, acceptPart := range strings.Split(accept, ",") {

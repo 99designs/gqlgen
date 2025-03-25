@@ -56,8 +56,8 @@ func TestGET(t *testing.T) {
 
 	t.Run("invalid variable", func(t *testing.T) {
 		resp := doRequest(h, "GET", `/graphql?query=query($id:Int!){find(id:$id)}&variables={"id":false}`, "", "", "application/json")
-		assert.Equal(t, http.StatusBadRequest, resp.Code, resp.Body.String())
-		assert.Equal(t, "application/graphql-response+json", resp.Header().Get("Content-Type"))
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
+		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 		assert.JSONEq(t, `{"errors":[{"message":"cannot use bool as Int","path":["variable","id"],"extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`, resp.Body.String())
 	})
 
@@ -70,8 +70,8 @@ func TestGET(t *testing.T) {
 
 	t.Run("parse failure", func(t *testing.T) {
 		resp := doRequest(h, "GET", "/graphql?query=!", "", "", "application/json")
-		assert.Equal(t, http.StatusBadRequest, resp.Code, resp.Body.String())
-		assert.Equal(t, "application/graphql-response+json", resp.Header().Get("Content-Type"))
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
+		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 		assert.JSONEq(t, `{"errors":[{"message":"Unexpected !","locations":[{"line":1,"column":1}],"extensions":{"code":"GRAPHQL_PARSE_FAILED"}}],"data":null}`, resp.Body.String())
 	})
 

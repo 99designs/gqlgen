@@ -25,7 +25,7 @@ func TestHeadersWithPOST(t *testing.T) {
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`, "", "application/json")
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Len(t, resp.Header(), 1)
-		assert.Equal(t, "application/graphql-response+json", resp.Header().Get("Content-Type"))
+		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 	})
 
 	t.Run("Headers set", func(t *testing.T) {
@@ -54,7 +54,7 @@ func TestHeadersWithGET(t *testing.T) {
 		resp := doRequest(h, "GET", "/graphql?query={name}", "", "", "application/json")
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Len(t, resp.Header(), 1)
-		assert.Equal(t, "application/graphql-response+json", resp.Header().Get("Content-Type"))
+		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 	})
 
 	t.Run("Headers set", func(t *testing.T) {

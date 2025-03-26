@@ -146,9 +146,8 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 {{- end}}
 
       let plugins = [];
-{{- if .PluginExplorerVersion}}
-      const explorerPlugin = GraphiQLPluginExplorer.explorerPlugin();
-      plugins.push(explorerPlugin);
+{{- if .EnablePluginExplorer}}
+      plugins.push(GraphiQLPluginExplorer.explorerPlugin());
 {{- end}}
 
       const fetcher = GraphiQL.createFetcher({ url, subscriptionUrl, headers: fetcherHeaders });

@@ -238,7 +238,12 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 
 var sources = []*ast.Source{
 	{Name: "../schema.graphql", Input: `directive @entityResolver(multi: Boolean) on OBJECT
-directive @goField(forceResolver: Boolean, name: String, omittable: Boolean) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+directive @goField(
+    forceResolver: Boolean
+    name: String
+    omittable: Boolean
+    type: String
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 type Query {
     test: String
@@ -255,10 +260,13 @@ type World @key(fields: "hello { name } foo   ") {
     hello: Hello
 }
 
-type Person @key(fields: "name"){
+type Person @key(fields: "name") {
     name: String!
     gender: Gender!
-    welcomeMessage: String @requires(fields:"gender { ... on Male {description} ... on Female {description}}")
+    welcomeMessage: String
+        @requires(
+            fields: "gender { ... on Male {description} ... on Female {description}}"
+        )
 }
 
 union Gender = Male | Female
@@ -271,7 +279,9 @@ type Female {
     description: String!
 }
 
-type WorldWithMultipleKeys @key(fields: "hello { name } foo   ") @key(fields: "bar") {
+type WorldWithMultipleKeys
+    @key(fields: "hello { name } foo   ")
+    @key(fields: "bar") {
     foo: String!
     bar: Int!
     hello: Hello
@@ -295,7 +305,9 @@ type PlanetMultipleRequires @key(fields: "name") {
     name: String! @external
     diameter: Int! @external
     density: Int! @external
-    weight(foo: String): Int! @requires(fields: "diameter density") @goField(forceResolver: true)
+    weight(foo: String): Int!
+        @requires(fields: "diameter density")
+        @goField(forceResolver: true)
     anotherField(foobar: String): String
 }
 
@@ -307,7 +319,9 @@ type PlanetRequiresNested @key(fields: "name") {
     sizes: [Int!] @requires(fields: "worlds{ foo }")
 }
 
-type MultiPlanetRequiresNested @key(fields: "name") @entityResolver(multi: true) {
+type MultiPlanetRequiresNested
+    @key(fields: "name")
+    @entityResolver(multi: true) {
     name: String! @external
     world: World! @external
     size: Int! @requires(fields: "world{ foo }")
@@ -332,7 +346,9 @@ type MultiHelloRequires @key(fields: "name") @entityResolver(multi: true) {
     key2: String! @requires(fields: "key1")
 }
 
-type MultiHelloMultipleRequires @key(fields: "name") @entityResolver(multi: true) {
+type MultiHelloMultipleRequires
+    @key(fields: "name")
+    @entityResolver(multi: true) {
     name: String! @external
     key1: String! @external
     key2: String! @external

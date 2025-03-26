@@ -191,12 +191,20 @@ directive @goField(
 	forceResolver: Boolean
 	name: String
 	omittable: Boolean
+	type: String
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 directive @goTag(
 	key: String!
 	value: String
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
+directive @goExtraField(
+	name: String
+	type: String!
+	overrideTags: String
+	description: String
+) repeatable on OBJECT | INPUT_OBJECT
 ```
 
 > Here be dragons
@@ -207,7 +215,9 @@ directive @goTag(
 Now you can use these directives when defining types in your schema:
 
 ```graphql
-type User @goModel(model: "github.com/my/app/models.User") {
+type User
+	@goModel(model: "github.com/my/app/models.User")
+	@goExtraField(name: "Activated", type: "bool") {
 	id: ID! @goField(name: "todoId")
 	name: String!
 		@goField(forceResolver: true)
@@ -222,7 +232,7 @@ type Person @goModel(forceGenerate: true) {
 }
 ```
 
-The builtin directives `goField`, `goModel` and `goTag` are automatically registered to `skip_runtime`. Any directives registered as `skip_runtime` will not exposed during introspection and are used during code generation only.
+The builtin directives `goField`, `goModel`, `goTag` and `goExtraField` are automatically registered to `skip_runtime`. Any directives registered as `skip_runtime` will not exposed during introspection and are used during code generation only.
 
 If you have created a new code generation plugin using a directive which does not require runtime execution, the directive will need to be set to `skip_runtime`.
 

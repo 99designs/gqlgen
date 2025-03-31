@@ -2,7 +2,7 @@ module github.com/99designs/gqlgen
 
 go 1.23.0
 
-toolchain go1.23.6
+toolchain go1.24.1
 
 require (
 	github.com/PuerkitoBio/goquery v1.10.2
@@ -21,7 +21,7 @@ require (
 	github.com/vektah/gqlparser/v2 v2.5.23
 	golang.org/x/text v0.23.0
 	golang.org/x/tools v0.31.0
-	google.golang.org/protobuf v1.36.5
+	google.golang.org/protobuf v1.36.6
 	gopkg.in/yaml.v3 v3.0.1
 )
 

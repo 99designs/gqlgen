@@ -53,7 +53,7 @@ linters:
       enable-all-rules: false
       rules:
         - name: empty-lines
-#        - name: use-any # this causes problems in some generated files
+        - name: use-any
         - name: struct-tag
         - name: blank-imports
         - name: context-as-argument
@@ -114,12 +114,13 @@ linters:
       - linters:
           - gocritic
         path: _examples/federation/products/graph/entity.resolvers.go
+      # revive.use-any causes problems in some generated files
       - path: graphql/map.go
-        text: 'use-any: since GO 1.18 ''interface{}'' can be replaced by ''any'''
+        text: 'use-any'
       - path: codegen/testserver/followschema/resolver.go
-        text: 'use-any: since GO 1.18 ''interface{}'' can be replaced by ''any'''
+        text: 'use-any'
       - path: codegen/testserver/singlefile/resolver.go
-        text: 'use-any: since GO 1.18 ''interface{}'' can be replaced by ''any'''
+        text: 'use-any'
       - linters:
           - staticcheck
         path: codegen/testserver/generated_test.go

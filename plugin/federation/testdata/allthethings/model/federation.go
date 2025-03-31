@@ -1,6 +1,6 @@
 package model
 
-type _FieldSet string //nolint:deadcode,unused
+type _FieldSet string //nolint:unused
 
 type Hello struct {
 	Name      string

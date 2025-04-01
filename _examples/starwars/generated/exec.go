@@ -163,7 +163,7 @@ func (e *executableSchema) Schema() *ast.Schema {
 	return parsedSchema
 }
 
-func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]any) (int, bool) {
+func (e *executableSchema) Complexity(ctx context.Context, typeName, field string, childComplexity int, rawArgs map[string]any) (int, bool) {
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
@@ -187,7 +187,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Droid_friendsConnection_args(context.TODO(), rawArgs)
+		args, err := ec.field_Droid_friendsConnection_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -276,7 +276,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Human_friendsConnection_args(context.TODO(), rawArgs)
+		args, err := ec.field_Human_friendsConnection_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -288,7 +288,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Human_height_args(context.TODO(), rawArgs)
+		args, err := ec.field_Human_height_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -342,7 +342,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Mutation_createReview_args(context.TODO(), rawArgs)
+		args, err := ec.field_Mutation_createReview_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -375,7 +375,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_character_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_character_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -387,7 +387,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_droid_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_droid_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -399,7 +399,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_hero_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_hero_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -411,7 +411,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_human_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_human_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -423,7 +423,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_reviews_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_reviews_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -435,7 +435,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_search_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_search_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -447,7 +447,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_starship_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_starship_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -494,7 +494,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Starship_length_args(context.TODO(), rawArgs)
+		args, err := ec.field_Starship_length_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}

@@ -1,6 +1,7 @@
 package complexity
 
 import (
+	"context"
 	"math"
 	"testing"
 
@@ -52,7 +53,7 @@ func requireComplexity(t *testing.T, source string, complexity int) {
 	query := gqlparser.MustLoadQuery(schema, source)
 
 	es := &graphql.ExecutableSchemaMock{
-		ComplexityFunc: func(typeName, field string, childComplexity int, args map[string]any) (int, bool) {
+		ComplexityFunc: func(ctx context.Context, typeName, field string, childComplexity int, args map[string]any) (int, bool) {
 			switch typeName + "." + field {
 			case "ExpensiveItem.name":
 				return 5, true
@@ -68,7 +69,7 @@ func requireComplexity(t *testing.T, source string, complexity int) {
 		},
 	}
 
-	actualComplexity := Calculate(es, query.Operations[0], nil)
+	actualComplexity := Calculate(context.TODO(), es, query.Operations[0], nil)
 	require.Equal(t, complexity, actualComplexity)
 }
 

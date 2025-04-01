@@ -113,7 +113,7 @@ func (e *executableSchema) Schema() *ast.Schema {
 	return parsedSchema
 }
 
-func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]any) (int, bool) {
+func (e *executableSchema) Complexity(ctx context.Context, typeName, field string, childComplexity int, rawArgs map[string]any) (int, bool) {
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
@@ -151,7 +151,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := field_Mutation_createUser_args(context.TODO(), &ec, rawArgs)
+		args, err := field_Mutation_createUser_args(ctx, &ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -163,7 +163,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := field_Mutation_deleteUser_args(context.TODO(), &ec, rawArgs)
+		args, err := field_Mutation_deleteUser_args(ctx, &ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -189,7 +189,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := field_Query_getEntity_args(context.TODO(), &ec, rawArgs)
+		args, err := field_Query_getEntity_args(ctx, &ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -201,7 +201,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := field_Query_getUser_args(context.TODO(), &ec, rawArgs)
+		args, err := field_Query_getUser_args(ctx, &ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -213,7 +213,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := field_Query_listUsers_args(context.TODO(), &ec, rawArgs)
+		args, err := field_Query_listUsers_args(ctx, &ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}

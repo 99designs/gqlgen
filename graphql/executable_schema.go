@@ -12,7 +12,7 @@ import (
 type ExecutableSchema interface {
 	Schema() *ast.Schema
 
-	Complexity(typeName, fieldName string, childComplexity int, args map[string]any) (int, bool)
+	Complexity(ctx context.Context, typeName, fieldName string, childComplexity int, args map[string]any) (int, bool)
 	Exec(ctx context.Context) ResponseHandler
 }
 

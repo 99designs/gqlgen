@@ -96,7 +96,7 @@ func (e *executableSchema) Schema() *ast.Schema {
 	return parsedSchema
 }
 
-func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]any) (int, bool) {
+func (e *executableSchema) Complexity(ctx context.Context, typeName, field string, childComplexity int, rawArgs map[string]any) (int, bool) {
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
@@ -106,7 +106,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_boolTyped_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_boolTyped_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -118,7 +118,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_boolTypedN_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_boolTypedN_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -130,7 +130,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_boolUntyped_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_boolUntyped_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -142,7 +142,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_boolUntypedN_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_boolUntypedN_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -154,7 +154,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_inPackage_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_inPackage_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -166,7 +166,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_intTyped_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_intTyped_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -178,7 +178,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_intTypedN_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_intTypedN_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -190,7 +190,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_intUntyped_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_intUntyped_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -202,7 +202,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_intUntypedN_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_intUntypedN_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -214,7 +214,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_stringTyped_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_stringTyped_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -226,7 +226,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_stringTypedN_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_stringTypedN_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -238,7 +238,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_stringUntyped_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_stringUntyped_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -250,7 +250,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_stringUntypedN_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_stringUntypedN_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -262,7 +262,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_varTyped_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_varTyped_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -274,7 +274,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_varUntyped_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_varUntyped_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}

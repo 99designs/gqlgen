@@ -81,7 +81,7 @@ func (e *executableSchema) Schema() *ast.Schema {
 	return parsedSchema
 }
 
-func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]any) (int, bool) {
+func (e *executableSchema) Complexity(ctx context.Context, typeName, field string, childComplexity int, rawArgs map[string]any) (int, bool) {
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
@@ -91,7 +91,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_echoInt64InputToInt64Object_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_echoInt64InputToInt64Object_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -103,7 +103,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_echoInt64ToInt64_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_echoInt64ToInt64_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -115,7 +115,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_echoIntInputToIntObject_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_echoIntInputToIntObject_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -127,7 +127,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		args, err := ec.field_Query_echoIntToInt_args(context.TODO(), rawArgs)
+		args, err := ec.field_Query_echoIntToInt_args(ctx, rawArgs)
 		if err != nil {
 			return 0, false
 		}

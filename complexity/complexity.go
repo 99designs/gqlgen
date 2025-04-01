@@ -2,6 +2,7 @@ package complexity
 
 import (
 	"context"
+
 	"github.com/vektah/gqlparser/v2/ast"
 
 	"github.com/99designs/gqlgen/graphql"

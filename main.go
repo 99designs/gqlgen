@@ -66,12 +66,10 @@ func findModuleRoot(dir string) (roots string) {
 
 func initFile(filename, contents string) error {
 	if err := os.MkdirAll(filepath.Dir(filename), 0o755); err != nil {
-		//nolint:staticcheck // yes, it is bad to end in newline here
-		return fmt.Errorf("unable to create directory for file '%s': %w\n", filename, err)
+		return fmt.Errorf("unable to create directory for file '%s': %w", filename, err)
 	}
 	if err := os.WriteFile(filename, []byte(contents), 0o644); err != nil {
-		//nolint:staticcheck // yes, it is bad to end in newline here
-		return fmt.Errorf("unable to write file '%s': %w\n", filename, err)
+		return fmt.Errorf("unable to write file '%s': %w", filename, err)
 	}
 
 	return nil
@@ -101,7 +99,6 @@ var initCmd = &cli.Command{
 
 		cwd, err := os.Getwd()
 		if err != nil {
-			log.Println(err)
 			return fmt.Errorf("unable to determine current directory: %w", err)
 		}
 		pkgName := code.ImportPathForDir(cwd)
@@ -112,8 +109,7 @@ var initCmd = &cli.Command{
 		}
 		modRoot := findModuleRoot(cwd)
 		if modRoot == "" {
-			//nolint:staticcheck // yes, it is bad to end in newline here
-			return errors.New("go.mod is missing. Please, do 'go mod init' first\n")
+			return cli.Exit("go.mod is missing. Please, do 'go mod init' first\n", 1)
 		}
 
 		// check schema and config don't already exist
@@ -124,28 +120,27 @@ var initCmd = &cli.Command{
 		}
 		_, err = config.LoadConfigFromDefaultLocations()
 		if err == nil {
-			//nolint:staticcheck // yes, it is bad to end in newline here
-			return errors.New("gqlgen.yml already exists in a parent directory\n")
+			return cli.Exit("gqlgen.yml already exists in a parent directory\n", 1)
 		}
 
 		// create config
 		fmt.Println("Creating", configFilename)
 		if err := initFile(configFilename, getConfigFileContent(pkgName)); err != nil {
-			return err
+			return cli.Exit(err.Error()+"\n", 1)
 		}
 
 		// create schema
 		fmt.Println("Creating", schemaFilename)
 
 		if err := initFile(schemaFilename, schemaFileContent); err != nil {
-			return err
+			return cli.Exit(err.Error()+"\n", 1)
 		}
 
 		// create the package directory with a temporary file so that go recognises it as a package
 		// and autobinding doesn't error out
 		tmpPackageNameFile := "graph/model/_tmp_gqlgen_init.go"
 		if err := initFile(tmpPackageNameFile, "package model"); err != nil {
-			return err
+			return cli.Exit(err.Error()+"\n", 1)
 		}
 		defer os.Remove(tmpPackageNameFile)
 

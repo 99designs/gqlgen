@@ -60,7 +60,7 @@ func (c *ComplexityLimit) Validate(schema graphql.ExecutableSchema) error {
 
 func (c ComplexityLimit) MutateOperationContext(ctx context.Context, opCtx *graphql.OperationContext) *gqlerror.Error {
 	op := opCtx.Doc.Operations.ForName(opCtx.OperationName)
-	complexityCalcs := complexity.Calculate(c.es, op, opCtx.Variables)
+	complexityCalcs := complexity.Calculate(ctx, c.es, op, opCtx.Variables)
 
 	limit := c.Func(ctx, opCtx)
 

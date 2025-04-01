@@ -6,10 +6,16 @@ import (
 	"github.com/google/uuid"
 )
 
+type Mutation struct {
+}
+
 type NewTodo struct {
 	Text   string    `json:"text"`
 	UserID string    `json:"userId"`
 	UID    uuid.UUID `json:"uid"`
+}
+
+type Query struct {
 }
 
 type Todo struct {

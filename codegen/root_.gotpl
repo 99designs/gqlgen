@@ -90,7 +90,7 @@ func (e *executableSchema) Schema() *ast.Schema {
 	return parsedSchema
 }
 
-func (e *executableSchema) Complexity(typeName, field string, childComplexity int, rawArgs map[string]any) (int, bool) {
+func (e *executableSchema) Complexity(ctx context.Context, typeName, field string, childComplexity int, rawArgs map[string]any) (int, bool) {
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	{{- if not .Config.OmitComplexity }}
@@ -108,9 +108,9 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 						}
 						{{ if $field.Args }}
 							{{ if $useFunctionSyntaxForExecutionContext -}}
-							args, err := {{ $field.ArgsFunc }}(context.TODO(), &ec, rawArgs)
+							args, err := {{ $field.ArgsFunc }}(ctx, &ec, rawArgs)
 							{{- else -}}
-							args, err := ec.{{ $field.ArgsFunc }}(context.TODO(),rawArgs)
+							args, err := ec.{{ $field.ArgsFunc }}(ctx,rawArgs)
 							{{- end }}
 							if err != nil {
 							return 0, false

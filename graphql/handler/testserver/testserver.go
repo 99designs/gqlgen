@@ -117,7 +117,7 @@ func New() *TestServer {
 		SchemaFunc: func() *ast.Schema {
 			return schema
 		},
-		ComplexityFunc: func(typeName string, fieldName string, childComplexity int, args map[string]any) (i int, b bool) {
+		ComplexityFunc: func(ctx context.Context, typeName string, fieldName string, childComplexity int, args map[string]any) (i int, b bool) {
 			return srv.complexity, true
 		},
 	})
@@ -168,7 +168,7 @@ func NewError() *TestServer {
 		SchemaFunc: func() *ast.Schema {
 			return schema
 		},
-		ComplexityFunc: func(typeName string, fieldName string, childComplexity int, args map[string]any) (i int, b bool) {
+		ComplexityFunc: func(ctx context.Context, typeName string, fieldName string, childComplexity int, args map[string]any) (i int, b bool) {
 			return srv.complexity, true
 		},
 	})

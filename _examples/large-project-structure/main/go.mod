@@ -1,17 +1,17 @@
-module github.com/corelight/main
+module github.com/99designs/gqlgen/_examples/large-project-structure/main
 
 go 1.24.1
 
 require (
 	github.com/99designs/gqlgen v0.17.70
-	github.com/corelight/integration v0.0.0-00010101000000-000000000000
-	github.com/corelight/shared v0.0.0
+	github.com/99designs/gqlgen/_examples/large-project-structure/integration v0.0.0-00010101000000-000000000000
+	github.com/99designs/gqlgen/_examples/large-project-structure/shared v0.0.0
 	github.com/vektah/gqlparser/v2 v2.5.23
 )
 
-replace github.com/corelight/shared => ../shared
+replace github.com/99designs/gqlgen/_examples/large-project-structure/shared => ../shared
 
-replace github.com/corelight/integration => ../integration
+replace github.com/99designs/gqlgen/_examples/large-project-structure/integration => ../integration
 
 require (
 	github.com/agnivade/levenshtein v1.2.1 // indirect

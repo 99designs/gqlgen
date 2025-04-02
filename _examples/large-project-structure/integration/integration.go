@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/corelight/main/graph/model"
+	"github.com/99designs/gqlgen/_examples/large-project-structure/main/graph/model"
 )
 
 type Resolver struct{}

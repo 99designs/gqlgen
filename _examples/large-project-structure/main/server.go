@@ -10,11 +10,11 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/corelight/main/graph"
+	"github.com/99designs/gqlgen/_examples/large-project-structure/main/graph"
 	"github.com/vektah/gqlparser/v2/ast"
 
-	"github.com/corelight/integration"
-	_ "github.com/corelight/shared"
+	"github.com/99designs/gqlgen/_examples/large-project-structure/integration"
+	_ "github.com/99designs/gqlgen/_examples/large-project-structure/shared"
 )
 
 const defaultPort = "8080"

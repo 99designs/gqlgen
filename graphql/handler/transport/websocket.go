@@ -53,8 +53,14 @@ type (
 		pingPongTicker  *time.Ticker
 		receivedPong    bool
 		exec            graphql.GraphExecutor
-		closed          bool
 		headers         http.Header
+
+		closeTimeout time.Duration
+
+		serverClosed bool
+		clientClosed bool
+
+		clientCloseReceiver chan struct{}
 
 		initPayload InitPayload
 	}
@@ -115,13 +121,14 @@ func (t Websocket) Do(w http.ResponseWriter, r *http.Request, exec graphql.Graph
 	}
 
 	conn := wsConnection{
-		active:    map[string]context.CancelFunc{},
-		conn:      ws,
-		ctx:       r.Context(),
-		exec:      exec,
-		me:        me,
-		headers:   r.Header,
-		Websocket: t,
+		active:              map[string]context.CancelFunc{},
+		conn:                ws,
+		ctx:                 r.Context(),
+		exec:                exec,
+		me:                  me,
+		headers:             r.Header,
+		Websocket:           t,
+		clientCloseReceiver: make(chan struct{}),
 	}
 
 	if !conn.init() {
@@ -231,6 +238,11 @@ func (c *wsConnection) init() bool {
 
 func (c *wsConnection) write(msg *message) {
 	c.mu.Lock()
+	// don't write anything to a closed / closing connection
+	if c.serverClosed {
+		c.mu.Unlock()
+		return
+	}
 	c.handlePossibleError(c.me.Send(msg), false)
 	c.mu.Unlock()
 }
@@ -283,6 +295,16 @@ func (c *wsConnection) run() {
 	go c.closeOnCancel(ctx)
 
 	for {
+		c.mu.Lock()
+		// dont read any more messages if the server has already closed
+		// the exception is the client close message for graceful shutdown
+		// or an early termination message from the client
+		if c.serverClosed {
+			c.mu.Unlock()
+			return
+		}
+		c.mu.Unlock()
+
 		start := graphql.Now()
 		m, err := c.me.NextMessage()
 		if err != nil {
@@ -303,7 +325,18 @@ func (c *wsConnection) run() {
 			if closer != nil {
 				closer()
 			}
+		// possible to receive this close message if connection was not marked as closed in time
+		// and this thread wins over the goroutine in closeOnCancel
+		// or for early termination
+		// notify the closeOnCancel loop
 		case connectionCloseMessageType:
+			c.mu.Lock()
+			c.clientClosed = true
+			// normal termination
+			if c.serverClosed {
+				c.clientCloseReceiver <- struct{}{}
+			}
+			c.mu.Unlock()
 			c.close(websocket.CloseNormalClosure, "terminated")
 			return
 		case pingMessageType:
@@ -494,16 +527,54 @@ func (c *wsConnection) sendConnectionError(format string, args ...any) {
 
 func (c *wsConnection) close(closeCode int, message string) {
 	c.mu.Lock()
-	if c.closed {
+	// we already sent our close message and are waiting for the client to send its close message
+	if c.serverClosed {
 		c.mu.Unlock()
 		return
 	}
+
+	// initiate the graceful shutdown server side
 	_ = c.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(closeCode, message))
 	for _, closer := range c.active {
 		closer()
 	}
-	c.closed = true
+
+	c.serverClosed = true
+
 	c.mu.Unlock()
+
+	closeTimeout := c.closeTimeout
+	if closeTimeout == 0 {
+		closeTimeout = time.Second * 3
+	}
+	closeTimer := time.NewTimer(c.closeTimeout)
+
+	// start a new read loop that only processes close messages
+	go func() {
+		for {
+			m, err := c.me.NextMessage()
+			if err == nil && m.t == connectionCloseMessageType {
+				c.clientCloseReceiver <- struct{}{}
+				return
+			}
+			// either we get net.ErrClosed or some other error
+			// either way, bail on the graceful shutdown as it's either
+			// impossible or very likely not happening
+			if err != nil {
+				return
+			}
+		}
+	}()
+
+	// wait for the client to send a close message or the timeout
+	select {
+	case <-c.clientCloseReceiver:
+		c.mu.Lock()
+		c.clientClosed = true
+		c.mu.Unlock()
+	case <-closeTimer.C:
+	}
+
 	_ = c.conn.Close()
 
 	if c.CloseFunc != nil {

@@ -1,0 +1,37 @@
+type Test {
+    id: ID!
+}
+
+type CustomZeekIntel implements ZeekIntel{
+  id: ID!
+  name: String!
+
+  extraField: String!
+}
+
+input CustomInput {
+  limit: Int
+  error: Boolean
+}
+
+extend type Query {
+  tezz: Test!
+  getYaSome(input: CustomInput): [CustomZeekIntel!]!
+}
+
+type Indicator {
+  id: ID!
+  indicator: String!
+  indicatorType: String!
+  metaSource: String!
+}
+
+input IndicatorInput {
+  indicator: String!
+  indicatorType: String!
+  metaSource: String!
+}
+
+extend type Mutation {
+  addIndicator(input: IndicatorInput!): Indicator!
+}

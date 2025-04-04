@@ -1,0 +1,8 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+interface ZeekIntel {
+  id: ID!
+  name: String!
+}

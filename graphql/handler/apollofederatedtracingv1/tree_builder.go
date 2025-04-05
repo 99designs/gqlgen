@@ -113,7 +113,7 @@ func (tb *TreeBuilder) StopTimer(ctx context.Context) {
 }
 
 // On each field, it calculates the time started at as now - tree.StartTime, as well as a deferred function upon full resolution of the
-// field as now - tree.StartTime; these are used by Apollo to calculate how fields are being resolved in the AST
+// field as (now - tree.StartTime); these are used by Apollo to calculate how fields are being resolved in the AST
 func (tb *TreeBuilder) WillResolveField(ctx context.Context) func() {
 	if tb.startTime == nil {
 		tb.logger.Println(errors.New("WillResolveField called before StartTimer"))

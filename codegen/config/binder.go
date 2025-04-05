@@ -476,7 +476,18 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 		ref.GO = b.CopyModifiersFromAst(schemaType, ref.GO)
 
 		if bindTarget != nil {
-			if err = code.CompatibleTypes(ref.GO, bindTarget); err != nil {
+			// if the bind type implements the graphql.ContextMarshaler/graphql.ContextUnmarshaler/graphql.Marshaler/graphql.Unmarshaler interface, we can use it
+			if hasMethod(bindTarget, "MarshalGQLContext") && hasMethod(bindTarget, "UnmarshalGQLContext") {
+				ref.IsContext = true
+				ref.IsMarshaler = true
+				ref.Marshaler = nil
+				ref.Unmarshaler = nil
+			} else if hasMethod(bindTarget, "MarshalGQL") && hasMethod(bindTarget, "UnmarshalGQL") {
+				ref.IsContext = false
+				ref.IsMarshaler = true
+				ref.Marshaler = nil
+				ref.Unmarshaler = nil
+			} else if err = code.CompatibleTypes(ref.GO, bindTarget); err != nil {
 				continue
 			}
 			ref.GO = bindTarget

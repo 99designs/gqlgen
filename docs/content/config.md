@@ -245,3 +245,27 @@ directives:
   constraint:
     skip_runtime: true
 ```
+
+## Configuring for a big projects
+For a single gqlgen project, what gqlgen config works best really changes at a few key points during the course of that project's normal growth and evolution. For instance:
+
+1. quick proof of concept - `single-file` layout
+2. medium-sized team(s) - `follow-schema` layout
+3. many teams - separate schema and resolvers into separate packages as [in this example](https://github.com/99designs/gqlgen/tree/master/_examples/large-project-structure/integration/go.mod) (see below)
+4. very large type systems (more than 65,000 methods) - `use_function_syntax_for_execution_context`
+However, some will instead choose to adopt GraphQL Federation and split into multiple gqlgen instances before one of these growth points is even reached.
+
+Big projects usually divide into a separate domains, grouping all related files and resources under a folder such as:
+```
+DomainA
+- schema
+- resolver
+- service
+DomainB
+- schema
+- resolver
+- service
+```
+
+After first generating `resolvers` section you can comment out the entire resolver section of the `config.yaml`, so that resolvers are **not** auto-generated so you can then design any desired resolver architecture.
+This idea is from a discussion [https://github.com/99designs/gqlgen/issues/1253](https://github.com/99designs/gqlgen/issues/1253#issuecomment-664448226)

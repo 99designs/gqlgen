@@ -1,10 +1,10 @@
 package graph
 
 import (
-	commentmutation "github.com/nabishec/ozon_habr_api/internal/handlers/comment_mutation"
-	commentquery "github.com/nabishec/ozon_habr_api/internal/handlers/comment_query"
-	postmutation "github.com/nabishec/ozon_habr_api/internal/handlers/post_mutation"
-	postquery "github.com/nabishec/ozon_habr_api/internal/handlers/post_query"
+	commentmutation "github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/handlers/comment_mutation"
+	commentquery "github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/handlers/comment_query"
+	postmutation "github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/handlers/post_mutation"
+	postquery "github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/handlers/post_query"
 )
 
 // This file will not be regenerated automatically.

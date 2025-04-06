@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"os"
 
+	dbconnection "github.com/gqlgen/_examples/mini-habr-with-subscriptions/cmd/db_connection"
+	"github.com/gqlgen/_examples/mini-habr-with-subscriptions/cmd/server"
+	"github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/storage"
+	"github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/storage/db"
+	inmemory "github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/storage/in-memory"
 	"github.com/joho/godotenv"
-	dbconnection "github.com/nabishec/ozon_habr_api/cmd/db_connection"
-	"github.com/nabishec/ozon_habr_api/cmd/server"
-	"github.com/nabishec/ozon_habr_api/internal/storage"
-	"github.com/nabishec/ozon_habr_api/internal/storage/db"
-	inmemory "github.com/nabishec/ozon_habr_api/internal/storage/in-memory"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )

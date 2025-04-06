@@ -4,7 +4,7 @@ import (
 	"slices"
 	"sync"
 
-	"github.com/nabishec/ozon_habr_api/graph/model"
+	"github.com/gqlgen/_examples/mini-habr-with-subscriptions/graph/model"
 )
 
 type Subscribers struct {

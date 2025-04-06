@@ -1,4 +1,4 @@
-modulemodule github.com/gqlgen/_examples/mini-habr-with-subscriptions
+module github.com/gqlgen/_examples/mini-habr-with-subscriptions
 
 go 1.24.0
 

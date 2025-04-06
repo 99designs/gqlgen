@@ -9,10 +9,10 @@ import (
 	"errors"
 
 	"github.com/google/uuid"
-	"github.com/nabishec/ozon_habr_api/graph/model"
-	internalmodel "github.com/nabishec/ozon_habr_api/internal/model"
-	"github.com/nabishec/ozon_habr_api/internal/pkg/cursor"
-	"github.com/nabishec/ozon_habr_api/internal/pkg/errs"
+	"github.com/gqlgen/_examples/mini-habr-with-subscriptions/graph/model"
+	internalmodel "github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/model"
+	"github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/pkg/cursor"
+	"github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/pkg/errs"
 	"github.com/rs/zerolog/log"
 )
 

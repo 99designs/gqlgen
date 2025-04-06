@@ -1,7 +1,7 @@
 package postquery
 
 import (
-	"github.com/nabishec/ozon_habr_api/internal/model"
+	"github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/model"
 )
 
 type PostQueryImp interface {

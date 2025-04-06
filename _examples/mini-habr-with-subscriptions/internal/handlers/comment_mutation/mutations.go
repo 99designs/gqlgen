@@ -3,8 +3,8 @@ package commentmutation
 import (
 	"fmt"
 
-	"github.com/nabishec/ozon_habr_api/internal/model"
-	"github.com/nabishec/ozon_habr_api/internal/pkg/errs"
+	"github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/model"
+	"github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/pkg/errs"
 	"github.com/rs/zerolog/log"
 )
 

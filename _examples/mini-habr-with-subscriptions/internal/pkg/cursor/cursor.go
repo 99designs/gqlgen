@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/nabishec/ozon_habr_api/internal/model"
+	"github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/model"
 )
 
 func GetCommentID(after *string) (int64, error) {

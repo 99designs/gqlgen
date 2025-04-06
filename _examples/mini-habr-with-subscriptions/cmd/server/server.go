@@ -14,12 +14,12 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/nabishec/ozon_habr_api/graph"
-	commentmutation "github.com/nabishec/ozon_habr_api/internal/handlers/comment_mutation"
-	commentquery "github.com/nabishec/ozon_habr_api/internal/handlers/comment_query"
-	postmutation "github.com/nabishec/ozon_habr_api/internal/handlers/post_mutation"
-	postquery "github.com/nabishec/ozon_habr_api/internal/handlers/post_query"
-	"github.com/nabishec/ozon_habr_api/internal/storage"
+	"github.com/gqlgen/_examples/mini-habr-with-subscriptions/graph"
+	commentmutation "github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/handlers/comment_mutation"
+	commentquery "github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/handlers/comment_query"
+	postmutation "github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/handlers/post_mutation"
+	postquery "github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/handlers/post_query"
+	"github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/storage"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 

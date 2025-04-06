@@ -1,4 +1,4 @@
-module github.com/nabishec/ozon_habr_api
+modulemodule github.com/gqlgen/_examples/mini-habr-with-subscriptions
 
 go 1.24.0
 

@@ -5,6 +5,8 @@ import (
 	"regexp"
 	"syscall"
 
+	"golang.org/x/tools/imports"
+
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/plugin"
@@ -54,6 +56,10 @@ func Generate(cfg *config.Config, option ...Option) error {
 
 	for _, o := range option {
 		o(cfg, &plugins)
+	}
+
+	if cfg.LocalPrefix != "" {
+		imports.LocalPrefix = cfg.LocalPrefix
 	}
 
 	for _, p := range plugins {

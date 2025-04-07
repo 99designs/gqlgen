@@ -238,13 +238,12 @@ func (c *wsConnection) init() bool {
 
 func (c *wsConnection) write(msg *message) {
 	c.mu.Lock()
+	defer c.mu.Unlock()
 	// don't write anything to a closed / closing connection
 	if c.serverClosed {
-		c.mu.Unlock()
 		return
 	}
 	c.handlePossibleError(c.me.Send(msg), false)
-	c.mu.Unlock()
 }
 
 func (c *wsConnection) run() {

@@ -24,7 +24,7 @@ func (fn visitFn) Visit(node ast.Node) ast.Visitor {
 }
 
 // Prune removes any unused imports
-func Prune(filename string, src []byte, packages *code.Packages) ([]byte, error) {
+func Prune(filename string, src []byte, packages *code.Packages, loaclPrefix string) ([]byte, error) {
 	fset := token.NewFileSet()
 
 	file, err := parser.ParseFile(fset, filename, src, parser.ParseComments|parser.AllErrors)
@@ -42,7 +42,9 @@ func Prune(filename string, src []byte, packages *code.Packages) ([]byte, error)
 	if err := printConfig.Fprint(&buf, fset, file); err != nil {
 		return nil, err
 	}
-
+	if localPrefix != "" {
+		imports.LocalPrefix = LocalPrefix
+	}
 	return imports.Process(filename, buf.Bytes(), &imports.Options{FormatOnly: true, Comments: true, TabIndent: true, TabWidth: 8})
 }
 

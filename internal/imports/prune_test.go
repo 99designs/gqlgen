@@ -13,7 +13,7 @@ import (
 func TestPrune(t *testing.T) {
 	// prime the packages cache so that it's not considered uninitialized
 
-	b, err := Prune("testdata/unused.go", mustReadFile("testdata/unused.go"), code.NewPackages())
+	b, err := Prune("testdata/unused.go", mustReadFile("testdata/unused.go"), code.NewPackages(), "")
 	require.NoError(t, err)
 	require.Equal(t, strings.ReplaceAll(string(mustReadFile("testdata/unused.expected.go")), "\r\n", "\n"), string(b))
 }

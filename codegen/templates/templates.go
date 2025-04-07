@@ -58,6 +58,9 @@ type Options struct {
 
 	// Packages cache, you can find me on config.Config
 	Packages *code.Packages
+
+	// use format imports
+	LocalPrefix string 
 }
 
 var (
@@ -153,7 +156,7 @@ func Render(cfg Options) error {
 	}
 	CurrentImports = nil
 
-	err = write(cfg.Filename, result.Bytes(), cfg.Packages)
+	err = write(cfg.Filename, result.Bytes(), cfg.Packages, cfg.LocalPrefix)
 	if err != nil {
 		return err
 	}
@@ -691,13 +694,13 @@ func render(filename string, tpldata any) (*bytes.Buffer, error) {
 	return buf, t.Execute(buf, tpldata)
 }
 
-func write(filename string, b []byte, packages *code.Packages) error {
+func write(filename string, b []byte, packages *code.Packages, localPrefix string) error {
 	err := os.MkdirAll(filepath.Dir(filename), 0o755)
 	if err != nil {
 		return fmt.Errorf("failed to create directory: %w", err)
 	}
 
-	formatted, err := imports.Prune(filename, b, packages)
+	formatted, err := imports.Prune(filename, b, packages, localPrefix)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "gofmt failed on %s: %s\n", filepath.Base(filename), err.Error())
 		formatted = b

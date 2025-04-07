@@ -31,6 +31,7 @@ type Config struct {
 	Models                               TypeMap                    `yaml:"models,omitempty"`
 	StructTag                            string                     `yaml:"struct_tag,omitempty"`
 	Directives                           map[string]DirectiveConfig `yaml:"directives,omitempty"`
+	LocalPrefix                          string                     `yaml:"local_prefix,omitempty"`
 	GoBuildTags                          StringList                 `yaml:"go_build_tags,omitempty"`
 	GoInitialisms                        GoInitialismsConfig        `yaml:"go_initialisms,omitempty"`
 	OmitSliceElementPointers             bool                       `yaml:"omit_slice_element_pointers,omitempty"`

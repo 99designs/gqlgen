@@ -835,6 +835,98 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 	})
 }
 
+func TestWebsocketGracefulShutdown(t *testing.T) {
+	t.Run("server gracefully closes connection", func(t *testing.T) {
+		// Create a channel to track server-side events
+		serverEvents := make(chan string, 10)
+
+		// Create a context we can cancel to trigger shutdown
+		ctx, cancel := context.WithCancel(context.Background())
+
+		// Create a custom close handler to track when connection is fully closed
+		h := testserver.New()
+		h.AddTransport(transport.Websocket{
+			CloseFunc: func(ctx context.Context, closeCode int) {
+				serverEvents <- "connection_fully_closed"
+			},
+		})
+
+		srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Intercept the handler to track when server initiates close
+			serverEvents <- "server_handling_request"
+
+			// Use our cancellable context
+			r = r.WithContext(ctx)
+
+			h.ServeHTTP(w, r)
+		}))
+		defer srv.Close()
+
+		// Connect client
+		c := wsConnect(srv.URL)
+		defer c.Close()
+
+		// Initialize connection
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
+		assert.Equal(t, connectionAckMsg, readOp(c).Type)
+		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
+
+		// Start a subscription to verify it gets terminated
+		require.NoError(t, c.WriteJSON(&operationMessage{
+			Type:    startMsg,
+			ID:      "test_sub",
+			Payload: json.RawMessage(`{"query": "subscription { name }"}`),
+		}))
+
+		// Trigger server shutdown by canceling the context
+		serverEvents <- "server_initiating_close"
+		cancel()
+
+		// Server should send close message
+		_, _, err := c.ReadMessage()
+		assert.Equal(t, websocket.CloseNormalClosure, err.(*websocket.CloseError).Code)
+
+		// Try to send another operation - server should ignore it
+		assert.Equal(t, c.WriteJSON(&operationMessage{
+			Type:    startMsg,
+			ID:      "ignored_operation",
+			Payload: json.RawMessage(`{"query": "query { name }"}`),
+		}), websocket.ErrCloseSent)
+
+		// Client acknowledges close
+		closeCode := websocket.CloseNormalClosure
+		closeText := "client acknowledging close"
+		// This should fail with a websocket.CloseError
+		// (but the close message is still actually sent under the hood)
+		assert.Equal(t, c.WriteControl(
+			websocket.CloseMessage,
+			websocket.FormatCloseMessage(closeCode, closeText),
+			time.Now().Add(time.Second),
+		), websocket.ErrCloseSent)
+
+		// Verify server events happened in correct order
+		require.Equal(t, "server_handling_request", <-serverEvents)
+		require.Equal(t, "server_initiating_close", <-serverEvents)
+		require.Equal(t, "connection_fully_closed", <-serverEvents)
+
+		// Verify no more events
+		select {
+		case event := <-serverEvents:
+			assert.Fail(t, "Unexpected server event", event)
+		case <-time.After(50 * time.Millisecond):
+			// This is expected - no more events
+		}
+
+		// Verify the underlying connection is actually closed by attempting to read from it
+		// This should fail with a websocket.CloseError
+		_, _, err = c.ReadMessage()
+		require.Error(t, err)
+		closeErr, ok := err.(*websocket.CloseError)
+		require.True(t, ok, "Expected websocket.CloseError, got %T: %v", err, err)
+		assert.Equal(t, websocket.CloseNormalClosure, closeErr.Code)
+	})
+}
+
 func wsConnect(url string) *websocket.Conn {
 	return wsConnectWithSubprotocol(url, "")
 }

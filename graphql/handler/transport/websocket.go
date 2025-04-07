@@ -563,6 +563,8 @@ func (c *wsConnection) close(closeCode int, message string) {
 			// either we get net.ErrClosed or some other error
 			// either way, bail on the graceful shutdown as it's either
 			// impossible or very likely not happening
+			// TODO: optimize this to bypass the select statement to avoid
+			// waiting the entire closeTimeout
 			if err != nil {
 				return
 			}

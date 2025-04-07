@@ -332,9 +332,12 @@ func (c *wsConnection) run() {
 		case connectionCloseMessageType:
 			c.mu.Lock()
 			c.clientClosed = true
-			// normal termination
+			// server already initiated the graceful shutdown
+			// we don't need to send another close message
 			if c.serverClosed {
 				c.clientCloseReceiver <- struct{}{}
+				c.mu.Unlock()
+				return
 			}
 			c.mu.Unlock()
 			c.close(websocket.CloseNormalClosure, "terminated")

@@ -94,18 +94,14 @@ func (t *Tracer) InterceptField(ctx context.Context, next graphql.Resolver) (any
 	if !t.shouldTrace(ctx) {
 		return next(ctx)
 	}
-
-	var stop func()
 	if tb := t.getTreeBuilder(ctx); tb != nil {
-		stop = tb.WillResolveField(ctx)
+		stop := tb.WillResolveField(ctx)
+		if stop != nil {
+			defer stop()
+		}
 	}
 
-	res, err := next(ctx)
-	if stop != nil {
-		stop()
-	}
-
-	return res, err
+	return next(ctx)
 }
 
 // InterceptResponse is called before the overall response is sent, but before each field resolves; as a result

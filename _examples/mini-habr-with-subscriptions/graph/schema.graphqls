@@ -1,0 +1,77 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+scalar Time
+scalar UUID
+scalar Int64 
+
+type Post {
+  id: Int64!
+  authorID: UUID!
+  title: String!
+  text: String!
+  commentsEnabled: Boolean!
+  comments(first: Int, after: String): CommentConnection @goField(forceResolver: true)
+  createDate: Time!
+}
+
+type CommentConnection {
+  edges: [CommentEdge!]!
+  pageInfo: PageInfo!
+}
+
+type CommentEdge {
+  node: Comment!
+  cursor: String!
+}
+
+type PageInfo {
+  endCursor: String
+  hasNextPage: Boolean!
+}
+
+type Comment {
+  id: Int64!
+  authorID: UUID!
+  postID: Int64!
+  parentID: Int64
+  text: String!
+  createDate: Time!
+  replies(first: Int, after: String): CommentConnection @goField(forceResolver: true)
+}
+
+type Query {
+  posts: [Post!]!
+  post(postID: Int64!): Post
+}
+
+input NewPost {
+  authorID: UUID!
+  title: String!
+  text: String!
+  commentsEnabled: Boolean!
+}
+
+input NewComment {
+  authorID: UUID!
+  postID: Int64!
+  parentID: Int64
+  text: String!
+}
+
+type Mutation {
+  addPost(postInput: NewPost!): Post!
+  addComment(commentInput: NewComment!): Comment!
+  updateEnableComment(postID: Int64!, authorID: UUID!, commentsEnabled: Boolean!): Post!
+}
+
+type Subscription {
+  commentAdded(postID: Int64!): Comment!
+}
+
+directive @goField(
+	forceResolver: Boolean
+	name: String
+	omittable: Boolean
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION

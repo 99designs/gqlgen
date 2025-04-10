@@ -68,6 +68,9 @@ resolver:
 # Optional: turn on use ` + "`" + `gqlgen:"fieldName"` + "`" + ` tags in your models
 # struct_tag: json
 
+# Optional: turn on to split imports in generated files into local modules and third-party packages
+# local_prefix: github.com/myrepo
+
 # Optional: turn on to use []Thing instead of []*Thing
 # omit_slice_element_pointers: false
 

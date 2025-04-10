@@ -95,7 +95,10 @@ func (t *Tracer) InterceptField(ctx context.Context, next graphql.Resolver) (any
 		return next(ctx)
 	}
 	if tb := t.getTreeBuilder(ctx); tb != nil {
-		tb.WillResolveField(ctx)
+		stop := tb.WillResolveField(ctx)
+		if stop != nil {
+			defer stop()
+		}
 	}
 
 	return next(ctx)

@@ -7,15 +7,16 @@ toolchain go1.23.7
 replace github.com/99designs/gqlgen => ../
 
 require (
-	github.com/99designs/gqlgen v0.17.67
+	github.com/99designs/gqlgen v0.17.70
 	github.com/go-viper/mapstructure/v2 v2.2.1
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.1
 	github.com/rs/cors v1.11.1
 	github.com/stretchr/testify v1.10.0
 	github.com/vektah/dataloaden v0.3.0
-	github.com/vektah/gqlparser/v2 v2.5.23
+	github.com/vektah/gqlparser/v2 v2.5.24
 	golang.org/x/sync v0.13.0
+
 )
 
 require (

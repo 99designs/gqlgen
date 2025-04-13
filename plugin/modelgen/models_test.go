@@ -22,8 +22,14 @@ import (
 	"github.com/99designs/gqlgen/plugin/modelgen/internal/extrafields"
 	"github.com/99designs/gqlgen/plugin/modelgen/out"
 	"github.com/99designs/gqlgen/plugin/modelgen/out_enable_model_json_omitempty_tag_false"
+	"github.com/99designs/gqlgen/plugin/modelgen/out_enable_model_json_omitempty_tag_false_omitzero_tag_false"
+	"github.com/99designs/gqlgen/plugin/modelgen/out_enable_model_json_omitempty_tag_false_omitzero_tag_nil"
+	"github.com/99designs/gqlgen/plugin/modelgen/out_enable_model_json_omitempty_tag_false_omitzero_tag_true"
 	"github.com/99designs/gqlgen/plugin/modelgen/out_enable_model_json_omitempty_tag_nil"
 	"github.com/99designs/gqlgen/plugin/modelgen/out_enable_model_json_omitempty_tag_true"
+	"github.com/99designs/gqlgen/plugin/modelgen/out_enable_model_json_omitzero_tag_false"
+	"github.com/99designs/gqlgen/plugin/modelgen/out_enable_model_json_omitzero_tag_nil"
+	"github.com/99designs/gqlgen/plugin/modelgen/out_enable_model_json_omitzero_tag_true"
 	"github.com/99designs/gqlgen/plugin/modelgen/out_nullable_input_omittable"
 	"github.com/99designs/gqlgen/plugin/modelgen/out_struct_pointers"
 )
@@ -456,6 +462,86 @@ func TestModelGenerationOmitemptyConfig(t *testing.T) {
 				expected = "Value"
 			}
 			require.Equal(t, expected, sf.Tag.Get("json"))
+		})
+	}
+}
+
+func TestModelGenerationOmitzeroConfig(t *testing.T) {
+	suites := []struct {
+		n        string
+		cfg      string
+		expected string
+		t        any
+		outPath  string
+	}{
+		{
+			n:        "omitempty nil and omomitzero nil",
+			cfg:      "gqlgen_enable_model_json_omitzero_tag_nil.yml",
+			expected: "Value,omitempty",
+			t:        out_enable_model_json_omitzero_tag_nil.OmitZeroJSONTagTest{},
+			outPath:  "./out_enable_model_json_omitzero_tag_nil/",
+		},
+		{
+			n:        "omitempty nil and omomitzero true",
+			cfg:      "gqlgen_enable_model_json_omitzero_tag_true.yml",
+			expected: "Value,omitempty,omitzero",
+			t:        out_enable_model_json_omitzero_tag_true.OmitZeroJSONTagTest{},
+			outPath:  "./out_enable_model_json_omitzero_tag_true/",
+		},
+		{
+			n:        "omitempty nil and omomitzero false",
+			cfg:      "gqlgen_enable_model_json_omitzero_tag_false.yml",
+			expected: "Value,omitempty",
+			t:        out_enable_model_json_omitzero_tag_false.OmitZeroJSONTagTest{},
+			outPath:  "./out_enable_model_json_omitzero_tag_false/",
+		},
+		{
+			n:        "omitempty false and omomitzero nil",
+			cfg:      "gqlgen_enable_model_json_omitempty_tag_false_omitzero_tag_nil.yml",
+			expected: "Value",
+			t:        out_enable_model_json_omitempty_tag_false_omitzero_tag_nil.OmitZeroJSONTagTest{},
+			outPath:  "./out_enable_model_json_omitempty_tag_false_omitzero_tag_nil/",
+		},
+		{
+			n:        "omitempty false and omomitzero true",
+			cfg:      "gqlgen_enable_model_json_omitempty_tag_false_omitzero_tag_true.yml",
+			expected: "Value,omitzero",
+			t:        out_enable_model_json_omitempty_tag_false_omitzero_tag_true.OmitZeroJSONTagTest{},
+			outPath:  "./out_enable_model_json_omitempty_tag_false_omitzero_tag_true/",
+		},
+		{
+			n:        "omitempty false and omomitzero false",
+			cfg:      "gqlgen_enable_model_json_omitempty_tag_false_omitzero_tag_false.yml",
+			expected: "Value",
+			t:        out_enable_model_json_omitempty_tag_false_omitzero_tag_false.OmitZeroJSONTagTest{},
+			outPath:  "./out_enable_model_json_omitempty_tag_false_omitzero_tag_false/",
+		},
+	}
+
+	for _, s := range suites {
+		t.Run(s.n, func(t *testing.T) {
+			cfg, err := config.LoadConfig(fmt.Sprintf("testdata/%s", s.cfg))
+			require.NoError(t, err)
+			require.NoError(t, cfg.Init())
+			p := Plugin{
+				MutateHook: mutateHook,
+				FieldHook:  DefaultFieldMutateHook,
+			}
+			require.NoError(t, p.MutateConfig(cfg))
+			require.NoError(t, goBuild(t, s.outPath))
+
+			rt := reflect.TypeOf(s.t)
+
+			// ensure non-nullable fields are never omitzero
+			sfn, ok := rt.FieldByName("ValueNonNil")
+			require.True(t, ok)
+			require.Equal(t, "ValueNonNil", sfn.Tag.Get("json"))
+
+			// test nullable fields for configured omitzero
+			sf, ok := rt.FieldByName("Value")
+			require.True(t, ok)
+
+			require.Equal(t, s.expected, sf.Tag.Get("json"))
 		})
 	}
 }

@@ -101,4 +101,18 @@
 		fmt.Fprint(w, strconv.Quote(e.String()))
 	}
 
+	func (e *{{ goModelName .Name }})UnmarshalJSON(b []byte) error {
+		s, err := strconv.Unquote(string(b))
+		if err != nil {
+			return err
+		}
+		return e.UnmarshalGQL(s)
+	}
+
+	func (e {{ goModelName .Name }}) MarshalJSON() ([]byte, error) {
+		var buf bytes.Buffer
+		e.MarshalGQL(&buf)
+		return buf.Bytes(), nil
+	}
+
 {{- end }}

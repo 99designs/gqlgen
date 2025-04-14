@@ -88,7 +88,15 @@
 					{{- else }}
 						err := res.UnmarshalGQL(v)
 					{{- end }}
-					return res, graphql.ErrorOnPath(ctx, err)
+						return res, graphql.ErrorOnPath(ctx, err)
+				{{- else if $type.IsJSONMarshaler }}
+					{{- if and $type.IsNilable $type.Elem }}
+						var res = new({{ $type.Elem.GO | ref }})
+					{{- else}}
+						var res {{ $type.GO | ref }}
+					{{- end }}
+						err := res.UnmarshalJSON(v)
+						return res, graphql.ErrorOnPath(ctx, err)
 				{{- else }}
 					{{ if $useFunctionSyntaxForExecutionContext -}}
 					res, err := unmarshalInput{{ $type.GQL.Name }}(ctx, ec, v)

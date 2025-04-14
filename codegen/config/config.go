@@ -55,6 +55,7 @@ type Config struct {
 	ResolversAlwaysReturnPointers  bool           `yaml:"resolvers_always_return_pointers,omitempty"`
 	NullableInputOmittable         bool           `yaml:"nullable_input_omittable,omitempty"`
 	EnableModelJsonOmitemptyTag    *bool          `yaml:"enable_model_json_omitempty_tag,omitempty"`
+	EnableModelJsonOmitzeroTag     *bool          `yaml:"enable_model_json_omitzero_tag,omitempty"`
 	SkipValidation                 bool           `yaml:"skip_validation,omitempty"`
 	SkipModTidy                    bool           `yaml:"skip_mod_tidy,omitempty"`
 	Sources                        []*ast.Source  `yaml:"-"`
@@ -69,6 +70,7 @@ var cfgFilenames = []string{".gqlgen.yml", "gqlgen.yml", "gqlgen.yaml"}
 
 // DefaultConfig creates a copy of the default config
 func DefaultConfig() *Config {
+	falseValue := false
 	return &Config{
 		SchemaFilename:                 StringList{"schema.graphql"},
 		Model:                          PackageConfig{Filename: "models_gen.go"},
@@ -79,6 +81,7 @@ func DefaultConfig() *Config {
 		ReturnPointersInUnmarshalInput: false,
 		ResolversAlwaysReturnPointers:  true,
 		NullableInputOmittable:         false,
+		EnableModelJsonOmitzeroTag:     &falseValue,
 	}
 }
 

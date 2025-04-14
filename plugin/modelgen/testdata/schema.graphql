@@ -208,3 +208,8 @@ type OmitEmptyJsonTagTest {
     ValueNonNil: String!
     Value: String
 }
+
+type OmitZeroJSONTagTest {
+    ValueNonNil: String!
+    Value: String
+}

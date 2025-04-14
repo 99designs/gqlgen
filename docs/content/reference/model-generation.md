@@ -47,11 +47,31 @@ type OmitEmptyJSONTagTest struct {
 }
 ```
 
+## json ",omitzero"
+
+Fields marked as nullable in the GraphQL schema, e.g. `field: String` rather than `field: String!`,
+have the [json ",omitzero"](https://pkg.go.dev/encoding/json#Marshal) field tag applied to them.
+To that end, you expressly enable the addition of the `,omitzero` json field tag by setting the top-level
+[config](https://gqlgen.com/config/) field `enable_model_json_omitzero_tag` to `true`:
+
+### Examples
+
+enable_model_json_omitempty_tag default is false.
+
 With `enable_model_json_omitempty_tag: false`:
 
 ```go
 type OmitEmptyJSONTagTest struct {
 	ValueNonNil string  `json:"ValueNonNil" database:"OmitEmptyJsonTagTestValueNonNil"`
 	Value       *string `json:"Value" database:"OmitEmptyJsonTagTestValue"`
+}
+```
+
+With `enable_model_json_omitzero_tag: true`:
+
+```go
+type OmitEmptyJSONTagTest struct {
+	ValueNonNil string  `json:"ValueNonNil" database:"OmitEmptyJsonTagTestValueNonNil"`
+	Value       *string `json:"Value,omitzero" database:"OmitEmptyJsonTagTestValue"`
 }
 ```

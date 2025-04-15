@@ -3088,7 +3088,7 @@ func (ec *executionContext) unmarshalInputTodoInput(ctx context.Context, obj any
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"text", "done"}
+	fieldsInOrder := [...]string{"text", "done", "number"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -3109,6 +3109,13 @@ func (ec *executionContext) unmarshalInputTodoInput(ctx context.Context, obj any
 				return it, err
 			}
 			it.Done = data
+		case "number":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("number"))
+			data, err := ec.unmarshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋtodoᚐNumber(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Number = data
 		}
 	}
 
@@ -3698,6 +3705,16 @@ func (ec *executionContext) marshalNID2int(ctx context.Context, sel ast.Selectio
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋtodoᚐNumber(ctx context.Context, v any) (Number, error) {
+	var res Number
+	err := res.UnmarshalGQLContext(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋtodoᚐNumber(ctx context.Context, sel ast.SelectionSet, v Number) graphql.Marshaler {
+	return graphql.WrapContextMarshaler(ctx, v)
 }
 
 func (ec *executionContext) unmarshalNMap2map(ctx context.Context, v any) (map[string]any, error) {

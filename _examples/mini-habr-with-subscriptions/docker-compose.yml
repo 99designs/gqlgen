@@ -3,7 +3,7 @@ services:
     image: redis:latest
     container_name: redis1
     ports: 
-      - 6379:6379     
+      - 127.0.0.1:6379:6379     
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD} 
     restart: always
@@ -15,7 +15,7 @@ services:
     volumes:
       - redis_data1:/data
     networks:
-      - ozon_habr_network
+      - mini_habr_network
     env_file:
       - .env 
   
@@ -23,7 +23,7 @@ services:
     image: redis:latest
     container_name: redis2
     ports: 
-      - 6380:6379
+      - 127.0.0.1:6380:6379
     environment:
       REDIS_PASSWORD: ${REDIS_PASSWORD}
     restart: always
@@ -35,19 +35,19 @@ services:
     volumes:
       - redis_data2:/data
     networks:
-      - ozon_habr_network
+      - mini_habr_network
     env_file:
       - .env
 
   db:
     image: postgres:17
-    container_name: ozon_habr_db
+    container_name: mini_habr_db
     environment:
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
     ports:
-      - 5432:5432
+      - 127.0.0.1:5432:5432
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
       interval: 5s
@@ -57,7 +57,7 @@ services:
     volumes:
       - db_data:/var/lib/postgresql/data
     networks:
-      - ozon_habr_network
+      - mini_habr_network
     env_file:
       - .env
 
@@ -65,7 +65,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: ozon_habr_app
+    container_name: mini_habr_app
     environment:
       REDIS_HOST1: redis1
       REDIS_PORT1: ${REDIS_PORT1}
@@ -90,15 +90,15 @@ services:
       redis2:
         condition: service_healthy
     ports:
-      - 8080:8080
+      - 127.0.0.1:8080:8080
     networks:
-      - ozon_habr_network
+      - mini_habr_network
     env_file:
       - .env
 
   migrate:
     image: ghcr.io/kukymbr/goose-docker:latest
-    container_name: ozon_habr_migrate
+    container_name: mini_habr_migrate
     environment:
       GOOSE_DRIVER: ${DB_PROTOCOL}
       GOOSE_DBSTRING: "host=${DB_HOST} port=${DB_PORT} user=${DB_USER} dbname=${DB_NAME} password=${DB_PASSWORD} ${DB_OPTIONS}"
@@ -108,7 +108,7 @@ services:
     volumes:
       - ./migrations:/migrations
     networks:
-      - ozon_habr_network
+      - mini_habr_network
     env_file:
       - .env
 volumes:
@@ -116,5 +116,5 @@ volumes:
   redis_data2:
   db_data:
 networks:
-  ozon_habr_network:
+  mini_habr_network:
     driver: bridge    

@@ -8,7 +8,7 @@
         "gen": "graphql-codegen --config codegen.ts"
     },
     "devDependencies": {
-        "@apollo/client": "^3.13.5",
+        "@apollo/client": "^3.13.7",
         "@graphql-codegen/cli": "^5.0.5",
         "@graphql-codegen/client-preset": "^4.8.0",
         "@graphql-codegen/introspection": "^4.0.3",
@@ -18,9 +18,9 @@
         "graphql-codegen": "^0.4.0",
         "graphql-sse": "^2.5.4",
         "graphql-ws": "^6.0.4",
-        "typescript": "^5.8.2",
+        "typescript": "^5.8.3",
         "urql": "^4.2.2",
-        "vite": "^6.2.5",
-        "vitest": "^3.0.9"
+        "vite": "^6.2.6",
+        "vitest": "^3.1.1"
     }
 }

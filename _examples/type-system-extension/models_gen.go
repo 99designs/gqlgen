@@ -3,6 +3,7 @@
 package type_system_extension
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"strconv"
@@ -78,4 +79,18 @@ func (e *State) UnmarshalGQL(v any) error {
 
 func (e State) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *State) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e State) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }

@@ -108,6 +108,7 @@ services:
     volumes:
       - ./migrations:/migrations
     networks:
+
       - mini_habr_network
     env_file:
       - .env

@@ -11,8 +11,6 @@ import (
 	"github.com/99designs/gqlgen/plugin/modelgen/internal/extrafields"
 )
 
-// Add any new functions or any additional code/template functionality here
-
 type A interface {
 	IsA()
 	GetA() string
@@ -212,6 +210,11 @@ type NotCyclicalB struct {
 type OmitEmptyJSONTagTest struct {
 	ValueNonNil string  `json:"ValueNonNil" database:"OmitEmptyJsonTagTestValueNonNil"`
 	Value       *string `json:"Value,omitempty" database:"OmitEmptyJsonTagTestValue"`
+}
+
+type OmitZeroJSONTagTest struct {
+	ValueNonNil string  `json:"ValueNonNil" database:"OmitZeroJSONTagTestValueNonNil"`
+	Value       *string `json:"Value,omitempty" database:"OmitZeroJSONTagTestValue"`
 }
 
 type Query struct {

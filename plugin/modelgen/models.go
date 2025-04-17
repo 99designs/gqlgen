@@ -526,8 +526,18 @@ func getExtraFields(cfg *config.Config, modelName string) []*Field {
 }
 
 func getStructTagFromField(cfg *config.Config, field *ast.FieldDefinition) string {
+	var tags []string
+
 	if !field.Type.NonNull && (cfg.EnableModelJsonOmitemptyTag == nil || *cfg.EnableModelJsonOmitemptyTag) {
-		return `json:"` + field.Name + `,omitempty"`
+		tags = append(tags, "omitempty")
+	}
+
+	if !field.Type.NonNull && (cfg.EnableModelJsonOmitzeroTag == nil || *cfg.EnableModelJsonOmitzeroTag) {
+		tags = append(tags, "omitzero")
+	}
+
+	if len(tags) > 0 {
+		return `json:"` + field.Name + `,` + strings.Join(tags, ",") + `"`
 	}
 	return `json:"` + field.Name + `"`
 }

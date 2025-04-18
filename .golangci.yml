@@ -54,7 +54,9 @@ linters:
       rules:
         - name: empty-lines
         - name: use-any
+        # https://github.com/mgechev/revive/blob/HEAD/RULES_DESCRIPTIONS.md#struct-tag
         - name: struct-tag
+          exclude: ["**/*_go124_test.go"]
         - name: blank-imports
         - name: context-as-argument
         - name: context-keys-type

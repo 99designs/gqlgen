@@ -2,8 +2,6 @@ module github.com/99designs/gqlgen/_examples
 
 go 1.23.8
 
-toolchain go1.24.2
-
 replace github.com/99designs/gqlgen => ../
 
 require (

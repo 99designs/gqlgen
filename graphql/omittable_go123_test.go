@@ -17,47 +17,47 @@ func TestOmittable_MarshalJSONBeforeGo124(t *testing.T) {
 		expectedJSON string
 	}{
 		{
-			name: "simple string omitzero IsZero=true",
+			name: "simple string omitempty IsZero=true",
 			input: struct {
-				Value Omittable[string] `json:",omitzero"`
+				Value Omittable[string] `json:",omitempty"`
 			}{},
 			expectedJSON: `{"Value":""}`,
 		},
 		{
-			name: "string pointer omitzero IsZero=true",
+			name: "string pointer omitempty IsZero=true",
 			input: struct {
-				Value Omittable[*string] `json:",omitzero"`
+				Value Omittable[*string] `json:",omitempty"`
 			}{},
 			expectedJSON: `{"Value":null}`,
 		},
 		{
-			name: "omitted integer omitzero IsZero=true",
+			name: "omitted integer omitempty IsZero=true",
 			input: struct {
-				Value Omittable[int] `json:",omitzero"`
+				Value Omittable[int] `json:",omitempty"`
 			}{},
 			expectedJSON: `{"Value":0}`,
 		},
 		{
-			name: "omittable omittable omitzero IsZero=true", //nolint:dupword
+			name: "omittable omittable omitempty IsZero=true", //nolint:dupword
 			input: struct {
-				Value Omittable[Omittable[uint64]] `json:",omitzero"`
+				Value Omittable[Omittable[uint64]] `json:",omitempty"`
 			}{},
 			expectedJSON: `{"Value":0}`,
 		},
 		{
-			name: "omittable struct Value omitzero IsZero=true",
+			name: "omittable struct Value omitempty IsZero=true",
 			input: struct {
 				Value Omittable[struct {
 					Inner string
-				}] `json:",omitzero"`
+				}] `json:",omitempty"`
 			}{},
 			expectedJSON: `{"Value":{"Inner":""}}`,
 		},
 		{
-			name: "omittable struct Inner omitzero IsZero=true",
+			name: "omittable struct Inner omitempty IsZero=true",
 			input: struct {
 				Value Omittable[struct {
-					Inner Omittable[string] `json:",omitzero"`
+					Inner Omittable[string] `json:",omitempty"`
 				}]
 			}{},
 			expectedJSON: `{"Value":{"Inner":""}}`,

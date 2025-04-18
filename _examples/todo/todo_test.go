@@ -21,7 +21,7 @@ func TestTodo(t *testing.T) {
 	var resp struct {
 		CreateTodo struct{ ID string }
 	}
-	c.MustPost(`mutation { createTodo(todo:{text:"Fery important"}) { id } }`, &resp)
+	c.MustPost(`mutation { createTodo(todo:{text:"Fery important", number:5}) { id } }`, &resp)
 
 	require.Equal(t, "5", resp.CreateTodo.ID)
 
@@ -179,7 +179,7 @@ func TestTodo(t *testing.T) {
 		var resp struct {
 			CreateTodo struct{ Text string }
 		}
-		c.MustPost(`mutation { createTodo(todo:{text:"Completed todo", done: null}) { text } }`, &resp)
+		c.MustPost(`mutation { createTodo(todo:{text:"Completed todo", number:5, done: null}) { text } }`, &resp)
 
 		require.Equal(t, "Completed todo", resp.CreateTodo.Text)
 	})

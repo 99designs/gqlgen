@@ -1,3 +1,15 @@
+directive @goField(
+    forceResolver: Boolean
+    name: String
+    omittable: Boolean
+    type: String
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
+enum Role {
+    ADMIN
+    OWNER
+}
+
 schema {
     query: MyQuery
     mutation: MyMutation
@@ -26,6 +38,7 @@ input TodoInput {
     text: String!
     "Is it done already?"
     done: Boolean
+    number: Int! @goField(type:"github.com/99designs/gqlgen/_examples/todo.Number")
 }
 
 scalar Map
@@ -34,7 +47,3 @@ scalar Map
 directive @hasRole(role: Role!) on FIELD_DEFINITION
 directive @user(id: ID!) on MUTATION | QUERY | FIELD
 
-enum Role {
-    ADMIN
-    OWNER
-}

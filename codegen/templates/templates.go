@@ -256,8 +256,12 @@ func ref(p types.Type) string {
 	typeString := CurrentImports.LookupType(p)
 	// TODO(steve): figure out why this is needed
 	// otherwise inconsistent sometimes
+	// see https://github.com/99designs/gqlgen/issues/3414#issuecomment-2822856422
 	if typeString == "interface{}" {
 		return "any"
+	}
+	if typeString == "map[string]interface{}" {
+		return "map[string]any"
 	}
 	return typeString
 }

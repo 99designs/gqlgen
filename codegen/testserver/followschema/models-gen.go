@@ -176,7 +176,7 @@ type NestedInput struct {
 }
 
 type NestedMapInput struct {
-	Map map[string]interface{} `json:"map,omitempty"`
+	Map map[string]any `json:"map,omitempty"`
 }
 
 type ObjectDirectives struct {

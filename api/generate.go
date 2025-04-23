@@ -16,8 +16,8 @@ import (
 )
 
 var (
-	urlRegex     = regexp.MustCompile(`(?s)@link.*\(.*url:.*?"(.*?)"[^)]+\)`) // regex to grab the url of a link directive, should it exist
-	versionRegex = regexp.MustCompile(`v(\d+).(\d+)$`)                        // regex to grab the version number from a url
+	urlRegex     = regexp.MustCompile(`(?s)@link.*\(.*url:\s*?"(.*?)"[^)]+\)`) // regex to grab the url of a link directive, should it exist
+	versionRegex = regexp.MustCompile(`v(\d+).(\d+)$`)                         // regex to grab the version number from a url
 )
 
 func Generate(cfg *config.Config, option ...Option) error {

@@ -1,0 +1,26 @@
+name: GoModVersion
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [ opened, synchronize ]
+env:
+  GOTOOLCHAIN: local
+# When a new revision is pushed to a PR, cancel all in-progress CI runs for that
+# PR. See https://docs.github.com/en/actions/using-jobs/using-concurrency
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  gomodclean:
+    strategy:
+      matrix:
+        go: ["1.23"]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: ${{ matrix.go }}
+      - run: .github/workflows/check-fmt

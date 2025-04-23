@@ -3659,9 +3659,9 @@ func (ec *executionContext) field_Query_mapInput_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Query_mapInput_argsInput(
 	ctx context.Context,
 	rawArgs map[string]any,
-) (map[string]interface{}, error) {
+) (map[string]any, error) {
 	if _, ok := rawArgs["input"]; !ok {
-		var zeroVal map[string]interface{}
+		var zeroVal map[string]any
 		return zeroVal, nil
 	}
 
@@ -3670,7 +3670,7 @@ func (ec *executionContext) field_Query_mapInput_argsInput(
 		return ec.unmarshalOChanges2map(ctx, tmp)
 	}
 
-	var zeroVal map[string]interface{}
+	var zeroVal map[string]any
 	return zeroVal, nil
 }
 
@@ -3715,9 +3715,9 @@ func (ec *executionContext) field_Query_mapStringInterface_args(ctx context.Cont
 func (ec *executionContext) field_Query_mapStringInterface_argsIn(
 	ctx context.Context,
 	rawArgs map[string]any,
-) (map[string]interface{}, error) {
+) (map[string]any, error) {
 	if _, ok := rawArgs["in"]; !ok {
-		var zeroVal map[string]interface{}
+		var zeroVal map[string]any
 		return zeroVal, nil
 	}
 
@@ -3726,7 +3726,7 @@ func (ec *executionContext) field_Query_mapStringInterface_argsIn(
 		return ec.unmarshalOMapStringInterfaceInput2map(ctx, tmp)
 	}
 
-	var zeroVal map[string]interface{}
+	var zeroVal map[string]any
 	return zeroVal, nil
 }
 
@@ -7588,7 +7588,7 @@ func (ec *executionContext) fieldContext_MapNested_value(_ context.Context, fiel
 	return fc, nil
 }
 
-func (ec *executionContext) _MapStringInterfaceType_a(ctx context.Context, field graphql.CollectedField, obj map[string]interface{}) (ret graphql.Marshaler) {
+func (ec *executionContext) _MapStringInterfaceType_a(ctx context.Context, field graphql.CollectedField, obj map[string]any) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_MapStringInterfaceType_a(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -7635,7 +7635,7 @@ func (ec *executionContext) fieldContext_MapStringInterfaceType_a(_ context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _MapStringInterfaceType_b(ctx context.Context, field graphql.CollectedField, obj map[string]interface{}) (ret graphql.Marshaler) {
+func (ec *executionContext) _MapStringInterfaceType_b(ctx context.Context, field graphql.CollectedField, obj map[string]any) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_MapStringInterfaceType_b(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -7682,7 +7682,7 @@ func (ec *executionContext) fieldContext_MapStringInterfaceType_b(_ context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _MapStringInterfaceType_c(ctx context.Context, field graphql.CollectedField, obj map[string]interface{}) (ret graphql.Marshaler) {
+func (ec *executionContext) _MapStringInterfaceType_c(ctx context.Context, field graphql.CollectedField, obj map[string]any) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_MapStringInterfaceType_c(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -7729,7 +7729,7 @@ func (ec *executionContext) fieldContext_MapStringInterfaceType_c(_ context.Cont
 	return fc, nil
 }
 
-func (ec *executionContext) _MapStringInterfaceType_nested(ctx context.Context, field graphql.CollectedField, obj map[string]interface{}) (ret graphql.Marshaler) {
+func (ec *executionContext) _MapStringInterfaceType_nested(ctx context.Context, field graphql.CollectedField, obj map[string]any) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_MapStringInterfaceType_nested(ctx, field)
 	if err != nil {
 		return graphql.Null
@@ -11594,7 +11594,7 @@ func (ec *executionContext) _Query_mapStringInterface(ctx context.Context, field
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(map[string]interface{})
+	res := resTmp.(map[string]any)
 	fc.Result = res
 	return ec.marshalOMapStringInterfaceType2map(ctx, field.Selections, res)
 }
@@ -11653,7 +11653,7 @@ func (ec *executionContext) _Query_mapNestedStringInterface(ctx context.Context,
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(map[string]interface{})
+	res := resTmp.(map[string]any)
 	fc.Result = res
 	return ec.marshalOMapStringInterfaceType2map(ctx, field.Selections, res)
 }
@@ -16674,7 +16674,7 @@ func (ec *executionContext) fieldContext_iIt_id(_ context.Context, field graphql
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputChanges(ctx context.Context, obj any) (map[string]interface{}, error) {
+func (ec *executionContext) unmarshalInputChanges(ctx context.Context, obj any) (map[string]any, error) {
 	it := make(map[string]any, len(obj.(map[string]any)))
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
@@ -17108,7 +17108,7 @@ func (ec *executionContext) unmarshalInputMapNestedInput(ctx context.Context, ob
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Context, obj any) (map[string]interface{}, error) {
+func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Context, obj any) (map[string]any, error) {
 	it := make(map[string]any, len(obj.(map[string]any)))
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
@@ -19485,7 +19485,7 @@ func (ec *executionContext) _MapNested(ctx context.Context, sel ast.SelectionSet
 
 var mapStringInterfaceTypeImplementors = []string{"MapStringInterfaceType"}
 
-func (ec *executionContext) _MapStringInterfaceType(ctx context.Context, sel ast.SelectionSet, obj map[string]interface{}) graphql.Marshaler {
+func (ec *executionContext) _MapStringInterfaceType(ctx context.Context, sel ast.SelectionSet, obj map[string]any) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, mapStringInterfaceTypeImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -24269,7 +24269,7 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
-func (ec *executionContext) unmarshalOChanges2map(ctx context.Context, v any) (map[string]interface{}, error) {
+func (ec *executionContext) unmarshalOChanges2map(ctx context.Context, v any) (map[string]any, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -24694,7 +24694,7 @@ func (ec *executionContext) unmarshalOMapNestedInput2ᚖgithubᚗcomᚋ99designs
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalOMapStringInterfaceInput2map(ctx context.Context, v any) (map[string]interface{}, error) {
+func (ec *executionContext) unmarshalOMapStringInterfaceInput2map(ctx context.Context, v any) (map[string]any, error) {
 	if v == nil {
 		return nil, nil
 	}
@@ -24702,7 +24702,7 @@ func (ec *executionContext) unmarshalOMapStringInterfaceInput2map(ctx context.Co
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalOMapStringInterfaceType2map(ctx context.Context, sel ast.SelectionSet, v map[string]interface{}) graphql.Marshaler {
+func (ec *executionContext) marshalOMapStringInterfaceType2map(ctx context.Context, sel ast.SelectionSet, v map[string]any) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

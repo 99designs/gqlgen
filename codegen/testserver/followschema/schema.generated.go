@@ -887,9 +887,9 @@ func (ec *executionContext) field_Query_mapInput_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Query_mapInput_argsInput(
 	ctx context.Context,
 	rawArgs map[string]any,
-) (map[string]interface{}, error) {
+) (map[string]any, error) {
 	if _, ok := rawArgs["input"]; !ok {
-		var zeroVal map[string]interface{}
+		var zeroVal map[string]any
 		return zeroVal, nil
 	}
 
@@ -898,7 +898,7 @@ func (ec *executionContext) field_Query_mapInput_argsInput(
 		return ec.unmarshalOChanges2map(ctx, tmp)
 	}
 
-	var zeroVal map[string]interface{}
+	var zeroVal map[string]any
 	return zeroVal, nil
 }
 
@@ -943,9 +943,9 @@ func (ec *executionContext) field_Query_mapStringInterface_args(ctx context.Cont
 func (ec *executionContext) field_Query_mapStringInterface_argsIn(
 	ctx context.Context,
 	rawArgs map[string]any,
-) (map[string]interface{}, error) {
+) (map[string]any, error) {
 	if _, ok := rawArgs["in"]; !ok {
-		var zeroVal map[string]interface{}
+		var zeroVal map[string]any
 		return zeroVal, nil
 	}
 
@@ -954,7 +954,7 @@ func (ec *executionContext) field_Query_mapStringInterface_argsIn(
 		return ec.unmarshalOMapStringInterfaceInput2map(ctx, tmp)
 	}
 
-	var zeroVal map[string]interface{}
+	var zeroVal map[string]any
 	return zeroVal, nil
 }
 
@@ -4249,7 +4249,7 @@ func (ec *executionContext) _Query_mapStringInterface(ctx context.Context, field
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(map[string]interface{})
+	res := resTmp.(map[string]any)
 	fc.Result = res
 	return ec.marshalOMapStringInterfaceType2map(ctx, field.Selections, res)
 }
@@ -4308,7 +4308,7 @@ func (ec *executionContext) _Query_mapNestedStringInterface(ctx context.Context,
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(map[string]interface{})
+	res := resTmp.(map[string]any)
 	fc.Result = res
 	return ec.marshalOMapStringInterfaceType2map(ctx, field.Selections, res)
 }
@@ -6432,7 +6432,7 @@ func (ec *executionContext) fieldContext_User_pets(ctx context.Context, field gr
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputChanges(ctx context.Context, obj any) (map[string]interface{}, error) {
+func (ec *executionContext) unmarshalInputChanges(ctx context.Context, obj any) (map[string]any, error) {
 	it := make(map[string]any, len(obj.(map[string]any)))
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
@@ -8918,7 +8918,7 @@ func (ec *executionContext) marshalOAutobind2ᚖgithubᚗcomᚋ99designsᚋgqlge
 	return ec._Autobind(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalOChanges2map(ctx context.Context, v any) (map[string]interface{}, error) {
+func (ec *executionContext) unmarshalOChanges2map(ctx context.Context, v any) (map[string]any, error) {
 	if v == nil {
 		return nil, nil
 	}

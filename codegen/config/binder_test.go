@@ -267,6 +267,54 @@ func TestEnumBinding(t *testing.T) {
 	require.Equal(t, cf.Schema.Types["Baz"].EnumValues[1], baz.EnumValues[1].Definition)
 }
 
+func TestTargetBinding(t *testing.T) {
+	cf := Config{}
+	cf.Packages = code.NewPackages()
+	cf.Models = TypeMap{
+		"Int": TypeMapEntry{
+			Model: []string{
+				"github.com/99designs/gqlgen/codegen/config/testdata/binding.Number",
+				"github.com/99designs/gqlgen/codegen/config/testdata/binding.ContextNumber",
+			},
+		},
+	}
+	cf.Schema = gqlparser.MustLoadSchema(&ast.Source{Name: "schema", Input: `
+	directive @goField(
+    forceResolver: Boolean
+    name: String
+    omittable: Boolean
+    type: String
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+	type Query {
+		number: Int! @goField(type:"github.com/99designs/gqlgen/codegen/config/testdata/binding.Number")
+	    contextNumber: Int! @goField(type:"github.com/99designs/gqlgen/codegen/config/testdata/binding.ContextNumber")
+	}
+	`})
+	binder := cf.NewBinder()
+
+	ctxTarget, err := binder.FindType("github.com/99designs/gqlgen/codegen/config/testdata/binding", "ContextNumber")
+	require.NoError(t, err)
+	got, err := binder.TypeReference(cf.Schema.Query.Fields.ForName("contextNumber").Type, ctxTarget)
+	require.NotNil(t, got)
+	require.NoError(t, err)
+	require.True(t, got.IsContext)
+	require.True(t, got.IsMarshaler)
+	require.Nil(t, got.Marshaler)
+	require.Nil(t, got.Unmarshaler)
+	require.Equal(t, got.GO, ctxTarget)
+
+	target, err := binder.FindType("github.com/99designs/gqlgen/codegen/config/testdata/binding", "Number")
+	require.NoError(t, err)
+	got, err = binder.TypeReference(cf.Schema.Query.Fields.ForName("number").Type, target)
+	require.NotNil(t, got)
+	require.NoError(t, err)
+	require.False(t, got.IsContext)
+	require.True(t, got.IsMarshaler)
+	require.Nil(t, got.Marshaler)
+	require.Nil(t, got.Unmarshaler)
+	require.Equal(t, got.GO, target)
+}
+
 func createTypeAlias(name string, t types.Type) *types.Alias {
 	var nopos token.Pos
 	return types.NewAlias(types.NewTypeName(nopos, nil, name, nil), t)

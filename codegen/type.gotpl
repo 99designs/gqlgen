@@ -226,6 +226,10 @@
 						return v
 					{{- end }}
 				{{- else if $type.Marshaler }}
+					_ = sel
+					{{- if and (not $type.GQL.NonNull) (not $type.IsContext) }}
+					_ = ctx
+					{{- end }}
 					{{- $v := "v" }}
 					{{- if and $type.IsTargetNilable (not $type.IsNilable) }}
 						{{- $v = "&v" }}

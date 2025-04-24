@@ -20,7 +20,8 @@ type TodoInput struct {
 	// The body text
 	Text string `json:"text"`
 	// Is it done already?
-	Done *bool `json:"done,omitempty"`
+	Done   *bool  `json:"done,omitempty"`
+	Number Number `json:"number"`
 }
 
 type Role string

@@ -4707,6 +4707,7 @@ func unmarshalNBoolean2bool(ctx context.Context, ec *executionContext, v any) (b
 }
 
 func marshalNBoolean2bool(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v bool) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalBoolean(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4727,6 +4728,7 @@ func unmarshalNID2string(ctx context.Context, ec *executionContext, v any) (stri
 }
 
 func marshalNID2string(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalID(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4766,6 +4768,7 @@ func unmarshalNString2string(ctx context.Context, ec *executionContext, v any) (
 }
 
 func marshalNString2string(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4917,6 +4920,7 @@ func unmarshalN__DirectiveLocation2string(ctx context.Context, ec *executionCont
 }
 
 func marshalN__DirectiveLocation2string(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -5105,6 +5109,7 @@ func unmarshalN__TypeKind2string(ctx context.Context, ec *executionContext, v an
 }
 
 func marshalN__TypeKind2string(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -5120,6 +5125,8 @@ func unmarshalOBoolean2bool(ctx context.Context, ec *executionContext, v any) (b
 }
 
 func marshalOBoolean2bool(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v bool) graphql.Marshaler {
+	_ = sel
+	_ = ctx
 	res := graphql.MarshalBoolean(v)
 	return res
 }
@@ -5136,6 +5143,8 @@ func marshalOBoolean2ᚖbool(ctx context.Context, ec *executionContext, sel ast.
 	if v == nil {
 		return graphql.Null
 	}
+	_ = sel
+	_ = ctx
 	res := graphql.MarshalBoolean(*v)
 	return res
 }
@@ -5152,6 +5161,8 @@ func marshalODate2ᚖstring(ctx context.Context, ec *executionContext, sel ast.S
 	if v == nil {
 		return graphql.Null
 	}
+	_ = sel
+	_ = ctx
 	res := graphql.MarshalString(*v)
 	return res
 }
@@ -5175,6 +5186,8 @@ func marshalOInt2ᚖint(ctx context.Context, ec *executionContext, sel ast.Selec
 	if v == nil {
 		return graphql.Null
 	}
+	_ = sel
+	_ = ctx
 	res := graphql.MarshalInt(*v)
 	return res
 }
@@ -5272,6 +5285,8 @@ func marshalOString2ᚖstring(ctx context.Context, ec *executionContext, sel ast
 	if v == nil {
 		return graphql.Null
 	}
+	_ = sel
+	_ = ctx
 	res := graphql.MarshalString(*v)
 	return res
 }

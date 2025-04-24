@@ -4622,6 +4622,7 @@ func (ec *executionContext) unmarshalNBoolTyped2githubᚗcomᚋ99designsᚋgqlge
 }
 
 func (ec *executionContext) marshalNBoolTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTyped(ctx context.Context, sel ast.SelectionSet, v model.BoolTyped) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalString(marshalNBoolTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTyped[v])
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4649,6 +4650,7 @@ func (ec *executionContext) unmarshalNBoolUntyped2bool(ctx context.Context, v an
 }
 
 func (ec *executionContext) marshalNBoolUntyped2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalString(marshalNBoolUntyped2bool[v])
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4675,6 +4677,7 @@ func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v any) (
 }
 
 func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalBoolean(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4691,6 +4694,7 @@ func (ec *executionContext) unmarshalNInPackage2githubᚗcomᚋ99designsᚋgqlge
 }
 
 func (ec *executionContext) marshalNInPackage2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋapiᚐInPackage(ctx context.Context, sel ast.SelectionSet, v InPackage) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalString(marshalNInPackage2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋapiᚐInPackage[v])
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4718,6 +4722,7 @@ func (ec *executionContext) unmarshalNIntTyped2githubᚗcomᚋ99designsᚋgqlgen
 }
 
 func (ec *executionContext) marshalNIntTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped(ctx context.Context, sel ast.SelectionSet, v model.IntTyped) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalString(marshalNIntTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped[v])
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4745,6 +4750,7 @@ func (ec *executionContext) unmarshalNIntUntyped2int(ctx context.Context, v any)
 }
 
 func (ec *executionContext) marshalNIntUntyped2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalString(marshalNIntUntyped2int[v])
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4771,6 +4777,7 @@ func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) 
 }
 
 func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4787,6 +4794,7 @@ func (ec *executionContext) unmarshalNStringTyped2githubᚗcomᚋ99designsᚋgql
 }
 
 func (ec *executionContext) marshalNStringTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTyped(ctx context.Context, sel ast.SelectionSet, v model.StringTyped) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalString(marshalNStringTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTyped[v])
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4814,6 +4822,7 @@ func (ec *executionContext) unmarshalNStringUntyped2string(ctx context.Context, 
 }
 
 func (ec *executionContext) marshalNStringUntyped2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalString(marshalNStringUntyped2string[v])
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4841,6 +4850,7 @@ func (ec *executionContext) unmarshalNVarTyped2githubᚗcomᚋ99designsᚋgqlgen
 }
 
 func (ec *executionContext) marshalNVarTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐVarTyped(ctx context.Context, sel ast.SelectionSet, v model.VarTyped) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalString(marshalNVarTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐVarTyped[v])
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4868,6 +4878,7 @@ func (ec *executionContext) unmarshalNVarUntyped2bool(ctx context.Context, v any
 }
 
 func (ec *executionContext) marshalNVarUntyped2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalString(marshalNVarUntyped2bool[v])
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -4942,6 +4953,7 @@ func (ec *executionContext) unmarshalN__DirectiveLocation2string(ctx context.Con
 }
 
 func (ec *executionContext) marshalN__DirectiveLocation2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -5130,6 +5142,7 @@ func (ec *executionContext) unmarshalN__TypeKind2string(ctx context.Context, v a
 }
 
 func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -5152,6 +5165,8 @@ func (ec *executionContext) marshalOBoolTyped2ᚖgithubᚗcomᚋ99designsᚋgqlg
 	if v == nil {
 		return graphql.Null
 	}
+	_ = sel
+	_ = ctx
 	res := graphql.MarshalString(marshalOBoolTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTyped[*v])
 	return res
 }
@@ -5180,6 +5195,8 @@ func (ec *executionContext) marshalOBoolUntyped2ᚖbool(ctx context.Context, sel
 	if v == nil {
 		return graphql.Null
 	}
+	_ = sel
+	_ = ctx
 	res := graphql.MarshalString(marshalOBoolUntyped2ᚖbool[*v])
 	return res
 }
@@ -5201,6 +5218,8 @@ func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v any) (
 }
 
 func (ec *executionContext) marshalOBoolean2bool(ctx context.Context, sel ast.SelectionSet, v bool) graphql.Marshaler {
+	_ = sel
+	_ = ctx
 	res := graphql.MarshalBoolean(v)
 	return res
 }
@@ -5217,6 +5236,8 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	if v == nil {
 		return graphql.Null
 	}
+	_ = sel
+	_ = ctx
 	res := graphql.MarshalBoolean(*v)
 	return res
 }
@@ -5234,6 +5255,8 @@ func (ec *executionContext) marshalOIntTyped2ᚖgithubᚗcomᚋ99designsᚋgqlge
 	if v == nil {
 		return graphql.Null
 	}
+	_ = sel
+	_ = ctx
 	res := graphql.MarshalString(marshalOIntTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped[*v])
 	return res
 }
@@ -5262,6 +5285,8 @@ func (ec *executionContext) marshalOIntUntyped2ᚖint(ctx context.Context, sel a
 	if v == nil {
 		return graphql.Null
 	}
+	_ = sel
+	_ = ctx
 	res := graphql.MarshalString(marshalOIntUntyped2ᚖint[*v])
 	return res
 }
@@ -5325,6 +5350,8 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	if v == nil {
 		return graphql.Null
 	}
+	_ = sel
+	_ = ctx
 	res := graphql.MarshalString(*v)
 	return res
 }
@@ -5342,6 +5369,8 @@ func (ec *executionContext) marshalOStringTyped2ᚖgithubᚗcomᚋ99designsᚋgq
 	if v == nil {
 		return graphql.Null
 	}
+	_ = sel
+	_ = ctx
 	res := graphql.MarshalString(marshalOStringTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTyped[*v])
 	return res
 }
@@ -5370,6 +5399,8 @@ func (ec *executionContext) marshalOStringUntyped2ᚖstring(ctx context.Context,
 	if v == nil {
 		return graphql.Null
 	}
+	_ = sel
+	_ = ctx
 	res := graphql.MarshalString(marshalOStringUntyped2ᚖstring[*v])
 	return res
 }

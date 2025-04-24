@@ -135,6 +135,8 @@ type User @goModel(model: "github.com/you/pkg/model.User") {
 }
 ```
 
+The field resolvers will be executed concurrently in separate goroutines. The degree of concurrency can be customized with the [`worker_limit` configuration attribute](https://gqlgen.com/config/).
+
 ### Can I change the type of the ID from type String to Type Int?
 
 Yes! You can by remapping it in config as seen below:

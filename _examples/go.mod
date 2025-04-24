@@ -38,3 +38,5 @@ require (
 )
 
 replace github.com/gorilla/websocket => github.com/gorilla/websocket v1.5.0
+
+replace github.com/vektah/gqlparser/v2 => github.com/robmyersrobmyers/gqlparser/v2 v2.0.0-20250424065456-c67c9da91637

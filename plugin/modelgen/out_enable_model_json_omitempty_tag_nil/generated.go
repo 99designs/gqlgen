@@ -3,6 +3,7 @@
 package out_enable_model_json_omitempty_tag_nil
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"strconv"
@@ -206,6 +207,11 @@ type OmitEmptyJSONTagTest struct {
 	Value       *string `json:"Value,omitempty" database:"OmitEmptyJsonTagTestValue"`
 }
 
+type OmitZeroJSONTagTest struct {
+	ValueNonNil string  `json:"ValueNonNil" database:"OmitZeroJSONTagTestValueNonNil"`
+	Value       *string `json:"Value,omitempty" database:"OmitZeroJSONTagTestValue"`
+}
+
 type Query struct {
 }
 
@@ -288,6 +294,20 @@ func (e EnumWithDescription) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+func (e *EnumWithDescription) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e EnumWithDescription) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
+}
+
 type MissingEnum string
 
 const (
@@ -327,4 +347,18 @@ func (e *MissingEnum) UnmarshalGQL(v any) error {
 
 func (e MissingEnum) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *MissingEnum) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e MissingEnum) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }

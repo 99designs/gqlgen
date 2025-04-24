@@ -11,6 +11,8 @@ import (
 	"github.com/99designs/gqlgen/plugin/modelgen/internal/extrafields"
 )
 
+// Add any new functions or any additional code/template functionality here
+
 type A interface {
 	IsA()
 	GetA() string

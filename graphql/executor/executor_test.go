@@ -174,7 +174,7 @@ func TestExecutorDisableSuggestion(t *testing.T) {
 	t.Run("by default, the error message will include suggestions", func(t *testing.T) {
 		resp := query(exec, "", "{nam}")
 		assert.Empty(t, string(resp.Data))
-		assert.Equal(t, "input:1: Cannot query field \"nam\" on type \"Query\". Did you mean \"name\"?\n", resp.Errors.Error())
+		assert.Equal(t, "input:1:2: Cannot query field \"nam\" on type \"Query\". Did you mean \"name\"?\n", resp.Errors.Error())
 	})
 
 	t.Run("disable suggestion, the error message will not include suggestions", func(t *testing.T) {
@@ -182,13 +182,13 @@ func TestExecutorDisableSuggestion(t *testing.T) {
 		resp := query(exec, "", "{nam}")
 		assert.Empty(t, string(resp.Data))
 		assert.Len(t, resp.Errors, 1)
-		assert.Equal(t, "input:1: Cannot query field \"nam\" on type \"Query\".\n", resp.Errors.Error())
+		assert.Equal(t, "input:1:2: Cannot query field \"nam\" on type \"Query\".\n", resp.Errors.Error())
 
 		// check if the error message is displayed correctly even if an error occurs multiple times
 		resp = query(exec, "", "{nam}")
 		assert.Empty(t, string(resp.Data))
 		assert.Len(t, resp.Errors, 1)
-		assert.Equal(t, "input:1: Cannot query field \"nam\" on type \"Query\".\n", resp.Errors.Error())
+		assert.Equal(t, "input:1:2: Cannot query field \"nam\" on type \"Query\".\n", resp.Errors.Error())
 	})
 }
 

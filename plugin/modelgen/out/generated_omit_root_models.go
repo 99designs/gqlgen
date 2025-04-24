@@ -3,6 +3,7 @@
 package out
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"strconv"
@@ -51,4 +52,18 @@ func (e *SomeContent) UnmarshalGQL(v any) error {
 
 func (e SomeContent) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *SomeContent) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e SomeContent) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }

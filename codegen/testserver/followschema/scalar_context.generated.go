@@ -45,6 +45,7 @@ func (ec *executionContext) unmarshalNStringFromContextFunction2string(ctx conte
 }
 
 func (ec *executionContext) marshalNStringFromContextFunction2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
 	res := MarshalStringFromContextFunction(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {

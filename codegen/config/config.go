@@ -286,24 +286,8 @@ func (c *Config) IsRoot(def *ast.Definition) bool {
 }
 
 func (c *Config) injectTypesFromSchema() error {
-	c.Directives["goModel"] = DirectiveConfig{
-		SkipRuntime: true,
-	}
-
-	c.Directives["goExtraField"] = DirectiveConfig{
-		SkipRuntime: true,
-	}
-
-	c.Directives["goField"] = DirectiveConfig{
-		SkipRuntime: true,
-	}
-
-	c.Directives["goTag"] = DirectiveConfig{
-		SkipRuntime: true,
-	}
-
-	c.Directives["goEnum"] = DirectiveConfig{
-		SkipRuntime: true,
+	for _, d := range []string{"goModel", "goExtraField", "goField", "goTag", "goEnum"} {
+		c.Directives[d] = DirectiveConfig{SkipRuntime: true}
 	}
 
 	for _, schemaType := range c.Schema.Types {

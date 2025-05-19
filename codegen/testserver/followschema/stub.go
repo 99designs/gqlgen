@@ -69,6 +69,7 @@ type Stub struct {
 		ShapeUnion                       func(ctx context.Context) (ShapeUnion, error)
 		Autobind                         func(ctx context.Context) (*Autobind, error)
 		DeprecatedField                  func(ctx context.Context) (string, error)
+		SkipInclude                      func(ctx context.Context) (*SkipIncludeTestType, error)
 		Overlapping                      func(ctx context.Context) (*OverlappingFields, error)
 		DefaultParameters                func(ctx context.Context, falsyBoolean *bool, truthyBoolean *bool) (*DefaultParametersMirror, error)
 		DeferSingle                      func(ctx context.Context) (*DeferModel, error)
@@ -345,6 +346,9 @@ func (r *stubQuery) Autobind(ctx context.Context) (*Autobind, error) {
 }
 func (r *stubQuery) DeprecatedField(ctx context.Context) (string, error) {
 	return r.QueryResolver.DeprecatedField(ctx)
+}
+func (r *stubQuery) SkipInclude(ctx context.Context) (*SkipIncludeTestType, error) {
+	return r.QueryResolver.SkipInclude(ctx)
 }
 func (r *stubQuery) Overlapping(ctx context.Context) (*OverlappingFields, error) {
 	return r.QueryResolver.Overlapping(ctx)

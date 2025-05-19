@@ -380,6 +380,7 @@ type ComplexityRoot struct {
 		ScalarSlice                      func(childComplexity int) int
 		ShapeUnion                       func(childComplexity int) int
 		Shapes                           func(childComplexity int) int
+		SkipInclude                      func(childComplexity int) int
 		Slices                           func(childComplexity int) int
 		StringFromContextFunction        func(childComplexity int) int
 		StringFromContextInterface       func(childComplexity int) int
@@ -405,6 +406,11 @@ type ComplexityRoot struct {
 	Size struct {
 		Height func(childComplexity int) int
 		Weight func(childComplexity int) int
+	}
+
+	SkipIncludeTestType struct {
+		A func(childComplexity int) int
+		B func(childComplexity int) int
 	}
 
 	Slices struct {
@@ -1749,6 +1755,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.Shapes(childComplexity), true
 
+	case "Query.skipInclude":
+		if e.complexity.Query.SkipInclude == nil {
+			break
+		}
+
+		return e.complexity.Query.SkipInclude(childComplexity), true
+
 	case "Query.slices":
 		if e.complexity.Query.Slices == nil {
 			break
@@ -1886,6 +1899,20 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Size.Weight(childComplexity), true
+
+	case "SkipIncludeTestType.a":
+		if e.complexity.SkipIncludeTestType.A == nil {
+			break
+		}
+
+		return e.complexity.SkipIncludeTestType.A(childComplexity), true
+
+	case "SkipIncludeTestType.b":
+		if e.complexity.SkipIncludeTestType.B == nil {
+			break
+		}
+
+		return e.complexity.SkipIncludeTestType.B(childComplexity), true
 
 	case "Slices.test1":
 		if e.complexity.Slices.Test1 == nil {

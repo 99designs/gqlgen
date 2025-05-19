@@ -29,17 +29,11 @@ type Query {
     shapeUnion: ShapeUnion!
     autobind: Autobind
     deprecatedField: String! @deprecated(reason: "test deprecated directive")
-    skipInclude: SkipIncludeTestType
 }
 
 type Subscription {
     updated: String!
     initPayload: String!
-}
-
-type SkipIncludeTestType {
-    a: String
-    b: String
 }
 
 type Pet {

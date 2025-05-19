@@ -2,12 +2,12 @@ package singlefile
 
 import (
 	"context"
-	"github.com/stretchr/testify/assert"
 	"testing"
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSkipInclude(t *testing.T) {

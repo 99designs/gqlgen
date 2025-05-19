@@ -69,7 +69,6 @@ type Stub struct {
 		ShapeUnion                       func(ctx context.Context) (ShapeUnion, error)
 		Autobind                         func(ctx context.Context) (*Autobind, error)
 		DeprecatedField                  func(ctx context.Context) (string, error)
-		SkipInclude                      func(ctx context.Context) (*SkipIncludeTestType, error)
 		Overlapping                      func(ctx context.Context) (*OverlappingFields, error)
 		DefaultParameters                func(ctx context.Context, falsyBoolean *bool, truthyBoolean *bool) (*DefaultParametersMirror, error)
 		DeferSingle                      func(ctx context.Context) (*DeferModel, error)
@@ -115,6 +114,7 @@ type Stub struct {
 		StringFromContextInterface       func(ctx context.Context) (*StringFromContextInterface, error)
 		StringFromContextFunction        func(ctx context.Context) (string, error)
 		DefaultScalar                    func(ctx context.Context, arg string) (string, error)
+		SkipInclude                      func(ctx context.Context) (*SkipIncludeTestType, error)
 		Slices                           func(ctx context.Context) (*Slices, error)
 		ScalarSlice                      func(ctx context.Context) ([]byte, error)
 		Fallback                         func(ctx context.Context, arg FallbackToStringEncoding) (FallbackToStringEncoding, error)
@@ -347,9 +347,6 @@ func (r *stubQuery) Autobind(ctx context.Context) (*Autobind, error) {
 func (r *stubQuery) DeprecatedField(ctx context.Context) (string, error) {
 	return r.QueryResolver.DeprecatedField(ctx)
 }
-func (r *stubQuery) SkipInclude(ctx context.Context) (*SkipIncludeTestType, error) {
-	return r.QueryResolver.SkipInclude(ctx)
-}
 func (r *stubQuery) Overlapping(ctx context.Context) (*OverlappingFields, error) {
 	return r.QueryResolver.Overlapping(ctx)
 }
@@ -484,6 +481,9 @@ func (r *stubQuery) StringFromContextFunction(ctx context.Context) (string, erro
 }
 func (r *stubQuery) DefaultScalar(ctx context.Context, arg string) (string, error) {
 	return r.QueryResolver.DefaultScalar(ctx, arg)
+}
+func (r *stubQuery) SkipInclude(ctx context.Context) (*SkipIncludeTestType, error) {
+	return r.QueryResolver.SkipInclude(ctx)
 }
 func (r *stubQuery) Slices(ctx context.Context) (*Slices, error) {
 	return r.QueryResolver.Slices(ctx)

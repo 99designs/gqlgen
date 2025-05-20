@@ -389,6 +389,7 @@ type ComplexityRoot struct {
 		ScalarSlice                      func(childComplexity int) int
 		ShapeUnion                       func(childComplexity int) int
 		Shapes                           func(childComplexity int) int
+		SkipInclude                      func(childComplexity int) int
 		Slices                           func(childComplexity int) int
 		StringFromContextFunction        func(childComplexity int) int
 		StringFromContextInterface       func(childComplexity int) int
@@ -414,6 +415,11 @@ type ComplexityRoot struct {
 	Size struct {
 		Height func(childComplexity int) int
 		Weight func(childComplexity int) int
+	}
+
+	SkipIncludeTestType struct {
+		A func(childComplexity int) int
+		B func(childComplexity int) int
 	}
 
 	Slices struct {
@@ -596,6 +602,7 @@ type QueryResolver interface {
 	StringFromContextInterface(ctx context.Context) (*StringFromContextInterface, error)
 	StringFromContextFunction(ctx context.Context) (string, error)
 	DefaultScalar(ctx context.Context, arg string) (string, error)
+	SkipInclude(ctx context.Context) (*SkipIncludeTestType, error)
 	Slices(ctx context.Context) (*Slices, error)
 	ScalarSlice(ctx context.Context) ([]byte, error)
 	Fallback(ctx context.Context, arg FallbackToStringEncoding) (FallbackToStringEncoding, error)
@@ -1902,6 +1909,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.Shapes(childComplexity), true
 
+	case "Query.skipInclude":
+		if e.complexity.Query.SkipInclude == nil {
+			break
+		}
+
+		return e.complexity.Query.SkipInclude(childComplexity), true
+
 	case "Query.slices":
 		if e.complexity.Query.Slices == nil {
 			break
@@ -2039,6 +2053,20 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Size.Weight(childComplexity), true
+
+	case "SkipIncludeTestType.a":
+		if e.complexity.SkipIncludeTestType.A == nil {
+			break
+		}
+
+		return e.complexity.SkipIncludeTestType.A(childComplexity), true
+
+	case "SkipIncludeTestType.b":
+		if e.complexity.SkipIncludeTestType.B == nil {
+			break
+		}
+
+		return e.complexity.SkipIncludeTestType.B(childComplexity), true
 
 	case "Slices.test1":
 		if e.complexity.Slices.Test1 == nil {
@@ -2443,7 +2471,7 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
-//go:embed "builtinscalar.graphql" "complexity.graphql" "defaults.graphql" "defer.graphql" "directive.graphql" "embedded.graphql" "enum.graphql" "fields_order.graphql" "interfaces.graphql" "issue896.graphql" "loops.graphql" "maps.graphql" "mutation_with_custom_scalar.graphql" "nulls.graphql" "panics.graphql" "primitive_objects.graphql" "ptr_to_any.graphql" "ptr_to_ptr_input.graphql" "ptr_to_slice.graphql" "scalar_context.graphql" "scalar_default.graphql" "schema.graphql" "slices.graphql" "typefallback.graphql" "useptr.graphql" "v-ok.graphql" "validtypes.graphql" "variadic.graphql" "weird_type_cases.graphql" "wrapped_type.graphql"
+//go:embed "builtinscalar.graphql" "complexity.graphql" "defaults.graphql" "defer.graphql" "directive.graphql" "embedded.graphql" "enum.graphql" "fields_order.graphql" "interfaces.graphql" "issue896.graphql" "loops.graphql" "maps.graphql" "mutation_with_custom_scalar.graphql" "nulls.graphql" "panics.graphql" "primitive_objects.graphql" "ptr_to_any.graphql" "ptr_to_ptr_input.graphql" "ptr_to_slice.graphql" "scalar_context.graphql" "scalar_default.graphql" "schema.graphql" "skip-include.graphql" "slices.graphql" "typefallback.graphql" "useptr.graphql" "v-ok.graphql" "validtypes.graphql" "variadic.graphql" "weird_type_cases.graphql" "wrapped_type.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -2477,6 +2505,7 @@ var sources = []*ast.Source{
 	{Name: "scalar_context.graphql", Input: sourceData("scalar_context.graphql"), BuiltIn: false},
 	{Name: "scalar_default.graphql", Input: sourceData("scalar_default.graphql"), BuiltIn: false},
 	{Name: "schema.graphql", Input: sourceData("schema.graphql"), BuiltIn: false},
+	{Name: "skip-include.graphql", Input: sourceData("skip-include.graphql"), BuiltIn: false},
 	{Name: "slices.graphql", Input: sourceData("slices.graphql"), BuiltIn: false},
 	{Name: "typefallback.graphql", Input: sourceData("typefallback.graphql"), BuiltIn: false},
 	{Name: "useptr.graphql", Input: sourceData("useptr.graphql"), BuiltIn: false},
@@ -12377,6 +12406,50 @@ func (ec *executionContext) fieldContext_Query_defaultScalar(ctx context.Context
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_skipInclude(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_skipInclude(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().SkipInclude(rctx)
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*SkipIncludeTestType)
+	fc.Result = res
+	return ec.marshalOSkipIncludeTestType2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐSkipIncludeTestType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_skipInclude(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "a":
+				return ec.fieldContext_SkipIncludeTestType_a(ctx, field)
+			case "b":
+				return ec.fieldContext_SkipIncludeTestType_b(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SkipIncludeTestType", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_slices(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_slices(ctx, field)
 	if err != nil {
@@ -13268,6 +13341,82 @@ func (ec *executionContext) fieldContext_Size_weight(_ context.Context, field gr
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SkipIncludeTestType_a(ctx context.Context, field graphql.CollectedField, obj *SkipIncludeTestType) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SkipIncludeTestType_a(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.A, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SkipIncludeTestType_a(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SkipIncludeTestType",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _SkipIncludeTestType_b(ctx context.Context, field graphql.CollectedField, obj *SkipIncludeTestType) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_SkipIncludeTestType_b(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.B, nil
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	fc.Result = res
+	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_SkipIncludeTestType_b(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "SkipIncludeTestType",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
 		},
 	}
 	return fc, nil
@@ -21697,6 +21846,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "skipInclude":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_skipInclude(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
 		case "slices":
 			field := field
 
@@ -22037,6 +22205,44 @@ func (ec *executionContext) _Size(ctx context.Context, sel ast.SelectionSet, obj
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var skipIncludeTestTypeImplementors = []string{"SkipIncludeTestType"}
+
+func (ec *executionContext) _SkipIncludeTestType(ctx context.Context, sel ast.SelectionSet, obj *SkipIncludeTestType) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, skipIncludeTestTypeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SkipIncludeTestType")
+		case "a":
+			out.Values[i] = ec._SkipIncludeTestType_a(ctx, field, obj)
+		case "b":
+			out.Values[i] = ec._SkipIncludeTestType_b(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -25084,6 +25290,13 @@ func (ec *executionContext) marshalOShape2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 	wg.Wait()
 
 	return ret
+}
+
+func (ec *executionContext) marshalOSkipIncludeTestType2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐSkipIncludeTestType(ctx context.Context, sel ast.SelectionSet, v *SkipIncludeTestType) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._SkipIncludeTestType(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalOSlices2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐSlices(ctx context.Context, sel ast.SelectionSet, v *Slices) graphql.Marshaler {

@@ -92,6 +92,7 @@ type QueryResolver interface {
 	StringFromContextInterface(ctx context.Context) (*StringFromContextInterface, error)
 	StringFromContextFunction(ctx context.Context) (string, error)
 	DefaultScalar(ctx context.Context, arg string) (string, error)
+	SkipInclude(ctx context.Context) (*SkipIncludeTestType, error)
 	Slices(ctx context.Context) (*Slices, error)
 	ScalarSlice(ctx context.Context) ([]byte, error)
 	Fallback(ctx context.Context, arg FallbackToStringEncoding) (FallbackToStringEncoding, error)
@@ -5032,6 +5033,50 @@ func (ec *executionContext) fieldContext_Query_defaultScalar(ctx context.Context
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_skipInclude(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_Query_skipInclude(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().SkipInclude(rctx)
+	})
+
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*SkipIncludeTestType)
+	fc.Result = res
+	return ec.marshalOSkipIncludeTestType2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐSkipIncludeTestType(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_Query_skipInclude(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "a":
+				return ec.fieldContext_SkipIncludeTestType_a(ctx, field)
+			case "b":
+				return ec.fieldContext_SkipIncludeTestType_b(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type SkipIncludeTestType", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_slices(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Query_slices(ctx, field)
 	if err != nil {
@@ -8344,6 +8389,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "skipInclude":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_skipInclude(ctx, field)
 				return res
 			}
 

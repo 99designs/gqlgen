@@ -20,6 +20,6 @@ func TestFieldSet_MarshalGQL(t *testing.T) {
 		b := bytes.NewBuffer(nil)
 		fs.MarshalGQL(b)
 
-		assert.Equal(t, "{\"__typename\":\"A\"}", string(b.Bytes()))
+		assert.Equal(t, "{\"__typename\":\"A\"}", b.String())
 	})
 }

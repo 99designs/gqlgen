@@ -217,6 +217,11 @@ type Size struct {
 	Weight int `json:"weight"`
 }
 
+type SkipIncludeTestType struct {
+	A *string `json:"a,omitempty"`
+	B *string `json:"b,omitempty"`
+}
+
 type Slices struct {
 	Test1 []*string `json:"test1,omitempty"`
 	Test2 []string  `json:"test2,omitempty"`

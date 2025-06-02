@@ -412,6 +412,11 @@ func (r *queryResolver) DefaultScalar(ctx context.Context, arg string) (string, 
 	panic("not implemented")
 }
 
+// SkipInclude is the resolver for the skipInclude field.
+func (r *queryResolver) SkipInclude(ctx context.Context) (*SkipIncludeTestType, error) {
+	panic("not implemented")
+}
+
 // Slices is the resolver for the slices field.
 func (r *queryResolver) Slices(ctx context.Context) (*Slices, error) {
 	panic("not implemented")

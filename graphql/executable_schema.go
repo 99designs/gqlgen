@@ -38,24 +38,14 @@ func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies 
 			f.Selections = append(f.Selections, sel.SelectionSet...)
 
 		case *ast.InlineFragment:
-			// To allow simplified "collect all" types behavior, pass an empty list
-			// of types that the type condition must satisfy: we will apply the
-			// fragment regardless of type condition.
-			//
-			// When the type condition is not set (... { field }) we will apply the
-			// fragment to any satisfying types.
-			//
-			// We will only NOT apply the fragment when we have at least one type in
-			// the list we must satisfy and a type condition to compare them to.
-			if len(satisfies) > 0 && sel.TypeCondition != "" && !instanceOf(sel.TypeCondition, satisfies) {
-				continue
-			}
-
 			if !shouldIncludeNode(sel.Directives, reqCtx.Variables) {
 				continue
 			}
-			shouldDefer, label := deferrable(sel.Directives, reqCtx.Variables)
+			if !doesFragmentConditionMatch(sel.TypeCondition, satisfies) {
+				continue
+			}
 
+			shouldDefer, label := deferrable(sel.Directives, reqCtx.Variables)
 			for _, childField := range collectFields(reqCtx, sel.SelectionSet, satisfies, visited) {
 				f := getOrCreateAndAppendField(
 					&groupedFields, childField.Name, childField.Alias, childField.ObjectDefinition,
@@ -73,6 +63,9 @@ func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies 
 			if _, seen := visited[fragmentName]; seen {
 				continue
 			}
+			if !shouldIncludeNode(sel.Directives, reqCtx.Variables) {
+				continue
+			}
 			visited[fragmentName] = true
 
 			fragment := reqCtx.Doc.Fragments.ForName(fragmentName)
@@ -80,16 +73,11 @@ func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies 
 				// should never happen, validator has already run
 				panic(fmt.Errorf("missing fragment %s", fragmentName))
 			}
-
-			if len(satisfies) > 0 && !instanceOf(fragment.TypeCondition, satisfies) {
+			if !doesFragmentConditionMatch(fragment.TypeCondition, satisfies) {
 				continue
 			}
 
-			if !shouldIncludeNode(sel.Directives, reqCtx.Variables) {
-				continue
-			}
 			shouldDefer, label := deferrable(sel.Directives, reqCtx.Variables)
-
 			for _, childField := range collectFields(reqCtx, fragment.SelectionSet, satisfies, visited) {
 				f := getOrCreateAndAppendField(&groupedFields,
 					childField.Name, childField.Alias, childField.ObjectDefinition,
@@ -115,9 +103,24 @@ type CollectedField struct {
 	Deferrable *Deferrable
 }
 
-func instanceOf(val string, satisfies []string) bool {
-	for _, s := range satisfies {
-		if val == s {
+func doesFragmentConditionMatch(typeCondition string, satisfies []string) bool {
+	// To allow simplified "collect all" types behavior, pass an empty list of types
+	// that the type condition must satisfy: we will apply the fragment regardless of
+	// type condition.
+	if len(satisfies) == 0 {
+		return true
+	}
+
+	// When the type condition is not set (... { field }) we will apply the fragment
+	// to any satisfying types.
+	if typeCondition == "" {
+		return true
+	}
+
+	// To handle abstract types we pass in a list of all known types that the current
+	// type will satisfy.
+	for _, satisfyingType := range satisfies {
+		if typeCondition == satisfyingType {
 			return true
 		}
 	}

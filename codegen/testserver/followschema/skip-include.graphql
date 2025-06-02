@@ -1,0 +1,8 @@
+extend type Query {
+    skipInclude: SkipIncludeTestType
+}
+
+type SkipIncludeTestType {
+    a: String
+    b: String
+}

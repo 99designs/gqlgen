@@ -263,6 +263,11 @@ func ref(p types.Type) string {
 	if typeString == "map[string]interface{}" {
 		return "map[string]any"
 	}
+	// assuming that some other container interface{} type
+	// like []interface{} or something needs coercion to any
+	if strings.Contains(typeString, "interface{}") {
+		return strings.ReplaceAll(typeString, "interface{}", "any")
+	}
 	return typeString
 }
 

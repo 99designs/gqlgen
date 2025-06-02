@@ -14,7 +14,6 @@ require (
 	github.com/vektah/dataloaden v0.3.0
 	github.com/vektah/gqlparser/v2 v2.5.27
 	golang.org/x/sync v0.14.0
-
 )
 
 require (

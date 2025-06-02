@@ -58,13 +58,18 @@ func (m *FieldSet) Dispatch(ctx context.Context) {
 
 func (m *FieldSet) MarshalGQL(writer io.Writer) {
 	writer.Write(openBrace)
+	writtenFields := make(map[string]bool, len(m.fields))
 	for i, field := range m.fields {
+		if writtenFields[field.Alias] {
+			continue
+		}
 		if i != 0 {
 			writer.Write(comma)
 		}
 		writeQuotedString(writer, field.Alias)
 		writer.Write(colon)
 		m.Values[i].MarshalGQL(writer)
+		writtenFields[field.Alias] = true
 	}
 	writer.Write(closeBrace)
 }

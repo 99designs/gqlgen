@@ -14,6 +14,9 @@ func TestGET(t *testing.T) {
 	h := testserver.New()
 	h.AddTransport(transport.GET{})
 
+	graphqlResponseH := testserver.New()
+	graphqlResponseH.AddTransport(transport.GET{UseGrapQLResponseJsonByDefault: true})
+
 	jsonH := testserver.New()
 	jsonH.AddTransport(transport.GET{
 		ResponseHeaders: map[string][]string{
@@ -28,6 +31,20 @@ func TestGET(t *testing.T) {
 		assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 	})
 
+	t.Run("success with accept is empty with enabling graphql response json", func(t *testing.T) {
+		resp := doRequest(graphqlResponseH, "GET", "/graphql?query={name}", ``, "", "application/json")
+		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+		assert.Equal(t, "application/graphql-response+json", resp.Header().Get("Content-Type"))
+		assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
+	})
+
+	t.Run("success with accept is empty without enabling graphql response json", func(t *testing.T) {
+		resp := doRequest(h, "GET", "/graphql?query={name}", ``, "", "application/json")
+		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
+		assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
+	})
+
 	t.Run("success with accept application/graphql-response+json", func(t *testing.T) {
 		resp := doRequest(h, "GET", "/graphql?query={name}", ``, "application/graphql-response+json", "application/json")
 		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
@@ -35,10 +52,17 @@ func TestGET(t *testing.T) {
 		assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 	})
 
-	t.Run("success with wildcard", func(t *testing.T) {
-		resp := doRequest(h, "GET", "/graphql?query={name}", ``, "*/*", "application/json")
+	t.Run("success with wildcard with enabling application/graphql-response+json", func(t *testing.T) {
+		resp := doRequest(graphqlResponseH, "GET", "/graphql?query={name}", ``, "*/*", "application/json")
 		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 		assert.Equal(t, "application/graphql-response+json", resp.Header().Get("Content-Type"))
+		assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
+	})
+
+	t.Run("success with wildcard without enabling application/graphql-response+json", func(t *testing.T) {
+		resp := doRequest(h, "GET", "/graphql?query={name}", ``, "*/*", "application/json")
+		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 		assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 	})
 

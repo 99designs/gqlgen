@@ -17,6 +17,9 @@ func TestPOST(t *testing.T) {
 	h := testserver.New()
 	h.AddTransport(transport.POST{})
 
+	graphqlResponseH := testserver.New()
+	graphqlResponseH.AddTransport(transport.POST{UseGrapQLResponseJsonByDefault: true})
+
 	jsonH := testserver.New()
 	jsonH.AddTransport(transport.POST{
 		ResponseHeaders: map[string][]string{
@@ -38,10 +41,17 @@ func TestPOST(t *testing.T) {
 		assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 	})
 
-	t.Run("success with accept wildcard", func(t *testing.T) {
-		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`, "*/*", "application/json")
+	t.Run("success with accept wildcard with enabling application/graphql-response+json", func(t *testing.T) {
+		resp := doRequest(graphqlResponseH, "POST", "/graphql", `{"query":"{ name }"}`, "*/*", "application/json")
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Equal(t, "application/graphql-response+json", resp.Header().Get("Content-Type"))
+		assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
+	})
+
+	t.Run("success with accept wildcard without enabling application/graphql-response+json", func(t *testing.T) {
+		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`, "*/*", "application/json")
+		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 		assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 	})
 

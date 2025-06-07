@@ -11,7 +11,7 @@ const (
 	acceptApplicationGraphqlResponseJson = "application/graphql-response+json"
 )
 
-func determineResponseContentType(explicitHeaders map[string][]string, r *http.Request) string {
+func determineResponseContentType(explicitHeaders map[string][]string, r *http.Request, useGrapQLResponseJsonByDefault bool) string {
 	for k, v := range explicitHeaders {
 		if strings.EqualFold(k, "Content-Type") {
 			return v[0]
@@ -19,9 +19,10 @@ func determineResponseContentType(explicitHeaders map[string][]string, r *http.R
 	}
 
 	accept := r.Header.Get("Accept")
-	// TODO(steve): Consider adding config option to opt-in to
-	// default "application/graphql-response+json"
 	if accept == "" {
+		if useGrapQLResponseJsonByDefault {
+			return acceptApplicationGraphqlResponseJson
+		}
 		return acceptApplicationJson
 	}
 
@@ -32,7 +33,10 @@ func determineResponseContentType(explicitHeaders map[string][]string, r *http.R
 		}
 		switch mediaType {
 		case "*/*", "application/*":
-			return acceptApplicationGraphqlResponseJson
+			if useGrapQLResponseJsonByDefault {
+				return acceptApplicationGraphqlResponseJson
+			}
+			return acceptApplicationJson
 		case "application/json":
 			return acceptApplicationJson
 		case "application/graphql-response+json":

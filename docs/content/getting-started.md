@@ -24,36 +24,23 @@ cd gqlgen-todos
 go mod init github.com/[username]/gqlgen-todos
 ```
 
-Next, create a `tools.go` file and add gqlgen as a [tool dependency for your module](https://go.dev/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module).
+Next, add `github.com/99designs/gqlgen` to your project, as a [tool dependency](https://go.dev/doc/modules/managing-dependencies#tools).
 
-```go
-//go:build tools
-
-package tools
-
-import (
-	_ "github.com/99designs/gqlgen"
-)
-```
-
-To automatically add the dependency to your `go.mod` run
 ```shell
-go mod tidy
+go get -tool github.com/99designs/gqlgen
 ```
 
 By default you'll be using the latest version of gqlgen, but if you want to specify a particular version you can use `go get` (replacing `VERSION` with the particular version desired)
 ```shell
-go get -d github.com/99designs/gqlgen@VERSION
+go get -tool github.com/99designs/gqlgen@VERSION
 ```
-
-
 
 ## Building the server
 
 ### Create the project skeleton
 
 ```shell
-go run github.com/99designs/gqlgen init
+go tool gqlgen init
 ```
 
 This will create our suggested package layout. You can modify these paths in gqlgen.yml if you need to.
@@ -239,10 +226,7 @@ type Todo struct {
 }
 ```
 
-And run `go run github.com/99designs/gqlgen generate`.
-
->
-> If you run into this error `package github.com/99designs/gqlgen: no Go files` while executing the `generate` command above, follow the instructions in [this](https://github.com/99designs/gqlgen/issues/800#issuecomment-888908950) comment for a possible solution.
+And run `go tool gqlgen generate`.
 
 Now if we look in `graph/schema.resolvers.go` we can see a new resolver, lets implement it and fix `CreateTodo`.
 ```go
@@ -267,7 +251,7 @@ func (r *todoResolver) User(ctx context.Context, obj *model.Todo) (*model.User, 
 At the top of our `resolver.go`, between `package` and `import`, add the following line:
 
 ```go
-//go:generate go run github.com/99designs/gqlgen generate
+//go:generate go tool gqlgen generate
 ```
 
 This magic comment tells `go generate` what command to run when we want to regenerate our code. To run go generate recursively over your entire project, use this command:

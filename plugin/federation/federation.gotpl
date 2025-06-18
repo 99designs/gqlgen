@@ -265,14 +265,23 @@ func (ec *executionContext) resolveManyEntities(
 
 						for i, entity := range entities {
 							{{- range $entity.Requires }}
-								{{ if $useFunctionSyntaxForExecutionContext -}}
-								entity.{{.Field.JoinGo `.`}}, err = {{.Type.UnmarshalFunc}}(ctx, ec, reps[i].entity["{{.Field.Join `"].(map[string]any)["`}}"])
-								{{- else -}}
-								entity.{{.Field.JoinGo `.`}}, err = ec.{{.Type.UnmarshalFunc}}(ctx, reps[i].entity["{{.Field.Join `"].(map[string]any)["`}}"])
-								{{- end }}
+								{{- if $options.ComputedRequires }}
+									{{/* We don't do anything in this case, computed requires are handled by standard resolvers */}}
+								{{- else if and $options.ExplicitRequires $entity.Requires }}
+									err = ec.Populate{{$entity.Def.Name}}Requires(ctx, {{- if (not $usePointers) -}}&{{- end -}}entity, rep)
+									if err != nil {
+										return nil, fmt.Errorf(`populating requires for Entity "{{$entity.Def.Name}}": %w`, err)
+									}
+								{{- else }}
+									{{ if $useFunctionSyntaxForExecutionContext -}}
+										entity.{{.Field.JoinGo `.`}}, err = {{.Type.UnmarshalFunc}}(ctx, ec, reps[i].entity["{{.Field.Join `"].(map[string]any)["`}}"])
+										{{- else -}}
+										entity.{{.Field.JoinGo `.`}}, err = ec.{{.Type.UnmarshalFunc}}(ctx, reps[i].entity["{{.Field.Join `"].(map[string]any)["`}}"])
+									{{- end }}
 									if err != nil {
 										return err
 									}
+								{{- end}}
 							{{- end}}
 						list[reps[i].index] = entity
 						}

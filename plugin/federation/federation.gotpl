@@ -270,7 +270,7 @@ func (ec *executionContext) resolveManyEntities(
 								{{- else if and $options.ExplicitRequires $entity.Requires }}
 									err = ec.Populate{{$entity.Def.Name}}Requires(ctx, {{- if (not $usePointers) -}}&{{- end -}}entity, rep)
 									if err != nil {
-										return nil, fmt.Errorf(`populating requires for Entity "{{$entity.Def.Name}}": %w`, err)
+										return fmt.Errorf(`populating requires for Entity "{{$entity.Def.Name}}": %w`, err)
 									}
 								{{- else }}
 									{{ if $useFunctionSyntaxForExecutionContext -}}

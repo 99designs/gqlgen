@@ -57,7 +57,7 @@ func TestExplicitRequires(t *testing.T) {
 		require.Equal(t, 10, resp.Entities[1].Diameter)
 	})
 
-	t.Run("PlanetRequires entities with multiple required fields directive", func(t *testing.T) {
+	t.Run("PlanetMultipleRequires entities with multiple required fields directive", func(t *testing.T) {
 		representations := []map[string]any{
 			{
 				"__typename": "PlanetMultipleRequires",
@@ -126,6 +126,47 @@ func TestExplicitRequires(t *testing.T) {
 		err := c.Post(
 			entityQuery([]string{
 				"PlanetRequiresNested {name, world { foo }}",
+			}),
+			&resp,
+			client.Var("representations", representations),
+		)
+
+		require.NoError(t, err)
+		require.Equal(t, "earth", resp.Entities[0].Name)
+		require.Equal(t, "A", resp.Entities[0].World.Foo)
+		require.Equal(t, "mars", resp.Entities[1].Name)
+		require.Equal(t, "B", resp.Entities[1].World.Foo)
+	})
+
+	t.Run("PlanetRequiresNestedMultiResolver entities with requires directive having nested field & multi enitity resolver", func(t *testing.T) {
+		representations := []map[string]any{
+			{
+				"__typename": "PlanetRequiresNestedMultiResolver",
+				"name":       "earth",
+				"world": map[string]any{
+					"foo": "A",
+				},
+			}, {
+				"__typename": "PlanetRequiresNestedMultiResolver",
+				"name":       "mars",
+				"world": map[string]any{
+					"foo": "B",
+				},
+			},
+		}
+
+		var resp struct {
+			Entities []struct {
+				Name  string `json:"name"`
+				World struct {
+					Foo string `json:"foo"`
+				} `json:"world"`
+			} `json:"_entities"`
+		}
+
+		err := c.Post(
+			entityQuery([]string{
+				"PlanetRequiresNestedMultiResolver {name, world { foo }}",
 			}),
 			&resp,
 			client.Var("representations", representations),

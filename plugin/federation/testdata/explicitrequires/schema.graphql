@@ -62,6 +62,14 @@ type PlanetRequiresNested @key(fields: "name") {
     sizes: [Int!] @requires(fields: "worlds{ foo }")
 }
 
+type PlanetRequiresNestedMultiResolver @key(fields: "name") @entityResolver(multi: true) {
+    name: String! @external
+    world: World! @external
+    worlds: [World!] @external
+    size: Int! @requires(fields: "world{ foo }")
+    sizes: [Int!] @requires(fields: "worlds{ foo }")
+}
+
 type MultiPlanetRequiresNested @key(fields: "name") @entityResolver(multi: true) {
     name: String! @external
     world: World! @external

@@ -147,6 +147,19 @@ func (r *entityResolver) FindPlanetRequiresNestedByName(ctx context.Context, nam
 	}, nil
 }
 
+// FindManyPlanetRequiresNestedMultiResolverByNames is the resolver for the findManyPlanetRequiresNestedMultiResolverByNames field.
+func (r *entityResolver) FindManyPlanetRequiresNestedMultiResolverByNames(ctx context.Context, reps []*generated.PlanetRequiresNestedMultiResolverByNamesInput) ([]*generated.PlanetRequiresNestedMultiResolver, error) {
+	result := make([]*generated.PlanetRequiresNestedMultiResolver, len(reps))
+	for i, rep := range reps {
+		p := &generated.PlanetRequiresNestedMultiResolver{
+			Name: rep.Name,
+		}
+		result[i] = p
+	}
+
+	return result, nil
+}
+
 // FindWorldByHelloNameAndFoo is the resolver for the findWorldByHelloNameAndFoo field.
 func (r *entityResolver) FindWorldByHelloNameAndFoo(ctx context.Context, helloName string, foo string) (*generated.World, error) {
 	return &generated.World{

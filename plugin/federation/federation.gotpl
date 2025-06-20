@@ -262,7 +262,7 @@ func (ec *executionContext) resolveManyEntities(
 						if err != nil {
 							return err
 						}
-
+						{{- $emitted := dict }}
 						for i, entity := range entities {
 							{{- range $entity.Requires }}
 								{{- if $options.ComputedRequires }}

@@ -23,8 +23,9 @@ var federationTemplate string
 var explicitRequiresTemplate string
 
 type Federation struct {
-	Entities       []*Entity
-	PackageOptions PackageOptions
+	Entities         []*Entity
+	RequiresEntities map[string]*Entity
+	PackageOptions   PackageOptions
 
 	version int
 
@@ -315,6 +316,7 @@ func (f *Federation) GenerateCode(data *codegen.Data) error {
 			requiresEntities,
 			requiresImports,
 		)
+		f.RequiresEntities = requiresEntities
 		if err != nil {
 			return err
 		}

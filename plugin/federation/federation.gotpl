@@ -267,7 +267,7 @@ func (ec *executionContext) resolveManyEntities(
 							{{- range $entity.Requires }}
 								{{- if $options.ComputedRequires }}
 									{{/* We don't do anything in this case, computed requires are handled by standard resolvers */}}
-								{{- else if index $.RequiredEntityNames $entity.Def.Name }}
+								{{- else if and $.PackageOptions.ExplicitRequires (index $.RequiresEntities $entity.Def.Name) }}
 									err = ec.Populate{{$entity.Def.Name}}Requires(ctx, {{- if (not $usePointers) -}}&{{- end -}}entity, rep)
 									if err != nil {
 										return fmt.Errorf(`populating requires for Entity "{{$entity.Def.Name}}": %w`, err)

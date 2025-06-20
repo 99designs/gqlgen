@@ -73,7 +73,7 @@ func dedupPackages(packages []string) []string {
 		packageMap[p] = struct{}{}
 	}
 
-	var dedupedPackages []string
+	dedupedPackages := make([]string, 0, len(packageMap))
 	for p := range packageMap {
 		dedupedPackages = append(dedupedPackages, p)
 	}
@@ -116,8 +116,6 @@ func (p *Packages) LoadAll(importPaths ...string) []*packages.Package {
 	if p.packages == nil {
 		p.packages = map[string]*packages.Package{}
 	}
-
-	importPaths = dedupPackages(importPaths)
 
 	missing := make([]string, 0, len(importPaths))
 	for _, path := range importPaths {
@@ -212,6 +210,10 @@ func (p *Packages) LoadAllNames(importPaths ...string) {
 		// otherwise we might have already loaded the full package data for it cached
 		pkg := p.packages[importPath]
 		if pkg != nil {
+			if _, ok := p.importToName[importPath]; !ok {
+				p.importToName[importPath] = pkg.Name
+			}
+
 			continue
 		}
 
@@ -243,6 +245,7 @@ func (p *Packages) NameForPackage(importPath string) string {
 	p.numNameCalls++
 	p.LoadAllNames(importPath)
 
+	importPath = NormalizeVendor(importPath)
 	return p.importToName[importPath]
 }
 

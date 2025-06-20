@@ -268,10 +268,13 @@ func (ec *executionContext) resolveManyEntities(
 								{{- if $options.ComputedRequires }}
 									{{/* We don't do anything in this case, computed requires are handled by standard resolvers */}}
 								{{- else if and $options.ExplicitRequires $entity.Requires }}
-									err = ec.Populate{{$entity.Def.Name}}Requires(ctx, {{- if (not $usePointers) -}}&{{- end -}}entity, rep)
-									if err != nil {
-										return fmt.Errorf(`populating requires for Entity "{{$entity.Def.Name}}": %w`, err)
-									}
+									{{- if not (index $emitted $entity.Def.Name) }}
+										err = ec.Populate{{$entity.Def.Name}}Requires(ctx, {{- if (not $usePointers) -}}&{{- end -}}entity, rep)
+										if err != nil {
+											return fmt.Errorf(`populating requires for Entity "{{$entity.Def.Name}}": %w`, err)
+										}
+										{{- $_ := set $emitted $entity.Def.Name true }}
+									{{- end }}
 								{{- else }}
 									{{ if $useFunctionSyntaxForExecutionContext -}}
 										entity.{{.Field.JoinGo `.`}}, err = {{.Type.UnmarshalFunc}}(ctx, ec, reps[i].entity["{{.Field.Join `"].(map[string]any)["`}}"])

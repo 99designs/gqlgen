@@ -68,6 +68,18 @@ func TestNameForPackage(t *testing.T) {
 	assert.Equal(t, "github_com", p.NameForPackage("github.com"))
 }
 
+func TestLoadAllNames(t *testing.T) {
+	var p Packages
+
+	p.LoadAllNames("github.com/99designs/gqlgen/api", "github.com/99designs/gqlgen/docs", "github.com")
+
+	// should now be cached
+	assert.Equal(t, 0, p.numNameCalls)
+	assert.Equal(t, "api", p.importToName["github.com/99designs/gqlgen/api"])
+	assert.Equal(t, "docs", p.importToName["github.com/99designs/gqlgen/docs"])
+	assert.Equal(t, "github_com", p.importToName["github.com"])
+}
+
 func initialState(t *testing.T, opts ...Option) *Packages {
 	p := NewPackages(opts...)
 	pkgs := p.LoadAll(

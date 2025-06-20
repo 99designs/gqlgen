@@ -8,17 +8,28 @@ import (
 
 // PopulateMultiHelloMultipleRequiresRequires is the requires populator for the MultiHelloMultipleRequires entity.
 func (ec *executionContext) PopulateMultiHelloMultipleRequiresRequires(ctx context.Context, entity *MultiHelloMultipleRequires, reps map[string]any) error {
-	panic(fmt.Errorf("not implemented: PopulateMultiHelloMultipleRequiresRequires"))
+	entity.Name, _ = reps["name"].(string)
+	entity.Key1, _ = reps["key1"].(string)
+	entity.Key2, _ = reps["key2"].(string)
+
+	return nil
 }
 
 // PopulateMultiHelloRequiresRequires is the requires populator for the MultiHelloRequires entity.
 func (ec *executionContext) PopulateMultiHelloRequiresRequires(ctx context.Context, entity *MultiHelloRequires, reps map[string]any) error {
-	panic(fmt.Errorf("not implemented: PopulateMultiHelloRequiresRequires"))
+	entity.Name, _ = reps["name"].(string)
+	entity.Key1, _ = reps["key1"].(string)
+
+	return nil
 }
 
 // PopulateMultiPlanetRequiresNestedRequires is the requires populator for the MultiPlanetRequiresNested entity.
 func (ec *executionContext) PopulateMultiPlanetRequiresNestedRequires(ctx context.Context, entity *MultiPlanetRequiresNested, reps map[string]any) error {
-	panic(fmt.Errorf("not implemented: PopulateMultiPlanetRequiresNestedRequires"))
+	entity.Name = reps["name"].(string)
+	entity.World = &World{
+		Foo: reps["world"].(map[string]any)["foo"].(string),
+	}
+	return nil
 }
 
 // PopulatePersonRequires is the requires populator for the Person entity.

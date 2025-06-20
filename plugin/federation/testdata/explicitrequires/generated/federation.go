@@ -473,14 +473,11 @@ func (ec *executionContext) resolveManyEntities(
 			}
 
 			for i, entity := range entities {
-				entity.Key1, err = ec.unmarshalNString2string(ctx, reps[i].entity["key1"])
+				err = ec.PopulateMultiHelloMultipleRequiresRequires(ctx, entity, reps[i].entity)
 				if err != nil {
-					return err
+					return fmt.Errorf(`populating requires for Entity "MultiHelloMultipleRequires": %w`, err)
 				}
-				entity.Key2, err = ec.unmarshalNString2string(ctx, reps[i].entity["key2"])
-				if err != nil {
-					return err
-				}
+
 				list[reps[i].index] = entity
 			}
 			return nil
@@ -516,10 +513,11 @@ func (ec *executionContext) resolveManyEntities(
 			}
 
 			for i, entity := range entities {
-				entity.Key1, err = ec.unmarshalNString2string(ctx, reps[i].entity["key1"])
+				err = ec.PopulateMultiHelloRequiresRequires(ctx, entity, reps[i].entity)
 				if err != nil {
-					return err
+					return fmt.Errorf(`populating requires for Entity "MultiHelloRequires": %w`, err)
 				}
+
 				list[reps[i].index] = entity
 			}
 			return nil
@@ -590,10 +588,11 @@ func (ec *executionContext) resolveManyEntities(
 			}
 
 			for i, entity := range entities {
-				entity.World.Foo, err = ec.unmarshalNString2string(ctx, reps[i].entity["world"].(map[string]any)["foo"])
+				err = ec.PopulateMultiPlanetRequiresNestedRequires(ctx, entity, reps[i].entity)
 				if err != nil {
-					return err
+					return fmt.Errorf(`populating requires for Entity "MultiPlanetRequiresNested": %w`, err)
 				}
+
 				list[reps[i].index] = entity
 			}
 			return nil
@@ -629,14 +628,11 @@ func (ec *executionContext) resolveManyEntities(
 			}
 
 			for i, entity := range entities {
-				entity.World.Foo, err = ec.unmarshalNString2string(ctx, reps[i].entity["world"].(map[string]any)["foo"])
+				err = ec.PopulatePlanetRequiresNestedMultiResolverRequires(ctx, entity, reps[i].entity)
 				if err != nil {
-					return err
+					return fmt.Errorf(`populating requires for Entity "PlanetRequiresNestedMultiResolver": %w`, err)
 				}
-				entity.Worlds.Foo, err = ec.unmarshalNString2string(ctx, reps[i].entity["worlds"].(map[string]any)["foo"])
-				if err != nil {
-					return err
-				}
+
 				list[reps[i].index] = entity
 			}
 			return nil

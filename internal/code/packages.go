@@ -229,6 +229,10 @@ func (p *Packages) LoadAllNames(importPaths ...string) {
 		}
 
 		for _, pkg := range pkgs {
+			if pkg.Name == "" {
+				pkg.Name = SanitizePackageName(filepath.Base(pkg.PkgPath))
+			}
+
 			p.importToName[pkg.PkgPath] = pkg.Name
 		}
 	}
@@ -238,12 +242,8 @@ func (p *Packages) LoadAllNames(importPaths ...string) {
 func (p *Packages) NameForPackage(importPath string) string {
 	p.numNameCalls++
 	p.LoadAllNames(importPath)
-	name := p.importToName[importPath]
-	if name == "" {
-		return SanitizePackageName(filepath.Base(importPath))
-	}
 
-	return name
+	return p.importToName[importPath]
 }
 
 // Evict removes a given package import path from the cache. Further calls to Load will fetch it from disk.

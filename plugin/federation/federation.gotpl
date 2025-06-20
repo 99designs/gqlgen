@@ -264,8 +264,8 @@ func (ec *executionContext) resolveManyEntities(
 						}
 
 						for i, entity := range entities {
-							{{- if $.PackageOptions.ExplicitRequires }}
-								err = ec.Populate{{$entity.Def.Name}}Requires(ctx, {{- if not $usePointers -}}&{{- end -}}entity, rep)
+							{{- if and $.PackageOptions.ExplicitRequires (index $.RequiresEntities $entity.Def.Name) }}
+								err = ec.Populate{{$entity.Def.Name}}Requires(ctx, {{- if not $usePointers -}}&{{- end -}}entity, reps[i].entity)
 								if err != nil {
 									return fmt.Errorf(`populating requires for Entity "{{$entity.Def.Name}}": %w`, err)
 								}

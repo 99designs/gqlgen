@@ -316,11 +316,12 @@ func (f *Federation) GenerateCode(data *codegen.Data) error {
 			requiresEntities,
 			requiresImports,
 		)
-		f.RequiresEntities = requiresEntities
 		if err != nil {
 			return err
 		}
 	}
+
+	f.RequiresEntities = requiresEntities
 
 	return templates.Render(templates.Options{
 		PackageName: data.Config.Federation.Package,

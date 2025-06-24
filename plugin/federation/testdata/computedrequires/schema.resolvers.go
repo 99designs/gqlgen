@@ -32,6 +32,11 @@ func (r *multiPlanetRequiresNestedResolver) Size(ctx context.Context, obj *model
 	return len(foo), nil
 }
 
+// Sizes is the resolver for the sizes field.
+func (r *multiPlanetRequiresNestedResolver) Sizes(ctx context.Context, obj *model.MultiPlanetRequiresNested, federationRequires map[string]any) ([]int, error) {
+	panic(fmt.Errorf("not implemented: Sizes - sizes"))
+}
+
 // WelcomeMessage is the resolver for the welcomeMessage field.
 func (r *personResolver) WelcomeMessage(ctx context.Context, obj *model.Person, federationRequires map[string]any) (*string, error) {
 	panic(fmt.Errorf("not implemented: WelcomeMessage - welcomeMessage"))

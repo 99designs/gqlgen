@@ -57,7 +57,7 @@ func TestExplicitRequires(t *testing.T) {
 		require.Equal(t, 10, resp.Entities[1].Diameter)
 	})
 
-	t.Run("PlanetRequires entities with multiple required fields directive", func(t *testing.T) {
+	t.Run("PlanetMultipleRequires entities with multiple required fields directive", func(t *testing.T) {
 		representations := []map[string]any{
 			{
 				"__typename": "PlanetMultipleRequires",

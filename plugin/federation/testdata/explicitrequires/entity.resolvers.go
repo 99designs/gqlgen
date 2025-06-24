@@ -147,19 +147,6 @@ func (r *entityResolver) FindPlanetRequiresNestedByName(ctx context.Context, nam
 	}, nil
 }
 
-// FindManyPlanetRequiresNestedMultiResolverByNames is the resolver for the findManyPlanetRequiresNestedMultiResolverByNames field.
-func (r *entityResolver) FindManyPlanetRequiresNestedMultiResolverByNames(ctx context.Context, reps []*generated.PlanetRequiresNestedMultiResolverByNamesInput) ([]*generated.PlanetRequiresNestedMultiResolver, error) {
-	result := make([]*generated.PlanetRequiresNestedMultiResolver, len(reps))
-	for i, rep := range reps {
-		p := &generated.PlanetRequiresNestedMultiResolver{
-			Name: rep.Name,
-		}
-		result[i] = p
-	}
-
-	return result, nil
-}
-
 // FindWorldByHelloNameAndFoo is the resolver for the findWorldByHelloNameAndFoo field.
 func (r *entityResolver) FindWorldByHelloNameAndFoo(ctx context.Context, helloName string, foo string) (*generated.World, error) {
 	return &generated.World{
@@ -198,3 +185,15 @@ func (r *entityResolver) FindWorldWithMultipleKeysByBar(ctx context.Context, bar
 func (r *Resolver) Entity() generated.EntityResolver { return &entityResolver{r} }
 
 type entityResolver struct{ *Resolver }
+
+// !!! WARNING !!!
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
+// one last chance to move it out of harms way if you want. There are two reasons this happens:
+//  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
+//    it when you're done.
+//  - You have helper methods in this file. Move them out to keep these resolver files clean.
+/*
+	func (r *entityResolver) FindManyMultiPlanetRequiresNestedObjectArrayByNames(ctx context.Context, reps []*generated.MultiPlanetRequiresNestedObjectArrayByNamesInput) ([]*generated.MultiPlanetRequiresNestedObjectArray, error) {
+	panic(fmt.Errorf("not implemented: FindManyMultiPlanetRequiresNestedObjectArrayByNames - findManyMultiPlanetRequiresNestedObjectArrayByNames"))
+}
+*/

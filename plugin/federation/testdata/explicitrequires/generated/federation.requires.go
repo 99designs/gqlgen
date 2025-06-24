@@ -47,15 +47,6 @@ func (ec *executionContext) PopulatePlanetMultipleRequiresRequires(ctx context.C
 	return nil
 }
 
-// PopulatePlanetRequiresNestedMultiResolverRequires is the requires populator for the PlanetRequiresNestedMultiResolver entity.
-func (ec *executionContext) PopulatePlanetRequiresNestedMultiResolverRequires(ctx context.Context, entity *PlanetRequiresNestedMultiResolver, reps map[string]any) error {
-	entity.Name = reps["name"].(string)
-	entity.World = &World{
-		Foo: reps["world"].(map[string]any)["foo"].(string),
-	}
-	return nil
-}
-
 // PopulatePlanetRequiresNestedRequires is the requires populator for the PlanetRequiresNested entity.
 func (ec *executionContext) PopulatePlanetRequiresNestedRequires(ctx context.Context, entity *PlanetRequiresNested, reps map[string]any) error {
 	entity.Name = reps["name"].(string)

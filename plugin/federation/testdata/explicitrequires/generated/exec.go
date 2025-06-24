@@ -60,7 +60,6 @@ type EntityResolver interface {
 	FindPlanetMultipleRequiresByName(ctx context.Context, name string) (*PlanetMultipleRequires, error)
 	FindPlanetRequiresByName(ctx context.Context, name string) (*PlanetRequires, error)
 	FindPlanetRequiresNestedByName(ctx context.Context, name string) (*PlanetRequiresNested, error)
-	FindManyPlanetRequiresNestedMultiResolverByNames(ctx context.Context, reps []*PlanetRequiresNestedMultiResolverByNamesInput) ([]*PlanetRequiresNestedMultiResolver, error)
 	FindWorldByHelloNameAndFoo(ctx context.Context, helloName string, foo string) (*World, error)
 	FindWorldNameByName(ctx context.Context, name string) (*WorldName, error)
 	FindWorldWithMultipleKeysByHelloNameAndFoo(ctx context.Context, helloName string, foo string) (*WorldWithMultipleKeys, error)
@@ -97,7 +96,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputMultiHelloRequiresByNamesInput,
 		ec.unmarshalInputMultiHelloWithErrorByNamesInput,
 		ec.unmarshalInputMultiPlanetRequiresNestedByNamesInput,
-		ec.unmarshalInputPlanetRequiresNestedMultiResolverByNamesInput,
 	)
 	first := true
 
@@ -244,18 +242,12 @@ type PlanetRequiresNested @key(fields: "name") {
     sizes: [Int!] @requires(fields: "worlds{ foo }")
 }
 
-type PlanetRequiresNestedMultiResolver @key(fields: "name") @entityResolver(multi: true) {
+type MultiPlanetRequiresNested @key(fields: "name") @entityResolver(multi: true) {
     name: String! @external
     world: World! @external
     worlds: [World!] @external
     size: Int! @requires(fields: "world{ foo }")
     sizes: [Int!] @requires(fields: "worlds{ foo }")
-}
-
-type MultiPlanetRequiresNested @key(fields: "name") @entityResolver(multi: true) {
-    name: String! @external
-    world: World! @external
-    size: Int! @requires(fields: "world{ foo }")
 }
 
 type MultiHello @key(fields: "name") @entityResolver(multi: true) {
@@ -295,7 +287,7 @@ type MultiHelloMultipleRequires @key(fields: "name") @entityResolver(multi: true
 `, BuiltIn: true},
 	{Name: "../../../federation/entity.graphql", Input: `
 # a union of all types that use the @key directive
-union _Entity = Hello | HelloMultiSingleKeys | HelloWithErrors | MultiHello | MultiHelloMultipleRequires | MultiHelloRequires | MultiHelloWithError | MultiPlanetRequiresNested | Person | PlanetMultipleRequires | PlanetRequires | PlanetRequiresNested | PlanetRequiresNestedMultiResolver | World | WorldName | WorldWithMultipleKeys
+union _Entity = Hello | HelloMultiSingleKeys | HelloWithErrors | MultiHello | MultiHelloMultipleRequires | MultiHelloRequires | MultiHelloWithError | MultiPlanetRequiresNested | Person | PlanetMultipleRequires | PlanetRequires | PlanetRequiresNested | World | WorldName | WorldWithMultipleKeys
 
 input MultiHelloByNamesInput {
 	Name: String!
@@ -317,10 +309,6 @@ input MultiPlanetRequiresNestedByNamesInput {
 	Name: String!
 }
 
-input PlanetRequiresNestedMultiResolverByNamesInput {
-	Name: String!
-}
-
 # fake type to build resolver interfaces for users to implement
 type Entity {
 	findHelloByName(name: String!,): Hello!
@@ -335,7 +323,6 @@ type Entity {
 	findPlanetMultipleRequiresByName(name: String!,): PlanetMultipleRequires!
 	findPlanetRequiresByName(name: String!,): PlanetRequires!
 	findPlanetRequiresNestedByName(name: String!,): PlanetRequiresNested!
-	findManyPlanetRequiresNestedMultiResolverByNames(reps: [PlanetRequiresNestedMultiResolverByNamesInput]!): [PlanetRequiresNestedMultiResolver]
 	findWorldByHelloNameAndFoo(helloName: String!,foo: String!,): World!
 	findWorldNameByName(name: String!,): WorldName!
 	findWorldWithMultipleKeysByHelloNameAndFoo(helloName: String!,foo: String!,): WorldWithMultipleKeys!
@@ -602,34 +589,6 @@ func (ec *executionContext) field_Entity_findManyMultiPlanetRequiresNestedByName
 	}
 
 	var zeroVal []*MultiPlanetRequiresNestedByNamesInput
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Entity_findManyPlanetRequiresNestedMultiResolverByNames_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := ec.field_Entity_findManyPlanetRequiresNestedMultiResolverByNames_argsReps(ctx, rawArgs)
-	if err != nil {
-		return nil, err
-	}
-	args["reps"] = arg0
-	return args, nil
-}
-func (ec *executionContext) field_Entity_findManyPlanetRequiresNestedMultiResolverByNames_argsReps(
-	ctx context.Context,
-	rawArgs map[string]any,
-) ([]*PlanetRequiresNestedMultiResolverByNamesInput, error) {
-	if _, ok := rawArgs["reps"]; !ok {
-		var zeroVal []*PlanetRequiresNestedMultiResolverByNamesInput
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("reps"))
-	if tmp, ok := rawArgs["reps"]; ok {
-		return ec.unmarshalNPlanetRequiresNestedMultiResolverByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐPlanetRequiresNestedMultiResolverByNamesInput(ctx, tmp)
-	}
-
-	var zeroVal []*PlanetRequiresNestedMultiResolverByNamesInput
 	return zeroVal, nil
 }
 
@@ -1534,8 +1493,12 @@ func (ec *executionContext) fieldContext_Entity_findManyMultiPlanetRequiresNeste
 				return ec.fieldContext_MultiPlanetRequiresNested_name(ctx, field)
 			case "world":
 				return ec.fieldContext_MultiPlanetRequiresNested_world(ctx, field)
+			case "worlds":
+				return ec.fieldContext_MultiPlanetRequiresNested_worlds(ctx, field)
 			case "size":
 				return ec.fieldContext_MultiPlanetRequiresNested_size(ctx, field)
+			case "sizes":
+				return ec.fieldContext_MultiPlanetRequiresNested_sizes(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type MultiPlanetRequiresNested", field.Name)
 		},
@@ -1806,70 +1769,6 @@ func (ec *executionContext) fieldContext_Entity_findPlanetRequiresNestedByName(c
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Entity_findPlanetRequiresNestedByName_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Entity_findManyPlanetRequiresNestedMultiResolverByNames(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_Entity_findManyPlanetRequiresNestedMultiResolverByNames(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Entity().FindManyPlanetRequiresNestedMultiResolverByNames(rctx, fc.Args["reps"].([]*PlanetRequiresNestedMultiResolverByNamesInput))
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*PlanetRequiresNestedMultiResolver)
-	fc.Result = res
-	return ec.marshalOPlanetRequiresNestedMultiResolver2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐPlanetRequiresNestedMultiResolver(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_Entity_findManyPlanetRequiresNestedMultiResolverByNames(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Entity",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return ec.fieldContext_PlanetRequiresNestedMultiResolver_name(ctx, field)
-			case "world":
-				return ec.fieldContext_PlanetRequiresNestedMultiResolver_world(ctx, field)
-			case "worlds":
-				return ec.fieldContext_PlanetRequiresNestedMultiResolver_worlds(ctx, field)
-			case "size":
-				return ec.fieldContext_PlanetRequiresNestedMultiResolver_size(ctx, field)
-			case "sizes":
-				return ec.fieldContext_PlanetRequiresNestedMultiResolver_sizes(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PlanetRequiresNestedMultiResolver", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Entity_findManyPlanetRequiresNestedMultiResolverByNames_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -2924,6 +2823,55 @@ func (ec *executionContext) fieldContext_MultiPlanetRequiresNested_world(_ conte
 	return fc, nil
 }
 
+func (ec *executionContext) _MultiPlanetRequiresNested_worlds(ctx context.Context, field graphql.CollectedField, obj *MultiPlanetRequiresNested) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_MultiPlanetRequiresNested_worlds(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Worlds, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*World)
+	fc.Result = res
+	return ec.marshalOWorld2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐWorldᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_MultiPlanetRequiresNested_worlds(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MultiPlanetRequiresNested",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "foo":
+				return ec.fieldContext_World_foo(ctx, field)
+			case "bar":
+				return ec.fieldContext_World_bar(ctx, field)
+			case "hello":
+				return ec.fieldContext_World_hello(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type World", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _MultiPlanetRequiresNested_size(ctx context.Context, field graphql.CollectedField, obj *MultiPlanetRequiresNested) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_MultiPlanetRequiresNested_size(ctx, field)
 	if err != nil {
@@ -2956,6 +2904,47 @@ func (ec *executionContext) _MultiPlanetRequiresNested_size(ctx context.Context,
 }
 
 func (ec *executionContext) fieldContext_MultiPlanetRequiresNested_size(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MultiPlanetRequiresNested",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MultiPlanetRequiresNested_sizes(ctx context.Context, field graphql.CollectedField, obj *MultiPlanetRequiresNested) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_MultiPlanetRequiresNested_sizes(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Sizes, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]int)
+	fc.Result = res
+	return ec.marshalOInt2ᚕintᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_MultiPlanetRequiresNested_sizes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "MultiPlanetRequiresNested",
 		Field:      field,
@@ -3625,236 +3614,6 @@ func (ec *executionContext) _PlanetRequiresNested_sizes(ctx context.Context, fie
 func (ec *executionContext) fieldContext_PlanetRequiresNested_sizes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "PlanetRequiresNested",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _PlanetRequiresNestedMultiResolver_name(ctx context.Context, field graphql.CollectedField, obj *PlanetRequiresNestedMultiResolver) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PlanetRequiresNestedMultiResolver_name(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_PlanetRequiresNestedMultiResolver_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PlanetRequiresNestedMultiResolver",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _PlanetRequiresNestedMultiResolver_world(ctx context.Context, field graphql.CollectedField, obj *PlanetRequiresNestedMultiResolver) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PlanetRequiresNestedMultiResolver_world(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.World, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(*World)
-	fc.Result = res
-	return ec.marshalNWorld2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐWorld(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_PlanetRequiresNestedMultiResolver_world(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PlanetRequiresNestedMultiResolver",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "foo":
-				return ec.fieldContext_World_foo(ctx, field)
-			case "bar":
-				return ec.fieldContext_World_bar(ctx, field)
-			case "hello":
-				return ec.fieldContext_World_hello(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type World", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _PlanetRequiresNestedMultiResolver_worlds(ctx context.Context, field graphql.CollectedField, obj *PlanetRequiresNestedMultiResolver) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PlanetRequiresNestedMultiResolver_worlds(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Worlds, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]*World)
-	fc.Result = res
-	return ec.marshalOWorld2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐWorldᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_PlanetRequiresNestedMultiResolver_worlds(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PlanetRequiresNestedMultiResolver",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "foo":
-				return ec.fieldContext_World_foo(ctx, field)
-			case "bar":
-				return ec.fieldContext_World_bar(ctx, field)
-			case "hello":
-				return ec.fieldContext_World_hello(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type World", field.Name)
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _PlanetRequiresNestedMultiResolver_size(ctx context.Context, field graphql.CollectedField, obj *PlanetRequiresNestedMultiResolver) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PlanetRequiresNestedMultiResolver_size(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Size, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(int)
-	fc.Result = res
-	return ec.marshalNInt2int(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_PlanetRequiresNestedMultiResolver_size(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PlanetRequiresNestedMultiResolver",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _PlanetRequiresNestedMultiResolver_sizes(ctx context.Context, field graphql.CollectedField, obj *PlanetRequiresNestedMultiResolver) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_PlanetRequiresNestedMultiResolver_sizes(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Sizes, nil
-	})
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]int)
-	fc.Result = res
-	return ec.marshalOInt2ᚕintᚄ(ctx, field.Selections, res)
-}
-
-func (ec *executionContext) fieldContext_PlanetRequiresNestedMultiResolver_sizes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PlanetRequiresNestedMultiResolver",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -6540,33 +6299,6 @@ func (ec *executionContext) unmarshalInputMultiPlanetRequiresNestedByNamesInput(
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputPlanetRequiresNestedMultiResolverByNamesInput(ctx context.Context, obj any) (PlanetRequiresNestedMultiResolverByNamesInput, error) {
-	var it PlanetRequiresNestedMultiResolverByNamesInput
-	asMap := map[string]any{}
-	for k, v := range obj.(map[string]any) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"Name"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "Name":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("Name"))
-			data, err := ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.Name = data
-		}
-	}
-
-	return it, nil
-}
-
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -6619,13 +6351,6 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 			return graphql.Null
 		}
 		return ec._World(ctx, sel, obj)
-	case PlanetRequiresNestedMultiResolver:
-		return ec._PlanetRequiresNestedMultiResolver(ctx, sel, &obj)
-	case *PlanetRequiresNestedMultiResolver:
-		if obj == nil {
-			return graphql.Null
-		}
-		return ec._PlanetRequiresNestedMultiResolver(ctx, sel, obj)
 	case PlanetRequiresNested:
 		return ec._PlanetRequiresNested(ctx, sel, &obj)
 	case *PlanetRequiresNested:
@@ -6978,25 +6703,6 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "findManyPlanetRequiresNestedMultiResolverByNames":
-			field := field
-
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Entity_findManyPlanetRequiresNestedMultiResolverByNames(ctx, field)
 				return res
 			}
 
@@ -7524,11 +7230,15 @@ func (ec *executionContext) _MultiPlanetRequiresNested(ctx context.Context, sel 
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "worlds":
+			out.Values[i] = ec._MultiPlanetRequiresNested_worlds(ctx, field, obj)
 		case "size":
 			out.Values[i] = ec._MultiPlanetRequiresNested_size(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "sizes":
+			out.Values[i] = ec._MultiPlanetRequiresNested_sizes(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -7731,59 +7441,6 @@ func (ec *executionContext) _PlanetRequiresNested(ctx context.Context, sel ast.S
 			}
 		case "sizes":
 			out.Values[i] = ec._PlanetRequiresNested_sizes(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
-
-	for label, dfs := range deferred {
-		ec.processDeferredGroup(graphql.DeferredGroup{
-			Label:    label,
-			Path:     graphql.GetPath(ctx),
-			FieldSet: dfs,
-			Context:  ctx,
-		})
-	}
-
-	return out
-}
-
-var planetRequiresNestedMultiResolverImplementors = []string{"PlanetRequiresNestedMultiResolver", "_Entity"}
-
-func (ec *executionContext) _PlanetRequiresNestedMultiResolver(ctx context.Context, sel ast.SelectionSet, obj *PlanetRequiresNestedMultiResolver) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, planetRequiresNestedMultiResolverImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := make(map[string]*graphql.FieldSet)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("PlanetRequiresNestedMultiResolver")
-		case "name":
-			out.Values[i] = ec._PlanetRequiresNestedMultiResolver_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "world":
-			out.Values[i] = ec._PlanetRequiresNestedMultiResolver_world(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "worlds":
-			out.Values[i] = ec._PlanetRequiresNestedMultiResolver_worlds(ctx, field, obj)
-		case "size":
-			out.Values[i] = ec._PlanetRequiresNestedMultiResolver_size(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "sizes":
-			out.Values[i] = ec._PlanetRequiresNestedMultiResolver_sizes(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -8618,21 +8275,6 @@ func (ec *executionContext) marshalNPlanetRequiresNested2ᚖgithubᚗcomᚋ99des
 	return ec._PlanetRequiresNested(ctx, sel, v)
 }
 
-func (ec *executionContext) unmarshalNPlanetRequiresNestedMultiResolverByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐPlanetRequiresNestedMultiResolverByNamesInput(ctx context.Context, v any) ([]*PlanetRequiresNestedMultiResolverByNamesInput, error) {
-	var vSlice []any
-	vSlice = graphql.CoerceList(v)
-	var err error
-	res := make([]*PlanetRequiresNestedMultiResolverByNamesInput, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = ec.unmarshalOPlanetRequiresNestedMultiResolverByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐPlanetRequiresNestedMultiResolverByNamesInput(ctx, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -9404,62 +9046,6 @@ func (ec *executionContext) unmarshalOMultiPlanetRequiresNestedByNamesInput2ᚖg
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputMultiPlanetRequiresNestedByNamesInput(ctx, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalOPlanetRequiresNestedMultiResolver2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐPlanetRequiresNestedMultiResolver(ctx context.Context, sel ast.SelectionSet, v []*PlanetRequiresNestedMultiResolver) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
-	for i := range v {
-		i := i
-		fc := &graphql.FieldContext{
-			Index:  &i,
-			Result: &v[i],
-		}
-		ctx := graphql.WithFieldContext(ctx, fc)
-		f := func(i int) {
-			defer func() {
-				if r := recover(); r != nil {
-					ec.Error(ctx, ec.Recover(ctx, r))
-					ret = nil
-				}
-			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
-			ret[i] = ec.marshalOPlanetRequiresNestedMultiResolver2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐPlanetRequiresNestedMultiResolver(ctx, sel, v[i])
-		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
-
-	}
-	wg.Wait()
-
-	return ret
-}
-
-func (ec *executionContext) marshalOPlanetRequiresNestedMultiResolver2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐPlanetRequiresNestedMultiResolver(ctx context.Context, sel ast.SelectionSet, v *PlanetRequiresNestedMultiResolver) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ec._PlanetRequiresNestedMultiResolver(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalOPlanetRequiresNestedMultiResolverByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐPlanetRequiresNestedMultiResolverByNamesInput(ctx context.Context, v any) (*PlanetRequiresNestedMultiResolverByNamesInput, error) {
-	if v == nil {
-		return nil, nil
-	}
-	res, err := ec.unmarshalInputPlanetRequiresNestedMultiResolverByNamesInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

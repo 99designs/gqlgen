@@ -144,8 +144,6 @@ func isMulti(typeName string) bool {
 		return true
 	case "MultiPlanetRequiresNested":
 		return true
-	case "PlanetRequiresNestedMultiResolver":
-		return true
 	default:
 		return false
 	}
@@ -601,46 +599,6 @@ func (ec *executionContext) resolveManyEntities(
 			return fmt.Errorf("unknown resolver: %s", resolverName)
 		}
 
-	case "PlanetRequiresNestedMultiResolver":
-		resolverName, err := entityResolverNameForPlanetRequiresNestedMultiResolver(ctx, reps[0].entity)
-		if err != nil {
-			return fmt.Errorf(`finding resolver for Entity "PlanetRequiresNestedMultiResolver": %w`, err)
-		}
-		switch resolverName {
-
-		case "findManyPlanetRequiresNestedMultiResolverByNames":
-			typedReps := make([]*PlanetRequiresNestedMultiResolverByNamesInput, len(reps))
-
-			for i, rep := range reps {
-				id0, err := ec.unmarshalNString2string(ctx, rep.entity["name"])
-				if err != nil {
-					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "name"))
-				}
-
-				typedReps[i] = &PlanetRequiresNestedMultiResolverByNamesInput{
-					Name: id0,
-				}
-			}
-
-			entities, err := ec.resolvers.Entity().FindManyPlanetRequiresNestedMultiResolverByNames(ctx, typedReps)
-			if err != nil {
-				return err
-			}
-
-			for i, entity := range entities {
-				err = ec.PopulatePlanetRequiresNestedMultiResolverRequires(ctx, entity, reps[i].entity)
-				if err != nil {
-					return fmt.Errorf(`populating requires for Entity "PlanetRequiresNestedMultiResolver": %w`, err)
-				}
-
-				list[reps[i].index] = entity
-			}
-			return nil
-
-		default:
-			return fmt.Errorf("unknown resolver: %s", resolverName)
-		}
-
 	default:
 		return errors.New("unknown type: " + typeName)
 	}
@@ -1073,41 +1031,6 @@ func entityResolverNameForPlanetRequiresNested(ctx context.Context, rep EntityRe
 		return "findPlanetRequiresNestedByName", nil
 	}
 	return "", fmt.Errorf("%w for PlanetRequiresNested due to %v", ErrTypeNotFound,
-		errors.Join(entityResolverErrs...).Error())
-}
-
-func entityResolverNameForPlanetRequiresNestedMultiResolver(ctx context.Context, rep EntityRepresentation) (string, error) {
-	// we collect errors because a later entity resolver may work fine
-	// when an entity has multiple keys
-	entityResolverErrs := []error{}
-	for {
-		var (
-			m   EntityRepresentation
-			val any
-			ok  bool
-		)
-		_ = val
-		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
-		allNull := true
-		m = rep
-		val, ok = m["name"]
-		if !ok {
-			entityResolverErrs = append(entityResolverErrs,
-				fmt.Errorf("%w due to missing Key Field \"name\" for PlanetRequiresNestedMultiResolver", ErrTypeNotFound))
-			break
-		}
-		if allNull {
-			allNull = val == nil
-		}
-		if allNull {
-			entityResolverErrs = append(entityResolverErrs,
-				fmt.Errorf("%w due to all null value KeyFields for PlanetRequiresNestedMultiResolver", ErrTypeNotFound))
-			break
-		}
-		return "findManyPlanetRequiresNestedMultiResolverByNames", nil
-	}
-	return "", fmt.Errorf("%w for PlanetRequiresNestedMultiResolver due to %v", ErrTypeNotFound,
 		errors.Join(entityResolverErrs...).Error())
 }
 

@@ -84,9 +84,11 @@ type MultiHelloWithErrorByNamesInput struct {
 }
 
 type MultiPlanetRequiresNested struct {
-	Name  string `json:"name"`
-	World *World `json:"world"`
-	Size  int    `json:"size"`
+	Name   string   `json:"name"`
+	World  *World   `json:"world"`
+	Worlds []*World `json:"worlds,omitempty"`
+	Size   int      `json:"size"`
+	Sizes  []int    `json:"sizes,omitempty"`
 }
 
 func (MultiPlanetRequiresNested) IsEntity() {}
@@ -129,20 +131,6 @@ type PlanetRequiresNested struct {
 }
 
 func (PlanetRequiresNested) IsEntity() {}
-
-type PlanetRequiresNestedMultiResolver struct {
-	Name   string   `json:"name"`
-	World  *World   `json:"world"`
-	Worlds []*World `json:"worlds,omitempty"`
-	Size   int      `json:"size"`
-	Sizes  []int    `json:"sizes,omitempty"`
-}
-
-func (PlanetRequiresNestedMultiResolver) IsEntity() {}
-
-type PlanetRequiresNestedMultiResolverByNamesInput struct {
-	Name string `json:"Name"`
-}
 
 type Query struct {
 }

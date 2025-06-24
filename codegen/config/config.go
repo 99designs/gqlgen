@@ -68,6 +68,14 @@ type Config struct {
 
 var cfgFilenames = []string{".gqlgen.yml", "gqlgen.yml", "gqlgen.yaml"}
 
+// templatePackageNames is a list of packages names that the default templates use, in order to preload those for performance considerations
+// any additional package added to the base templates should be added here to improve performance and load all packages in bulk
+var templatePackageNames = []string{
+	"context", "fmt", "io", "strconv", "time", "sync", "strings", "sync/atomic", "embed", "golang.org/x/sync/semaphore",
+	"errors", "bytes", "github.com/vektah/gqlparser/v2", "github.com/vektah/gqlparser/v2/ast",
+	"github.com/99designs/gqlgen/graphql", "github.com/99designs/gqlgen/graphql/introspection",
+}
+
 // DefaultConfig creates a copy of the default config
 func DefaultConfig() *Config {
 	falseValue := false
@@ -235,6 +243,7 @@ func (c *Config) Init() error {
 		c.Packages = code.NewPackages(
 			code.WithBuildTags(c.GoBuildTags...),
 			code.PackagePrefixToCache("github.com/99designs/gqlgen/graphql"),
+			code.WithPreloadNames(templatePackageNames...),
 		)
 	}
 
@@ -249,14 +258,15 @@ func (c *Config) Init() error {
 		return err
 	}
 
+	// prefetch all packages in one big packages.Load call
+	c.Packages.LoadAll(c.packageList()...)
+
 	err = c.autobind()
 	if err != nil {
 		return err
 	}
 
 	c.injectBuiltins()
-	// prefetch all packages in one big packages.Load call
-	c.Packages.LoadAll(c.packageList()...)
 
 	//  check everything is valid on the way out
 	err = c.check()
@@ -881,6 +891,7 @@ func (c *Config) LoadSchema() error {
 		c.Packages = code.NewPackages(
 			code.WithBuildTags(c.GoBuildTags...),
 			code.PackagePrefixToCache("github.com/99designs/gqlgen/graphql"),
+			code.WithPreloadNames(templatePackageNames...),
 		)
 	}
 

@@ -43,6 +43,12 @@ func WithBuildTags(tags ...string) func(p *Packages) {
 	}
 }
 
+func WithPreloadNames(importPaths ...string) func(p *Packages) {
+	return func(p *Packages) {
+		p.LoadAllNames(importPaths...)
+	}
+}
+
 // PackagePrefixToCache option for NewPackages
 // will not reset gqlgen packages in packages.Load call
 func PackagePrefixToCache(prefixPath string) func(p *Packages) {
@@ -59,6 +65,20 @@ func NewPackages(opts ...Option) *Packages {
 		opt(p)
 	}
 	return p
+}
+
+func dedupPackages(packages []string) []string {
+	packageMap := make(map[string]struct{})
+	dedupedPackages := make([]string, 0, len(packageMap))
+	for _, p := range packages {
+		if _, ok := packageMap[p]; ok {
+			continue
+		}
+		packageMap[p] = struct{}{}
+		dedupedPackages = append(dedupedPackages, p)
+	}
+
+	return dedupedPackages
 }
 
 func (p *Packages) CleanupUserPackages() {
@@ -169,46 +189,67 @@ func (p *Packages) LoadWithTypes(importPath string) *packages.Package {
 	return pkg
 }
 
-// NameForPackage looks up the package name from the package stanza in the go files at the given import path.
-func (p *Packages) NameForPackage(importPath string) string {
-	if importPath == "" {
-		panic(errors.New("import path can not be empty"))
+// LoadAllNames will call packages.Load with the NeedName mode only and will store the package name in a cache.
+// it does not return any package data, but after calling this you can call NameForPackage to get the package name without loading the full package data.
+func (p *Packages) LoadAllNames(importPaths ...string) {
+	importPaths = dedupPackages(importPaths)
+	missing := make([]string, 0, len(importPaths))
+	for _, importPath := range importPaths {
+		if importPath == "" {
+			panic(errors.New("import path can not be empty"))
+		}
+
+		if p.importToName == nil {
+			p.importToName = map[string]string{}
+		}
+
+		importPath = NormalizeVendor(importPath)
+
+		// if it's in the name cache use it
+		if name := p.importToName[importPath]; name != "" {
+			continue
+		}
+
+		// otherwise we might have already loaded the full package data for it cached
+		pkg := p.packages[importPath]
+		if pkg != nil {
+			if _, ok := p.importToName[importPath]; !ok {
+				p.importToName[importPath] = pkg.Name
+			}
+
+			continue
+		}
+
+		missing = append(missing, importPath)
 	}
-	if p.importToName == nil {
-		p.importToName = map[string]string{}
-	}
 
-	importPath = NormalizeVendor(importPath)
-
-	// if its in the name cache use it
-	if name := p.importToName[importPath]; name != "" {
-		return name
-	}
-
-	// otherwise we might have already loaded the full package data for it cached
-	pkg := p.packages[importPath]
-
-	if pkg == nil {
-		// otherwise do a name only lookup for it but don't put it in the package cache.
-		p.numNameCalls++
+	if len(missing) > 0 {
 		pkgs, err := packages.Load(&packages.Config{
 			Mode:       packages.NeedName,
 			BuildFlags: p.buildFlags,
-		}, importPath)
+		}, missing...)
+
 		if err != nil {
 			p.loadErrors = append(p.loadErrors, err)
-		} else {
-			pkg = pkgs[0]
+		}
+
+		for _, pkg := range pkgs {
+			if pkg.Name == "" {
+				pkg.Name = SanitizePackageName(filepath.Base(pkg.PkgPath))
+			}
+
+			p.importToName[pkg.PkgPath] = pkg.Name
 		}
 	}
+}
 
-	if pkg == nil || pkg.Name == "" {
-		return SanitizePackageName(filepath.Base(importPath))
-	}
+// NameForPackage looks up the package name from the package stanza in the go files at the given import path.
+func (p *Packages) NameForPackage(importPath string) string {
+	p.numNameCalls++
+	p.LoadAllNames(importPath)
 
-	p.importToName[importPath] = pkg.Name
-
-	return pkg.Name
+	importPath = NormalizeVendor(importPath)
+	return p.importToName[importPath]
 }
 
 // Evict removes a given package import path from the cache. Further calls to Load will fetch it from disk.

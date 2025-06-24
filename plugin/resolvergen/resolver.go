@@ -187,10 +187,17 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 		}
 	}
 
+	var allImports []string
 	for _, file := range files {
 		file.imports = rewriter.ExistingImports(file.name)
 		file.RemainingSource = rewriter.RemainingSource(file.name)
+
+		for _, i := range file.imports {
+			allImports = append(allImports, i.ImportPath)
+		}
 	}
+	data.Config.Packages.LoadAllNames(allImports...) // Preload all names in one Load call for performance reasons
+
 	newResolverTemplate := resolverTemplate
 	if data.Config.Resolver.ResolverTemplate != "" {
 		newResolverTemplate = readResolverTemplate(data.Config.Resolver.ResolverTemplate)

@@ -229,10 +229,6 @@ func (ec *executionContext) resolveManyEntities(
 
 			for i, entity := range entities {
 
-				entity.Manufacturer.ID, err = ec.unmarshalNString2string(ctx, reps[i].entity["manufacturer"].(map[string]any)["id"])
-				if err != nil {
-					return err
-				}
 				list[reps[i].index] = entity
 			}
 			return nil

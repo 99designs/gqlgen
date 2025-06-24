@@ -271,8 +271,9 @@ func (ec *executionContext) resolveManyEntities(
 								}
 							{{- end }}
 							{{- range $entity.Requires }}
-								{{/* if $options.ComputedRequires needs to be resolved in another PR as it is inconsistent with resolveEntity */}}
-								{{- if $.PackageOptions.ExplicitRequires }}
+								{{- if $options.ComputedRequires }}
+									{{/* We don't do anything in this case, computed requires are handled by standard resolvers */}}
+								{{- else if $.PackageOptions.ExplicitRequires }}
 									{{/* already handled above */}}
 								{{- else }}
 									{{ if $useFunctionSyntaxForExecutionContext -}}

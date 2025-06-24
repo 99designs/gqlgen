@@ -457,12 +457,10 @@ func (ec *executionContext) resolveManyEntities(
 			}
 
 			for i, entity := range entities {
-
 				entity.Key1, err = unmarshalNString2string(ctx, ec, reps[i].entity["key1"])
 				if err != nil {
 					return err
 				}
-
 				entity.Key2, err = unmarshalNString2string(ctx, ec, reps[i].entity["key2"])
 				if err != nil {
 					return err
@@ -502,7 +500,6 @@ func (ec *executionContext) resolveManyEntities(
 			}
 
 			for i, entity := range entities {
-
 				entity.Key1, err = unmarshalNString2string(ctx, ec, reps[i].entity["key1"])
 				if err != nil {
 					return err
@@ -577,7 +574,6 @@ func (ec *executionContext) resolveManyEntities(
 			}
 
 			for i, entity := range entities {
-
 				entity.World.Foo, err = unmarshalNString2string(ctx, ec, reps[i].entity["world"].(map[string]any)["foo"])
 				if err != nil {
 					return err

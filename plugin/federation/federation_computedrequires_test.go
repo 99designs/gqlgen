@@ -162,12 +162,13 @@ func TestMultiComputedRequires(t *testing.T) {
 			Entities []struct {
 				Name string `json:"name"`
 				Key1 string `json:"key1"`
+				Key2 string `json:"key2"`
 			} `json:"_entities"`
 		}
 
 		err := c.Post(
 			entityQuery([]string{
-				"MultiHelloRequires {name, key1}",
+				"MultiHelloRequires {name, key2}",
 			}),
 			&resp,
 			client.Var("representations", representations),
@@ -175,9 +176,9 @@ func TestMultiComputedRequires(t *testing.T) {
 
 		require.NoError(t, err)
 		require.Equal(t, "first name - 1", resp.Entities[0].Name)
-		require.Equal(t, "key1 - 1", resp.Entities[0].Key1)
+		require.Equal(t, "key1 - 1", resp.Entities[0].Key2)
 		require.Equal(t, "first name - 2", resp.Entities[1].Name)
-		require.Equal(t, "key1 - 2", resp.Entities[1].Key1)
+		require.Equal(t, "key1 - 2", resp.Entities[1].Key2)
 	})
 
 	t.Run("MultiHelloMultipleRequires entities with multiple required fields", func(t *testing.T) {
@@ -200,12 +201,13 @@ func TestMultiComputedRequires(t *testing.T) {
 				Name string `json:"name"`
 				Key1 string `json:"key1"`
 				Key2 string `json:"key2"`
+				Key3 string `json:"key3"`
 			} `json:"_entities"`
 		}
 
 		err := c.Post(
 			entityQuery([]string{
-				"MultiHelloMultipleRequires {name, key1, key2}",
+				"MultiHelloMultipleRequires {name, key3}",
 			}),
 			&resp,
 			client.Var("representations", representations),
@@ -213,11 +215,9 @@ func TestMultiComputedRequires(t *testing.T) {
 
 		require.NoError(t, err)
 		require.Equal(t, "first name - 1", resp.Entities[0].Name)
-		require.Equal(t, "key1 - 1", resp.Entities[0].Key1)
-		require.Equal(t, "key2 - 1", resp.Entities[0].Key2)
+		require.Equal(t, "key1 - 1:key2 - 1", resp.Entities[0].Key3)
 		require.Equal(t, "first name - 2", resp.Entities[1].Name)
-		require.Equal(t, "key1 - 2", resp.Entities[1].Key1)
-		require.Equal(t, "key2 - 2", resp.Entities[1].Key2)
+		require.Equal(t, "key1 - 2:key2 - 2", resp.Entities[1].Key3)
 	})
 
 	t.Run("MultiPlanetRequiresNested entities with requires directive having nested field", func(t *testing.T) {

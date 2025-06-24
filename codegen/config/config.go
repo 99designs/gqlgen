@@ -258,14 +258,15 @@ func (c *Config) Init() error {
 		return err
 	}
 
+	// prefetch all packages in one big packages.Load call
+	c.Packages.LoadAll(c.packageList()...)
+
 	err = c.autobind()
 	if err != nil {
 		return err
 	}
 
 	c.injectBuiltins()
-	// prefetch all packages in one big packages.Load call
-	c.Packages.LoadAll(c.packageList()...)
 
 	//  check everything is valid on the way out
 	err = c.check()

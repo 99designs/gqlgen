@@ -69,14 +69,15 @@ func NewPackages(opts ...Option) *Packages {
 
 func dedupPackages(packages []string) []string {
 	packageMap := make(map[string]struct{})
-	for _, p := range packages {
-		packageMap[p] = struct{}{}
-	}
-
 	dedupedPackages := make([]string, 0, len(packageMap))
-	for p := range packageMap {
+	for _, p := range packages {
+		if _, ok := packageMap[p]; ok {
+			continue
+		}
+		packageMap[p] = struct{}{}
 		dedupedPackages = append(dedupedPackages, p)
 	}
+
 	return dedupedPackages
 }
 
@@ -188,6 +189,8 @@ func (p *Packages) LoadWithTypes(importPath string) *packages.Package {
 	return pkg
 }
 
+// LoadAllNames will call packages.Load with the NeedName mode only and will store the package name in a cache.
+// it does not return any package data, but after calling this you can call NameForPackage to get the package name without loading the full package data.
 func (p *Packages) LoadAllNames(importPaths ...string) {
 	importPaths = dedupPackages(importPaths)
 	missing := make([]string, 0, len(importPaths))

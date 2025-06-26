@@ -1878,9 +1878,9 @@ func _User_role(ctx context.Context, ec *executionContext, field graphql.Collect
 		}
 		return graphql.Null
 	}
-	res := resTmp.(Role)
+	res := resTmp.(RoleModel)
 	fc.Result = res
-	return marshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRole(ctx, ec, field.Selections, res)
+	return marshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModel(ctx, ec, field.Selections, res)
 }
 
 func fieldContext_User_role(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -3929,7 +3929,7 @@ func unmarshalInputCreateUserInput(ctx context.Context, ec *executionContext, ob
 			it.Age = data
 		case "role":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("role"))
-			data, err := unmarshalORole2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRole(ctx, ec, v)
+			data, err := unmarshalORole2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModel(ctx, ec, v)
 			if err != nil {
 				return it, err
 			}
@@ -3981,7 +3981,7 @@ func unmarshalInputUserFilter(ctx context.Context, ec *executionContext, obj any
 			it.Age = data
 		case "roles":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("roles"))
-			data, err := unmarshalORole2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleᚄ(ctx, ec, v)
+			data, err := unmarshalORole2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModelᚄ(ctx, ec, v)
 			if err != nil {
 				return it, err
 			}
@@ -4752,15 +4752,35 @@ func marshalNMutationResponse2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋt
 	return _MutationResponse(ctx, ec, sel, v)
 }
 
-func unmarshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRole(ctx context.Context, ec *executionContext, v any) (Role, error) {
-	var res Role
-	err := res.UnmarshalGQL(v)
+func unmarshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModel(ctx context.Context, ec *executionContext, v any) (RoleModel, error) {
+	tmp, err := graphql.UnmarshalString(v)
+	res := unmarshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModelF[tmp]
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func marshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRole(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v Role) graphql.Marshaler {
-	return v
+func marshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModel(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v RoleModel) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalString(marshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModelF[v])
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
 }
+
+var (
+	unmarshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModelF = map[string]RoleModel{
+		"ADMIN": RoleModelAdmin,
+		"USER":  RoleModelUser,
+		"GUEST": RoleModelGuest,
+	}
+	marshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModelF = map[RoleModel]string{
+		RoleModelAdmin: "ADMIN",
+		RoleModelUser:  "USER",
+		RoleModelGuest: "GUEST",
+	}
+)
 
 func unmarshalNString2string(ctx context.Context, ec *executionContext, v any) (string, error) {
 	res, err := graphql.UnmarshalString(v)
@@ -5192,17 +5212,17 @@ func marshalOInt2ᚖint(ctx context.Context, ec *executionContext, sel ast.Selec
 	return res
 }
 
-func unmarshalORole2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleᚄ(ctx context.Context, ec *executionContext, v any) ([]Role, error) {
+func unmarshalORole2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModelᚄ(ctx context.Context, ec *executionContext, v any) ([]RoleModel, error) {
 	if v == nil {
 		return nil, nil
 	}
 	var vSlice []any
 	vSlice = graphql.CoerceList(v)
 	var err error
-	res := make([]Role, len(vSlice))
+	res := make([]RoleModel, len(vSlice))
 	for i := range vSlice {
 		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = unmarshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRole(ctx, ec, vSlice[i])
+		res[i], err = unmarshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModel(ctx, ec, vSlice[i])
 		if err != nil {
 			return nil, err
 		}
@@ -5210,7 +5230,7 @@ func unmarshalORole2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserver�
 	return res, nil
 }
 
-func marshalORole2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleᚄ(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v []Role) graphql.Marshaler {
+func marshalORole2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModelᚄ(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v []RoleModel) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
@@ -5237,7 +5257,7 @@ func marshalORole2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = marshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRole(ctx, ec, sel, v[i])
+			ret[i] = marshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModel(ctx, ec, sel, v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -5257,20 +5277,85 @@ func marshalORole2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋ
 	return ret
 }
 
-func unmarshalORole2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRole(ctx context.Context, ec *executionContext, v any) (*Role, error) {
+var (
+	unmarshalORole2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModelᚄF = map[string]RoleModel{
+		"ADMIN": RoleModelAdmin,
+		"USER":  RoleModelUser,
+		"GUEST": RoleModelGuest,
+	}
+	marshalORole2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModelᚄF = map[RoleModel]string{
+		RoleModelAdmin: "ADMIN",
+		RoleModelUser:  "USER",
+		RoleModelGuest: "GUEST",
+	}
+)
+
+func unmarshalORole2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModel(ctx context.Context, ec *executionContext, v any) (*RoleModel, error) {
 	if v == nil {
 		return nil, nil
 	}
-	var res = new(Role)
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
+	tmp, err := graphql.UnmarshalString(v)
+	res := unmarshalORole2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModelF[tmp]
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func marshalORole2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRole(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v *Role) graphql.Marshaler {
+func marshalORole2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModel(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v *RoleModel) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
-	return v
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalString(marshalORole2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModelF[*v])
+	return res
+}
+
+var (
+	unmarshalORole2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModelF = map[string]RoleModel{
+		"ADMIN": RoleModelAdmin,
+		"USER":  RoleModelUser,
+		"GUEST": RoleModelGuest,
+	}
+	marshalORole2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModelF = map[RoleModel]string{
+		RoleModelAdmin: "ADMIN",
+		RoleModelUser:  "USER",
+		RoleModelGuest: "GUEST",
+	}
+)
+
+func unmarshalOString2ᚕstringᚄ(ctx context.Context, ec *executionContext, v any) ([]string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = unmarshalNString2string(ctx, ec, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func marshalOString2ᚕstringᚄ(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = marshalNString2string(ctx, ec, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func unmarshalOString2ᚖstring(ctx context.Context, ec *executionContext, v any) (*string, error) {

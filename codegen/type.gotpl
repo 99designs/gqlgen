@@ -51,7 +51,11 @@
 				{{- if $type.Unmarshaler }}
 					{{- if $type.HasEnumValues }}
 						tmp, err := {{ $type.Unmarshaler | call }}(v)
+						{{ if $useFunctionSyntaxForExecutionContext -}}
+						res := {{ $type.UnmarshalFuncFunctionSyntax }}[tmp]
+						{{- else -}}
 						res := {{ $type.UnmarshalFunc }}[tmp]
+						{{- end -}}
 					{{- else if $type.CastType }}
 						{{- if $type.IsContext }}
 							tmp, err := {{ $type.Unmarshaler | call }}(ctx, v)
@@ -237,7 +241,11 @@
 						{{- $v = "*v" }}
 					{{- end }}
 					{{- if $type.HasEnumValues }}
+						{{- if $useFunctionSyntaxForExecutionContext -}}
+						{{- $v = printf "%v[%v]" $type.MarshalFuncFunctionSyntax $v }}
+						{{- else -}}
 						{{- $v = printf "%v[%v]" $type.MarshalFunc $v }}
+						{{- end -}}
 					{{- else if $type.CastType }}
 						{{- $v = printf "%v(%v)" ($type.CastType | ref) $v}}
 					{{- end }}
@@ -286,12 +294,20 @@
 		{{- $enum = $type.GO.Elem }}
 	{{- end }}
 	var (
+		{{ if $useFunctionSyntaxForExecutionContext -}}
+		{{ $type.UnmarshalFuncFunctionSyntax }} = map[string]{{ $enum | ref }}{
+		{{- else -}}
 		{{ $type.UnmarshalFunc }} = map[string]{{ $enum | ref }}{
+		{{- end -}}
 		{{- range $value := $type.EnumValues }}
 			"{{ $value.Definition.Name }}": {{ $value.Object | obj }},
 		{{- end }}
 		}
+		{{ if $useFunctionSyntaxForExecutionContext -}}
+		{{ $type.MarshalFuncFunctionSyntax }} = map[{{ $enum | ref }}]string{
+		{{- else -}}
 		{{ $type.MarshalFunc }} = map[{{ $enum | ref }}]string{
+		{{- end -}}
 		{{- range $value := $type.EnumValues }}
 			 {{ $value.Object | obj }}: "{{ $value.Definition.Name }}",
 		{{- end }}

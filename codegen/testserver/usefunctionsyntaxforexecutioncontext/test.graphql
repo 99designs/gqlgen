@@ -1,14 +1,19 @@
 # Custom directive to log field access (limited to fields, not input fields)
 directive @log(message: String) on FIELD_DEFINITION
+directive @goModel(
+    model: String
+    models: [String!]
+) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+directive @goEnum(value: String) on ENUM_VALUE
 
 # Custom scalar for Date
 scalar Date
 
 # Enum for user roles
-enum Role {
-  ADMIN
-  USER
-  GUEST
+enum Role @goModel(model: "github.com/99designs/gqlgen/codegen/testserver/usefunctionsyntaxforexecutioncontext.RoleModel") {
+  ADMIN @goEnum(value: "github.com/99designs/gqlgen/codegen/testserver/usefunctionsyntaxforexecutioncontext.RoleModelAdmin")
+  USER @goEnum(value: "github.com/99designs/gqlgen/codegen/testserver/usefunctionsyntaxforexecutioncontext.RoleModelUser")
+  GUEST @goEnum(value: "github.com/99designs/gqlgen/codegen/testserver/usefunctionsyntaxforexecutioncontext.RoleModelGuest")
 }
 
 # Interface representing an Entity with common fields

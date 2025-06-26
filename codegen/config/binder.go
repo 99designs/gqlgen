@@ -308,6 +308,10 @@ func (ref *TypeReference) MarshalFunc() string {
 	return "marshal" + ref.UniquenessKey()
 }
 
+func (ref *TypeReference) MarshalFuncFunctionSyntax() string {
+	return ref.MarshalFunc() + "F"
+}
+
 func (ref *TypeReference) UnmarshalFunc() string {
 	if ref.Definition == nil {
 		panic(errors.New("Definition missing for " + ref.GQL.Name()))
@@ -318,6 +322,10 @@ func (ref *TypeReference) UnmarshalFunc() string {
 	}
 
 	return "unmarshal" + ref.UniquenessKey()
+}
+
+func (ref *TypeReference) UnmarshalFuncFunctionSyntax() string {
+	return ref.UnmarshalFunc() + "F"
 }
 
 func (ref *TypeReference) IsTargetNilable() bool {

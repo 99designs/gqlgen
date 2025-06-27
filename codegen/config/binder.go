@@ -93,8 +93,8 @@ func (b *Binder) InstantiateType(orig types.Type, targs []types.Type) (types.Typ
 }
 
 var (
-	MapType       = types.NewMap(types.Typ[types.String], types.NewInterfaceType(nil, nil).Complete())
-	InterfaceType = types.NewInterfaceType(nil, nil)
+	MapType       = types.NewMap(types.Typ[types.String], types.Universe.Lookup("any").Type())
+	InterfaceType = types.Universe.Lookup("any").Type()
 )
 
 func (b *Binder) DefaultUserObject(name string) (types.Type, error) {

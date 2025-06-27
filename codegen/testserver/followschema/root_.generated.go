@@ -358,9 +358,9 @@ type ComplexityRoot struct {
 		Invalid                          func(childComplexity int) int
 		InvalidIdentifier                func(childComplexity int) int
 		Issue896a                        func(childComplexity int) int
-		MapInput                         func(childComplexity int, input map[string]interface{}) int
+		MapInput                         func(childComplexity int, input map[string]any) int
 		MapNestedStringInterface         func(childComplexity int, in *NestedMapInput) int
-		MapStringInterface               func(childComplexity int, in map[string]interface{}) int
+		MapStringInterface               func(childComplexity int, in map[string]any) int
 		ModelMethods                     func(childComplexity int) int
 		NestedInputs                     func(childComplexity int, input [][]*OuterInput) int
 		NestedOutputs                    func(childComplexity int) int
@@ -1581,7 +1581,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.MapInput(childComplexity, args["input"].(map[string]interface{})), true
+		return e.complexity.Query.MapInput(childComplexity, args["input"].(map[string]any)), true
 
 	case "Query.mapNestedStringInterface":
 		if e.complexity.Query.MapNestedStringInterface == nil {
@@ -1605,7 +1605,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.MapStringInterface(childComplexity, args["in"].(map[string]interface{})), true
+		return e.complexity.Query.MapStringInterface(childComplexity, args["in"].(map[string]any)), true
 
 	case "Query.modelMethods":
 		if e.complexity.Query.ModelMethods == nil {

@@ -201,7 +201,7 @@ func TestEnumBinding(t *testing.T) {
 	type Query {
 	    foo(arg: Bar!): Baz
 	}
-	
+
 	enum Bar {
 	    ONE
 	    TWO
@@ -339,8 +339,8 @@ func TestIsNilable(t *testing.T) {
 		{types.NewMap(types.Typ[types.Int], types.Typ[types.Int]), true},
 		{types.NewSlice(types.Typ[types.Int]), true},
 		{types.NewInterfaceType(nil, nil), true},
-		{createTypeAlias("interfaceAlias", types.NewInterfaceType(nil, nil)), true},
-		{createTypeAlias("interfaceNestedAlias", createTypeAlias("interfaceAlias", types.NewInterfaceType(nil, nil))), true},
+		{createTypeAlias("interfaceAlias", types.Universe.Lookup("any").Type()), true},
+		{createTypeAlias("interfaceNestedAlias", createTypeAlias("interfaceAlias", types.Universe.Lookup("any").Type())), true},
 		{createTypeAlias("intAlias", types.Typ[types.Int]), false},
 		{createTypeAlias("intNestedAlias", createTypeAlias("intAlias", types.Typ[types.Int])), false},
 	}

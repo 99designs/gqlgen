@@ -34,7 +34,7 @@ type PetResolver interface {
 type QueryResolver interface {
 	InvalidIdentifier(ctx context.Context) (*invalid_packagename.InvalidIdentifier, error)
 	Collision(ctx context.Context) (*introspection1.It, error)
-	MapInput(ctx context.Context, input map[string]interface{}) (*bool, error)
+	MapInput(ctx context.Context, input map[string]any) (*bool, error)
 	Recursive(ctx context.Context, input *RecursiveInputSlice) (*bool, error)
 	NestedInputs(ctx context.Context, input [][]*OuterInput) (*bool, error)
 	NestedOutputs(ctx context.Context) ([][]*OuterObject, error)
@@ -75,8 +75,8 @@ type QueryResolver interface {
 	NotAnInterface(ctx context.Context) (BackedByInterface, error)
 	Dog(ctx context.Context) (*Dog, error)
 	Issue896a(ctx context.Context) ([]*CheckIssue896, error)
-	MapStringInterface(ctx context.Context, in map[string]interface{}) (map[string]interface{}, error)
-	MapNestedStringInterface(ctx context.Context, in *NestedMapInput) (map[string]interface{}, error)
+	MapStringInterface(ctx context.Context, in map[string]any) (map[string]any, error)
+	MapNestedStringInterface(ctx context.Context, in *NestedMapInput) (map[string]any, error)
 	ErrorBubble(ctx context.Context) (*Error, error)
 	ErrorBubbleList(ctx context.Context) ([]*Error, error)
 	ErrorList(ctx context.Context) ([]*Error, error)
@@ -2143,7 +2143,7 @@ func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.C
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().MapInput(rctx, fc.Args["input"].(map[string]interface{}))
+		return ec.resolvers.Query().MapInput(rctx, fc.Args["input"].(map[string]any))
 	})
 
 	if resTmp == nil {
@@ -4244,7 +4244,7 @@ func (ec *executionContext) _Query_mapStringInterface(ctx context.Context, field
 	}()
 	resTmp := ec._fieldMiddleware(ctx, nil, func(rctx context.Context) (any, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().MapStringInterface(rctx, fc.Args["in"].(map[string]interface{}))
+		return ec.resolvers.Query().MapStringInterface(rctx, fc.Args["in"].(map[string]any))
 	})
 
 	if resTmp == nil {

@@ -230,13 +230,13 @@ func (e *Executor) parseQuery(
 
 	// swap out the FieldsOnCorrectType rule with one that doesn't provide suggestions
 	if e.disableSuggestion {
-		validator.RemoveRule("FieldsOnCorrectType")
+		currentRules.RemoveRule("FieldsOnCorrectType")
 		rule := rules.FieldsOnCorrectTypeRuleWithoutSuggestions
-		validator.AddRule(rule.Name, rule.RuleFunc)
+		currentRules.AddRule(rule.Name, rule.RuleFunc)
 	} else { // or vice versa
-		validator.RemoveRule("FieldsOnCorrectTypeWithoutSuggestions")
+		currentRules.RemoveRule("FieldsOnCorrectTypeWithoutSuggestions")
 		rule := rules.FieldsOnCorrectTypeRule
-		validator.AddRule(rule.Name, rule.RuleFunc)
+		currentRules.AddRule(rule.Name, rule.RuleFunc)
 	}
 
 	listErr := validator.ValidateWithRules(e.es.Schema(), doc, currentRules)

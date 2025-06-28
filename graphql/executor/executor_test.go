@@ -170,7 +170,6 @@ func TestExecutor(t *testing.T) {
 }
 
 func TestExecutorDisableSuggestion(t *testing.T) {
-
 	t.Run("by default, the error message will include suggestions", func(t *testing.T) {
 		exec := testexecutor.New()
 		resp := query(exec, "", "{nam}")

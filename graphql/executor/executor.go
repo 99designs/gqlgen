@@ -216,23 +216,30 @@ func (e *Executor) parseQuery(
 
 	stats.Validation.Start = graphql.Now()
 
-	if len(doc.Operations) == 0 {
+	if doc == nil || len(doc.Operations) == 0 {
 		err = gqlerror.Errorf("no operation provided")
 		gqlErr, _ := err.(*gqlerror.Error)
 		errcode.Set(err, errcode.ValidationFailed)
 		return nil, gqlerror.List{gqlErr}
 	}
 
+	currentRules := rules.NewDefaultRules()
+
+	// Customise rules as required
+	// TODO(steve): consider currentRules.RemoveRule(rules.MaxIntrospectionDepth.Name)
+
 	// swap out the FieldsOnCorrectType rule with one that doesn't provide suggestions
 	if e.disableSuggestion {
-		validator.RemoveRule("FieldsOnCorrectType")
-
+		currentRules.RemoveRule("FieldsOnCorrectType")
 		rule := rules.FieldsOnCorrectTypeRuleWithoutSuggestions
-		// rule may already have been added
-		validator.ReplaceRule(rule.Name, rule.RuleFunc)
+		currentRules.AddRule(rule.Name, rule.RuleFunc)
+	} else { // or vice versa
+		currentRules.RemoveRule("FieldsOnCorrectTypeWithoutSuggestions")
+		rule := rules.FieldsOnCorrectTypeRule
+		currentRules.AddRule(rule.Name, rule.RuleFunc)
 	}
 
-	listErr := validator.Validate(e.es.Schema(), doc)
+	listErr := validator.ValidateWithRules(e.es.Schema(), doc, currentRules)
 	if len(listErr) != 0 {
 		for _, e := range listErr {
 			errcode.Set(e, errcode.ValidationFailed)

@@ -170,14 +170,16 @@ func TestExecutor(t *testing.T) {
 }
 
 func TestExecutorDisableSuggestion(t *testing.T) {
-	exec := testexecutor.New()
+
 	t.Run("by default, the error message will include suggestions", func(t *testing.T) {
+		exec := testexecutor.New()
 		resp := query(exec, "", "{nam}")
 		assert.Empty(t, string(resp.Data))
 		assert.Equal(t, "input:1:2: Cannot query field \"nam\" on type \"Query\". Did you mean \"name\"?\n", resp.Errors.Error())
 	})
 
 	t.Run("disable suggestion, the error message will not include suggestions", func(t *testing.T) {
+		exec := testexecutor.New()
 		exec.SetDisableSuggestion(true)
 		resp := query(exec, "", "{nam}")
 		assert.Empty(t, string(resp.Data))

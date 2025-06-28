@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
+	"github.com/vektah/gqlparser/v2/validator/rules"
 
 	"github.com/99designs/gqlgen/graphql"
 )
@@ -50,7 +51,7 @@ var schema = gqlparser.MustLoadSchema(
 
 func requireComplexity(t *testing.T, source string, complexity int) {
 	t.Helper()
-	query := gqlparser.MustLoadQuery(schema, source)
+	query := gqlparser.MustLoadQueryWithRules(schema, source, rules.NewDefaultRules())
 
 	es := &graphql.ExecutableSchemaMock{
 		ComplexityFunc: func(ctx context.Context, typeName, field string, childComplexity int, args map[string]any) (int, bool) {

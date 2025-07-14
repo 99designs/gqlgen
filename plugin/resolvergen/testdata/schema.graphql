@@ -1,7 +1,10 @@
 type Query {
-    resolver: Resolver!
+    resolver: Resolver! @test
 }
 
 type Resolver {
-    name: String!
+    name: String! @test2(param: "asd") @test
 }
+
+directive @test on FIELD_DEFINITION
+directive @test2(param: String!) on FIELD_DEFINITION

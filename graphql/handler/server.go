@@ -36,12 +36,13 @@ func New(es graphql.ExecutableSchema) *Server {
 }
 
 // NewDefaultServer returns a Server for the given executable schema which is
-// suitable as an example.
+// only suitable for use in examples.
 //
 // Deprecated:
-// NewDefaultServer is only suitable as an example. Use [New] and add transports
-// configured for your use case. See the implementation of this constructor for
-// an example.
+// The Server returned by NewDefaultServer is not suitable for production use.
+// Use [New] instead and add transports configured for your use case,
+// appropriate caches, and introspection if required. See the implementation of
+// NewDefaultServer for an example of starting point to construct a Server.
 //
 // SSE is not supported using this example. SSE when used over HTTP/1.1 (but not
 // HTTP/2 or HTTP/3) suffers from a severe limitation to the maximum number of

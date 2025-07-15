@@ -64,7 +64,7 @@ func main() {
 }
 ```
 
-In `resolver.go`, add `//go:generate go run generate.go` (or replace `//go:generate go run github.com/99designs/gqlgen generate` if you have it there). 
+In `resolver.go`, add `//go:generate go run generate.go` (or replace `//go:generate go tool gqlgen` if you have it there).
 
 Now you can run `go generate ./...` to generate the code.
 

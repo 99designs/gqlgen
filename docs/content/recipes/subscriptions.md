@@ -158,7 +158,7 @@ type Subscription {
 
 ## Implementing your Resolver
 
-After regenerating your code with `go run github.com/99designs/gqlgen generate` you'll find a
+After regenerating your code with `go tool gqlgen generate` you'll find a
 new resolver for your subscription. It will look like any other resolver, except it expects
 a `<-chan *model.Time` (or whatever your type is). This is a
 [channel](https://go.dev/tour/concurrency/2). Channels in Go are used to send objects to a

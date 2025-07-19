@@ -25,27 +25,30 @@ type (
 	}
 )
 
+// New returns a new Server for the given executable schema. The Server is not
+// ready for use until the transports you require are added and configured with
+// Server.AddTransport. See the implementation of [NewDefaultServer] for an
+// example.
 func New(es graphql.ExecutableSchema) *Server {
 	return &Server{
 		exec: executor.New(es),
 	}
 }
 
-// NewDefaultServer is a demonstration only. Not for prod.
+// NewDefaultServer returns a Server for the given executable schema which is
+// only suitable for use in examples.
 //
-// Currently, the server just picks the first available transport,
-// so this example NewDefaultServer orders them, but it is just
-// for demonstration purposes.
-// You will likely want to tune and better configure Websocket transport
-// since adding a new one (To configure it) doesn't have effect.
+// Deprecated:
+// The Server returned by NewDefaultServer is not suitable for production use.
+// Use [New] instead and add transports configured for your use case,
+// appropriate caches, and introspection if required. See the implementation of
+// NewDefaultServer for an example of starting point to construct a Server.
 //
-// Also SSE support is not in here at all!
-// SSE when used over HTTP/1.1 (but not HTTP/2 or HTTP/3),
-// SSE suffers from a severe limitation to the maximum number
-// of open connections of 6 per browser. See:
-// https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#sect1
+// SSE is not supported using this example. SSE when used over HTTP/1.1 (but not
+// HTTP/2 or HTTP/3) suffers from a severe limitation to the maximum number of
+// open connections of 6 per browser, see [Using server-sent events].
 //
-// Deprecated: This was and is just an example.
+// [Using server-sent events]: https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#sect1
 func NewDefaultServer(es graphql.ExecutableSchema) *Server {
 	srv := New(es)
 
@@ -67,6 +70,9 @@ func NewDefaultServer(es graphql.ExecutableSchema) *Server {
 	return srv
 }
 
+// AddTransport adds a transport to the Server. The server picks the first
+// supported transport. Adding a transport which has already been added has no
+// effect.
 func (s *Server) AddTransport(transport graphql.Transport) {
 	s.transports = append(s.transports, transport)
 }
@@ -91,6 +97,8 @@ func (s *Server) SetDisableSuggestion(value bool) {
 	s.exec.SetDisableSuggestion(value)
 }
 
+// Use adds the given extension middleware to the server. Extensions are run in
+// order from first to last added.
 func (s *Server) Use(extension graphql.HandlerExtension) {
 	s.exec.Use(extension)
 }

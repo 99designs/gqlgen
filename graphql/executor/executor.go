@@ -27,6 +27,7 @@ type Executor struct {
 
 	parserTokenLimit  int
 	disableSuggestion bool
+	defaultRulesFn    func() *rules.Rules
 }
 
 var _ graphql.GraphExecutor = &Executor{}
@@ -43,6 +44,11 @@ func New(es graphql.ExecutableSchema) *Executor {
 		parserTokenLimit: parserTokenNoLimit,
 	}
 	return e
+}
+
+// SetDefaultRulesFn is to customize the Default GraphQL Validation Rules
+func (e *Executor) SetDefaultRulesFn(f func() *rules.Rules) {
+	e.defaultRulesFn = f
 }
 
 func (e *Executor) CreateOperationContext(
@@ -86,7 +92,11 @@ func (e *Executor) CreateOperationContext(
 	}
 
 	var err error
-	opCtx.Variables, err = validator.VariableValues(e.es.Schema(), opCtx.Operation, params.Variables)
+	opCtx.Variables, err = validator.VariableValues(
+		e.es.Schema(),
+		opCtx.Operation,
+		params.Variables,
+	)
 	if err != nil {
 		gqlErr, ok := err.(*gqlerror.Error)
 		if ok {
@@ -223,8 +233,12 @@ func (e *Executor) parseQuery(
 		return nil, gqlerror.List{gqlErr}
 	}
 
-	currentRules := rules.NewDefaultRules()
-
+	var currentRules *rules.Rules
+	if e.defaultRulesFn == nil {
+		currentRules = rules.NewDefaultRules()
+	} else {
+		currentRules = e.defaultRulesFn()
+	}
 	// Customise rules as required
 	// TODO(steve): consider currentRules.RemoveRule(rules.MaxIntrospectionDepth.Name)
 

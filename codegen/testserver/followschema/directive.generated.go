@@ -22,238 +22,82 @@ import (
 func (ec *executionContext) dir_length_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.dir_length_argsMin(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "min", ec.unmarshalNInt2int)
 	if err != nil {
 		return nil, err
 	}
 	args["min"] = arg0
-	arg1, err := ec.dir_length_argsMax(ctx, rawArgs)
+	arg1, err := processArgField(ctx, rawArgs, "max", ec.unmarshalOInt2ᚖint)
 	if err != nil {
 		return nil, err
 	}
 	args["max"] = arg1
-	arg2, err := ec.dir_length_argsMessage(ctx, rawArgs)
+	arg2, err := processArgField(ctx, rawArgs, "message", ec.unmarshalOString2ᚖstring)
 	if err != nil {
 		return nil, err
 	}
 	args["message"] = arg2
 	return args, nil
 }
-func (ec *executionContext) dir_length_argsMin(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (int, error) {
-	if _, ok := rawArgs["min"]; !ok {
-		var zeroVal int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("min"))
-	if tmp, ok := rawArgs["min"]; ok {
-		return ec.unmarshalNInt2int(ctx, tmp)
-	}
-
-	var zeroVal int
-	return zeroVal, nil
-}
-
-func (ec *executionContext) dir_length_argsMax(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*int, error) {
-	if _, ok := rawArgs["max"]; !ok {
-		var zeroVal *int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("max"))
-	if tmp, ok := rawArgs["max"]; ok {
-		return ec.unmarshalOInt2ᚖint(ctx, tmp)
-	}
-
-	var zeroVal *int
-	return zeroVal, nil
-}
-
-func (ec *executionContext) dir_length_argsMessage(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*string, error) {
-	if _, ok := rawArgs["message"]; !ok {
-		var zeroVal *string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("message"))
-	if tmp, ok := rawArgs["message"]; ok {
-		return ec.unmarshalOString2ᚖstring(ctx, tmp)
-	}
-
-	var zeroVal *string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) dir_logged_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.dir_logged_argsID(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "id", ec.unmarshalNUUID2string)
 	if err != nil {
 		return nil, err
 	}
 	args["id"] = arg0
 	return args, nil
 }
-func (ec *executionContext) dir_logged_argsID(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["id"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-	if tmp, ok := rawArgs["id"]; ok {
-		return ec.unmarshalNUUID2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) dir_order1_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.dir_order1_argsLocation(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "location", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["location"] = arg0
 	return args, nil
-}
-func (ec *executionContext) dir_order1_argsLocation(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["location"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("location"))
-	if tmp, ok := rawArgs["location"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
 }
 
 func (ec *executionContext) dir_order2_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.dir_order2_argsLocation(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "location", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["location"] = arg0
 	return args, nil
 }
-func (ec *executionContext) dir_order2_argsLocation(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["location"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("location"))
-	if tmp, ok := rawArgs["location"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) dir_populate_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.dir_populate_argsValue(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "value", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["value"] = arg0
 	return args, nil
 }
-func (ec *executionContext) dir_populate_argsValue(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["value"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
-	if tmp, ok := rawArgs["value"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) dir_range_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.dir_range_argsMin(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "min", ec.unmarshalOInt2ᚖint)
 	if err != nil {
 		return nil, err
 	}
 	args["min"] = arg0
-	arg1, err := ec.dir_range_argsMax(ctx, rawArgs)
+	arg1, err := processArgField(ctx, rawArgs, "max", ec.unmarshalOInt2ᚖint)
 	if err != nil {
 		return nil, err
 	}
 	args["max"] = arg1
 	return args, nil
-}
-func (ec *executionContext) dir_range_argsMin(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*int, error) {
-	if _, ok := rawArgs["min"]; !ok {
-		var zeroVal *int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("min"))
-	if tmp, ok := rawArgs["min"]; ok {
-		return ec.unmarshalOInt2ᚖint(ctx, tmp)
-	}
-
-	var zeroVal *int
-	return zeroVal, nil
-}
-
-func (ec *executionContext) dir_range_argsMax(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*int, error) {
-	if _, ok := rawArgs["max"]; !ok {
-		var zeroVal *int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("max"))
-	if tmp, ok := rawArgs["max"]; ok {
-		return ec.unmarshalOInt2ᚖint(ctx, tmp)
-	}
-
-	var zeroVal *int
-	return zeroVal, nil
 }
 
 // endregion ***************************** args.gotpl *****************************

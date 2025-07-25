@@ -21,29 +21,12 @@ import (
 func (ec *executionContext) field_VariadicModel_value_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_VariadicModel_value_argsRank(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "rank", ec.unmarshalNInt2int)
 	if err != nil {
 		return nil, err
 	}
 	args["rank"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_VariadicModel_value_argsRank(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (int, error) {
-	if _, ok := rawArgs["rank"]; !ok {
-		var zeroVal int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("rank"))
-	if tmp, ok := rawArgs["rank"]; ok {
-		return ec.unmarshalNInt2int(ctx, tmp)
-	}
-
-	var zeroVal int
-	return zeroVal, nil
 }
 
 // endregion ***************************** args.gotpl *****************************

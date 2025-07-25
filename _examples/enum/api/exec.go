@@ -328,6 +328,26 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	}
 }
 
+func processArgField[T any](
+	ctx context.Context,
+	rawArgs map[string]any,
+	fieldName string,
+	valueMapperFn func(ctx context.Context, value any) (T, error),
+) (T, error) {
+	if _, ok := rawArgs[fieldName]; !ok {
+		var zeroVal T
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField(fieldName))
+	if tmp, ok := rawArgs[fieldName]; ok {
+		return valueMapperFn(ctx, tmp)
+	}
+
+	var zeroVal T
+	return zeroVal, nil
+}
+
 type executionContext struct {
 	*graphql.OperationContext
 	*executableSchema
@@ -456,561 +476,221 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query___type_argsName(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["name"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query___type_argsName(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["name"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-	if tmp, ok := rawArgs["name"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Query_boolTypedN_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_boolTypedN_argsArg(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "arg", ec.unmarshalOBoolTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTyped)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_boolTypedN_argsArg(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*model.BoolTyped, error) {
-	if _, ok := rawArgs["arg"]; !ok {
-		var zeroVal *model.BoolTyped
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalOBoolTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTyped(ctx, tmp)
-	}
-
-	var zeroVal *model.BoolTyped
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_boolTyped_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_boolTyped_argsArg(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "arg", ec.unmarshalNBoolTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTyped)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_boolTyped_argsArg(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (model.BoolTyped, error) {
-	if _, ok := rawArgs["arg"]; !ok {
-		var zeroVal model.BoolTyped
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalNBoolTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTyped(ctx, tmp)
-	}
-
-	var zeroVal model.BoolTyped
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_boolUntypedN_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_boolUntypedN_argsArg(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "arg", ec.unmarshalOBoolUntyped2ᚖbool)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_boolUntypedN_argsArg(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*bool, error) {
-	if _, ok := rawArgs["arg"]; !ok {
-		var zeroVal *bool
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalOBoolUntyped2ᚖbool(ctx, tmp)
-	}
-
-	var zeroVal *bool
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_boolUntyped_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_boolUntyped_argsArg(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "arg", ec.unmarshalNBoolUntyped2bool)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_boolUntyped_argsArg(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (bool, error) {
-	if _, ok := rawArgs["arg"]; !ok {
-		var zeroVal bool
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalNBoolUntyped2bool(ctx, tmp)
-	}
-
-	var zeroVal bool
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_inPackage_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_inPackage_argsArg(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "arg", ec.unmarshalNInPackage2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋapiᚐInPackage)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_inPackage_argsArg(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (InPackage, error) {
-	if _, ok := rawArgs["arg"]; !ok {
-		var zeroVal InPackage
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalNInPackage2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋapiᚐInPackage(ctx, tmp)
-	}
-
-	var zeroVal InPackage
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_intTypedN_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_intTypedN_argsArg(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "arg", ec.unmarshalOIntTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_intTypedN_argsArg(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*model.IntTyped, error) {
-	if _, ok := rawArgs["arg"]; !ok {
-		var zeroVal *model.IntTyped
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalOIntTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped(ctx, tmp)
-	}
-
-	var zeroVal *model.IntTyped
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_intTyped_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_intTyped_argsArg(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "arg", ec.unmarshalNIntTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_intTyped_argsArg(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (model.IntTyped, error) {
-	if _, ok := rawArgs["arg"]; !ok {
-		var zeroVal model.IntTyped
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalNIntTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped(ctx, tmp)
-	}
-
-	var zeroVal model.IntTyped
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_intUntypedN_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_intUntypedN_argsArg(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "arg", ec.unmarshalOIntUntyped2ᚖint)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_intUntypedN_argsArg(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*int, error) {
-	if _, ok := rawArgs["arg"]; !ok {
-		var zeroVal *int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalOIntUntyped2ᚖint(ctx, tmp)
-	}
-
-	var zeroVal *int
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_intUntyped_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_intUntyped_argsArg(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "arg", ec.unmarshalNIntUntyped2int)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_intUntyped_argsArg(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (int, error) {
-	if _, ok := rawArgs["arg"]; !ok {
-		var zeroVal int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalNIntUntyped2int(ctx, tmp)
-	}
-
-	var zeroVal int
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_stringTypedN_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_stringTypedN_argsArg(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "arg", ec.unmarshalOStringTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTyped)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_stringTypedN_argsArg(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*model.StringTyped, error) {
-	if _, ok := rawArgs["arg"]; !ok {
-		var zeroVal *model.StringTyped
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalOStringTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTyped(ctx, tmp)
-	}
-
-	var zeroVal *model.StringTyped
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_stringTyped_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_stringTyped_argsArg(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "arg", ec.unmarshalNStringTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTyped)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_stringTyped_argsArg(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (model.StringTyped, error) {
-	if _, ok := rawArgs["arg"]; !ok {
-		var zeroVal model.StringTyped
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalNStringTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTyped(ctx, tmp)
-	}
-
-	var zeroVal model.StringTyped
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_stringUntypedN_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_stringUntypedN_argsArg(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "arg", ec.unmarshalOStringUntyped2ᚖstring)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_stringUntypedN_argsArg(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*string, error) {
-	if _, ok := rawArgs["arg"]; !ok {
-		var zeroVal *string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalOStringUntyped2ᚖstring(ctx, tmp)
-	}
-
-	var zeroVal *string
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_stringUntyped_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_stringUntyped_argsArg(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "arg", ec.unmarshalNStringUntyped2string)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_stringUntyped_argsArg(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["arg"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalNStringUntyped2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_varTyped_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_varTyped_argsArg(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "arg", ec.unmarshalNVarTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐVarTyped)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_varTyped_argsArg(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (model.VarTyped, error) {
-	if _, ok := rawArgs["arg"]; !ok {
-		var zeroVal model.VarTyped
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalNVarTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐVarTyped(ctx, tmp)
-	}
-
-	var zeroVal model.VarTyped
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_varUntyped_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_varUntyped_argsArg(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "arg", ec.unmarshalNVarUntyped2bool)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query_varUntyped_argsArg(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (bool, error) {
-	if _, ok := rawArgs["arg"]; !ok {
-		var zeroVal bool
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalNVarUntyped2bool(ctx, tmp)
-	}
-
-	var zeroVal bool
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field___Directive_args_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field___Directive_args_argsIncludeDeprecated(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2ᚖbool)
 	if err != nil {
 		return nil, err
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field___Directive_args_argsIncludeDeprecated(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*bool, error) {
-	if _, ok := rawArgs["includeDeprecated"]; !ok {
-		var zeroVal *bool
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		return ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
-	}
-
-	var zeroVal *bool
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field___Field_args_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field___Field_args_argsIncludeDeprecated(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2ᚖbool)
 	if err != nil {
 		return nil, err
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field___Field_args_argsIncludeDeprecated(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*bool, error) {
-	if _, ok := rawArgs["includeDeprecated"]; !ok {
-		var zeroVal *bool
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		return ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
-	}
-
-	var zeroVal *bool
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field___Type_enumValues_argsIncludeDeprecated(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2bool)
 	if err != nil {
 		return nil, err
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field___Type_enumValues_argsIncludeDeprecated(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (bool, error) {
-	if _, ok := rawArgs["includeDeprecated"]; !ok {
-		var zeroVal bool
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		return ec.unmarshalOBoolean2bool(ctx, tmp)
-	}
-
-	var zeroVal bool
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field___Type_fields_argsIncludeDeprecated(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2bool)
 	if err != nil {
 		return nil, err
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (bool, error) {
-	if _, ok := rawArgs["includeDeprecated"]; !ok {
-		var zeroVal bool
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		return ec.unmarshalOBoolean2bool(ctx, tmp)
-	}
-
-	var zeroVal bool
-	return zeroVal, nil
 }
 
 // endregion ***************************** args.gotpl *****************************

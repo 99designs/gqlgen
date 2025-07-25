@@ -29,113 +29,45 @@ type MutationResolver interface {
 func (ec *executionContext) field_Mutation_defaultInput_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Mutation_defaultInput_argsInput(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "input", ec.unmarshalNDefaultInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐDefaultInput)
 	if err != nil {
 		return nil, err
 	}
 	args["input"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Mutation_defaultInput_argsInput(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (DefaultInput, error) {
-	if _, ok := rawArgs["input"]; !ok {
-		var zeroVal DefaultInput
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNDefaultInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐDefaultInput(ctx, tmp)
-	}
-
-	var zeroVal DefaultInput
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_overrideValueViaInput_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Mutation_overrideValueViaInput_argsInput(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "input", ec.unmarshalNFieldsOrderInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐFieldsOrderInput)
 	if err != nil {
 		return nil, err
 	}
 	args["input"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Mutation_overrideValueViaInput_argsInput(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (FieldsOrderInput, error) {
-	if _, ok := rawArgs["input"]; !ok {
-		var zeroVal FieldsOrderInput
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNFieldsOrderInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐFieldsOrderInput(ctx, tmp)
-	}
-
-	var zeroVal FieldsOrderInput
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_updatePtrToPtr_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Mutation_updatePtrToPtr_argsInput(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "input", ec.unmarshalNUpdatePtrToPtrOuter2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐUpdatePtrToPtrOuter)
 	if err != nil {
 		return nil, err
 	}
 	args["input"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Mutation_updatePtrToPtr_argsInput(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (UpdatePtrToPtrOuter, error) {
-	if _, ok := rawArgs["input"]; !ok {
-		var zeroVal UpdatePtrToPtrOuter
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNUpdatePtrToPtrOuter2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐUpdatePtrToPtrOuter(ctx, tmp)
-	}
-
-	var zeroVal UpdatePtrToPtrOuter
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_updateSomething_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Mutation_updateSomething_argsInput(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "input", ec.unmarshalNSpecialInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐSpecialInput)
 	if err != nil {
 		return nil, err
 	}
 	args["input"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Mutation_updateSomething_argsInput(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (SpecialInput, error) {
-	if _, ok := rawArgs["input"]; !ok {
-		var zeroVal SpecialInput
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNSpecialInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐSpecialInput(ctx, tmp)
-	}
-
-	var zeroVal SpecialInput
-	return zeroVal, nil
 }
 
 // endregion ***************************** args.gotpl *****************************

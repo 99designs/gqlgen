@@ -196,6 +196,26 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	}
 }
 
+func processArgField[T any](
+	ctx context.Context,
+	rawArgs map[string]any,
+	fieldName string,
+	valueMapperFn func(ctx context.Context, value any) (T, error),
+) (T, error) {
+	if _, ok := rawArgs[fieldName]; !ok {
+		var zeroVal T
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField(fieldName))
+	if tmp, ok := rawArgs[fieldName]; ok {
+		return valueMapperFn(ctx, tmp)
+	}
+
+	var zeroVal T
+	return zeroVal, nil
+}
+
 type executionContext struct {
 	*graphql.OperationContext
 	*executableSchema
@@ -472,428 +492,198 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Entity_findHelloByName_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Entity_findHelloByName_argsName(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["name"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Entity_findHelloByName_argsName(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-	if tmp, ok := rawArgs["name"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Entity_findHelloMultiSingleKeysByKey1AndKey2_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Entity_findHelloMultiSingleKeysByKey1AndKey2_argsKey1(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "key1", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["key1"] = arg0
-	arg1, err := ec.field_Entity_findHelloMultiSingleKeysByKey1AndKey2_argsKey2(ctx, rawArgs)
+	arg1, err := processArgField(ctx, rawArgs, "key2", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["key2"] = arg1
 	return args, nil
 }
-func (ec *executionContext) field_Entity_findHelloMultiSingleKeysByKey1AndKey2_argsKey1(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("key1"))
-	if tmp, ok := rawArgs["key1"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Entity_findHelloMultiSingleKeysByKey1AndKey2_argsKey2(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("key2"))
-	if tmp, ok := rawArgs["key2"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Entity_findHelloWithErrorsByName_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Entity_findHelloWithErrorsByName_argsName(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["name"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Entity_findHelloWithErrorsByName_argsName(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-	if tmp, ok := rawArgs["name"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Entity_findManyMultiHelloByNames_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Entity_findManyMultiHelloByNames_argsReps(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "reps", ec.unmarshalNMultiHelloByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐMultiHelloByNamesInput)
 	if err != nil {
 		return nil, err
 	}
 	args["reps"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Entity_findManyMultiHelloByNames_argsReps(
-	ctx context.Context,
-	rawArgs map[string]any,
-) ([]*model.MultiHelloByNamesInput, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("reps"))
-	if tmp, ok := rawArgs["reps"]; ok {
-		return ec.unmarshalNMultiHelloByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐMultiHelloByNamesInput(ctx, tmp)
-	}
-
-	var zeroVal []*model.MultiHelloByNamesInput
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Entity_findManyMultiHelloMultipleRequiresByNames_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Entity_findManyMultiHelloMultipleRequiresByNames_argsReps(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "reps", ec.unmarshalNMultiHelloMultipleRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐMultiHelloMultipleRequiresByNamesInput)
 	if err != nil {
 		return nil, err
 	}
 	args["reps"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Entity_findManyMultiHelloMultipleRequiresByNames_argsReps(
-	ctx context.Context,
-	rawArgs map[string]any,
-) ([]*model.MultiHelloMultipleRequiresByNamesInput, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("reps"))
-	if tmp, ok := rawArgs["reps"]; ok {
-		return ec.unmarshalNMultiHelloMultipleRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐMultiHelloMultipleRequiresByNamesInput(ctx, tmp)
-	}
-
-	var zeroVal []*model.MultiHelloMultipleRequiresByNamesInput
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Entity_findManyMultiHelloRequiresByNames_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Entity_findManyMultiHelloRequiresByNames_argsReps(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "reps", ec.unmarshalNMultiHelloRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐMultiHelloRequiresByNamesInput)
 	if err != nil {
 		return nil, err
 	}
 	args["reps"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Entity_findManyMultiHelloRequiresByNames_argsReps(
-	ctx context.Context,
-	rawArgs map[string]any,
-) ([]*model.MultiHelloRequiresByNamesInput, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("reps"))
-	if tmp, ok := rawArgs["reps"]; ok {
-		return ec.unmarshalNMultiHelloRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐMultiHelloRequiresByNamesInput(ctx, tmp)
-	}
-
-	var zeroVal []*model.MultiHelloRequiresByNamesInput
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Entity_findManyMultiHelloWithErrorByNames_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Entity_findManyMultiHelloWithErrorByNames_argsReps(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "reps", ec.unmarshalNMultiHelloWithErrorByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐMultiHelloWithErrorByNamesInput)
 	if err != nil {
 		return nil, err
 	}
 	args["reps"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Entity_findManyMultiHelloWithErrorByNames_argsReps(
-	ctx context.Context,
-	rawArgs map[string]any,
-) ([]*model.MultiHelloWithErrorByNamesInput, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("reps"))
-	if tmp, ok := rawArgs["reps"]; ok {
-		return ec.unmarshalNMultiHelloWithErrorByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐMultiHelloWithErrorByNamesInput(ctx, tmp)
-	}
-
-	var zeroVal []*model.MultiHelloWithErrorByNamesInput
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Entity_findManyMultiPlanetRequiresNestedByNames_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Entity_findManyMultiPlanetRequiresNestedByNames_argsReps(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "reps", ec.unmarshalNMultiPlanetRequiresNestedByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐMultiPlanetRequiresNestedByNamesInput)
 	if err != nil {
 		return nil, err
 	}
 	args["reps"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Entity_findManyMultiPlanetRequiresNestedByNames_argsReps(
-	ctx context.Context,
-	rawArgs map[string]any,
-) ([]*model.MultiPlanetRequiresNestedByNamesInput, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("reps"))
-	if tmp, ok := rawArgs["reps"]; ok {
-		return ec.unmarshalNMultiPlanetRequiresNestedByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐMultiPlanetRequiresNestedByNamesInput(ctx, tmp)
-	}
-
-	var zeroVal []*model.MultiPlanetRequiresNestedByNamesInput
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Entity_findPersonByName_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Entity_findPersonByName_argsName(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["name"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Entity_findPersonByName_argsName(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-	if tmp, ok := rawArgs["name"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Entity_findPlanetMultipleRequiresByName_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Entity_findPlanetMultipleRequiresByName_argsName(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["name"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Entity_findPlanetMultipleRequiresByName_argsName(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-	if tmp, ok := rawArgs["name"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Entity_findPlanetRequiresByName_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Entity_findPlanetRequiresByName_argsName(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["name"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Entity_findPlanetRequiresByName_argsName(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-	if tmp, ok := rawArgs["name"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Entity_findPlanetRequiresNestedByName_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Entity_findPlanetRequiresNestedByName_argsName(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["name"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Entity_findPlanetRequiresNestedByName_argsName(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-	if tmp, ok := rawArgs["name"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Entity_findWorldByHelloNameAndFoo_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Entity_findWorldByHelloNameAndFoo_argsHelloName(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "helloName", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["helloName"] = arg0
-	arg1, err := ec.field_Entity_findWorldByHelloNameAndFoo_argsFoo(ctx, rawArgs)
+	arg1, err := processArgField(ctx, rawArgs, "foo", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["foo"] = arg1
 	return args, nil
 }
-func (ec *executionContext) field_Entity_findWorldByHelloNameAndFoo_argsHelloName(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("helloName"))
-	if tmp, ok := rawArgs["helloName"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Entity_findWorldByHelloNameAndFoo_argsFoo(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("foo"))
-	if tmp, ok := rawArgs["foo"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Entity_findWorldNameByName_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Entity_findWorldNameByName_argsName(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["name"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Entity_findWorldNameByName_argsName(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-	if tmp, ok := rawArgs["name"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Entity_findWorldWithMultipleKeysByBar_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Entity_findWorldWithMultipleKeysByBar_argsBar(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "bar", ec.unmarshalNInt2int)
 	if err != nil {
 		return nil, err
 	}
 	args["bar"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Entity_findWorldWithMultipleKeysByBar_argsBar(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (int, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("bar"))
-	if tmp, ok := rawArgs["bar"]; ok {
-		return ec.unmarshalNInt2int(ctx, tmp)
-	}
-
-	var zeroVal int
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Entity_findWorldWithMultipleKeysByHelloNameAndFoo_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Entity_findWorldWithMultipleKeysByHelloNameAndFoo_argsHelloName(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "helloName", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["helloName"] = arg0
-	arg1, err := ec.field_Entity_findWorldWithMultipleKeysByHelloNameAndFoo_argsFoo(ctx, rawArgs)
+	arg1, err := processArgField(ctx, rawArgs, "foo", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["foo"] = arg1
 	return args, nil
 }
-func (ec *executionContext) field_Entity_findWorldWithMultipleKeysByHelloNameAndFoo_argsHelloName(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("helloName"))
-	if tmp, ok := rawArgs["helloName"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Entity_findWorldWithMultipleKeysByHelloNameAndFoo_argsFoo(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("foo"))
-	if tmp, ok := rawArgs["foo"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_MultiHelloMultipleRequires_key3_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
+
 	arg0, err := ec.field_MultiHelloMultipleRequires_key3_argsFederationRequires(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -901,6 +691,7 @@ func (ec *executionContext) field_MultiHelloMultipleRequires_key3_args(ctx conte
 	args["_federationRequires"] = arg0
 	return args, nil
 }
+
 func (ec *executionContext) field_MultiHelloMultipleRequires_key3_argsFederationRequires(
 	ctx context.Context,
 	rawArgs map[string]any,
@@ -938,6 +729,7 @@ func (ec *executionContext) field_MultiHelloMultipleRequires_key3_argsFederation
 func (ec *executionContext) field_MultiHelloRequires_key2_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
+
 	arg0, err := ec.field_MultiHelloRequires_key2_argsFederationRequires(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -945,6 +737,7 @@ func (ec *executionContext) field_MultiHelloRequires_key2_args(ctx context.Conte
 	args["_federationRequires"] = arg0
 	return args, nil
 }
+
 func (ec *executionContext) field_MultiHelloRequires_key2_argsFederationRequires(
 	ctx context.Context,
 	rawArgs map[string]any,
@@ -982,6 +775,7 @@ func (ec *executionContext) field_MultiHelloRequires_key2_argsFederationRequires
 func (ec *executionContext) field_MultiPlanetRequiresNested_size_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
+
 	arg0, err := ec.field_MultiPlanetRequiresNested_size_argsFederationRequires(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -989,6 +783,7 @@ func (ec *executionContext) field_MultiPlanetRequiresNested_size_args(ctx contex
 	args["_federationRequires"] = arg0
 	return args, nil
 }
+
 func (ec *executionContext) field_MultiPlanetRequiresNested_size_argsFederationRequires(
 	ctx context.Context,
 	rawArgs map[string]any,
@@ -1026,6 +821,7 @@ func (ec *executionContext) field_MultiPlanetRequiresNested_size_argsFederationR
 func (ec *executionContext) field_MultiPlanetRequiresNested_sizes_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
+
 	arg0, err := ec.field_MultiPlanetRequiresNested_sizes_argsFederationRequires(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1033,6 +829,7 @@ func (ec *executionContext) field_MultiPlanetRequiresNested_sizes_args(ctx conte
 	args["_federationRequires"] = arg0
 	return args, nil
 }
+
 func (ec *executionContext) field_MultiPlanetRequiresNested_sizes_argsFederationRequires(
 	ctx context.Context,
 	rawArgs map[string]any,
@@ -1070,6 +867,7 @@ func (ec *executionContext) field_MultiPlanetRequiresNested_sizes_argsFederation
 func (ec *executionContext) field_Person_welcomeMessage_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
+
 	arg0, err := ec.field_Person_welcomeMessage_argsFederationRequires(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1077,6 +875,7 @@ func (ec *executionContext) field_Person_welcomeMessage_args(ctx context.Context
 	args["_federationRequires"] = arg0
 	return args, nil
 }
+
 func (ec *executionContext) field_Person_welcomeMessage_argsFederationRequires(
 	ctx context.Context,
 	rawArgs map[string]any,
@@ -1114,52 +913,29 @@ func (ec *executionContext) field_Person_welcomeMessage_argsFederationRequires(
 func (ec *executionContext) field_PlanetMultipleRequires_anotherField_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_PlanetMultipleRequires_anotherField_argsFoobar(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "foobar", ec.unmarshalOString2ᚖstring)
 	if err != nil {
 		return nil, err
 	}
 	args["foobar"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_PlanetMultipleRequires_anotherField_argsFoobar(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("foobar"))
-	if tmp, ok := rawArgs["foobar"]; ok {
-		return ec.unmarshalOString2ᚖstring(ctx, tmp)
-	}
-
-	var zeroVal *string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_PlanetMultipleRequires_weight_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_PlanetMultipleRequires_weight_argsFoo(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "foo", ec.unmarshalOString2ᚖstring)
 	if err != nil {
 		return nil, err
 	}
 	args["foo"] = arg0
+
 	arg1, err := ec.field_PlanetMultipleRequires_weight_argsFederationRequires(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
 	args["_federationRequires"] = arg1
 	return args, nil
-}
-func (ec *executionContext) field_PlanetMultipleRequires_weight_argsFoo(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("foo"))
-	if tmp, ok := rawArgs["foo"]; ok {
-		return ec.unmarshalOString2ᚖstring(ctx, tmp)
-	}
-
-	var zeroVal *string
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_PlanetMultipleRequires_weight_argsFederationRequires(
@@ -1199,6 +975,7 @@ func (ec *executionContext) field_PlanetMultipleRequires_weight_argsFederationRe
 func (ec *executionContext) field_PlanetRequiresNested_size_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
+
 	arg0, err := ec.field_PlanetRequiresNested_size_argsFederationRequires(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1206,6 +983,7 @@ func (ec *executionContext) field_PlanetRequiresNested_size_args(ctx context.Con
 	args["_federationRequires"] = arg0
 	return args, nil
 }
+
 func (ec *executionContext) field_PlanetRequiresNested_size_argsFederationRequires(
 	ctx context.Context,
 	rawArgs map[string]any,
@@ -1243,6 +1021,7 @@ func (ec *executionContext) field_PlanetRequiresNested_size_argsFederationRequir
 func (ec *executionContext) field_PlanetRequiresNested_sizes_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
+
 	arg0, err := ec.field_PlanetRequiresNested_sizes_argsFederationRequires(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1250,6 +1029,7 @@ func (ec *executionContext) field_PlanetRequiresNested_sizes_args(ctx context.Co
 	args["_federationRequires"] = arg0
 	return args, nil
 }
+
 func (ec *executionContext) field_PlanetRequiresNested_sizes_argsFederationRequires(
 	ctx context.Context,
 	rawArgs map[string]any,
@@ -1287,6 +1067,7 @@ func (ec *executionContext) field_PlanetRequiresNested_sizes_argsFederationRequi
 func (ec *executionContext) field_PlanetRequires_size_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
+
 	arg0, err := ec.field_PlanetRequires_size_argsFederationRequires(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -1294,6 +1075,7 @@ func (ec *executionContext) field_PlanetRequires_size_args(ctx context.Context, 
 	args["_federationRequires"] = arg0
 	return args, nil
 }
+
 func (ec *executionContext) field_PlanetRequires_size_argsFederationRequires(
 	ctx context.Context,
 	rawArgs map[string]any,
@@ -1331,139 +1113,67 @@ func (ec *executionContext) field_PlanetRequires_size_argsFederationRequires(
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query___type_argsName(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["name"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query___type_argsName(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-	if tmp, ok := rawArgs["name"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Query__entities_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query__entities_argsRepresentations(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "representations", ec.unmarshalN_Any2ᚕmapᚄ)
 	if err != nil {
 		return nil, err
 	}
 	args["representations"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query__entities_argsRepresentations(
-	ctx context.Context,
-	rawArgs map[string]any,
-) ([]map[string]any, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("representations"))
-	if tmp, ok := rawArgs["representations"]; ok {
-		return ec.unmarshalN_Any2ᚕmapᚄ(ctx, tmp)
-	}
-
-	var zeroVal []map[string]any
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field___Directive_args_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field___Directive_args_argsIncludeDeprecated(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2ᚖbool)
 	if err != nil {
 		return nil, err
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field___Directive_args_argsIncludeDeprecated(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*bool, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		return ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
-	}
-
-	var zeroVal *bool
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field___Field_args_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field___Field_args_argsIncludeDeprecated(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2ᚖbool)
 	if err != nil {
 		return nil, err
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field___Field_args_argsIncludeDeprecated(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*bool, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		return ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
-	}
-
-	var zeroVal *bool
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field___Type_enumValues_argsIncludeDeprecated(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2bool)
 	if err != nil {
 		return nil, err
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field___Type_enumValues_argsIncludeDeprecated(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (bool, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		return ec.unmarshalOBoolean2bool(ctx, tmp)
-	}
-
-	var zeroVal bool
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field___Type_fields_argsIncludeDeprecated(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2bool)
 	if err != nil {
 		return nil, err
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (bool, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		return ec.unmarshalOBoolean2bool(ctx, tmp)
-	}
-
-	var zeroVal bool
-	return zeroVal, nil
 }
 
 // endregion ***************************** args.gotpl *****************************

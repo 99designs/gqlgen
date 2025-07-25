@@ -27,57 +27,23 @@ type PanicsResolver interface {
 func (ec *executionContext) field_Panics_argUnmarshal_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Panics_argUnmarshal_argsU(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "u", ec.unmarshalNMarshalPanic2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐMarshalPanicᚄ)
 	if err != nil {
 		return nil, err
 	}
 	args["u"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Panics_argUnmarshal_argsU(
-	ctx context.Context,
-	rawArgs map[string]any,
-) ([]MarshalPanic, error) {
-	if _, ok := rawArgs["u"]; !ok {
-		var zeroVal []MarshalPanic
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("u"))
-	if tmp, ok := rawArgs["u"]; ok {
-		return ec.unmarshalNMarshalPanic2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐMarshalPanicᚄ(ctx, tmp)
-	}
-
-	var zeroVal []MarshalPanic
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Panics_fieldFuncMarshal_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Panics_fieldFuncMarshal_argsU(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "u", ec.unmarshalNMarshalPanic2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐMarshalPanicᚄ)
 	if err != nil {
 		return nil, err
 	}
 	args["u"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Panics_fieldFuncMarshal_argsU(
-	ctx context.Context,
-	rawArgs map[string]any,
-) ([]MarshalPanic, error) {
-	if _, ok := rawArgs["u"]; !ok {
-		var zeroVal []MarshalPanic
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("u"))
-	if tmp, ok := rawArgs["u"]; ok {
-		return ec.unmarshalNMarshalPanic2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐMarshalPanicᚄ(ctx, tmp)
-	}
-
-	var zeroVal []MarshalPanic
-	return zeroVal, nil
 }
 
 // endregion ***************************** args.gotpl *****************************

@@ -2430,6 +2430,26 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	}
 }
 
+func processArgField[T any](
+	ctx context.Context,
+	rawArgs map[string]any,
+	fieldName string,
+	valueMapperFn func(ctx context.Context, value any) (T, error),
+) (T, error) {
+	if _, ok := rawArgs[fieldName]; !ok {
+		var zeroVal T
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField(fieldName))
+	if tmp, ok := rawArgs[fieldName]; ok {
+		return valueMapperFn(ctx, tmp)
+	}
+
+	var zeroVal T
+	return zeroVal, nil
+}
+
 type executionContext struct {
 	*graphql.OperationContext
 	*executableSchema
@@ -2524,597 +2544,219 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) dir_defer_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.dir_defer_argsIf(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "if", ec.unmarshalOBoolean2ᚖbool)
 	if err != nil {
 		return nil, err
 	}
 	args["if"] = arg0
-	arg1, err := ec.dir_defer_argsLabel(ctx, rawArgs)
+	arg1, err := processArgField(ctx, rawArgs, "label", ec.unmarshalOString2ᚖstring)
 	if err != nil {
 		return nil, err
 	}
 	args["label"] = arg1
 	return args, nil
 }
-func (ec *executionContext) dir_defer_argsIf(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*bool, error) {
-	if _, ok := rawArgs["if"]; !ok {
-		var zeroVal *bool
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("if"))
-	if tmp, ok := rawArgs["if"]; ok {
-		return ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
-	}
-
-	var zeroVal *bool
-	return zeroVal, nil
-}
-
-func (ec *executionContext) dir_defer_argsLabel(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*string, error) {
-	if _, ok := rawArgs["label"]; !ok {
-		var zeroVal *string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("label"))
-	if tmp, ok := rawArgs["label"]; ok {
-		return ec.unmarshalOString2ᚖstring(ctx, tmp)
-	}
-
-	var zeroVal *string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) dir_length_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.dir_length_argsMin(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "min", ec.unmarshalNInt2int)
 	if err != nil {
 		return nil, err
 	}
 	args["min"] = arg0
-	arg1, err := ec.dir_length_argsMax(ctx, rawArgs)
+	arg1, err := processArgField(ctx, rawArgs, "max", ec.unmarshalOInt2ᚖint)
 	if err != nil {
 		return nil, err
 	}
 	args["max"] = arg1
-	arg2, err := ec.dir_length_argsMessage(ctx, rawArgs)
+	arg2, err := processArgField(ctx, rawArgs, "message", ec.unmarshalOString2ᚖstring)
 	if err != nil {
 		return nil, err
 	}
 	args["message"] = arg2
 	return args, nil
 }
-func (ec *executionContext) dir_length_argsMin(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (int, error) {
-	if _, ok := rawArgs["min"]; !ok {
-		var zeroVal int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("min"))
-	if tmp, ok := rawArgs["min"]; ok {
-		return ec.unmarshalNInt2int(ctx, tmp)
-	}
-
-	var zeroVal int
-	return zeroVal, nil
-}
-
-func (ec *executionContext) dir_length_argsMax(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*int, error) {
-	if _, ok := rawArgs["max"]; !ok {
-		var zeroVal *int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("max"))
-	if tmp, ok := rawArgs["max"]; ok {
-		return ec.unmarshalOInt2ᚖint(ctx, tmp)
-	}
-
-	var zeroVal *int
-	return zeroVal, nil
-}
-
-func (ec *executionContext) dir_length_argsMessage(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*string, error) {
-	if _, ok := rawArgs["message"]; !ok {
-		var zeroVal *string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("message"))
-	if tmp, ok := rawArgs["message"]; ok {
-		return ec.unmarshalOString2ᚖstring(ctx, tmp)
-	}
-
-	var zeroVal *string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) dir_logged_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.dir_logged_argsID(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "id", ec.unmarshalNUUID2string)
 	if err != nil {
 		return nil, err
 	}
 	args["id"] = arg0
 	return args, nil
 }
-func (ec *executionContext) dir_logged_argsID(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["id"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-	if tmp, ok := rawArgs["id"]; ok {
-		return ec.unmarshalNUUID2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) dir_order1_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.dir_order1_argsLocation(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "location", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["location"] = arg0
 	return args, nil
-}
-func (ec *executionContext) dir_order1_argsLocation(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["location"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("location"))
-	if tmp, ok := rawArgs["location"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
 }
 
 func (ec *executionContext) dir_order2_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.dir_order2_argsLocation(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "location", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["location"] = arg0
 	return args, nil
 }
-func (ec *executionContext) dir_order2_argsLocation(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["location"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("location"))
-	if tmp, ok := rawArgs["location"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) dir_populate_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.dir_populate_argsValue(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "value", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["value"] = arg0
 	return args, nil
 }
-func (ec *executionContext) dir_populate_argsValue(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["value"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
-	if tmp, ok := rawArgs["value"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) dir_range_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.dir_range_argsMin(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "min", ec.unmarshalOInt2ᚖint)
 	if err != nil {
 		return nil, err
 	}
 	args["min"] = arg0
-	arg1, err := ec.dir_range_argsMax(ctx, rawArgs)
+	arg1, err := processArgField(ctx, rawArgs, "max", ec.unmarshalOInt2ᚖint)
 	if err != nil {
 		return nil, err
 	}
 	args["max"] = arg1
 	return args, nil
 }
-func (ec *executionContext) dir_range_argsMin(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*int, error) {
-	if _, ok := rawArgs["min"]; !ok {
-		var zeroVal *int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("min"))
-	if tmp, ok := rawArgs["min"]; ok {
-		return ec.unmarshalOInt2ᚖint(ctx, tmp)
-	}
-
-	var zeroVal *int
-	return zeroVal, nil
-}
-
-func (ec *executionContext) dir_range_argsMax(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*int, error) {
-	if _, ok := rawArgs["max"]; !ok {
-		var zeroVal *int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("max"))
-	if tmp, ok := rawArgs["max"]; ok {
-		return ec.unmarshalOInt2ᚖint(ctx, tmp)
-	}
-
-	var zeroVal *int
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Mutation_defaultInput_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Mutation_defaultInput_argsInput(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "input", ec.unmarshalNDefaultInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐDefaultInput)
 	if err != nil {
 		return nil, err
 	}
 	args["input"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Mutation_defaultInput_argsInput(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (DefaultInput, error) {
-	if _, ok := rawArgs["input"]; !ok {
-		var zeroVal DefaultInput
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNDefaultInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐDefaultInput(ctx, tmp)
-	}
-
-	var zeroVal DefaultInput
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_overrideValueViaInput_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Mutation_overrideValueViaInput_argsInput(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "input", ec.unmarshalNFieldsOrderInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐFieldsOrderInput)
 	if err != nil {
 		return nil, err
 	}
 	args["input"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Mutation_overrideValueViaInput_argsInput(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (FieldsOrderInput, error) {
-	if _, ok := rawArgs["input"]; !ok {
-		var zeroVal FieldsOrderInput
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNFieldsOrderInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐFieldsOrderInput(ctx, tmp)
-	}
-
-	var zeroVal FieldsOrderInput
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_updatePtrToPtr_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Mutation_updatePtrToPtr_argsInput(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "input", ec.unmarshalNUpdatePtrToPtrOuter2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐUpdatePtrToPtrOuter)
 	if err != nil {
 		return nil, err
 	}
 	args["input"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Mutation_updatePtrToPtr_argsInput(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (UpdatePtrToPtrOuter, error) {
-	if _, ok := rawArgs["input"]; !ok {
-		var zeroVal UpdatePtrToPtrOuter
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNUpdatePtrToPtrOuter2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐUpdatePtrToPtrOuter(ctx, tmp)
-	}
-
-	var zeroVal UpdatePtrToPtrOuter
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Mutation_updateSomething_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Mutation_updateSomething_argsInput(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "input", ec.unmarshalNSpecialInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐSpecialInput)
 	if err != nil {
 		return nil, err
 	}
 	args["input"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Mutation_updateSomething_argsInput(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (SpecialInput, error) {
-	if _, ok := rawArgs["input"]; !ok {
-		var zeroVal SpecialInput
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalNSpecialInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐSpecialInput(ctx, tmp)
-	}
-
-	var zeroVal SpecialInput
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Panics_argUnmarshal_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Panics_argUnmarshal_argsU(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "u", ec.unmarshalNMarshalPanic2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐMarshalPanicᚄ)
 	if err != nil {
 		return nil, err
 	}
 	args["u"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Panics_argUnmarshal_argsU(
-	ctx context.Context,
-	rawArgs map[string]any,
-) ([]MarshalPanic, error) {
-	if _, ok := rawArgs["u"]; !ok {
-		var zeroVal []MarshalPanic
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("u"))
-	if tmp, ok := rawArgs["u"]; ok {
-		return ec.unmarshalNMarshalPanic2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐMarshalPanicᚄ(ctx, tmp)
-	}
-
-	var zeroVal []MarshalPanic
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Panics_fieldFuncMarshal_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Panics_fieldFuncMarshal_argsU(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "u", ec.unmarshalNMarshalPanic2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐMarshalPanicᚄ)
 	if err != nil {
 		return nil, err
 	}
 	args["u"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Panics_fieldFuncMarshal_argsU(
-	ctx context.Context,
-	rawArgs map[string]any,
-) ([]MarshalPanic, error) {
-	if _, ok := rawArgs["u"]; !ok {
-		var zeroVal []MarshalPanic
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("u"))
-	if tmp, ok := rawArgs["u"]; ok {
-		return ec.unmarshalNMarshalPanic2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐMarshalPanicᚄ(ctx, tmp)
-	}
-
-	var zeroVal []MarshalPanic
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Pet_friends_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Pet_friends_argsLimit(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "limit", ec.unmarshalOInt2ᚖint)
 	if err != nil {
 		return nil, err
 	}
 	args["limit"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Pet_friends_argsLimit(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*int, error) {
-	if _, ok := rawArgs["limit"]; !ok {
-		var zeroVal *int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
-	if tmp, ok := rawArgs["limit"]; ok {
-		return ec.unmarshalOInt2ᚖint(ctx, tmp)
-	}
-
-	var zeroVal *int
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query___type_argsName(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["name"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query___type_argsName(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["name"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-	if tmp, ok := rawArgs["name"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Query_defaultParameters_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_defaultParameters_argsFalsyBoolean(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "falsyBoolean", ec.unmarshalOBoolean2ᚖbool)
 	if err != nil {
 		return nil, err
 	}
 	args["falsyBoolean"] = arg0
-	arg1, err := ec.field_Query_defaultParameters_argsTruthyBoolean(ctx, rawArgs)
+	arg1, err := processArgField(ctx, rawArgs, "truthyBoolean", ec.unmarshalOBoolean2ᚖbool)
 	if err != nil {
 		return nil, err
 	}
 	args["truthyBoolean"] = arg1
 	return args, nil
 }
-func (ec *executionContext) field_Query_defaultParameters_argsFalsyBoolean(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*bool, error) {
-	if _, ok := rawArgs["falsyBoolean"]; !ok {
-		var zeroVal *bool
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("falsyBoolean"))
-	if tmp, ok := rawArgs["falsyBoolean"]; ok {
-		return ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
-	}
-
-	var zeroVal *bool
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_Query_defaultParameters_argsTruthyBoolean(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*bool, error) {
-	if _, ok := rawArgs["truthyBoolean"]; !ok {
-		var zeroVal *bool
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("truthyBoolean"))
-	if tmp, ok := rawArgs["truthyBoolean"]; ok {
-		return ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
-	}
-
-	var zeroVal *bool
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Query_defaultScalar_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_defaultScalar_argsArg(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "arg", ec.unmarshalNDefaultScalarImplementation2string)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query_defaultScalar_argsArg(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["arg"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalNDefaultScalarImplementation2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Query_directiveArg_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
+
 	arg0, err := ec.field_Query_directiveArg_argsArg(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3122,6 +2764,7 @@ func (ec *executionContext) field_Query_directiveArg_args(ctx context.Context, r
 	args["arg"] = arg0
 	return args, nil
 }
+
 func (ec *executionContext) field_Query_directiveArg_argsArg(
 	ctx context.Context,
 	rawArgs map[string]any,
@@ -3180,62 +2823,29 @@ func (ec *executionContext) field_Query_directiveArg_argsArg(
 func (ec *executionContext) field_Query_directiveFieldDef_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_directiveFieldDef_argsRet(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "ret", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["ret"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query_directiveFieldDef_argsRet(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["ret"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("ret"))
-	if tmp, ok := rawArgs["ret"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Query_directiveInputNullable_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_directiveInputNullable_argsArg(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "arg", ec.unmarshalOInputDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐInputDirectives)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query_directiveInputNullable_argsArg(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*InputDirectives, error) {
-	if _, ok := rawArgs["arg"]; !ok {
-		var zeroVal *InputDirectives
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalOInputDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐInputDirectives(ctx, tmp)
-	}
-
-	var zeroVal *InputDirectives
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Query_directiveInputType_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
+
 	arg0, err := ec.field_Query_directiveInputType_argsArg(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3243,6 +2853,7 @@ func (ec *executionContext) field_Query_directiveInputType_args(ctx context.Cont
 	args["arg"] = arg0
 	return args, nil
 }
+
 func (ec *executionContext) field_Query_directiveInputType_argsArg(
 	ctx context.Context,
 	rawArgs map[string]any,
@@ -3286,44 +2897,30 @@ func (ec *executionContext) field_Query_directiveInputType_argsArg(
 func (ec *executionContext) field_Query_directiveInput_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_directiveInput_argsArg(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "arg", ec.unmarshalNInputDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐInputDirectives)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query_directiveInput_argsArg(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (InputDirectives, error) {
-	if _, ok := rawArgs["arg"]; !ok {
-		var zeroVal InputDirectives
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalNInputDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐInputDirectives(ctx, tmp)
-	}
-
-	var zeroVal InputDirectives
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Query_directiveNullableArg_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
+
 	arg0, err := ec.field_Query_directiveNullableArg_argsArg(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
+
 	arg1, err := ec.field_Query_directiveNullableArg_argsArg2(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
 	args["arg2"] = arg1
+
 	arg2, err := ec.field_Query_directiveNullableArg_argsArg3(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3331,6 +2928,7 @@ func (ec *executionContext) field_Query_directiveNullableArg_args(ctx context.Co
 	args["arg3"] = arg2
 	return args, nil
 }
+
 func (ec *executionContext) field_Query_directiveNullableArg_argsArg(
 	ctx context.Context,
 	rawArgs map[string]any,
@@ -3473,6 +3071,7 @@ func (ec *executionContext) field_Query_directiveNullableArg_argsArg3(
 func (ec *executionContext) field_Query_directiveSingleNullableArg_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
+
 	arg0, err := ec.field_Query_directiveSingleNullableArg_argsArg1(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3480,6 +3079,7 @@ func (ec *executionContext) field_Query_directiveSingleNullableArg_args(ctx cont
 	args["arg1"] = arg0
 	return args, nil
 }
+
 func (ec *executionContext) field_Query_directiveSingleNullableArg_argsArg1(
 	ctx context.Context,
 	rawArgs map[string]any,
@@ -3538,342 +3138,139 @@ func (ec *executionContext) field_Query_directiveSingleNullableArg_argsArg1(
 func (ec *executionContext) field_Query_enumInInput_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_enumInInput_argsInput(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "input", ec.unmarshalOInputWithEnumValue2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐInputWithEnumValue)
 	if err != nil {
 		return nil, err
 	}
 	args["input"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_enumInInput_argsInput(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*InputWithEnumValue, error) {
-	if _, ok := rawArgs["input"]; !ok {
-		var zeroVal *InputWithEnumValue
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalOInputWithEnumValue2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐInputWithEnumValue(ctx, tmp)
-	}
-
-	var zeroVal *InputWithEnumValue
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_fallback_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_fallback_argsArg(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "arg", ec.unmarshalNFallbackToStringEncoding2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐFallbackToStringEncoding)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_fallback_argsArg(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (FallbackToStringEncoding, error) {
-	if _, ok := rawArgs["arg"]; !ok {
-		var zeroVal FallbackToStringEncoding
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalNFallbackToStringEncoding2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐFallbackToStringEncoding(ctx, tmp)
-	}
-
-	var zeroVal FallbackToStringEncoding
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_inputNullableSlice_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_inputNullableSlice_argsArg(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "arg", ec.unmarshalOString2ᚕstringᚄ)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_inputNullableSlice_argsArg(
-	ctx context.Context,
-	rawArgs map[string]any,
-) ([]string, error) {
-	if _, ok := rawArgs["arg"]; !ok {
-		var zeroVal []string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalOString2ᚕstringᚄ(ctx, tmp)
-	}
-
-	var zeroVal []string
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_inputOmittable_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_inputOmittable_argsArg(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "arg", ec.unmarshalNOmittableInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐOmittableInput)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_inputOmittable_argsArg(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (OmittableInput, error) {
-	if _, ok := rawArgs["arg"]; !ok {
-		var zeroVal OmittableInput
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalNOmittableInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐOmittableInput(ctx, tmp)
-	}
-
-	var zeroVal OmittableInput
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_inputSlice_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_inputSlice_argsArg(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "arg", ec.unmarshalNString2ᚕstringᚄ)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_inputSlice_argsArg(
-	ctx context.Context,
-	rawArgs map[string]any,
-) ([]string, error) {
-	if _, ok := rawArgs["arg"]; !ok {
-		var zeroVal []string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalNString2ᚕstringᚄ(ctx, tmp)
-	}
-
-	var zeroVal []string
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_mapInput_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_mapInput_argsInput(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "input", ec.unmarshalOChanges2map)
 	if err != nil {
 		return nil, err
 	}
 	args["input"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_mapInput_argsInput(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (map[string]any, error) {
-	if _, ok := rawArgs["input"]; !ok {
-		var zeroVal map[string]any
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalOChanges2map(ctx, tmp)
-	}
-
-	var zeroVal map[string]any
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_mapNestedStringInterface_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_mapNestedStringInterface_argsIn(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "in", ec.unmarshalONestedMapInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐNestedMapInput)
 	if err != nil {
 		return nil, err
 	}
 	args["in"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_Query_mapNestedStringInterface_argsIn(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*NestedMapInput, error) {
-	if _, ok := rawArgs["in"]; !ok {
-		var zeroVal *NestedMapInput
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("in"))
-	if tmp, ok := rawArgs["in"]; ok {
-		return ec.unmarshalONestedMapInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐNestedMapInput(ctx, tmp)
-	}
-
-	var zeroVal *NestedMapInput
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field_Query_mapStringInterface_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_mapStringInterface_argsIn(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "in", ec.unmarshalOMapStringInterfaceInput2map)
 	if err != nil {
 		return nil, err
 	}
 	args["in"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query_mapStringInterface_argsIn(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (map[string]any, error) {
-	if _, ok := rawArgs["in"]; !ok {
-		var zeroVal map[string]any
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("in"))
-	if tmp, ok := rawArgs["in"]; ok {
-		return ec.unmarshalOMapStringInterfaceInput2map(ctx, tmp)
-	}
-
-	var zeroVal map[string]any
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Query_nestedInputs_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_nestedInputs_argsInput(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "input", ec.unmarshalOOuterInput2ᚕᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐOuterInput)
 	if err != nil {
 		return nil, err
 	}
 	args["input"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query_nestedInputs_argsInput(
-	ctx context.Context,
-	rawArgs map[string]any,
-) ([][]*OuterInput, error) {
-	if _, ok := rawArgs["input"]; !ok {
-		var zeroVal [][]*OuterInput
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalOOuterInput2ᚕᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐOuterInput(ctx, tmp)
-	}
-
-	var zeroVal [][]*OuterInput
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Query_nullableArg_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_nullableArg_argsArg(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "arg", ec.unmarshalOInt2ᚖint)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query_nullableArg_argsArg(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*int, error) {
-	if _, ok := rawArgs["arg"]; !ok {
-		var zeroVal *int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("arg"))
-	if tmp, ok := rawArgs["arg"]; ok {
-		return ec.unmarshalOInt2ᚖint(ctx, tmp)
-	}
-
-	var zeroVal *int
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Query_recursive_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_recursive_argsInput(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "input", ec.unmarshalORecursiveInputSlice2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐRecursiveInputSlice)
 	if err != nil {
 		return nil, err
 	}
 	args["input"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query_recursive_argsInput(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*RecursiveInputSlice, error) {
-	if _, ok := rawArgs["input"]; !ok {
-		var zeroVal *RecursiveInputSlice
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalORecursiveInputSlice2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐRecursiveInputSlice(ctx, tmp)
-	}
-
-	var zeroVal *RecursiveInputSlice
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query_user_argsID(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "id", ec.unmarshalNInt2int)
 	if err != nil {
 		return nil, err
 	}
 	args["id"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query_user_argsID(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (int, error) {
-	if _, ok := rawArgs["id"]; !ok {
-		var zeroVal int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-	if tmp, ok := rawArgs["id"]; ok {
-		return ec.unmarshalNInt2int(ctx, tmp)
-	}
-
-	var zeroVal int
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Subscription_directiveArg_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
+
 	arg0, err := ec.field_Subscription_directiveArg_argsArg(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3881,6 +3278,7 @@ func (ec *executionContext) field_Subscription_directiveArg_args(ctx context.Con
 	args["arg"] = arg0
 	return args, nil
 }
+
 func (ec *executionContext) field_Subscription_directiveArg_argsArg(
 	ctx context.Context,
 	rawArgs map[string]any,
@@ -3939,16 +3337,19 @@ func (ec *executionContext) field_Subscription_directiveArg_argsArg(
 func (ec *executionContext) field_Subscription_directiveNullableArg_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
+
 	arg0, err := ec.field_Subscription_directiveNullableArg_argsArg(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
 	args["arg"] = arg0
+
 	arg1, err := ec.field_Subscription_directiveNullableArg_argsArg2(ctx, rawArgs)
 	if err != nil {
 		return nil, err
 	}
 	args["arg2"] = arg1
+
 	arg2, err := ec.field_Subscription_directiveNullableArg_argsArg3(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -3956,6 +3357,7 @@ func (ec *executionContext) field_Subscription_directiveNullableArg_args(ctx con
 	args["arg3"] = arg2
 	return args, nil
 }
+
 func (ec *executionContext) field_Subscription_directiveNullableArg_argsArg(
 	ctx context.Context,
 	rawArgs map[string]any,
@@ -4098,856 +3500,236 @@ func (ec *executionContext) field_Subscription_directiveNullableArg_argsArg3(
 func (ec *executionContext) field_User_pets_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_User_pets_argsLimit(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "limit", ec.unmarshalOInt2ᚖint)
 	if err != nil {
 		return nil, err
 	}
 	args["limit"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_User_pets_argsLimit(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*int, error) {
-	if _, ok := rawArgs["limit"]; !ok {
-		var zeroVal *int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("limit"))
-	if tmp, ok := rawArgs["limit"]; ok {
-		return ec.unmarshalOInt2ᚖint(ctx, tmp)
-	}
-
-	var zeroVal *int
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_ValidType_validArgs_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_ValidType_validArgs_argsBreak(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "break", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["break"] = arg0
-	arg1, err := ec.field_ValidType_validArgs_argsDefault(ctx, rawArgs)
+	arg1, err := processArgField(ctx, rawArgs, "default", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["default"] = arg1
-	arg2, err := ec.field_ValidType_validArgs_argsFunc(ctx, rawArgs)
+	arg2, err := processArgField(ctx, rawArgs, "func", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["func"] = arg2
-	arg3, err := ec.field_ValidType_validArgs_argsInterface(ctx, rawArgs)
+	arg3, err := processArgField(ctx, rawArgs, "interface", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["interface"] = arg3
-	arg4, err := ec.field_ValidType_validArgs_argsSelect(ctx, rawArgs)
+	arg4, err := processArgField(ctx, rawArgs, "select", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["select"] = arg4
-	arg5, err := ec.field_ValidType_validArgs_argsCase(ctx, rawArgs)
+	arg5, err := processArgField(ctx, rawArgs, "case", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["case"] = arg5
-	arg6, err := ec.field_ValidType_validArgs_argsDefer(ctx, rawArgs)
+	arg6, err := processArgField(ctx, rawArgs, "defer", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["defer"] = arg6
-	arg7, err := ec.field_ValidType_validArgs_argsGo(ctx, rawArgs)
+	arg7, err := processArgField(ctx, rawArgs, "go", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["go"] = arg7
-	arg8, err := ec.field_ValidType_validArgs_argsMap(ctx, rawArgs)
+	arg8, err := processArgField(ctx, rawArgs, "map", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["map"] = arg8
-	arg9, err := ec.field_ValidType_validArgs_argsStruct(ctx, rawArgs)
+	arg9, err := processArgField(ctx, rawArgs, "struct", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["struct"] = arg9
-	arg10, err := ec.field_ValidType_validArgs_argsChan(ctx, rawArgs)
+	arg10, err := processArgField(ctx, rawArgs, "chan", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["chan"] = arg10
-	arg11, err := ec.field_ValidType_validArgs_argsElse(ctx, rawArgs)
+	arg11, err := processArgField(ctx, rawArgs, "else", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["else"] = arg11
-	arg12, err := ec.field_ValidType_validArgs_argsGoto(ctx, rawArgs)
+	arg12, err := processArgField(ctx, rawArgs, "goto", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["goto"] = arg12
-	arg13, err := ec.field_ValidType_validArgs_argsPackage(ctx, rawArgs)
+	arg13, err := processArgField(ctx, rawArgs, "package", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["package"] = arg13
-	arg14, err := ec.field_ValidType_validArgs_argsSwitch(ctx, rawArgs)
+	arg14, err := processArgField(ctx, rawArgs, "switch", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["switch"] = arg14
-	arg15, err := ec.field_ValidType_validArgs_argsConst(ctx, rawArgs)
+	arg15, err := processArgField(ctx, rawArgs, "const", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["const"] = arg15
-	arg16, err := ec.field_ValidType_validArgs_argsFallthrough(ctx, rawArgs)
+	arg16, err := processArgField(ctx, rawArgs, "fallthrough", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["fallthrough"] = arg16
-	arg17, err := ec.field_ValidType_validArgs_argsIf(ctx, rawArgs)
+	arg17, err := processArgField(ctx, rawArgs, "if", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["if"] = arg17
-	arg18, err := ec.field_ValidType_validArgs_argsRange(ctx, rawArgs)
+	arg18, err := processArgField(ctx, rawArgs, "range", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["range"] = arg18
-	arg19, err := ec.field_ValidType_validArgs_argsType(ctx, rawArgs)
+	arg19, err := processArgField(ctx, rawArgs, "type", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["type"] = arg19
-	arg20, err := ec.field_ValidType_validArgs_argsContinue(ctx, rawArgs)
+	arg20, err := processArgField(ctx, rawArgs, "continue", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["continue"] = arg20
-	arg21, err := ec.field_ValidType_validArgs_argsFor(ctx, rawArgs)
+	arg21, err := processArgField(ctx, rawArgs, "for", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["for"] = arg21
-	arg22, err := ec.field_ValidType_validArgs_argsImport(ctx, rawArgs)
+	arg22, err := processArgField(ctx, rawArgs, "import", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["import"] = arg22
-	arg23, err := ec.field_ValidType_validArgs_argsReturn(ctx, rawArgs)
+	arg23, err := processArgField(ctx, rawArgs, "return", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["return"] = arg23
-	arg24, err := ec.field_ValidType_validArgs_argsVar(ctx, rawArgs)
+	arg24, err := processArgField(ctx, rawArgs, "var", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["var"] = arg24
-	arg25, err := ec.field_ValidType_validArgs_args_(ctx, rawArgs)
+	arg25, err := processArgField(ctx, rawArgs, "_", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["_"] = arg25
 	return args, nil
 }
-func (ec *executionContext) field_ValidType_validArgs_argsBreak(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["break"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("break"))
-	if tmp, ok := rawArgs["break"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsDefault(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["default"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("default"))
-	if tmp, ok := rawArgs["default"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsFunc(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["func"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("func"))
-	if tmp, ok := rawArgs["func"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsInterface(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["interface"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("interface"))
-	if tmp, ok := rawArgs["interface"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsSelect(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["select"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("select"))
-	if tmp, ok := rawArgs["select"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsCase(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["case"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("case"))
-	if tmp, ok := rawArgs["case"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsDefer(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["defer"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("defer"))
-	if tmp, ok := rawArgs["defer"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsGo(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["go"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("go"))
-	if tmp, ok := rawArgs["go"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsMap(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["map"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("map"))
-	if tmp, ok := rawArgs["map"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsStruct(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["struct"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("struct"))
-	if tmp, ok := rawArgs["struct"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsChan(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["chan"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("chan"))
-	if tmp, ok := rawArgs["chan"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsElse(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["else"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("else"))
-	if tmp, ok := rawArgs["else"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsGoto(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["goto"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("goto"))
-	if tmp, ok := rawArgs["goto"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsPackage(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["package"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("package"))
-	if tmp, ok := rawArgs["package"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsSwitch(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["switch"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("switch"))
-	if tmp, ok := rawArgs["switch"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsConst(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["const"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("const"))
-	if tmp, ok := rawArgs["const"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsFallthrough(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["fallthrough"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("fallthrough"))
-	if tmp, ok := rawArgs["fallthrough"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsIf(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["if"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("if"))
-	if tmp, ok := rawArgs["if"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsRange(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["range"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("range"))
-	if tmp, ok := rawArgs["range"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsType(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["type"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("type"))
-	if tmp, ok := rawArgs["type"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsContinue(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["continue"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("continue"))
-	if tmp, ok := rawArgs["continue"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsFor(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["for"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("for"))
-	if tmp, ok := rawArgs["for"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsImport(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["import"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("import"))
-	if tmp, ok := rawArgs["import"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsReturn(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["return"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("return"))
-	if tmp, ok := rawArgs["return"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_argsVar(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["var"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("var"))
-	if tmp, ok := rawArgs["var"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
-
-func (ec *executionContext) field_ValidType_validArgs_args_(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["_"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("_"))
-	if tmp, ok := rawArgs["_"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_ValidType_validInputKeywords_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_ValidType_validInputKeywords_argsInput(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "input", ec.unmarshalOValidInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐValidInput)
 	if err != nil {
 		return nil, err
 	}
 	args["input"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_ValidType_validInputKeywords_argsInput(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*ValidInput, error) {
-	if _, ok := rawArgs["input"]; !ok {
-		var zeroVal *ValidInput
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("input"))
-	if tmp, ok := rawArgs["input"]; ok {
-		return ec.unmarshalOValidInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐValidInput(ctx, tmp)
-	}
-
-	var zeroVal *ValidInput
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_VariadicModel_value_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_VariadicModel_value_argsRank(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "rank", ec.unmarshalNInt2int)
 	if err != nil {
 		return nil, err
 	}
 	args["rank"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_VariadicModel_value_argsRank(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (int, error) {
-	if _, ok := rawArgs["rank"]; !ok {
-		var zeroVal int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("rank"))
-	if tmp, ok := rawArgs["rank"]; ok {
-		return ec.unmarshalNInt2int(ctx, tmp)
-	}
-
-	var zeroVal int
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_WrappedMap_get_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_WrappedMap_get_argsKey(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "key", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["key"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_WrappedMap_get_argsKey(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["key"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("key"))
-	if tmp, ok := rawArgs["key"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_WrappedSlice_get_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_WrappedSlice_get_argsIdx(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "idx", ec.unmarshalNInt2int)
 	if err != nil {
 		return nil, err
 	}
 	args["idx"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_WrappedSlice_get_argsIdx(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (int, error) {
-	if _, ok := rawArgs["idx"]; !ok {
-		var zeroVal int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("idx"))
-	if tmp, ok := rawArgs["idx"]; ok {
-		return ec.unmarshalNInt2int(ctx, tmp)
-	}
-
-	var zeroVal int
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field___Directive_args_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field___Directive_args_argsIncludeDeprecated(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2ᚖbool)
 	if err != nil {
 		return nil, err
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field___Directive_args_argsIncludeDeprecated(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*bool, error) {
-	if _, ok := rawArgs["includeDeprecated"]; !ok {
-		var zeroVal *bool
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		return ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
-	}
-
-	var zeroVal *bool
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field___Field_args_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field___Field_args_argsIncludeDeprecated(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2ᚖbool)
 	if err != nil {
 		return nil, err
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field___Field_args_argsIncludeDeprecated(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*bool, error) {
-	if _, ok := rawArgs["includeDeprecated"]; !ok {
-		var zeroVal *bool
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		return ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
-	}
-
-	var zeroVal *bool
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field___Type_enumValues_argsIncludeDeprecated(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2bool)
 	if err != nil {
 		return nil, err
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field___Type_enumValues_argsIncludeDeprecated(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (bool, error) {
-	if _, ok := rawArgs["includeDeprecated"]; !ok {
-		var zeroVal bool
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		return ec.unmarshalOBoolean2bool(ctx, tmp)
-	}
-
-	var zeroVal bool
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field___Type_fields_argsIncludeDeprecated(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2bool)
 	if err != nil {
 		return nil, err
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (bool, error) {
-	if _, ok := rawArgs["includeDeprecated"]; !ok {
-		var zeroVal bool
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		return ec.unmarshalOBoolean2bool(ctx, tmp)
-	}
-
-	var zeroVal bool
-	return zeroVal, nil
 }
 
 // endregion ***************************** args.gotpl *****************************

@@ -154,6 +154,26 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	}
 }
 
+func processArgField[T any](
+	ctx context.Context,
+	rawArgs map[string]any,
+	fieldName string,
+	valueMapperFn func(ctx context.Context, value any) (T, error),
+) (T, error) {
+	if _, ok := rawArgs[fieldName]; !ok {
+		var zeroVal T
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField(fieldName))
+	if tmp, ok := rawArgs[fieldName]; ok {
+		return valueMapperFn(ctx, tmp)
+	}
+
+	var zeroVal T
+	return zeroVal, nil
+}
+
 type executionContext struct {
 	*graphql.OperationContext
 	*executableSchema
@@ -293,52 +313,29 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Entity_findManyProductByManufacturerIDAndIDs_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Entity_findManyProductByManufacturerIDAndIDs_argsReps(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "reps", ec.unmarshalNProductByManufacturerIDAndIDsInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋreviewsᚋgraphᚋmodelᚐProductByManufacturerIDAndIDsInput)
 	if err != nil {
 		return nil, err
 	}
 	args["reps"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Entity_findManyProductByManufacturerIDAndIDs_argsReps(
-	ctx context.Context,
-	rawArgs map[string]any,
-) ([]*model.ProductByManufacturerIDAndIDsInput, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("reps"))
-	if tmp, ok := rawArgs["reps"]; ok {
-		return ec.unmarshalNProductByManufacturerIDAndIDsInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋreviewsᚋgraphᚋmodelᚐProductByManufacturerIDAndIDsInput(ctx, tmp)
-	}
-
-	var zeroVal []*model.ProductByManufacturerIDAndIDsInput
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Entity_findUserByID_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Entity_findUserByID_argsID(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
 	if err != nil {
 		return nil, err
 	}
 	args["id"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Entity_findUserByID_argsID(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-	if tmp, ok := rawArgs["id"]; ok {
-		return ec.unmarshalNID2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Product_manufacturerID_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
+
 	arg0, err := ec.field_Product_manufacturerID_argsFederationRequires(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -346,6 +343,7 @@ func (ec *executionContext) field_Product_manufacturerID_args(ctx context.Contex
 	args["_federationRequires"] = arg0
 	return args, nil
 }
+
 func (ec *executionContext) field_Product_manufacturerID_argsFederationRequires(
 	ctx context.Context,
 	rawArgs map[string]any,
@@ -383,52 +381,29 @@ func (ec *executionContext) field_Product_manufacturerID_argsFederationRequires(
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query___type_argsName(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["name"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query___type_argsName(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-	if tmp, ok := rawArgs["name"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_Query__entities_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_Query__entities_argsRepresentations(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "representations", ec.unmarshalN_Any2ᚕmapᚄ)
 	if err != nil {
 		return nil, err
 	}
 	args["representations"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_Query__entities_argsRepresentations(
-	ctx context.Context,
-	rawArgs map[string]any,
-) ([]map[string]any, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("representations"))
-	if tmp, ok := rawArgs["representations"]; ok {
-		return ec.unmarshalN_Any2ᚕmapᚄ(ctx, tmp)
-	}
-
-	var zeroVal []map[string]any
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_User_reviews_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
+
 	arg0, err := ec.field_User_reviews_argsFederationRequires(ctx, rawArgs)
 	if err != nil {
 		return nil, err
@@ -436,6 +411,7 @@ func (ec *executionContext) field_User_reviews_args(ctx context.Context, rawArgs
 	args["_federationRequires"] = arg0
 	return args, nil
 }
+
 func (ec *executionContext) field_User_reviews_argsFederationRequires(
 	ctx context.Context,
 	rawArgs map[string]any,
@@ -473,93 +449,45 @@ func (ec *executionContext) field_User_reviews_argsFederationRequires(
 func (ec *executionContext) field___Directive_args_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field___Directive_args_argsIncludeDeprecated(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2ᚖbool)
 	if err != nil {
 		return nil, err
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field___Directive_args_argsIncludeDeprecated(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*bool, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		return ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
-	}
-
-	var zeroVal *bool
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field___Field_args_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field___Field_args_argsIncludeDeprecated(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2ᚖbool)
 	if err != nil {
 		return nil, err
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field___Field_args_argsIncludeDeprecated(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (*bool, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		return ec.unmarshalOBoolean2ᚖbool(ctx, tmp)
-	}
-
-	var zeroVal *bool
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field___Type_enumValues_argsIncludeDeprecated(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2bool)
 	if err != nil {
 		return nil, err
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field___Type_enumValues_argsIncludeDeprecated(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (bool, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		return ec.unmarshalOBoolean2bool(ctx, tmp)
-	}
-
-	var zeroVal bool
-	return zeroVal, nil
 }
 
 func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field___Type_fields_argsIncludeDeprecated(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2bool)
 	if err != nil {
 		return nil, err
 	}
 	args["includeDeprecated"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (bool, error) {
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("includeDeprecated"))
-	if tmp, ok := rawArgs["includeDeprecated"]; ok {
-		return ec.unmarshalOBoolean2bool(ctx, tmp)
-	}
-
-	var zeroVal bool
-	return zeroVal, nil
 }
 
 // endregion ***************************** args.gotpl *****************************

@@ -29,57 +29,23 @@ type WrappedSliceResolver interface {
 func (ec *executionContext) field_WrappedMap_get_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_WrappedMap_get_argsKey(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "key", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["key"] = arg0
 	return args, nil
 }
-func (ec *executionContext) field_WrappedMap_get_argsKey(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (string, error) {
-	if _, ok := rawArgs["key"]; !ok {
-		var zeroVal string
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("key"))
-	if tmp, ok := rawArgs["key"]; ok {
-		return ec.unmarshalNString2string(ctx, tmp)
-	}
-
-	var zeroVal string
-	return zeroVal, nil
-}
 
 func (ec *executionContext) field_WrappedSlice_get_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := ec.field_WrappedSlice_get_argsIdx(ctx, rawArgs)
+	arg0, err := processArgField(ctx, rawArgs, "idx", ec.unmarshalNInt2int)
 	if err != nil {
 		return nil, err
 	}
 	args["idx"] = arg0
 	return args, nil
-}
-func (ec *executionContext) field_WrappedSlice_get_argsIdx(
-	ctx context.Context,
-	rawArgs map[string]any,
-) (int, error) {
-	if _, ok := rawArgs["idx"]; !ok {
-		var zeroVal int
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("idx"))
-	if tmp, ok := rawArgs["idx"]; ok {
-		return ec.unmarshalNInt2int(ctx, tmp)
-	}
-
-	var zeroVal int
-	return zeroVal, nil
 }
 
 // endregion ***************************** args.gotpl *****************************

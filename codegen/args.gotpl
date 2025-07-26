@@ -10,10 +10,18 @@ func (ec *executionContext) {{ $name }}(ctx context.Context, rawArgs map[string]
 	args := map[string]any{}
 
 	{{- range $i, $arg := . }}
-		{{ if $useFunctionSyntaxForExecutionContext -}}
-		arg{{$i}}, err := {{ $name }}{{$arg.Name | go}}(ctx, ec, rawArgs)
+		{{ if $arg.ImplDirectives }}
+			{{ if $useFunctionSyntaxForExecutionContext -}}
+			arg{{$i}}, err := {{ $name }}{{$arg.Name | go}}(ctx, ec, rawArgs)
+			{{- else -}}
+			arg{{$i}}, err := ec.{{ $name }}{{$arg.Name | go}}(ctx, rawArgs)
+			{{- end }}
 		{{- else -}}
-		arg{{$i}}, err := ec.{{ $name }}{{$arg.Name | go}}(ctx, rawArgs)
+			{{ if $useFunctionSyntaxForExecutionContext -}}
+			arg{{$i}}, err := processArgField(ctx, ec, rawArgs, {{$arg.Name|quote}}, {{ $arg.TypeReference.UnmarshalFunc }})
+			{{- else -}}
+			arg{{$i}}, err := processArgField(ctx, rawArgs, {{$arg.Name|quote}}, ec.{{ $arg.TypeReference.UnmarshalFunc }})
+			{{- end }}
 		{{- end }}
 		if err != nil {
 			return nil, err
@@ -24,6 +32,9 @@ func (ec *executionContext) {{ $name }}(ctx context.Context, rawArgs map[string]
 }
 
 	{{- range $i, $arg := . }}
+		{{ if not $arg.ImplDirectives -}}
+			{{- continue -}}
+		{{- end }}
 		{{ if $useFunctionSyntaxForExecutionContext -}}
 		func {{ $name }}{{$arg.Name | go}}(
 			ctx context.Context,

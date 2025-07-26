@@ -6,7 +6,7 @@ replace github.com/99designs/gqlgen => ../
 
 require (
 	github.com/99designs/gqlgen v0.17.76
-	github.com/go-viper/mapstructure/v2 v2.3.0
+	github.com/go-viper/mapstructure/v2 v2.4.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.1
 	github.com/rs/cors v1.11.1

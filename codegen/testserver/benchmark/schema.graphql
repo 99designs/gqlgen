@@ -1,0 +1,50 @@
+type PageInfo {
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+    startCursor: String!
+    endCursor: String!
+}
+
+enum OrderDirection {
+    ASCENDING
+    DESCENDING
+}
+
+enum UserOrderField {
+    FIRST_NAME
+    LAST_NAME
+    EMAIL
+}
+
+input UserOrderBy {
+    orderByField: UserOrderField!
+    orderByDirection: OrderDirection!
+}
+
+type User {
+    firstName: String!
+    lastName: String!
+    email: String!
+}
+
+type UserEdge {
+    cursor: String!
+    node: User!
+}
+
+type UserConnection {
+    edges: [UserEdge!]!
+    pageInfo: PageInfo!
+    totalCount: Int!
+}
+
+type Query {
+    users(
+        query: String
+        first: Int
+        last: Int
+        before: String
+        after: String
+        orderBy: UserOrderBy! = { orderByField: FIRST_NAME orderByDirection: ASCENDING }
+    ): UserConnection
+}

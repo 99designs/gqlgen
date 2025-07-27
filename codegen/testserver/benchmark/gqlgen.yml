@@ -1,0 +1,14 @@
+schema:
+  - "*.graphql"
+skip_validation: true
+exec:
+  layout: follow-schema
+  dir: generated
+  package: generated
+model:
+  filename: generated/models/models-gen.go
+  package: models
+resolver:
+  filename: generated/resolvers/resolver.go
+  package: resolver
+  type: Resolver

@@ -136,26 +136,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	}
 }
 
-func processArgField[T any](
-	ctx context.Context,
-	rawArgs map[string]any,
-	fieldName string,
-	valueMapperFn func(ctx context.Context, value any) (T, error),
-) (T, error) {
-	if _, ok := rawArgs[fieldName]; !ok {
-		var zeroVal T
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField(fieldName))
-	if tmp, ok := rawArgs[fieldName]; ok {
-		return valueMapperFn(ctx, tmp)
-	}
-
-	var zeroVal T
-	return zeroVal, nil
-}
-
 type executionContext struct {
 	*graphql.OperationContext
 	*executableSchema
@@ -368,7 +348,7 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Entity_findHelloByName_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
@@ -379,12 +359,12 @@ func (ec *executionContext) field_Entity_findHelloByName_args(ctx context.Contex
 func (ec *executionContext) field_Entity_findHelloMultiSingleKeysByKey1AndKey2_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "key1", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "key1", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["key1"] = arg0
-	arg1, err := processArgField(ctx, rawArgs, "key2", ec.unmarshalNString2string)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "key2", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
@@ -395,7 +375,7 @@ func (ec *executionContext) field_Entity_findHelloMultiSingleKeysByKey1AndKey2_a
 func (ec *executionContext) field_Entity_findHelloWithErrorsByName_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
@@ -406,7 +386,7 @@ func (ec *executionContext) field_Entity_findHelloWithErrorsByName_args(ctx cont
 func (ec *executionContext) field_Entity_findManyMultiHelloByNames_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "reps", ec.unmarshalNMultiHelloByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐMultiHelloByNamesInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "reps", ec.unmarshalNMultiHelloByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐMultiHelloByNamesInput)
 	if err != nil {
 		return nil, err
 	}
@@ -417,7 +397,7 @@ func (ec *executionContext) field_Entity_findManyMultiHelloByNames_args(ctx cont
 func (ec *executionContext) field_Entity_findManyMultiHelloMultipleRequiresByNames_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "reps", ec.unmarshalNMultiHelloMultipleRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐMultiHelloMultipleRequiresByNamesInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "reps", ec.unmarshalNMultiHelloMultipleRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐMultiHelloMultipleRequiresByNamesInput)
 	if err != nil {
 		return nil, err
 	}
@@ -428,7 +408,7 @@ func (ec *executionContext) field_Entity_findManyMultiHelloMultipleRequiresByNam
 func (ec *executionContext) field_Entity_findManyMultiHelloRequiresByNames_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "reps", ec.unmarshalNMultiHelloRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐMultiHelloRequiresByNamesInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "reps", ec.unmarshalNMultiHelloRequiresByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐMultiHelloRequiresByNamesInput)
 	if err != nil {
 		return nil, err
 	}
@@ -439,7 +419,7 @@ func (ec *executionContext) field_Entity_findManyMultiHelloRequiresByNames_args(
 func (ec *executionContext) field_Entity_findManyMultiHelloWithErrorByNames_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "reps", ec.unmarshalNMultiHelloWithErrorByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐMultiHelloWithErrorByNamesInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "reps", ec.unmarshalNMultiHelloWithErrorByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐMultiHelloWithErrorByNamesInput)
 	if err != nil {
 		return nil, err
 	}
@@ -450,7 +430,7 @@ func (ec *executionContext) field_Entity_findManyMultiHelloWithErrorByNames_args
 func (ec *executionContext) field_Entity_findManyMultiPlanetRequiresNestedByNames_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "reps", ec.unmarshalNMultiPlanetRequiresNestedByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐMultiPlanetRequiresNestedByNamesInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "reps", ec.unmarshalNMultiPlanetRequiresNestedByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐMultiPlanetRequiresNestedByNamesInput)
 	if err != nil {
 		return nil, err
 	}
@@ -461,7 +441,7 @@ func (ec *executionContext) field_Entity_findManyMultiPlanetRequiresNestedByName
 func (ec *executionContext) field_Entity_findPersonByName_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
@@ -472,7 +452,7 @@ func (ec *executionContext) field_Entity_findPersonByName_args(ctx context.Conte
 func (ec *executionContext) field_Entity_findPlanetMultipleRequiresByName_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
@@ -483,7 +463,7 @@ func (ec *executionContext) field_Entity_findPlanetMultipleRequiresByName_args(c
 func (ec *executionContext) field_Entity_findPlanetRequiresByName_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
@@ -494,7 +474,7 @@ func (ec *executionContext) field_Entity_findPlanetRequiresByName_args(ctx conte
 func (ec *executionContext) field_Entity_findPlanetRequiresNestedByName_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
@@ -505,12 +485,12 @@ func (ec *executionContext) field_Entity_findPlanetRequiresNestedByName_args(ctx
 func (ec *executionContext) field_Entity_findWorldByHelloNameAndFoo_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "helloName", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "helloName", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["helloName"] = arg0
-	arg1, err := processArgField(ctx, rawArgs, "foo", ec.unmarshalNString2string)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "foo", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
@@ -521,7 +501,7 @@ func (ec *executionContext) field_Entity_findWorldByHelloNameAndFoo_args(ctx con
 func (ec *executionContext) field_Entity_findWorldNameByName_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
@@ -532,7 +512,7 @@ func (ec *executionContext) field_Entity_findWorldNameByName_args(ctx context.Co
 func (ec *executionContext) field_Entity_findWorldWithMultipleKeysByBar_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "bar", ec.unmarshalNInt2int)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "bar", ec.unmarshalNInt2int)
 	if err != nil {
 		return nil, err
 	}
@@ -543,12 +523,12 @@ func (ec *executionContext) field_Entity_findWorldWithMultipleKeysByBar_args(ctx
 func (ec *executionContext) field_Entity_findWorldWithMultipleKeysByHelloNameAndFoo_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "helloName", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "helloName", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["helloName"] = arg0
-	arg1, err := processArgField(ctx, rawArgs, "foo", ec.unmarshalNString2string)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "foo", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
@@ -559,7 +539,7 @@ func (ec *executionContext) field_Entity_findWorldWithMultipleKeysByHelloNameAnd
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
@@ -570,7 +550,7 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query__entities_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "representations", ec.unmarshalN_Any2ᚕmapᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "representations", ec.unmarshalN_Any2ᚕmapᚄ)
 	if err != nil {
 		return nil, err
 	}
@@ -581,7 +561,7 @@ func (ec *executionContext) field_Query__entities_args(ctx context.Context, rawA
 func (ec *executionContext) field___Directive_args_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2ᚖbool)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2ᚖbool)
 	if err != nil {
 		return nil, err
 	}
@@ -592,7 +572,7 @@ func (ec *executionContext) field___Directive_args_args(ctx context.Context, raw
 func (ec *executionContext) field___Field_args_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2ᚖbool)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2ᚖbool)
 	if err != nil {
 		return nil, err
 	}
@@ -603,7 +583,7 @@ func (ec *executionContext) field___Field_args_args(ctx context.Context, rawArgs
 func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2bool)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2bool)
 	if err != nil {
 		return nil, err
 	}
@@ -614,7 +594,7 @@ func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, ra
 func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2bool)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2bool)
 	if err != nil {
 		return nil, err
 	}

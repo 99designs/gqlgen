@@ -572,26 +572,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	}
 }
 
-func processArgField[T any](
-	ctx context.Context,
-	rawArgs map[string]any,
-	fieldName string,
-	valueMapperFn func(ctx context.Context, value any) (T, error),
-) (T, error) {
-	if _, ok := rawArgs[fieldName]; !ok {
-		var zeroVal T
-		return zeroVal, nil
-	}
-
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField(fieldName))
-	if tmp, ok := rawArgs[fieldName]; ok {
-		return valueMapperFn(ctx, tmp)
-	}
-
-	var zeroVal T
-	return zeroVal, nil
-}
-
 type executionContext struct {
 	*graphql.OperationContext
 	*executableSchema
@@ -780,12 +760,12 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 func (ec *executionContext) field_Droid_friendsConnection_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
 	if err != nil {
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := processArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
 	if err != nil {
 		return nil, err
 	}
@@ -796,12 +776,12 @@ func (ec *executionContext) field_Droid_friendsConnection_args(ctx context.Conte
 func (ec *executionContext) field_Human_friendsConnection_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "first", ec.unmarshalOInt2ᚖint)
 	if err != nil {
 		return nil, err
 	}
 	args["first"] = arg0
-	arg1, err := processArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "after", ec.unmarshalOID2ᚖstring)
 	if err != nil {
 		return nil, err
 	}
@@ -812,7 +792,7 @@ func (ec *executionContext) field_Human_friendsConnection_args(ctx context.Conte
 func (ec *executionContext) field_Human_height_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "unit", ec.unmarshalOLengthUnit2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐLengthUnit)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "unit", ec.unmarshalOLengthUnit2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐLengthUnit)
 	if err != nil {
 		return nil, err
 	}
@@ -823,12 +803,12 @@ func (ec *executionContext) field_Human_height_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Mutation_createReview_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "episode", ec.unmarshalNEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐEpisode)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "episode", ec.unmarshalNEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐEpisode)
 	if err != nil {
 		return nil, err
 	}
 	args["episode"] = arg0
-	arg1, err := processArgField(ctx, rawArgs, "review", ec.unmarshalNReviewInput2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐReview)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "review", ec.unmarshalNReviewInput2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐReview)
 	if err != nil {
 		return nil, err
 	}
@@ -839,7 +819,7 @@ func (ec *executionContext) field_Mutation_createReview_args(ctx context.Context
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
@@ -850,7 +830,7 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_character_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
 	if err != nil {
 		return nil, err
 	}
@@ -861,7 +841,7 @@ func (ec *executionContext) field_Query_character_args(ctx context.Context, rawA
 func (ec *executionContext) field_Query_droid_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
 	if err != nil {
 		return nil, err
 	}
@@ -872,7 +852,7 @@ func (ec *executionContext) field_Query_droid_args(ctx context.Context, rawArgs 
 func (ec *executionContext) field_Query_hero_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "episode", ec.unmarshalOEpisode2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐEpisode)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "episode", ec.unmarshalOEpisode2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐEpisode)
 	if err != nil {
 		return nil, err
 	}
@@ -883,7 +863,7 @@ func (ec *executionContext) field_Query_hero_args(ctx context.Context, rawArgs m
 func (ec *executionContext) field_Query_human_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
 	if err != nil {
 		return nil, err
 	}
@@ -894,12 +874,12 @@ func (ec *executionContext) field_Query_human_args(ctx context.Context, rawArgs 
 func (ec *executionContext) field_Query_reviews_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "episode", ec.unmarshalNEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐEpisode)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "episode", ec.unmarshalNEpisode2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐEpisode)
 	if err != nil {
 		return nil, err
 	}
 	args["episode"] = arg0
-	arg1, err := processArgField(ctx, rawArgs, "since", ec.unmarshalOTime2ᚖtimeᚐTime)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "since", ec.unmarshalOTime2ᚖtimeᚐTime)
 	if err != nil {
 		return nil, err
 	}
@@ -910,7 +890,7 @@ func (ec *executionContext) field_Query_reviews_args(ctx context.Context, rawArg
 func (ec *executionContext) field_Query_search_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "text", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "text", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
@@ -921,7 +901,7 @@ func (ec *executionContext) field_Query_search_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_starship_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
 	if err != nil {
 		return nil, err
 	}
@@ -932,7 +912,7 @@ func (ec *executionContext) field_Query_starship_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Starship_length_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "unit", ec.unmarshalOLengthUnit2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐLengthUnit)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "unit", ec.unmarshalOLengthUnit2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐLengthUnit)
 	if err != nil {
 		return nil, err
 	}
@@ -943,7 +923,7 @@ func (ec *executionContext) field_Starship_length_args(ctx context.Context, rawA
 func (ec *executionContext) field___Directive_args_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2ᚖbool)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2ᚖbool)
 	if err != nil {
 		return nil, err
 	}
@@ -954,7 +934,7 @@ func (ec *executionContext) field___Directive_args_args(ctx context.Context, raw
 func (ec *executionContext) field___Field_args_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2ᚖbool)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2ᚖbool)
 	if err != nil {
 		return nil, err
 	}
@@ -965,7 +945,7 @@ func (ec *executionContext) field___Field_args_args(ctx context.Context, rawArgs
 func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2bool)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2bool)
 	if err != nil {
 		return nil, err
 	}
@@ -976,7 +956,7 @@ func (ec *executionContext) field___Type_enumValues_args(ctx context.Context, ra
 func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2bool)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated", ec.unmarshalOBoolean2bool)
 	if err != nil {
 		return nil, err
 	}

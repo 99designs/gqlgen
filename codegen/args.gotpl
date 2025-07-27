@@ -18,9 +18,9 @@ func (ec *executionContext) {{ $name }}(ctx context.Context, rawArgs map[string]
 			{{- end }}
 		{{- else -}}
 			{{ if $useFunctionSyntaxForExecutionContext -}}
-			arg{{$i}}, err := processArgField(ctx, ec, rawArgs, {{$arg.Name|quote}}, {{ $arg.TypeReference.UnmarshalFunc }})
+			arg{{$i}}, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, {{$arg.Name|quote}}, {{ $arg.TypeReference.UnmarshalFunc }})
 			{{- else -}}
-			arg{{$i}}, err := processArgField(ctx, rawArgs, {{$arg.Name|quote}}, ec.{{ $arg.TypeReference.UnmarshalFunc }})
+			arg{{$i}}, err := graphql.ProcessArgField(ctx, rawArgs, {{$arg.Name|quote}}, ec.{{ $arg.TypeReference.UnmarshalFunc }})
 			{{- end }}
 		{{- end }}
 		if err != nil {

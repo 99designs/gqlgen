@@ -22,132 +22,132 @@ import (
 func (ec *executionContext) field_ValidType_validArgs_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "break", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "break", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["break"] = arg0
-	arg1, err := processArgField(ctx, rawArgs, "default", ec.unmarshalNString2string)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "default", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["default"] = arg1
-	arg2, err := processArgField(ctx, rawArgs, "func", ec.unmarshalNString2string)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "func", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["func"] = arg2
-	arg3, err := processArgField(ctx, rawArgs, "interface", ec.unmarshalNString2string)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "interface", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["interface"] = arg3
-	arg4, err := processArgField(ctx, rawArgs, "select", ec.unmarshalNString2string)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "select", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["select"] = arg4
-	arg5, err := processArgField(ctx, rawArgs, "case", ec.unmarshalNString2string)
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "case", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["case"] = arg5
-	arg6, err := processArgField(ctx, rawArgs, "defer", ec.unmarshalNString2string)
+	arg6, err := graphql.ProcessArgField(ctx, rawArgs, "defer", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["defer"] = arg6
-	arg7, err := processArgField(ctx, rawArgs, "go", ec.unmarshalNString2string)
+	arg7, err := graphql.ProcessArgField(ctx, rawArgs, "go", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["go"] = arg7
-	arg8, err := processArgField(ctx, rawArgs, "map", ec.unmarshalNString2string)
+	arg8, err := graphql.ProcessArgField(ctx, rawArgs, "map", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["map"] = arg8
-	arg9, err := processArgField(ctx, rawArgs, "struct", ec.unmarshalNString2string)
+	arg9, err := graphql.ProcessArgField(ctx, rawArgs, "struct", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["struct"] = arg9
-	arg10, err := processArgField(ctx, rawArgs, "chan", ec.unmarshalNString2string)
+	arg10, err := graphql.ProcessArgField(ctx, rawArgs, "chan", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["chan"] = arg10
-	arg11, err := processArgField(ctx, rawArgs, "else", ec.unmarshalNString2string)
+	arg11, err := graphql.ProcessArgField(ctx, rawArgs, "else", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["else"] = arg11
-	arg12, err := processArgField(ctx, rawArgs, "goto", ec.unmarshalNString2string)
+	arg12, err := graphql.ProcessArgField(ctx, rawArgs, "goto", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["goto"] = arg12
-	arg13, err := processArgField(ctx, rawArgs, "package", ec.unmarshalNString2string)
+	arg13, err := graphql.ProcessArgField(ctx, rawArgs, "package", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["package"] = arg13
-	arg14, err := processArgField(ctx, rawArgs, "switch", ec.unmarshalNString2string)
+	arg14, err := graphql.ProcessArgField(ctx, rawArgs, "switch", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["switch"] = arg14
-	arg15, err := processArgField(ctx, rawArgs, "const", ec.unmarshalNString2string)
+	arg15, err := graphql.ProcessArgField(ctx, rawArgs, "const", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["const"] = arg15
-	arg16, err := processArgField(ctx, rawArgs, "fallthrough", ec.unmarshalNString2string)
+	arg16, err := graphql.ProcessArgField(ctx, rawArgs, "fallthrough", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["fallthrough"] = arg16
-	arg17, err := processArgField(ctx, rawArgs, "if", ec.unmarshalNString2string)
+	arg17, err := graphql.ProcessArgField(ctx, rawArgs, "if", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["if"] = arg17
-	arg18, err := processArgField(ctx, rawArgs, "range", ec.unmarshalNString2string)
+	arg18, err := graphql.ProcessArgField(ctx, rawArgs, "range", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["range"] = arg18
-	arg19, err := processArgField(ctx, rawArgs, "type", ec.unmarshalNString2string)
+	arg19, err := graphql.ProcessArgField(ctx, rawArgs, "type", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["type"] = arg19
-	arg20, err := processArgField(ctx, rawArgs, "continue", ec.unmarshalNString2string)
+	arg20, err := graphql.ProcessArgField(ctx, rawArgs, "continue", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["continue"] = arg20
-	arg21, err := processArgField(ctx, rawArgs, "for", ec.unmarshalNString2string)
+	arg21, err := graphql.ProcessArgField(ctx, rawArgs, "for", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["for"] = arg21
-	arg22, err := processArgField(ctx, rawArgs, "import", ec.unmarshalNString2string)
+	arg22, err := graphql.ProcessArgField(ctx, rawArgs, "import", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["import"] = arg22
-	arg23, err := processArgField(ctx, rawArgs, "return", ec.unmarshalNString2string)
+	arg23, err := graphql.ProcessArgField(ctx, rawArgs, "return", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["return"] = arg23
-	arg24, err := processArgField(ctx, rawArgs, "var", ec.unmarshalNString2string)
+	arg24, err := graphql.ProcessArgField(ctx, rawArgs, "var", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
 	args["var"] = arg24
-	arg25, err := processArgField(ctx, rawArgs, "_", ec.unmarshalNString2string)
+	arg25, err := graphql.ProcessArgField(ctx, rawArgs, "_", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
@@ -158,7 +158,7 @@ func (ec *executionContext) field_ValidType_validArgs_args(ctx context.Context, 
 func (ec *executionContext) field_ValidType_validInputKeywords_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "input", ec.unmarshalOValidInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐValidInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalOValidInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐValidInput)
 	if err != nil {
 		return nil, err
 	}

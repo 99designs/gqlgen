@@ -22,17 +22,17 @@ import (
 func (ec *executionContext) dir_length_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "min", ec.unmarshalNInt2int)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "min", ec.unmarshalNInt2int)
 	if err != nil {
 		return nil, err
 	}
 	args["min"] = arg0
-	arg1, err := processArgField(ctx, rawArgs, "max", ec.unmarshalOInt2ᚖint)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "max", ec.unmarshalOInt2ᚖint)
 	if err != nil {
 		return nil, err
 	}
 	args["max"] = arg1
-	arg2, err := processArgField(ctx, rawArgs, "message", ec.unmarshalOString2ᚖstring)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "message", ec.unmarshalOString2ᚖstring)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (ec *executionContext) dir_length_args(ctx context.Context, rawArgs map[str
 func (ec *executionContext) dir_logged_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "id", ec.unmarshalNUUID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNUUID2string)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +54,7 @@ func (ec *executionContext) dir_logged_args(ctx context.Context, rawArgs map[str
 func (ec *executionContext) dir_order1_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "location", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "location", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (ec *executionContext) dir_order1_args(ctx context.Context, rawArgs map[str
 func (ec *executionContext) dir_order2_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "location", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "location", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +76,7 @@ func (ec *executionContext) dir_order2_args(ctx context.Context, rawArgs map[str
 func (ec *executionContext) dir_populate_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "value", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "value", ec.unmarshalNString2string)
 	if err != nil {
 		return nil, err
 	}
@@ -87,12 +87,12 @@ func (ec *executionContext) dir_populate_args(ctx context.Context, rawArgs map[s
 func (ec *executionContext) dir_range_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := processArgField(ctx, rawArgs, "min", ec.unmarshalOInt2ᚖint)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "min", ec.unmarshalOInt2ᚖint)
 	if err != nil {
 		return nil, err
 	}
 	args["min"] = arg0
-	arg1, err := processArgField(ctx, rawArgs, "max", ec.unmarshalOInt2ᚖint)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "max", ec.unmarshalOInt2ᚖint)
 	if err != nil {
 		return nil, err
 	}

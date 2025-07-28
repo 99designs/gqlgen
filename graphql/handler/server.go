@@ -10,6 +10,7 @@ import (
 
 	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
+	"github.com/vektah/gqlparser/v2/validator/rules"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/executor"
@@ -48,7 +49,8 @@ func New(es graphql.ExecutableSchema) *Server {
 // HTTP/2 or HTTP/3) suffers from a severe limitation to the maximum number of
 // open connections of 6 per browser, see [Using server-sent events].
 //
-// [Using server-sent events]: https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#sect1
+// [Using server-sent events]:
+// https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events/Using_server-sent_events#sect1
 func NewDefaultServer(es graphql.ExecutableSchema) *Server {
 	srv := New(es)
 
@@ -103,22 +105,26 @@ func (s *Server) Use(extension graphql.HandlerExtension) {
 	s.exec.Use(extension)
 }
 
-// AroundFields is a convenience method for creating an extension that only implements field middleware
+// AroundFields is a convenience method for creating an extension that only implements field
+// middleware
 func (s *Server) AroundFields(f graphql.FieldMiddleware) {
 	s.exec.AroundFields(f)
 }
 
-// AroundRootFields is a convenience method for creating an extension that only implements field middleware
+// AroundRootFields is a convenience method for creating an extension that only implements field
+// middleware
 func (s *Server) AroundRootFields(f graphql.RootFieldMiddleware) {
 	s.exec.AroundRootFields(f)
 }
 
-// AroundOperations is a convenience method for creating an extension that only implements operation middleware
+// AroundOperations is a convenience method for creating an extension that only implements operation
+// middleware
 func (s *Server) AroundOperations(f graphql.OperationMiddleware) {
 	s.exec.AroundOperations(f)
 }
 
-// AroundResponses is a convenience method for creating an extension that only implements response middleware
+// AroundResponses is a convenience method for creating an extension that only implements response
+// middleware
 func (s *Server) AroundResponses(f graphql.ResponseMiddleware) {
 	s.exec.AroundResponses(f)
 }
@@ -130,6 +136,11 @@ func (s *Server) getTransport(r *http.Request) graphql.Transport {
 		}
 	}
 	return nil
+}
+
+// SetValidationRulesFn is to customize the Default GraphQL Validation Rules
+func (s *Server) SetValidationRulesFn(f func() *rules.Rules) {
+	s.exec.SetDefaultRulesFn(f)
 }
 
 func (s *Server) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -181,7 +192,10 @@ func (r OperationFunc) Validate(schema graphql.ExecutableSchema) error {
 	return nil
 }
 
-func (r OperationFunc) InterceptOperation(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+func (r OperationFunc) InterceptOperation(
+	ctx context.Context,
+	next graphql.OperationHandler,
+) graphql.ResponseHandler {
 	return r(ctx, next)
 }
 
@@ -198,7 +212,10 @@ func (r ResponseFunc) Validate(schema graphql.ExecutableSchema) error {
 	return nil
 }
 
-func (r ResponseFunc) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+func (r ResponseFunc) InterceptResponse(
+	ctx context.Context,
+	next graphql.ResponseHandler,
+) *graphql.Response {
 	return r(ctx, next)
 }
 

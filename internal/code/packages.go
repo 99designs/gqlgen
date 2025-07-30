@@ -114,10 +114,6 @@ func (p *Packages) ReloadAll(importPaths ...string) []*packages.Package {
 // LoadAll will call packages.Load and return the package data for the given packages,
 // but if the package already have been loaded it will return cached values instead.
 func (p *Packages) LoadAll(importPaths ...string) []*packages.Package {
-	if p.packages == nil {
-		p.packages = map[string]*packages.Package{}
-	}
-
 	missing := make([]string, 0, len(importPaths))
 	for _, path := range importPaths {
 		if _, ok := p.packages[path]; ok {
@@ -150,6 +146,9 @@ func (p *Packages) LoadAll(importPaths ...string) []*packages.Package {
 
 func (p *Packages) addToCache(pkg *packages.Package) {
 	imp := NormalizeVendor(pkg.PkgPath)
+	if p.packages == nil {
+		p.packages = map[string]*packages.Package{}
+	}
 	p.packages[imp] = pkg
 }
 

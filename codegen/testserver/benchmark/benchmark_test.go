@@ -166,7 +166,8 @@ query GetUsersConnection($query: String, $first: Int, $before: String, $orderBy:
 					b.Fatal(errs)
 				}
 
-				_, _ = exec.DispatchOperation(ctx, opCtx)
+				resultHandler, ctx := exec.DispatchOperation(ctx, opCtx)
+				_ = resultHandler(ctx)
 			}
 		})
 	}

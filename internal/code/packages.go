@@ -12,7 +12,7 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-var mode = packages.NeedName |
+const mode = packages.NeedName |
 	packages.NeedFiles |
 	packages.NeedSyntax |
 	packages.NeedModule

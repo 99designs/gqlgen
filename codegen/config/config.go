@@ -770,7 +770,10 @@ func (c *Config) autobind() error {
 		return nil
 	}
 
-	ps := c.Packages.LoadAll(c.AutoBind...)
+	ps := make([]*packages.Package, len(c.AutoBind))
+	for i, p := range c.AutoBind {
+		ps[i] = c.Packages.LoadWithTypes(p)
+	}
 
 	for _, t := range c.Schema.Types {
 		if c.Models.UserDefined(t.Name) || c.Models[t.Name].ForceGenerate {

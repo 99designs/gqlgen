@@ -14,9 +14,7 @@ import (
 
 var mode = packages.NeedName |
 	packages.NeedFiles |
-	packages.NeedTypes |
 	packages.NeedSyntax |
-	packages.NeedTypesInfo |
 	packages.NeedModule
 
 type (
@@ -171,11 +169,11 @@ func (p *Packages) Load(importPath string) *packages.Package {
 // LoadWithTypes tries a standard load, which may not have enough type info (TypesInfo== nil) available if the imported package is a
 // second order dependency. Fortunately this doesnt happen very often, so we can just issue a load when we detect it.
 func (p *Packages) LoadWithTypes(importPath string) *packages.Package {
-	pkg := p.Load(importPath)
+	pkg := p.packages[importPath]
 	if pkg == nil || pkg.TypesInfo == nil {
 		p.numLoadCalls++
 		pkgs, err := packages.Load(&packages.Config{
-			Mode:       mode,
+			Mode:       mode | packages.NeedTypesInfo | packages.NeedTypes,
 			BuildFlags: p.buildFlags,
 		}, importPath)
 		if err != nil {

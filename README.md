@@ -22,18 +22,16 @@ cd example
 go mod init example
 ```
 
-2. Add `github.com/99designs/gqlgen` to your [project's tools.go](https://go.dev/wiki/Modules#how-can-i-track-tool-dependencies-for-a-module)
+2. Add `github.com/99designs/gqlgen` to your project, as a [tool dependency](https://go.dev/doc/modules/managing-dependencies#tools)
 
 ```shell
-printf '//go:build tools\npackage tools\nimport (_ "github.com/99designs/gqlgen"\n _ "github.com/99designs/gqlgen/graphql/introspection")' | gofmt > tools.go
-go mod tidy
+go get -tool github.com/99designs/gqlgen
 ```
 
 3. Initialise gqlgen config and generate models
 
 ```shell
-go run github.com/99designs/gqlgen init
-go mod tidy
+go tool gqlgen init
 ```
 
 4. Start the graphql server

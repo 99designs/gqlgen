@@ -15,7 +15,6 @@ jobs:
       - name: Download Test Report
         uses: dawidd6/action-download-artifact@v11
         with:
-          name: junit-test-results
           workflow: ${{ github.event.workflow.id }}
           run_id: ${{ github.event.workflow_run.id }}
       - name: Publish Test Report

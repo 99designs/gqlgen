@@ -83,6 +83,10 @@ func interfaceToSignedNumber[N number](v any) (N, error) {
 	case uint32:
 		return safeCastSignedNumber[N](int64(v))
 	case uint64:
+		if v > math.MaxInt64 {
+			return 0, newNumberOverflowError[int64](v, 64)
+		}
+
 		return safeCastSignedNumber[N](int64(v))
 	case string:
 		iv, err := strconv.ParseInt(v, 10, 64)

@@ -67,14 +67,6 @@ func interfaceToSignedNumber[N number](v any) (N, error) {
 	switch v := v.(type) {
 	case int, int8, int16, int32, int64:
 		return safeCastSignedNumber[N](reflect.ValueOf(v).Int())
-	case uint, uint8, uint16, uint32:
-		return safeCastSignedNumber[N](int64(reflect.ValueOf(v).Uint()))
-	case uint64:
-		if v > math.MaxInt64 {
-			return 0, newNumberOverflowError[int64](v, 64)
-		}
-
-		return safeCastSignedNumber[N](int64(v))
 	case string:
 		iv, err := strconv.ParseInt(v, 10, 64)
 		if err != nil {
@@ -125,18 +117,11 @@ func newNumberOverflowError[N maxNumber](i any, bitsize int) *NumberOverflowErro
 				Message: fmt.Sprintf("%d overflows signed %d-bit integer", i, bitsize),
 			},
 		}
-	case uint64:
-		return &NumberOverflowError{
-			Value: v,
-			IntegerError: &IntegerError{
-				Message: fmt.Sprintf("%d overflows unsigned %d-bit integer", i, bitsize),
-			},
-		}
 	default:
 		return &NumberOverflowError{
 			Value: v,
 			IntegerError: &IntegerError{
-				Message: fmt.Sprintf("%T overflows %d-bit integer", v, bitsize),
+				Message: fmt.Sprintf("%d overflows unsigned %d-bit integer", i, bitsize),
 			},
 		}
 	}
@@ -154,24 +139,12 @@ func safeCastSignedNumber[N number](val int64) (N, error) {
 		if val > math.MaxInt8 || val < math.MinInt8 {
 			return 0, newNumberOverflowError[int64](val, 8)
 		}
-	case uint8:
-		if val > math.MaxUint8 || val < 0 {
-			return 0, newNumberOverflowError[int64](val, 8)
-		}
 	case int16:
 		if val > math.MaxInt16 || val < math.MinInt16 {
 			return 0, newNumberOverflowError[int64](val, 16)
 		}
-	case uint16:
-		if val > math.MaxUint16 || val < 0 {
-			return 0, newNumberOverflowError[int64](val, 16)
-		}
 	case int32:
 		if val > math.MaxInt32 || val < math.MinInt32 {
-			return 0, newNumberOverflowError[int64](val, 32)
-		}
-	case uint32:
-		if val > math.MaxUint32 || val < 0 {
 			return 0, newNumberOverflowError[int64](val, 32)
 		}
 	case int:
@@ -179,10 +152,6 @@ func safeCastSignedNumber[N number](val int64) (N, error) {
 			return 0, newNumberOverflowError[int64](val, 32)
 		}
 	case int64:
-	case uint64, uint:
-		if val < 0 {
-			return 0, newNumberOverflowError[int64](val, 64)
-		}
 	default:
 		return 0, fmt.Errorf("invalid type %T", zero)
 	}

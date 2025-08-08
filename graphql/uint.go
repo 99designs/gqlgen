@@ -62,7 +62,7 @@ func UnmarshalUint64(v any) (uint64, error) {
 
 func interfaceToUnsignedNumber[N number](v any) (N, error) {
 	switch v := v.(type) {
-	case int, int8, int16, int32, int64:
+	case int, int64:
 		if reflect.ValueOf(v).Int() < 0 {
 			return 0, newUintSignError(strconv.FormatInt(reflect.ValueOf(v).Int(), 10))
 		}
@@ -116,31 +116,19 @@ func (e *UintSignError) Unwrap() error {
 func safeCastUnsignedNumber[N number](val uint64) (N, error) {
 	var zero N
 	switch any(zero).(type) {
-	case int8:
-		if val > math.MaxInt8 {
-			return 0, newNumberOverflowError[uint64](val, 8)
-		}
 	case uint8:
 		if val > math.MaxUint8 {
 			return 0, newNumberOverflowError[uint64](val, 8)
-		}
-	case int16:
-		if val > math.MaxInt16 {
-			return 0, newNumberOverflowError[uint64](val, 16)
 		}
 	case uint16:
 		if val > math.MaxUint16 {
 			return 0, newNumberOverflowError[uint64](val, 16)
 		}
-	case int32:
-		if val > math.MaxInt32 {
-			return 0, newNumberOverflowError[uint64](val, 32)
-		}
 	case uint32:
 		if val > math.MaxUint32 {
 			return 0, newNumberOverflowError[uint64](val, 32)
 		}
-	case int64, int, uint64, uint:
+	case uint64, uint, int:
 	default:
 		return 0, fmt.Errorf("invalid type %T", zero)
 	}

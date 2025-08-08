@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"reflect"
 	"strconv"
 )
 
@@ -64,24 +65,10 @@ type number interface {
 
 func interfaceToSignedNumber[N number](v any) (N, error) {
 	switch v := v.(type) {
-	case int:
-		return safeCastSignedNumber[N](int64(v))
-	case int8:
-		return safeCastSignedNumber[N](int64(v))
-	case int16:
-		return safeCastSignedNumber[N](int64(v))
-	case int32:
-		return safeCastSignedNumber[N](int64(v))
-	case int64:
-		return safeCastSignedNumber[N](v)
-	case uint:
-		return safeCastSignedNumber[N](int64(v))
-	case uint8:
-		return safeCastSignedNumber[N](int64(v))
-	case uint16:
-		return safeCastSignedNumber[N](int64(v))
-	case uint32:
-		return safeCastSignedNumber[N](int64(v))
+	case int, int8, int16, int32, int64:
+		return safeCastSignedNumber[N](reflect.ValueOf(v).Int())
+	case uint, uint8, uint16, uint32:
+		return safeCastSignedNumber[N](int64(reflect.ValueOf(v).Uint()))
 	case uint64:
 		if v > math.MaxInt64 {
 			return 0, newNumberOverflowError[int64](v, 64)
@@ -161,46 +148,44 @@ func (e *NumberOverflowError) Unwrap() error {
 
 // safeCastSignedNumber converts an int64 to a number of type N.
 func safeCastSignedNumber[N number](val int64) (N, error) {
-	bitsize := fmt.Sprintf("%T", N(0))
-	switch bitsize {
-	case "int8":
+	var zero N
+	switch any(zero).(type) {
+	case int8:
 		if val > math.MaxInt8 || val < math.MinInt8 {
 			return 0, newNumberOverflowError[int64](val, 8)
 		}
-		return N(val), nil
-	case "uint8":
+	case uint8:
 		if val > math.MaxUint8 || val < 0 {
 			return 0, newNumberOverflowError[int64](val, 8)
 		}
-		return N(val), nil
-	case "int16":
+	case int16:
 		if val > math.MaxInt16 || val < math.MinInt16 {
 			return 0, newNumberOverflowError[int64](val, 16)
 		}
-		return N(val), nil
-	case "uint16":
+	case uint16:
 		if val > math.MaxUint16 || val < 0 {
 			return 0, newNumberOverflowError[int64](val, 16)
 		}
-		return N(val), nil
-	case "int32":
+	case int32:
 		if val > math.MaxInt32 || val < math.MinInt32 {
 			return 0, newNumberOverflowError[int64](val, 32)
 		}
-		return N(val), nil
-	case "uint32":
+	case uint32:
 		if val > math.MaxUint32 || val < 0 {
 			return 0, newNumberOverflowError[int64](val, 32)
 		}
-		return N(val), nil
-	case "int64", "int":
-		return N(val), nil
-	case "uint64", "uint":
+	case int:
+		if strconv.IntSize == 32 && (val > math.MaxInt32 || val < math.MinInt32) {
+			return 0, newNumberOverflowError[int64](val, 32)
+		}
+	case int64:
+	case uint64, uint:
 		if val < 0 {
 			return 0, newNumberOverflowError[int64](val, 64)
 		}
-		return N(val), nil
 	default:
-		return 0, fmt.Errorf("invalid bitsize %s", bitsize)
+		return 0, fmt.Errorf("invalid type %T", zero)
 	}
+
+	return N(val), nil
 }

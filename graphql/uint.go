@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"reflect"
 	"strconv"
 )
 
@@ -61,41 +62,13 @@ func UnmarshalUint64(v any) (uint64, error) {
 
 func interfaceToUnsignedNumber[N number](v any) (N, error) {
 	switch v := v.(type) {
-	case int:
-		if v < 0 {
-			return 0, newUintSignError(strconv.FormatInt(int64(v), 10))
+	case int, int8, int16, int32, int64:
+		if reflect.ValueOf(v).Int() < 0 {
+			return 0, newUintSignError(strconv.FormatInt(reflect.ValueOf(v).Int(), 10))
 		}
-		return safeCastUnsignedNumber[N](uint64(v))
-	case int8:
-		if v < 0 {
-			return 0, newUintSignError(strconv.FormatInt(int64(v), 10))
-		}
-		return safeCastUnsignedNumber[N](uint64(v))
-	case int16:
-		if v < 0 {
-			return 0, newUintSignError(strconv.FormatInt(int64(v), 10))
-		}
-		return safeCastUnsignedNumber[N](uint64(v))
-	case int32:
-		if v < 0 {
-			return 0, newUintSignError(strconv.FormatInt(int64(v), 10))
-		}
-		return safeCastUnsignedNumber[N](uint64(v))
-	case int64:
-		if v < 0 {
-			return 0, newUintSignError(strconv.FormatInt(v, 10))
-		}
-		return safeCastUnsignedNumber[N](uint64(v))
-	case uint:
-		return safeCastUnsignedNumber[N](uint64(v))
-	case uint8:
-		return safeCastUnsignedNumber[N](uint64(v))
-	case uint16:
-		return safeCastUnsignedNumber[N](uint64(v))
-	case uint32:
-		return safeCastUnsignedNumber[N](uint64(v))
-	case uint64:
-		return safeCastUnsignedNumber[N](v)
+		return safeCastUnsignedNumber[N](uint64(reflect.ValueOf(v).Int()))
+	case uint, uint8, uint16, uint32, uint64:
+		return safeCastUnsignedNumber[N](reflect.ValueOf(v).Uint())
 	case string:
 		uv, err := strconv.ParseUint(v, 10, 64)
 		if err != nil {
@@ -141,43 +114,38 @@ func (e *UintSignError) Unwrap() error {
 
 // safeCastUnsignedNumber converts an uint64 to a number of type N.
 func safeCastUnsignedNumber[N number](val uint64) (N, error) {
-	bitsize := fmt.Sprintf("%T", N(0))
-	switch bitsize {
-	case "int8":
+	var zero N
+	switch any(zero).(type) {
+	case int8:
 		if val > math.MaxInt8 {
 			return 0, newNumberOverflowError[uint64](val, 8)
 		}
-		return N(val), nil
-	case "uint8":
+	case uint8:
 		if val > math.MaxUint8 {
 			return 0, newNumberOverflowError[uint64](val, 8)
 		}
-		return N(val), nil
-	case "int16":
+	case int16:
 		if val > math.MaxInt16 {
 			return 0, newNumberOverflowError[uint64](val, 16)
 		}
-		return N(val), nil
-	case "uint16":
+	case uint16:
 		if val > math.MaxUint16 {
 			return 0, newNumberOverflowError[uint64](val, 16)
 		}
-		return N(val), nil
-	case "int32":
+	case int32:
 		if val > math.MaxInt32 {
 			return 0, newNumberOverflowError[uint64](val, 32)
 		}
-		return N(val), nil
-	case "uint32":
+	case uint32:
 		if val > math.MaxUint32 {
 			return 0, newNumberOverflowError[uint64](val, 32)
 		}
-		return N(val), nil
-	case "int64", "int", "uint64", "uint":
-		return N(val), nil
+	case int64, int, uint64, uint:
 	default:
-		return 0, fmt.Errorf("invalid bitsize %s", bitsize)
+		return 0, fmt.Errorf("invalid type %T", zero)
 	}
+
+	return N(val), nil
 }
 
 func isSignedInteger(v string) bool {

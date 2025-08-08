@@ -143,17 +143,32 @@ func (e *UintSignError) Unwrap() error {
 func safeCastUnsignedNumber[N number](val uint64) (N, error) {
 	bitsize := fmt.Sprintf("%T", N(0))
 	switch bitsize {
-	case "int8", "uint8":
+	case "int8":
+		if val > math.MaxInt8 {
+			return 0, newNumberOverflowError[uint64](val, 8)
+		}
+		return N(val), nil
+	case "uint8":
 		if val > math.MaxUint8 {
 			return 0, newNumberOverflowError[uint64](val, 8)
 		}
 		return N(val), nil
-	case "int16", "uint16":
+	case "int16":
+		if val > math.MaxInt16 {
+			return 0, newNumberOverflowError[uint64](val, 16)
+		}
+		return N(val), nil
+	case "uint16":
 		if val > math.MaxUint16 {
 			return 0, newNumberOverflowError[uint64](val, 16)
 		}
 		return N(val), nil
-	case "int32", "uint32":
+	case "int32":
+		if val > math.MaxInt32 {
+			return 0, newNumberOverflowError[uint64](val, 32)
+		}
+		return N(val), nil
+	case "uint32":
 		if val > math.MaxUint32 {
 			return 0, newNumberOverflowError[uint64](val, 32)
 		}

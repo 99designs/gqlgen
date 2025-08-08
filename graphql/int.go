@@ -15,7 +15,7 @@ func MarshalInt(i int) Marshaler {
 }
 
 func UnmarshalInt(v any) (int, error) {
-	return interfaceToNumber[int](v)
+	return interfaceToSignedNumber[int](v)
 }
 
 func MarshalInt8(i int8) Marshaler {
@@ -25,7 +25,7 @@ func MarshalInt8(i int8) Marshaler {
 }
 
 func UnmarshalInt8(v any) (int8, error) {
-	return interfaceToNumber[int8](v)
+	return interfaceToSignedNumber[int8](v)
 }
 
 func MarshalInt16(i int16) Marshaler {
@@ -35,7 +35,7 @@ func MarshalInt16(i int16) Marshaler {
 }
 
 func UnmarshalInt16(v any) (int16, error) {
-	return interfaceToNumber[int16](v)
+	return interfaceToSignedNumber[int16](v)
 }
 
 func MarshalInt32(i int32) Marshaler {
@@ -45,7 +45,7 @@ func MarshalInt32(i int32) Marshaler {
 }
 
 func UnmarshalInt32(v any) (int32, error) {
-	return interfaceToNumber[int32](v)
+	return interfaceToSignedNumber[int32](v)
 }
 
 func MarshalInt64(i int64) Marshaler {
@@ -55,47 +55,47 @@ func MarshalInt64(i int64) Marshaler {
 }
 
 func UnmarshalInt64(v any) (int64, error) {
-	return interfaceToNumber[int64](v)
+	return interfaceToSignedNumber[int64](v)
 }
 
 type number interface {
 	int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64
 }
 
-func interfaceToNumber[N number](v any) (N, error) {
+func interfaceToSignedNumber[N number](v any) (N, error) {
 	switch v := v.(type) {
 	case int:
-		return safeCastNumber[N](int64(v))
+		return safeCastSignedNumber[N](int64(v))
 	case int8:
-		return safeCastNumber[N](int64(v))
+		return safeCastSignedNumber[N](int64(v))
 	case int16:
-		return safeCastNumber[N](int64(v))
+		return safeCastSignedNumber[N](int64(v))
 	case int32:
-		return safeCastNumber[N](int64(v))
+		return safeCastSignedNumber[N](int64(v))
 	case int64:
-		return safeCastNumber[N](int64(v))
+		return safeCastSignedNumber[N](int64(v))
 	case uint:
-		return safeCastNumber[N](int64(v))
+		return safeCastSignedNumber[N](int64(v))
 	case uint8:
-		return safeCastNumber[N](int64(v))
+		return safeCastSignedNumber[N](int64(v))
 	case uint16:
-		return safeCastNumber[N](int64(v))
+		return safeCastSignedNumber[N](int64(v))
 	case uint32:
-		return safeCastNumber[N](int64(v))
+		return safeCastSignedNumber[N](int64(v))
 	case uint64:
-		return safeCastNumber[N](int64(v))
+		return safeCastSignedNumber[N](int64(v))
 	case string:
 		iv, err := strconv.ParseInt(v, 10, 64)
 		if err != nil {
 			return 0, err
 		}
-		return safeCastNumber[N](iv)
+		return safeCastSignedNumber[N](iv)
 	case json.Number:
 		iv, err := strconv.ParseInt(string(v), 10, 64)
 		if err != nil {
 			return 0, err
 		}
-		return safeCastNumber[N](iv)
+		return safeCastSignedNumber[N](iv)
 	case nil:
 		return 0, nil
 	default:
@@ -117,16 +117,37 @@ func (e IntegerError) Error() string {
 }
 
 type NumberOverflowError struct {
-	Value int64
+	Value any
 	*IntegerError
 }
 
-func newNumberOverflowError(i int64, bitsize int) *NumberOverflowError {
-	return &NumberOverflowError{
-		Value: i,
-		IntegerError: &IntegerError{
-			Message: fmt.Sprintf("%d overflows signed %d-bit integer", i, bitsize),
-		},
+type maxNumber interface {
+	int64 | uint64
+}
+
+func newNumberOverflowError[N maxNumber](i any, bitsize int) *NumberOverflowError {
+	switch v := i.(type) {
+	case int64:
+		return &NumberOverflowError{
+			Value: v,
+			IntegerError: &IntegerError{
+				Message: fmt.Sprintf("%d overflows signed %d-bit integer", i, bitsize),
+			},
+		}
+	case uint64:
+		return &NumberOverflowError{
+			Value: v,
+			IntegerError: &IntegerError{
+				Message: fmt.Sprintf("%d overflows unsigned %d-bit integer", i, bitsize),
+			},
+		}
+	default:
+		return &NumberOverflowError{
+			Value: v,
+			IntegerError: &IntegerError{
+				Message: fmt.Sprintf("%T overflows %d-bit integer", v, bitsize),
+			},
+		}
 	}
 }
 
@@ -134,45 +155,45 @@ func (e *NumberOverflowError) Unwrap() error {
 	return e.IntegerError
 }
 
-// safeCastNumber converts an int64 to a number of type N.
-func safeCastNumber[N number](val int64) (N, error) {
+// safeCastSignedNumber converts an int64 to a number of type N.
+func safeCastSignedNumber[N number](val int64) (N, error) {
 	bitsize := fmt.Sprintf("%T", N(0))
 	switch bitsize {
 	case "int8":
 		if val > math.MaxInt8 || val < math.MinInt8 {
-			return 0, newNumberOverflowError(val, 8)
+			return 0, newNumberOverflowError[int64](val, 8)
 		}
 		return N(val), nil
 	case "uint8":
 		if val > math.MaxUint8 || val < 0 {
-			return 0, newNumberOverflowError(val, 8)
+			return 0, newNumberOverflowError[int64](val, 8)
 		}
 		return N(val), nil
 	case "int16":
 		if val > math.MaxInt16 || val < math.MinInt16 {
-			return 0, newNumberOverflowError(val, 16)
+			return 0, newNumberOverflowError[int64](val, 16)
 		}
 		return N(val), nil
 	case "uint16":
 		if val > math.MaxUint16 || val < 0 {
-			return 0, newNumberOverflowError(val, 16)
+			return 0, newNumberOverflowError[int64](val, 16)
 		}
 		return N(val), nil
-	case "int32", "int":
+	case "int32":
 		if val > math.MaxInt32 || val < math.MinInt32 {
-			return 0, newNumberOverflowError(val, 32)
+			return 0, newNumberOverflowError[int64](val, 32)
 		}
 		return N(val), nil
-	case "uint32", "uint":
+	case "uint32":
 		if val > math.MaxUint32 || val < 0 {
-			return 0, newNumberOverflowError(val, 32)
+			return 0, newNumberOverflowError[int64](val, 32)
 		}
 		return N(val), nil
-	case "int64":
+	case "int64", "int":
 		return N(val), nil
-	case "uint64":
+	case "uint64", "uint":
 		if val < 0 {
-			return 0, newNumberOverflowError(val, 64)
+			return 0, newNumberOverflowError[int64](val, 64)
 		}
 		return N(val), nil
 	default:

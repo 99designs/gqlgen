@@ -83,7 +83,7 @@ func interfaceToUnsignedNumber[N number](v any) (N, error) {
 		return safeCastUnsignedNumber[N](uint64(v))
 	case int64:
 		if v < 0 {
-			return 0, newUintSignError(strconv.FormatInt(int64(v), 10))
+			return 0, newUintSignError(strconv.FormatInt(v, 10))
 		}
 		return safeCastUnsignedNumber[N](uint64(v))
 	case uint:
@@ -95,7 +95,7 @@ func interfaceToUnsignedNumber[N number](v any) (N, error) {
 	case uint32:
 		return safeCastUnsignedNumber[N](uint64(v))
 	case uint64:
-		return safeCastUnsignedNumber[N](uint64(v))
+		return safeCastUnsignedNumber[N](v)
 	case string:
 		uv, err := strconv.ParseUint(v, 10, 64)
 		if err != nil {

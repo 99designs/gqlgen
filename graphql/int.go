@@ -73,7 +73,7 @@ func interfaceToSignedNumber[N number](v any) (N, error) {
 	case int32:
 		return safeCastSignedNumber[N](int64(v))
 	case int64:
-		return safeCastSignedNumber[N](int64(v))
+		return safeCastSignedNumber[N](v)
 	case uint:
 		return safeCastSignedNumber[N](int64(v))
 	case uint8:

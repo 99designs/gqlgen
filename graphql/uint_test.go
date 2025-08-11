@@ -2,7 +2,10 @@ package graphql
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"math"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -414,4 +417,63 @@ func mustUnmarshalUint64(v any) uint64 {
 		panic(err)
 	}
 	return res
+}
+
+func beforeUnmarshalUint(v any) (uint, error) {
+	switch v := v.(type) {
+	case string:
+		u64, err := strconv.ParseUint(v, 10, 64)
+		if err != nil {
+			var strconvErr *strconv.NumError
+			if errors.As(err, &strconvErr) && isSignedInteger(v) {
+				return 0, newUintSignError(v)
+			}
+			return 0, err
+		}
+		return uint(u64), err
+	case int:
+		if v < 0 {
+			return 0, newUintSignError(strconv.FormatInt(int64(v), 10))
+		}
+		return uint(v), nil
+	case int64:
+		if v < 0 {
+			return 0, newUintSignError(strconv.FormatInt(v, 10))
+		}
+		return uint(v), nil
+	case json.Number:
+		u64, err := strconv.ParseUint(string(v), 10, 64)
+		if err != nil {
+			var strconvErr *strconv.NumError
+			if errors.As(err, &strconvErr) && isSignedInteger(string(v)) {
+				return 0, newUintSignError(string(v))
+			}
+			return 0, err
+		}
+		return uint(u64), err
+	case nil:
+		return 0, nil
+	default:
+		return 0, fmt.Errorf("%T is not an uint", v)
+	}
+}
+
+func BenchmarkUnmarshalUintInitial(b *testing.B) {
+	numbers := makeRandomNumberSlice(LENGTH, false)
+
+	for range b.N {
+		for i := range numbers {
+			_, _ = beforeUnmarshalUint(numbers[i])
+		}
+	}
+}
+
+func BenchmarkUnmarshalUintNew(b *testing.B) {
+	numbers := makeRandomNumberSlice(LENGTH, false)
+
+	for range b.N {
+		for i := range numbers {
+			_, _ = UnmarshalUint(numbers[i])
+		}
+	}
 }

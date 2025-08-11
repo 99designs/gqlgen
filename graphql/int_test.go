@@ -2,12 +2,17 @@ package graphql
 
 import (
 	"encoding/json"
+	"fmt"
 	"math"
+	"math/rand/v2"
+	"strconv"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+const LENGTH = 1000
 
 func TestInt8(t *testing.T) {
 	t.Run("marshal", func(t *testing.T) {
@@ -241,4 +246,83 @@ func mustUnmarshalInt64(t *testing.T, v any) int64 {
 	res, err := UnmarshalInt64(v)
 	require.NoError(t, err)
 	return res
+}
+
+func beforeUnmarshalInt(v any) (int, error) {
+	switch v := v.(type) {
+	case string:
+		return strconv.Atoi(v)
+	case int:
+		return v, nil
+	case int64:
+		return int(v), nil
+	case json.Number:
+		return strconv.Atoi(string(v))
+	case nil:
+		return 0, nil
+	default:
+		return 0, fmt.Errorf("%T is not an int", v)
+	}
+}
+
+func BenchmarkUnmarshalIntInitial(b *testing.B) {
+	numbers := makeRandomNumberSlice(LENGTH, true)
+
+	for range b.N {
+		for i := range numbers {
+			_, _ = beforeUnmarshalInt(numbers[i])
+		}
+	}
+}
+
+func BenchmarkUnmarshalIntNew(b *testing.B) {
+	numbers := makeRandomNumberSlice(LENGTH, true)
+
+	for range b.N {
+		for i := range numbers {
+			_, _ = UnmarshalInt(numbers[i])
+		}
+	}
+}
+
+func makeRandomNumberSlice(length int, signed bool) []any {
+	numbers := make([]any, length)
+	for i := range numbers {
+		numbers[i] = randomNumber(signed)
+	}
+	return numbers
+}
+
+func randomNumber(signed bool) any {
+	switch rand.UintN(4) {
+	case 0:
+		switch signed {
+		case true:
+			return rand.Int()
+		case false:
+			return rand.Uint()
+		}
+	case 1:
+		switch signed {
+		case true:
+			return rand.Int64()
+		case false:
+			return rand.Uint64()
+		}
+	case 2:
+		switch signed {
+		case true:
+			return json.Number(strconv.FormatInt(rand.Int64(), 10))
+		case false:
+			return json.Number(strconv.FormatUint(rand.Uint64(), 10))
+		}
+	case 3:
+		switch signed {
+		case true:
+			return strconv.FormatInt(rand.Int64(), 10)
+		case false:
+			return strconv.FormatUint(rand.Uint64(), 10)
+		}
+	}
+	panic("unreachable")
 }

@@ -19,7 +19,7 @@ jobs:
         go: ["1.24"] # nancy is a little flaky running more than once
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: actions/setup-go@v5
         with:
           go-version: ${{ matrix.go }}

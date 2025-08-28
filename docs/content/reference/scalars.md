@@ -87,7 +87,7 @@ Maps an arbitrary GraphQL value to a `interface{}` Go type.
 scalar Duration
 ```
 
-This maps a `Duration` scalar value conforming to the `ISO8601` standard (ex.: `P1Y2D`)  to a `time.Duration` type.
+This maps a `Duration` scalar value conforming to the [`ISO8601`](https://en.wikipedia.org/wiki/ISO_8601#Durations) standard `PnDTnHnMn.nS` format (ex.: `P1Y2D` or `PT15M`)  to a `time.Duration` type.
 
 If you add to gqlgen.yml:
 

@@ -441,6 +441,12 @@ func (m *Plugin) generateField(
 		if err != nil {
 			return nil, fmt.Errorf("generror: field %v.%v: %w", schemaType.Name, field.Name, err)
 		}
+
+		if mf == nil {
+			// the field hook wants to omit the field
+			return nil, nil
+		}
+
 		f = mf
 	}
 

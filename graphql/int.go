@@ -5,83 +5,84 @@ import (
 	"fmt"
 	"io"
 	"math"
+	"reflect"
 	"strconv"
 )
 
 func MarshalInt(i int) Marshaler {
 	return WriterFunc(func(w io.Writer) {
-		io.WriteString(w, strconv.Itoa(i))
+		_, _ = io.WriteString(w, strconv.FormatInt(int64(i), 10))
 	})
 }
 
 func UnmarshalInt(v any) (int, error) {
-	switch v := v.(type) {
-	case string:
-		return strconv.Atoi(v)
-	case int:
-		return v, nil
-	case int64:
-		return int(v), nil
-	case json.Number:
-		return strconv.Atoi(string(v))
-	case nil:
-		return 0, nil
-	default:
-		return 0, fmt.Errorf("%T is not an int", v)
-	}
+	return interfaceToSignedNumber[int](v)
 }
 
-func MarshalInt64(i int64) Marshaler {
+func MarshalInt8(i int8) Marshaler {
 	return WriterFunc(func(w io.Writer) {
-		io.WriteString(w, strconv.FormatInt(i, 10))
+		_, _ = io.WriteString(w, strconv.FormatInt(int64(i), 10))
 	})
 }
 
-func UnmarshalInt64(v any) (int64, error) {
-	switch v := v.(type) {
-	case string:
-		return strconv.ParseInt(v, 10, 64)
-	case int:
-		return int64(v), nil
-	case int64:
-		return v, nil
-	case json.Number:
-		return strconv.ParseInt(string(v), 10, 64)
-	case nil:
-		return 0, nil
-	default:
-		return 0, fmt.Errorf("%T is not an int", v)
-	}
+func UnmarshalInt8(v any) (int8, error) {
+	return interfaceToSignedNumber[int8](v)
+}
+
+func MarshalInt16(i int16) Marshaler {
+	return WriterFunc(func(w io.Writer) {
+		_, _ = io.WriteString(w, strconv.FormatInt(int64(i), 10))
+	})
+}
+
+func UnmarshalInt16(v any) (int16, error) {
+	return interfaceToSignedNumber[int16](v)
 }
 
 func MarshalInt32(i int32) Marshaler {
 	return WriterFunc(func(w io.Writer) {
-		io.WriteString(w, strconv.FormatInt(int64(i), 10))
+		_, _ = io.WriteString(w, strconv.FormatInt(int64(i), 10))
 	})
 }
 
 func UnmarshalInt32(v any) (int32, error) {
+	return interfaceToSignedNumber[int32](v)
+}
+
+func MarshalInt64(i int64) Marshaler {
+	return WriterFunc(func(w io.Writer) {
+		_, _ = io.WriteString(w, strconv.FormatInt(i, 10))
+	})
+}
+
+func UnmarshalInt64(v any) (int64, error) {
+	return interfaceToSignedNumber[int64](v)
+}
+
+type number interface {
+	int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64
+}
+
+func interfaceToSignedNumber[N number](v any) (N, error) {
 	switch v := v.(type) {
+	case int, int8, int16, int32, int64:
+		return safeCastSignedNumber[N](reflect.ValueOf(v).Int())
 	case string:
 		iv, err := strconv.ParseInt(v, 10, 64)
 		if err != nil {
 			return 0, err
 		}
-		return safeCastInt32(iv)
-	case int:
-		return safeCastInt32(int64(v))
-	case int64:
-		return safeCastInt32(v)
+		return safeCastSignedNumber[N](iv)
 	case json.Number:
 		iv, err := strconv.ParseInt(string(v), 10, 64)
 		if err != nil {
 			return 0, err
 		}
-		return safeCastInt32(iv)
+		return safeCastSignedNumber[N](iv)
 	case nil:
 		return 0, nil
 	default:
-		return 0, fmt.Errorf("%T is not an int", v)
+		return 0, fmt.Errorf("%T is not an %T", v, N(0))
 	}
 }
 
@@ -98,27 +99,62 @@ func (e IntegerError) Error() string {
 	return e.Message
 }
 
-type Int32OverflowError struct {
-	Value int64
+type NumberOverflowError struct {
+	Value any
 	*IntegerError
 }
 
-func newInt32OverflowError(i int64) *Int32OverflowError {
-	return &Int32OverflowError{
-		Value: i,
-		IntegerError: &IntegerError{
-			Message: fmt.Sprintf("%d overflows signed 32-bit integer", i),
-		},
+type maxNumber interface {
+	int64 | uint64
+}
+
+func newNumberOverflowError[N maxNumber](i any, bitsize int) *NumberOverflowError {
+	switch v := i.(type) {
+	case int64:
+		return &NumberOverflowError{
+			Value: v,
+			IntegerError: &IntegerError{
+				Message: fmt.Sprintf("%d overflows signed %d-bit integer", i, bitsize),
+			},
+		}
+	default:
+		return &NumberOverflowError{
+			Value: v,
+			IntegerError: &IntegerError{
+				Message: fmt.Sprintf("%d overflows unsigned %d-bit integer", i, bitsize),
+			},
+		}
 	}
 }
 
-func (e *Int32OverflowError) Unwrap() error {
+func (e *NumberOverflowError) Unwrap() error {
 	return e.IntegerError
 }
 
-func safeCastInt32(i int64) (int32, error) {
-	if i > math.MaxInt32 || i < math.MinInt32 {
-		return 0, newInt32OverflowError(i)
+// safeCastSignedNumber converts an int64 to a number of type N.
+func safeCastSignedNumber[N number](val int64) (N, error) {
+	var zero N
+	switch any(zero).(type) {
+	case int8:
+		if val > math.MaxInt8 || val < math.MinInt8 {
+			return 0, newNumberOverflowError[int64](val, 8)
+		}
+	case int16:
+		if val > math.MaxInt16 || val < math.MinInt16 {
+			return 0, newNumberOverflowError[int64](val, 16)
+		}
+	case int32:
+		if val > math.MaxInt32 || val < math.MinInt32 {
+			return 0, newNumberOverflowError[int64](val, 32)
+		}
+	case int:
+		if strconv.IntSize == 32 && (val > math.MaxInt32 || val < math.MinInt32) {
+			return 0, newNumberOverflowError[int64](val, 32)
+		}
+	case int64:
+	default:
+		return 0, fmt.Errorf("invalid type %T", zero)
 	}
-	return int32(i), nil
+
+	return N(val), nil
 }

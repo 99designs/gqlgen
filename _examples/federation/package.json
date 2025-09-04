@@ -13,10 +13,11 @@
   "dependencies": {
     "@apollo/gateway": "^2.7.1",
     "@apollo/server": "^5.0.0",
-    "graphql": "^16.8.1"
+    "graphql": "^16.11.0",
+    "rxjs": "^7.8.2"
   },
   "devDependencies": {
-    "@apollo/client": "^3.9.4",
+    "@apollo/client": "^4.0.4",
     "cross-fetch": "^4.0.0",
     "jest": "^30.0.0",
     "node-fetch": "^3.3.2"

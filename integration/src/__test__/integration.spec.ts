@@ -1,15 +1,9 @@
 import { afterAll, describe, expect, it } from "vitest";
 
 import fetch from 'cross-fetch';
-import {
-    ApolloClient,
-    ApolloLink,
-    FetchResult,
-    InMemoryCache,
-    NormalizedCacheObject,
-    Observable,
-    Operation,
-} from '@apollo/client/core';
+import { ApolloClient, ApolloLink, InMemoryCache, NormalizedCacheObject, Observable } from "@apollo/client";
+import { Defer20220824Handler } from "@apollo/client/incremental";
+import { LocalState } from "@apollo/client/local-state";
 import { HttpLink } from '@apollo/client/link/http';
 
 import { print } from "graphql";
@@ -43,7 +37,7 @@ import { join } from "path";
 
 const uri = process.env.VITE_SERVER_URL || "http://localhost:8080/query";
 
-function test(client: ApolloClient<NormalizedCacheObject>) {
+function test(client: ApolloClient) {
     describe("Json", () => {
         it("should follow json escaping rules", async () => {
             const res = await client.query({
@@ -238,8 +232,8 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
 
 describe("HTTP client", () => {
     const client = new ApolloClient({
-        uri: uri,
         cache: new InMemoryCache(),
+
         defaultOptions: {
             watchQuery: {
                 fetchPolicy: "network-only",
@@ -250,6 +244,24 @@ describe("HTTP client", () => {
                 errorPolicy: "all",
             },
         },
+
+        link: new HttpLink({
+            uri: uri
+        }),
+
+        /*
+        Inserted by Apollo Client 3->4 migration codemod.
+        If you are not using the `@client` directive in your application,
+        you can safely remove this option.
+        */
+        localState: new LocalState({}),
+
+        /*
+        Inserted by Apollo Client 3->4 migration codemod.
+        If you are not using the `@defer` directive in your application,
+        you can safely remove this option.
+        */
+        incrementalHandler: new Defer20220824Handler()
     });
 
     test(client);
@@ -293,7 +305,9 @@ describe("Websocket client", () => {
                 webSocketImpl: WebSocket,
             })
         ),
+
         cache: new InMemoryCache(),
+
         defaultOptions: {
             watchQuery: {
                 fetchPolicy: "network-only",
@@ -304,6 +318,20 @@ describe("Websocket client", () => {
                 errorPolicy: "all",
             },
         },
+
+        /*
+        Inserted by Apollo Client 3->4 migration codemod.
+        If you are not using the `@client` directive in your application,
+        you can safely remove this option.
+        */
+        localState: new LocalState({}),
+
+        /*
+        Inserted by Apollo Client 3->4 migration codemod.
+        If you are not using the `@defer` directive in your application,
+        you can safely remove this option.
+        */
+        incrementalHandler: new Defer20220824Handler()
     });
 
     test(client);
@@ -322,9 +350,9 @@ describe("SSE client", () => {
             this.client = createClientSSE(options);
         }
 
-        public request(operation: Operation): Observable<FetchResult> {
+        public request(operation: ApolloLink.Operation): Observable<ApolloLink.Result> {
             return new Observable((sink) => {
-                return this.client.subscribe<FetchResult>(
+                return this.client.subscribe<ApolloLink.Result>(
                     { ...operation, query: print(operation.query) },
                     {
                         next: sink.next.bind(sink),
@@ -340,7 +368,9 @@ describe("SSE client", () => {
         link: new SSELink({
             url: uri,
         }),
+
         cache: new InMemoryCache(),
+
         defaultOptions: {
             watchQuery: {
                 fetchPolicy: "network-only",
@@ -351,6 +381,20 @@ describe("SSE client", () => {
                 errorPolicy: "all",
             },
         },
+
+        /*
+        Inserted by Apollo Client 3->4 migration codemod.
+        If you are not using the `@client` directive in your application,
+        you can safely remove this option.
+        */
+        localState: new LocalState({}),
+
+        /*
+        Inserted by Apollo Client 3->4 migration codemod.
+        If you are not using the `@defer` directive in your application,
+        you can safely remove this option.
+        */
+        incrementalHandler: new Defer20220824Handler()
     });
 
     test(client);
@@ -415,3 +459,60 @@ describe("URQL SSE client", () => {
         });
     });
 });
+
+/*
+Start: Inserted by Apollo Client 3->4 migration codemod.
+Copy the contents of this block into a `.d.ts` file in your project to enable correct response types in your custom links.
+If you do not use the `@defer` directive in your application, you can safely remove this block.
+*/
+
+
+import "@apollo/client";
+import { Defer20220824Handler } from "@apollo/client/incremental";
+
+declare module "@apollo/client" {
+    export interface TypeOverrides extends Defer20220824Handler.TypeOverrides {}
+}
+
+/*
+End: Inserted by Apollo Client 3->4 migration codemod.
+*/
+
+
+/*
+Start: Inserted by Apollo Client 3->4 migration codemod.
+Copy the contents of this block into a `.d.ts` file in your project to enable correct response types in your custom links.
+If you do not use the `@defer` directive in your application, you can safely remove this block.
+*/
+
+
+import "@apollo/client";
+import { Defer20220824Handler } from "@apollo/client/incremental";
+
+declare module "@apollo/client" {
+    export interface TypeOverrides extends Defer20220824Handler.TypeOverrides {}
+}
+
+/*
+End: Inserted by Apollo Client 3->4 migration codemod.
+*/
+
+
+/*
+Start: Inserted by Apollo Client 3->4 migration codemod.
+Copy the contents of this block into a `.d.ts` file in your project to enable correct response types in your custom links.
+If you do not use the `@defer` directive in your application, you can safely remove this block.
+*/
+
+
+import "@apollo/client";
+import { Defer20220824Handler } from "@apollo/client/incremental";
+
+declare module "@apollo/client" {
+    export interface TypeOverrides extends Defer20220824Handler.TypeOverrides {}
+}
+
+/*
+End: Inserted by Apollo Client 3->4 migration codemod.
+*/
+

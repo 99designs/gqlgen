@@ -5079,19 +5079,6 @@ func marshalORole2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋ
 	return ret
 }
 
-var (
-	unmarshalORole2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModelᚄF = map[string]RoleModel{
-		"ADMIN": RoleModelAdmin,
-		"USER":  RoleModelUser,
-		"GUEST": RoleModelGuest,
-	}
-	marshalORole2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModelᚄF = map[RoleModel]string{
-		RoleModelAdmin: "ADMIN",
-		RoleModelUser:  "USER",
-		RoleModelGuest: "GUEST",
-	}
-)
-
 func unmarshalORole2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModel(ctx context.Context, ec *executionContext, v any) (*RoleModel, error) {
 	if v == nil {
 		return nil, nil

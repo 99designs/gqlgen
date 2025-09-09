@@ -1,21 +1,18 @@
-import { afterAll, describe, expect, it } from "vitest";
+import {afterAll, describe, expect, it} from "vitest";
 
-import fetch from 'cross-fetch';
 import {
     ApolloClient,
     ApolloLink,
-    FetchResult,
+    CombinedGraphQLErrors,
+    HttpLink,
     InMemoryCache,
-    NormalizedCacheObject,
     Observable,
-    Operation,
 } from '@apollo/client/core';
-import { HttpLink } from '@apollo/client/link/http';
 
-import { print } from "graphql";
-import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
-import { WebSocket } from "ws";
-import { createClient as createClientWS } from "graphql-ws";
+import {print} from "graphql";
+import {GraphQLWsLink} from "@apollo/client/link/subscriptions";
+import {WebSocket} from "ws";
+import {createClient as createClientWS} from "graphql-ws";
 import {
     Client as ClientSSE,
     ClientOptions as ClientOptionsSSE,
@@ -37,21 +34,21 @@ import {
     Client,
     subscriptionExchange,
 } from "urql";
-import { isFragmentReady, useFragment } from "../generated";
-import { readFileSync } from "fs";
-import { join } from "path";
+import {isFragmentReady, useFragment} from "../generated";
+import {readFileSync} from "node:fs";
+import {join} from "node:path";
 
 const uri = process.env.VITE_SERVER_URL || "http://localhost:8080/query";
 
-function test(client: ApolloClient<NormalizedCacheObject>) {
+function test(client: ApolloClient) {
     describe("Json", () => {
         it("should follow json escaping rules", async () => {
             const res = await client.query({
                 query: JsonEncodingDocument,
             });
 
-            expect(res.data.jsonEncoding).toBe("󾓭");
-            expect(res.errors).toBe(undefined);
+            expect(res.data?.jsonEncoding).toBe("󾓭");
+            expect(res.error).toBeUndefined();
 
             return null;
         });
@@ -68,8 +65,8 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
                 },
             });
 
-            expect(res.data.date).toBe(true);
-            expect(res.errors).toBe(undefined);
+            expect(res.data?.date).toBeTruthy();
+            expect(res.error).toBeUndefined();
             return null;
         });
     });
@@ -83,12 +80,10 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
                 },
             });
 
-            expect(res.errors).toBeDefined();
-            if (res.errors) {
-                expect(res.errors[0].message).toBe(
-                    "operation has complexity 2000, which exceeds the limit of 1000"
-                );
-            }
+            expect(res.error).toBeDefined();
+            expect(res.error?.message).toBe(
+            "operation has complexity 2000, which exceeds the limit of 1000"
+            );
             return null;
         });
 
@@ -100,8 +95,8 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
                 },
             });
 
-            expect(res.data.complexity).toBe(true);
-            expect(res.errors).toBe(undefined);
+            expect(res.data?.complexity).toBeTruthy();
+            expect(res.error).toBeUndefined();
             return null;
         });
     });
@@ -119,7 +114,7 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
                 },
             });
 
-            expect(res.data.coercion).toBe(true);
+            expect(res.data?.coercion).toBeTruthy();
             return null;
         });
 
@@ -135,7 +130,7 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
                 },
             });
 
-            expect(res.data.coercion).toBe(true);
+            expect(res.data?.coercion).toBeTruthy();
             return null;
         });
 
@@ -149,7 +144,7 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
                 },
             });
 
-            expect(res.data.coercion).toBe(true);
+            expect(res.data?.coercion).toBeTruthy();
             return null;
         });
 
@@ -167,7 +162,7 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
                 },
             });
 
-            expect(res.data.coercion).toBe(true);
+            expect(res.data?.coercion).toBeTruthy();
             return null;
         });
 
@@ -183,7 +178,7 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
                 },
             });
 
-            expect(res.data.coercion).toBe(true);
+            expect(res.data?.coercion).toBeTruthy();
             return null;
         });
     });
@@ -194,13 +189,15 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
                 query: PathDocument,
             });
 
-            expect(res.errors).toBeDefined();
-            if (res.errors) {
-                expect(res.errors[0].path).toEqual(["path", 0, "cc", "error"]);
-                expect(res.errors[1].path).toEqual(["path", 1, "cc", "error"]);
-                expect(res.errors[2].path).toEqual(["path", 2, "cc", "error"]);
-                expect(res.errors[3].path).toEqual(["path", 3, "cc", "error"]);
+            expect(res.error).toBeDefined();
+            expect(CombinedGraphQLErrors.is(res.error)).toBeTruthy()
+            if (res.error instanceof CombinedGraphQLErrors) {
+                expect(res.error.errors[0].path).toEqual(["path", 0, "cc", "error"]);
+                expect(res.error.errors[1].path).toEqual(["path", 1, "cc", "error"]);
+                expect(res.error.errors[2].path).toEqual(["path", 2, "cc", "error"]);
+                expect(res.error.errors[3].path).toEqual(["path", 3, "cc", "error"]);
             }
+
             return null;
         });
 
@@ -212,10 +209,8 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
                 },
             });
 
-            expect(res.errors).toBeDefined();
-            if (res.errors) {
-                expect(res.errors[0].message).toEqual("User message");
-            }
+            expect(res.error).toBeDefined();
+            expect(res.error?.message).toEqual("User message");
             return null;
         });
 
@@ -227,10 +222,8 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
                 },
             });
 
-            expect(res.errors).toBeDefined();
-            if (res.errors) {
-                expect(res.errors[0]?.message).toEqual("normal error");
-            }
+            expect(res.error).toBeDefined();
+            expect(res.error?.message).toEqual("normal error");
             return null;
         });
     });
@@ -238,7 +231,7 @@ function test(client: ApolloClient<NormalizedCacheObject>) {
 
 describe("HTTP client", () => {
     const client = new ApolloClient({
-        uri: uri,
+        link: new HttpLink({uri}),
         cache: new InMemoryCache(),
         defaultOptions: {
             watchQuery: {
@@ -278,7 +271,7 @@ describe("Schema Introspection", () => {
         );
         expect(phoneNumberField).toBeDefined();
 
-        expect(phoneNumberField.isDeprecated).toBe(true);
+        expect(phoneNumberField.isDeprecated).toBeTruthy();
         expect(phoneNumberField.deprecationReason).toBe("No longer supported");
     });
 });
@@ -322,12 +315,12 @@ describe("SSE client", () => {
             this.client = createClientSSE(options);
         }
 
-        public request(operation: Operation): Observable<FetchResult> {
+        public request(operation: ApolloLink.Operation): Observable<ApolloLink.Result> {
             return new Observable((sink) => {
-                return this.client.subscribe<FetchResult>(
-                    { ...operation, query: print(operation.query) },
+                return this.client.subscribe<ApolloLink.Result>(
+                    {...operation, query: print(operation.query)},
                     {
-                        next: sink.next.bind(sink),
+                        next: (data) => sink.next?.(data as ApolloLink.Result),
                         complete: sink.complete.bind(sink),
                         error: sink.error.bind(sink),
                     }
@@ -373,11 +366,11 @@ describe("URQL SSE client", () => {
             subscriptionExchange({
                 enableAllOperations: true,
                 forwardSubscription(request) {
-                    const input = { ...request, query: request.query || "" };
+                    const input = {...request, query: request.query || ""};
                     return {
                         subscribe(sink) {
                             const unsubscribe = wsClient.subscribe(input, sink);
-                            return { unsubscribe };
+                            return {unsubscribe};
                         },
                     };
                 },
@@ -389,10 +382,8 @@ describe("URQL SSE client", () => {
         it("test using defer", async () => {
             const res = await client.query(ViewerDocument, {});
 
-            expect(res.error).toBe(undefined);
+            expect(res.error).toBeUndefined();
             expect(res.data).toBeDefined();
-            expect(res.data?.viewer).toBeDefined();
-            expect(res.data?.viewer?.user).toBeDefined();
             expect(res.data?.viewer?.user?.name).toBe("Bob");
             expect(res.data?.viewer?.user?.query?.jsonEncoding).toBe("󾓭");
             let ready: boolean;

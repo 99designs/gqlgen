@@ -18,6 +18,5 @@ curl -s --connect-timeout 5 \
 sleep 1
 
 echo "### running jest integration spec"
-export NODE_OPTIONS="--experimental-vm-modules"
-npx jest --color
+npx vitest --color --run
 

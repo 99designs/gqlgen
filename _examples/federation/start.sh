@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 function cleanup {
     kill "$ACCOUNTS_PID"
@@ -22,4 +22,4 @@ REVIEWS_PID=$!
 
 sleep 1
 
-node gateway/index.js
+node src/gateway/index.ts

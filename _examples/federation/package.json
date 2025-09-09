@@ -1,24 +1,25 @@
 {
-  "name": "gateway",
-  "version": "1.0.0",
-  "description": "",
-  "main": "gateway/index.js",
-  "type": "module",
-  "scripts": {
-    "start-gateway": "node gateway/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "@apollo/gateway": "^2.7.1",
-    "@apollo/server": "^5.0.0",
-    "graphql": "^16.8.1"
-  },
-  "devDependencies": {
-    "@apollo/client": "^3.9.4",
-    "cross-fetch": "^4.0.0",
-    "jest": "^30.0.0",
-    "node-fetch": "^3.3.2"
-  }
+    "name": "gateway",
+    "version": "1.0.1",
+    "description": "",
+    "main": "src/gateway/index.ts",
+    "type": "module",
+    "scripts": {
+        "start-gateway": "node src/gateway/index.ts",
+        "test": "vitest"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@apollo/gateway": "^2.11.2",
+        "@apollo/server": "^5.0.0",
+        "graphql": "^16.11.0",
+        "rxjs": "^7.8.2"
+    },
+    "devDependencies": {
+        "@apollo/client": "^4.0.4",
+        "cross-fetch": "^4.1.0",
+        "node-fetch": "^3.3.2",
+        "vitest": "^3.2.4"
+    }
 }

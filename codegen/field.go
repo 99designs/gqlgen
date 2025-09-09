@@ -319,7 +319,7 @@ func (b *builder) findBindMethodTarget(in types.Type, name string) (types.Object
 
 func (b *builder) findBindMethoderTarget(methodFunc func(i int) *types.Func, methodCount int, name string) (types.Object, error) {
 	var found types.Object
-	for i := 0; i < methodCount; i++ {
+	for i := range methodCount {
 		method := methodFunc(i)
 		if !method.Exported() || !strings.EqualFold(method.Name(), name) {
 			continue
@@ -588,7 +588,7 @@ func (f *Field) CallArgs() string {
 	args := make([]string, 0, len(f.Args)+2)
 
 	if f.IsResolver {
-		args = append(args, "rctx")
+		args = append(args, "ctx")
 
 		if !f.Object.Root {
 			args = append(args, "obj")

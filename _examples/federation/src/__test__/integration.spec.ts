@@ -1,11 +1,10 @@
-import {jest} from '@jest/globals';
-import { InMemoryCache, ApolloClient} from '@apollo/client/core';
-import { gql } from '@apollo/client/core';
+import {describe, expect, it} from "vitest";
+import {InMemoryCache, ApolloClient, HttpLink, gql} from '@apollo/client/core';
 
-var uri = process.env.SERVER_URL || 'http://localhost:4000/';
+const uri = process.env.SERVER_URL || 'http://localhost:4000/';
 
 const client = new ApolloClient({
-    uri: uri,
+    link: new HttpLink({uri}),
     cache: new InMemoryCache(),
 });
 
@@ -53,7 +52,7 @@ describe('Json', () => {
                 ]
             }
         });
-        expect(res.errors).toBe(undefined);
+        expect(res.error).toBeUndefined();
     });
 });
 

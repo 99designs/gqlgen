@@ -104,7 +104,7 @@ func (ec *executionContext) dir_range_args(ctx context.Context, rawArgs map[stri
 
 // region    ************************** directives.gotpl **************************
 
-func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj any, next graphql.Resolver) any {
+func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj any, next graphql.Resolver) graphql.Resolver {
 	fc := graphql.GetFieldContext(ctx)
 	for _, d := range fc.Field.Directives {
 		switch d.Name {
@@ -124,12 +124,7 @@ func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj any, next 
 			}
 		}
 	}
-	res, err := ec.ResolverMiddleware(ctx, next)
-	if err != nil {
-		ec.Error(ctx, err)
-		return nil
-	}
-	return res
+	return next
 }
 
 // endregion ************************** directives.gotpl **************************
@@ -137,68 +132,58 @@ func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj any, next 
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _ObjectDirectives_text(ctx context.Context, field graphql.CollectedField, obj *ObjectDirectives) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ObjectDirectives_text(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		directive0 := func(rctx context.Context) (any, error) {
-			ctx = rctx // use context from middleware stack in children
-			return obj.Text, nil
-		}
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ObjectDirectives_text,
+		func(ctx context.Context) (any, error) {
+			directive0 := func(ctx context.Context) (any, error) {
+				return obj.Text, nil
+			}
 
-		directive1 := func(ctx context.Context) (any, error) {
-			min, err := ec.unmarshalNInt2int(ctx, 0)
-			if err != nil {
-				var zeroVal string
-				return zeroVal, err
+			directive1 := func(ctx context.Context) (any, error) {
+				min, err := ec.unmarshalNInt2int(ctx, 0)
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				max, err := ec.unmarshalOInt2ᚖint(ctx, 7)
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				message, err := ec.unmarshalOString2ᚖstring(ctx, "not valid")
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.directives.Length == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive length is not implemented")
+				}
+				return ec.directives.Length(ctx, obj, directive0, min, max, message)
 			}
-			max, err := ec.unmarshalOInt2ᚖint(ctx, 7)
-			if err != nil {
-				var zeroVal string
-				return zeroVal, err
-			}
-			message, err := ec.unmarshalOString2ᚖstring(ctx, "not valid")
-			if err != nil {
-				var zeroVal string
-				return zeroVal, err
-			}
-			if ec.directives.Length == nil {
-				var zeroVal string
-				return zeroVal, errors.New("directive length is not implemented")
-			}
-			return ec.directives.Length(ctx, obj, directive0, min, max, message)
-		}
 
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(string); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalNString2string(ctx, field.Selections, res)
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return nil, graphql.ErrorOnPath(ctx, err)
+			}
+			if tmp == nil {
+				return nil, nil
+			}
+			if data, ok := tmp.(string); ok {
+				return data, nil
+			}
+			return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2string,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_ObjectDirectives_text(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -215,50 +200,43 @@ func (ec *executionContext) fieldContext_ObjectDirectives_text(_ context.Context
 }
 
 func (ec *executionContext) _ObjectDirectives_nullableText(ctx context.Context, field graphql.CollectedField, obj *ObjectDirectives) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ObjectDirectives_nullableText(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		directive0 := func(rctx context.Context) (any, error) {
-			ctx = rctx // use context from middleware stack in children
-			return obj.NullableText, nil
-		}
-
-		directive1 := func(ctx context.Context) (any, error) {
-			if ec.directives.ToNull == nil {
-				var zeroVal *string
-				return zeroVal, errors.New("directive toNull is not implemented")
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ObjectDirectives_nullableText,
+		func(ctx context.Context) (any, error) {
+			directive0 := func(ctx context.Context) (any, error) {
+				return obj.NullableText, nil
 			}
-			return ec.directives.ToNull(ctx, obj, directive0)
-		}
 
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(*string); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
-	})
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.directives.ToNull == nil {
+					var zeroVal *string
+					return zeroVal, errors.New("directive toNull is not implemented")
+				}
+				return ec.directives.ToNull(ctx, obj, directive0)
+			}
 
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	fc.Result = res
-	return ec.marshalOString2ᚖstring(ctx, field.Selections, res)
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return nil, graphql.ErrorOnPath(ctx, err)
+			}
+			if tmp == nil {
+				return nil, nil
+			}
+			if data, ok := tmp.(*string); ok {
+				return data, nil
+			}
+			return nil, fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
 }
 
 func (ec *executionContext) fieldContext_ObjectDirectives_nullableText(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -275,31 +253,19 @@ func (ec *executionContext) fieldContext_ObjectDirectives_nullableText(_ context
 }
 
 func (ec *executionContext) _ObjectDirectives_order(ctx context.Context, field graphql.CollectedField, obj *ObjectDirectives) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ObjectDirectives_order(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Order, nil
-	})
-
-	if resTmp == nil {
-		if !graphql.HasFieldError(ctx, fc) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]string)
-	fc.Result = res
-	return ec.marshalNString2ᚕstringᚄ(ctx, field.Selections, res)
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ObjectDirectives_order,
+		func(ctx context.Context) (any, error) { return obj.Order, nil },
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalNString2ᚕstringᚄ,
+		true,
+		true,
+	)
 }
 
 func (ec *executionContext) fieldContext_ObjectDirectives_order(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -316,50 +282,43 @@ func (ec *executionContext) fieldContext_ObjectDirectives_order(_ context.Contex
 }
 
 func (ec *executionContext) _ObjectDirectivesWithCustomGoModel_nullableText(ctx context.Context, field graphql.CollectedField, obj *ObjectDirectivesWithCustomGoModel) (ret graphql.Marshaler) {
-	fc, err := ec.fieldContext_ObjectDirectivesWithCustomGoModel_nullableText(ctx, field)
-	if err != nil {
-		return graphql.Null
-	}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	defer func() {
-		if r := recover(); r != nil {
-			ec.Error(ctx, ec.Recover(ctx, r))
-			ret = graphql.Null
-		}
-	}()
-	resTmp := ec._fieldMiddleware(ctx, obj, func(rctx context.Context) (any, error) {
-		directive0 := func(rctx context.Context) (any, error) {
-			ctx = rctx // use context from middleware stack in children
-			return obj.NullableText, nil
-		}
-
-		directive1 := func(ctx context.Context) (any, error) {
-			if ec.directives.ToNull == nil {
-				var zeroVal string
-				return zeroVal, errors.New("directive toNull is not implemented")
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ObjectDirectivesWithCustomGoModel_nullableText,
+		func(ctx context.Context) (any, error) {
+			directive0 := func(ctx context.Context) (any, error) {
+				return obj.NullableText, nil
 			}
-			return ec.directives.ToNull(ctx, obj, directive0)
-		}
 
-		tmp, err := directive1(rctx)
-		if err != nil {
-			return nil, graphql.ErrorOnPath(ctx, err)
-		}
-		if tmp == nil {
-			return nil, nil
-		}
-		if data, ok := tmp.(string); ok {
-			return data, nil
-		}
-		return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
-	})
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.directives.ToNull == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive toNull is not implemented")
+				}
+				return ec.directives.ToNull(ctx, obj, directive0)
+			}
 
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	fc.Result = res
-	return ec.marshalOString2string(ctx, field.Selections, res)
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return nil, graphql.ErrorOnPath(ctx, err)
+			}
+			if tmp == nil {
+				return nil, nil
+			}
+			if data, ok := tmp.(string); ok {
+				return data, nil
+			}
+			return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		ec.marshalOString2string,
+		true,
+		false,
+	)
 }
 
 func (ec *executionContext) fieldContext_ObjectDirectivesWithCustomGoModel_nullableText(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {

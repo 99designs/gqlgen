@@ -13,50 +13,25 @@ func ResolveField[T any](
 	field CollectedField,
 	initializeFieldContext func(ctx context.Context, field CollectedField) (*FieldContext, error),
 	fieldResolver func(ctx context.Context) (any, error),
-	middlewareResolver func(ctx context.Context, next Resolver) Resolver,
+	middlewareChain func(ctx context.Context, next Resolver) Resolver,
 	marshal func(ctx context.Context, sel ast.SelectionSet, v T) Marshaler,
 	recoverFromPanic bool,
 	nonNull bool,
-) (ret Marshaler) {
-	fc, err := initializeFieldContext(ctx, field)
-	if err != nil {
-		return Null
-	}
-	ctx = WithFieldContext(ctx, fc)
-	if recoverFromPanic {
-		defer func() {
-			if r := recover(); r != nil {
-				oc.Error(ctx, oc.Recover(ctx, r))
-				ret = Null
-			}
-		}()
-	}
-
-	next := func(rctx context.Context) (any, error) {
-		ctx = rctx // use context from middleware stack in children
-		return fieldResolver(rctx)
-	}
-
-	if middlewareResolver != nil {
-		next = middlewareResolver(ctx, next)
-	}
-
-	resTmp, err := oc.ResolverMiddleware(ctx, next)
-	if err != nil {
-		oc.Error(ctx, err)
-		return Null
-	}
-	if resTmp == nil {
-		if nonNull {
-			if !HasFieldError(ctx, fc) {
-				oc.Errorf(ctx, "must not be null")
-			}
-		}
-		return Null
-	}
-	res := resTmp.(T)
-	fc.Result = res
-	return marshal(ctx, field.Selections, res)
+) Marshaler {
+	return resolveField[T, Marshaler](
+		ctx,
+		oc,
+		field,
+		initializeFieldContext,
+		fieldResolver,
+		middlewareChain,
+		recoverFromPanic,
+		nonNull,
+		Null,
+		func(ctx context.Context, res T) Marshaler {
+			return marshal(ctx, field.Selections, res)
+		},
+	)
 }
 
 func ResolveFieldStream[T any](
@@ -65,21 +40,66 @@ func ResolveFieldStream[T any](
 	field CollectedField,
 	initializeFieldContext func(ctx context.Context, field CollectedField) (*FieldContext, error),
 	fieldResolver func(context.Context) (any, error),
-	middlewareResolver func(ctx context.Context, next Resolver) Resolver,
+	middlewareChain func(ctx context.Context, next Resolver) Resolver,
 	marshal func(ctx context.Context, sel ast.SelectionSet, v T) Marshaler,
 	recoverFromPanic bool,
 	nonNull bool,
-) (ret func(ctx context.Context) Marshaler) {
+) func(context.Context) Marshaler {
+	return resolveField(
+		ctx,
+		oc,
+		field,
+		initializeFieldContext,
+		fieldResolver,
+		middlewareChain,
+		recoverFromPanic,
+		nonNull,
+		nil,
+		func(ctx context.Context, res <-chan T) func(context.Context) Marshaler {
+			return func(ctx context.Context) Marshaler {
+				select {
+				case v, ok := <-res:
+					if !ok {
+						return nil
+					}
+					return WriterFunc(func(w io.Writer) {
+						w.Write([]byte{'{'})
+						MarshalString(field.Alias).MarshalGQL(w)
+						w.Write([]byte{':'})
+						marshal(ctx, field.Selections, v).MarshalGQL(w)
+						w.Write([]byte{'}'})
+					})
+				case <-ctx.Done():
+					return nil
+				}
+			}
+		},
+	)
+}
+
+func resolveField[T, R any](
+	ctx context.Context,
+	oc *OperationContext,
+	field CollectedField,
+	initializeFieldContext func(ctx context.Context, field CollectedField) (*FieldContext, error),
+	fieldResolver func(ctx context.Context) (any, error),
+	middlewareChain func(ctx context.Context, next Resolver) Resolver,
+	recoverFromPanic bool,
+	nonNull bool,
+	defaultResult R,
+	result func(ctx context.Context, res T) R,
+) (ret R) {
 	fc, err := initializeFieldContext(ctx, field)
 	if err != nil {
-		return nil
+		return defaultResult
 	}
 	ctx = WithFieldContext(ctx, fc)
+
 	if recoverFromPanic {
 		defer func() {
 			if r := recover(); r != nil {
 				oc.Error(ctx, oc.Recover(ctx, r))
-				ret = nil
+				ret = defaultResult
 			}
 		}()
 	}
@@ -89,14 +109,14 @@ func ResolveFieldStream[T any](
 		return fieldResolver(rctx)
 	}
 
-	if middlewareResolver != nil {
-		next = middlewareResolver(ctx, next)
+	if middlewareChain != nil {
+		next = middlewareChain(ctx, next)
 	}
 
 	resTmp, err := oc.ResolverMiddleware(ctx, next)
 	if err != nil {
 		oc.Error(ctx, err)
-		return nil
+		return defaultResult
 	}
 	if resTmp == nil {
 		if nonNull {
@@ -104,25 +124,9 @@ func ResolveFieldStream[T any](
 				oc.Errorf(ctx, "must not be null")
 			}
 		}
-		return nil
+		return defaultResult
 	}
-	res := resTmp.(<-chan T)
+	res := resTmp.(T)
 	fc.Result = res
-	return func(ctx context.Context) Marshaler {
-		select {
-		case v, ok := <-res:
-			if !ok {
-				return nil
-			}
-			return WriterFunc(func(w io.Writer) {
-				w.Write([]byte{'{'})
-				MarshalString(field.Alias).MarshalGQL(w)
-				w.Write([]byte{':'})
-				marshal(ctx, field.Selections, v).MarshalGQL(w)
-				w.Write([]byte{'}'})
-			})
-		case <-ctx.Done():
-			return nil
-		}
-	}
+	return result(ctx, res)
 }

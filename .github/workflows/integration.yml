@@ -16,7 +16,7 @@ jobs:
   integration:
     strategy:
       matrix:
-        go: ["1.23", "1.24"]
+        go: ["1.24", "1.25"]
         node: [22]
     runs-on: ubuntu-latest
     timeout-minutes: 3
@@ -35,7 +35,7 @@ jobs:
   federation:
     strategy:
       matrix:
-        go: ["1.23", "1.24"]
+        go: ["1.24", "1.25"]
         node: [22]
     runs-on: ubuntu-latest
     steps:
@@ -53,7 +53,7 @@ jobs:
   init:
     strategy:
       matrix:
-        go: ["1.23", "1.24"]
+        go: ["1.24", "1.25"]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5

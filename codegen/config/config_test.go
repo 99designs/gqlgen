@@ -66,8 +66,12 @@ func TestReadConfig(t *testing.T) {
 		require.NoError(t, err)
 		t.Cleanup(func() { _ = cfgFile.Close() })
 		_, err = ReadConfig(cfgFile)
+
 		if runtime.GOOS == "windows" {
-			require.EqualError(t, err, "failed to walk schema at root not_walkable/: CreateFile not_walkable/: The system cannot find the file specified.")
+			require.ErrorContains(t, err, "failed to walk schema at root not_walkable/: ")
+			// Go 1.24 and below report "CreateFile" but 1.25 and above report "GetFileAttributesEx" in error
+			// See https://go.dev/doc/go1.25#ospkgos
+			require.ErrorContains(t, err, " not_walkable/: The system cannot find the file specified.")
 		} else {
 			require.EqualError(t, err, "failed to walk schema at root not_walkable/: lstat not_walkable/: no such file or directory")
 		}

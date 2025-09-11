@@ -145,7 +145,7 @@
 									}
 								{{ end }}
 								return e.complexity.{{ucFirst $object.Name}}.{{$field.GoFieldName}}(childComplexity{{if $field.Args}}, {{$field.ComplexityArgs}} {{ end }}), true
-							{{ end }}
+							{{- end }}
 						{{- end }}
 					{{- end }}
 				{{ end }}

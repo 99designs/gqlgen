@@ -184,7 +184,7 @@ func TestField_CallArgs(t *testing.T) {
 					},
 				},
 			},
-			Expected: `rctx, obj, fc.Args["test"].(int)`,
+			Expected: `ctx, obj, fc.Args["test"].(int)`,
 		},
 	}
 

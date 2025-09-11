@@ -156,9 +156,9 @@ func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *as
 
 {{ if .Directives.LocationDirectives "FIELD" }}
 	{{ if $useFunctionSyntaxForExecutionContext -}}
-	func _fieldMiddleware(ctx context.Context, ec *executionContext, obj any, next graphql.Resolver) any {
+	func _fieldMiddleware(ctx context.Context, ec *executionContext, obj any, next graphql.Resolver) graphql.Resolver {
 	{{- else -}}
-	func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj any, next graphql.Resolver) any {
+	func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj any, next graphql.Resolver) graphql.Resolver {
 	{{- end }}
 		{{- if .Directives.LocationDirectives "FIELD" }}
 		fc := graphql.GetFieldContext(ctx)
@@ -186,11 +186,6 @@ func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *as
 			}
 		}
 		{{- end }}
-		res, err := ec.ResolverMiddleware(ctx, next)
-		if err != nil {
-			ec.Error(ctx, err)
-			return nil
-		}
-		return res
+		return next
 	}
 {{ end }}

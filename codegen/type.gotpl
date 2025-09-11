@@ -288,7 +288,7 @@
 		}
 	{{- end }}
 
-	{{- if $type.HasEnumValues }}
+	{{- if and $type.HasEnumValues (not $type.IsSlice) }}
 	{{- $enum := $type.GO }}
 	{{- if $type.IsNilable }}
 		{{- $enum = $type.GO.Elem }}

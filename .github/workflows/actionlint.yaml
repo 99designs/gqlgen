@@ -31,8 +31,8 @@ on:
 # will be treated as if they were opened from a repository fork.
 # This means they will receive a read-only GITHUB_TOKEN
 # and will not have access to any secrets available in the repository.
-#
 # This will cause any workflows that attempt to write to the repository to fail.
+#
 # When a new revision is pushed to a PR, cancel all in-progress CI runs for that
 # PR. See https://docs.github.com/en/actions/using-jobs/using-concurrency
 concurrency:
@@ -44,19 +44,22 @@ jobs:
     # runs-on: [self-hosted, linux, x64]
     timeout-minutes: 30
     permissions:
-      contents: 'read'
+      # needed for the checkout action
+      contents: read
+      # needed to annotate the files in a pull request with comments
+      pull-requests: write
     steps:
     - name: Clone Repository (Latest)
-      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       if: github.event.inputs.git-ref == ''
-      with:
-        persist-credentials: false
-    - name: Clone Repository (Custom Ref)
       uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
-      if: github.event.inputs.git-ref != ''
       with:
+        persist-credentials: "false"
+    - name: Clone Repository (Custom Ref)
+      if: github.event.inputs.git-ref != ''
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      with:
+        persist-credentials: "false"
         ref: ${{ github.event.inputs.git-ref }}
-        persist-credentials: false
     - name: Run actionlint
       if: ${{ always() }}
       uses: devops-actions/actionlint@c6744a34774e4e1c1df0ff66bdb07ec7ee480ca0 # v0.1.9
@@ -69,6 +72,8 @@ jobs:
         SHELLCHECK_OPTS: '-e SC2086 -e SC2129 -e SC2164 -e SC2155 -e SC2103'
     - name: Install Go
       uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6
-    - run: ghalint run
+    - name: Install GHALINT
+      run: go install github.com/suzuki-shunsuke/ghalint/cmd/ghalint@v1.5.3 # v1.5.3
+    - run: cd ..; ghalint run
       env:
         GHALINT_LOG_COLOR: always

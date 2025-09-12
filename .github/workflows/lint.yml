@@ -15,14 +15,20 @@ env:
   GOFLAGS: "-trimpath"
 jobs:
   golangci-lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
     env:
       GOLANGCI_LINT_VERSION: latest
     strategy:
       matrix:
         go: ["1.24", "1.25"]
-    runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      with:
+        persist-credentials: "false"
     - uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6
       with:
         go-version: ${{ matrix.go }}

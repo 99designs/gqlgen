@@ -3,8 +3,7 @@
 # and make a new branch
 gh-find-latest() {
   local owner=$1 project=$2
-  local output_directory=${3:-$owner-$project-release}
-  local release_url=$(curl -Ls -o /dev/null -w %{url_effective} https://github.com/$owner/$project/releases/latest)
+  local release_url=$(curl -Ls -o /dev/null -w '%{url_effective}' "https://github.com/${owner}/${project}/releases/latest")
   export release_tag=$(basename $release_url)
 }
 
@@ -29,7 +28,7 @@ go generate ./...
 git commit -s -S -am "Re-generate after update"
 
 gh pr create --title "Update gqlparser to $(gh release view -R vektah/gqlparser --json tagName --jq .tagName)" --body "Automated update of gqlparser. See $(gh release view -R vektah/gqlparser --json url --jq .url)" --base "master"
-echo done
+echo "done"
 
 
 #gh release list --json name,isLatest --jq '.[] | select(.isLatest)|.name'

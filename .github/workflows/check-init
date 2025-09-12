@@ -3,7 +3,7 @@
 set -euo pipefail
 export GO111MODULE=on
 gqlgen_dir=$(pwd)
-cd $(mktemp -d)
+cd "$(mktemp -d)"
 go mod init inittest
 printf '//go:build tools\npackage tools\nimport _ "github.com/99designs/gqlgen"' | gofmt > tools.go
 go mod tidy

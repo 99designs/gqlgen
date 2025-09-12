@@ -1,0 +1,26 @@
+self-hosted-runner:
+  # Labels of self-hosted runner in array of strings.
+  labels: []
+# Configuration variables in array of strings defined in your repository or
+# organization. `null` means disabling configuration variables check.
+# Empty array means no configuration variable is allowed.
+config-variables: null
+# Configuration for file paths. The keys are glob patterns to match to file
+# paths relative to the repository root. The values are the configurations for
+# the file paths. Note that the path separator is always '/'.
+# The following configurations are available.
+#
+# "ignore" is an array of regular expression patterns. Matched error messages
+# are ignored. This is similar to the "-ignore" command line option.
+# Path-specific configurations.
+paths:
+  # Glob pattern relative to the repository root for matching files. The path separator is always '/'.
+  # This example configures any YAML file under the '.github/workflows/' directory.
+  .github/workflows/**/*.{yml,yaml}:
+    # List of regular expressions to filter errors by the error messages. # Ignore the specific error from shellcheck '-e SC2086 -e SC2129 -e SC2164 -e SC2155 -e SC2103'
+    ignore:
+    - 'shellcheck reported issue in this script: SC2086:.+'
+    - 'shellcheck reported issue in this script: SC2129:.+'
+    - 'shellcheck reported issue in this script: SC2164:.+'
+    - 'shellcheck reported issue in this script: SC2155:.+'
+    - 'shellcheck reported issue in this script: SC2103:.+'

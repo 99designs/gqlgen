@@ -2,9 +2,9 @@ name: Format and Generate
 on:
   push:
     branches:
-      - master
+    - master
   pull_request:
-    types: [ opened, synchronize ]
+    types: [opened, synchronize]
 env:
   GOTOOLCHAIN: local
 # When a new revision is pushed to a PR, cancel all in-progress CI runs for that
@@ -14,15 +14,21 @@ concurrency:
   cancel-in-progress: true
 jobs:
   fmt-and-lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
     strategy:
       matrix:
         go: ["1.24", "1.25"]
-    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-go@v6
-        with:
-          go-version: ${{ matrix.go }}
-      - run: go mod download
-      - run: .github/workflows/check-fmt
-      - run: .github/workflows/check-generate
+    - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      with:
+        persist-credentials: "false"
+    - uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6
+      with:
+        go-version: ${{ matrix.go }}
+    - run: go mod download
+    - run: .github/workflows/check-fmt
+    - run: .github/workflows/check-generate

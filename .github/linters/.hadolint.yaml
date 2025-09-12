@@ -1,0 +1,13 @@
+ignored:
+- DL3007 # use latest tag
+- DL3018 # apk should not pin all package versions
+- DL3041 # dnf should not pin all package versions
+- DL3008 # apt should not pin all package versions
+- DL3003 # don't use workdir, this is readable when workdir isn't created yet
+- SC2086 # double quote to prevent globbing and word splitting
+trustedRegistries:
+- docker.io
+- quay.io
+- ghcr.io
+- registry.access.redhat.com
+- cgr.dev

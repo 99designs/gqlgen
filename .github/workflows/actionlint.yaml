@@ -1,0 +1,79 @@
+name: action-lint
+on:
+  push:
+    branches:
+    - main
+    - master
+    paths:
+    - .github/**
+  pull_request:
+    branches:
+    - main
+    - master
+    paths:
+    - .github/**
+  workflow_dispatch:
+    inputs:
+      git-ref:
+        description: Git Ref (Optional)
+        required: false
+# only on merge to main/master unless debugging this workflow
+#  pull_request:
+#    branches:
+#      - main
+#      - master
+# we do NOT use pull_request_target because
+# workflow runs that are triggered by forks from events:
+#  - push,
+#  - pull_request,
+#  - pull_request_review
+#  - pull_request_review_comment
+# will be treated as if they were opened from a repository fork.
+# This means they will receive a read-only GITHUB_TOKEN
+# and will not have access to any secrets available in the repository.
+# This will cause any workflows that attempt to write to the repository to fail.
+#
+# When a new revision is pushed to a PR, cancel all in-progress CI runs for that
+# PR. See https://docs.github.com/en/actions/using-jobs/using-concurrency
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  github-lint:
+    runs-on: ubuntu-latest
+    # runs-on: [self-hosted, linux, x64]
+    timeout-minutes: 30
+    permissions:
+      # needed for the checkout action
+      contents: read
+      # needed to annotate the files in a pull request with comments
+      pull-requests: write
+    steps:
+    - name: Clone Repository (Latest)
+      if: github.event.inputs.git-ref == ''
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      with:
+        persist-credentials: "false"
+    - name: Clone Repository (Custom Ref)
+      if: github.event.inputs.git-ref != ''
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
+      with:
+        persist-credentials: "false"
+        ref: ${{ github.event.inputs.git-ref }}
+    - name: Run actionlint
+      if: ${{ always() }}
+      uses: devops-actions/actionlint@c6744a34774e4e1c1df0ff66bdb07ec7ee480ca0 # v0.1.9
+      with: # https://www.shellcheck.net/wiki/SC2086 https://www.shellcheck.net/wiki/SC2129
+        shellcheck_opts: '-e SC2086 -e SC2129'
+    - name: Lint Any Shell scripts
+      if: ${{ always() }}
+      uses: ludeeus/action-shellcheck@00cae500b08a931fb5698e11e79bfbd38e612a38 # 2.0.0
+      env:
+        SHELLCHECK_OPTS: '-e SC2086 -e SC2129 -e SC2164 -e SC2155 -e SC2103'
+    - name: Install Go
+      uses: actions/setup-go@44694675825211faa026b3c33043df3e48a5fa00 # v6
+    - name: Install GHALINT
+      run: go install github.com/suzuki-shunsuke/ghalint/cmd/ghalint@v1.5.3 # v1.5.3
+    - run: cd ..; ghalint run
+      env:
+        GHALINT_LOG_COLOR: always

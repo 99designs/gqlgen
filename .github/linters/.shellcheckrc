@@ -1,0 +1,18 @@
+# Look for 'source'd files relative to the checked script
+source-path=SCRIPTDIR
+# source-path=/mnt/chroot
+
+# Since 0.9.0, values can be quoted with '' or "" to allow spaces
+# source-path="My Documents/scripts"
+
+# Allow opening any 'source'd file, even if not specified as input
+external-sources=true
+
+# Turn on warnings for unquoted variables with safe values
+# enable=quote-safe-variables
+
+# Turn on warnings for unassigned uppercase variables
+# enable=check-unassigned-uppercase
+
+# See https://www.shellcheck.net/wiki/SC2086 https://www.shellcheck.net/wiki/SC2129
+disable=SC2086,SC2129

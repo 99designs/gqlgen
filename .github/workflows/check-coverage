@@ -3,7 +3,7 @@
 set -euo pipefail
 go install github.com/mattn/goveralls@latest
 
-go test -covermode atomic -coverprofile=/tmp/coverage.out.tmp -coverpkg=./... $(go list github.com/99designs/gqlgen/... | grep -v _examples)
+go test -covermode atomic -coverprofile=/tmp/coverage.out.tmp -coverpkg=./... "$(go list github.com/99designs/gqlgen/... | grep -v _examples)"
 # ignore protobuf files
 cat /tmp/coverage.out.tmp | grep -v ".pb.go" > /tmp/coverage.out
 

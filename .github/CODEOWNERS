@@ -1,0 +1,7 @@
+# SEE:
+# https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-on-github/about-code-owners#codeowners-syntax
+# These owners will be the default owners for these directories.
+# Unless a later match takes precedence,
+# @StevenACoffman will be requested for
+# review when someone opens a pull request.
+*                     @StevenACoffman

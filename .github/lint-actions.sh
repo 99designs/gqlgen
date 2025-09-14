@@ -18,4 +18,5 @@ yamllint -c ./linters/.yamllint.yaml .
 # https://www.shellcheck.net/wiki/SC2086 https://www.shellcheck.net/wiki/SC2129
 export SHELLCHECK_OPTS='-e SC2086 -e SC2129'
 actionlint -config-file=./linters/actionlint.yaml -shellcheck="$(which shellcheck)"
+cd ..
 ghalint run

@@ -1,17 +1,43 @@
 #!/bin/bash
 
-set -euo pipefail
-go install github.com/mattn/goveralls@latest
+# Script to check the coverage by running tests and merging profiles
+set -o errexit
+set -o nounset
+set -o xtrace
+set -o pipefail
 
-go test -covermode atomic -coverprofile=/tmp/coverage.out.tmp -coverpkg=./... "$(go list github.com/99designs/gqlgen/... | grep -v _examples | grep -v invalid-packagename)"
-# ignore protobuf files
-cat /tmp/coverage.out.tmp | grep -v ".pb.go" > /tmp/coverage.out
+# set -euxo pipefail is short for:
+# set -e, -o errexit: stop the script when an error occurs
+# set -u, -o nounset: detects uninitialised variables in your script and exits with an error (including Env variables)
+# set -x, -o xtrace: prints every expression before executing it
+# set -o pipefail: If any command in a pipeline fails, use that return code for whole pipeline instead of final success
+
+
+#set -euo pipefail
+
+function is_bin_in_path {
+  builtin type -P "$1" &> /dev/null
+}
+
+export SED_COMMAND="gsed"
+! is_bin_in_path gsed && export SED_COMMAND="sed"
 
 join () {
   local IFS="$1"
   shift
   echo "$*"
 }
+
+echo "Installing goveralls latest"
+go install github.com/mattn/goveralls@latest
+echo "Collecting Test Package List"
+# ${SED_COMMAND} 's/^\|$/"/g'|
+test_package_list="$(go list github.com/99designs/gqlgen/... | grep -v "_examples" | grep -v "invalid-packagename" | grep -v "generated-default" | paste -sd, -)"
+
+echo "Attempting to create initial coverage profile"
+go test -covermode atomic -coverprofile=/tmp/coverage.out.tmp -coverpkg="${test_package_list}" ./...
+# ignore protobuf files
+cat /tmp/coverage.out.tmp | grep -v ".pb.go" > /tmp/coverage.out
 
 ignore_list=(
   '_examples/*/*'

@@ -32,12 +32,26 @@ echo "Installing goveralls latest"
 go install github.com/mattn/goveralls@latest
 echo "Collecting Test Package List"
 # ${SED_COMMAND} 's/^\|$/"/g'|
-test_package_list="$(go list github.com/99designs/gqlgen/... | grep -v "_examples" | grep -v "invalid-packagename" | grep -v "generated-default" | paste -sd, -)"
+pkgs="$(go list github.com/99designs/gqlgen/... 2> /dev/null | grep -v "integration" | grep -v "_examples" |grep -v "plugin/resolvergen/testdata" | grep -v "plugin/federation/testdata" | grep -v "plugin/resolvergen/testdata" | grep -v "invalid-packagename" | grep -v "generated-default")"
 
+deps=$(echo "${pkgs}" | tr ' ' ",")
+# -covermode atomic
+echo "mode: atomic" > /tmp/coverage.out.tmp
 echo "Attempting to create initial coverage profile"
-go test -covermode atomic -coverprofile=/tmp/coverage.out.tmp -coverpkg="${test_package_list}" ./...
+for pkg in $pkgs; do
+    go test -v -race -cover -coverpkg "$deps" -coverprofile=/tmp/profile.tmp "${pkg}"
+
+    if [ -f /tmp/profile.tmp ]; then
+        tail -n +2 /tmp/profile.tmp >> /tmp/coverage.out.tmp
+        rm /tmp/profile.tmp
+    fi
+done;
+
+# this was the old way and it did not work very well:
+# go test -covermode atomic -coverprofile=/tmp/coverage.out.tmp -coverpkg=./...
+
 # ignore protobuf files
-cat /tmp/coverage.out.tmp | grep -v ".pb.go" > /tmp/coverage.out
+grep -v ".pb.go" < /tmp/coverage.out.tmp > /tmp/coverage.out
 
 ignore_list=(
   '_examples/*/*'

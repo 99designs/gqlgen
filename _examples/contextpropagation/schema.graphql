@@ -1,0 +1,21 @@
+directive @goField(
+    forceResolver: Boolean
+    name: String
+    omittable: Boolean
+    type: String
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
+directive @withContext(value: String!) on FIELD_DEFINITION
+
+type Query {
+    testTodo: Todo! @withContext(value: "Some value")
+}
+
+type Todo {
+    text: String!
+    context: TodoContext!
+}
+
+type TodoContext {
+    value: String @goField(forceResolver: true)
+}

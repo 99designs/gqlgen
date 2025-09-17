@@ -110,6 +110,15 @@ func TestResolveField(t *testing.T) {
 				expected:           `"test value"`,
 				expectedCalls:      5,
 			},
+			{
+				name:    "should fail when field resolver returns invalid type",
+				nonNull: true,
+				// the tests are using string so int should fail
+				fieldResolverValue: 123,
+				expected:           "null",
+				expectedErr:        "input: testField unexpected type int from middleware/directive chain, should be string\n",
+				expectedCalls:      4,
+			},
 		},
 		commonResolveFieldTests...,
 	)
@@ -137,6 +146,15 @@ func TestResolveFieldStream(t *testing.T) {
 				marshalCalls:       []int{5, 6, 7},
 				expected:           `{"testField":"test one"}{"testField":"test two"}{"testField":"test three"}`,
 				expectedCalls:      7,
+			},
+			{
+				name:    "should fail when field resolver returns invalid type",
+				nonNull: true,
+				// the tests are using <-chan string so int should fail
+				fieldResolverValue: 123,
+				expected:           "null",
+				expectedErr:        "input: testField unexpected type int from middleware/directive chain, should be <-chan string\n",
+				expectedCalls:      4,
 			},
 		},
 		commonResolveFieldTests...,

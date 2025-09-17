@@ -32,7 +32,9 @@ func (ec *executionContext) _Slices_test1(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Slices_test1,
-		func(ctx context.Context) (any, error) { return obj.Test1, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Test1, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -61,7 +63,9 @@ func (ec *executionContext) _Slices_test2(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Slices_test2,
-		func(ctx context.Context) (any, error) { return obj.Test2, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Test2, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -90,7 +94,9 @@ func (ec *executionContext) _Slices_test3(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Slices_test3,
-		func(ctx context.Context) (any, error) { return obj.Test3, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Test3, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -119,7 +125,9 @@ func (ec *executionContext) _Slices_test4(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Slices_test4,
-		func(ctx context.Context) (any, error) { return obj.Test4, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Test4, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},

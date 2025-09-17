@@ -947,7 +947,9 @@ func (ec *executionContext) _Droid_id(ctx context.Context, field graphql.Collect
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Droid_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		nil,
 		ec.marshalNID2string,
 		true,
@@ -974,7 +976,9 @@ func (ec *executionContext) _Droid_name(ctx context.Context, field graphql.Colle
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Droid_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1081,7 +1085,9 @@ func (ec *executionContext) _Droid_appearsIn(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Droid_appearsIn,
-		func(ctx context.Context) (any, error) { return obj.AppearsIn, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.AppearsIn, nil
+		},
 		nil,
 		ec.marshalNEpisode2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐEpisodeᚄ,
 		true,
@@ -1108,7 +1114,9 @@ func (ec *executionContext) _Droid_primaryFunction(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Droid_primaryFunction,
-		func(ctx context.Context) (any, error) { return obj.PrimaryFunction, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PrimaryFunction, nil
+		},
 		nil,
 		ec.marshalOString2string,
 		true,
@@ -1265,7 +1273,9 @@ func (ec *executionContext) _FriendsEdge_cursor(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_FriendsEdge_cursor,
-		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
 		nil,
 		ec.marshalNID2string,
 		true,
@@ -1292,7 +1302,9 @@ func (ec *executionContext) _FriendsEdge_node(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_FriendsEdge_node,
-		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
 		nil,
 		ec.marshalOCharacter2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐCharacter,
 		true,
@@ -1319,7 +1331,9 @@ func (ec *executionContext) _Human_id(ctx context.Context, field graphql.Collect
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Human_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		nil,
 		ec.marshalNID2string,
 		true,
@@ -1346,7 +1360,9 @@ func (ec *executionContext) _Human_name(ctx context.Context, field graphql.Colle
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Human_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1414,7 +1430,9 @@ func (ec *executionContext) _Human_mass(ctx context.Context, field graphql.Colle
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Human_mass,
-		func(ctx context.Context) (any, error) { return obj.Mass, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Mass, nil
+		},
 		nil,
 		ec.marshalOFloat2float64,
 		true,
@@ -1521,7 +1539,9 @@ func (ec *executionContext) _Human_appearsIn(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Human_appearsIn,
-		func(ctx context.Context) (any, error) { return obj.AppearsIn, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.AppearsIn, nil
+		},
 		nil,
 		ec.marshalNEpisode2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐEpisodeᚄ,
 		true,
@@ -1720,7 +1740,9 @@ func (ec *executionContext) _PageInfo_startCursor(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PageInfo_startCursor,
-		func(ctx context.Context) (any, error) { return obj.StartCursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.StartCursor, nil
+		},
 		nil,
 		ec.marshalNID2string,
 		true,
@@ -1747,7 +1769,9 @@ func (ec *executionContext) _PageInfo_endCursor(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PageInfo_endCursor,
-		func(ctx context.Context) (any, error) { return obj.EndCursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.EndCursor, nil
+		},
 		nil,
 		ec.marshalNID2string,
 		true,
@@ -1774,7 +1798,9 @@ func (ec *executionContext) _PageInfo_hasNextPage(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PageInfo_hasNextPage,
-		func(ctx context.Context) (any, error) { return obj.HasNextPage, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.HasNextPage, nil
+		},
 		nil,
 		ec.marshalNBoolean2bool,
 		true,
@@ -2250,7 +2276,9 @@ func (ec *executionContext) _Review_stars(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Review_stars,
-		func(ctx context.Context) (any, error) { return obj.Stars, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Stars, nil
+		},
 		nil,
 		ec.marshalNInt2int,
 		true,
@@ -2277,7 +2305,9 @@ func (ec *executionContext) _Review_commentary(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Review_commentary,
-		func(ctx context.Context) (any, error) { return obj.Commentary, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Commentary, nil
+		},
 		nil,
 		ec.marshalOString2ᚖstring,
 		true,
@@ -2304,7 +2334,9 @@ func (ec *executionContext) _Review_time(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Review_time,
-		func(ctx context.Context) (any, error) { return obj.Time, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Time, nil
+		},
 		nil,
 		ec.marshalOTime2timeᚐTime,
 		true,
@@ -2331,7 +2363,9 @@ func (ec *executionContext) _Starship_id(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Starship_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		nil,
 		ec.marshalNID2string,
 		true,
@@ -2358,7 +2392,9 @@ func (ec *executionContext) _Starship_name(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Starship_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2426,7 +2462,9 @@ func (ec *executionContext) _Starship_history(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Starship_history,
-		func(ctx context.Context) (any, error) { return obj.History, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.History, nil
+		},
 		nil,
 		ec.marshalNInt2ᚕᚕintᚄ,
 		true,
@@ -2453,7 +2491,9 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2509,7 +2549,9 @@ func (ec *executionContext) ___Directive_isRepeatable(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_isRepeatable,
-		func(ctx context.Context) (any, error) { return obj.IsRepeatable, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.IsRepeatable, nil
+		},
 		nil,
 		ec.marshalNBoolean2bool,
 		true,
@@ -2536,7 +2578,9 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_locations,
-		func(ctx context.Context) (any, error) { return obj.Locations, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Locations, nil
+		},
 		nil,
 		ec.marshalN__DirectiveLocation2ᚕstringᚄ,
 		true,
@@ -2563,7 +2607,9 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_args,
-		func(ctx context.Context) (any, error) { return obj.Args, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Args, nil
+		},
 		nil,
 		ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ,
 		true,
@@ -2615,7 +2661,9 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext___EnumValue_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2729,7 +2777,9 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Field_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2785,7 +2835,9 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Field_args,
-		func(ctx context.Context) (any, error) { return obj.Args, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Args, nil
+		},
 		nil,
 		ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ,
 		true,
@@ -2837,7 +2889,9 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Field_type,
-		func(ctx context.Context) (any, error) { return obj.Type, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
 		nil,
 		ec.marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType,
 		true,
@@ -2946,7 +3000,9 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext___InputValue_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -3002,7 +3058,9 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext___InputValue_type,
-		func(ctx context.Context) (any, error) { return obj.Type, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
 		nil,
 		ec.marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType,
 		true,
@@ -3053,7 +3111,9 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext___InputValue_defaultValue,
-		func(ctx context.Context) (any, error) { return obj.DefaultValue, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DefaultValue, nil
+		},
 		nil,
 		ec.marshalOString2ᚖstring,
 		true,

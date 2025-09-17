@@ -84,7 +84,9 @@ func (ec *executionContext) _DefaultParametersMirror_falsyBoolean(ctx context.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_DefaultParametersMirror_falsyBoolean,
-		func(ctx context.Context) (any, error) { return obj.FalsyBoolean, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.FalsyBoolean, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -113,7 +115,9 @@ func (ec *executionContext) _DefaultParametersMirror_truthyBoolean(ctx context.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_DefaultParametersMirror_truthyBoolean,
-		func(ctx context.Context) (any, error) { return obj.TruthyBoolean, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TruthyBoolean, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},

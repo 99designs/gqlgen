@@ -32,7 +32,9 @@ func (ec *executionContext) _PtrToAnyContainer_ptrToAny(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PtrToAnyContainer_ptrToAny,
-		func(ctx context.Context) (any, error) { return obj.PtrToAny, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PtrToAny, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},

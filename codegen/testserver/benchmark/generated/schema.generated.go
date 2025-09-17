@@ -86,7 +86,9 @@ func (ec *executionContext) _PageInfo_hasNextPage(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PageInfo_hasNextPage,
-		func(ctx context.Context) (any, error) { return obj.HasNextPage, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.HasNextPage, nil
+		},
 		nil,
 		ec.marshalNBoolean2bool,
 		true,
@@ -113,7 +115,9 @@ func (ec *executionContext) _PageInfo_hasPreviousPage(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PageInfo_hasPreviousPage,
-		func(ctx context.Context) (any, error) { return obj.HasPreviousPage, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.HasPreviousPage, nil
+		},
 		nil,
 		ec.marshalNBoolean2bool,
 		true,
@@ -140,7 +144,9 @@ func (ec *executionContext) _PageInfo_startCursor(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PageInfo_startCursor,
-		func(ctx context.Context) (any, error) { return obj.StartCursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.StartCursor, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -167,7 +173,9 @@ func (ec *executionContext) _PageInfo_endCursor(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PageInfo_endCursor,
-		func(ctx context.Context) (any, error) { return obj.EndCursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.EndCursor, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -351,7 +359,9 @@ func (ec *executionContext) _User_firstName(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_User_firstName,
-		func(ctx context.Context) (any, error) { return obj.FirstName, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.FirstName, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -378,7 +388,9 @@ func (ec *executionContext) _User_lastName(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_User_lastName,
-		func(ctx context.Context) (any, error) { return obj.LastName, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.LastName, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -405,7 +417,9 @@ func (ec *executionContext) _User_email(ctx context.Context, field graphql.Colle
 		ec.OperationContext,
 		field,
 		ec.fieldContext_User_email,
-		func(ctx context.Context) (any, error) { return obj.Email, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Email, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -432,7 +446,9 @@ func (ec *executionContext) _UserConnection_edges(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_UserConnection_edges,
-		func(ctx context.Context) (any, error) { return obj.Edges, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
 		nil,
 		ec.marshalNUserEdge2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋbenchmarkᚋgeneratedᚋmodelsᚐUserEdgeᚄ,
 		true,
@@ -465,7 +481,9 @@ func (ec *executionContext) _UserConnection_pageInfo(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_UserConnection_pageInfo,
-		func(ctx context.Context) (any, error) { return obj.PageInfo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PageInfo, nil
+		},
 		nil,
 		ec.marshalNPageInfo2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋbenchmarkᚋgeneratedᚋmodelsᚐPageInfo,
 		true,
@@ -502,7 +520,9 @@ func (ec *executionContext) _UserConnection_totalCount(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext_UserConnection_totalCount,
-		func(ctx context.Context) (any, error) { return obj.TotalCount, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TotalCount, nil
+		},
 		nil,
 		ec.marshalNInt2int,
 		true,
@@ -529,7 +549,9 @@ func (ec *executionContext) _UserEdge_cursor(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_UserEdge_cursor,
-		func(ctx context.Context) (any, error) { return obj.Cursor, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -556,7 +578,9 @@ func (ec *executionContext) _UserEdge_node(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_UserEdge_node,
-		func(ctx context.Context) (any, error) { return obj.Node, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
 		nil,
 		ec.marshalNUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋbenchmarkᚋgeneratedᚋmodelsᚐUser,
 		true,

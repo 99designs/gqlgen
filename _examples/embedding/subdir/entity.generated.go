@@ -33,7 +33,9 @@ func (ec *executionContext) __Service_sdl(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext__Service_sdl,
-		func(ctx context.Context) (any, error) { return obj.SDL, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.SDL, nil
+		},
 		nil,
 		ec.marshalOString2string,
 		true,

@@ -32,7 +32,9 @@ func (ec *executionContext) _LoopA_b(ctx context.Context, field graphql.Collecte
 		ec.OperationContext,
 		field,
 		ec.fieldContext_LoopA_b,
-		func(ctx context.Context) (any, error) { return obj.B, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.B, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -65,7 +67,9 @@ func (ec *executionContext) _LoopB_a(ctx context.Context, field graphql.Collecte
 		ec.OperationContext,
 		field,
 		ec.fieldContext_LoopB_a,
-		func(ctx context.Context) (any, error) { return obj.A, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.A, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},

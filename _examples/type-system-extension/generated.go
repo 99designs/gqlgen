@@ -377,10 +377,11 @@ func (ec *executionContext) _MyMutation_createTodo(ctx context.Context, field gr
 		field,
 		ec.fieldContext_MyMutation_createTodo,
 		func(ctx context.Context) (any, error) {
-			directive0 := func(ctx context.Context) (any, error) {
-				fc := graphql.GetFieldContext(ctx)
-				return ec.resolvers.MyMutation().CreateTodo(ctx, fc.Args["todo"].(TodoInput))
-			}
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.MyMutation().CreateTodo(ctx, fc.Args["todo"].(TodoInput))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
 				if ec.directives.ObjectLogging == nil {
@@ -390,19 +391,9 @@ func (ec *executionContext) _MyMutation_createTodo(ctx context.Context, field gr
 				return ec.directives.ObjectLogging(ctx, nil, directive0)
 			}
 
-			tmp, err := directive1(ctx)
-			if err != nil {
-				return nil, graphql.ErrorOnPath(ctx, err)
-			}
-			if tmp == nil {
-				return nil, nil
-			}
-			if data, ok := tmp.(*Todo); ok {
-				return data, nil
-			}
-			return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/_examples/type-system-extension.Todo`, tmp)
+			next = directive1
+			return next
 		},
-		nil,
 		ec.marshalNTodo2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋtypeᚑsystemᚑextensionᚐTodo,
 		true,
 		true,
@@ -450,10 +441,10 @@ func (ec *executionContext) _MyQuery_todos(ctx context.Context, field graphql.Co
 		field,
 		ec.fieldContext_MyQuery_todos,
 		func(ctx context.Context) (any, error) {
-			directive0 := func(ctx context.Context) (any, error) {
-
-				return ec.resolvers.MyQuery().Todos(ctx)
-			}
+			return ec.resolvers.MyQuery().Todos(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
 				if ec.directives.ObjectLogging == nil {
@@ -463,19 +454,9 @@ func (ec *executionContext) _MyQuery_todos(ctx context.Context, field graphql.Co
 				return ec.directives.ObjectLogging(ctx, nil, directive0)
 			}
 
-			tmp, err := directive1(ctx)
-			if err != nil {
-				return nil, graphql.ErrorOnPath(ctx, err)
-			}
-			if tmp == nil {
-				return nil, nil
-			}
-			if data, ok := tmp.([]*Todo); ok {
-				return data, nil
-			}
-			return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/_examples/type-system-extension.Todo`, tmp)
+			next = directive1
+			return next
 		},
-		nil,
 		ec.marshalNTodo2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋtypeᚑsystemᚑextensionᚐTodoᚄ,
 		true,
 		true,
@@ -512,10 +493,11 @@ func (ec *executionContext) _MyQuery_todo(ctx context.Context, field graphql.Col
 		field,
 		ec.fieldContext_MyQuery_todo,
 		func(ctx context.Context) (any, error) {
-			directive0 := func(ctx context.Context) (any, error) {
-				fc := graphql.GetFieldContext(ctx)
-				return ec.resolvers.MyQuery().Todo(ctx, fc.Args["id"].(string))
-			}
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.MyQuery().Todo(ctx, fc.Args["id"].(string))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
 				if ec.directives.ObjectLogging == nil {
@@ -525,19 +507,9 @@ func (ec *executionContext) _MyQuery_todo(ctx context.Context, field graphql.Col
 				return ec.directives.ObjectLogging(ctx, nil, directive0)
 			}
 
-			tmp, err := directive1(ctx)
-			if err != nil {
-				return nil, graphql.ErrorOnPath(ctx, err)
-			}
-			if tmp == nil {
-				return nil, nil
-			}
-			if data, ok := tmp.(*Todo); ok {
-				return data, nil
-			}
-			return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/_examples/type-system-extension.Todo`, tmp)
+			next = directive1
+			return next
 		},
-		nil,
 		ec.marshalOTodo2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋtypeᚑsystemᚑextensionᚐTodo,
 		true,
 		false,
@@ -692,7 +664,9 @@ func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.Collecte
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Todo_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		nil,
 		ec.marshalNID2string,
 		true,
@@ -719,7 +693,9 @@ func (ec *executionContext) _Todo_text(ctx context.Context, field graphql.Collec
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Todo_text,
-		func(ctx context.Context) (any, error) { return obj.Text, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Text, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -746,7 +722,9 @@ func (ec *executionContext) _Todo_state(ctx context.Context, field graphql.Colle
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Todo_state,
-		func(ctx context.Context) (any, error) { return obj.State, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.State, nil
+		},
 		nil,
 		ec.marshalNState2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋtypeᚑsystemᚑextensionᚐState,
 		true,
@@ -774,9 +752,10 @@ func (ec *executionContext) _Todo_verified(ctx context.Context, field graphql.Co
 		field,
 		ec.fieldContext_Todo_verified,
 		func(ctx context.Context) (any, error) {
-			directive0 := func(ctx context.Context) (any, error) {
-				return obj.Verified, nil
-			}
+			return obj.Verified, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
 				if ec.directives.FieldLogging == nil {
@@ -786,19 +765,9 @@ func (ec *executionContext) _Todo_verified(ctx context.Context, field graphql.Co
 				return ec.directives.FieldLogging(ctx, obj, directive0)
 			}
 
-			tmp, err := directive1(ctx)
-			if err != nil {
-				return nil, graphql.ErrorOnPath(ctx, err)
-			}
-			if tmp == nil {
-				return nil, nil
-			}
-			if data, ok := tmp.(bool); ok {
-				return data, nil
-			}
-			return nil, fmt.Errorf(`unexpected type %T from directive, should be bool`, tmp)
+			next = directive1
+			return next
 		},
-		nil,
 		ec.marshalNBoolean2bool,
 		true,
 		true,
@@ -824,7 +793,9 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -880,7 +851,9 @@ func (ec *executionContext) ___Directive_isRepeatable(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_isRepeatable,
-		func(ctx context.Context) (any, error) { return obj.IsRepeatable, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.IsRepeatable, nil
+		},
 		nil,
 		ec.marshalNBoolean2bool,
 		true,
@@ -907,7 +880,9 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_locations,
-		func(ctx context.Context) (any, error) { return obj.Locations, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Locations, nil
+		},
 		nil,
 		ec.marshalN__DirectiveLocation2ᚕstringᚄ,
 		true,
@@ -934,7 +909,9 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_args,
-		func(ctx context.Context) (any, error) { return obj.Args, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Args, nil
+		},
 		nil,
 		ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ,
 		true,
@@ -986,7 +963,9 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext___EnumValue_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1100,7 +1079,9 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Field_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1156,7 +1137,9 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Field_args,
-		func(ctx context.Context) (any, error) { return obj.Args, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Args, nil
+		},
 		nil,
 		ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ,
 		true,
@@ -1208,7 +1191,9 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Field_type,
-		func(ctx context.Context) (any, error) { return obj.Type, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
 		nil,
 		ec.marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType,
 		true,
@@ -1317,7 +1302,9 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext___InputValue_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1373,7 +1360,9 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext___InputValue_type,
-		func(ctx context.Context) (any, error) { return obj.Type, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
 		nil,
 		ec.marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType,
 		true,
@@ -1424,7 +1413,9 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext___InputValue_defaultValue,
-		func(ctx context.Context) (any, error) { return obj.DefaultValue, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DefaultValue, nil
+		},
 		nil,
 		ec.marshalOString2ᚖstring,
 		true,

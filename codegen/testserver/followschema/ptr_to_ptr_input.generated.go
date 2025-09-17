@@ -33,7 +33,9 @@ func (ec *executionContext) _PtrToPtrInner_key(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PtrToPtrInner_key,
-		func(ctx context.Context) (any, error) { return obj.Key, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Key, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -62,7 +64,9 @@ func (ec *executionContext) _PtrToPtrInner_value(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PtrToPtrInner_value,
-		func(ctx context.Context) (any, error) { return obj.Value, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Value, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -91,7 +95,9 @@ func (ec *executionContext) _PtrToPtrOuter_name(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PtrToPtrOuter_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -120,7 +126,9 @@ func (ec *executionContext) _PtrToPtrOuter_inner(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PtrToPtrOuter_inner,
-		func(ctx context.Context) (any, error) { return obj.Inner, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Inner, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -155,7 +163,9 @@ func (ec *executionContext) _PtrToPtrOuter_stupidInner(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PtrToPtrOuter_stupidInner,
-		func(ctx context.Context) (any, error) { return obj.StupidInner, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.StupidInner, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},

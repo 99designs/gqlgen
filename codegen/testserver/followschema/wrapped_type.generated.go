@@ -148,7 +148,9 @@ func (ec *executionContext) _WrappedStruct_name(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_WrappedStruct_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -177,7 +179,9 @@ func (ec *executionContext) _WrappedStruct_desc(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_WrappedStruct_desc,
-		func(ctx context.Context) (any, error) { return obj.Desc, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Desc, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},

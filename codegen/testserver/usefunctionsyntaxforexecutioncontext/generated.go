@@ -536,7 +536,9 @@ func _Admin_id(ctx context.Context, ec *executionContext, field graphql.Collecte
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_Admin_id(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNID2string(ctx, ec, selections, v)
@@ -567,7 +569,9 @@ func _Admin_name(ctx context.Context, ec *executionContext, field graphql.Collec
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_Admin_name(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -598,7 +602,9 @@ func _Admin_permissions(ctx context.Context, ec *executionContext, field graphql
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_Admin_permissions(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Permissions, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Permissions, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
 			return marshalNString2ᚕstringᚄ(ctx, ec, selections, v)
@@ -629,7 +635,9 @@ func _Admin_createdAt(ctx context.Context, ec *executionContext, field graphql.C
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_Admin_createdAt(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.CreatedAt, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
 			return marshalODate2ᚖstring(ctx, ec, selections, v)
@@ -661,10 +669,11 @@ func _Mutation_createUser(ctx context.Context, ec *executionContext, field graph
 			return fieldContext_Mutation_createUser(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
-			directive0 := func(ctx context.Context) (any, error) {
-				fc := graphql.GetFieldContext(ctx)
-				return ec.resolvers.Mutation().CreateUser(ctx, fc.Args["input"].(CreateUserInput))
-			}
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().CreateUser(ctx, fc.Args["input"].(CreateUserInput))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
 				message, err := unmarshalOString2ᚖstring(ctx, ec, "Creating a user")
@@ -679,19 +688,9 @@ func _Mutation_createUser(ctx context.Context, ec *executionContext, field graph
 				return ec.directives.Log(ctx, nil, directive0, message)
 			}
 
-			tmp, err := directive1(ctx)
-			if err != nil {
-				return nil, graphql.ErrorOnPath(ctx, err)
-			}
-			if tmp == nil {
-				return nil, nil
-			}
-			if data, ok := tmp.(*User); ok {
-				return data, nil
-			}
-			return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/codegen/testserver/usefunctionsyntaxforexecutioncontext.User`, tmp)
+			next = directive1
+			return next
 		},
-		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *User) graphql.Marshaler {
 			return marshalNUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐUser(ctx, ec, selections, v)
 		},
@@ -747,10 +746,11 @@ func _Mutation_deleteUser(ctx context.Context, ec *executionContext, field graph
 			return fieldContext_Mutation_deleteUser(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
-			directive0 := func(ctx context.Context) (any, error) {
-				fc := graphql.GetFieldContext(ctx)
-				return ec.resolvers.Mutation().DeleteUser(ctx, fc.Args["id"].(string))
-			}
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Mutation().DeleteUser(ctx, fc.Args["id"].(string))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
 				message, err := unmarshalOString2ᚖstring(ctx, ec, "Deleting a user")
@@ -765,19 +765,9 @@ func _Mutation_deleteUser(ctx context.Context, ec *executionContext, field graph
 				return ec.directives.Log(ctx, nil, directive0, message)
 			}
 
-			tmp, err := directive1(ctx)
-			if err != nil {
-				return nil, graphql.ErrorOnPath(ctx, err)
-			}
-			if tmp == nil {
-				return nil, nil
-			}
-			if data, ok := tmp.(*MutationResponse); ok {
-				return data, nil
-			}
-			return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/codegen/testserver/usefunctionsyntaxforexecutioncontext.MutationResponse`, tmp)
+			next = directive1
+			return next
 		},
-		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *MutationResponse) graphql.Marshaler {
 			return marshalNMutationResponse2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐMutationResponse(ctx, ec, selections, v)
 		},
@@ -824,7 +814,9 @@ func _MutationResponse_success(ctx context.Context, ec *executionContext, field 
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_MutationResponse_success(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Success, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Success, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
 			return marshalNBoolean2bool(ctx, ec, selections, v)
@@ -855,7 +847,9 @@ func _MutationResponse_message(ctx context.Context, ec *executionContext, field 
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_MutationResponse_message(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Message, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Message, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
 			return marshalOString2ᚖstring(ctx, ec, selections, v)
@@ -887,10 +881,11 @@ func _Query_getUser(ctx context.Context, ec *executionContext, field graphql.Col
 			return fieldContext_Query_getUser(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
-			directive0 := func(ctx context.Context) (any, error) {
-				fc := graphql.GetFieldContext(ctx)
-				return ec.resolvers.Query().GetUser(ctx, fc.Args["id"].(string))
-			}
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().GetUser(ctx, fc.Args["id"].(string))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
 				message, err := unmarshalOString2ᚖstring(ctx, ec, "Fetching a user")
@@ -905,19 +900,9 @@ func _Query_getUser(ctx context.Context, ec *executionContext, field graphql.Col
 				return ec.directives.Log(ctx, nil, directive0, message)
 			}
 
-			tmp, err := directive1(ctx)
-			if err != nil {
-				return nil, graphql.ErrorOnPath(ctx, err)
-			}
-			if tmp == nil {
-				return nil, nil
-			}
-			if data, ok := tmp.(*User); ok {
-				return data, nil
-			}
-			return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/codegen/testserver/usefunctionsyntaxforexecutioncontext.User`, tmp)
+			next = directive1
+			return next
 		},
-		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *User) graphql.Marshaler {
 			return marshalOUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐUser(ctx, ec, selections, v)
 		},
@@ -973,10 +958,11 @@ func _Query_listUsers(ctx context.Context, ec *executionContext, field graphql.C
 			return fieldContext_Query_listUsers(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
-			directive0 := func(ctx context.Context) (any, error) {
-				fc := graphql.GetFieldContext(ctx)
-				return ec.resolvers.Query().ListUsers(ctx, fc.Args["filter"].(*UserFilter))
-			}
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().ListUsers(ctx, fc.Args["filter"].(*UserFilter))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
 				message, err := unmarshalOString2ᚖstring(ctx, ec, "Listing users")
@@ -991,19 +977,9 @@ func _Query_listUsers(ctx context.Context, ec *executionContext, field graphql.C
 				return ec.directives.Log(ctx, nil, directive0, message)
 			}
 
-			tmp, err := directive1(ctx)
-			if err != nil {
-				return nil, graphql.ErrorOnPath(ctx, err)
-			}
-			if tmp == nil {
-				return nil, nil
-			}
-			if data, ok := tmp.([]*User); ok {
-				return data, nil
-			}
-			return nil, fmt.Errorf(`unexpected type %T from directive, should be []*github.com/99designs/gqlgen/codegen/testserver/usefunctionsyntaxforexecutioncontext.User`, tmp)
+			next = directive1
+			return next
 		},
-		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []*User) graphql.Marshaler {
 			return marshalNUser2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐUserᚄ(ctx, ec, selections, v)
 		},
@@ -1059,10 +1035,11 @@ func _Query_getEntity(ctx context.Context, ec *executionContext, field graphql.C
 			return fieldContext_Query_getEntity(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
-			directive0 := func(ctx context.Context) (any, error) {
-				fc := graphql.GetFieldContext(ctx)
-				return ec.resolvers.Query().GetEntity(ctx, fc.Args["id"].(string))
-			}
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().GetEntity(ctx, fc.Args["id"].(string))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
 				message, err := unmarshalOString2ᚖstring(ctx, ec, "Fetching an entity")
@@ -1077,19 +1054,9 @@ func _Query_getEntity(ctx context.Context, ec *executionContext, field graphql.C
 				return ec.directives.Log(ctx, nil, directive0, message)
 			}
 
-			tmp, err := directive1(ctx)
-			if err != nil {
-				return nil, graphql.ErrorOnPath(ctx, err)
-			}
-			if tmp == nil {
-				return nil, nil
-			}
-			if data, ok := tmp.(Entity); ok {
-				return data, nil
-			}
-			return nil, fmt.Errorf(`unexpected type %T from directive, should be github.com/99designs/gqlgen/codegen/testserver/usefunctionsyntaxforexecutioncontext.Entity`, tmp)
+			next = directive1
+			return next
 		},
-		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v Entity) graphql.Marshaler {
 			return marshalOEntity2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐEntity(ctx, ec, selections, v)
 		},
@@ -1247,10 +1214,10 @@ func _Subscription_userCreated(ctx context.Context, ec *executionContext, field 
 			return fieldContext_Subscription_userCreated(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
-			directive0 := func(ctx context.Context) (any, error) {
-
-				return ec.resolvers.Subscription().UserCreated(ctx)
-			}
+			return ec.resolvers.Subscription().UserCreated(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
 				message, err := unmarshalOString2ᚖstring(ctx, ec, "User created subscription")
@@ -1265,19 +1232,9 @@ func _Subscription_userCreated(ctx context.Context, ec *executionContext, field 
 				return ec.directives.Log(ctx, nil, directive0, message)
 			}
 
-			tmp, err := directive1(ctx)
-			if err != nil {
-				return nil, graphql.ErrorOnPath(ctx, err)
-			}
-			if tmp == nil {
-				return nil, nil
-			}
-			if data, ok := tmp.(<-chan *User); ok {
-				return data, nil
-			}
-			return nil, fmt.Errorf(`unexpected type %T from directive, should be <-chan *github.com/99designs/gqlgen/codegen/testserver/usefunctionsyntaxforexecutioncontext.User`, tmp)
+			next = directive1
+			return next
 		},
-		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *User) graphql.Marshaler {
 			return marshalNUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐUser(ctx, ec, selections, v)
 		},
@@ -1321,7 +1278,9 @@ func _User_id(ctx context.Context, ec *executionContext, field graphql.Collected
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_User_id(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNID2string(ctx, ec, selections, v)
@@ -1352,7 +1311,9 @@ func _User_name(ctx context.Context, ec *executionContext, field graphql.Collect
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_User_name(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -1383,7 +1344,9 @@ func _User_email(ctx context.Context, ec *executionContext, field graphql.Collec
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_User_email(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Email, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Email, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -1414,7 +1377,9 @@ func _User_age(ctx context.Context, ec *executionContext, field graphql.Collecte
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_User_age(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Age, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Age, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *int) graphql.Marshaler {
 			return marshalOInt2ᚖint(ctx, ec, selections, v)
@@ -1445,7 +1410,9 @@ func _User_role(ctx context.Context, ec *executionContext, field graphql.Collect
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_User_role(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Role, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Role, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v RoleModel) graphql.Marshaler {
 			return marshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐRoleModel(ctx, ec, selections, v)
@@ -1476,7 +1443,9 @@ func _User_createdAt(ctx context.Context, ec *executionContext, field graphql.Co
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_User_createdAt(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.CreatedAt, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.CreatedAt, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
 			return marshalODate2ᚖstring(ctx, ec, selections, v)
@@ -1507,7 +1476,9 @@ func ___Directive_name(ctx context.Context, ec *executionContext, field graphql.
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext___Directive_name(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -1571,7 +1542,9 @@ func ___Directive_isRepeatable(ctx context.Context, ec *executionContext, field 
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext___Directive_isRepeatable(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.IsRepeatable, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.IsRepeatable, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
 			return marshalNBoolean2bool(ctx, ec, selections, v)
@@ -1602,7 +1575,9 @@ func ___Directive_locations(ctx context.Context, ec *executionContext, field gra
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext___Directive_locations(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Locations, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Locations, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
 			return marshalN__DirectiveLocation2ᚕstringᚄ(ctx, ec, selections, v)
@@ -1633,7 +1608,9 @@ func ___Directive_args(ctx context.Context, ec *executionContext, field graphql.
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext___Directive_args(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Args, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Args, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
 			return marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx, ec, selections, v)
@@ -1689,7 +1666,9 @@ func ___EnumValue_name(ctx context.Context, ec *executionContext, field graphql.
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext___EnumValue_name(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -1819,7 +1798,9 @@ func ___Field_name(ctx context.Context, ec *executionContext, field graphql.Coll
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext___Field_name(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -1883,7 +1864,9 @@ func ___Field_args(ctx context.Context, ec *executionContext, field graphql.Coll
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext___Field_args(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Args, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Args, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
 			return marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx, ec, selections, v)
@@ -1939,7 +1922,9 @@ func ___Field_type(ctx context.Context, ec *executionContext, field graphql.Coll
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext___Field_type(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Type, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *introspection.Type) graphql.Marshaler {
 			return marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, ec, selections, v)
@@ -2060,7 +2045,9 @@ func ___InputValue_name(ctx context.Context, ec *executionContext, field graphql
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext___InputValue_name(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -2124,7 +2111,9 @@ func ___InputValue_type(ctx context.Context, ec *executionContext, field graphql
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext___InputValue_type(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Type, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *introspection.Type) graphql.Marshaler {
 			return marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, ec, selections, v)
@@ -2179,7 +2168,9 @@ func ___InputValue_defaultValue(ctx context.Context, ec *executionContext, field
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext___InputValue_defaultValue(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.DefaultValue, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DefaultValue, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
 			return marshalOString2ᚖstring(ctx, ec, selections, v)

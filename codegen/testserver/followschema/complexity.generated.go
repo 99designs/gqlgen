@@ -36,7 +36,9 @@ func (ec *executionContext) _OverlappingFields_oneFoo(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_OverlappingFields_oneFoo,
-		func(ctx context.Context) (any, error) { return obj.Foo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Foo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -65,7 +67,9 @@ func (ec *executionContext) _OverlappingFields_twoFoo(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_OverlappingFields_twoFoo,
-		func(ctx context.Context) (any, error) { return obj.Foo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Foo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -125,7 +129,9 @@ func (ec *executionContext) _OverlappingFields_newFoo(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_OverlappingFields_newFoo,
-		func(ctx context.Context) (any, error) { return obj.NewFoo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.NewFoo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -154,7 +160,9 @@ func (ec *executionContext) _OverlappingFields_new_foo(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext_OverlappingFields_new_foo,
-		func(ctx context.Context) (any, error) { return obj.NewFoo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.NewFoo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},

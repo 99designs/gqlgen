@@ -131,7 +131,9 @@ func (ec *executionContext) _Cat_species(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Cat_species,
-		func(ctx context.Context) (any, error) { return obj.Species, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Species, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -160,7 +162,9 @@ func (ec *executionContext) _Cat_size(ctx context.Context, field graphql.Collect
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Cat_size,
-		func(ctx context.Context) (any, error) { return obj.Size, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Size, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -195,7 +199,9 @@ func (ec *executionContext) _Cat_catBreed(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Cat_catBreed,
-		func(ctx context.Context) (any, error) { return obj.CatBreed, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.CatBreed, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -224,7 +230,9 @@ func (ec *executionContext) _Circle_radius(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Circle_radius,
-		func(ctx context.Context) (any, error) { return obj.Radius, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Radius, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -284,7 +292,9 @@ func (ec *executionContext) _Circle_coordinates(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Circle_coordinates,
-		func(ctx context.Context) (any, error) { return obj.Coordinates, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Coordinates, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -319,7 +329,9 @@ func (ec *executionContext) _ConcreteNodeA_id(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ConcreteNodeA_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -379,7 +391,9 @@ func (ec *executionContext) _ConcreteNodeA_name(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ConcreteNodeA_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -470,7 +484,9 @@ func (ec *executionContext) _Coordinates_x(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Coordinates_x,
-		func(ctx context.Context) (any, error) { return obj.X, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.X, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -499,7 +515,9 @@ func (ec *executionContext) _Coordinates_y(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Coordinates_y,
-		func(ctx context.Context) (any, error) { return obj.Y, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Y, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -528,7 +546,9 @@ func (ec *executionContext) _Dog_species(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Dog_species,
-		func(ctx context.Context) (any, error) { return obj.Species, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Species, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -557,7 +577,9 @@ func (ec *executionContext) _Dog_size(ctx context.Context, field graphql.Collect
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Dog_size,
-		func(ctx context.Context) (any, error) { return obj.Size, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Size, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -592,7 +614,9 @@ func (ec *executionContext) _Dog_dogBreed(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Dog_dogBreed,
-		func(ctx context.Context) (any, error) { return obj.DogBreed, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DogBreed, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -621,7 +645,9 @@ func (ec *executionContext) _Horse_species(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Horse_species,
-		func(ctx context.Context) (any, error) { return obj.Species, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Species, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -650,7 +676,9 @@ func (ec *executionContext) _Horse_size(ctx context.Context, field graphql.Colle
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Horse_size,
-		func(ctx context.Context) (any, error) { return obj.Size, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Size, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -685,7 +713,9 @@ func (ec *executionContext) _Horse_horseBreed(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Horse_horseBreed,
-		func(ctx context.Context) (any, error) { return obj.HorseBreed, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.HorseBreed, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -714,7 +744,9 @@ func (ec *executionContext) _Rectangle_length(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Rectangle_length,
-		func(ctx context.Context) (any, error) { return obj.Length, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Length, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -743,7 +775,9 @@ func (ec *executionContext) _Rectangle_width(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Rectangle_width,
-		func(ctx context.Context) (any, error) { return obj.Width, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Width, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -803,7 +837,9 @@ func (ec *executionContext) _Rectangle_coordinates(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Rectangle_coordinates,
-		func(ctx context.Context) (any, error) { return obj.Coordinates, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Coordinates, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -838,7 +874,9 @@ func (ec *executionContext) _Size_height(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Size_height,
-		func(ctx context.Context) (any, error) { return obj.Height, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Height, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -867,7 +905,9 @@ func (ec *executionContext) _Size_weight(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Size_weight,
-		func(ctx context.Context) (any, error) { return obj.Weight, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Weight, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},

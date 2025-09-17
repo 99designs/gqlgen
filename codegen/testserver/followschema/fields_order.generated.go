@@ -36,7 +36,9 @@ func (ec *executionContext) _FieldsOrderPayload_firstFieldValue(ctx context.Cont
 		ec.OperationContext,
 		field,
 		ec.fieldContext_FieldsOrderPayload_firstFieldValue,
-		func(ctx context.Context) (any, error) { return obj.FirstFieldValue, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.FirstFieldValue, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},

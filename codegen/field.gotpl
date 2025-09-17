@@ -52,18 +52,29 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 			{{- else -}}
 			ec.{{ $field.FieldContextFunc }},
 			{{- end }}
-			{{- template "field" (dict "Field" $field "UseFunctionSyntaxForExecutionContext" $useFunctionSyntaxForExecutionContext) -}}
-			{{- if  $.AllDirectives.LocationDirectives "FIELD" -}}
-				func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
-					{{ if $useFunctionSyntaxForExecutionContext -}}
-					return _fieldMiddleware(ctx, ec, {{if $object.Root}}nil{{else}}obj{{end}}, next)
-					{{- else -}}
-					return ec._fieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, next)
-					{{- end }}
-				},
-			{{- else -}}
-				nil,
-			{{- end }}
+			func(ctx context.Context) (any, error) {
+				{{- template "fieldDefinition" $field }}
+			},
+			{{if or ($.AllDirectives.LocationDirectives "FIELD") $field.HasDirectives -}}
+			func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+				{{- if $field.HasDirectives -}}
+				directive0 := next
+				{{ template "implDirectives" (dict "Field" $field "UseFunctionSyntaxForExecutionContext" $useFunctionSyntaxForExecutionContext) }}
+				next = directive{{$field.ImplDirectives|len}}
+				{{end}}
+				{{- if  $.AllDirectives.LocationDirectives "FIELD" -}}
+						{{ if $useFunctionSyntaxForExecutionContext -}}
+						return _fieldMiddleware(ctx, ec, {{if $object.Root}}nil{{else}}obj{{end}}, next)
+						{{- else -}}
+						return ec._fieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, next)
+						{{- end }}
+				{{- else -}}
+				return next
+				{{end -}}
+			},
+			{{else -}}
+		    nil,
+			{{end -}}
 			{{ if $useFunctionSyntaxForExecutionContext -}}
 			func(ctx context.Context, selections ast.SelectionSet, v {{ $field.TypeReference.GO | ref }}) graphql.Marshaler { return {{ $field.TypeReference.MarshalFunc }}(ctx, ec, selections, v) },
 			{{- else -}}
@@ -128,31 +139,6 @@ func (ec *executionContext) {{ $field.FieldContextFunc }}({{ if not $field.Args 
 }
 
 {{- end }}{{- end}}
-
-{{ define "field" }}
-	func(ctx context.Context) (any, error) {
-		{{- $useFunctionSyntaxForExecutionContext := .UseFunctionSyntaxForExecutionContext -}}
-		{{- if .Field.HasDirectives -}}
-			directive0 := func(ctx context.Context) (any, error) {
-				{{ template "fieldDefinition" .Field }}
-			}
-			{{ template "implDirectives" (dict "Field" .Field "UseFunctionSyntaxForExecutionContext" $useFunctionSyntaxForExecutionContext) }}
-			tmp, err := directive{{.Field.ImplDirectives|len}}(ctx)
-			if err != nil {
-				return nil, graphql.ErrorOnPath(ctx, err)
-			}
-			if tmp == nil {
-				return nil, nil
-			}
-			if data, ok := tmp.({{if .Field.Stream}}<-chan {{end}}{{ .Field.TypeReference.GO | ref }}) ; ok {
-				return data, nil
-			}
-			return nil, fmt.Errorf(`unexpected type %T from directive, should be {{if .Field.Stream}}<-chan {{end}}{{ .Field.TypeReference.GO }}`, tmp)
-		{{- else -}}
-			{{ template "fieldDefinition" .Field }}
-		{{- end -}}
-	},
-{{ end }}
 
 {{ define "fieldDefinition" }}
 	{{- if or .IsResolver .IsMethod -}}

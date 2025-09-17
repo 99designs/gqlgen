@@ -32,7 +32,9 @@ func (ec *executionContext) _PtrToSliceContainer_ptrToSlice(ctx context.Context,
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PtrToSliceContainer_ptrToSlice,
-		func(ctx context.Context) (any, error) { return obj.PtrToSlice, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PtrToSlice, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},

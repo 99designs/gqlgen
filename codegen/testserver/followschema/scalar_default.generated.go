@@ -32,7 +32,9 @@ func (ec *executionContext) _EmbeddedDefaultScalar_value(ctx context.Context, fi
 		ec.OperationContext,
 		field,
 		ec.fieldContext_EmbeddedDefaultScalar_value,
-		func(ctx context.Context) (any, error) { return obj.Value, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Value, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},

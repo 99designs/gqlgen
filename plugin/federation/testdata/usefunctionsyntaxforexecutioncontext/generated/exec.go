@@ -1878,7 +1878,9 @@ func _Hello_name(ctx context.Context, ec *executionContext, field graphql.Collec
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_Hello_name(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -1909,7 +1911,9 @@ func _Hello_secondary(ctx context.Context, ec *executionContext, field graphql.C
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_Hello_secondary(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Secondary, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Secondary, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -1940,7 +1944,9 @@ func _HelloMultiSingleKeys_key1(ctx context.Context, ec *executionContext, field
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_HelloMultiSingleKeys_key1(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Key1, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Key1, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -1971,7 +1977,9 @@ func _HelloMultiSingleKeys_key2(ctx context.Context, ec *executionContext, field
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_HelloMultiSingleKeys_key2(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Key2, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Key2, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -2002,7 +2010,9 @@ func _HelloWithErrors_name(ctx context.Context, ec *executionContext, field grap
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_HelloWithErrors_name(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -2033,7 +2043,9 @@ func _MultiHello_name(ctx context.Context, ec *executionContext, field graphql.C
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_MultiHello_name(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -2064,7 +2076,9 @@ func _MultiHelloMultipleRequires_name(ctx context.Context, ec *executionContext,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_MultiHelloMultipleRequires_name(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -2095,7 +2109,9 @@ func _MultiHelloMultipleRequires_key1(ctx context.Context, ec *executionContext,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_MultiHelloMultipleRequires_key1(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Key1, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Key1, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -2126,7 +2142,9 @@ func _MultiHelloMultipleRequires_key2(ctx context.Context, ec *executionContext,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_MultiHelloMultipleRequires_key2(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Key2, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Key2, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -2157,7 +2175,9 @@ func _MultiHelloMultipleRequires_key3(ctx context.Context, ec *executionContext,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_MultiHelloMultipleRequires_key3(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Key3, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Key3, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -2188,7 +2208,9 @@ func _MultiHelloRequires_name(ctx context.Context, ec *executionContext, field g
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_MultiHelloRequires_name(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -2219,7 +2241,9 @@ func _MultiHelloRequires_key1(ctx context.Context, ec *executionContext, field g
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_MultiHelloRequires_key1(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Key1, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Key1, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -2250,7 +2274,9 @@ func _MultiHelloRequires_key2(ctx context.Context, ec *executionContext, field g
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_MultiHelloRequires_key2(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Key2, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Key2, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -2281,7 +2307,9 @@ func _MultiHelloWithError_name(ctx context.Context, ec *executionContext, field 
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_MultiHelloWithError_name(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -2312,7 +2340,9 @@ func _MultiPlanetRequiresNested_name(ctx context.Context, ec *executionContext, 
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_MultiPlanetRequiresNested_name(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -2343,7 +2373,9 @@ func _MultiPlanetRequiresNested_world(ctx context.Context, ec *executionContext,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_MultiPlanetRequiresNested_world(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.World, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.World, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *model.World) graphql.Marshaler {
 			return marshalNWorld2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐWorld(ctx, ec, selections, v)
@@ -2382,7 +2414,9 @@ func _MultiPlanetRequiresNested_size(ctx context.Context, ec *executionContext, 
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_MultiPlanetRequiresNested_size(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Size, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Size, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
 			return marshalNInt2int(ctx, ec, selections, v)
@@ -2413,7 +2447,9 @@ func _PlanetMultipleRequires_name(ctx context.Context, ec *executionContext, fie
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_PlanetMultipleRequires_name(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -2444,7 +2480,9 @@ func _PlanetMultipleRequires_diameter(ctx context.Context, ec *executionContext,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_PlanetMultipleRequires_diameter(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Diameter, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Diameter, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
 			return marshalNInt2int(ctx, ec, selections, v)
@@ -2475,7 +2513,9 @@ func _PlanetMultipleRequires_density(ctx context.Context, ec *executionContext, 
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_PlanetMultipleRequires_density(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Density, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Density, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
 			return marshalNInt2int(ctx, ec, selections, v)
@@ -2506,7 +2546,9 @@ func _PlanetMultipleRequires_weight(ctx context.Context, ec *executionContext, f
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_PlanetMultipleRequires_weight(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Weight, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Weight, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
 			return marshalNInt2int(ctx, ec, selections, v)
@@ -2537,7 +2579,9 @@ func _PlanetRequires_name(ctx context.Context, ec *executionContext, field graph
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_PlanetRequires_name(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -2568,7 +2612,9 @@ func _PlanetRequires_size(ctx context.Context, ec *executionContext, field graph
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_PlanetRequires_size(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Size, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Size, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
 			return marshalNInt2int(ctx, ec, selections, v)
@@ -2599,7 +2645,9 @@ func _PlanetRequires_diameter(ctx context.Context, ec *executionContext, field g
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_PlanetRequires_diameter(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Diameter, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Diameter, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
 			return marshalNInt2int(ctx, ec, selections, v)
@@ -2630,7 +2678,9 @@ func _PlanetRequiresNested_name(ctx context.Context, ec *executionContext, field
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_PlanetRequiresNested_name(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -2661,7 +2711,9 @@ func _PlanetRequiresNested_world(ctx context.Context, ec *executionContext, fiel
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_PlanetRequiresNested_world(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.World, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.World, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *model.World) graphql.Marshaler {
 			return marshalNWorld2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐWorld(ctx, ec, selections, v)
@@ -2700,7 +2752,9 @@ func _PlanetRequiresNested_size(ctx context.Context, ec *executionContext, field
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_PlanetRequiresNested_size(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Size, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Size, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
 			return marshalNInt2int(ctx, ec, selections, v)
@@ -2929,7 +2983,9 @@ func _World_foo(ctx context.Context, ec *executionContext, field graphql.Collect
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_World_foo(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Foo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Foo, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -2960,7 +3016,9 @@ func _World_bar(ctx context.Context, ec *executionContext, field graphql.Collect
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_World_bar(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Bar, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Bar, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
 			return marshalNInt2int(ctx, ec, selections, v)
@@ -2991,7 +3049,9 @@ func _World_hello(ctx context.Context, ec *executionContext, field graphql.Colle
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_World_hello(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Hello, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Hello, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *model.Hello) graphql.Marshaler {
 			return marshalOHello2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐHello(ctx, ec, selections, v)
@@ -3028,7 +3088,9 @@ func _WorldName_name(ctx context.Context, ec *executionContext, field graphql.Co
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_WorldName_name(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -3059,7 +3121,9 @@ func _WorldWithMultipleKeys_foo(ctx context.Context, ec *executionContext, field
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_WorldWithMultipleKeys_foo(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Foo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Foo, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -3090,7 +3154,9 @@ func _WorldWithMultipleKeys_bar(ctx context.Context, ec *executionContext, field
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_WorldWithMultipleKeys_bar(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Bar, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Bar, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
 			return marshalNInt2int(ctx, ec, selections, v)
@@ -3121,7 +3187,9 @@ func _WorldWithMultipleKeys_hello(ctx context.Context, ec *executionContext, fie
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext_WorldWithMultipleKeys_hello(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Hello, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Hello, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *model.Hello) graphql.Marshaler {
 			return marshalOHello2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐHello(ctx, ec, selections, v)
@@ -3158,7 +3226,9 @@ func __Service_sdl(ctx context.Context, ec *executionContext, field graphql.Coll
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext__Service_sdl(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.SDL, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.SDL, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalOString2string(ctx, ec, selections, v)
@@ -3189,7 +3259,9 @@ func ___Directive_name(ctx context.Context, ec *executionContext, field graphql.
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext___Directive_name(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -3253,7 +3325,9 @@ func ___Directive_isRepeatable(ctx context.Context, ec *executionContext, field 
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext___Directive_isRepeatable(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.IsRepeatable, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.IsRepeatable, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
 			return marshalNBoolean2bool(ctx, ec, selections, v)
@@ -3284,7 +3358,9 @@ func ___Directive_locations(ctx context.Context, ec *executionContext, field gra
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext___Directive_locations(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Locations, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Locations, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
 			return marshalN__DirectiveLocation2ᚕstringᚄ(ctx, ec, selections, v)
@@ -3315,7 +3391,9 @@ func ___Directive_args(ctx context.Context, ec *executionContext, field graphql.
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext___Directive_args(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Args, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Args, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
 			return marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx, ec, selections, v)
@@ -3371,7 +3449,9 @@ func ___EnumValue_name(ctx context.Context, ec *executionContext, field graphql.
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext___EnumValue_name(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -3501,7 +3581,9 @@ func ___Field_name(ctx context.Context, ec *executionContext, field graphql.Coll
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext___Field_name(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -3565,7 +3647,9 @@ func ___Field_args(ctx context.Context, ec *executionContext, field graphql.Coll
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext___Field_args(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Args, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Args, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
 			return marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx, ec, selections, v)
@@ -3621,7 +3705,9 @@ func ___Field_type(ctx context.Context, ec *executionContext, field graphql.Coll
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext___Field_type(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Type, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *introspection.Type) graphql.Marshaler {
 			return marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, ec, selections, v)
@@ -3742,7 +3828,9 @@ func ___InputValue_name(ctx context.Context, ec *executionContext, field graphql
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext___InputValue_name(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
 			return marshalNString2string(ctx, ec, selections, v)
@@ -3806,7 +3894,9 @@ func ___InputValue_type(ctx context.Context, ec *executionContext, field graphql
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext___InputValue_type(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.Type, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *introspection.Type) graphql.Marshaler {
 			return marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, ec, selections, v)
@@ -3861,7 +3951,9 @@ func ___InputValue_defaultValue(ctx context.Context, ec *executionContext, field
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return fieldContext___InputValue_defaultValue(ctx, ec, field)
 		},
-		func(ctx context.Context) (any, error) { return obj.DefaultValue, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DefaultValue, nil
+		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
 			return marshalOString2ᚖstring(ctx, ec, selections, v)

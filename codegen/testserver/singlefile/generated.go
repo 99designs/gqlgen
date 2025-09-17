@@ -3602,7 +3602,9 @@ func (ec *executionContext) _A_id(ctx context.Context, field graphql.CollectedFi
 		ec.OperationContext,
 		field,
 		ec.fieldContext_A_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -3631,7 +3633,9 @@ func (ec *executionContext) _AIt_id(ctx context.Context, field graphql.Collected
 		ec.OperationContext,
 		field,
 		ec.fieldContext_AIt_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -3660,7 +3664,9 @@ func (ec *executionContext) _AbIt_id(ctx context.Context, field graphql.Collecte
 		ec.OperationContext,
 		field,
 		ec.fieldContext_AbIt_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -3689,7 +3695,9 @@ func (ec *executionContext) _Autobind_int(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Autobind_int,
-		func(ctx context.Context) (any, error) { return obj.Int, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Int, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -3718,7 +3726,9 @@ func (ec *executionContext) _Autobind_int32(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Autobind_int32,
-		func(ctx context.Context) (any, error) { return obj.Int32, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Int32, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -3747,7 +3757,9 @@ func (ec *executionContext) _Autobind_int64(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Autobind_int64,
-		func(ctx context.Context) (any, error) { return obj.Int64, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Int64, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -3776,7 +3788,9 @@ func (ec *executionContext) _Autobind_idStr(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Autobind_idStr,
-		func(ctx context.Context) (any, error) { return obj.IdStr, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.IdStr, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -3805,7 +3819,9 @@ func (ec *executionContext) _Autobind_idInt(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Autobind_idInt,
-		func(ctx context.Context) (any, error) { return obj.IdInt, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.IdInt, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -3834,7 +3850,9 @@ func (ec *executionContext) _B_id(ctx context.Context, field graphql.CollectedFi
 		ec.OperationContext,
 		field,
 		ec.fieldContext_B_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -3956,7 +3974,9 @@ func (ec *executionContext) _Cat_species(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Cat_species,
-		func(ctx context.Context) (any, error) { return obj.Species, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Species, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -3985,7 +4005,9 @@ func (ec *executionContext) _Cat_size(ctx context.Context, field graphql.Collect
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Cat_size,
-		func(ctx context.Context) (any, error) { return obj.Size, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Size, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -4020,7 +4042,9 @@ func (ec *executionContext) _Cat_catBreed(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Cat_catBreed,
-		func(ctx context.Context) (any, error) { return obj.CatBreed, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.CatBreed, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -4049,7 +4073,9 @@ func (ec *executionContext) _CheckIssue896_id(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CheckIssue896_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -4078,7 +4104,9 @@ func (ec *executionContext) _Circle_radius(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Circle_radius,
-		func(ctx context.Context) (any, error) { return obj.Radius, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Radius, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -4138,7 +4166,9 @@ func (ec *executionContext) _Circle_coordinates(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Circle_coordinates,
-		func(ctx context.Context) (any, error) { return obj.Coordinates, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Coordinates, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -4173,7 +4203,9 @@ func (ec *executionContext) _ConcreteNodeA_id(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ConcreteNodeA_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -4233,7 +4265,9 @@ func (ec *executionContext) _ConcreteNodeA_name(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ConcreteNodeA_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -4324,7 +4358,9 @@ func (ec *executionContext) _Content_Post_foo(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Content_Post_foo,
-		func(ctx context.Context) (any, error) { return obj.Foo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Foo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -4353,7 +4389,9 @@ func (ec *executionContext) _Content_User_foo(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Content_User_foo,
-		func(ctx context.Context) (any, error) { return obj.Foo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Foo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -4382,7 +4420,9 @@ func (ec *executionContext) _Coordinates_x(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Coordinates_x,
-		func(ctx context.Context) (any, error) { return obj.X, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.X, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -4411,7 +4451,9 @@ func (ec *executionContext) _Coordinates_y(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Coordinates_y,
-		func(ctx context.Context) (any, error) { return obj.Y, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Y, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -4440,7 +4482,9 @@ func (ec *executionContext) _DefaultParametersMirror_falsyBoolean(ctx context.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_DefaultParametersMirror_falsyBoolean,
-		func(ctx context.Context) (any, error) { return obj.FalsyBoolean, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.FalsyBoolean, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -4469,7 +4513,9 @@ func (ec *executionContext) _DefaultParametersMirror_truthyBoolean(ctx context.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_DefaultParametersMirror_truthyBoolean,
-		func(ctx context.Context) (any, error) { return obj.TruthyBoolean, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.TruthyBoolean, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -4498,7 +4544,9 @@ func (ec *executionContext) _DeferModel_id(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_DeferModel_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -4527,7 +4575,9 @@ func (ec *executionContext) _DeferModel_name(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_DeferModel_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -4587,7 +4637,9 @@ func (ec *executionContext) _Dog_species(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Dog_species,
-		func(ctx context.Context) (any, error) { return obj.Species, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Species, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -4616,7 +4668,9 @@ func (ec *executionContext) _Dog_size(ctx context.Context, field graphql.Collect
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Dog_size,
-		func(ctx context.Context) (any, error) { return obj.Size, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Size, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -4651,7 +4705,9 @@ func (ec *executionContext) _Dog_dogBreed(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Dog_dogBreed,
-		func(ctx context.Context) (any, error) { return obj.DogBreed, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DogBreed, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -4773,7 +4829,9 @@ func (ec *executionContext) _EmbeddedDefaultScalar_value(ctx context.Context, fi
 		ec.OperationContext,
 		field,
 		ec.fieldContext_EmbeddedDefaultScalar_value,
-		func(ctx context.Context) (any, error) { return obj.Value, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Value, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -4802,7 +4860,9 @@ func (ec *executionContext) _EmbeddedPointer_ID(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_EmbeddedPointer_ID,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -4831,7 +4891,9 @@ func (ec *executionContext) _EmbeddedPointer_Title(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_EmbeddedPointer_Title,
-		func(ctx context.Context) (any, error) { return obj.Title, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Title, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -4860,7 +4922,9 @@ func (ec *executionContext) _Error_id(ctx context.Context, field graphql.Collect
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Error_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -5187,7 +5251,9 @@ func (ec *executionContext) _FieldsOrderPayload_firstFieldValue(ctx context.Cont
 		ec.OperationContext,
 		field,
 		ec.fieldContext_FieldsOrderPayload_firstFieldValue,
-		func(ctx context.Context) (any, error) { return obj.FirstFieldValue, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.FirstFieldValue, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -5255,7 +5321,9 @@ func (ec *executionContext) _Horse_species(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Horse_species,
-		func(ctx context.Context) (any, error) { return obj.Species, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Species, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -5284,7 +5352,9 @@ func (ec *executionContext) _Horse_size(ctx context.Context, field graphql.Colle
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Horse_size,
-		func(ctx context.Context) (any, error) { return obj.Size, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Size, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -5319,7 +5389,9 @@ func (ec *executionContext) _Horse_horseBreed(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Horse_horseBreed,
-		func(ctx context.Context) (any, error) { return obj.HorseBreed, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.HorseBreed, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -5348,7 +5420,9 @@ func (ec *executionContext) _InnerObject_id(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_InnerObject_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -5377,7 +5451,9 @@ func (ec *executionContext) _InvalidIdentifier_id(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_InvalidIdentifier_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -5406,7 +5482,9 @@ func (ec *executionContext) _It_id(ctx context.Context, field graphql.CollectedF
 		ec.OperationContext,
 		field,
 		ec.fieldContext_It_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -5435,7 +5513,9 @@ func (ec *executionContext) _LoopA_b(ctx context.Context, field graphql.Collecte
 		ec.OperationContext,
 		field,
 		ec.fieldContext_LoopA_b,
-		func(ctx context.Context) (any, error) { return obj.B, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.B, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -5468,7 +5548,9 @@ func (ec *executionContext) _LoopB_a(ctx context.Context, field graphql.Collecte
 		ec.OperationContext,
 		field,
 		ec.fieldContext_LoopB_a,
-		func(ctx context.Context) (any, error) { return obj.A, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.A, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -5501,7 +5583,9 @@ func (ec *executionContext) _Map_id(ctx context.Context, field graphql.Collected
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Map_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -5530,7 +5614,9 @@ func (ec *executionContext) _MapNested_value(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_MapNested_value,
-		func(ctx context.Context) (any, error) { return obj.Value, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Value, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -6007,9 +6093,10 @@ func (ec *executionContext) _ObjectDirectives_text(ctx context.Context, field gr
 		field,
 		ec.fieldContext_ObjectDirectives_text,
 		func(ctx context.Context) (any, error) {
-			directive0 := func(ctx context.Context) (any, error) {
-				return obj.Text, nil
-			}
+			return obj.Text, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
 				min, err := ec.unmarshalNInt2int(ctx, 0)
@@ -6034,19 +6121,7 @@ func (ec *executionContext) _ObjectDirectives_text(ctx context.Context, field gr
 				return ec.directives.Length(ctx, obj, directive0, min, max, message)
 			}
 
-			tmp, err := directive1(ctx)
-			if err != nil {
-				return nil, graphql.ErrorOnPath(ctx, err)
-			}
-			if tmp == nil {
-				return nil, nil
-			}
-			if data, ok := tmp.(string); ok {
-				return data, nil
-			}
-			return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			next = directive1
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
 		ec.marshalNString2string,
@@ -6075,9 +6150,10 @@ func (ec *executionContext) _ObjectDirectives_nullableText(ctx context.Context, 
 		field,
 		ec.fieldContext_ObjectDirectives_nullableText,
 		func(ctx context.Context) (any, error) {
-			directive0 := func(ctx context.Context) (any, error) {
-				return obj.NullableText, nil
-			}
+			return obj.NullableText, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
 				if ec.directives.ToNull == nil {
@@ -6087,19 +6163,7 @@ func (ec *executionContext) _ObjectDirectives_nullableText(ctx context.Context, 
 				return ec.directives.ToNull(ctx, obj, directive0)
 			}
 
-			tmp, err := directive1(ctx)
-			if err != nil {
-				return nil, graphql.ErrorOnPath(ctx, err)
-			}
-			if tmp == nil {
-				return nil, nil
-			}
-			if data, ok := tmp.(*string); ok {
-				return data, nil
-			}
-			return nil, fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			next = directive1
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
 		ec.marshalOString2ᚖstring,
@@ -6127,7 +6191,9 @@ func (ec *executionContext) _ObjectDirectives_order(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ObjectDirectives_order,
-		func(ctx context.Context) (any, error) { return obj.Order, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Order, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -6157,9 +6223,10 @@ func (ec *executionContext) _ObjectDirectivesWithCustomGoModel_nullableText(ctx 
 		field,
 		ec.fieldContext_ObjectDirectivesWithCustomGoModel_nullableText,
 		func(ctx context.Context) (any, error) {
-			directive0 := func(ctx context.Context) (any, error) {
-				return obj.NullableText, nil
-			}
+			return obj.NullableText, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
 				if ec.directives.ToNull == nil {
@@ -6169,19 +6236,7 @@ func (ec *executionContext) _ObjectDirectivesWithCustomGoModel_nullableText(ctx 
 				return ec.directives.ToNull(ctx, obj, directive0)
 			}
 
-			tmp, err := directive1(ctx)
-			if err != nil {
-				return nil, graphql.ErrorOnPath(ctx, err)
-			}
-			if tmp == nil {
-				return nil, nil
-			}
-			if data, ok := tmp.(string); ok {
-				return data, nil
-			}
-			return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			next = directive1
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
 		ec.marshalOString2string,
@@ -6209,7 +6264,9 @@ func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext_OuterObject_inner,
-		func(ctx context.Context) (any, error) { return obj.Inner, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Inner, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -6242,7 +6299,9 @@ func (ec *executionContext) _OverlappingFields_oneFoo(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_OverlappingFields_oneFoo,
-		func(ctx context.Context) (any, error) { return obj.Foo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Foo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -6271,7 +6330,9 @@ func (ec *executionContext) _OverlappingFields_twoFoo(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_OverlappingFields_twoFoo,
-		func(ctx context.Context) (any, error) { return obj.Foo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Foo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -6331,7 +6392,9 @@ func (ec *executionContext) _OverlappingFields_newFoo(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_OverlappingFields_newFoo,
-		func(ctx context.Context) (any, error) { return obj.NewFoo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.NewFoo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -6360,7 +6423,9 @@ func (ec *executionContext) _OverlappingFields_new_foo(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext_OverlappingFields_new_foo,
-		func(ctx context.Context) (any, error) { return obj.NewFoo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.NewFoo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -6506,7 +6571,9 @@ func (ec *executionContext) _Pet_id(ctx context.Context, field graphql.Collected
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Pet_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -6739,7 +6806,9 @@ func (ec *executionContext) _PtrToAnyContainer_ptrToAny(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PtrToAnyContainer_ptrToAny,
-		func(ctx context.Context) (any, error) { return obj.PtrToAny, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PtrToAny, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -6799,7 +6868,9 @@ func (ec *executionContext) _PtrToPtrInner_key(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PtrToPtrInner_key,
-		func(ctx context.Context) (any, error) { return obj.Key, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Key, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -6828,7 +6899,9 @@ func (ec *executionContext) _PtrToPtrInner_value(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PtrToPtrInner_value,
-		func(ctx context.Context) (any, error) { return obj.Value, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Value, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -6857,7 +6930,9 @@ func (ec *executionContext) _PtrToPtrOuter_name(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PtrToPtrOuter_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -6886,7 +6961,9 @@ func (ec *executionContext) _PtrToPtrOuter_inner(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PtrToPtrOuter_inner,
-		func(ctx context.Context) (any, error) { return obj.Inner, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Inner, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -6921,7 +6998,9 @@ func (ec *executionContext) _PtrToPtrOuter_stupidInner(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PtrToPtrOuter_stupidInner,
-		func(ctx context.Context) (any, error) { return obj.StupidInner, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.StupidInner, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -6956,7 +7035,9 @@ func (ec *executionContext) _PtrToSliceContainer_ptrToSlice(ctx context.Context,
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PtrToSliceContainer_ptrToSlice,
-		func(ctx context.Context) (any, error) { return obj.PtrToSlice, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.PtrToSlice, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -8019,10 +8100,10 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 		field,
 		ec.fieldContext_Query_directiveObject,
 		func(ctx context.Context) (any, error) {
-			directive0 := func(ctx context.Context) (any, error) {
-
-				return ec.resolvers.Query().DirectiveObject(ctx)
-			}
+			return ec.resolvers.Query().DirectiveObject(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
 				location, err := ec.unmarshalNString2string(ctx, "order1_1")
@@ -8073,19 +8154,7 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 				return ec.directives.Order1(ctx, nil, directive3, location)
 			}
 
-			tmp, err := directive4(ctx)
-			if err != nil {
-				return nil, graphql.ErrorOnPath(ctx, err)
-			}
-			if tmp == nil {
-				return nil, nil
-			}
-			if data, ok := tmp.(*ObjectDirectives); ok {
-				return data, nil
-			}
-			return nil, fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/codegen/testserver/singlefile.ObjectDirectives`, tmp)
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			next = directive4
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
 		ec.marshalOObjectDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐObjectDirectives,
@@ -8157,10 +8226,11 @@ func (ec *executionContext) _Query_directiveFieldDef(ctx context.Context, field 
 		field,
 		ec.fieldContext_Query_directiveFieldDef,
 		func(ctx context.Context) (any, error) {
-			directive0 := func(ctx context.Context) (any, error) {
-				fc := graphql.GetFieldContext(ctx)
-				return ec.resolvers.Query().DirectiveFieldDef(ctx, fc.Args["ret"].(string))
-			}
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().DirectiveFieldDef(ctx, fc.Args["ret"].(string))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
 				min, err := ec.unmarshalNInt2int(ctx, 1)
@@ -8180,19 +8250,7 @@ func (ec *executionContext) _Query_directiveFieldDef(ctx context.Context, field 
 				return ec.directives.Length(ctx, nil, directive0, min, nil, message)
 			}
 
-			tmp, err := directive1(ctx)
-			if err != nil {
-				return nil, graphql.ErrorOnPath(ctx, err)
-			}
-			if tmp == nil {
-				return nil, nil
-			}
-			if data, ok := tmp.(string); ok {
-				return data, nil
-			}
-			return nil, fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			next = directive1
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
 		ec.marshalNString2string,
@@ -8263,10 +8321,10 @@ func (ec *executionContext) _Query_directiveDouble(ctx context.Context, field gr
 		field,
 		ec.fieldContext_Query_directiveDouble,
 		func(ctx context.Context) (any, error) {
-			directive0 := func(ctx context.Context) (any, error) {
-
-				return ec.resolvers.Query().DirectiveDouble(ctx)
-			}
+			return ec.resolvers.Query().DirectiveDouble(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
 				if ec.directives.Directive1 == nil {
@@ -8283,19 +8341,7 @@ func (ec *executionContext) _Query_directiveDouble(ctx context.Context, field gr
 				return ec.directives.Directive2(ctx, nil, directive1)
 			}
 
-			tmp, err := directive2(ctx)
-			if err != nil {
-				return nil, graphql.ErrorOnPath(ctx, err)
-			}
-			if tmp == nil {
-				return nil, nil
-			}
-			if data, ok := tmp.(*string); ok {
-				return data, nil
-			}
-			return nil, fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			next = directive2
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
 		ec.marshalOString2ᚖstring,
@@ -8324,10 +8370,10 @@ func (ec *executionContext) _Query_directiveUnimplemented(ctx context.Context, f
 		field,
 		ec.fieldContext_Query_directiveUnimplemented,
 		func(ctx context.Context) (any, error) {
-			directive0 := func(ctx context.Context) (any, error) {
-
-				return ec.resolvers.Query().DirectiveUnimplemented(ctx)
-			}
+			return ec.resolvers.Query().DirectiveUnimplemented(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
 				if ec.directives.Unimplemented == nil {
@@ -8337,19 +8383,7 @@ func (ec *executionContext) _Query_directiveUnimplemented(ctx context.Context, f
 				return ec.directives.Unimplemented(ctx, nil, directive0)
 			}
 
-			tmp, err := directive1(ctx)
-			if err != nil {
-				return nil, graphql.ErrorOnPath(ctx, err)
-			}
-			if tmp == nil {
-				return nil, nil
-			}
-			if data, ok := tmp.(*string); ok {
-				return data, nil
-			}
-			return nil, fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			next = directive1
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
 		ec.marshalOString2ᚖstring,
@@ -8557,10 +8591,10 @@ func (ec *executionContext) _Query_noShape(ctx context.Context, field graphql.Co
 		field,
 		ec.fieldContext_Query_noShape,
 		func(ctx context.Context) (any, error) {
-			directive0 := func(ctx context.Context) (any, error) {
-
-				return ec.resolvers.Query().NoShape(ctx)
-			}
+			return ec.resolvers.Query().NoShape(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
 				if ec.directives.MakeNil == nil {
@@ -8570,19 +8604,7 @@ func (ec *executionContext) _Query_noShape(ctx context.Context, field graphql.Co
 				return ec.directives.MakeNil(ctx, nil, directive0)
 			}
 
-			tmp, err := directive1(ctx)
-			if err != nil {
-				return nil, graphql.ErrorOnPath(ctx, err)
-			}
-			if tmp == nil {
-				return nil, nil
-			}
-			if data, ok := tmp.(Shape); ok {
-				return data, nil
-			}
-			return nil, fmt.Errorf(`unexpected type %T from directive, should be github.com/99designs/gqlgen/codegen/testserver/singlefile.Shape`, tmp)
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			next = directive1
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
 		ec.marshalOShape2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐShape,
@@ -8642,10 +8664,10 @@ func (ec *executionContext) _Query_noShapeTypedNil(ctx context.Context, field gr
 		field,
 		ec.fieldContext_Query_noShapeTypedNil,
 		func(ctx context.Context) (any, error) {
-			directive0 := func(ctx context.Context) (any, error) {
-
-				return ec.resolvers.Query().NoShapeTypedNil(ctx)
-			}
+			return ec.resolvers.Query().NoShapeTypedNil(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
 				if ec.directives.MakeTypedNil == nil {
@@ -8655,19 +8677,7 @@ func (ec *executionContext) _Query_noShapeTypedNil(ctx context.Context, field gr
 				return ec.directives.MakeTypedNil(ctx, nil, directive0)
 			}
 
-			tmp, err := directive1(ctx)
-			if err != nil {
-				return nil, graphql.ErrorOnPath(ctx, err)
-			}
-			if tmp == nil {
-				return nil, nil
-			}
-			if data, ok := tmp.(Shape); ok {
-				return data, nil
-			}
-			return nil, fmt.Errorf(`unexpected type %T from directive, should be github.com/99designs/gqlgen/codegen/testserver/singlefile.Shape`, tmp)
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			next = directive1
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
 		ec.marshalOShape2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐShape,
@@ -8696,10 +8706,10 @@ func (ec *executionContext) _Query_animal(ctx context.Context, field graphql.Col
 		field,
 		ec.fieldContext_Query_animal,
 		func(ctx context.Context) (any, error) {
-			directive0 := func(ctx context.Context) (any, error) {
-
-				return ec.resolvers.Query().Animal(ctx)
-			}
+			return ec.resolvers.Query().Animal(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
 				if ec.directives.MakeTypedNil == nil {
@@ -8709,19 +8719,7 @@ func (ec *executionContext) _Query_animal(ctx context.Context, field graphql.Col
 				return ec.directives.MakeTypedNil(ctx, nil, directive0)
 			}
 
-			tmp, err := directive1(ctx)
-			if err != nil {
-				return nil, graphql.ErrorOnPath(ctx, err)
-			}
-			if tmp == nil {
-				return nil, nil
-			}
-			if data, ok := tmp.(Animal); ok {
-				return data, nil
-			}
-			return nil, fmt.Errorf(`unexpected type %T from directive, should be github.com/99designs/gqlgen/codegen/testserver/singlefile.Animal`, tmp)
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			next = directive1
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
 		ec.marshalOAnimal2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐAnimal,
@@ -10098,7 +10096,9 @@ func (ec *executionContext) _Rectangle_length(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Rectangle_length,
-		func(ctx context.Context) (any, error) { return obj.Length, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Length, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -10127,7 +10127,9 @@ func (ec *executionContext) _Rectangle_width(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Rectangle_width,
-		func(ctx context.Context) (any, error) { return obj.Width, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Width, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -10187,7 +10189,9 @@ func (ec *executionContext) _Rectangle_coordinates(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Rectangle_coordinates,
-		func(ctx context.Context) (any, error) { return obj.Coordinates, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Coordinates, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -10222,7 +10226,9 @@ func (ec *executionContext) _Size_height(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Size_height,
-		func(ctx context.Context) (any, error) { return obj.Height, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Height, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -10251,7 +10257,9 @@ func (ec *executionContext) _Size_weight(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Size_weight,
-		func(ctx context.Context) (any, error) { return obj.Weight, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Weight, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -10280,7 +10288,9 @@ func (ec *executionContext) _SkipIncludeTestType_a(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SkipIncludeTestType_a,
-		func(ctx context.Context) (any, error) { return obj.A, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.A, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -10309,7 +10319,9 @@ func (ec *executionContext) _SkipIncludeTestType_b(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SkipIncludeTestType_b,
-		func(ctx context.Context) (any, error) { return obj.B, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.B, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -10338,7 +10350,9 @@ func (ec *executionContext) _Slices_test1(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Slices_test1,
-		func(ctx context.Context) (any, error) { return obj.Test1, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Test1, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -10367,7 +10381,9 @@ func (ec *executionContext) _Slices_test2(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Slices_test2,
-		func(ctx context.Context) (any, error) { return obj.Test2, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Test2, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -10396,7 +10412,9 @@ func (ec *executionContext) _Slices_test3(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Slices_test3,
-		func(ctx context.Context) (any, error) { return obj.Test3, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Test3, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -10425,7 +10443,9 @@ func (ec *executionContext) _Slices_test4(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Slices_test4,
-		func(ctx context.Context) (any, error) { return obj.Test4, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Test4, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -10603,10 +10623,10 @@ func (ec *executionContext) _Subscription_directiveDouble(ctx context.Context, f
 		field,
 		ec.fieldContext_Subscription_directiveDouble,
 		func(ctx context.Context) (any, error) {
-			directive0 := func(ctx context.Context) (any, error) {
-
-				return ec.resolvers.Subscription().DirectiveDouble(ctx)
-			}
+			return ec.resolvers.Subscription().DirectiveDouble(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
 				if ec.directives.Directive1 == nil {
@@ -10623,19 +10643,7 @@ func (ec *executionContext) _Subscription_directiveDouble(ctx context.Context, f
 				return ec.directives.Directive2(ctx, nil, directive1)
 			}
 
-			tmp, err := directive2(ctx)
-			if err != nil {
-				return nil, graphql.ErrorOnPath(ctx, err)
-			}
-			if tmp == nil {
-				return nil, nil
-			}
-			if data, ok := tmp.(<-chan *string); ok {
-				return data, nil
-			}
-			return nil, fmt.Errorf(`unexpected type %T from directive, should be <-chan *string`, tmp)
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			next = directive2
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
 		ec.marshalOString2ᚖstring,
@@ -10664,10 +10672,10 @@ func (ec *executionContext) _Subscription_directiveUnimplemented(ctx context.Con
 		field,
 		ec.fieldContext_Subscription_directiveUnimplemented,
 		func(ctx context.Context) (any, error) {
-			directive0 := func(ctx context.Context) (any, error) {
-
-				return ec.resolvers.Subscription().DirectiveUnimplemented(ctx)
-			}
+			return ec.resolvers.Subscription().DirectiveUnimplemented(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
 				if ec.directives.Unimplemented == nil {
@@ -10677,19 +10685,7 @@ func (ec *executionContext) _Subscription_directiveUnimplemented(ctx context.Con
 				return ec.directives.Unimplemented(ctx, nil, directive0)
 			}
 
-			tmp, err := directive1(ctx)
-			if err != nil {
-				return nil, graphql.ErrorOnPath(ctx, err)
-			}
-			if tmp == nil {
-				return nil, nil
-			}
-			if data, ok := tmp.(<-chan *string); ok {
-				return data, nil
-			}
-			return nil, fmt.Errorf(`unexpected type %T from directive, should be <-chan *string`, tmp)
-		},
-		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			next = directive1
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
 		ec.marshalOString2ᚖstring,
@@ -10793,7 +10789,9 @@ func (ec *executionContext) _User_id(ctx context.Context, field graphql.Collecte
 		ec.OperationContext,
 		field,
 		ec.fieldContext_User_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -10865,7 +10863,9 @@ func (ec *executionContext) _User_created(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext_User_created,
-		func(ctx context.Context) (any, error) { return obj.Created, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Created, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -10894,7 +10894,9 @@ func (ec *executionContext) _User_updated(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext_User_updated,
-		func(ctx context.Context) (any, error) { return obj.Updated, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Updated, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -11042,7 +11044,9 @@ func (ec *executionContext) _ValidType_differentCase(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ValidType_differentCase,
-		func(ctx context.Context) (any, error) { return obj.DifferentCase, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DifferentCase, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -11071,7 +11075,9 @@ func (ec *executionContext) _ValidType_different_case(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ValidType_different_case,
-		func(ctx context.Context) (any, error) { return obj.DifferentCaseOld, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DifferentCaseOld, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -11100,7 +11106,9 @@ func (ec *executionContext) _ValidType_validInputKeywords(ctx context.Context, f
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ValidType_validInputKeywords,
-		func(ctx context.Context) (any, error) { return obj.ValidInputKeywords, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ValidInputKeywords, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -11140,7 +11148,9 @@ func (ec *executionContext) _ValidType_validArgs(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ValidType_validArgs,
-		func(ctx context.Context) (any, error) { return obj.ValidArgs, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ValidArgs, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -11309,7 +11319,9 @@ func (ec *executionContext) _WrappedStruct_name(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_WrappedStruct_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -11338,7 +11350,9 @@ func (ec *executionContext) _WrappedStruct_desc(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_WrappedStruct_desc,
-		func(ctx context.Context) (any, error) { return obj.Desc, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Desc, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -11367,7 +11381,9 @@ func (ec *executionContext) _XXIt_id(ctx context.Context, field graphql.Collecte
 		ec.OperationContext,
 		field,
 		ec.fieldContext_XXIt_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -11396,7 +11412,9 @@ func (ec *executionContext) _XxIt_id(ctx context.Context, field graphql.Collecte
 		ec.OperationContext,
 		field,
 		ec.fieldContext_XxIt_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -11425,7 +11443,9 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -11485,7 +11505,9 @@ func (ec *executionContext) ___Directive_isRepeatable(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_isRepeatable,
-		func(ctx context.Context) (any, error) { return obj.IsRepeatable, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.IsRepeatable, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -11514,7 +11536,9 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_locations,
-		func(ctx context.Context) (any, error) { return obj.Locations, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Locations, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -11543,7 +11567,9 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_args,
-		func(ctx context.Context) (any, error) { return obj.Args, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Args, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -11597,7 +11623,9 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext___EnumValue_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -11719,7 +11747,9 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Field_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -11779,7 +11809,9 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Field_args,
-		func(ctx context.Context) (any, error) { return obj.Args, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Args, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -11833,7 +11865,9 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Field_type,
-		func(ctx context.Context) (any, error) { return obj.Type, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -11948,7 +11982,9 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext___InputValue_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -12008,7 +12044,9 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext___InputValue_type,
-		func(ctx context.Context) (any, error) { return obj.Type, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -12061,7 +12099,9 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext___InputValue_defaultValue,
-		func(ctx context.Context) (any, error) { return obj.DefaultValue, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DefaultValue, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -12921,7 +12961,9 @@ func (ec *executionContext) _asdfIt_id(ctx context.Context, field graphql.Collec
 		ec.OperationContext,
 		field,
 		ec.fieldContext_asdfIt_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -12950,7 +12992,9 @@ func (ec *executionContext) _iIt_id(ctx context.Context, field graphql.Collected
 		ec.OperationContext,
 		field,
 		ec.fieldContext_iIt_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},

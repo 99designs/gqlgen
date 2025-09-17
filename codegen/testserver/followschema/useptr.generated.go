@@ -33,7 +33,9 @@ func (ec *executionContext) _A_id(ctx context.Context, field graphql.CollectedFi
 		ec.OperationContext,
 		field,
 		ec.fieldContext_A_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -62,7 +64,9 @@ func (ec *executionContext) _B_id(ctx context.Context, field graphql.CollectedFi
 		ec.OperationContext,
 		field,
 		ec.fieldContext_B_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},

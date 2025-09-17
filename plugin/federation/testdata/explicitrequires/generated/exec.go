@@ -1392,7 +1392,9 @@ func (ec *executionContext) _Female_description(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Female_description,
-		func(ctx context.Context) (any, error) { return obj.Description, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Description, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1419,7 +1421,9 @@ func (ec *executionContext) _Hello_name(ctx context.Context, field graphql.Colle
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Hello_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1446,7 +1450,9 @@ func (ec *executionContext) _Hello_secondary(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Hello_secondary,
-		func(ctx context.Context) (any, error) { return obj.Secondary, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Secondary, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1473,7 +1479,9 @@ func (ec *executionContext) _HelloMultiSingleKeys_key1(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HelloMultiSingleKeys_key1,
-		func(ctx context.Context) (any, error) { return obj.Key1, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Key1, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1500,7 +1508,9 @@ func (ec *executionContext) _HelloMultiSingleKeys_key2(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HelloMultiSingleKeys_key2,
-		func(ctx context.Context) (any, error) { return obj.Key2, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Key2, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1527,7 +1537,9 @@ func (ec *executionContext) _HelloWithErrors_name(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		ec.fieldContext_HelloWithErrors_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1554,7 +1566,9 @@ func (ec *executionContext) _Male_description(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Male_description,
-		func(ctx context.Context) (any, error) { return obj.Description, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Description, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1581,7 +1595,9 @@ func (ec *executionContext) _MultiHello_name(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		ec.fieldContext_MultiHello_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1608,7 +1624,9 @@ func (ec *executionContext) _MultiHelloMultipleRequires_name(ctx context.Context
 		ec.OperationContext,
 		field,
 		ec.fieldContext_MultiHelloMultipleRequires_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1635,7 +1653,9 @@ func (ec *executionContext) _MultiHelloMultipleRequires_key1(ctx context.Context
 		ec.OperationContext,
 		field,
 		ec.fieldContext_MultiHelloMultipleRequires_key1,
-		func(ctx context.Context) (any, error) { return obj.Key1, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Key1, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1662,7 +1682,9 @@ func (ec *executionContext) _MultiHelloMultipleRequires_key2(ctx context.Context
 		ec.OperationContext,
 		field,
 		ec.fieldContext_MultiHelloMultipleRequires_key2,
-		func(ctx context.Context) (any, error) { return obj.Key2, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Key2, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1689,7 +1711,9 @@ func (ec *executionContext) _MultiHelloMultipleRequires_key3(ctx context.Context
 		ec.OperationContext,
 		field,
 		ec.fieldContext_MultiHelloMultipleRequires_key3,
-		func(ctx context.Context) (any, error) { return obj.Key3, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Key3, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1716,7 +1740,9 @@ func (ec *executionContext) _MultiHelloRequires_name(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_MultiHelloRequires_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1743,7 +1769,9 @@ func (ec *executionContext) _MultiHelloRequires_key1(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_MultiHelloRequires_key1,
-		func(ctx context.Context) (any, error) { return obj.Key1, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Key1, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1770,7 +1798,9 @@ func (ec *executionContext) _MultiHelloRequires_key2(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_MultiHelloRequires_key2,
-		func(ctx context.Context) (any, error) { return obj.Key2, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Key2, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1797,7 +1827,9 @@ func (ec *executionContext) _MultiHelloWithError_name(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_MultiHelloWithError_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1824,7 +1856,9 @@ func (ec *executionContext) _MultiPlanetRequiresNested_name(ctx context.Context,
 		ec.OperationContext,
 		field,
 		ec.fieldContext_MultiPlanetRequiresNested_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -1851,7 +1885,9 @@ func (ec *executionContext) _MultiPlanetRequiresNested_world(ctx context.Context
 		ec.OperationContext,
 		field,
 		ec.fieldContext_MultiPlanetRequiresNested_world,
-		func(ctx context.Context) (any, error) { return obj.World, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.World, nil
+		},
 		nil,
 		ec.marshalNWorld2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐWorld,
 		true,
@@ -1886,7 +1922,9 @@ func (ec *executionContext) _MultiPlanetRequiresNested_worlds(ctx context.Contex
 		ec.OperationContext,
 		field,
 		ec.fieldContext_MultiPlanetRequiresNested_worlds,
-		func(ctx context.Context) (any, error) { return obj.Worlds, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Worlds, nil
+		},
 		nil,
 		ec.marshalOWorld2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐWorldᚄ,
 		true,
@@ -1921,7 +1959,9 @@ func (ec *executionContext) _MultiPlanetRequiresNested_size(ctx context.Context,
 		ec.OperationContext,
 		field,
 		ec.fieldContext_MultiPlanetRequiresNested_size,
-		func(ctx context.Context) (any, error) { return obj.Size, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Size, nil
+		},
 		nil,
 		ec.marshalNInt2int,
 		true,
@@ -1948,7 +1988,9 @@ func (ec *executionContext) _MultiPlanetRequiresNested_sizes(ctx context.Context
 		ec.OperationContext,
 		field,
 		ec.fieldContext_MultiPlanetRequiresNested_sizes,
-		func(ctx context.Context) (any, error) { return obj.Sizes, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Sizes, nil
+		},
 		nil,
 		ec.marshalOInt2ᚕintᚄ,
 		true,
@@ -1975,7 +2017,9 @@ func (ec *executionContext) _Person_name(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Person_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2002,7 +2046,9 @@ func (ec *executionContext) _Person_gender(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Person_gender,
-		func(ctx context.Context) (any, error) { return obj.Gender, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Gender, nil
+		},
 		nil,
 		ec.marshalNGender2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐGender,
 		true,
@@ -2029,7 +2075,9 @@ func (ec *executionContext) _Person_welcomeMessage(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Person_welcomeMessage,
-		func(ctx context.Context) (any, error) { return obj.WelcomeMessage, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.WelcomeMessage, nil
+		},
 		nil,
 		ec.marshalOString2ᚖstring,
 		true,
@@ -2056,7 +2104,9 @@ func (ec *executionContext) _PlanetMultipleRequires_name(ctx context.Context, fi
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PlanetMultipleRequires_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2083,7 +2133,9 @@ func (ec *executionContext) _PlanetMultipleRequires_diameter(ctx context.Context
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PlanetMultipleRequires_diameter,
-		func(ctx context.Context) (any, error) { return obj.Diameter, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Diameter, nil
+		},
 		nil,
 		ec.marshalNInt2int,
 		true,
@@ -2110,7 +2162,9 @@ func (ec *executionContext) _PlanetMultipleRequires_density(ctx context.Context,
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PlanetMultipleRequires_density,
-		func(ctx context.Context) (any, error) { return obj.Density, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Density, nil
+		},
 		nil,
 		ec.marshalNInt2int,
 		true,
@@ -2137,7 +2191,9 @@ func (ec *executionContext) _PlanetMultipleRequires_weight(ctx context.Context, 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PlanetMultipleRequires_weight,
-		func(ctx context.Context) (any, error) { return obj.Weight, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Weight, nil
+		},
 		nil,
 		ec.marshalNInt2int,
 		true,
@@ -2164,7 +2220,9 @@ func (ec *executionContext) _PlanetRequires_name(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PlanetRequires_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2191,7 +2249,9 @@ func (ec *executionContext) _PlanetRequires_size(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PlanetRequires_size,
-		func(ctx context.Context) (any, error) { return obj.Size, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Size, nil
+		},
 		nil,
 		ec.marshalNInt2int,
 		true,
@@ -2218,7 +2278,9 @@ func (ec *executionContext) _PlanetRequires_diameter(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PlanetRequires_diameter,
-		func(ctx context.Context) (any, error) { return obj.Diameter, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Diameter, nil
+		},
 		nil,
 		ec.marshalNInt2int,
 		true,
@@ -2245,7 +2307,9 @@ func (ec *executionContext) _PlanetRequiresNested_name(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PlanetRequiresNested_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2272,7 +2336,9 @@ func (ec *executionContext) _PlanetRequiresNested_world(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PlanetRequiresNested_world,
-		func(ctx context.Context) (any, error) { return obj.World, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.World, nil
+		},
 		nil,
 		ec.marshalNWorld2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐWorld,
 		true,
@@ -2307,7 +2373,9 @@ func (ec *executionContext) _PlanetRequiresNested_worlds(ctx context.Context, fi
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PlanetRequiresNested_worlds,
-		func(ctx context.Context) (any, error) { return obj.Worlds, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Worlds, nil
+		},
 		nil,
 		ec.marshalOWorld2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐWorldᚄ,
 		true,
@@ -2342,7 +2410,9 @@ func (ec *executionContext) _PlanetRequiresNested_size(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PlanetRequiresNested_size,
-		func(ctx context.Context) (any, error) { return obj.Size, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Size, nil
+		},
 		nil,
 		ec.marshalNInt2int,
 		true,
@@ -2369,7 +2439,9 @@ func (ec *executionContext) _PlanetRequiresNested_sizes(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		ec.fieldContext_PlanetRequiresNested_sizes,
-		func(ctx context.Context) (any, error) { return obj.Sizes, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Sizes, nil
+		},
 		nil,
 		ec.marshalOInt2ᚕintᚄ,
 		true,
@@ -2578,7 +2650,9 @@ func (ec *executionContext) _World_foo(ctx context.Context, field graphql.Collec
 		ec.OperationContext,
 		field,
 		ec.fieldContext_World_foo,
-		func(ctx context.Context) (any, error) { return obj.Foo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Foo, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2605,7 +2679,9 @@ func (ec *executionContext) _World_bar(ctx context.Context, field graphql.Collec
 		ec.OperationContext,
 		field,
 		ec.fieldContext_World_bar,
-		func(ctx context.Context) (any, error) { return obj.Bar, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Bar, nil
+		},
 		nil,
 		ec.marshalNInt2int,
 		true,
@@ -2632,7 +2708,9 @@ func (ec *executionContext) _World_hello(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		ec.fieldContext_World_hello,
-		func(ctx context.Context) (any, error) { return obj.Hello, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Hello, nil
+		},
 		nil,
 		ec.marshalOHello2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐHello,
 		true,
@@ -2665,7 +2743,9 @@ func (ec *executionContext) _WorldName_name(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		ec.fieldContext_WorldName_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2692,7 +2772,9 @@ func (ec *executionContext) _WorldWithMultipleKeys_foo(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext_WorldWithMultipleKeys_foo,
-		func(ctx context.Context) (any, error) { return obj.Foo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Foo, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2719,7 +2801,9 @@ func (ec *executionContext) _WorldWithMultipleKeys_bar(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext_WorldWithMultipleKeys_bar,
-		func(ctx context.Context) (any, error) { return obj.Bar, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Bar, nil
+		},
 		nil,
 		ec.marshalNInt2int,
 		true,
@@ -2746,7 +2830,9 @@ func (ec *executionContext) _WorldWithMultipleKeys_hello(ctx context.Context, fi
 		ec.OperationContext,
 		field,
 		ec.fieldContext_WorldWithMultipleKeys_hello,
-		func(ctx context.Context) (any, error) { return obj.Hello, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Hello, nil
+		},
 		nil,
 		ec.marshalOHello2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐHello,
 		true,
@@ -2779,7 +2865,9 @@ func (ec *executionContext) __Service_sdl(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext__Service_sdl,
-		func(ctx context.Context) (any, error) { return obj.SDL, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.SDL, nil
+		},
 		nil,
 		ec.marshalOString2string,
 		true,
@@ -2806,7 +2894,9 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -2862,7 +2952,9 @@ func (ec *executionContext) ___Directive_isRepeatable(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_isRepeatable,
-		func(ctx context.Context) (any, error) { return obj.IsRepeatable, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.IsRepeatable, nil
+		},
 		nil,
 		ec.marshalNBoolean2bool,
 		true,
@@ -2889,7 +2981,9 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_locations,
-		func(ctx context.Context) (any, error) { return obj.Locations, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Locations, nil
+		},
 		nil,
 		ec.marshalN__DirectiveLocation2ᚕstringᚄ,
 		true,
@@ -2916,7 +3010,9 @@ func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Directive_args,
-		func(ctx context.Context) (any, error) { return obj.Args, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Args, nil
+		},
 		nil,
 		ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ,
 		true,
@@ -2968,7 +3064,9 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext___EnumValue_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -3082,7 +3180,9 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Field_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -3138,7 +3238,9 @@ func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Field_args,
-		func(ctx context.Context) (any, error) { return obj.Args, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Args, nil
+		},
 		nil,
 		ec.marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ,
 		true,
@@ -3190,7 +3292,9 @@ func (ec *executionContext) ___Field_type(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		ec.fieldContext___Field_type,
-		func(ctx context.Context) (any, error) { return obj.Type, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
 		nil,
 		ec.marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType,
 		true,
@@ -3299,7 +3403,9 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext___InputValue_name,
-		func(ctx context.Context) (any, error) { return obj.Name, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
 		nil,
 		ec.marshalNString2string,
 		true,
@@ -3355,7 +3461,9 @@ func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		ec.fieldContext___InputValue_type,
-		func(ctx context.Context) (any, error) { return obj.Type, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Type, nil
+		},
 		nil,
 		ec.marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType,
 		true,
@@ -3406,7 +3514,9 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		ec.fieldContext___InputValue_defaultValue,
-		func(ctx context.Context) (any, error) { return obj.DefaultValue, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DefaultValue, nil
+		},
 		nil,
 		ec.marshalOString2ᚖstring,
 		true,

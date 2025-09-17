@@ -32,7 +32,9 @@ func (ec *executionContext) _SkipIncludeTestType_a(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SkipIncludeTestType_a,
-		func(ctx context.Context) (any, error) { return obj.A, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.A, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -61,7 +63,9 @@ func (ec *executionContext) _SkipIncludeTestType_b(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		ec.fieldContext_SkipIncludeTestType_b,
-		func(ctx context.Context) (any, error) { return obj.B, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.B, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},

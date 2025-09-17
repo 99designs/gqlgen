@@ -32,7 +32,9 @@ func (ec *executionContext) _Map_id(ctx context.Context, field graphql.Collected
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Map_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},

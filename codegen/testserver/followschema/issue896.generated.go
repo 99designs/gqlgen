@@ -33,7 +33,9 @@ func (ec *executionContext) _CheckIssue896_id(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_CheckIssue896_id,
-		func(ctx context.Context) (any, error) { return obj.ID, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},

@@ -180,7 +180,9 @@ func (ec *executionContext) _Content_Post_foo(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Content_Post_foo,
-		func(ctx context.Context) (any, error) { return obj.Foo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Foo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -209,7 +211,9 @@ func (ec *executionContext) _Content_User_foo(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		ec.fieldContext_Content_User_foo,
-		func(ctx context.Context) (any, error) { return obj.Foo, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.Foo, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -238,7 +242,9 @@ func (ec *executionContext) _ValidType_differentCase(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ValidType_differentCase,
-		func(ctx context.Context) (any, error) { return obj.DifferentCase, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DifferentCase, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -267,7 +273,9 @@ func (ec *executionContext) _ValidType_different_case(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ValidType_different_case,
-		func(ctx context.Context) (any, error) { return obj.DifferentCaseOld, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.DifferentCaseOld, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -296,7 +304,9 @@ func (ec *executionContext) _ValidType_validInputKeywords(ctx context.Context, f
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ValidType_validInputKeywords,
-		func(ctx context.Context) (any, error) { return obj.ValidInputKeywords, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ValidInputKeywords, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
@@ -336,7 +346,9 @@ func (ec *executionContext) _ValidType_validArgs(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		ec.fieldContext_ValidType_validArgs,
-		func(ctx context.Context) (any, error) { return obj.ValidArgs, nil },
+		func(ctx context.Context) (any, error) {
+			return obj.ValidArgs, nil
+		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},

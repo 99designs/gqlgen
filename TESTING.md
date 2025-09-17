@@ -1,5 +1,6 @@
 How to write tests for gqlgen
 ===
+foobar
 
 Testing generated code is a little tricky, here's how its currently set up.
 

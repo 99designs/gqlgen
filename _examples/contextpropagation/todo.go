@@ -4,6 +4,7 @@ package contextpropagation
 
 import (
 	"context"
+
 	"github.com/99designs/gqlgen/graphql"
 )
 

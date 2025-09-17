@@ -114,7 +114,7 @@ func TestResolveField(t *testing.T) {
 		commonResolveFieldTests...,
 	)
 
-	testResolveField(t, tests, ResolveField, func(t *testing.T, test ResolveFieldTest, result Marshaler) {
+	testResolveField(t, tests, ResolveField, false, func(t *testing.T, test ResolveFieldTest, result Marshaler) {
 		var sb strings.Builder
 		if result != nil {
 			result.MarshalGQL(&sb)
@@ -148,7 +148,7 @@ func TestResolveFieldStream(t *testing.T) {
 		}
 	}
 
-	testResolveField(t, tests, ResolveFieldStream, func(t *testing.T, test ResolveFieldTest, result func(ctx context.Context) Marshaler) {
+	testResolveField(t, tests, ResolveFieldStream, true, func(t *testing.T, test ResolveFieldTest, result func(ctx context.Context) Marshaler) {
 		var sb strings.Builder
 		if result != nil {
 			for range 3 {
@@ -177,6 +177,7 @@ func testResolveField[R any](
 	t *testing.T,
 	tests []ResolveFieldTest,
 	resolveField resolveFieldFunc[string, R],
+	stream bool,
 	assertResult func(t *testing.T, test ResolveFieldTest, result R),
 ) {
 	for _, test := range tests {
@@ -201,7 +202,7 @@ func testResolveField[R any](
 				},
 				ResolverMiddleware: func(ctx context.Context, next Resolver) (res any, err error) {
 					assertCall(3)
-					ctx = context.WithValue(ctx, resolveFieldTestKey("resolver"), "middleware")
+					ctx = context.WithValue(ctx, resolveFieldTestKey("middlewareResolver"), "test middleware resolver")
 					if test.panicResolverMiddleware != "" {
 						panic(test.panicResolverMiddleware)
 					}
@@ -228,7 +229,7 @@ func testResolveField[R any](
 					},
 					func(ctx context.Context) (any, error) {
 						assertCall(4)
-						assert.Equal(t, "middleware", ctx.Value(resolveFieldTestKey("resolver")), "should propagate value from resolver middleware")
+						assert.Equal(t, "test middleware resolver", ctx.Value(resolveFieldTestKey("middlewareResolver")), "should propagate value from resolver middleware")
 						if test.panicFieldResolver != "" {
 							panic(test.panicFieldResolver)
 						}
@@ -239,11 +240,17 @@ func testResolveField[R any](
 						if test.panicMiddlewareChain != "" {
 							panic(test.panicMiddlewareChain)
 						}
-						return next
+						return func(ctx context.Context) (res any, err error) {
+							ctx = context.WithValue(ctx, resolveFieldTestKey("middlewareChain"), "test middleware chain")
+							return next(ctx)
+						}
 					},
 					func(ctx context.Context, sel ast.SelectionSet, v string) Marshaler {
 						assertCall(test.marshalCalls[marshalCalled])
 						marshalCalled++
+						if !stream {
+							assert.Equal(t, "test middleware chain", ctx.Value(resolveFieldTestKey("middlewareChain")), "should propagate value from middleware chain")
+						}
 						return MarshalString(v)
 					},
 					test.recoverFromPanic,

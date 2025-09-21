@@ -26,7 +26,7 @@ var apolloSandboxPage = template.Must(template.New("ApolloSandbox").Parse(`<!doc
 
 <body>
   <div style="width: 100vw; height: 100vh;" id='embedded-sandbox'></div>
-  <script rel="preload" as="script" crossorigin="anonymous" integrity="{{.mainSRI}}" type="text/javascript" src="https://embeddable-sandbox.cdn.apollographql.com/02e2da0fccbe0240ef03d2396d6c98559bab5b06/embeddable-sandbox.umd.production.min.js"></script>
+  <script rel="preload" as="script" crossorigin="anonymous" integrity="{{.mainSRI}}" type="text/javascript" src="https://embeddable-sandbox.cdn.apollographql.com/02e2da0fccbe0240ef03d2396d6c98559bab5b06/embeddable-sandbox.umd.production.min.js"></script>/embeddable-sandbox.umd.production.min.js"></script>
   <script>
 {{- if .endpointIsAbsolute}}
 	const url = {{.endpoint}};
@@ -68,7 +68,7 @@ func ApolloSandboxHandler(title, endpoint string, opts ...ApolloSandboxOption) h
 			"title":              title,
 			"endpoint":           endpoint,
 			"endpointIsAbsolute": endpointHasScheme(endpoint),
-			"mainSRI":            "sha256-pYhw/8TGkZxk960PMMpDtjhw9YtKXUzGv6XQQaMJSh8=",
+			"mainSRI":            "sha256-asj/scPAF8jmMGj1J+YwCHps3uI57AZ78cHs0bJkML4=",
 			"options":            string(optionsBytes),
 		})
 		if err != nil {

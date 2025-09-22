@@ -26,7 +26,7 @@ var apolloSandboxPage = template.Must(template.New("ApolloSandbox").Parse(`<!doc
 
 <body>
   <div style="width: 100vw; height: 100vh;" id='embedded-sandbox'></div>
-  <script rel="preload" as="script" crossorigin="anonymous" integrity="{{.mainSRI}}" type="text/javascript" src="https://embeddable-sandbox.cdn.apollographql.com/02e2da0fccbe0240ef03d2396d6c98559bab5b06/embeddable-sandbox.umd.production.min.js"></script>/embeddable-sandbox.umd.production.min.js"></script>
+  <script rel="preload" as="script" crossorigin="anonymous" integrity="{{.mainSRI}}" type="text/javascript" src="https://embeddable-sandbox.cdn.apollographql.com/02e2da0fccbe0240ef03d2396d6c98559bab5b06/embeddable-sandbox.umd.production.min.js"></script>
   <script>
 {{- if .endpointIsAbsolute}}
 	const url = {{.endpoint}};

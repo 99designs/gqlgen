@@ -42,6 +42,10 @@ type PackageOptions struct {
 	// ComputedRequires generates resolver functions to compute values for
 	// fields using the @required directive.
 	ComputedRequires bool
+	// EntityResolverMulti is default engine for entityResolver generation.
+	// This can be overriding by @entityResolver(multi: Boolean) directive.
+	// false by default.
+	EntityResolverMulti bool
 }
 
 // New returns a federation plugin that injects
@@ -64,30 +68,61 @@ func New(version int, cfg *config.Config) (*Federation, error) {
 func buildPackageOptions(cfg *config.Config) (PackageOptions, error) {
 	packageOptions := cfg.Federation.Options
 
-	explicitRequires := packageOptions["explicit_requires"]
-	computedRequires := packageOptions["computed_requires"]
+	const (
+		optionExplicitRequires    = "explicit_requires"
+		optionComputedRequires    = "computed_requires"
+		optionEntityResolverMulti = "entity_resolver_multi"
+	)
+
+	var explicitRequires,
+		computedRequires,
+		entityResolverMulti bool
+
+	for k, v := range packageOptions {
+		switch k {
+		case optionExplicitRequires:
+			explicitRequires = v
+		case optionComputedRequires:
+			computedRequires = v
+		case optionEntityResolverMulti:
+			entityResolverMulti = v
+		default:
+			return PackageOptions{}, fmt.Errorf("unknown package option: %s", k)
+		}
+	}
+
 	if explicitRequires && computedRequires {
-		return PackageOptions{}, errors.New("only one of explicit_requires or computed_requires can be set to true")
+		return PackageOptions{}, fmt.Errorf(
+			"only one of %s or %s can be set to true",
+			optionExplicitRequires,
+			optionComputedRequires,
+		)
 	}
 
 	if computedRequires {
 		if cfg.Federation.Version != 2 {
-			return PackageOptions{}, errors.New("when using federation.options.computed_requires you must be using Federation 2")
+			return PackageOptions{}, fmt.Errorf(
+				"when using federation.options.%s you must be using Federation 2",
+				optionComputedRequires,
+			)
 		}
 
 		// We rely on injecting a null argument with a directives for fields with @requires, so we need to ensure
 		// our directive is always called.
 		if !cfg.CallArgumentDirectivesWithNull {
-			return PackageOptions{}, errors.New("when using federation.options.computed_requires, call_argument_directives_with_null must be set to true")
+			return PackageOptions{}, fmt.Errorf(
+				"when using federation.options.%s, call_argument_directives_with_null must be set to true",
+				optionComputedRequires,
+			)
 		}
 	}
 
 	// We rely on injecting a null argument with a directives for fields with @requires, so we need to ensure
 	// our directive is always called.
-
 	return PackageOptions{
-		ExplicitRequires: explicitRequires,
-		ComputedRequires: computedRequires,
+		ExplicitRequires:    explicitRequires,
+		ComputedRequires:    computedRequires,
+		EntityResolverMulti: entityResolverMulti,
 	}, nil
 }
 
@@ -157,7 +192,7 @@ func (f *Federation) InjectSourcesEarly() ([]*ast.Source, error) {
 	}}, nil
 }
 
-// InjectSourceLate creates a GraphQL Entity type with all
+// InjectSourcesLate creates a GraphQL Entity type with all
 // the fields that had the @key directive
 func (f *Federation) InjectSourcesLate(schema *ast.Schema) ([]*ast.Source, error) {
 	f.Entities = f.buildEntities(schema, f.version)
@@ -402,7 +437,7 @@ func (f *Federation) buildEntity(
 		Def:       schemaType,
 		Resolvers: nil,
 		Requires:  nil,
-		Multi:     isMultiEntity(schemaType),
+		Multi:     f.isMultiEntity(schemaType),
 	}
 
 	// If our schema has a field with a type defined in
@@ -436,10 +471,12 @@ func (f *Federation) buildEntity(
 	return entity
 }
 
-func isMultiEntity(schemaType *ast.Definition) bool {
+// isMultiEntity returns @entityResolver(multi) value, if directive is not defined,
+// then global configuration parameter will be used.
+func (f *Federation) isMultiEntity(schemaType *ast.Definition) bool {
 	dir := schemaType.Directives.ForName(dirNameEntityResolver)
 	if dir == nil {
-		return false
+		return f.PackageOptions.EntityResolverMulti
 	}
 
 	if dirArg := dir.Arguments.ForName("multi"); dirArg != nil {
@@ -448,7 +485,7 @@ func isMultiEntity(schemaType *ast.Definition) bool {
 		}
 	}
 
-	return false
+	return f.PackageOptions.EntityResolverMulti
 }
 
 func buildResolvers(

@@ -1,8 +1,8 @@
 ---
-title: 'Using Apollo federation gqlgen'
+title: "Using Apollo federation gqlgen"
 description: How federate many services into a single graph using Apollo
 linkTitle: Apollo Federation
-menu: { main: { parent: 'recipes' } }
+menu: { main: { parent: "recipes" } }
 ---
 
 In this quick guide we are going to implement the example [Apollo Federation](https://www.apollographql.com/docs/apollo-server/federation/introduction/)
@@ -39,31 +39,33 @@ go run github.com/99designs/gqlgen
 ```
 
 Update the schema to reflect the federated example
+
 ```graphql
 type Review {
-  body: String
-  author: User @provides(fields: "username")
-  product: Product
+	body: String
+	author: User @provides(fields: "username")
+	product: Product
 }
 
 extend type User @key(fields: "id") {
-  id: ID! @external # External directive not required for key fields in federation v2
-  reviews: [Review]
+	id: ID! @external # External directive not required for key fields in federation v2
+	reviews: [Review]
 }
 
 extend type Product @key(fields: "upc") {
-  upc: String! @external # External directive not required for key fields in federation v2
-  reviews: [Review]
+	upc: String! @external # External directive not required for key fields in federation v2
+	reviews: [Review]
 }
 ```
 
-
 and regenerate
+
 ```bash
 go run github.com/99designs/gqlgen
 ```
 
 then implement the resolvers
+
 ```go
 // These two methods are required for gqlgen to resolve the internal id-only wrapper structs.
 // This boilerplate might be removed in a future version of gqlgen that can no-op id only nodes.
@@ -123,33 +125,34 @@ npm install --save @apollo/gateway apollo-server graphql
 ```
 
 ```typescript
-const { ApolloServer } = require('apollo-server');
+const { ApolloServer } = require("apollo-server");
 const { ApolloGateway, IntrospectAndCompose } = require("@apollo/gateway");
 
 const gateway = new ApolloGateway({
-    supergraphSdl: new IntrospectAndCompose({
-        subgraphs: [
-            { name: 'accounts', url: 'http://localhost:4001/query' },
-            { name: 'products', url: 'http://localhost:4002/query' },
-            { name: 'reviews', url: 'http://localhost:4003/query' }
-        ]
-    })
+	supergraphSdl: new IntrospectAndCompose({
+		subgraphs: [
+			{ name: "accounts", url: "http://localhost:4001/query" },
+			{ name: "products", url: "http://localhost:4002/query" },
+			{ name: "reviews", url: "http://localhost:4003/query" },
+		],
+	}),
 });
 
 const server = new ApolloServer({
-    gateway,
+	gateway,
 
-    subscriptions: false,
+	subscriptions: false,
 });
 
 server.listen().then(({ url }) => {
-    console.log(`🚀 Server ready at ${url}`);
+	console.log(`🚀 Server ready at ${url}`);
 });
 ```
 
 ## Start all the services
 
 In separate terminals:
+
 ```bash
 go run accounts/server.go
 go run products/server.go
@@ -163,16 +166,16 @@ The examples from the apollo doc should all work, eg
 
 ```graphql
 query {
-  me {
-    username
-    reviews {
-      body
-      product {
-        name
-        upc
-      }
-    }
-  }
+	me {
+		username
+		reviews {
+			body
+			product {
+				name
+				upc
+			}
+		}
+	}
 }
 ```
 
@@ -180,27 +183,27 @@ should return
 
 ```json
 {
-  "data": {
-    "me": {
-      "username": "Me",
-      "reviews": [
-        {
-          "body": "A highly effective form of birth control.",
-          "product": {
-            "name": "Trilby",
-            "upc": "top-1"
-          }
-        },
-        {
-          "body": "Fedoras are one of the most fashionable hats around and can look great with a variety of outfits.",
-          "product": {
-            "name": "Trilby",
-            "upc": "top-1"
-          }
-        }
-      ]
-    }
-  }
+	"data": {
+		"me": {
+			"username": "Me",
+			"reviews": [
+				{
+					"body": "A highly effective form of birth control.",
+					"product": {
+						"name": "Trilby",
+						"upc": "top-1"
+					}
+				},
+				{
+					"body": "Fedoras are one of the most fashionable hats around and can look great with a variety of outfits.",
+					"product": {
+						"name": "Trilby",
+						"upc": "top-1"
+					}
+				}
+			]
+		}
+	}
 }
 ```
 
@@ -227,26 +230,26 @@ genrated resolver functions that include a new argument, `federationRequires`, t
 fields you requested in your `@requires.fields` selection set.
 
 > Note: currently it's represented as a map[string]any where the contained values are encoded with
-`encoding/json`. Eventually we will generate a typesafe model that represents these models,
-however that is a large lift. This typesafe support will be added in the future.
+> `encoding/json`. Eventually we will generate a typesafe model that represents these models,
+> however that is a large lift. This typesafe support will be added in the future.
 
 ### Example
 
 Take a simple todo app schema that needs to provide a formatted status text to be used across all clients by referencing the assignee's name.
 
 ```graphql
-type Todo @key(fields:"id") {
-  id: ID!
-  text: String!
-  statusText: String! @requires(fields: "assignee { name }")
-  status: String!
-  owner: User!
-  assignee: User! @external
+type Todo @key(fields: "id") {
+	id: ID!
+	text: String!
+	statusText: String! @requires(fields: "assignee { name }")
+	status: String!
+	owner: User!
+	assignee: User! @external
 }
 
-type User @key(fields:"id") {
-  id: ID!
-  name: String! @external
+type User @key(fields: "id") {
+	id: ID!
+	name: String! @external
 }
 ```
 
@@ -286,18 +289,18 @@ Enabling this will generate corresponding functions with the entity representati
 Take a simple todo app schema that needs to provide a formatted status text to be used across all clients by referencing the assignee's name.
 
 ```graphql
-type Todo @key(fields:"id") {
-  id: ID!
-  text: String!
-  statusText: String! @requires(fields: "assignee { name }")
-  status: String!
-  owner: User!
-  assignee: User!
+type Todo @key(fields: "id") {
+	id: ID!
+	text: String!
+	statusText: String! @requires(fields: "assignee { name }")
+	status: String!
+	owner: User!
+	assignee: User!
 }
 
-type User @key(fields:"id") {
-  id: ID!
-  name: String! @external
+type User @key(fields: "id") {
+	id: ID!
+	name: String! @external
 }
 ```
 
@@ -312,3 +315,68 @@ func (ec *executionContext) PopulateTodoRequires(ctx context.Context, entity *mo
 	return nil
 }
 ```
+
+## Using @entityResolver
+
+The `@entityResolver` directive enables optimization for entity resolver generation in GraphQL federation.
+
+### Configuration
+
+To use this feature, define the `@entityResolver(multi: Boolean)` directive on your OBJECT types. Federated entities must be annotated with this directive to enable the functionality.
+
+Example:
+
+```graphql
+type MultiHello @key(fields: "name") @entityResolver(multi: true)
+```
+
+### Global Configuration
+
+You can enable this feature by default by setting the `federation.options.entity_resolver_multi` flag in your configuration:
+
+```yml
+federation:
+  filename: graph/federation.go
+  package: graph
+  version: 2
+  options:
+    entity_resolver_multi: true
+```
+
+### Schema Example
+
+```graphql
+directive @entityResolver(multi: Boolean) on OBJECT
+
+type User @key(fields: "id") @entityResolver(multi: true) {
+	id: ID!
+	name: String!
+}
+```
+
+After defining your schema, regenerate the code:
+
+```bash
+go run github.com/99designs/gqlgen
+```
+
+### Implementation
+
+Implement the generated resolver method:
+
+```go
+// IMPORTANT: The output slice order is critical and must match the input slice order exactly!
+func (r *entityResolver) FindUserByIDs(ctx context.Context, ids []string) ([]*model.User, error) {
+	output := make([]*model.User, len(ids))
+	for i, id := range ids {
+		output[i] = &model.User{
+			ID:   id,
+			Name: "User " + id,
+		}
+	}
+
+	return output, nil
+}
+```
+
+When configured, the federation plugin creates an entity resolver that accepts a list of representations, improving performance by reducing the number of individual resolver calls.

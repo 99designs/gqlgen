@@ -34,6 +34,7 @@ type Field struct {
 	Object           *Object          // A link back to the parent object
 	Default          any              // The default value
 	Stream           bool             // does this field return a channel?
+	ThunkResolver    bool             // does this field return a thunk resolver?
 	Directives       []*Directive
 }
 
@@ -107,6 +108,7 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 	}()
 
 	f.Stream = obj.Stream
+	f.ThunkResolver = b.Config.Resolver.ThunkResolvers
 
 	switch {
 	case f.Name == "__schema":
@@ -554,6 +556,9 @@ func (f *Field) ShortResolverSignature(ft *goast.FuncType) string {
 		if ft.Results != nil && len(ft.Results.List) > 1 && len(ft.Results.List[1].Names) > 0 {
 			namedE = ft.Results.List[1].Names[0].Name
 		}
+	}
+	if f.ThunkResolver {
+		result = fmt.Sprintf("func() (%s, error)", result)
 	}
 	res += fmt.Sprintf(") (%s %s, %s error)", namedV, result, namedE)
 	return res

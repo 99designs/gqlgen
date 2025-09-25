@@ -9,7 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
-	"sync"
 	"sync/atomic"
 	"time"
 
@@ -80,16 +79,16 @@ type ComplexityRoot struct {
 }
 
 type CustomerResolver interface {
-	Address(ctx context.Context, obj *Customer) (*Address, error)
-	Orders(ctx context.Context, obj *Customer) ([]*Order, error)
+	Address(ctx context.Context, obj *Customer) (func() (*Address, error), error)
+	Orders(ctx context.Context, obj *Customer) (func() ([]*Order, error), error)
 }
 type OrderResolver interface {
-	Items(ctx context.Context, obj *Order) ([]*Item, error)
+	Items(ctx context.Context, obj *Order) (func() ([]*Item, error), error)
 }
 type QueryResolver interface {
-	Customers(ctx context.Context) ([]*Customer, error)
-	Torture1d(ctx context.Context, customerIds []int) ([]*Customer, error)
-	Torture2d(ctx context.Context, customerIds [][]int) ([][]*Customer, error)
+	Customers(ctx context.Context) (func() ([]*Customer, error), error)
+	Torture1d(ctx context.Context, customerIds []int) (func() ([]*Customer, error), error)
+	Torture2d(ctx context.Context, customerIds [][]int) (func() ([][]*Customer, error), error)
 }
 
 type executableSchema struct {
@@ -3320,11 +3319,6 @@ func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlge
 
 func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Directive) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
 	for i := range v {
 		i := i
 		fc := &graphql.FieldContext{
@@ -3339,19 +3333,11 @@ func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgq
 					ret = nil
 				}
 			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
 			ret[i] = ec.marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx, sel, v[i])
 		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
+		f(i)
 
 	}
-	wg.Wait()
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -3395,11 +3381,6 @@ func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx conte
 
 func (ec *executionContext) marshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
 	for i := range v {
 		i := i
 		fc := &graphql.FieldContext{
@@ -3414,19 +3395,11 @@ func (ec *executionContext) marshalN__DirectiveLocation2ᚕstringᚄ(ctx context
 					ret = nil
 				}
 			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
 			ret[i] = ec.marshalN__DirectiveLocation2string(ctx, sel, v[i])
 		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
+		f(i)
 
 	}
-	wg.Wait()
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -3451,11 +3424,6 @@ func (ec *executionContext) marshalN__InputValue2githubᚗcomᚋ99designsᚋgqlg
 
 func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
 	for i := range v {
 		i := i
 		fc := &graphql.FieldContext{
@@ -3470,19 +3438,11 @@ func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 					ret = nil
 				}
 			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
 			ret[i] = ec.marshalN__InputValue2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValue(ctx, sel, v[i])
 		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
+		f(i)
 
 	}
-	wg.Wait()
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -3499,11 +3459,6 @@ func (ec *executionContext) marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋg
 
 func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
 	for i := range v {
 		i := i
 		fc := &graphql.FieldContext{
@@ -3518,19 +3473,11 @@ func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 					ret = nil
 				}
 			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
 			ret[i] = ec.marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, sel, v[i])
 		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
+		f(i)
 
 	}
-	wg.Wait()
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -3609,11 +3556,6 @@ func (ec *executionContext) marshalOCustomer2ᚕᚕᚖgithubᚗcomᚋ99designs�
 		return graphql.Null
 	}
 	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
 	for i := range v {
 		i := i
 		fc := &graphql.FieldContext{
@@ -3628,19 +3570,11 @@ func (ec *executionContext) marshalOCustomer2ᚕᚕᚖgithubᚗcomᚋ99designs�
 					ret = nil
 				}
 			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
 			ret[i] = ec.marshalOCustomer2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋdataloaderᚐCustomerᚄ(ctx, sel, v[i])
 		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
+		f(i)
 
 	}
-	wg.Wait()
 
 	return ret
 }
@@ -3650,11 +3584,6 @@ func (ec *executionContext) marshalOCustomer2ᚕᚖgithubᚗcomᚋ99designsᚋgq
 		return graphql.Null
 	}
 	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
 	for i := range v {
 		i := i
 		fc := &graphql.FieldContext{
@@ -3669,19 +3598,11 @@ func (ec *executionContext) marshalOCustomer2ᚕᚖgithubᚗcomᚋ99designsᚋgq
 					ret = nil
 				}
 			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
 			ret[i] = ec.marshalNCustomer2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋdataloaderᚐCustomer(ctx, sel, v[i])
 		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
+		f(i)
 
 	}
-	wg.Wait()
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -3763,11 +3684,6 @@ func (ec *executionContext) marshalOItem2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgen
 		return graphql.Null
 	}
 	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
 	for i := range v {
 		i := i
 		fc := &graphql.FieldContext{
@@ -3782,19 +3698,11 @@ func (ec *executionContext) marshalOItem2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgen
 					ret = nil
 				}
 			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
 			ret[i] = ec.marshalNItem2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋdataloaderᚐItem(ctx, sel, v[i])
 		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
+		f(i)
 
 	}
-	wg.Wait()
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -3810,11 +3718,6 @@ func (ec *executionContext) marshalOOrder2ᚕᚖgithubᚗcomᚋ99designsᚋgqlge
 		return graphql.Null
 	}
 	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
 	for i := range v {
 		i := i
 		fc := &graphql.FieldContext{
@@ -3829,19 +3732,11 @@ func (ec *executionContext) marshalOOrder2ᚕᚖgithubᚗcomᚋ99designsᚋgqlge
 					ret = nil
 				}
 			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
 			ret[i] = ec.marshalNOrder2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋdataloaderᚐOrder(ctx, sel, v[i])
 		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
+		f(i)
 
 	}
-	wg.Wait()
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -3875,11 +3770,6 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 		return graphql.Null
 	}
 	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
 	for i := range v {
 		i := i
 		fc := &graphql.FieldContext{
@@ -3894,19 +3784,11 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 					ret = nil
 				}
 			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
 			ret[i] = ec.marshalN__EnumValue2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValue(ctx, sel, v[i])
 		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
+		f(i)
 
 	}
-	wg.Wait()
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -3922,11 +3804,6 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 		return graphql.Null
 	}
 	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
 	for i := range v {
 		i := i
 		fc := &graphql.FieldContext{
@@ -3941,19 +3818,11 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 					ret = nil
 				}
 			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
 			ret[i] = ec.marshalN__Field2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐField(ctx, sel, v[i])
 		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
+		f(i)
 
 	}
-	wg.Wait()
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -3969,11 +3838,6 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 		return graphql.Null
 	}
 	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
 	for i := range v {
 		i := i
 		fc := &graphql.FieldContext{
@@ -3988,19 +3852,11 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 					ret = nil
 				}
 			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
 			ret[i] = ec.marshalN__InputValue2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValue(ctx, sel, v[i])
 		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
+		f(i)
 
 	}
-	wg.Wait()
 
 	for _, e := range ret {
 		if e == graphql.Null {
@@ -4023,11 +3879,6 @@ func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 		return graphql.Null
 	}
 	ret := make(graphql.Array, len(v))
-	var wg sync.WaitGroup
-	isLen1 := len(v) == 1
-	if !isLen1 {
-		wg.Add(len(v))
-	}
 	for i := range v {
 		i := i
 		fc := &graphql.FieldContext{
@@ -4042,19 +3893,11 @@ func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 					ret = nil
 				}
 			}()
-			if !isLen1 {
-				defer wg.Done()
-			}
 			ret[i] = ec.marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, sel, v[i])
 		}
-		if isLen1 {
-			f(i)
-		} else {
-			go f(i)
-		}
+		f(i)
 
 	}
-	wg.Wait()
 
 	for _, e := range ret {
 		if e == graphql.Null {

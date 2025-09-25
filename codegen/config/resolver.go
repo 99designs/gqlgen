@@ -20,6 +20,7 @@ type ResolverConfig struct {
 	OmitTemplateComment bool           `yaml:"omit_template_comment,omitempty"`
 	ResolverTemplate    string         `yaml:"resolver_template,omitempty"`
 	PreserveResolver    bool           `yaml:"preserve_resolver,omitempty"`
+	ThunkResolvers      bool           `yaml:"thunk_resolvers,omitempty"`
 }
 
 type ResolverLayout string

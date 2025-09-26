@@ -3,3 +3,6 @@ models:
     model: github.com/99designs/gqlgen/_examples/dataloader.Order
   Customer:
     model: github.com/99designs/gqlgen/_examples/dataloader.Customer
+
+resolver:
+  thunk_resolvers: true

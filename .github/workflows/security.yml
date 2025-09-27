@@ -31,3 +31,6 @@ jobs:
         go-version: ${{ matrix.go }}
     - run: go mod download && go list -json -deps all > go.list
     - uses: sonatype-nexus-community/nancy-github-action@395e2fb168f674f96502e5652103d112899ea369 # main
+      env:
+        OSSI_TOKEN: "${{ secrets.OSSI_TOKEN }}"
+        OSSI_USERNAME: "${{ secrets.OSSI_USERNAME }}"

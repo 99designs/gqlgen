@@ -7,6 +7,9 @@ import (
 	"net/http"
 )
 
+const apolloSandboxMainJs = "https://embeddable-sandbox.cdn.apollographql.com/02e2da0fccbe0240ef03d2396d6c98559bab5b06/embeddable-sandbox.umd.production.min.js"
+const apolloSandboxMainSri = "sha256-asj/scPAF8jmMGj1J+YwCHps3uI57AZ78cHs0bJkML4="
+
 // NOTE: New version available at https://embeddable-sandbox.cdn.apollographql.com/ -->
 var apolloSandboxPage = template.Must(template.New("ApolloSandbox").Parse(`<!doctype html>
 <html>
@@ -47,8 +50,8 @@ var apolloSandboxPage = template.Must(template.New("ApolloSandbox").Parse(`<!doc
 // ApolloSandboxHandler responsible for setting up the apollo sandbox playground
 func ApolloSandboxHandler(title, endpoint string, opts ...ApolloSandboxOption) http.HandlerFunc {
 	options := &apolloSandboxHandlerOptions{
-		MainJs:  "https://embeddable-sandbox.cdn.apollographql.com/02e2da0fccbe0240ef03d2396d6c98559bab5b06/embeddable-sandbox.umd.production.min.js",
-		MainSri: "sha256-asj/scPAF8jmMGj1J+YwCHps3uI57AZ78cHs0bJkML4=",
+		MainJs:  apolloSandboxMainJs,
+		MainSri: apolloSandboxMainSri,
 		ApolloSandboxOption: &apolloSandboxOptions{
 			HideCookieToggle:   true,
 			EndpointIsEditable: false,

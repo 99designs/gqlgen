@@ -15,13 +15,17 @@ import (
 	"encoding/base64"
 	"encoding/xml"
 	"fmt"
+	"go/ast"
+	"go/parser"
+	"go/printer"
+	"go/token"
 	"hash"
 	"io"
 	"log"
 	"net/http"
 	"os"
 	"path/filepath"
-	"slices"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -76,19 +80,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	fmt.Println("Please update:")
 	apolloSandBoxFile := filepath.Join(
 		filepath.Dir(gitRepoDir),
 		"/graphql/playground/apollo_sandbox_playground.go",
 	)
 
-	goFileBytes, err := os.ReadFile(apolloSandBoxFile)
-	if err != nil {
-		fmt.Printf("Unable to ReadFile %s: %s\n", apolloSandBoxFile, err)
-		os.Exit(1)
-	}
-
-	goFileBytes = alterApolloSandboxContents(goFileBytes, latestKey, sri)
+	goFileBytes, err := alterApolloSandboxContents(apolloSandBoxFile, cdnFileURL, sri)
 	err = os.WriteFile(apolloSandBoxFile, goFileBytes, 0o644)
 	if err != nil {
 		log.Fatalln(err)
@@ -96,35 +93,44 @@ func main() {
 	return
 }
 
-// TODO(steve): This isn't *quite* correct as it leaves the old stuff and SRI
-// as well as adding it
-func alterApolloSandboxContents(src []byte, latestKey, sri string) []byte {
-	prefixLatestLine := `<script rel="preload" as="script" crossorigin="anonymous" integrity="{{.mainSRI}}" type="text/javascript" src="https://embeddable-sandbox.cdn.apollographql.com/`
-	suffixSuffixLatestLine := `/embeddable-sandbox.umd.production.min.js"></script>`
+func alterApolloSandboxContents(filename string, latestKey, sri string) ([]byte, error) {
+	tokenFileSet := token.NewFileSet()
+	node, err := parser.ParseFile(tokenFileSet, filename, nil, parser.ParseComments)
+	if err != nil {
+		return nil, err
+	}
 
-	prefixSRILine := `"mainSRI":            "`
-	suffixSRILine := `",`
-	lines := strings.Split(string(src), "\n")
-
-	var newlines []string
-	for _, line := range lines {
-		switch {
-		case strings.Contains(line, prefixLatestLine):
-			chunks := strings.SplitAfter(line, prefixLatestLine)
-			chunks = slices.Insert(chunks, 1, latestKey)
-			chunks = append(chunks, suffixSuffixLatestLine)
-			newlines = append(newlines, strings.Join(chunks, ""))
-		case strings.Contains(line, prefixSRILine):
-			chunks := strings.SplitAfter(line, prefixSRILine)
-			chunks = slices.Insert(chunks, 1, sri)
-			chunks = append(chunks, suffixSRILine)
-			newlines = append(newlines, strings.Join(chunks, ""))
-		default:
-			newlines = append(newlines, line)
+	for _, decl := range node.Decls {
+		gen, ok := decl.(*ast.GenDecl)
+		if !ok || gen.Tok != token.CONST {
+			continue
+		}
+		for _, spec := range gen.Specs {
+			valSpec, ok := spec.(*ast.ValueSpec)
+			if !ok {
+				continue
+			}
+			for i, name := range valSpec.Names {
+				switch name.Name {
+				case "apolloSandboxMainJs":
+					valSpec.Values[i] = &ast.BasicLit{
+						Kind:  token.STRING,
+						Value: strconv.Quote(latestKey),
+					}
+				case "apolloSandboxMainSri":
+					valSpec.Values[i] = &ast.BasicLit{
+						Kind:  token.STRING,
+						Value: strconv.Quote(sri),
+					}
+				}
+			}
 		}
 	}
-	output := strings.Join(newlines, "\n")
-	return []byte(output)
+	var buf bytes.Buffer
+	if err := printer.Fprint(&buf, tokenFileSet, node); err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
 }
 
 func getCDNFile(reqURL string) []byte {

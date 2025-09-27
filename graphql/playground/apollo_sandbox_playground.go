@@ -26,7 +26,7 @@ var apolloSandboxPage = template.Must(template.New("ApolloSandbox").Parse(`<!doc
 
 <body>
   <div style="width: 100vw; height: 100vh;" id='embedded-sandbox'></div>
-  <script rel="preload" as="script" crossorigin="anonymous" integrity="{{.mainSRI}}" type="text/javascript" src="https://embeddable-sandbox.cdn.apollographql.com/02e2da0fccbe0240ef03d2396d6c98559bab5b06/embeddable-sandbox.umd.production.min.js"></script>
+  <script rel="preload" as="script" crossorigin="anonymous" integrity="{{.mainSRI}}" type="text/javascript" src="{{.mainJs}}"></script>
   <script>
 {{- if .endpointIsAbsolute}}
 	const url = {{.endpoint}};
@@ -46,11 +46,16 @@ var apolloSandboxPage = template.Must(template.New("ApolloSandbox").Parse(`<!doc
 
 // ApolloSandboxHandler responsible for setting up the apollo sandbox playground
 func ApolloSandboxHandler(title, endpoint string, opts ...ApolloSandboxOption) http.HandlerFunc {
-	options := &apolloSandboxOptions{
-		HideCookieToggle: true,
-		InitialState: apolloSandboxInitialState{
-			IncludeCookies:       true,
-			PollForSchemaUpdates: false,
+	options := &apolloSandboxHandlerOptions{
+		MainJs:  "https://embeddable-sandbox.cdn.apollographql.com/02e2da0fccbe0240ef03d2396d6c98559bab5b06/embeddable-sandbox.umd.production.min.js",
+		MainSri: "sha256-asj/scPAF8jmMGj1J+YwCHps3uI57AZ78cHs0bJkML4=",
+		ApolloSandboxOption: &apolloSandboxOptions{
+			HideCookieToggle:   true,
+			EndpointIsEditable: false,
+			InitialState: &apolloSandboxInitialState{
+				IncludeCookies:       true,
+				PollForSchemaUpdates: false,
+			},
 		},
 	}
 
@@ -58,7 +63,7 @@ func ApolloSandboxHandler(title, endpoint string, opts ...ApolloSandboxOption) h
 		opt(options)
 	}
 
-	optionsBytes, err := json.Marshal(options)
+	optionsBytes, err := json.Marshal(options.ApolloSandboxOption)
 	if err != nil {
 		panic(fmt.Errorf("failed to marshal apollo sandbox options: %w", err))
 	}
@@ -68,7 +73,8 @@ func ApolloSandboxHandler(title, endpoint string, opts ...ApolloSandboxOption) h
 			"title":              title,
 			"endpoint":           endpoint,
 			"endpointIsAbsolute": endpointHasScheme(endpoint),
-			"mainSRI":            "sha256-asj/scPAF8jmMGj1J+YwCHps3uI57AZ78cHs0bJkML4=",
+			"mainJs":             options.MainJs,
+			"mainSRI":            options.MainSri,
 			"options":            string(optionsBytes),
 		})
 		if err != nil {
@@ -77,11 +83,17 @@ func ApolloSandboxHandler(title, endpoint string, opts ...ApolloSandboxOption) h
 	}
 }
 
+type apolloSandboxHandlerOptions struct {
+	MainJs              string
+	MainSri             string
+	ApolloSandboxOption *apolloSandboxOptions
+}
+
 // See https://www.apollographql.com/docs/graphos/explorer/sandbox/#options -->
 type apolloSandboxOptions struct {
-	HideCookieToggle   bool                      `json:"hideCookieToggle"`
-	EndpointIsEditable bool                      `json:"endpointIsEditable"`
-	InitialState       apolloSandboxInitialState `json:"initialState,omitempty"`
+	HideCookieToggle   bool                       `json:"hideCookieToggle"`
+	EndpointIsEditable bool                       `json:"endpointIsEditable"`
+	InitialState       *apolloSandboxInitialState `json:"initialState,omitempty"`
 }
 
 type apolloSandboxInitialState struct {
@@ -95,14 +107,14 @@ type apolloSandboxInitialState struct {
 	SharedHeaders        map[string]any `json:"sharedHeaders,omitempty"`
 }
 
-type ApolloSandboxOption func(options *apolloSandboxOptions)
+type ApolloSandboxOption func(options *apolloSandboxHandlerOptions)
 
 // WithApolloSandboxHideCookieToggle By default, the embedded Sandbox does not show the Include cookies toggle in its connection settings.
 //
 // Set hideCookieToggle to false to enable users of your embedded Sandbox instance to toggle the Include cookies setting.
 func WithApolloSandboxHideCookieToggle(hideCookieToggle bool) ApolloSandboxOption {
-	return func(options *apolloSandboxOptions) {
-		options.HideCookieToggle = hideCookieToggle
+	return func(options *apolloSandboxHandlerOptions) {
+		options.ApolloSandboxOption.HideCookieToggle = hideCookieToggle
 	}
 }
 
@@ -110,8 +122,8 @@ func WithApolloSandboxHideCookieToggle(hideCookieToggle bool) ApolloSandboxOptio
 //
 // Set endpointIsEditable to false to prevent users of your embedded Sandbox instance from changing the endpoint URL.
 func WithApolloSandboxEndpointIsEditable(endpointIsEditable bool) ApolloSandboxOption {
-	return func(options *apolloSandboxOptions) {
-		options.EndpointIsEditable = endpointIsEditable
+	return func(options *apolloSandboxHandlerOptions) {
+		options.ApolloSandboxOption.EndpointIsEditable = endpointIsEditable
 	}
 }
 
@@ -123,8 +135,8 @@ func WithApolloSandboxEndpointIsEditable(endpointIsEditable bool) ApolloSandboxO
 //
 // Read more about the fetch API and credentials here https://developer.mozilla.org/en-US/docs/Web/API/fetch#credentials
 func WithApolloSandboxInitialStateIncludeCookies(includeCookies bool) ApolloSandboxOption {
-	return func(options *apolloSandboxOptions) {
-		options.InitialState.IncludeCookies = includeCookies
+	return func(options *apolloSandboxHandlerOptions) {
+		options.ApolloSandboxOption.InitialState.IncludeCookies = includeCookies
 	}
 }
 
@@ -132,8 +144,8 @@ func WithApolloSandboxInitialStateIncludeCookies(includeCookies bool) ApolloSand
 //
 // If you omit this, the Sandbox initially loads an example query based on your schema.
 func WithApolloSandboxInitialStateDocument(document string) ApolloSandboxOption {
-	return func(options *apolloSandboxOptions) {
-		options.InitialState.Document = document
+	return func(options *apolloSandboxHandlerOptions) {
+		options.ApolloSandboxOption.InitialState.Document = document
 	}
 }
 
@@ -141,8 +153,8 @@ func WithApolloSandboxInitialStateDocument(document string) ApolloSandboxOption 
 //
 // If provided, these variables should apply to the initial query you provide for document.
 func WithApolloSandboxInitialStateVariables(variables map[string]any) ApolloSandboxOption {
-	return func(options *apolloSandboxOptions) {
-		options.InitialState.Variables = variables
+	return func(options *apolloSandboxHandlerOptions) {
+		options.ApolloSandboxOption.InitialState.Variables = variables
 	}
 }
 
@@ -150,8 +162,8 @@ func WithApolloSandboxInitialStateVariables(variables map[string]any) ApolloSand
 //
 // If provided, these variables should apply to the initial query you provide for document.
 func WithApolloSandboxInitialStateHeaders(headers map[string]any) ApolloSandboxOption {
-	return func(options *apolloSandboxOptions) {
-		options.InitialState.Headers = headers
+	return func(options *apolloSandboxHandlerOptions) {
+		options.ApolloSandboxOption.InitialState.Headers = headers
 	}
 }
 
@@ -159,9 +171,9 @@ func WithApolloSandboxInitialStateHeaders(headers map[string]any) ApolloSandboxO
 //
 // You can find these values from a registered graph in Studio by clicking the ... menu next to an operation in the Explorer of that graph and selecting View operation details.
 func WithApolloSandboxInitialStateCollectionIdAndOperationId(collectionId, operationId string) ApolloSandboxOption {
-	return func(options *apolloSandboxOptions) {
-		options.InitialState.CollectionId = collectionId
-		options.InitialState.OperationId = operationId
+	return func(options *apolloSandboxHandlerOptions) {
+		options.ApolloSandboxOption.InitialState.CollectionId = collectionId
+		options.ApolloSandboxOption.InitialState.OperationId = operationId
 	}
 }
 
@@ -169,8 +181,8 @@ func WithApolloSandboxInitialStateCollectionIdAndOperationId(collectionId, opera
 //
 // The default value is false.
 func WithApolloSandboxInitialStatePollForSchemaUpdates(pollForSchemaUpdates bool) ApolloSandboxOption {
-	return func(options *apolloSandboxOptions) {
-		options.InitialState.PollForSchemaUpdates = pollForSchemaUpdates
+	return func(options *apolloSandboxHandlerOptions) {
+		options.ApolloSandboxOption.InitialState.PollForSchemaUpdates = pollForSchemaUpdates
 	}
 }
 
@@ -180,7 +192,17 @@ func WithApolloSandboxInitialStatePollForSchemaUpdates(pollForSchemaUpdates bool
 //
 // The embedded Sandbox always includes these headers in its introspection queries to your initialEndpoint.
 func WithApolloSandboxInitialStateSharedHeaders(sharedHeaders map[string]any) ApolloSandboxOption {
-	return func(options *apolloSandboxOptions) {
-		options.InitialState.SharedHeaders = sharedHeaders
+	return func(options *apolloSandboxHandlerOptions) {
+		options.ApolloSandboxOption.InitialState.SharedHeaders = sharedHeaders
+	}
+}
+
+// WithApolloSandboxJs The main javascript resource and its subresource integrity checksum
+//
+// You can change the version of apollo sandbox.
+func WithApolloSandboxJs(mainJs, mainSri string) ApolloSandboxOption {
+	return func(options *apolloSandboxHandlerOptions) {
+		options.MainJs = mainJs
+		options.MainSri = mainSri
 	}
 }

@@ -14,8 +14,10 @@ import (
 	"crypto/sha512"
 	"encoding/base64"
 	"encoding/xml"
+	"errors"
 	"fmt"
 	"go/ast"
+	"go/format"
 	"go/parser"
 	"go/printer"
 	"go/token"
@@ -23,11 +25,17 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
+)
+
+const (
+	apolloSandboxCdnUrl       = "https://embeddable-sandbox.cdn.apollographql.com"
+	apolloSandboxSriAlgorithm = "sha256" // md5, sha256 or sha512
 )
 
 type ListBucketResult struct {
@@ -51,55 +59,187 @@ type ListBucketResult struct {
 }
 
 func main() {
+	if err := updateApolloSandbox(); err != nil {
+		log.Fatalln(err.Error())
+	}
+}
+
+// updateApolloSandbox finds the latest version of apollo sandbox js and updates the apollo_sandbox_playground.go.
+func updateApolloSandbox() error {
+	repoRootPath, err := findRepoRootPath()
+	if err != nil {
+		return fmt.Errorf("failed to find git directory: %w", err)
+	}
+
+	latestKey, err := findLastRelease()
+	if err != nil {
+		return fmt.Errorf("failed to parse base url: %w", err)
+	}
+
+	latestJsUrl, err := url.JoinPath(apolloSandboxCdnUrl, latestKey)
+	if err != nil {
+		return fmt.Errorf("failed to join url: %w", err)
+	}
+
+	latestJsSri, err := computeSRIHash(latestJsUrl, apolloSandboxSriAlgorithm)
+	if err != nil {
+		return fmt.Errorf("failed to compute latestJsSri hash: %w", err)
+	}
+
+	apolloSandBoxFile := filepath.Join(repoRootPath, "graphql", "playground", "apollo_sandbox_playground.go")
+
+	goFileBytes, err := alterApolloSandboxContents(apolloSandBoxFile, latestJsUrl, latestJsSri)
+	if err != nil {
+		return fmt.Errorf("failed to alter apollo sandbox contents: %w", err)
+	}
+
+	if err := os.WriteFile(apolloSandBoxFile, goFileBytes, 0o644); err != nil {
+		return fmt.Errorf("failed to write apollo sandbox contents: %w", err)
+	}
+	return nil
+}
+
+// findRepoRootPath returns the path that contains ".git" directory, based on the working directory.
+// It starts at the working directory, and walks up the filesystem hierarchy until it finds a valid
+// ".git" directory. If it can't retrieve the working directory, and can't find a ".git" directory
+// it will return an error.
+func findRepoRootPath() (string, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return "", fmt.Errorf("failed to get current working directory: %w", err)
+	}
+
+	dir := wd
+	for {
+		if fi, err := os.Stat(filepath.Join(dir, ".git")); err == nil && fi.IsDir() {
+			return dir, nil
+		}
+
+		parent := filepath.Dir(dir)
+		if parent == dir {
+			return "", fmt.Errorf("failed to find a .git directory starting from %s", wd)
+		}
+
+		dir = parent
+	}
+}
+
+// findLastRelease Finds the latest release from the CDN bucket.
+// Ignores the _latest, latest and v2 keys.
+func findLastRelease() (string, error) {
+	baseUrl, err := url.Parse(apolloSandboxCdnUrl)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse base url: %w", err)
+	}
+
 	var continuationToken string
 	var latestKey string
 	var latestTime time.Time
-	isTruncated := true
 
-	for isTruncated {
-		continuationToken, isTruncated, latestKey, latestTime = getPage(
-			latestKey,
-			latestTime,
-			continuationToken,
-			isTruncated,
-		)
+	for {
+		result, err := getBucketFiles(baseUrl, continuationToken)
+		if err != nil {
+			return "", fmt.Errorf("failed to get latest release: %w", err)
+		}
+
+		for _, content := range result.Contents {
+			if strings.HasSuffix(content.Key, "/embeddable-sandbox.umd.production.min.js") &&
+				!strings.HasPrefix(content.Key, "_latest/") &&
+				!strings.HasPrefix(content.Key, "latest/") &&
+				!strings.HasPrefix(content.Key, "v2/") {
+				if latestTime.IsZero() || latestTime.Before(content.LastModified) {
+					latestKey = content.Key
+					latestTime = content.LastModified
+				}
+			}
+		}
+
+		if !result.IsTruncated {
+			break
+		}
+		continuationToken = result.NextContinuationToken
 	}
 
-	cdnFileURL := fmt.Sprintf(
-		"%s/%s",
-		"https://embeddable-sandbox.cdn.apollographql.com",
-		latestKey,
-	)
-	cdnFileBytes := getCDNFile(cdnFileURL)
-
-	sri, err := fingerprintTransform(cdnFileBytes, "sha256")
-	var gitRepoDir string
-	gitRepoDir, err = findGitDirectory()
-	if err != nil {
-		fmt.Printf("Unable to findGitDirectory: %s\n", err)
-		os.Exit(1)
-	}
-
-	apolloSandBoxFile := filepath.Join(
-		filepath.Dir(gitRepoDir),
-		"/graphql/playground/apollo_sandbox_playground.go",
-	)
-
-	goFileBytes, err := alterApolloSandboxContents(apolloSandBoxFile, cdnFileURL, sri)
-	err = os.WriteFile(apolloSandBoxFile, goFileBytes, 0o644)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	return
+	return latestKey, nil
 }
 
-func alterApolloSandboxContents(filename string, latestKey, sri string) ([]byte, error) {
+// getBucketFiles gets the file list from the CDN bucket.
+func getBucketFiles(baseUrl *url.URL, continuationToken string) (ListBucketResult, error) {
+	query := baseUrl.Query()
+	query.Set("list-type", "2")
+	if continuationToken != "" {
+		query.Set("continuationToken", continuationToken)
+	}
+	baseUrl.RawQuery = query.Encode()
+
+	resp, err := http.Get(baseUrl.String())
+	if err != nil {
+		return ListBucketResult{}, fmt.Errorf("client: could not make request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	data, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return ListBucketResult{}, fmt.Errorf("client: could not read response body: %w", err)
+	}
+
+	var result ListBucketResult
+	if err := xml.Unmarshal(data, &result); err != nil {
+		return ListBucketResult{}, fmt.Errorf("failed to unmarshal xml response %w", err)
+	}
+
+	return result, nil
+}
+
+// computeSRIHash computes the SRI hash for the given URL.
+func computeSRIHash(reqURL string, algo string) (string, error) {
+	h, err := newHasher(algo)
+	if err != nil {
+		return "", err
+	}
+
+	resp, err := http.Get(reqURL)
+	if err != nil {
+		return "", fmt.Errorf("client: could not make request: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if _, err := io.Copy(h, resp.Body); err != nil {
+		return "", fmt.Errorf("could not copy bytes into hash: %w", err)
+	}
+
+	return integrity(algo, h.Sum(nil)), nil
+}
+
+// newHasher creates a new hasher for the given algorithm.
+func newHasher(algo string) (hash.Hash, error) {
+	switch algo {
+	case "md5":
+		return md5.New(), nil
+	case "sha256":
+		return sha256.New(), nil
+	case "sha512":
+		return sha512.New(), nil
+	default:
+		return nil, fmt.Errorf("unsupported crypto algo: %q, use either md5, sha256 or sha512", algo)
+	}
+}
+
+// integrity computes the SRI hash for the given bytes.
+func integrity(algo string, sum []byte) string {
+	encoded := base64.StdEncoding.EncodeToString(sum)
+	return fmt.Sprintf("%s-%s", algo, encoded)
+}
+
+// alterApolloSandboxContents alters the apollo sandbox source code contents to use the latest JS URL and SRI.
+func alterApolloSandboxContents(filename, latestJsUrl, latestJsSri string) ([]byte, error) {
 	tokenFileSet := token.NewFileSet()
 	node, err := parser.ParseFile(tokenFileSet, filename, nil, parser.ParseComments)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to parse %s: %w", filename, err)
 	}
 
+	var mainJsUpdated, mainSriUpdated bool
 	for _, decl := range node.Decls {
 		gen, ok := decl.(*ast.GenDecl)
 		if !ok || gen.Tok != token.CONST {
@@ -115,158 +255,31 @@ func alterApolloSandboxContents(filename string, latestKey, sri string) ([]byte,
 				case "apolloSandboxMainJs":
 					valSpec.Values[i] = &ast.BasicLit{
 						Kind:  token.STRING,
-						Value: strconv.Quote(latestKey),
+						Value: strconv.Quote(latestJsUrl),
 					}
+					mainJsUpdated = true
 				case "apolloSandboxMainSri":
 					valSpec.Values[i] = &ast.BasicLit{
 						Kind:  token.STRING,
-						Value: strconv.Quote(sri),
+						Value: strconv.Quote(latestJsSri),
 					}
+					mainSriUpdated = true
 				}
 			}
 		}
 	}
+	if !mainJsUpdated || !mainSriUpdated {
+		return nil, errors.New("failed to find apolloSandboxMainJs or apolloSandboxMainSri constants")
+	}
+
 	var buf bytes.Buffer
 	if err := printer.Fprint(&buf, tokenFileSet, node); err != nil {
-		return nil, err
+		return nil, fmt.Errorf("failed to format ast: %w", err)
 	}
-	return buf.Bytes(), nil
-}
 
-func getCDNFile(reqURL string) []byte {
-	resp, err := http.Get(reqURL)
+	formatted, err := format.Source(buf.Bytes())
 	if err != nil {
-		fmt.Printf("client: could not make request: %s\n", err)
-		os.Exit(1)
+		return nil, fmt.Errorf("failed to format source: %w", err)
 	}
-	defer resp.Body.Close()
-
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Printf("client: could not read response body: %s\n", err)
-		os.Exit(1)
-	}
-	return data
-}
-
-func getPage(
-	latestKey string,
-	latestTime time.Time,
-	continuationToken string,
-	isTruncated bool,
-) (string, bool, string, time.Time) {
-	const baseURL = "https://embeddable-sandbox.cdn.apollographql.com/?list-type=2"
-	reqURL := baseURL
-	if continuationToken != "" {
-		reqURL += "&continuation-token=" + continuationToken
-	}
-	var result ListBucketResult
-	resp, err := http.Get(reqURL)
-	if err != nil {
-		fmt.Printf("client: could not make request: %s\n", err)
-		os.Exit(1)
-	}
-	defer resp.Body.Close()
-
-	data, err := io.ReadAll(resp.Body)
-	if err != nil {
-		fmt.Printf("client: could not read response body: %s\n", err)
-		os.Exit(1)
-	}
-
-	err = xml.Unmarshal(data, &result)
-	if err != nil {
-		log.Fatalf("xml.Unmarshal failed with '%s'\n", err)
-	}
-	continuationToken = result.NextContinuationToken
-	isTruncated = result.IsTruncated
-	for _, content := range result.Contents {
-		if strings.Contains(content.Key, "embeddable-sandbox.umd.production.min.js") &&
-			!strings.Contains(content.Key, "embeddable-sandbox.umd.production.min.js.map") &&
-			!strings.Contains(content.Key, "_latest") {
-			if latestTime.IsZero() || latestTime.Before(content.LastModified) {
-				latestKey = content.Key
-				latestTime = content.LastModified
-			}
-		}
-	}
-	return continuationToken, isTruncated, latestKey, latestTime
-}
-
-const defaultHashAlgo = "sha256"
-
-// Fingerprint applies fingerprinting of the given resource and hash algorithm.
-// It defaults to sha256 if none given, and the options are md5, sha256 or sha512.
-// The same algo is used for both the fingerprinting part (aka cache busting) and
-// the base64-encoded Subresource Integrity hash, so you will have to stay away from
-// md5 if you plan to use both.
-// See https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity
-// Transform creates a MD5 hash of the Resource content and inserts that hash before
-// the extension in the filename.
-func fingerprintTransform(src []byte, algo string) (string, error) {
-	var h hash.Hash
-
-	switch algo {
-	case "md5":
-		h = md5.New()
-	case "sha256":
-		h = sha256.New()
-	case "sha512":
-		h = sha512.New()
-	default:
-		return "",
-			fmt.Errorf("unsupported crypto algo: %q, use either md5, sha256 or sha512", algo)
-	}
-
-	buf := bytes.NewBuffer(src)
-	_, err := io.Copy(h, buf)
-	if err != nil {
-		fmt.Printf("could not copy bytes into hash: %s\n", err)
-		os.Exit(1)
-	}
-	var d []byte
-	d, err = digest(h)
-	if err != nil {
-		return "", err
-	}
-
-	sri := integrity(algo, d)
-	// digestString := hex.EncodeToString(d[:])
-	return sri, nil
-}
-
-func integrity(algo string, sum []byte) string {
-	encoded := base64.StdEncoding.EncodeToString(sum)
-	return fmt.Sprintf("%s-%s", algo, encoded)
-}
-
-func digest(h hash.Hash) ([]byte, error) {
-	sum := h.Sum(nil)
-	return sum, nil
-}
-
-// findGitDirectory returns the path of the local ".git" directory, based on the working directory.
-// It starts at the working directory, and walks up the filesystem hierarchy until it finds a valid
-// ".git" directory. If it can't retrieve the working directory, and can't find a ".git" directory
-// it will return an error.
-func findGitDirectory() (string, error) {
-	wd, err := os.Getwd()
-	if err != nil {
-		return "", fmt.Errorf("failed to get current working directory: %w", err)
-	}
-
-	dir := wd
-	for {
-		fi, _ := os.Stat(filepath.Join(dir, ".git", "config"))
-		if fi != nil && !fi.IsDir() {
-			return filepath.Join(dir, ".git"), nil
-		}
-
-		if len(dir) == 0 || (len(dir) == 1 && os.IsPathSeparator(dir[0])) {
-			return "", fmt.Errorf("failed to find a .git directory starting from %s", wd)
-		}
-
-		dir = strings.TrimSuffix(dir, string(os.PathSeparator))
-		dir = filepath.Dir(dir)
-	}
+	return formatted, nil
 }

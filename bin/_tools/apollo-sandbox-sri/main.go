@@ -192,6 +192,7 @@ func getBucketFiles(baseUrl *url.URL, continuationToken string) (ListBucketResul
 }
 
 // computeSRIHash computes the SRI hash for the given URL.
+// See https://developer.mozilla.org/en-US/docs/Web/Security/Subresource_Integrity
 func computeSRIHash(reqURL string, algo string) (string, error) {
 	h, err := newHasher(algo)
 	if err != nil {

@@ -38,49 +38,55 @@ func (r *Resolver) Query() QueryResolver {
 
 type customerResolver struct{ *Resolver }
 
-func (r *customerResolver) Address(ctx context.Context, obj *Customer) (*Address, error) {
-	return ctxLoaders(ctx).addressByID.Load(obj.AddressID)
+func (r *customerResolver) Address(ctx context.Context, obj *Customer) (func() (*Address, error), error) {
+	return ctxLoaders(ctx).addressByID.LoadThunk(obj.AddressID), nil
 }
 
-func (r *customerResolver) Orders(ctx context.Context, obj *Customer) ([]*Order, error) {
-	return ctxLoaders(ctx).ordersByCustomer.Load(obj.ID)
+func (r *customerResolver) Orders(ctx context.Context, obj *Customer) (func() ([]*Order, error), error) {
+	return ctxLoaders(ctx).ordersByCustomer.LoadThunk(obj.ID), nil
 }
 
 type orderResolver struct{ *Resolver }
 
-func (r *orderResolver) Items(ctx context.Context, obj *Order) ([]*Item, error) {
-	return ctxLoaders(ctx).itemsByOrder.Load(obj.ID)
+func (r *orderResolver) Items(ctx context.Context, obj *Order) (func() ([]*Item, error), error) {
+	return ctxLoaders(ctx).itemsByOrder.LoadThunk(obj.ID), nil
 }
 
 type queryResolver struct{ *Resolver }
 
-func (r *queryResolver) Customers(ctx context.Context) ([]*Customer, error) {
+func (r *queryResolver) Customers(ctx context.Context) (func() ([]*Customer, error), error) {
 	fmt.Println("SELECT * FROM customer")
 
-	time.Sleep(5 * time.Millisecond)
+	ch := time.After(5 * time.Millisecond)
 
-	return []*Customer{
-		{ID: 1, Name: "Bob", AddressID: 1},
-		{ID: 2, Name: "Alice", AddressID: 3},
-		{ID: 3, Name: "Eve", AddressID: 4},
+	return func() ([]*Customer, error) {
+		<-ch
+
+		return []*Customer{
+			{ID: 1, Name: "Bob", AddressID: 1},
+			{ID: 2, Name: "Alice", AddressID: 3},
+			{ID: 3, Name: "Eve", AddressID: 4},
+		}, nil
 	}, nil
 }
 
 // this method is here to test code generation of nested arrays
 //
 //nolint:gosec
-func (r *queryResolver) Torture1d(ctx context.Context, customerIds []int) ([]*Customer, error) {
+func (r *queryResolver) Torture1d(ctx context.Context, customerIds []int) (func() ([]*Customer, error), error) {
 	result := make([]*Customer, len(customerIds))
 	for i, id := range customerIds {
 		result[i] = &Customer{ID: id, Name: strconv.Itoa(i), AddressID: rand.Int() % 10}
 	}
-	return result, nil
+	return func() ([]*Customer, error) {
+		return result, nil
+	}, nil
 }
 
 // this method is here to test code generation of nested arrays
 //
 //nolint:gosec
-func (r *queryResolver) Torture2d(ctx context.Context, customerIds [][]int) ([][]*Customer, error) {
+func (r *queryResolver) Torture2d(ctx context.Context, customerIds [][]int) (func() ([][]*Customer, error), error) {
 	result := make([][]*Customer, len(customerIds))
 	for i := range customerIds {
 		inner := make([]*Customer, len(customerIds[i]))
@@ -89,5 +95,7 @@ func (r *queryResolver) Torture2d(ctx context.Context, customerIds [][]int) ([][
 		}
 		result[i] = inner
 	}
-	return result, nil
+	return func() ([][]*Customer, error) {
+		return result, nil
+	}, nil
 }

@@ -1,6 +1,6 @@
 {{- range $object := .Objects }}{{- range $field := $object.Fields }}
 
-func {{$.FuncReceiver}}_{{$object.Name}}_{{$field.Name}}(ctx context.Context, {{$.ECFuncParam}}field graphql.CollectedField{{ if not $object.Root }}, obj {{$object.Reference | ref}}{{end}}) (ret {{ if $object.Stream }}func(ctx context.Context){{ end }}graphql.Marshaler) {
+func {{$.FuncReceiver}}_{{$object.Name}}_{{$field.Name}}(ctx context.Context, {{$.ECFuncParam}}field graphql.CollectedField{{ if not $object.Root }}, obj {{$object.Reference | ref}}{{end}}) ({{- if eq $field.Name "subscription" }} retCtx context.Context, {{- end}}ret {{ if $object.Stream }}func(ctx context.Context) {{ if not $field.TypeReference.IsRoot }}(context.Context, {{ end }} {{ end }}graphql.Marshaler{{ if $object.Stream }}{{ if not $field.TypeReference.IsRoot }}) {{ end }}{{ end }}) {
 	{{- $null := "graphql.Null" }}
 	{{- if $object.Stream }}
 		{{- $null = "nil" }}
@@ -9,7 +9,7 @@ func {{$.FuncReceiver}}_{{$object.Name}}_{{$field.Name}}(ctx context.Context, {{
 	{{- if $field.TypeReference.IsRoot }}
 		fc, err := {{$.ECDot}}{{ $field.FieldContextFunc }}(ctx, {{$.ECArg}}field)
 		if err != nil {
-			return {{ $null }}
+			return {{- if eq $field.Name "subscription" }}  ctx,{{- end}} {{ $null }}
 		}
 		ctx = graphql.WithFieldContext(ctx, fc)
 		{{- if not $.Config.OmitPanicHandler }}

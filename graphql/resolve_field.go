@@ -44,7 +44,7 @@ func ResolveFieldStream[T any](
 	marshal func(ctx context.Context, sel ast.SelectionSet, v T) Marshaler,
 	recoverFromPanic bool,
 	nonNull bool,
-) func(context.Context) Marshaler {
+) func(context.Context) (context.Context, Marshaler) {
 	return resolveField(
 		ctx,
 		oc,
@@ -55,22 +55,22 @@ func ResolveFieldStream[T any](
 		recoverFromPanic,
 		nonNull,
 		nil,
-		func(ctx context.Context, res <-chan T) func(context.Context) Marshaler {
-			return func(ctx context.Context) Marshaler {
+		func(ctx context.Context, res <-chan SubscriptionField[T]) func(context.Context) (context.Context, Marshaler) {
+			return func(ctx context.Context) (context.Context, Marshaler) {
 				select {
 				case v, ok := <-res:
 					if !ok {
-						return nil
+						return ctx, nil
 					}
-					return WriterFunc(func(w io.Writer) {
+					return v.GetContext(), WriterFunc(func(w io.Writer) {
 						w.Write([]byte{'{'})
 						MarshalString(field.Alias).MarshalGQL(w)
 						w.Write([]byte{':'})
-						marshal(ctx, field.Selections, v).MarshalGQL(w)
+						marshal(ctx, field.Selections, v.GetField()).MarshalGQL(w)
 						w.Write([]byte{'}'})
 					})
 				case <-ctx.Done():
-					return nil
+					return ctx, nil
 				}
 			}
 		},

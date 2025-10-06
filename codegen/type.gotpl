@@ -87,13 +87,13 @@
 	{{- end }}
 
 	{{ with $type.MarshalFunc }}
-		func {{$.FuncReceiver}}{{ . }}(ctx context.Context, {{$.ECFuncParam}}sel ast.SelectionSet, v {{ $type.GO | ref }}) graphql.Marshaler {
+		func {{$.FuncReceiver}}{{ . }}(ctx context.Context, {{$.ECFuncParam}}sel ast.SelectionSet, v {{ $type.GO | ref }}) {{- if eq $type.Definition.Name "Subscription" }}(context.Context, {{- end}}graphql.Marshaler{{- if eq $type.Definition.Name "Subscription" }}){{- end}} {
 			{{- if or $type.IsPtrToSlice $type.IsPtrToIntf }}
 				return {{$.ECDot}}{{ $type.Elem.MarshalFunc }}(ctx, {{$.ECArg}}sel, *v)
 			{{- else if $type.IsSlice }}
 				{{- if not $type.GQL.NonNull }}
 					if v == nil {
-						return graphql.Null
+						return {{- if eq $type.Definition.Name "Subscription" }} ctx,{{- end}} graphql.Null
 					}
 				{{- end }}
 				{{- if and $.HasBatchResolverFields (not $type.IsScalar) (eq $type.Elem.Definition.Kind "OBJECT") }}
@@ -149,14 +149,14 @@
 				{{ if $type.Elem.GQL.NonNull }}
 					for _, e := range ret {
 						if e == graphql.Null {
-							return graphql.Null
+							return {{- if eq $type.Definition.Name "Subscription" }} ctx,{{- end}} graphql.Null
 						}
 					}
 				{{ end }}
 				return ret
 			{{- else if and $type.IsPtrToPtr (not $type.Unmarshaler) (not $type.IsMarshaler) }}
 				if v == nil {
-					return graphql.Null
+					return {{- if eq $type.Definition.Name "Subscription" }} ctx,{{- end}} graphql.Null
 				}
 				return {{$.ECDot}}{{ $type.Elem.MarshalFunc }}(ctx, {{$.ECArg}}sel, *v)
 			{{- else }}
@@ -167,7 +167,7 @@
 								graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 							}
 						{{- end }}
-						return graphql.Null
+						return {{- if eq $type.Definition.Name "Subscription" }} ctx,{{- end}} graphql.Null
 					}
 				{{- end }}
 				{{- if $type.IsMarshaler }}

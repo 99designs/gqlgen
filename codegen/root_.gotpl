@@ -180,6 +180,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 					return nil
 				}
 			}
+			response.Context = ctx
+
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 			response.Data = buf.Bytes()
@@ -217,6 +219,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			data.MarshalGQL(&buf)
 
 			return &graphql.Response{
+				Context:    ctx,
 				Data:       buf.Bytes(),
 			}
 		}
@@ -225,10 +228,10 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	{{- if .SubscriptionRoot }} case ast.Subscription:
 		{{ if .Directives.LocationDirectives "SUBSCRIPTION" -}}
 			{{ if $useFunctionSyntaxForExecutionContext -}}
-			next := _subscriptionMiddleware(ctx, &ec, opCtx.Operation, func(ctx context.Context) (any, error){
+			next := _subscriptionMiddleware(ctx, &ec, opCtx.Operation, func(ctx context.Context) (context.Context, any, error){
 				return _{{.SubscriptionRoot.Name}}(ctx, ec, opCtx.Operation.SelectionSet),nil
 			{{- else -}}
-			next := ec._subscriptionMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (any, error){
+			next := ec._subscriptionMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (context.Context, any, error){
 				return ec._{{.SubscriptionRoot.Name}}(ctx, opCtx.Operation.SelectionSet),nil
 			{{- end }}
 			})
@@ -243,14 +246,19 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		var buf bytes.Buffer
 		return func(ctx context.Context) *graphql.Response {
 			buf.Reset()
-			data := next(ctx)
+			respCtx, data := next(ctx)
 
 			if data == nil {
 				return nil
 			}
 			data.MarshalGQL(&buf)
 
+			if respCtx == nil {
+				respCtx = ctx
+			}
+
 			return &graphql.Response{
+				Context:    respCtx,
 				Data:       buf.Bytes(),
 			}
 		}

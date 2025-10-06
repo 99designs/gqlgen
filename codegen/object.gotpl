@@ -8,7 +8,7 @@ var {{ $object.Name|lcFirst}}Implementors = {{$object.Implementors}}
 {{ if $useFunctionSyntaxForExecutionContext -}}
 func _{{$object.Name}}(ctx context.Context, ec *executionContext, sel ast.SelectionSet) func(ctx context.Context) graphql.Marshaler {
 {{- else -}}
-func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.SelectionSet) func(ctx context.Context) graphql.Marshaler {
+func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.SelectionSet) func(ctx context.Context) (context.Context, graphql.Marshaler) {
 {{- end }}
 	fields := graphql.CollectFields(ec.OperationContext, sel, {{$object.Name|lcFirst}}Implementors)
 	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
@@ -134,9 +134,9 @@ func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.Selec
 					})
 				{{- else -}}
 					{{ if $useFunctionSyntaxForExecutionContext -}}
-					out.Values[i] = _{{$object.Name}}_{{$field.Name}}(ctx, ec, field, obj)
+					{{ if eq $field.Name "subscription"}} _, {{- end}}out.Values[i] = _{{$object.Name}}_{{$field.Name}}(ctx, ec, field, obj)
 					{{- else -}}
-					out.Values[i] = ec._{{$object.Name}}_{{$field.Name}}(ctx, field, obj)
+					{{ if eq $field.Name "subscription"}} _, {{- end}}out.Values[i] = ec._{{$object.Name}}_{{$field.Name}}(ctx, field, obj)
 					{{- end }}
 				{{- end -}}
 

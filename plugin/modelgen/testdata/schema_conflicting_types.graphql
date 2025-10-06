@@ -1,0 +1,22 @@
+directive @goField(
+    forceResolver: Boolean
+    name: String
+    omittable: Boolean
+    type: String
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION | INTERFACE
+
+type FooBar {
+    without_underscore: Boolean
+}
+
+type Foo_Bar {
+    with_underscore: Boolean
+}
+
+type Baz {
+    want_without_underscore: FooBar!
+}
+
+type Bees {
+    want_with_underscore: Foo_Bar!
+}

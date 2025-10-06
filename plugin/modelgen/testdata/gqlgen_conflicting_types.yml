@@ -1,0 +1,7 @@
+schema:
+  - "testdata/schema_conflicting_types.graphql"
+
+exec:
+  filename: out_conflicting_types/ignored.go
+model:
+  filename: out_conflicting_types/generated.go

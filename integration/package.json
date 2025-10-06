@@ -16,7 +16,7 @@
         "graphql": "^16.11.0",
         "graphql-sse": "^2.5.4",
         "graphql-ws": "^6.0.6",
-        "typescript": "^5.9.2",
+        "typescript": "^5.9.3",
         "urql": "^5.0.1",
         "vitest": "^3.2.4"
     }

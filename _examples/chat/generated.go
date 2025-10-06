@@ -83,7 +83,7 @@ type QueryResolver interface {
 	Room(ctx context.Context, name string) (*Chatroom, error)
 }
 type SubscriptionResolver interface {
-	MessageAdded(ctx context.Context, roomName string) (<-chan *Message, error)
+	MessageAdded(ctx context.Context, roomName string) (<-chan graphql.SubscriptionField[*Message], error)
 }
 
 type executableSchema struct {
@@ -222,6 +222,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 					return nil
 				}
 			}
+			response.Context = ctx
+
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 			response.Data = buf.Bytes()
@@ -244,7 +246,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			data.MarshalGQL(&buf)
 
 			return &graphql.Response{
-				Data: buf.Bytes(),
+				Context: ctx,
+				Data:    buf.Bytes(),
 			}
 		}
 	case ast.Subscription:
@@ -255,15 +258,20 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		var buf bytes.Buffer
 		return func(ctx context.Context) *graphql.Response {
 			buf.Reset()
-			data := next(ctx)
+			respCtx, data := next(ctx)
 
 			if data == nil {
 				return nil
 			}
 			data.MarshalGQL(&buf)
 
+			if respCtx == nil {
+				respCtx = ctx
+			}
+
 			return &graphql.Response{
-				Data: buf.Bytes(),
+				Context: respCtx,
+				Data:    buf.Bytes(),
 			}
 		}
 
@@ -446,7 +454,7 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    ************************** directives.gotpl **************************
 
-func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *ast.OperationDefinition, next func(ctx context.Context) (any, error)) func(ctx context.Context) graphql.Marshaler {
+func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *ast.OperationDefinition, next func(ctx context.Context) (any, error)) func(ctx context.Context) (context.Context, graphql.Marshaler) {
 	for _, d := range obj.Directives {
 		switch d.Name {
 		case "user":
@@ -454,8 +462,8 @@ func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *as
 			args, err := ec.dir_user_args(ctx, rawArgs)
 			if err != nil {
 				ec.Error(ctx, err)
-				return func(ctx context.Context) graphql.Marshaler {
-					return graphql.Null
+				return func(ctx context.Context) (context.Context, graphql.Marshaler) {
+					return ctx, graphql.Null
 				}
 			}
 			n := next
@@ -470,16 +478,16 @@ func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *as
 	tmp, err := next(ctx)
 	if err != nil {
 		ec.Error(ctx, err)
-		return func(ctx context.Context) graphql.Marshaler {
-			return graphql.Null
+		return func(ctx context.Context) (context.Context, graphql.Marshaler) {
+			return ctx, graphql.Null
 		}
 	}
-	if data, ok := tmp.(func(ctx context.Context) graphql.Marshaler); ok {
+	if data, ok := tmp.(func(ctx context.Context) (context.Context, graphql.Marshaler)); ok {
 		return data
 	}
 	ec.Errorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
-	return func(ctx context.Context) graphql.Marshaler {
-		return graphql.Null
+	return func(ctx context.Context) (context.Context, graphql.Marshaler) {
+		return ctx, graphql.Null
 	}
 }
 
@@ -557,10 +565,10 @@ func (ec *executionContext) fieldContext_Chatroom_messages(_ context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Chatroom_subscription(ctx context.Context, field graphql.CollectedField, obj *Chatroom) (ret graphql.Marshaler) {
+func (ec *executionContext) _Chatroom_subscription(ctx context.Context, field graphql.CollectedField, obj *Chatroom) (retCtx context.Context, ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Chatroom_subscription(ctx, field)
 	if err != nil {
-		return graphql.Null
+		return ctx, graphql.Null
 	}
 	ctx = graphql.WithFieldContext(ctx, fc)
 	defer func() {
@@ -707,10 +715,10 @@ func (ec *executionContext) fieldContext_Message_createdAt(_ context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Message_subscription(ctx context.Context, field graphql.CollectedField, obj *Message) (ret graphql.Marshaler) {
+func (ec *executionContext) _Message_subscription(ctx context.Context, field graphql.CollectedField, obj *Message) (retCtx context.Context, ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Message_subscription(ctx, field)
 	if err != nil {
-		return graphql.Null
+		return ctx, graphql.Null
 	}
 	ctx = graphql.WithFieldContext(ctx, fc)
 	defer func() {
@@ -951,7 +959,7 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 	return fc, nil
 }
 
-func (ec *executionContext) _Subscription_messageAdded(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+func (ec *executionContext) _Subscription_messageAdded(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) (context.Context, graphql.Marshaler)) {
 	return graphql.ResolveFieldStream(
 		ctx,
 		ec.OperationContext,
@@ -2480,7 +2488,7 @@ func (ec *executionContext) _Chatroom(ctx context.Context, sel ast.SelectionSet,
 				out.Invalids++
 			}
 		case "subscription":
-			out.Values[i] = ec._Chatroom_subscription(ctx, field, obj)
+			_, out.Values[i] = ec._Chatroom_subscription(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -2539,7 +2547,7 @@ func (ec *executionContext) _Message(ctx context.Context, sel ast.SelectionSet, 
 				out.Invalids++
 			}
 		case "subscription":
-			out.Values[i] = ec._Message_subscription(ctx, field, obj)
+			_, out.Values[i] = ec._Message_subscription(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -2686,7 +2694,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 
 var subscriptionImplementors = []string{"Subscription"}
 
-func (ec *executionContext) _Subscription(ctx context.Context, sel ast.SelectionSet) func(ctx context.Context) graphql.Marshaler {
+func (ec *executionContext) _Subscription(ctx context.Context, sel ast.SelectionSet) func(ctx context.Context) (context.Context, graphql.Marshaler) {
 	fields := graphql.CollectFields(ec.OperationContext, sel, subscriptionImplementors)
 	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
 		Object: "Subscription",
@@ -3145,17 +3153,17 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNSubscription2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋchatᚐSubscription(ctx context.Context, sel ast.SelectionSet, v Subscription) graphql.Marshaler {
+func (ec *executionContext) marshalNSubscription2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋchatᚐSubscription(ctx context.Context, sel ast.SelectionSet, v Subscription) (context.Context, graphql.Marshaler) {
 	res := ec._Subscription(ctx, sel)
 	return res(ctx)
 }
 
-func (ec *executionContext) marshalNSubscription2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋchatᚐSubscription(ctx context.Context, sel ast.SelectionSet, v *Subscription) graphql.Marshaler {
+func (ec *executionContext) marshalNSubscription2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋchatᚐSubscription(ctx context.Context, sel ast.SelectionSet, v *Subscription) (context.Context, graphql.Marshaler) {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 		}
-		return graphql.Null
+		return ctx, graphql.Null
 	}
 	res := ec._Subscription(ctx, sel)
 	return res(ctx)

@@ -95,7 +95,7 @@ type QueryResolver interface {
 	GetEntity(ctx context.Context, id string) (Entity, error)
 }
 type SubscriptionResolver interface {
-	UserCreated(ctx context.Context) (<-chan *User, error)
+	UserCreated(ctx context.Context) (<-chan graphql.SubscriptionField[*User], error)
 }
 
 type executableSchema struct {
@@ -290,6 +290,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 					return nil
 				}
 			}
+			response.Context = ctx
+
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 			response.Data = buf.Bytes()
@@ -312,7 +314,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			data.MarshalGQL(&buf)
 
 			return &graphql.Response{
-				Data: buf.Bytes(),
+				Context: ctx,
+				Data:    buf.Bytes(),
 			}
 		}
 	case ast.Subscription:
@@ -321,15 +324,20 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		var buf bytes.Buffer
 		return func(ctx context.Context) *graphql.Response {
 			buf.Reset()
-			data := next(ctx)
+			respCtx, data := next(ctx)
 
 			if data == nil {
 				return nil
 			}
 			data.MarshalGQL(&buf)
 
+			if respCtx == nil {
+				respCtx = ctx
+			}
+
 			return &graphql.Response{
-				Data: buf.Bytes(),
+				Context: respCtx,
+				Data:    buf.Bytes(),
 			}
 		}
 
@@ -1205,7 +1213,7 @@ func fieldContext_Query___schema(_ context.Context, ec *executionContext, field 
 	return fc, nil
 }
 
-func _Subscription_userCreated(ctx context.Context, ec *executionContext, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+func _Subscription_userCreated(ctx context.Context, ec *executionContext, field graphql.CollectedField) (ret func(ctx context.Context) (context.Context, graphql.Marshaler)) {
 	return graphql.ResolveFieldStream(
 		ctx,
 		ec.OperationContext,

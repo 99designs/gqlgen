@@ -8,6 +8,7 @@ import (
 	introspection1 "github.com/99designs/gqlgen/codegen/testserver/singlefile/introspection"
 	invalid_packagename "github.com/99designs/gqlgen/codegen/testserver/singlefile/invalid-packagename"
 	"github.com/99designs/gqlgen/codegen/testserver/singlefile/otherpkg"
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type Resolver struct{}
@@ -478,42 +479,42 @@ func (r *queryResolver) WrappedSlice(ctx context.Context) (WrappedSlice, error) 
 }
 
 // Updated is the resolver for the updated field.
-func (r *subscriptionResolver) Updated(ctx context.Context) (<-chan string, error) {
+func (r *subscriptionResolver) Updated(ctx context.Context) (<-chan graphql.SubscriptionField[string], error) {
 	panic("not implemented")
 }
 
 // InitPayload is the resolver for the initPayload field.
-func (r *subscriptionResolver) InitPayload(ctx context.Context) (<-chan string, error) {
+func (r *subscriptionResolver) InitPayload(ctx context.Context) (<-chan graphql.SubscriptionField[string], error) {
 	panic("not implemented")
 }
 
 // DirectiveArg is the resolver for the directiveArg field.
-func (r *subscriptionResolver) DirectiveArg(ctx context.Context, arg string) (<-chan *string, error) {
+func (r *subscriptionResolver) DirectiveArg(ctx context.Context, arg string) (<-chan graphql.SubscriptionField[*string], error) {
 	panic("not implemented")
 }
 
 // DirectiveNullableArg is the resolver for the directiveNullableArg field.
-func (r *subscriptionResolver) DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int, arg3 *string) (<-chan *string, error) {
+func (r *subscriptionResolver) DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int, arg3 *string) (<-chan graphql.SubscriptionField[*string], error) {
 	panic("not implemented")
 }
 
 // DirectiveDouble is the resolver for the directiveDouble field.
-func (r *subscriptionResolver) DirectiveDouble(ctx context.Context) (<-chan *string, error) {
+func (r *subscriptionResolver) DirectiveDouble(ctx context.Context) (<-chan graphql.SubscriptionField[*string], error) {
 	panic("not implemented")
 }
 
 // DirectiveUnimplemented is the resolver for the directiveUnimplemented field.
-func (r *subscriptionResolver) DirectiveUnimplemented(ctx context.Context) (<-chan *string, error) {
+func (r *subscriptionResolver) DirectiveUnimplemented(ctx context.Context) (<-chan graphql.SubscriptionField[*string], error) {
 	panic("not implemented")
 }
 
 // Issue896b is the resolver for the issue896b field.
-func (r *subscriptionResolver) Issue896b(ctx context.Context) (<-chan []*CheckIssue896, error) {
+func (r *subscriptionResolver) Issue896b(ctx context.Context) (<-chan graphql.SubscriptionField[[]*CheckIssue896], error) {
 	panic("not implemented")
 }
 
 // ErrorRequired is the resolver for the errorRequired field.
-func (r *subscriptionResolver) ErrorRequired(ctx context.Context) (<-chan *Error, error) {
+func (r *subscriptionResolver) ErrorRequired(ctx context.Context) (<-chan graphql.SubscriptionField[*Error], error) {
 	panic("not implemented")
 }
 

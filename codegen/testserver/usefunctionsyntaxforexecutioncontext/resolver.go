@@ -4,6 +4,8 @@ package usefunctionsyntaxforexecutioncontext
 
 import (
 	"context"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type Resolver struct{}
@@ -34,7 +36,7 @@ func (r *queryResolver) GetEntity(ctx context.Context, id string) (Entity, error
 }
 
 // UserCreated is the resolver for the userCreated field.
-func (r *subscriptionResolver) UserCreated(ctx context.Context) (<-chan *User, error) {
+func (r *subscriptionResolver) UserCreated(ctx context.Context) (<-chan graphql.SubscriptionField[*User], error) {
 	panic("not implemented")
 }
 

@@ -7,7 +7,7 @@ type Baz struct {
 }
 
 type Bees struct {
-	WantWithUnderscore *FooBar `json:"want_with_underscore" database:"Beeswant_with_underscore"`
+	WantWithUnderscore *FooBar0 `json:"want_with_underscore" database:"Beeswant_with_underscore"`
 }
 
 type FooBar struct {

@@ -303,6 +303,31 @@ func TestModelGeneration(t *testing.T) {
 	})
 }
 
+func TestModelGenerationConflictingTypes(t *testing.T) {
+	cfg, err := config.LoadConfig("testdata/gqlgen_conflicting_types.yml")
+	require.NoError(t, err)
+	require.NoError(t, cfg.Init())
+	p := Plugin{
+		MutateHook: mutateHook,
+		FieldHook:  DefaultFieldMutateHook,
+	}
+	require.NoError(t, p.MutateConfig(cfg))
+	require.NoError(t, goBuild(t, "./out_conflicting_types/"))
+	generated, err := os.ReadFile("./out_conflicting_types/generated.go")
+	require.NoError(t, err)
+
+	// Depending on the order of the fields in the schema, the generated code will be different
+	withoutUnderscore := "FooBar0"
+	withUnderscore := "FooBar"
+	if strings.Contains(string(generated), `type FooBar struct {
+	WithoutUnderscore *bool`) {
+		withoutUnderscore = "FooBar"
+		withUnderscore = "FooBar0"
+	}
+	require.Contains(t, string(generated), "WantWithoutUnderscore *"+withoutUnderscore+" ")
+	require.Contains(t, string(generated), "WantWithUnderscore *"+withUnderscore+" ")
+}
+
 func TestModelGenerationOmitRootModels(t *testing.T) {
 	cfg, err := config.LoadConfig("testdata/gqlgen_omit_root_models.yml")
 	require.NoError(t, err)

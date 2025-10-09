@@ -13,52 +13,59 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
   	<title>{{.Title}}</title>
 	<style>
 		body {
-			height: 100%;
 			margin: 0;
-			width: 100%;
-			overflow: hidden;
 		}
 
 		#graphiql {
 			height: 100vh;
 		}
+
+		.loading {
+        	height: 100%;
+        	display: flex;
+        	align-items: center;
+        	justify-content: center;
+        	font-size: 4rem;
+		}
 	</style>
 	<script
-		src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"
+		src="{{.ReactUrl}}"
 		integrity="{{.ReactSRI}}"
 		crossorigin="anonymous"
 	></script>
 	<script
-		src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"
+		src="{{.ReactDOMUrl}}"
 		integrity="{{.ReactDOMSRI}}"
 		crossorigin="anonymous"
 	></script>
 	<link
 		rel="stylesheet"
-		href="https://cdn.jsdelivr.net/npm/graphiql@{{.Version}}/graphiql.min.css"
+		href="{{.CssUrl}}"
 		integrity="{{.CssSRI}}"
 		crossorigin="anonymous"
 	/>
 {{- if .EnablePluginExplorer}}
 	<link
 		rel="stylesheet"
-		href="https://cdn.jsdelivr.net/npm/@graphiql/plugin-explorer@{{.PluginExplorerVersion}}/dist/style.css"
+		href="{{.PluginExplorerCssUrl}}"
 		integrity="{{.PluginExplorerCssSRI}}"
 		crossorigin="anonymous"
 	/>
 {{- end}}
   </head>
   <body>
-    <div id="graphiql">Loading...</div>
+    <div id="graphiql">
+		<div class="loading">Loading…</div>
+	</div>
 
 	<script
-		src="https://cdn.jsdelivr.net/npm/graphiql@{{.Version}}/graphiql.min.js"
+		src="{{.JsUrl}}"
 		integrity="{{.JsSRI}}"
 		crossorigin="anonymous"
 	></script>
 {{- if .EnablePluginExplorer}}
 	<script
-		src="https://cdn.jsdelivr.net/npm/@graphiql/plugin-explorer@{{.PluginExplorerVersion}}/dist/index.umd.js"
+		src="{{.PluginExplorerJsUrl}}"
 		integrity="{{.PluginExplorerJsSRI}}"
 		crossorigin="anonymous"
 	></script>
@@ -168,26 +175,26 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
 `))
 
 type GraphiqlConfig struct {
-	Title                 string
-	StoragePrefix         string
-	Endpoint              string
-	FetcherHeaders        map[string]string
-	UiHeaders             map[string]string
-	EndpointIsAbsolute    bool
-	SubscriptionEndpoint  string
-	Version               string
-	EnablePluginExplorer  bool
-	PluginExplorerVersion string
-	// https://www.jsdelivr.com/package/npm/@graphiql/plugin-explorer?tab=files
-	PluginExplorerCssSRI string
+	Title                string
+	StoragePrefix        string
+	Endpoint             string
+	FetcherHeaders       map[string]string
+	UiHeaders            map[string]string
+	EndpointIsAbsolute   bool
+	SubscriptionEndpoint string
+	JsUrl                template.URL
+	JsSRI                string
+	CssUrl               template.URL
+	CssSRI               string
+	ReactUrl             template.URL
+	ReactSRI             string
+	ReactDOMUrl          template.URL
+	ReactDOMSRI          string
+	EnablePluginExplorer bool
+	PluginExplorerJsUrl  template.URL
 	PluginExplorerJsSRI  string
-	// https://www.jsdelivr.com/package/npm/graphiql?tab=files
-	CssSRI string
-	JsSRI  string
-	// https://www.jsdelivr.com/package/npm/react?tab=files
-	ReactSRI string
-	// https://www.jsdelivr.com/package/npm/react-dom?tab=files
-	ReactDOMSRI string
+	PluginExplorerCssUrl template.URL
+	PluginExplorerCssSRI string
 }
 type GraphiqlConfigOption func(*GraphiqlConfig)
 
@@ -200,6 +207,33 @@ func WithGraphiqlFetcherHeaders(headers map[string]string) GraphiqlConfigOption 
 func WithGraphiqlUiHeaders(headers map[string]string) GraphiqlConfigOption {
 	return func(config *GraphiqlConfig) {
 		config.UiHeaders = headers
+	}
+}
+
+func WithGraphiqlVersion(jsUrl, cssUrl, cssSri, jsSri string) GraphiqlConfigOption {
+	return func(config *GraphiqlConfig) {
+		config.JsUrl = template.URL(jsUrl)
+		config.CssUrl = template.URL(cssUrl)
+		config.CssSRI = cssSri
+		config.JsSRI = jsSri
+	}
+}
+
+func WithGraphiqlReactVersion(reactJsUrl, reactDomJsUrl, reactJsSri, reactDomJsSri string) GraphiqlConfigOption {
+	return func(config *GraphiqlConfig) {
+		config.ReactUrl = template.URL(reactJsUrl)
+		config.ReactDOMUrl = template.URL(reactDomJsUrl)
+		config.ReactSRI = reactJsSri
+		config.ReactDOMSRI = reactDomJsSri
+	}
+}
+
+func WithGraphiqlPluginExplorerVersion(jsUrl, cssUrl, cssSri, jsSri string) GraphiqlConfigOption {
+	return func(config *GraphiqlConfig) {
+		config.PluginExplorerJsUrl = template.URL(jsUrl)
+		config.PluginExplorerCssUrl = template.URL(cssUrl)
+		config.PluginExplorerCssSRI = cssSri
+		config.PluginExplorerJsSRI = jsSri
 	}
 }
 
@@ -217,27 +251,36 @@ func WithStoragePrefix(prefix string) GraphiqlConfigOption {
 
 // Handler responsible for setting up the playground
 func Handler(title, endpoint string, opts ...GraphiqlConfigOption) http.HandlerFunc {
+	var data = GraphiqlConfig{
+		Title:                title,
+		Endpoint:             endpoint,
+		EndpointIsAbsolute:   endpointHasScheme(endpoint),
+		SubscriptionEndpoint: getSubscriptionEndpoint(endpoint),
+		// https://www.jsdelivr.com/package/npm/graphiql?tab=files
+		JsUrl:  "https://cdn.jsdelivr.net/npm/graphiql@4.1.2/graphiql.min.js",
+		JsSRI:  "sha256-hnImuor1znlJkD/FOTL3jayfS/xsyNoP04abi8bFJWs=",
+		CssUrl: "https://cdn.jsdelivr.net/npm/graphiql@4.1.2/graphiql.min.css",
+		CssSRI: "sha256-MEh+B2NdMSpj9kexQNN3QKc8UzMrCXW/Sx/phcpuyIU=",
+		// https://www.jsdelivr.com/package/npm/react?tab=files
+		ReactUrl: "https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js",
+		ReactSRI: "sha256-S0lp+k7zWUMk2ixteM6HZvu8L9Eh//OVrt+ZfbCpmgY=",
+		// https://www.jsdelivr.com/package/npm/react-dom?tab=files
+		ReactDOMUrl: "https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js",
+		ReactDOMSRI: "sha256-IXWO0ITNDjfnNXIu5POVfqlgYoop36bDzhodR6LW5Pc=",
+		// https://www.jsdelivr.com/package/npm/@graphiql/plugin-explorer?tab=files
+		PluginExplorerJsUrl:  template.URL("https://cdn.jsdelivr.net/npm/@graphiql/plugin-explorer@4.0.6/dist/index.umd.js"),
+		PluginExplorerJsSRI:  "sha256-UM8sWOS0Xa9yLY85q6Clh0pF4qpxX+TOcJ41flECqBs=",
+		PluginExplorerCssUrl: template.URL("https://cdn.jsdelivr.net/npm/@graphiql/plugin-explorer@4.0.6/dist/style.min.css"),
+		PluginExplorerCssSRI: "sha256-b0izygy8aEMY3fCLmtNkm9PKdE3kRD4Qjn6Q8gw5xKI=",
+	}
+	for _, opt := range opts {
+		opt(&data)
+	}
+
 	return func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "text/html; charset=UTF-8")
-		var data = GraphiqlConfig{
-			Title:                 title,
-			Endpoint:              endpoint,
-			EndpointIsAbsolute:    endpointHasScheme(endpoint),
-			SubscriptionEndpoint:  getSubscriptionEndpoint(endpoint),
-			Version:               "3.7.0",
-			CssSRI:                "sha256-Dbkv2LUWis+0H4Z+IzxLBxM2ka1J133lSjqqtSu49o8=",
-			JsSRI:                 "sha256-qsScAZytFdTAEOM8REpljROHu8DvdvxXBK7xhoq5XD0=",
-			ReactSRI:              "sha256-S0lp+k7zWUMk2ixteM6HZvu8L9Eh//OVrt+ZfbCpmgY=",
-			ReactDOMSRI:           "sha256-IXWO0ITNDjfnNXIu5POVfqlgYoop36bDzhodR6LW5Pc=",
-			PluginExplorerVersion: "3.2.5",
-			PluginExplorerCssSRI:  "sha256-+fdus37Qf3cEIKiD3VvTvgMdc8qOAT1NGUKEevz5l6k=",
-			PluginExplorerJsSRI:   "sha256-minamf9GZIDrlzoMXDvU55DKk6DC5D6pNctIDWFMxS0=",
-		}
-		for _, opt := range opts {
-			opt(&data)
-		}
-		err := page.Execute(w, data)
-		if err != nil {
+
+		if err := page.Execute(w, data); err != nil {
 			panic(err)
 		}
 	}

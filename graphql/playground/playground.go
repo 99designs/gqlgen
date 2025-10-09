@@ -210,12 +210,12 @@ func WithGraphiqlUiHeaders(headers map[string]string) GraphiqlConfigOption {
 	}
 }
 
-func WithGraphiqlVersion(jsUrl, cssUrl, cssSri, jsSri string) GraphiqlConfigOption {
+func WithGraphiqlVersion(jsUrl, cssUrl, jsSri, cssSri string) GraphiqlConfigOption {
 	return func(config *GraphiqlConfig) {
 		config.JsUrl = template.URL(jsUrl)
 		config.CssUrl = template.URL(cssUrl)
-		config.CssSRI = cssSri
 		config.JsSRI = jsSri
+		config.CssSRI = cssSri
 	}
 }
 
@@ -228,12 +228,12 @@ func WithGraphiqlReactVersion(reactJsUrl, reactDomJsUrl, reactJsSri, reactDomJsS
 	}
 }
 
-func WithGraphiqlPluginExplorerVersion(jsUrl, cssUrl, cssSri, jsSri string) GraphiqlConfigOption {
+func WithGraphiqlPluginExplorerVersion(jsUrl, cssUrl, jsSri, cssSri string) GraphiqlConfigOption {
 	return func(config *GraphiqlConfig) {
 		config.PluginExplorerJsUrl = template.URL(jsUrl)
 		config.PluginExplorerCssUrl = template.URL(cssUrl)
-		config.PluginExplorerCssSRI = cssSri
 		config.PluginExplorerJsSRI = jsSri
+		config.PluginExplorerCssSRI = cssSri
 	}
 }
 

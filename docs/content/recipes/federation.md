@@ -366,12 +366,12 @@ Implement the generated resolver method:
 
 ```go
 // IMPORTANT: The output slice order is critical and must match the input slice order exactly!
-func (r *entityResolver) FindUserByIDs(ctx context.Context, ids []string) ([]*model.User, error) {
-	output := make([]*model.User, len(ids))
-	for i, id := range ids {
+func (r *entityResolver) FindUserByIDs(ctx context.Context, reps []*entity.UserByIDsInput) ([]*model.User, error) {
+	output := make([]*model.User, len(reps))
+	for i, user := range reps {
 		output[i] = &model.User{
-			ID:   id,
-			Name: "User " + id,
+			ID:   user.ID,
+			Name: "User " + user.ID,
 		}
 	}
 

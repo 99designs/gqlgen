@@ -208,6 +208,8 @@
 						return nil
 					}
 				}
+				response.Context = ctx
+
 				var buf bytes.Buffer
 				data.MarshalGQL(&buf)
 				response.Data = buf.Bytes()
@@ -245,6 +247,7 @@
 				data.MarshalGQL(&buf)
 
 				return &graphql.Response{
+					Context: 	ctx,
 					Data:       buf.Bytes(),
 				}
 			}
@@ -271,14 +274,19 @@
 			var buf bytes.Buffer
 			return func(ctx context.Context) *graphql.Response {
 				buf.Reset()
-				data := next(ctx)
+				respCtx, data := next(ctx)
 
 				if data == nil {
 					return nil
 				}
 				data.MarshalGQL(&buf)
 
+				if respCtx == nil {
+					respCtx = ctx
+				}
+
 				return &graphql.Response{
+					Context:    respCtx,
 					Data:       buf.Bytes(),
 				}
 			}

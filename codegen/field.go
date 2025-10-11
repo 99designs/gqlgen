@@ -543,7 +543,7 @@ func (f *Field) ShortResolverSignature(ft *goast.FuncType) string {
 
 	result := templates.CurrentImports.LookupType(f.TypeReference.GO)
 	if f.Object.Stream {
-		result = "<-chan " + result
+		result = "<-chan graphql.SubscriptionField[" + result + "]"
 	}
 	// Named return.
 	var namedV, namedE string

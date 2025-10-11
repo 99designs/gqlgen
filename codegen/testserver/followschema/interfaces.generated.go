@@ -1054,7 +1054,10 @@ var backedByInterfaceImplementors = []string{"BackedByInterface"}
 
 func (ec *executionContext) _BackedByInterface(ctx context.Context, sel ast.SelectionSet, obj BackedByInterface) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, backedByInterfaceImplementors)
+	return ec.__BackedByInterface(ctx, fields, obj)
+}
 
+func (ec *executionContext) __BackedByInterface(ctx context.Context, fields []graphql.CollectedField, obj BackedByInterface) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -1134,7 +1137,10 @@ var catImplementors = []string{"Cat", "Animal"}
 
 func (ec *executionContext) _Cat(ctx context.Context, sel ast.SelectionSet, obj *Cat) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, catImplementors)
+	return ec.__Cat(ctx, fields, obj)
+}
 
+func (ec *executionContext) __Cat(ctx context.Context, fields []graphql.CollectedField, obj *Cat) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -1183,7 +1189,10 @@ var circleImplementors = []string{"Circle", "Shape", "ShapeUnion"}
 
 func (ec *executionContext) _Circle(ctx context.Context, sel ast.SelectionSet, obj *Circle) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, circleImplementors)
+	return ec.__Circle(ctx, fields, obj)
+}
 
+func (ec *executionContext) __Circle(ctx context.Context, fields []graphql.CollectedField, obj *Circle) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -1223,7 +1232,10 @@ var concreteNodeAImplementors = []string{"ConcreteNodeA", "Node"}
 
 func (ec *executionContext) _ConcreteNodeA(ctx context.Context, sel ast.SelectionSet, obj *ConcreteNodeA) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, concreteNodeAImplementors)
+	return ec.__ConcreteNodeA(ctx, fields, obj)
+}
 
+func (ec *executionContext) __ConcreteNodeA(ctx context.Context, fields []graphql.CollectedField, obj *ConcreteNodeA) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -1272,7 +1284,10 @@ var concreteNodeInterfaceImplementors = []string{"ConcreteNodeInterface", "Node"
 
 func (ec *executionContext) _ConcreteNodeInterface(ctx context.Context, sel ast.SelectionSet, obj ConcreteNodeInterface) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, concreteNodeInterfaceImplementors)
+	return ec.__ConcreteNodeInterface(ctx, fields, obj)
+}
 
+func (ec *executionContext) __ConcreteNodeInterface(ctx context.Context, fields []graphql.CollectedField, obj ConcreteNodeInterface) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -1316,7 +1331,10 @@ var coordinatesImplementors = []string{"Coordinates"}
 
 func (ec *executionContext) _Coordinates(ctx context.Context, sel ast.SelectionSet, obj *Coordinates) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, coordinatesImplementors)
+	return ec.__Coordinates(ctx, fields, obj)
+}
 
+func (ec *executionContext) __Coordinates(ctx context.Context, fields []graphql.CollectedField, obj *Coordinates) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -1360,7 +1378,10 @@ var dogImplementors = []string{"Dog", "Animal"}
 
 func (ec *executionContext) _Dog(ctx context.Context, sel ast.SelectionSet, obj *Dog) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, dogImplementors)
+	return ec.__Dog(ctx, fields, obj)
+}
 
+func (ec *executionContext) __Dog(ctx context.Context, fields []graphql.CollectedField, obj *Dog) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -1409,7 +1430,10 @@ var horseImplementors = []string{"Horse", "Mammalian", "Animal"}
 
 func (ec *executionContext) _Horse(ctx context.Context, sel ast.SelectionSet, obj *Horse) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, horseImplementors)
+	return ec.__Horse(ctx, fields, obj)
+}
 
+func (ec *executionContext) __Horse(ctx context.Context, fields []graphql.CollectedField, obj *Horse) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -1458,7 +1482,10 @@ var rectangleImplementors = []string{"Rectangle", "Shape", "ShapeUnion"}
 
 func (ec *executionContext) _Rectangle(ctx context.Context, sel ast.SelectionSet, obj *Rectangle) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, rectangleImplementors)
+	return ec.__Rectangle(ctx, fields, obj)
+}
 
+func (ec *executionContext) __Rectangle(ctx context.Context, fields []graphql.CollectedField, obj *Rectangle) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -1500,7 +1527,10 @@ var sizeImplementors = []string{"Size"}
 
 func (ec *executionContext) _Size(ctx context.Context, sel ast.SelectionSet, obj *Size) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, sizeImplementors)
+	return ec.__Size(ctx, fields, obj)
+}
 
+func (ec *executionContext) __Size(ctx context.Context, fields []graphql.CollectedField, obj *Size) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {

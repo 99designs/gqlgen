@@ -112,7 +112,10 @@ var vOkCaseNilImplementors = []string{"VOkCaseNil"}
 
 func (ec *executionContext) _VOkCaseNil(ctx context.Context, sel ast.SelectionSet, obj *VOkCaseNil) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, vOkCaseNilImplementors)
+	return ec.__VOkCaseNil(ctx, fields, obj)
+}
 
+func (ec *executionContext) __VOkCaseNil(ctx context.Context, fields []graphql.CollectedField, obj *VOkCaseNil) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -148,7 +151,10 @@ var vOkCaseValueImplementors = []string{"VOkCaseValue"}
 
 func (ec *executionContext) _VOkCaseValue(ctx context.Context, sel ast.SelectionSet, obj *VOkCaseValue) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, vOkCaseValueImplementors)
+	return ec.__VOkCaseValue(ctx, fields, obj)
+}
 
+func (ec *executionContext) __VOkCaseValue(ctx context.Context, fields []graphql.CollectedField, obj *VOkCaseValue) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {

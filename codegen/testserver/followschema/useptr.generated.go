@@ -128,7 +128,10 @@ var aImplementors = []string{"A", "TestUnion"}
 
 func (ec *executionContext) _A(ctx context.Context, sel ast.SelectionSet, obj *A) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, aImplementors)
+	return ec.__A(ctx, fields, obj)
+}
 
+func (ec *executionContext) __A(ctx context.Context, fields []graphql.CollectedField, obj *A) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -167,7 +170,10 @@ var bImplementors = []string{"B", "TestUnion"}
 
 func (ec *executionContext) _B(ctx context.Context, sel ast.SelectionSet, obj *B) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, bImplementors)
+	return ec.__B(ctx, fields, obj)
+}
 
+func (ec *executionContext) __B(ctx context.Context, fields []graphql.CollectedField, obj *B) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {

@@ -112,7 +112,10 @@ var loopAImplementors = []string{"LoopA"}
 
 func (ec *executionContext) _LoopA(ctx context.Context, sel ast.SelectionSet, obj *LoopA) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, loopAImplementors)
+	return ec.__LoopA(ctx, fields, obj)
+}
 
+func (ec *executionContext) __LoopA(ctx context.Context, fields []graphql.CollectedField, obj *LoopA) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -151,7 +154,10 @@ var loopBImplementors = []string{"LoopB"}
 
 func (ec *executionContext) _LoopB(ctx context.Context, sel ast.SelectionSet, obj *LoopB) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, loopBImplementors)
+	return ec.__LoopB(ctx, fields, obj)
+}
 
+func (ec *executionContext) __LoopB(ctx context.Context, fields []graphql.CollectedField, obj *LoopB) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {

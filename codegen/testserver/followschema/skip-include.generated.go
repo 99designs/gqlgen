@@ -104,7 +104,10 @@ var skipIncludeTestTypeImplementors = []string{"SkipIncludeTestType"}
 
 func (ec *executionContext) _SkipIncludeTestType(ctx context.Context, sel ast.SelectionSet, obj *SkipIncludeTestType) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, skipIncludeTestTypeImplementors)
+	return ec.__SkipIncludeTestType(ctx, fields, obj)
+}
 
+func (ec *executionContext) __SkipIncludeTestType(ctx context.Context, fields []graphql.CollectedField, obj *SkipIncludeTestType) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {

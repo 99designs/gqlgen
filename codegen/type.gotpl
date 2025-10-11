@@ -116,7 +116,13 @@
 		func {{ . }}(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v {{ $type.GO | ref }}) graphql.Marshaler {
 		{{- else -}}
 		func (ec *executionContext) {{ . }}(ctx context.Context, sel ast.SelectionSet, v {{ $type.GO | ref }}) graphql.Marshaler {
-		{{- end -}}
+		{{- end }}
+			{{- $isIntrospection := false }}
+			{{- $isOptimizable := false }}
+			{{- if and $type.Elem $type.Elem.Definition }}
+				{{- $isIntrospection = or (eq $type.Elem.Definition.Name "__Schema") (eq $type.Elem.Definition.Name "__Type") (eq $type.Elem.Definition.Name "__Field") (eq $type.Elem.Definition.Name "__InputValue") (eq $type.Elem.Definition.Name "__EnumValue") (eq $type.Elem.Definition.Name "__Directive") }}
+				{{- $isOptimizable = and (eq $type.Elem.Definition.Kind "OBJECT") (ne $type.Elem.Definition.Name "Entity") (not $isIntrospection) (not $type.Elem.IsMarshaler) (not $type.Elem.Marshaler) (not $type.Elem.IsScalar) (not $type.Elem.IsSlice) (not $type.Elem.IsPtrToSlice) (not $type.Elem.IsPtrToPtr) (not $type.Elem.IsPtrToIntf) (not $type.Elem.IsMap) (not $type.Elem.IsRoot) }}
+			{{- end }}
 			{{- if or $type.IsPtrToSlice $type.IsPtrToIntf }}
 				{{ if $useFunctionSyntaxForExecutionContext -}}
 				return {{ $type.Elem.MarshalFunc }}(ctx, ec, sel, *v)
@@ -131,6 +137,9 @@
 				{{- end }}
 				ret := make(graphql.Array, len(v))
 				{{- if not $type.IsScalar }}
+					{{- if $isOptimizable }}
+						elemFields := graphql.CollectFields(ec.OperationContext, sel, {{$type.Elem.Definition.Name|lcFirst}}Implementors)
+					{{- end }}
 					var wg sync.WaitGroup
 					{{- if gt $.Config.Exec.WorkerLimit 0 }}
 						sm := semaphore.NewWeighted({{ $.Config.Exec.WorkerLimit }})
@@ -167,10 +176,35 @@
 									defer wg.Done()
 								{{- end }}
 							}
-							{{ if $useFunctionSyntaxForExecutionContext -}}
-							ret[i] = {{ $type.Elem.MarshalFunc }}(ctx, ec, sel, v[i])
-							{{- else -}}
-							ret[i] = ec.{{ $type.Elem.MarshalFunc }}(ctx, sel, v[i])
+							{{- if $isOptimizable }}
+								{{- if $type.Elem.IsNilable }}
+									if v[i] == nil {
+										{{- if $type.Elem.GQL.NonNull }}
+											if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+												ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+											}
+										{{- end }}
+										ret[i] = graphql.Null
+									} else {
+										{{ if $useFunctionSyntaxForExecutionContext -}}
+										ret[i] = __{{$type.Elem.Definition.Name}}(ctx, ec, elemFields{{ if not $type.Elem.IsRoot }}, v[i]{{ end }})
+										{{- else -}}
+										ret[i] = ec.__{{$type.Elem.Definition.Name}}(ctx, elemFields{{ if not $type.Elem.IsRoot }}, v[i]{{ end }})
+										{{- end }}
+									}
+								{{- else }}
+									{{ if $useFunctionSyntaxForExecutionContext -}}
+									ret[i] = __{{$type.Elem.Definition.Name}}(ctx, ec, elemFields{{ if not $type.Elem.IsRoot }}, &v[i]{{ end }})
+									{{- else -}}
+									ret[i] = ec.__{{$type.Elem.Definition.Name}}(ctx, elemFields{{ if not $type.Elem.IsRoot }}, &v[i]{{ end }})
+									{{- end }}
+								{{- end }}
+							{{- else }}
+								{{ if $useFunctionSyntaxForExecutionContext -}}
+								ret[i] = {{ $type.Elem.MarshalFunc }}(ctx, ec, sel, v[i])
+								{{- else -}}
+								ret[i] = ec.{{ $type.Elem.MarshalFunc }}(ctx, sel, v[i])
+								{{- end }}
 							{{- end }}
 						}
 						if isLen1 {

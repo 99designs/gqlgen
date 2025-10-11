@@ -166,7 +166,10 @@ var slicesImplementors = []string{"Slices"}
 
 func (ec *executionContext) _Slices(ctx context.Context, sel ast.SelectionSet, obj *Slices) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, slicesImplementors)
+	return ec.__Slices(ctx, fields, obj)
+}
 
+func (ec *executionContext) __Slices(ctx context.Context, fields []graphql.CollectedField, obj *Slices) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {

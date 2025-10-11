@@ -659,7 +659,10 @@ var pageInfoImplementors = []string{"PageInfo"}
 
 func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet, obj *models.PageInfo) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, pageInfoImplementors)
+	return ec.__PageInfo(ctx, fields, obj)
+}
 
+func (ec *executionContext) __PageInfo(ctx context.Context, fields []graphql.CollectedField, obj *models.PageInfo) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -782,7 +785,10 @@ var userImplementors = []string{"User"}
 
 func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj *models.User) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, userImplementors)
+	return ec.__User(ctx, fields, obj)
+}
 
+func (ec *executionContext) __User(ctx context.Context, fields []graphql.CollectedField, obj *models.User) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -831,7 +837,10 @@ var userConnectionImplementors = []string{"UserConnection"}
 
 func (ec *executionContext) _UserConnection(ctx context.Context, sel ast.SelectionSet, obj *models.UserConnection) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, userConnectionImplementors)
+	return ec.__UserConnection(ctx, fields, obj)
+}
 
+func (ec *executionContext) __UserConnection(ctx context.Context, fields []graphql.CollectedField, obj *models.UserConnection) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -880,7 +889,10 @@ var userEdgeImplementors = []string{"UserEdge"}
 
 func (ec *executionContext) _UserEdge(ctx context.Context, sel ast.SelectionSet, obj *models.UserEdge) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, userEdgeImplementors)
+	return ec.__UserEdge(ctx, fields, obj)
+}
 
+func (ec *executionContext) __UserEdge(ctx context.Context, fields []graphql.CollectedField, obj *models.UserEdge) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -956,6 +968,7 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ
 
 func (ec *executionContext) marshalNUserEdge2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋbenchmarkᚋgeneratedᚋmodelsᚐUserEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.UserEdge) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
+	elemFields := graphql.CollectFields(ec.OperationContext, sel, userEdgeImplementors)
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
 	if !isLen1 {
@@ -978,7 +991,14 @@ func (ec *executionContext) marshalNUserEdge2ᚕᚖgithubᚗcomᚋ99designsᚋgq
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNUserEdge2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋbenchmarkᚋgeneratedᚋmodelsᚐUserEdge(ctx, sel, v[i])
+			if v[i] == nil {
+				if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+					ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+				}
+				ret[i] = graphql.Null
+			} else {
+				ret[i] = ec.__UserEdge(ctx, elemFields, v[i])
+			}
 		}
 		if isLen1 {
 			f(i)

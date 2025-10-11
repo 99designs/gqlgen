@@ -73,7 +73,10 @@ var ptrToSliceContainerImplementors = []string{"PtrToSliceContainer"}
 
 func (ec *executionContext) _PtrToSliceContainer(ctx context.Context, sel ast.SelectionSet, obj *PtrToSliceContainer) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, ptrToSliceContainerImplementors)
+	return ec.__PtrToSliceContainer(ctx, fields, obj)
+}
 
+func (ec *executionContext) __PtrToSliceContainer(ctx context.Context, fields []graphql.CollectedField, obj *PtrToSliceContainer) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {

@@ -561,7 +561,10 @@ var objectDirectivesImplementors = []string{"ObjectDirectives"}
 
 func (ec *executionContext) _ObjectDirectives(ctx context.Context, sel ast.SelectionSet, obj *ObjectDirectives) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, objectDirectivesImplementors)
+	return ec.__ObjectDirectives(ctx, fields, obj)
+}
 
+func (ec *executionContext) __ObjectDirectives(ctx context.Context, fields []graphql.CollectedField, obj *ObjectDirectives) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -607,7 +610,10 @@ var objectDirectivesWithCustomGoModelImplementors = []string{"ObjectDirectivesWi
 
 func (ec *executionContext) _ObjectDirectivesWithCustomGoModel(ctx context.Context, sel ast.SelectionSet, obj *ObjectDirectivesWithCustomGoModel) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, objectDirectivesWithCustomGoModelImplementors)
+	return ec.__ObjectDirectivesWithCustomGoModel(ctx, fields, obj)
+}
 
+func (ec *executionContext) __ObjectDirectivesWithCustomGoModel(ctx context.Context, fields []graphql.CollectedField, obj *ObjectDirectivesWithCustomGoModel) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {

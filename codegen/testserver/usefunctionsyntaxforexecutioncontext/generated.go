@@ -3212,7 +3212,10 @@ var adminImplementors = []string{"Admin", "Entity"}
 
 func _Admin(ctx context.Context, ec *executionContext, sel ast.SelectionSet, obj *Admin) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, adminImplementors)
+	return __Admin(ctx, ec, fields, obj)
+}
 
+func __Admin(ctx context.Context, ec *executionContext, fields []graphql.CollectedField, obj *Admin) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -3319,7 +3322,10 @@ var mutationResponseImplementors = []string{"MutationResponse"}
 
 func _MutationResponse(ctx context.Context, ec *executionContext, sel ast.SelectionSet, obj *MutationResponse) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, mutationResponseImplementors)
+	return __MutationResponse(ctx, ec, fields, obj)
+}
 
+func __MutationResponse(ctx context.Context, ec *executionContext, fields []graphql.CollectedField, obj *MutationResponse) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -3490,7 +3496,10 @@ var userImplementors = []string{"User", "Entity"}
 
 func _User(ctx context.Context, ec *executionContext, sel ast.SelectionSet, obj *User) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, userImplementors)
+	return __User(ctx, ec, fields, obj)
+}
 
+func __User(ctx context.Context, ec *executionContext, fields []graphql.CollectedField, obj *User) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -3548,7 +3557,6 @@ var __DirectiveImplementors = []string{"__Directive"}
 
 func ___Directive(ctx context.Context, ec *executionContext, sel ast.SelectionSet, obj *introspection.Directive) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, __DirectiveImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -3604,7 +3612,6 @@ var __EnumValueImplementors = []string{"__EnumValue"}
 
 func ___EnumValue(ctx context.Context, ec *executionContext, sel ast.SelectionSet, obj *introspection.EnumValue) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, __EnumValueImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -3652,7 +3659,6 @@ var __FieldImplementors = []string{"__Field"}
 
 func ___Field(ctx context.Context, ec *executionContext, sel ast.SelectionSet, obj *introspection.Field) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, __FieldImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -3710,7 +3716,6 @@ var __InputValueImplementors = []string{"__InputValue"}
 
 func ___InputValue(ctx context.Context, ec *executionContext, sel ast.SelectionSet, obj *introspection.InputValue) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, __InputValueImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -3765,7 +3770,6 @@ var __SchemaImplementors = []string{"__Schema"}
 
 func ___Schema(ctx context.Context, ec *executionContext, sel ast.SelectionSet, obj *introspection.Schema) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, __SchemaImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -3820,7 +3824,6 @@ var __TypeImplementors = []string{"__Type"}
 
 func ___Type(ctx context.Context, ec *executionContext, sel ast.SelectionSet, obj *introspection.Type) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, __TypeImplementors)
-
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -4012,6 +4015,7 @@ func marshalNUser2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋuse
 
 func marshalNUser2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐUserᚄ(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v []*User) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
+	elemFields := graphql.CollectFields(ec.OperationContext, sel, userImplementors)
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
 	if !isLen1 {
@@ -4034,7 +4038,14 @@ func marshalNUser2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserver
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = marshalNUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐUser(ctx, ec, sel, v[i])
+			if v[i] == nil {
+				if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+					ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+				}
+				ret[i] = graphql.Null
+			} else {
+				ret[i] = __User(ctx, ec, elemFields, v[i])
+			}
 		}
 		if isLen1 {
 			f(i)

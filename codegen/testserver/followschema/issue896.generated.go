@@ -74,7 +74,10 @@ var checkIssue896Implementors = []string{"CheckIssue896"}
 
 func (ec *executionContext) _CheckIssue896(ctx context.Context, sel ast.SelectionSet, obj *CheckIssue896) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, checkIssue896Implementors)
+	return ec.__CheckIssue896(ctx, fields, obj)
+}
 
+func (ec *executionContext) __CheckIssue896(ctx context.Context, fields []graphql.CollectedField, obj *CheckIssue896) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -125,6 +128,7 @@ func (ec *executionContext) marshalOCheckIssue8962ᚕᚖgithubᚗcomᚋ99designs
 		return graphql.Null
 	}
 	ret := make(graphql.Array, len(v))
+	elemFields := graphql.CollectFields(ec.OperationContext, sel, checkIssue896Implementors)
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
 	if !isLen1 {
@@ -147,7 +151,11 @@ func (ec *executionContext) marshalOCheckIssue8962ᚕᚖgithubᚗcomᚋ99designs
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalOCheckIssue8962ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCheckIssue896(ctx, sel, v[i])
+			if v[i] == nil {
+				ret[i] = graphql.Null
+			} else {
+				ret[i] = ec.__CheckIssue896(ctx, elemFields, v[i])
+			}
 		}
 		if isLen1 {
 			f(i)
@@ -166,6 +174,7 @@ func (ec *executionContext) marshalOCheckIssue8962ᚕᚖgithubᚗcomᚋ99designs
 		return graphql.Null
 	}
 	ret := make(graphql.Array, len(v))
+	elemFields := graphql.CollectFields(ec.OperationContext, sel, checkIssue896Implementors)
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
 	if !isLen1 {
@@ -188,7 +197,14 @@ func (ec *executionContext) marshalOCheckIssue8962ᚕᚖgithubᚗcomᚋ99designs
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNCheckIssue8962ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCheckIssue896(ctx, sel, v[i])
+			if v[i] == nil {
+				if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+					ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+				}
+				ret[i] = graphql.Null
+			} else {
+				ret[i] = ec.__CheckIssue896(ctx, elemFields, v[i])
+			}
 		}
 		if isLen1 {
 			f(i)

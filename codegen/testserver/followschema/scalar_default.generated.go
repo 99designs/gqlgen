@@ -73,7 +73,10 @@ var embeddedDefaultScalarImplementors = []string{"EmbeddedDefaultScalar"}
 
 func (ec *executionContext) _EmbeddedDefaultScalar(ctx context.Context, sel ast.SelectionSet, obj *EmbeddedDefaultScalar) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, embeddedDefaultScalarImplementors)
+	return ec.__EmbeddedDefaultScalar(ctx, fields, obj)
+}
 
+func (ec *executionContext) __EmbeddedDefaultScalar(ctx context.Context, fields []graphql.CollectedField, obj *EmbeddedDefaultScalar) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {

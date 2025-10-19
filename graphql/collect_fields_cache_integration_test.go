@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
+	"github.com/vektah/gqlparser/v2/validator/rules"
 )
 
 const collectFieldsSchemaSDL = `
@@ -51,7 +52,7 @@ func TestCollectFieldsCache_InterfaceResult(t *testing.T) {
         }
     `
 
-	doc := gqlparser.MustLoadQuery(collectFieldsSchema, query)
+	doc := gqlparser.MustLoadQueryWithRules(collectFieldsSchema, query, rules.NewDefaultRules())
 	op := doc.Operations[0]
 	searchField := op.SelectionSet[0].(*ast.Field)
 
@@ -78,7 +79,7 @@ func TestCollectFieldsCache_AliasResult(t *testing.T) {
         }
     `
 
-	doc := gqlparser.MustLoadQuery(collectFieldsSchema, query)
+	doc := gqlparser.MustLoadQueryWithRules(collectFieldsSchema, query, rules.NewDefaultRules())
 	op := doc.Operations[0]
 
 	opCtx := &OperationContext{
@@ -130,7 +131,7 @@ func TestCollectFieldsCache_DirectiveResult(t *testing.T) {
     `
 
 	run := func(vars map[string]any) ([]CollectedField, int) {
-		doc := gqlparser.MustLoadQuery(collectFieldsSchema, query)
+		doc := gqlparser.MustLoadQueryWithRules(collectFieldsSchema, query, rules.NewDefaultRules())
 		op := doc.Operations[0]
 		searchField := op.SelectionSet[0].(*ast.Field)
 
@@ -157,7 +158,7 @@ func TestCollectFieldsCache_DirectiveResult(t *testing.T) {
 
 	fieldsC, cacheC := run(map[string]any{"includeEmail": false, "skipName": true})
 	require.Equal(t, 1, cacheC)
-	require.Len(t, fieldsC, 0)
+	require.Empty(t, fieldsC)
 
 	fieldsD, cacheD := run(map[string]any{"includeEmail": true, "skipName": false})
 	require.Equal(t, 1, cacheD)

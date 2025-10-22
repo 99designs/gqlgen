@@ -2228,6 +2228,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 					return nil
 				}
 			}
+			response.Context = ctx
+
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 			response.Data = buf.Bytes()
@@ -2250,7 +2252,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			data.MarshalGQL(&buf)
 
 			return &graphql.Response{
-				Data: buf.Bytes(),
+				Context: ctx,
+				Data:    buf.Bytes(),
 			}
 		}
 	case ast.Subscription:
@@ -2259,15 +2262,20 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		var buf bytes.Buffer
 		return func(ctx context.Context) *graphql.Response {
 			buf.Reset()
-			data := next(ctx)
+			respCtx, data := next(ctx)
 
 			if data == nil {
 				return nil
 			}
 			data.MarshalGQL(&buf)
 
+			if respCtx == nil {
+				respCtx = ctx
+			}
+
 			return &graphql.Response{
-				Data: buf.Bytes(),
+				Context: respCtx,
+				Data:    buf.Bytes(),
 			}
 		}
 

@@ -113,9 +113,9 @@
 
 	{{ with $type.MarshalFunc }}
 		{{ if $useFunctionSyntaxForExecutionContext -}}
-		func {{ . }}(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v {{ $type.GO | ref }}) graphql.Marshaler {
+		func {{ . }}(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v {{ $type.GO | ref }}) {{- if eq $type.Definition.Name "Subscription" }}(context.Context, {{- end}}graphql.Marshaler{{- if eq $type.Definition.Name "Subscription" }}){{- end}} {
 		{{- else -}}
-		func (ec *executionContext) {{ . }}(ctx context.Context, sel ast.SelectionSet, v {{ $type.GO | ref }}) graphql.Marshaler {
+		func (ec *executionContext) {{ . }}(ctx context.Context, sel ast.SelectionSet, v {{ $type.GO | ref }}) {{- if eq $type.Definition.Name "Subscription" }}(context.Context, {{- end}}graphql.Marshaler{{- if eq $type.Definition.Name "Subscription" }}){{- end}} {
 		{{- end -}}
 			{{- if or $type.IsPtrToSlice $type.IsPtrToIntf }}
 				{{ if $useFunctionSyntaxForExecutionContext -}}
@@ -126,7 +126,7 @@
 			{{- else if $type.IsSlice }}
 				{{- if not $type.GQL.NonNull }}
 					if v == nil {
-						return graphql.Null
+						return {{- if eq $type.Definition.Name "Subscription" }} ctx,{{- end}} graphql.Null
 					}
 				{{- end }}
 				ret := make(graphql.Array, len(v))
@@ -198,14 +198,14 @@
 				{{ if $type.Elem.GQL.NonNull }}
 					for _, e := range ret {
 						if e == graphql.Null {
-							return graphql.Null
+							return {{- if eq $type.Definition.Name "Subscription" }} ctx,{{- end}} graphql.Null
 						}
 					}
 				{{ end }}
 				return ret
 			{{- else if and $type.IsPtrToPtr (not $type.Unmarshaler) (not $type.IsMarshaler) }}
 				if v == nil {
-					return graphql.Null
+					return {{- if eq $type.Definition.Name "Subscription" }} ctx,{{- end}} graphql.Null
 				}
 				{{ if $useFunctionSyntaxForExecutionContext -}}
 				return {{ $type.Elem.MarshalFunc }}(ctx, ec, sel, *v)
@@ -220,7 +220,7 @@
 								ec.Errorf(ctx, "the requested element is null which the schema does not allow")
 							}
 						{{- end }}
-						return graphql.Null
+						return {{- if eq $type.Definition.Name "Subscription" }} ctx,{{- end}} graphql.Null
 					}
 				{{- end }}
 				{{- if $type.IsMarshaler }}

@@ -4,6 +4,8 @@ package usefunctionsyntaxforexecutioncontext
 
 import (
 	"context"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type Stub struct {
@@ -17,7 +19,7 @@ type Stub struct {
 		GetEntity func(ctx context.Context, id string) (Entity, error)
 	}
 	SubscriptionResolver struct {
-		UserCreated func(ctx context.Context) (<-chan *User, error)
+		UserCreated func(ctx context.Context) (<-chan graphql.SubscriptionField[*User], error)
 	}
 }
 
@@ -54,6 +56,6 @@ func (r *stubQuery) GetEntity(ctx context.Context, id string) (Entity, error) {
 
 type stubSubscription struct{ *Stub }
 
-func (r *stubSubscription) UserCreated(ctx context.Context) (<-chan *User, error) {
+func (r *stubSubscription) UserCreated(ctx context.Context) (<-chan graphql.SubscriptionField[*User], error) {
 	return r.SubscriptionResolver.UserCreated(ctx)
 }

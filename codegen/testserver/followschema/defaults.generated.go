@@ -387,7 +387,10 @@ var defaultParametersMirrorImplementors = []string{"DefaultParametersMirror"}
 
 func (ec *executionContext) _DefaultParametersMirror(ctx context.Context, sel ast.SelectionSet, obj *DefaultParametersMirror) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, defaultParametersMirrorImplementors)
+	return ec.__DefaultParametersMirror(ctx, fields, obj)
+}
 
+func (ec *executionContext) __DefaultParametersMirror(ctx context.Context, fields []graphql.CollectedField, obj *DefaultParametersMirror) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {

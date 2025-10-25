@@ -6,7 +6,7 @@ package graph
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	"github.com/99designs/gqlgen/_examples/federation/reviews/graph/model"
 )
@@ -15,12 +15,12 @@ import (
 func (r *productResolver) ManufacturerID(ctx context.Context, obj *model.Product, federationRequires map[string]any) (*string, error) {
 	manufacturer, ok := federationRequires["manufacturer"].(map[string]any)
 	if !ok {
-		return nil, fmt.Errorf("manufacturer not provided or not an object")
+		return nil, errors.New("manufacturer not provided or not an object")
 	}
 
 	manufacturerID, ok := manufacturer["id"].(string)
 	if !ok {
-		return nil, fmt.Errorf("manufacturer.id not provided or not a string")
+		return nil, errors.New("manufacturer.id not provided or not a string")
 	}
 
 	return &manufacturerID, nil
@@ -28,7 +28,7 @@ func (r *productResolver) ManufacturerID(ctx context.Context, obj *model.Product
 
 // Username is the resolver for the username field.
 func (r *userResolver) Username(ctx context.Context, obj *model.User) (string, error) {
-	panic(fmt.Errorf("not implemented: Username - username"))
+	panic(errors.New("not implemented: Username - username"))
 }
 
 // Reviews is the resolver for the reviews field.
@@ -38,17 +38,17 @@ func (r *userResolver) Reviews(ctx context.Context, obj *model.User, federationR
 		if review.Author.ID == obj.ID {
 			host, ok := federationRequires["host"].(map[string]any)
 			if !ok {
-				return nil, fmt.Errorf("host not provided or not an object")
+				return nil, errors.New("host not provided or not an object")
 			}
 
 			hostID, ok := host["id"].(string)
 			if !ok {
-				return nil, fmt.Errorf("host.id not provided or not a string")
+				return nil, errors.New("host.id not provided or not a string")
 			}
 
 			email, ok := federationRequires["email"].(string)
 			if !ok {
-				return nil, fmt.Errorf("email not provided or not a string")
+				return nil, errors.New("email not provided or not a string")
 			}
 
 			productReviews = append(productReviews, &model.Review{

@@ -55,7 +55,7 @@ jobs:
         go mod download
         gotestsum --junitfile ../go_examples_report.xml --format-icons=hivis --format=pkgname-and-test-fails -- -race ./... -trimpath
     - name: Upload Test Report
-      uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+      uses: actions/upload-artifact@330a01c490aca151604b8cf639adc76d48f6c5d4 # v5.0.0
       if: always() # always run even if the previous step fails
       with:
         name: test-junit-${{ matrix.os }}-${{ matrix.go }}

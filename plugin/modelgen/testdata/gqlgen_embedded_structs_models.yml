@@ -1,0 +1,7 @@
+schema:
+  - "testdata/schema_embedded_structs_models.graphql"
+
+model:
+  filename: out_embedded_structs_models/generated_embedded_structs_models.go
+
+omit_embedded_structs: false

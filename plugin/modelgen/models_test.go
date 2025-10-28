@@ -359,15 +359,15 @@ func TestModelGenerationDontOmitEmbeddedStructs(t *testing.T) {
 	require.Contains(t, string(generated), "type BaseElement")
 
 	carbonStr := getStringInBetween(string(generated), "type Carbon struct {", "}")
-	require.NotEqual(t, "", carbonStr)
+	require.NotEmpty(t, carbonStr)
 	require.Contains(t, carbonStr, "BaseElement")
 
 	magnesiumStr := getStringInBetween(string(generated), "type Magnesium struct {", "}")
-	require.NotEqual(t, "", magnesiumStr)
+	require.NotEmpty(t, magnesiumStr)
 	require.Contains(t, magnesiumStr, "BaseElement")
 
 	potassiumStr := getStringInBetween(string(generated), "type Potassium struct {", "}")
-	require.NotEqual(t, "", potassiumStr)
+	require.NotEmpty(t, potassiumStr)
 	require.Contains(t, potassiumStr, "BaseElement")
 }
 

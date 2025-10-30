@@ -1,7 +1,7 @@
 package modelgen
 
 import (
-	"fmt"
+	"errors"
 
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -69,7 +69,7 @@ func (g *interfaceGraph) topologicalSort(interfaces []string) ([]string, error) 
 	}
 
 	if len(result) != len(interfaces) {
-		return nil, fmt.Errorf("cycle detected in interface implementations")
+		return nil, errors.New("cycle detected in interface implementations")
 	}
 
 	return result, nil

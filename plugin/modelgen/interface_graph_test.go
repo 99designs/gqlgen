@@ -71,8 +71,8 @@ func TestInterfaceGraph(t *testing.T) {
 			}
 		}
 
-		assert.True(t, nodeIdx < elementIdx, "Node should come before Element")
-		assert.True(t, elementIdx < metalIdx, "Element should come before Metal")
+		assert.Less(t, nodeIdx, elementIdx, "Node should come before Element")
+		assert.Less(t, elementIdx, metalIdx, "Element should come before Metal")
 	})
 
 	t.Run("gets interface own fields correctly", func(t *testing.T) {

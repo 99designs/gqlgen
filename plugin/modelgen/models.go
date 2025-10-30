@@ -803,7 +803,7 @@ func (m *Plugin) getObject(cfg *config.Config, schemaType *ast.Definition, b *Mo
 }
 
 func (m *Plugin) buildBaseObjectFromSpec(cfg *config.Config, binder *config.Binder, spec *baseStructSpec) (*Object, error) {
-	var fields []*Field
+	fields := make([]*Field, 0)
 
 	for _, parentType := range spec.ParentEmbeddings {
 		fields = append(fields, &Field{

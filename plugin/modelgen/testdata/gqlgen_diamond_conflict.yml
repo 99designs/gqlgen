@@ -1,0 +1,8 @@
+schema:
+  - "testdata/schema_diamond_conflict.graphql"
+
+exec:
+  filename: out_diamond_conflict/ignored.go
+model:
+  filename: out_diamond_conflict/generated.go
+

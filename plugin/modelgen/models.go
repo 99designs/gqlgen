@@ -103,34 +103,38 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 	b := &ModelBuild{
 		PackageName: cfg.Model.Package,
 	}
+	binder := cfg.NewBinder()
 
-	// We need to generate the models in a more deterministic order, therefor, we iterate through `interfaces` and `unions
-	//  first and afterward, the rest of the types.
-	for _, schemaType := range cfg.Schema.Types {
-		if cfg.Models.UserDefined(schemaType.Name) {
-			continue
+	// Generate Base structs for interfaces if embedded structs are enabled
+	if !cfg.OmitEmbeddedStructs {
+		embedder := newEmbeddedInterfaceGenerator(cfg, binder, nil, b)
+		specs, err := embedder.generateAllInterfaceBaseStructs()
+		if err != nil {
+			return err
 		}
-		switch schemaType.Kind {
-		case ast.Interface, ast.Union:
-			it, err := m.getInterface(cfg, schemaType, b)
+
+		for _, spec := range specs {
+			obj, err := m.buildBaseObjectFromSpec(cfg, binder, spec)
 			if err != nil {
 				return err
 			}
+			if obj != nil {
+				b.Models = append(b.Models, obj)
+			}
+		}
+	}
 
-			if !cfg.OmitEmbeddedStructs {
-				ob, err := m.getObject(cfg, schemaType, b)
+	for _, schemaType := range cfg.Schema.Types {
+		userDefined := cfg.Models.UserDefined(schemaType.Name)
+		switch schemaType.Kind {
+		case ast.Interface, ast.Union:
+			if !userDefined {
+				it, err := m.getInterface(cfg, schemaType, b)
 				if err != nil {
 					return err
 				}
-				if ob == nil {
-					continue
-				}
-
-				ob.Name = fmt.Sprintf("%s%s", cfg.EmbeddedStructsPrefix, ob.Name)
-				b.Models = append(b.Models, ob)
+				b.Interfaces = append(b.Interfaces, it)
 			}
-
-			b.Interfaces = append(b.Interfaces, it)
 		}
 	}
 
@@ -305,49 +309,20 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 }
 
 func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition, model *ModelBuild) ([]*Field, error) {
-	// func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition) ([]*Field, error) {
 	binder := cfg.NewBinder()
+	embeddedGen := newEmbeddedInterfaceGenerator(cfg, binder, schemaType, model)
+
 	fields := make([]*Field, 0)
-	embeddedFields := map[string]*Field{}
+	embeddedFieldMap := embeddedGen.generateEmbeddedFields(schemaType.Fields)
 
 	for _, field := range schemaType.Fields {
-		if model != nil && !cfg.OmitEmbeddedStructs && schemaType.Kind == ast.Object && len(schemaType.Interfaces) > 0 {
-			interfaceHasField := false
-			interfaceName := ""
-
-			for _, iface := range schemaType.Interfaces {
-				// We skip the node interface as it should be present in all interfaces implementing it, and it
-				//  creates an issue with ambiguity when referencing `ID`.
-				if iface == "Node" {
-					continue
-				}
-
-				for _, modelInterface := range model.Interfaces {
-					if modelInterface.Name == iface {
-						for _, mField := range modelInterface.Fields {
-							if field.Name == mField.Name {
-								interfaceHasField = true
-								interfaceName = iface
-								break
-							}
-						}
-					}
-				}
+		if embeddedField, isEmbedded := embeddedFieldMap[field.Name]; isEmbedded {
+			// First field of interface gets the embedded base struct
+			if embeddedField != nil {
+				fields = append(fields, embeddedField)
 			}
-
-			if interfaceHasField {
-				embeddedField := &Field{
-					Type: types.NewNamed(
-						types.NewTypeName(0, cfg.Model.Pkg(), templates.ToGo(fmt.Sprintf("%s%s", cfg.EmbeddedStructsPrefix, interfaceName)), nil),
-						types.NewStruct(nil, nil),
-						nil,
-					),
-				}
-
-				embeddedFields[interfaceName] = embeddedField
-
-				continue
-			}
+			// Skip this field (either it's first with embedded field, or subsequent field from same interface)
+			continue
 		}
 
 		f, err := m.generateField(cfg, binder, schemaType, field)
@@ -360,10 +335,6 @@ func (m *Plugin) generateFields(cfg *config.Config, schemaType *ast.Definition, 
 		}
 
 		fields = append(fields, f)
-	}
-
-	for _, field := range embeddedFields {
-		fields = append(fields, field)
 	}
 
 	fields = append(fields, getExtraFields(cfg, schemaType.Name)...)
@@ -829,4 +800,36 @@ func (m *Plugin) getObject(cfg *config.Config, schemaType *ast.Definition, b *Mo
 	}
 
 	return it, nil
+}
+
+func (m *Plugin) buildBaseObjectFromSpec(cfg *config.Config, binder *config.Binder, spec *baseStructSpec) (*Object, error) {
+	var fields []*Field
+
+	for _, parentType := range spec.ParentEmbeddings {
+		fields = append(fields, &Field{
+			Name:   "",
+			GoName: "", // Empty GoName creates anonymous embedding
+			Type:   parentType,
+		})
+	}
+
+	// Generate fields from schema definitions
+	for _, fieldDef := range spec.FieldsToGenerate {
+		f, err := m.generateField(cfg, binder, spec.SchemaType, fieldDef)
+		if err != nil {
+			return nil, err
+		}
+		if f != nil {
+			fields = append(fields, f)
+		}
+	}
+
+	fields = append(fields, getExtraFields(cfg, spec.SchemaType.Name)...)
+
+	return &Object{
+		Description: spec.SchemaType.Description,
+		Name:        fmt.Sprintf("%s%s", cfg.EmbeddedStructsPrefix, spec.SchemaType.Name),
+		Fields:      fields,
+		Implements:  spec.ImplementsInterfaces,
+	}, nil
 }

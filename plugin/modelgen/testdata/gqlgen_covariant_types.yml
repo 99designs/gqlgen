@@ -1,0 +1,8 @@
+schema:
+  - "testdata/schema_covariant_types.graphql"
+
+model:
+  filename: out_covariant_types/generated_covariant_types.go
+
+omit_embedded_structs: false
+

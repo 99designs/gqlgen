@@ -1,0 +1,58 @@
+# Test schema for covariant return types in interface implementations
+# GraphQL allows implementations to use more specific types than the interface declares
+
+interface Identifiable {
+    id: ID!
+}
+
+interface Typeable {
+    type: String!
+}
+
+interface NodeData {
+    name: String!
+    childrenIds: [String!]!
+}
+
+# Interface implementing multiple interfaces (diamond problem test)
+interface Node implements Identifiable & Typeable {
+    id: ID!
+    type: String!
+    data: NodeData!
+}
+
+# Specific implementation of NodeData
+type ProductNodeData implements NodeData {
+    name: String!
+    childrenIds: [String!]!
+    productSpecificField: String!
+}
+
+# Implementation with covariant return type for 'data' field
+type ProductNode implements Node & Identifiable & Typeable {
+    id: ID!
+    type: String!
+    # This is a covariant override - using ProductNodeData instead of NodeData
+    data: ProductNodeData!
+    productTitle: String!
+}
+
+# Another interface for tags
+interface Tags {
+    data: [String!]
+}
+
+type ProductTags implements Tags {
+    data: [String!]
+    productSpecific: Boolean
+}
+
+# Type with multiple covariant overrides
+type ExtendedProductNode implements Node & Identifiable & Typeable {
+    id: ID!
+    type: String!
+    # Covariant override
+    data: ProductNodeData!
+    tags: ProductTags
+}
+

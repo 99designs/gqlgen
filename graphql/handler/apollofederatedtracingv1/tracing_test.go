@@ -68,7 +68,7 @@ func TestApolloTracing_Concurrent(t *testing.T) {
 	h := testserver.New()
 	h.AddTransport(transport.POST{})
 	h.Use(&apollofederatedtracingv1.Tracer{})
-	for i := 0; i < 2; i++ {
+	for range 2 {
 		go func() {
 			resp := doRequest(h, http.MethodPost, "/graphql", `{"query":"{ name }"}`)
 			assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())

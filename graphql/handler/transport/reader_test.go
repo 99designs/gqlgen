@@ -15,7 +15,7 @@ func TestBytesRead(t *testing.T) {
 		// See golang.org/issue/7856
 		r := bytesReader{s: &([]byte{})}
 		var wg sync.WaitGroup
-		for i := 0; i < 5; i++ {
+		for range 5 {
 			wg.Add(2)
 			go func() {
 				defer wg.Done()

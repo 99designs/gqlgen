@@ -25,7 +25,7 @@ func TestChatSubscriptions(t *testing.T) {
 
 	const batchSize = 128
 	var wg sync.WaitGroup
-	for i := 0; i < batchSize*8; i++ {
+	for i := range batchSize*8 {
 		wg.Add(1)
 		go func(i int) {
 			defer wg.Done()

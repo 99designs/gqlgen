@@ -235,7 +235,7 @@ func TestEntityResolver(t *testing.T) {
 		representations := []map[string]any{}
 		count := 10
 
-		for i := 0; i < count; i++ {
+		for i := range count {
 			if i%2 == 0 {
 				representations = append(representations, map[string]any{
 					"__typename": "Hello",
@@ -267,7 +267,7 @@ func TestEntityResolver(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, resp.Entities, count)
 
-		for i := 0; i < count; i++ {
+		for i := range count {
 			if i%2 == 0 {
 				require.Equal(t, resp.Entities[i].Name, "hello - "+strconv.Itoa(i))
 			} else {
@@ -406,7 +406,7 @@ func TestMultiEntityResolver(t *testing.T) {
 		itemCount := 10
 		representations := []map[string]any{}
 
-		for i := 0; i < itemCount; i++ {
+		for i := range itemCount {
 			representations = append(representations, map[string]any{
 				"__typename": "MultiHello",
 				"name":       "world name - " + strconv.Itoa(i),
@@ -429,7 +429,7 @@ func TestMultiEntityResolver(t *testing.T) {
 
 		require.NoError(t, err)
 
-		for i := 0; i < itemCount; i++ {
+		for i := range itemCount {
 			require.Equal(t, resp.Entities[i].Name, "world name - "+strconv.Itoa(i)+" - from multiget")
 		}
 	})
@@ -438,7 +438,7 @@ func TestMultiEntityResolver(t *testing.T) {
 		itemCount := 20
 		representations := []map[string]any{}
 
-		for i := 0; i < itemCount; i++ {
+		for i := range itemCount {
 			// Let's interleve the representations to test ordering of the
 			// responses from the entity query
 			if i%2 == 0 {
@@ -471,7 +471,7 @@ func TestMultiEntityResolver(t *testing.T) {
 
 		require.NoError(t, err)
 
-		for i := 0; i < itemCount; i++ {
+		for i := range itemCount {
 			if i%2 == 0 {
 				require.Equal(t, resp.Entities[i].Name, "world name - "+strconv.Itoa(i)+" - from multiget")
 			} else {
@@ -484,7 +484,7 @@ func TestMultiEntityResolver(t *testing.T) {
 		itemCount := 10
 		representations := []map[string]any{}
 
-		for i := 0; i < itemCount; i++ {
+		for i := range itemCount {
 			representations = append(representations, map[string]any{
 				"__typename": "MultiHelloWithError",
 				"name":       "world name - " + strconv.Itoa(i),

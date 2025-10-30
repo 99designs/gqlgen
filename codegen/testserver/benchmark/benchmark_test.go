@@ -159,7 +159,7 @@ query GetUsersConnection($query: String, $first: Int, $before: String, $orderBy:
 
 	for _, benchmark := range benchmarks {
 		b.Run(benchmark.name, func(b *testing.B) {
-			for i := 0; i < b.N; i++ {
+			for b.Loop() {
 				ctx := graphql.StartOperationTrace(context.Background())
 				opCtx, errs := exec.CreateOperationContext(ctx, benchmark.params)
 				if errs != nil {

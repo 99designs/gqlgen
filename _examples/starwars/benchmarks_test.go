@@ -21,10 +21,9 @@ func BenchmarkSimpleQueryNoArgs(b *testing.B) {
 	r.Header.Set("Content-Type", "application/json")
 
 	b.ReportAllocs()
-	b.ResetTimer()
 
 	rec := httptest.NewRecorder()
-	for i := 0; i < b.N; i++ {
+	for b.Loop() {
 		body.Reset(q)
 		rec.Body.Reset()
 		server.ServeHTTP(rec, r)

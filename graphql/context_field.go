@@ -103,7 +103,7 @@ func equalPath(a, b ast.Path) bool {
 		return false
 	}
 
-	for i := 0; i < len(a); i++ {
+	for i := range a {
 		if a[i] != b[i] {
 			return false
 		}

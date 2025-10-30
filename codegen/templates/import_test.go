@@ -48,7 +48,7 @@ func TestImports(t *testing.T) {
 
 	t.Run("duplicates above 10 are decollisioned", func(t *testing.T) {
 		a := Imports{destDir: wd, packages: code.NewPackages()}
-		for i := 0; i < 100; i++ {
+		for i := range 100 {
 			cBar := fmt.Sprintf("github.com/99designs/gqlgen/codegen/templates/testdata/%d/bar", i)
 			if i > 0 {
 				require.Equal(t, fmt.Sprintf("bar%d", i), a.Lookup(cBar))

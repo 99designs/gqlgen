@@ -38,7 +38,7 @@ func (r *queryResolver) Events(ctx context.Context) ([]Event, error) {
 	}
 
 	var events []Event
-	for i := 0; i < 10; i++ {
+	for i := range 10 {
 		if i%2 == 0 {
 			events = append(events, &Like{
 				Selection: sels,

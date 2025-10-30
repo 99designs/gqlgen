@@ -201,7 +201,10 @@ var overlappingFieldsImplementors = []string{"OverlappingFields"}
 
 func (ec *executionContext) _OverlappingFields(ctx context.Context, sel ast.SelectionSet, obj *OverlappingFields) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, overlappingFieldsImplementors)
+	return ec.__OverlappingFields(ctx, fields, obj)
+}
 
+func (ec *executionContext) __OverlappingFields(ctx context.Context, fields []graphql.CollectedField, obj *OverlappingFields) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {

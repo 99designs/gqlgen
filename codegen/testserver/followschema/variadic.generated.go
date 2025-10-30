@@ -96,7 +96,10 @@ var variadicModelImplementors = []string{"VariadicModel"}
 
 func (ec *executionContext) _VariadicModel(ctx context.Context, sel ast.SelectionSet, obj *VariadicModel) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, variadicModelImplementors)
+	return ec.__VariadicModel(ctx, fields, obj)
+}
 
+func (ec *executionContext) __VariadicModel(ctx context.Context, fields []graphql.CollectedField, obj *VariadicModel) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {

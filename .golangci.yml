@@ -131,6 +131,10 @@ linters:
           - staticcheck
         path: plugin/modelgen/models_test.go
         text: SA1019
+      - linters:
+          - staticcheck
+        path: api/generate.go
+        text: SA1019
     paths:
       - bin
       - third_party$

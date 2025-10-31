@@ -29,6 +29,7 @@ type CodeGenerator interface {
 }
 
 // EarlySourceInjector is used to inject things that are required for user schema files to compile.
+//
 // Deprecated: Use EarlySourcesInjector instead
 type EarlySourceInjector interface {
 	InjectSourceEarly() *ast.Source
@@ -40,7 +41,7 @@ type EarlySourcesInjector interface {
 }
 
 // LateSourceInjector is used to inject more sources, after we have loaded the users schema.
-// Deprecated: Use LateSourcesInjector instead
+// // Deprecated: Use LateSourcesInjector instead
 type LateSourceInjector interface {
 	InjectSourceLate(schema *ast.Schema) *ast.Source
 }

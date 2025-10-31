@@ -103,6 +103,7 @@ Next:
 }
 
 // Errorf sends an error string to the client, passing it through the formatter.
+//
 // Deprecated: use graphql.AddErrorf(ctx, err) instead
 func (c *OperationContext) Errorf(ctx context.Context, format string, args ...any) {
 	AddErrorf(ctx, format, args...)

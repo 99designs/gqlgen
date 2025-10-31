@@ -19,7 +19,15 @@ type ExecutableSchema interface {
 // CollectFields returns the set of fields from an ast.SelectionSet where all collected fields satisfy at least one of the GraphQL types
 // passed through satisfies. Providing an empty slice for satisfies will collect all fields regardless of fragment type conditions.
 func CollectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies []string) []CollectedField {
-	return collectFields(reqCtx, selSet, satisfies, map[string]bool{})
+	cacheKey := makeCollectFieldsCacheKey(selSet, satisfies)
+
+	if cached, ok := reqCtx.collectFieldsCache.Get(cacheKey); ok {
+		return cached
+	}
+
+	result := collectFields(reqCtx, selSet, satisfies, map[string]bool{})
+
+	return reqCtx.collectFieldsCache.Add(cacheKey, result)
 }
 
 func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies []string, visited map[string]bool) []CollectedField {

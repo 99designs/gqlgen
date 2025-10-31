@@ -32,12 +32,14 @@ func (i *Import) String() string {
 
 func (s *Imports) String() string {
 	res := ""
+	var resSb35 strings.Builder
 	for i, imp := range s.imports {
 		if i != 0 {
-			res += "\n"
+			resSb35.WriteString("\n")
 		}
-		res += imp.String()
+		resSb35.WriteString(imp.String())
 	}
+	res += resSb35.String()
 	return res
 }
 

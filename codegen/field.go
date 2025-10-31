@@ -537,9 +537,11 @@ func (f *Field) ShortResolverSignature(ft *goast.FuncType) string {
 	if !f.Object.Root {
 		res += fmt.Sprintf(", obj %s", templates.CurrentImports.LookupType(f.Object.Reference()))
 	}
+	var resSb540 strings.Builder
 	for _, arg := range f.Args {
-		res += fmt.Sprintf(", %s %s", arg.VarName, templates.CurrentImports.LookupType(arg.TypeReference.GO))
+		resSb540.WriteString(fmt.Sprintf(", %s %s", arg.VarName, templates.CurrentImports.LookupType(arg.TypeReference.GO)))
 	}
+	res += resSb540.String()
 
 	result := templates.CurrentImports.LookupType(f.TypeReference.GO)
 	if f.Object.Stream {
@@ -568,9 +570,11 @@ func (f *Field) GoResultName() (string, bool) {
 
 func (f *Field) ComplexitySignature() string {
 	res := "func(childComplexity int"
+	var resSb571 strings.Builder
 	for _, arg := range f.Args {
-		res += fmt.Sprintf(", %s %s", arg.VarName, templates.CurrentImports.LookupType(arg.TypeReference.GO))
+		resSb571.WriteString(fmt.Sprintf(", %s %s", arg.VarName, templates.CurrentImports.LookupType(arg.TypeReference.GO)))
 	}
+	res += resSb571.String()
 	res += ") int"
 	return res
 }

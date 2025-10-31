@@ -88,9 +88,11 @@ func (f Field) TypeReference(obj *codegen.Object, objects codegen.Objects) *code
 func (f Field) ToGo() string {
 	var ret string
 
+	var retSb91 strings.Builder
 	for _, field := range f {
-		ret += templates.ToGo(field)
+		retSb91.WriteString(templates.ToGo(field))
 	}
+	ret += retSb91.String()
 	return ret
 }
 
@@ -98,14 +100,16 @@ func (f Field) ToGo() string {
 func (f Field) ToGoPrivate() string {
 	var ret string
 
+	var retSb101 strings.Builder
 	for i, field := range f {
 		if i == 0 {
 			field = trimArgumentFromFieldName(field)
-			ret += templates.ToGoPrivate(field)
+			retSb101.WriteString(templates.ToGoPrivate(field))
 			continue
 		}
-		ret += templates.ToGo(field)
+		retSb101.WriteString(templates.ToGo(field))
 	}
+	ret += retSb101.String()
 	return ret
 }
 

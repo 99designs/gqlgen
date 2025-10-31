@@ -97,9 +97,11 @@ type Objects []*Object
 
 func (o *Object) Implementors() string {
 	satisfiedBy := strconv.Quote(o.Name)
+	var satisfiedBySb100 strings.Builder
 	for _, s := range o.Implements {
-		satisfiedBy += ", " + strconv.Quote(s.Name)
+		satisfiedBySb100.WriteString(", " + strconv.Quote(s.Name))
 	}
+	satisfiedBy += satisfiedBySb100.String()
 	return "[]string{" + satisfiedBy + "}"
 }
 

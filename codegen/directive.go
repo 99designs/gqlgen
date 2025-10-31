@@ -170,9 +170,11 @@ func (d *Directive) CallName() string {
 func (d *Directive) Declaration() string {
 	res := d.CallName() + " func(ctx context.Context, obj any, next graphql.Resolver"
 
+	var resSb173 strings.Builder
 	for _, arg := range d.Args {
-		res += fmt.Sprintf(", %s %s", templates.ToGoPrivate(arg.Name), templates.CurrentImports.LookupType(arg.TypeReference.GO))
+		resSb173.WriteString(fmt.Sprintf(", %s %s", templates.ToGoPrivate(arg.Name), templates.CurrentImports.LookupType(arg.TypeReference.GO)))
 	}
+	res += resSb173.String()
 
 	res += ") (res any, err error)"
 	return res

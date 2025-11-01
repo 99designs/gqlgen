@@ -15,20 +15,26 @@ type Node interface {
 }
 
 type BaseElement struct {
-	ID   string `json:"id"`
+	BaseNode
 	Name string `json:"name"`
 }
 
-func (BaseElement) IsNode()            {}
-func (this BaseElement) GetID() string { return this.ID }
+func (BaseElement) IsElement()           {}
+func (this BaseElement) GetID() string   { return this.ID }
+func (this BaseElement) GetName() string { return this.Name }
+
+func (BaseElement) IsNode() {}
 
 type BaseNode struct {
 	ID string `json:"id"`
 }
 
+func (BaseNode) IsNode()            {}
+func (this BaseNode) GetID() string { return this.ID }
+
 type Carbon struct {
-	Footprint string `json:"footprint"`
 	BaseElement
+	Footprint string `json:"footprint"`
 }
 
 func (Carbon) IsElement()           {}
@@ -38,8 +44,8 @@ func (this Carbon) GetName() string { return this.Name }
 func (Carbon) IsNode() {}
 
 type Magnesium struct {
-	Types int `json:"types"`
 	BaseElement
+	Types int `json:"types"`
 }
 
 func (Magnesium) IsElement()           {}
@@ -49,8 +55,8 @@ func (this Magnesium) GetName() string { return this.Name }
 func (Magnesium) IsNode() {}
 
 type Potassium struct {
-	Price float64 `json:"price"`
 	BaseElement
+	Price float64 `json:"price"`
 }
 
 func (Potassium) IsElement()           {}

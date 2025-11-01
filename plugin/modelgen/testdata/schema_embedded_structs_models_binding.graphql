@@ -1,0 +1,10 @@
+type Molecule implements Node {
+    id: ID!
+    elements: [Element!]
+}
+
+type Oxygen implements Element & Node {
+    id: ID!
+    name: String!
+    purity: Float!
+}

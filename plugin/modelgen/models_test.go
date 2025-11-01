@@ -346,29 +346,130 @@ func TestModelGenerationOmitRootModels(t *testing.T) {
 }
 
 func TestModelGenerationDontOmitEmbeddedStructs(t *testing.T) {
-	cfg, err := config.LoadConfig("testdata/gqlgen_embedded_structs_models.yml")
+	t.Run("single package base type embedding", func(t *testing.T) {
+		cfg, err := config.LoadConfig("testdata/gqlgen_embedded_structs_models.yml")
+		require.NoError(t, err)
+		require.NoError(t, cfg.Init())
+		p := Plugin{
+			FieldHook: DefaultFieldMutateHook,
+		}
+		require.NoError(t, p.MutateConfig(cfg))
+		require.NoError(t, goBuild(t, "./out_embedded_structs_models/"))
+		generated, err := os.ReadFile("./out_embedded_structs_models/generated_embedded_structs_models.go")
+		require.NoError(t, err)
+
+		require.Contains(t, string(generated), "type BaseNode")
+		require.Contains(t, string(generated), "type BaseElement")
+
+		baseElementStr := getStringInBetween(string(generated), "type BaseElement struct {", "}")
+		require.NotEmpty(t, baseElementStr)
+		require.Contains(t, baseElementStr, "BaseNode")
+		require.Contains(t, baseElementStr, "Name")
+
+		baseNodeStr := getStringInBetween(string(generated), "type BaseNode struct {", "}")
+		require.NotEmpty(t, baseNodeStr)
+		require.Contains(t, baseNodeStr, "ID")
+		require.NotContains(t, baseNodeStr, "Name")
+
+		carbonStr := getStringInBetween(string(generated), "type Carbon struct {", "}")
+		require.NotEmpty(t, carbonStr)
+		require.Contains(t, carbonStr, "BaseElement")
+
+		magnesiumStr := getStringInBetween(string(generated), "type Magnesium struct {", "}")
+		require.NotEmpty(t, magnesiumStr)
+		require.Contains(t, magnesiumStr, "BaseElement")
+
+		potassiumStr := getStringInBetween(string(generated), "type Potassium struct {", "}")
+		require.NotEmpty(t, potassiumStr)
+		require.Contains(t, potassiumStr, "BaseElement")
+	})
+
+	t.Run("binded package type embedding", func(t *testing.T) {
+		cfg, err := config.LoadConfig("testdata/gqlgen_embedded_structs_models_binding.yml")
+		require.NoError(t, err)
+		require.NoError(t, cfg.Init())
+		p := Plugin{
+			FieldHook: DefaultFieldMutateHook,
+		}
+		require.NoError(t, p.MutateConfig(cfg))
+		require.NoError(t, goBuild(t, "./out_embedded_struct_models_with_binding/"))
+		generated, err := os.ReadFile("./out_embedded_struct_models_with_binding/generated_embedded_structs_models_binding.go")
+		require.NoError(t, err)
+
+		require.NotContains(t, string(generated), "type BaseElement")
+		require.NotContains(t, string(generated), "type BaseNode")
+
+		require.Contains(t, string(generated), "github.com/99designs/gqlgen/plugin/modelgen/out_embedded_structs_models")
+
+		oxygenStr := getStringInBetween(string(generated), "type Oxygen struct {", "}")
+		require.NotEmpty(t, oxygenStr)
+		require.Contains(t, oxygenStr, "out_embedded_structs_models.BaseElement")
+		require.Contains(t, oxygenStr, "Purity")
+
+		moleculeStr := getStringInBetween(string(generated), "type Molecule struct {", "}")
+		require.NotEmpty(t, moleculeStr)
+		require.Contains(t, moleculeStr, "out_embedded_structs_models.BaseNode")
+	})
+}
+
+func TestModelGenerationCovariantTypes(t *testing.T) {
+	cfg, err := config.LoadConfig("testdata/gqlgen_covariant_types.yml")
 	require.NoError(t, err)
 	require.NoError(t, cfg.Init())
 	p := Plugin{
 		FieldHook: DefaultFieldMutateHook,
 	}
 	require.NoError(t, p.MutateConfig(cfg))
-	require.NoError(t, goBuild(t, "./out_embedded_structs_models/"))
-	generated, err := os.ReadFile("./out_embedded_structs_models/generated_embedded_structs_models.go")
+	require.NoError(t, goBuild(t, "./out_covariant_types/"))
+	generated, err := os.ReadFile("./out_covariant_types/generated_covariant_types.go")
 	require.NoError(t, err)
-	require.Contains(t, string(generated), "type BaseElement")
 
-	carbonStr := getStringInBetween(string(generated), "type Carbon struct {", "}")
-	require.NotEmpty(t, carbonStr)
-	require.Contains(t, carbonStr, "BaseElement")
+	generatedStr := string(generated)
 
-	magnesiumStr := getStringInBetween(string(generated), "type Magnesium struct {", "}")
-	require.NotEmpty(t, magnesiumStr)
-	require.Contains(t, magnesiumStr, "BaseElement")
+	t.Run("ProductNode uses ProductNodeData not embedded BaseNode", func(t *testing.T) {
+		productNodeStr := getStringInBetween(generatedStr, "type ProductNode struct {", "}")
+		require.NotEmpty(t, productNodeStr)
 
-	potassiumStr := getStringInBetween(string(generated), "type Potassium struct {", "}")
-	require.NotEmpty(t, potassiumStr)
-	require.Contains(t, potassiumStr, "BaseElement")
+		// Should NOT embed BaseNode when there's a covariant override
+		require.NotContains(t, productNodeStr, "BaseNode")
+
+		// Should have explicit fields from the interface
+		require.Contains(t, productNodeStr, "ID")
+		require.Contains(t, productNodeStr, "Type")
+
+		// Should use the specific ProductNodeData type
+		require.Contains(t, productNodeStr, "*ProductNodeData")
+
+		// Should have its own fields
+		require.Contains(t, productNodeStr, "ProductTitle")
+	})
+
+	t.Run("ExtendedProductNode has covariant override for data", func(t *testing.T) {
+		extendedNodeStr := getStringInBetween(generatedStr, "type ExtendedProductNode struct {", "}")
+		require.NotEmpty(t, extendedNodeStr)
+
+		// Should NOT embed BaseNode
+		require.NotContains(t, extendedNodeStr, "BaseNode")
+
+		// Should have explicit interface fields
+		require.Contains(t, extendedNodeStr, "ID")
+		require.Contains(t, extendedNodeStr, "Type")
+
+		// Should use the more specific ProductNodeData type
+		require.Contains(t, extendedNodeStr, "*ProductNodeData")
+		// Should use the more specific ProductTags type
+		require.Contains(t, extendedNodeStr, "*ProductTags")
+	})
+
+	t.Run("ProductNodeData also handles covariant overrides", func(t *testing.T) {
+		productDataStr := getStringInBetween(generatedStr, "type ProductNodeData struct {", "}")
+		require.NotEmpty(t, productDataStr)
+
+		// ProductNodeData implements NodeData which has name and childrenIds
+		// Since it implements the interface correctly (same types), it should still embed BaseNodeData
+		require.Contains(t, productDataStr, "BaseNodeData")
+		require.Contains(t, productDataStr, "ProductSpecificField")
+	})
 }
 
 func TestModelGenerationOmitResolverFields(t *testing.T) {

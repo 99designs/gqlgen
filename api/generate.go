@@ -63,6 +63,7 @@ func Generate(cfg *config.Config, option ...Option) error {
 	}
 
 	for _, p := range plugins {
+		//nolint:staticcheck // for backwards compatibility only
 		if inj, ok := p.(plugin.EarlySourceInjector); ok {
 			if s := inj.InjectSourceEarly(); s != nil {
 				cfg.Sources = append(cfg.Sources, s)

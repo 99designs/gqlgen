@@ -119,10 +119,9 @@ func (e *Executor) DispatchOperation(
 	ctx context.Context,
 	opCtx *graphql.OperationContext,
 ) (graphql.ResponseHandler, context.Context) {
-	ctx = graphql.WithOperationContext(ctx, opCtx)
+	innerCtx := graphql.WithOperationContext(ctx, opCtx)
 
-	var innerCtx context.Context
-	res := e.ext.operationMiddleware(ctx, func(ctx context.Context) graphql.ResponseHandler {
+	res := e.ext.operationMiddleware(innerCtx, func(ctx context.Context) graphql.ResponseHandler {
 		innerCtx = ctx
 
 		tmpResponseContext := graphql.WithResponseContext(ctx, e.errorPresenter, e.recoverFunc)

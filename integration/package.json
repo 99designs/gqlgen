@@ -13,7 +13,7 @@
         "@graphql-codegen/client-preset": "^5.1.1",
         "@graphql-codegen/introspection": "^5.0.0",
         "@graphql-codegen/schema-ast": "^5.0.0",
-        "graphql": "^16.11.0",
+        "graphql": "^16.12.0",
         "graphql-sse": "^2.6.0",
         "graphql-ws": "^6.0.6",
         "typescript": "^5.9.3",

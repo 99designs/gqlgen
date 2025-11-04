@@ -6,22 +6,44 @@ on:
   pull_request:
     types: [opened, synchronize]
 env:
-  GOTOOLCHAIN: local
+  GOTOOLCHAIN: "local"
 # When a new revision is pushed to a PR, cancel all in-progress CI runs for that
 # PR. See https://docs.github.com/en/actions/using-jobs/using-concurrency
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 jobs:
-  nancy:
+  check-secret:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    outputs:
+      my-secret-exists: ${{ steps.my-secret-check.outputs.defined }}
+    steps:
+    - name: Check for Secret availability
+      id: my-secret-check
+        # perform secret check and write boolean as output
+      shell: bash
+      run: |
+          if [ "${{ secrets.OSSI_TOKEN }}" != '' ]; then
+            echo "defined=true" >> $GITHUB_OUTPUT;
+          else
+            echo "defined=false" >> $GITHUB_OUTPUT;
+          fi
+
+  nancy: # only run when not in fork and secret is available
+    runs-on: ubuntu-latest
+    needs: [check-secret]
+    if: needs.check-secret.outputs.my-secret-exists == 'true'
     timeout-minutes: 10
     permissions:
       contents: read
       pull-requests: write
     strategy:
       matrix:
-        go: ["1.24"] # nancy is a little flaky running more than once
+        go: ["1.25"] # nancy is a little flaky running more than once
     steps:
     - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5
       with:
@@ -32,5 +54,5 @@ jobs:
     - run: go mod download && go list -json -deps all > go.list
     - uses: sonatype-nexus-community/nancy-github-action@395e2fb168f674f96502e5652103d112899ea369 # main
       env:
-          OSSI_USERNAME: ${{ secrets.OSSI_USERNAME }}
-          OSSI_TOKEN: ${{ secrets.OSSI_TOKEN }}
+        OSSI_USERNAME: "${{ secrets.OSSI_USERNAME }}"
+        OSSI_TOKEN: "${{ secrets.OSSI_TOKEN }}"

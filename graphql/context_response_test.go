@@ -11,6 +11,12 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+func nilUserPresenter(ctx context.Context, err error) *gqlerror.Error {
+	return nil
+}
+
+var _ ErrorPresenterFunc = nilUserPresenter
+
 func TestAddError(t *testing.T) {
 	ctx := WithResponseContext(context.Background(), DefaultErrorPresenter, nil)
 
@@ -78,6 +84,23 @@ func TestAddError(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestAddError_NilUserPresenter(t *testing.T) {
+	ctx := WithResponseContext(context.Background(), nilUserPresenter, nil)
+	nilUserPresenterRoot := &FieldContext{
+		Field: CollectedField{
+			Field: &ast.Field{
+				Alias: "foo",
+			},
+		},
+	}
+	ctx = WithFieldContext(ctx, nilUserPresenterRoot)
+	AddError(ctx, errors.New("foo"))
+	AddError(ctx, errors.New("bar"))
+
+	errList := GetFieldErrors(ctx, nilUserPresenterRoot)
+	require.Empty(t, errList)
 }
 
 func TestGetErrorFromPresenter(t *testing.T) {

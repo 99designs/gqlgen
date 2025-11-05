@@ -2,17 +2,17 @@ package graphql
 
 import (
 	"hash/fnv"
+	"reflect"
 	"sync"
-	"unsafe"
 
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
 // collectFieldsCacheKey is the cache key for CollectFields results.
 type collectFieldsCacheKey struct {
-	selectionData unsafe.Pointer // Pointer to the underlying SelectionSet data
-	selectionLen  int            // Length of the selection set
-	satisfiesHash uint64         // Hash of the satisfies array
+	selectionPtr  uintptr // Pointer to the underlying SelectionSet data
+	selectionLen  int     // Length of the selection set
+	satisfiesHash uint64  // Hash of the satisfies array
 }
 
 // collectFieldsCacheStore manages CollectFields cache entries safely.
@@ -57,9 +57,9 @@ func (s *collectFieldsCacheStore) Len() int {
 
 // makeCollectFieldsCacheKey generates a cache key for CollectFields.
 func makeCollectFieldsCacheKey(selSet ast.SelectionSet, satisfies []string) collectFieldsCacheKey {
-	var dataPtr unsafe.Pointer
-	if len(selSet) > 0 {
-		dataPtr = unsafe.Pointer(unsafe.SliceData(selSet))
+	var selectionPtr uintptr
+	if selSet != nil {
+		selectionPtr = reflect.ValueOf(selSet).Pointer()
 	}
 
 	h := fnv.New64a()
@@ -69,7 +69,7 @@ func makeCollectFieldsCacheKey(selSet ast.SelectionSet, satisfies []string) coll
 	}
 
 	return collectFieldsCacheKey{
-		selectionData: dataPtr,
+		selectionPtr:  selectionPtr,
 		selectionLen:  len(selSet),
 		satisfiesHash: h.Sum64(),
 	}

@@ -27,6 +27,8 @@ type OperationContext struct {
 	RootResolverMiddleware RootFieldMiddleware
 
 	Stats Stats
+
+	collectFieldsCache collectFieldsCacheStore
 }
 
 func (c *OperationContext) Validate(ctx context.Context) error {

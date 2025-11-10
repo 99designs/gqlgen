@@ -122,7 +122,7 @@ func (g *embeddedInterfaceGenerator) createParentBaseType(interfaceName string) 
 // generateEmbeddedFields returns map: field name -> embedded Base struct (or nil for subsequent fields).
 // Covariant overrides prevent embedding and require explicit field generation.
 func (g *embeddedInterfaceGenerator) generateEmbeddedFields(fields []*ast.FieldDefinition) map[string]*Field {
-	if g.model == nil || g.cfg.OmitEmbeddedStructs || g.schemaType.Kind != ast.Object {
+	if g.model == nil || g.cfg.OmitEmbeddedStructs == nil || *g.cfg.OmitEmbeddedStructs || g.schemaType.Kind != ast.Object {
 		return nil
 	}
 

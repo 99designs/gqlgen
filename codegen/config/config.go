@@ -44,7 +44,7 @@ type Config struct {
 	OmitRootModels                       bool                       `yaml:"omit_root_models,omitempty"`
 	OmitResolverFields                   bool                       `yaml:"omit_resolver_fields,omitempty"`
 	OmitPanicHandler                     bool                       `yaml:"omit_panic_handler,omitempty"`
-	OmitEmbeddedStructs                  bool                       `yaml:"omit_embedded_structs,omitempty"`
+	OmitEmbeddedStructs                  *bool                      `yaml:"omit_embedded_structs,omitempty"`
 	UseFunctionSyntaxForExecutionContext bool                       `yaml:"use_function_syntax_for_execution_context,omitempty"`
 	// If this is set to true, argument directives that
 	// decorate a field with a null value will still be called.
@@ -92,7 +92,6 @@ func DefaultConfig() *Config {
 		ResolversAlwaysReturnPointers:  true,
 		NullableInputOmittable:         false,
 		EnableModelJsonOmitzeroTag:     &falseValue,
-		OmitEmbeddedStructs:            true,
 		EmbeddedStructsPrefix:          "Base",
 	}
 }

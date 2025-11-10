@@ -345,6 +345,40 @@ func TestModelGenerationOmitRootModels(t *testing.T) {
 	require.NotContains(t, string(generated), "type Subscription struct")
 }
 
+func TestModelGenerationOmitEmbeddedStructs(t *testing.T) {
+	t.Run("embedding disabled with nil", func(t *testing.T) {
+		cfg, err := config.LoadConfig("testdata/gqlgen_omit_embedded_structs_models.yml")
+		require.NoError(t, err)
+		require.NoError(t, cfg.Init())
+		p := Plugin{
+			FieldHook: DefaultFieldMutateHook,
+		}
+		require.NoError(t, p.MutateConfig(cfg))
+		require.NoError(t, goBuild(t, "./out_omit_embedded_structs_models/"))
+		generated, err := os.ReadFile("./out_omit_embedded_structs_models/generated_omit_embedded_structs_models.go")
+		require.NoError(t, err)
+
+		require.NotContains(t, string(generated), "type Base")
+	})
+
+	t.Run("embedding disabled with nil", func(t *testing.T) {
+		cfg, err := config.LoadConfig("testdata/gqlgen_omit_embedded_structs_models.yml")
+		cfg.OmitEmbeddedStructs = nil // zero value check
+
+		require.NoError(t, err)
+		require.NoError(t, cfg.Init())
+		p := Plugin{
+			FieldHook: DefaultFieldMutateHook,
+		}
+		require.NoError(t, p.MutateConfig(cfg))
+		require.NoError(t, goBuild(t, "./out_omit_embedded_structs_models/"))
+		generated, err := os.ReadFile("./out_omit_embedded_structs_models/generated_omit_embedded_structs_models.go")
+		require.NoError(t, err)
+
+		require.NotContains(t, string(generated), "type Base")
+	})
+}
+
 func TestModelGenerationDontOmitEmbeddedStructs(t *testing.T) {
 	t.Run("single package base type embedding", func(t *testing.T) {
 		cfg, err := config.LoadConfig("testdata/gqlgen_embedded_structs_models.yml")

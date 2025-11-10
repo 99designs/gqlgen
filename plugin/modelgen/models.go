@@ -106,7 +106,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 	binder := cfg.NewBinder()
 
 	// Generate Base structs for interfaces if embedded structs are enabled
-	if !cfg.OmitEmbeddedStructs {
+	if cfg.OmitEmbeddedStructs != nil && !*cfg.OmitEmbeddedStructs {
 		embedder := newEmbeddedInterfaceGenerator(cfg, binder, nil, b)
 		specs, err := embedder.generateAllInterfaceBaseStructs()
 		if err != nil {
@@ -258,7 +258,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 			getter += fmt.Sprintf("\tif this.%s == nil { return nil }\n", field.GoName)
 			getter += fmt.Sprintf("\tinterfaceSlice := make(%s, 0, len(this.%s))\n", goType, field.GoName)
 			getter += fmt.Sprintf("\tfor _, concrete := range this.%s { interfaceSlice = append(interfaceSlice, ", field.GoName)
-			if interfaceFieldTypeIsPointer && !structFieldTypeIsPointer && cfg.OmitEmbeddedStructs {
+			if interfaceFieldTypeIsPointer && !structFieldTypeIsPointer && (cfg.OmitEmbeddedStructs == nil || *cfg.OmitEmbeddedStructs) {
 				getter += "&"
 			} else if !interfaceFieldTypeIsPointer && structFieldTypeIsPointer {
 				getter += "*"
@@ -270,7 +270,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		}
 		getter := fmt.Sprintf("func (this %s) Get%s() %s { return ", templates.ToGo(model.Name), field.GoName, goType)
 
-		if interfaceFieldTypeIsPointer && !structFieldTypeIsPointer && cfg.OmitEmbeddedStructs {
+		if interfaceFieldTypeIsPointer && !structFieldTypeIsPointer && (cfg.OmitEmbeddedStructs == nil || *cfg.OmitEmbeddedStructs) {
 			getter += "&"
 		} else if !interfaceFieldTypeIsPointer && structFieldTypeIsPointer {
 			getter += "*"

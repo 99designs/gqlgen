@@ -15,7 +15,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20
 	github.com/sosodev/duration v1.3.1
 	github.com/stretchr/testify v1.11.1
-	github.com/urfave/cli/v3 v3.5.0
+	github.com/urfave/cli/v3 v3.6.0
 	github.com/vektah/gqlparser/v2 v2.5.31
 	golang.org/x/text v0.30.0
 	golang.org/x/tools v0.38.0

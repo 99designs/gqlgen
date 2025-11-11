@@ -220,7 +220,10 @@ var wrappedMapImplementors = []string{"WrappedMap"}
 
 func (ec *executionContext) _WrappedMap(ctx context.Context, sel ast.SelectionSet, obj WrappedMap) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, wrappedMapImplementors)
+	return ec.__WrappedMap(ctx, fields, obj)
+}
 
+func (ec *executionContext) __WrappedMap(ctx context.Context, fields []graphql.CollectedField, obj WrappedMap) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -290,7 +293,10 @@ var wrappedSliceImplementors = []string{"WrappedSlice"}
 
 func (ec *executionContext) _WrappedSlice(ctx context.Context, sel ast.SelectionSet, obj WrappedSlice) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, wrappedSliceImplementors)
+	return ec.__WrappedSlice(ctx, fields, obj)
+}
 
+func (ec *executionContext) __WrappedSlice(ctx context.Context, fields []graphql.CollectedField, obj WrappedSlice) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -360,7 +366,10 @@ var wrappedStructImplementors = []string{"WrappedStruct"}
 
 func (ec *executionContext) _WrappedStruct(ctx context.Context, sel ast.SelectionSet, obj *WrappedStruct) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, wrappedStructImplementors)
+	return ec.__WrappedStruct(ctx, fields, obj)
+}
 
+func (ec *executionContext) __WrappedStruct(ctx context.Context, fields []graphql.CollectedField, obj *WrappedStruct) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {

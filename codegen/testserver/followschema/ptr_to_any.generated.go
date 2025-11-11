@@ -104,7 +104,10 @@ var ptrToAnyContainerImplementors = []string{"PtrToAnyContainer"}
 
 func (ec *executionContext) _PtrToAnyContainer(ctx context.Context, sel ast.SelectionSet, obj *PtrToAnyContainer) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, ptrToAnyContainerImplementors)
+	return ec.__PtrToAnyContainer(ctx, fields, obj)
+}
 
+func (ec *executionContext) __PtrToAnyContainer(ctx context.Context, fields []graphql.CollectedField, obj *PtrToAnyContainer) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {

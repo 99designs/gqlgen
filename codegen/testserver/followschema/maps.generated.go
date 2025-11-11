@@ -340,7 +340,10 @@ var mapNestedImplementors = []string{"MapNested"}
 
 func (ec *executionContext) _MapNested(ctx context.Context, sel ast.SelectionSet, obj *MapNested) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, mapNestedImplementors)
+	return ec.__MapNested(ctx, fields, obj)
+}
 
+func (ec *executionContext) __MapNested(ctx context.Context, fields []graphql.CollectedField, obj *MapNested) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -379,7 +382,10 @@ var mapStringInterfaceTypeImplementors = []string{"MapStringInterfaceType"}
 
 func (ec *executionContext) _MapStringInterfaceType(ctx context.Context, sel ast.SelectionSet, obj map[string]any) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, mapStringInterfaceTypeImplementors)
+	return ec.__MapStringInterfaceType(ctx, fields, obj)
+}
 
+func (ec *executionContext) __MapStringInterfaceType(ctx context.Context, fields []graphql.CollectedField, obj map[string]any) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {

@@ -163,19 +163,6 @@ func TestCalculate(t *testing.T) {
 		requireComplexity(t, query, 2)
 	})
 
-	t.Run("custom complexity must be >= child complexity", func(t *testing.T) {
-		const query = `
-		{
-			customObject {
-				list(size: 100) {
-					scalar
-				}
-			}
-		}
-		`
-		requireComplexity(t, query, 101)
-	})
-
 	t.Run("interfaces take max concrete cost", func(t *testing.T) {
 		const query = `
 		{

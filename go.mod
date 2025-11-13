@@ -5,6 +5,7 @@ go 1.24.0
 require (
 	github.com/PuerkitoBio/goquery v1.10.3
 	github.com/go-viper/mapstructure/v2 v2.4.0
+	github.com/goccy/go-yaml v1.18.0
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.0 // do not upgrade to v1.5.1 as it has serious bugs
 	github.com/hashicorp/golang-lru/v2 v2.0.7
@@ -20,7 +21,7 @@ require (
 	golang.org/x/text v0.30.0
 	golang.org/x/tools v0.38.0
 	google.golang.org/protobuf v1.36.10
-	gopkg.in/yaml.v3 v3.0.1
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
 require (

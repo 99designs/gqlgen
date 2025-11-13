@@ -12,10 +12,10 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/goccy/go-yaml"
 	"github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
 	"golang.org/x/tools/go/packages"
-	"gopkg.in/yaml.v3"
 
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/99designs/gqlgen/internal/code"
@@ -147,11 +147,17 @@ func LoadConfig(filename string) (*Config, error) {
 	return ReadConfig(bytes.NewReader(b))
 }
 
-func ReadConfig(cfgFile io.Reader) (*Config, error) {
+func ReadConfig(cfgFile io.Reader) (cfg *Config, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			cfg = nil
+			err = fmt.Errorf("unable to parse config: panic during decode: %v", r)
+		}
+	}()
+
 	config := DefaultConfig()
 
-	dec := yaml.NewDecoder(cfgFile)
-	dec.KnownFields(true)
+	dec := yaml.NewDecoder(cfgFile, yaml.DisallowUnknownField())
 
 	if err := dec.Decode(config); err != nil {
 		return nil, fmt.Errorf("unable to parse config: %w", err)

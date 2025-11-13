@@ -1,0 +1,5 @@
+schema:
+  - "testdata/interface_embedding/schema_directive_basic.graphql"
+
+model:
+  filename: out_directive_embedding_models/generated_directive_embedding_models.go

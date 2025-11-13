@@ -1,0 +1,28 @@
+directive @goEmbedInterface on INTERFACE
+
+interface A @goEmbedInterface {
+    id: ID!
+    fieldA: String!
+}
+
+interface B implements A {
+    id: ID!
+    fieldA: String!
+    fieldB: String!
+}
+
+interface C implements B & A @goEmbedInterface {
+    id: ID!
+    fieldA: String!
+    fieldB: String!
+    fieldC: String!
+}
+
+type ConcreteC implements C & B & A {
+    id: ID!
+    fieldA: String!
+    fieldB: String!
+    fieldC: String!
+    concreteField: String!
+}
+

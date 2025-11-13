@@ -1,21 +1,22 @@
 # Test schema for covariant return types in interface implementations
 # GraphQL allows implementations to use more specific types than the interface declares
+directive @goEmbedInterface on INTERFACE
 
-interface Identifiable {
+interface Identifiable @goEmbedInterface {
     id: ID!
 }
 
-interface Typeable {
+interface Typeable @goEmbedInterface {
     type: String!
 }
 
-interface NodeData {
+interface NodeData @goEmbedInterface {
     name: String!
     childrenIds: [String!]!
 }
 
 # Interface implementing multiple interfaces (diamond problem test)
-interface Node implements Identifiable & Typeable {
+interface Node implements Identifiable & Typeable @goEmbedInterface {
     id: ID!
     type: String!
     data: NodeData!
@@ -38,7 +39,7 @@ type ProductNode implements Node & Identifiable & Typeable {
 }
 
 # Another interface for tags
-interface Tags {
+interface Tags @goEmbedInterface {
     data: [String!]
 }
 

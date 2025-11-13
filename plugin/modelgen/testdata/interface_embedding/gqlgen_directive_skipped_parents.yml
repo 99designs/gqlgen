@@ -1,0 +1,6 @@
+schema:
+  - "testdata/interface_embedding/schema_directive_skipped_parents.graphql"
+
+model:
+  filename: out_directive_skipped_parents/generated_directive_skipped_parents.go
+

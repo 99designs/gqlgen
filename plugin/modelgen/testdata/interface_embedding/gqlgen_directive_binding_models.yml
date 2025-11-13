@@ -1,0 +1,9 @@
+schema:
+    - "testdata/interface_embedding/schema_directive_basic.graphql"
+    - "testdata/interface_embedding/schema_directive_binding.graphql"
+
+model:
+    filename: out_directive_binding_models/generated_directive_binding_models.go
+
+autobind:
+    - "github.com/99designs/gqlgen/plugin/modelgen/out_directive_embedding_models"

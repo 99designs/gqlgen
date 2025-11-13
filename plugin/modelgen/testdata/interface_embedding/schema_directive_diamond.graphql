@@ -1,0 +1,42 @@
+directive @goEmbedInterface on INTERFACE
+
+interface HasID @goEmbedInterface {
+    id: ID!
+}
+
+interface HasIdentifier @goEmbedInterface {
+    identifier: ID!
+}
+
+interface Conflicting implements HasID & HasIdentifier @goEmbedInterface {
+    id: ID!
+    identifier: ID!
+    name: String!
+}
+
+interface HasName {
+    name: String!
+}
+
+interface HasTitle {
+    title: String!
+}
+
+interface NoConflict implements HasName & HasTitle @goEmbedInterface {
+    name: String!
+    title: String!
+}
+
+type ConcreteConflicting implements Conflicting & HasID & HasIdentifier {
+    id: ID!
+    identifier: ID!
+    name: String!
+    extra: String!
+}
+
+type ConcreteNoConflict implements NoConflict & HasName & HasTitle {
+    name: String!
+    title: String!
+    extra: String!
+}
+

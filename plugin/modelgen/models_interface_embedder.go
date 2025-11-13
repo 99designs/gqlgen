@@ -33,10 +33,15 @@ func newEmbeddedInterfaceGenerator(cfg *config.Config, binder *config.Binder, sc
 
 // generateAllInterfaceBaseStructs returns Base struct specs ordered with parents before children.
 func (g *embeddedInterfaceGenerator) generateAllInterfaceBaseStructs() ([]*baseStructSpec, error) {
+	// Filter to only embeddable interfaces (have directive) and not bound to external packages
 	var interfaceNames []string
-	for _, schemaType := range g.cfg.Schema.Types {
-		if schemaType.Kind == ast.Interface && !g.cfg.Models.UserDefined(schemaType.Name) {
-			interfaceNames = append(interfaceNames, schemaType.Name)
+	for name := range g.graph.parentInterfaces {
+		// Only include interfaces with directive
+		if g.graph.isEmbeddable(name) {
+			// Skip interfaces bound to external packages - their Base structs already exist there
+			if !g.cfg.Models.UserDefined(name) {
+				interfaceNames = append(interfaceNames, name)
+			}
 		}
 	}
 
@@ -72,21 +77,26 @@ func (g *embeddedInterfaceGenerator) generateBaseStructForInterface(schemaType *
 		return nil, fmt.Errorf("generateBaseStructForInterface called on non-interface type: %s", schemaType.Name)
 	}
 
-	parents := g.graph.parentInterfaces[schemaType.Name]
-	if len(parents) > 1 {
-		log.Printf("WARN: Base%s: implements %d interfaces %v (potential diamond problem)", schemaType.Name, len(parents), parents)
-	}
-
 	spec := &baseStructSpec{
 		SchemaType:           schemaType,
 		FieldsToGenerate:     g.graph.getInterfaceOwnFields(schemaType.Name),
 		ImplementsInterfaces: []string{schemaType.Name},
 	}
 
-	for _, parent := range parents {
+	// Get embeddable parents and fields from skipped intermediate parents
+	embedInfo := g.graph.getEmbeddingInfo(schemaType.Name)
+
+	if len(embedInfo.Parents) > 1 {
+		log.Printf("WARN: Base%s: implements %d interfaces %v (potential diamond problem)", schemaType.Name, len(embedInfo.Parents), embedInfo.Parents)
+	}
+
+	for _, parent := range embedInfo.Parents {
 		spec.ParentEmbeddings = append(spec.ParentEmbeddings, g.createParentBaseType(parent))
 		spec.ImplementsInterfaces = append(spec.ImplementsInterfaces, parent)
 	}
+
+	// Add fields from intermediate parents without the directive
+	spec.FieldsToGenerate = append(spec.FieldsToGenerate, embedInfo.SkippedFields...)
 
 	return spec, nil
 }
@@ -122,7 +132,7 @@ func (g *embeddedInterfaceGenerator) createParentBaseType(interfaceName string) 
 // generateEmbeddedFields returns map: field name -> embedded Base struct (or nil for subsequent fields).
 // Covariant overrides prevent embedding and require explicit field generation.
 func (g *embeddedInterfaceGenerator) generateEmbeddedFields(fields []*ast.FieldDefinition) map[string]*Field {
-	if g.model == nil || g.cfg.OmitEmbeddedStructs == nil || *g.cfg.OmitEmbeddedStructs || g.schemaType.Kind != ast.Object {
+	if g.model == nil || g.schemaType.Kind != ast.Object {
 		return nil
 	}
 
@@ -152,17 +162,26 @@ func (g *embeddedInterfaceGenerator) findInterfacesWithCovariantOverrides(fields
 
 	for _, implField := range fields {
 		for _, interfaceName := range g.schemaType.Interfaces {
-			if iface := g.cfg.Schema.Types[interfaceName]; iface != nil {
-				for _, ifaceField := range iface.Fields {
-					if ifaceField.Name == implField.Name && !typesMatch(ifaceField.Type, implField.Type) {
-						if !result[interfaceName] {
-							log.Printf("WARN: %s.%s: covariant override %s -> %s (skipping Base%s embedding)",
-								g.schemaType.Name, implField.Name, ifaceField.Type.Name(), implField.Type.Name(), interfaceName)
-						}
-						result[interfaceName] = true
-						break
-					}
+			if !g.graph.isEmbeddable(interfaceName) {
+				continue
+			}
+
+			iface := g.cfg.Schema.Types[interfaceName]
+			if iface == nil {
+				continue
+			}
+
+			for _, ifaceField := range iface.Fields {
+				if ifaceField.Name != implField.Name || typesMatch(ifaceField.Type, implField.Type) {
+					continue
 				}
+
+				if !result[interfaceName] {
+					log.Printf("WARN: %s.%s: covariant override %s -> %s (skipping Base%s embedding)",
+						g.schemaType.Name, implField.Name, ifaceField.Type.Name(), implField.Type.Name(), interfaceName)
+				}
+				result[interfaceName] = true
+				break
 			}
 		}
 	}
@@ -191,6 +210,10 @@ func (g *embeddedInterfaceGenerator) findInterfaceForField(field *ast.FieldDefin
 
 	for _, ifaceName := range interfaces {
 		if iface := g.cfg.Schema.Types[ifaceName]; iface != nil && (iface.Kind == ast.Interface || iface.Kind == ast.Union) {
+			if !g.graph.isEmbeddable(ifaceName) {
+				continue
+			}
+
 			for _, ifaceField := range iface.Fields {
 				if ifaceField.Name == field.Name && typesMatch(ifaceField.Type, field.Type) {
 					return ifaceName

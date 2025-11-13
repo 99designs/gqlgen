@@ -103,24 +103,25 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 	b := &ModelBuild{
 		PackageName: cfg.Model.Package,
 	}
+
+	cfg.Directives["goEmbedInterface"] = config.DirectiveConfig{SkipRuntime: true}
+
 	binder := cfg.NewBinder()
 
 	// Generate Base structs for interfaces if embedded structs are enabled
-	if cfg.OmitEmbeddedStructs != nil && !*cfg.OmitEmbeddedStructs {
-		embedder := newEmbeddedInterfaceGenerator(cfg, binder, nil, b)
-		specs, err := embedder.generateAllInterfaceBaseStructs()
+	embedder := newEmbeddedInterfaceGenerator(cfg, binder, nil, b)
+	specs, err := embedder.generateAllInterfaceBaseStructs()
+	if err != nil {
+		return err
+	}
+
+	for _, spec := range specs {
+		obj, err := m.buildBaseObjectFromSpec(cfg, binder, spec)
 		if err != nil {
 			return err
 		}
-
-		for _, spec := range specs {
-			obj, err := m.buildBaseObjectFromSpec(cfg, binder, spec)
-			if err != nil {
-				return err
-			}
-			if obj != nil {
-				b.Models = append(b.Models, obj)
-			}
+		if obj != nil {
+			b.Models = append(b.Models, obj)
 		}
 	}
 
@@ -258,7 +259,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 			getter += fmt.Sprintf("\tif this.%s == nil { return nil }\n", field.GoName)
 			getter += fmt.Sprintf("\tinterfaceSlice := make(%s, 0, len(this.%s))\n", goType, field.GoName)
 			getter += fmt.Sprintf("\tfor _, concrete := range this.%s { interfaceSlice = append(interfaceSlice, ", field.GoName)
-			if interfaceFieldTypeIsPointer && !structFieldTypeIsPointer && (cfg.OmitEmbeddedStructs == nil || *cfg.OmitEmbeddedStructs) {
+			if interfaceFieldTypeIsPointer && !structFieldTypeIsPointer {
 				getter += "&"
 			} else if !interfaceFieldTypeIsPointer && structFieldTypeIsPointer {
 				getter += "*"
@@ -270,7 +271,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		}
 		getter := fmt.Sprintf("func (this %s) Get%s() %s { return ", templates.ToGoModelName(model.Name), field.GoName, goType)
 
-		if interfaceFieldTypeIsPointer && !structFieldTypeIsPointer && (cfg.OmitEmbeddedStructs == nil || *cfg.OmitEmbeddedStructs) {
+		if interfaceFieldTypeIsPointer && !structFieldTypeIsPointer {
 			getter += "&"
 		} else if !interfaceFieldTypeIsPointer && structFieldTypeIsPointer {
 			getter += "*"
@@ -288,7 +289,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		newModelTemplate = readModelTemplate(cfg.Model.ModelTemplate)
 	}
 
-	err := templates.Render(templates.Options{
+	err = templates.Render(templates.Options{
 		PackageName:     cfg.Model.Package,
 		Filename:        cfg.Model.Filename,
 		Data:            b,

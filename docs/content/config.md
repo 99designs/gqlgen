@@ -92,15 +92,6 @@ resolver:
 # Optional: turn on to exclude resolver fields from the generated models file.
 # omit_resolver_fields: false
 
-# Optional: turn off to generate the models using embedding where a base struct is created that implements an interface
-# and subsequent graphql types that implement that particular interface will embed the base struct.
-# This feature might be useful when you want to work with base interface types in your code and want to avoid copy-pasting logic for each implementing type.
-# However, it comes with some caveats which doesn't allow it to enable this feature by default and one who enables it should be aware of all intricacies.
-# Main issues with this feature are:
-#  - Diamond inheritance is tricky to support, when several interfaces have repeated fields and sometimes implement each other.
-#  - When interface has fields which are also interfaces and implementing type has same fields but with concrete types, embedding cannot be used.
-# omit_embedded_structs: true
-
 # Optional: turn on to set a different prefix to the generated base structs used for embedding.
 # embedded_structs_prefix: "Base"
 

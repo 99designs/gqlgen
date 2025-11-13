@@ -1,0 +1,6 @@
+schema:
+  - "testdata/interface_embedding/schema_directive_diamond.graphql"
+
+model:
+  filename: out_directive_diamond/generated_directive_diamond.go
+

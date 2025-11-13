@@ -1,0 +1,28 @@
+directive @goEmbedInterface on INTERFACE
+
+interface Node @goEmbedInterface {
+    id: ID!
+}
+
+interface Element implements Node @goEmbedInterface {
+    id: ID!
+    name: String!
+}
+
+type Magnesium implements Element & Node {
+    id: ID!
+    name: String!
+    types: Int!
+}
+
+type Potassium implements Element & Node {
+    id: ID!
+    name: String!
+    price: Float!
+}
+
+type Carbon implements Element & Node {
+    id: ID!
+    name: String!
+    footprint: String!
+}

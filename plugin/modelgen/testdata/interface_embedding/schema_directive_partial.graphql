@@ -1,0 +1,31 @@
+directive @goEmbedInterface on INTERFACE
+
+interface Node @goEmbedInterface {
+    id: ID!
+}
+
+interface Element implements Node {
+    id: ID!
+    name: String!
+}
+
+interface Metal implements Element & Node @goEmbedInterface {
+    id: ID!
+    name: String!
+    atomicNumber: Int!
+}
+
+type Gold implements Metal & Element & Node {
+    id: ID!
+    name: String!
+    atomicNumber: Int!
+    karat: Int!
+}
+
+type Silver implements Metal & Element & Node {
+    id: ID!
+    name: String!
+    atomicNumber: Int!
+    purity: Float!
+}
+

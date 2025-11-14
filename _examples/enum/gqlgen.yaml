@@ -19,21 +19,21 @@ models:
   BoolTyped:
     model: github.com/99designs/gqlgen/_examples/enum/model.BoolTyped
     enum_values:
-      TRUE:
+      "TRUE":
         value: github.com/99designs/gqlgen/_examples/enum/model.BoolTypedTrue
-      FALSE:
+      "FALSE":
         value: github.com/99designs/gqlgen/_examples/enum/model.BoolTypedFalse
   BoolUntyped:
     model: github.com/99designs/gqlgen/graphql.Boolean
     enum_values:
-      TRUE:
+      "TRUE":
         value: github.com/99designs/gqlgen/_examples/enum/model.BoolUntypedTrue
-      FALSE:
+      "FALSE":
         value: github.com/99designs/gqlgen/_examples/enum/model.BoolUntypedFalse
   InPackage:
     model: github.com/99designs/gqlgen/_examples/enum/api.InPackage
     enum_values:
-      TRUE:
+      "TRUE":
         value: github.com/99designs/gqlgen/_examples/enum/api.InPackageTrue
-      FALSE:
+      "FALSE":
         value: github.com/99designs/gqlgen/_examples/enum/api.InPackageFalse

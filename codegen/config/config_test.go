@@ -35,7 +35,11 @@ func TestReadConfig(t *testing.T) {
 		t.Cleanup(func() { _ = cfgFile.Close() })
 		_, err = ReadConfig(cfgFile)
 
-		require.EqualError(t, err, "unable to parse config: [1:1] string was used where mapping is expected\n>  1 | asdf\n       ^\n")
+		if runtime.GOOS == "windows" {
+			require.EqualError(t, err, "unable to parse config: [1:1] string was used where mapping is expected\n>  1 | asdf\r\n       ^\n")
+		} else {
+			require.EqualError(t, err, "unable to parse config: [1:1] string was used where mapping is expected\n>  1 | asdf\n       ^\n")
+		}
 	})
 
 	t.Run("unknown keys", func(t *testing.T) {
@@ -44,7 +48,11 @@ func TestReadConfig(t *testing.T) {
 		t.Cleanup(func() { _ = cfgFile.Close() })
 		_, err = ReadConfig(cfgFile)
 
-		require.EqualError(t, err, "unable to parse config: [2:1] unknown field \"unknown\"\n   1 | schema: outer\n>  2 | unknown: foo\n       ^\n")
+		if runtime.GOOS == "windows" {
+			require.EqualError(t, err, "unable to parse config: [2:1] unknown field \"unknown\"\n   1 | schema: outer\r\n>  2 | unknown: foo\n       ^\n")
+		} else {
+			require.EqualError(t, err, "unable to parse config: [2:1] unknown field \"unknown\"\n   1 | schema: outer\n>  2 | unknown: foo\n       ^\n")
+		}
 	})
 
 	t.Run("globbed filenames", func(t *testing.T) {

@@ -8,6 +8,7 @@ import (
 	introspection1 "github.com/99designs/gqlgen/codegen/testserver/followschema/introspection"
 	invalid_packagename "github.com/99designs/gqlgen/codegen/testserver/followschema/invalid-packagename"
 	"github.com/99designs/gqlgen/codegen/testserver/followschema/otherpkg"
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type Stub struct {
@@ -129,14 +130,14 @@ type Stub struct {
 		WrappedSlice                     func(ctx context.Context) (WrappedSlice, error)
 	}
 	SubscriptionResolver struct {
-		Updated                func(ctx context.Context) (<-chan string, error)
-		InitPayload            func(ctx context.Context) (<-chan string, error)
-		DirectiveArg           func(ctx context.Context, arg string) (<-chan *string, error)
-		DirectiveNullableArg   func(ctx context.Context, arg *int, arg2 *int, arg3 *string) (<-chan *string, error)
-		DirectiveDouble        func(ctx context.Context) (<-chan *string, error)
-		DirectiveUnimplemented func(ctx context.Context) (<-chan *string, error)
-		Issue896b              func(ctx context.Context) (<-chan []*CheckIssue896, error)
-		ErrorRequired          func(ctx context.Context) (<-chan *Error, error)
+		Updated                func(ctx context.Context) (<-chan graphql.SubscriptionField[string], error)
+		InitPayload            func(ctx context.Context) (<-chan graphql.SubscriptionField[string], error)
+		DirectiveArg           func(ctx context.Context, arg string) (<-chan graphql.SubscriptionField[*string], error)
+		DirectiveNullableArg   func(ctx context.Context, arg *int, arg2 *int, arg3 *string) (<-chan graphql.SubscriptionField[*string], error)
+		DirectiveDouble        func(ctx context.Context) (<-chan graphql.SubscriptionField[*string], error)
+		DirectiveUnimplemented func(ctx context.Context) (<-chan graphql.SubscriptionField[*string], error)
+		Issue896b              func(ctx context.Context) (<-chan graphql.SubscriptionField[[]*CheckIssue896], error)
+		ErrorRequired          func(ctx context.Context) (<-chan graphql.SubscriptionField[*Error], error)
 	}
 	UserResolver struct {
 		Friends func(ctx context.Context, obj *User) ([]*User, error)
@@ -524,28 +525,28 @@ func (r *stubQuery) WrappedSlice(ctx context.Context) (WrappedSlice, error) {
 
 type stubSubscription struct{ *Stub }
 
-func (r *stubSubscription) Updated(ctx context.Context) (<-chan string, error) {
+func (r *stubSubscription) Updated(ctx context.Context) (<-chan graphql.SubscriptionField[string], error) {
 	return r.SubscriptionResolver.Updated(ctx)
 }
-func (r *stubSubscription) InitPayload(ctx context.Context) (<-chan string, error) {
+func (r *stubSubscription) InitPayload(ctx context.Context) (<-chan graphql.SubscriptionField[string], error) {
 	return r.SubscriptionResolver.InitPayload(ctx)
 }
-func (r *stubSubscription) DirectiveArg(ctx context.Context, arg string) (<-chan *string, error) {
+func (r *stubSubscription) DirectiveArg(ctx context.Context, arg string) (<-chan graphql.SubscriptionField[*string], error) {
 	return r.SubscriptionResolver.DirectiveArg(ctx, arg)
 }
-func (r *stubSubscription) DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int, arg3 *string) (<-chan *string, error) {
+func (r *stubSubscription) DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int, arg3 *string) (<-chan graphql.SubscriptionField[*string], error) {
 	return r.SubscriptionResolver.DirectiveNullableArg(ctx, arg, arg2, arg3)
 }
-func (r *stubSubscription) DirectiveDouble(ctx context.Context) (<-chan *string, error) {
+func (r *stubSubscription) DirectiveDouble(ctx context.Context) (<-chan graphql.SubscriptionField[*string], error) {
 	return r.SubscriptionResolver.DirectiveDouble(ctx)
 }
-func (r *stubSubscription) DirectiveUnimplemented(ctx context.Context) (<-chan *string, error) {
+func (r *stubSubscription) DirectiveUnimplemented(ctx context.Context) (<-chan graphql.SubscriptionField[*string], error) {
 	return r.SubscriptionResolver.DirectiveUnimplemented(ctx)
 }
-func (r *stubSubscription) Issue896b(ctx context.Context) (<-chan []*CheckIssue896, error) {
+func (r *stubSubscription) Issue896b(ctx context.Context) (<-chan graphql.SubscriptionField[[]*CheckIssue896], error) {
 	return r.SubscriptionResolver.Issue896b(ctx)
 }
-func (r *stubSubscription) ErrorRequired(ctx context.Context) (<-chan *Error, error) {
+func (r *stubSubscription) ErrorRequired(ctx context.Context) (<-chan graphql.SubscriptionField[*Error], error) {
 	return r.SubscriptionResolver.ErrorRequired(ctx)
 }
 

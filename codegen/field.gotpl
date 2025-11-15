@@ -3,9 +3,9 @@
 {{- range $object := .Objects }}{{- range $field := $object.Fields }}
 
 {{ if $useFunctionSyntaxForExecutionContext -}}
-func _{{$object.Name}}_{{$field.Name}}(ctx context.Context, ec *executionContext, field graphql.CollectedField{{ if not $object.Root }}, obj {{$object.Reference | ref}}{{end}}) (ret {{ if $object.Stream }}func(ctx context.Context){{ end }}graphql.Marshaler) {
+func _{{$object.Name}}_{{$field.Name}}(ctx context.Context, ec *executionContext, field graphql.CollectedField{{ if not $object.Root }}, obj {{$object.Reference | ref}}{{end}}) ({{- if eq $field.Name "subscription" }} retCtx context.Context, {{- end}}ret {{ if $object.Stream }}func(ctx context.Context) {{ if not $field.TypeReference.IsRoot }}(context.Context, {{ end }} {{ end }}graphql.Marshaler{{ if $object.Stream }}{{ if not $field.TypeReference.IsRoot }}) {{ end }}{{ end }}) {
 {{- else -}}
-func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Context, field graphql.CollectedField{{ if not $object.Root }}, obj {{$object.Reference | ref}}{{end}}) (ret {{ if $object.Stream }}func(ctx context.Context){{ end }}graphql.Marshaler) {
+func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Context, field graphql.CollectedField{{ if not $object.Root }}, obj {{$object.Reference | ref}}{{end}}) ({{- if eq $field.Name "subscription" }} retCtx context.Context, {{- end}}ret {{ if $object.Stream }}func(ctx context.Context) {{ if not $field.TypeReference.IsRoot }}(context.Context, {{ end }} {{ end }}graphql.Marshaler{{ if $object.Stream }}{{ if not $field.TypeReference.IsRoot }}) {{ end }}{{ end }}) {
 {{- end }}
 	{{- $null := "graphql.Null" }}
 	{{- if $object.Stream }}
@@ -19,7 +19,7 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 		fc, err := ec.{{ $field.FieldContextFunc }}(ctx, field)
 		{{- end }}
 		if err != nil {
-			return {{ $null }}
+			return {{- if eq $field.Name "subscription" }}  ctx,{{- end}} {{ $null }}
 		}
 		ctx = graphql.WithFieldContext(ctx, fc)
 		{{- if not $.Config.OmitPanicHandler }}

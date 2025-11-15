@@ -74,7 +74,7 @@ func (cw complexityWalker) interfaceFieldComplexity(ctx context.Context, def *as
 }
 
 func (cw complexityWalker) fieldComplexity(ctx context.Context, object, field string, childComplexity int, args map[string]any) int {
-	if customComplexity, ok := cw.es.Complexity(ctx, object, field, childComplexity, args); ok && customComplexity >= childComplexity {
+	if customComplexity, ok := cw.es.Complexity(ctx, object, field, childComplexity, args); ok && customComplexity >= 1 {
 		return customComplexity
 	}
 	// default complexity calculation

@@ -73,7 +73,7 @@
 	if data, ok := tmp.(graphql.Marshaler); ok {
 		return data
 	}
-	ec.Errorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
+	graphql.AddErrorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
 	return graphql.Null
 {{end}}
 
@@ -147,7 +147,7 @@ func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *as
 	if data, ok := tmp.(func(ctx context.Context) graphql.Marshaler); ok {
 		return data
 	}
-	ec.Errorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
+	graphql.AddErrorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
 	return func(ctx context.Context) graphql.Marshaler {
 		return graphql.Null
 	}

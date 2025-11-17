@@ -196,13 +196,10 @@ func BuildData(cfg *config.Config, plugins ...any) (*Data, error) {
 		// otherwise show a generic error message
 		return nil, errors.New("invalid types were encountered while traversing the go source code, this probably means the invalid code generated isnt correct. add try adding -v to debug")
 	}
-	sources := cfg.Sources
-	transformedSources, wasTransformed, err := SerializeTransformedSchema(cfg.Schema, cfg.Sources)
+	var sources []*ast.Source
+	sources, err = SerializeTransformedSchema(cfg.Schema, cfg.Sources)
 	if err != nil {
 		return nil, fmt.Errorf("failed to serialize transformed schema: %w", err)
-	}
-	if wasTransformed {
-		sources = transformedSources
 	}
 
 	aSources := []AugmentedSource{}

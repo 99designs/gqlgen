@@ -130,9 +130,9 @@ func ClearInlineArgsMetadata() {
 	inlineArgsMetadata = make(map[string]*InlineArgsInfo)
 }
 
-func SerializeTransformedSchema(schema *ast.Schema, originalSources []*ast.Source) ([]*ast.Source, bool, error) {
+func SerializeTransformedSchema(schema *ast.Schema, originalSources []*ast.Source) ([]*ast.Source, error) {
 	if len(inlineArgsMetadata) == 0 {
-		return originalSources, false, nil
+		return originalSources, nil
 	}
 
 	var buf bytes.Buffer
@@ -145,5 +145,5 @@ func SerializeTransformedSchema(schema *ast.Schema, originalSources []*ast.Sourc
 			Input:   buf.String(),
 			BuiltIn: true,
 		},
-	}, true, nil
+	}, nil
 }

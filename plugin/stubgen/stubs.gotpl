@@ -61,12 +61,7 @@ type {{$root.TypeName}} struct {
 		{{ range $field := $object.Fields -}}
 			{{- if $field.IsResolver -}}
 				func (r *{{lcFirst $root.TypeName}}{{$object.Name}}) {{$field.GoFieldName}}{{ $field.ShortResolverDeclaration }} {
-					return r.{{$object.Name}}Resolver.{{$field.GoFieldName}}(ctx,
-						{{- if not $object.Root }}obj,{{end -}}
-						{{- range $arg := $field.Args}}
-							{{- $arg.VarName}},
-						{{- end }}
-					)
+					return r.{{$object.Name}}Resolver.{{$field.GoFieldName}}(ctx,{{if not $object.Root}} obj,{{end}}{{ if $field.Args }} {{$field.StubCallArgs}}{{end}})
 				}
 			{{ end -}}
 		{{ end -}}

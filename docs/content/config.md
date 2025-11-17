@@ -211,6 +211,8 @@ directive @goExtraField(
 	overrideTags: String
 	description: String
 ) repeatable on OBJECT | INPUT_OBJECT
+
+directive @inlineArguments on ARGUMENT_DEFINITION
 ```
 
 > Here be dragons

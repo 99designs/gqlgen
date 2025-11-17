@@ -102,6 +102,11 @@ func Generate(cfg *config.Config, option ...Option) error {
 		return fmt.Errorf("failed to load schema: %w", err)
 	}
 
+	codegen.ClearInlineArgsMetadata()
+	if err := codegen.ExpandInlineArguments(cfg.Schema); err != nil {
+		return fmt.Errorf("failed to expand inline arguments: %w", err)
+	}
+
 	if err := cfg.Init(); err != nil {
 		return fmt.Errorf("generating core failed: %w", err)
 	}
@@ -123,6 +128,7 @@ func Generate(cfg *config.Config, option ...Option) error {
 			}
 		}
 	}
+
 	// Merge again now that the generated models have been injected into the typemap
 	dataPlugins := make([]any, len(plugins))
 	for index := range plugins {

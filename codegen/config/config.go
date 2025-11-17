@@ -304,7 +304,7 @@ func (c *Config) IsRoot(def *ast.Definition) bool {
 }
 
 func (c *Config) injectTypesFromSchema() error {
-	for _, d := range []string{"goModel", "goExtraField", "goField", "goTag", "goEnum"} {
+	for _, d := range []string{"goModel", "goExtraField", "goField", "goTag", "goEnum", "inlineArguments"} {
 		c.Directives[d] = DirectiveConfig{SkipRuntime: true}
 	}
 

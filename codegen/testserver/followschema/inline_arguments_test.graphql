@@ -1,0 +1,49 @@
+directive @inlineArguments on ARGUMENT_DEFINITION
+
+input SearchFilters @goModel(model: "map[string]interface{}") {
+  query: String
+  category: String
+  minPrice: Int
+}
+
+input RequiredFilters @goModel(model: "map[string]interface{}") {
+  name: String!
+  age: Int!
+}
+
+input UpdateProductInput @goModel(model: "map[string]interface{}") {
+  id: ID!
+  name: String
+  price: Float
+}
+
+input SearchWithDefaults @goModel(model: "map[string]interface{}") {
+  query: String = "default search"
+  limit: Int = 20
+  includeArchived: Boolean = false
+}
+
+input DirectiveInput @goModel(model: "map[string]interface{}") {
+  oldField: String @deprecated(reason: "Use newField instead")
+  newField: String
+}
+
+extend type Query {
+  searchProducts(filters: SearchFilters @inlineArguments): [String!]!
+  searchRequired(filters: RequiredFilters! @inlineArguments): [String!]!
+  searchProductsNormal(filters: SearchFilters): [String!]!
+  searchWithDefaults(filters: SearchWithDefaults @inlineArguments): [String!]!
+  searchMixed(
+    filters: SearchFilters @inlineArguments,
+    limit: Int = 10,
+    offset: Int = 0,
+    sortBy: String
+  ): [String!]!
+  filterProducts(filters: SearchFilters @inlineArguments): [String!]!
+  findProducts(filters: SearchFilters @inlineArguments): [String!]!
+  searchWithDirectives(input: DirectiveInput @inlineArguments): [String!]!
+}
+
+extend type Mutation {
+  updateProduct(input: UpdateProductInput @inlineArguments): String!
+}

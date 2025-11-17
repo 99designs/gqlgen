@@ -518,6 +518,36 @@ func (f *Field) IsRoot() bool {
 	return f.Object.Root
 }
 
+func contains(slice []string, str string) bool {
+	for _, s := range slice {
+		if s == str {
+			return true
+		}
+	}
+	return false
+}
+
+func formatGoType(goType string) string {
+	if strings.Contains(goType, "/") {
+		lastDot := strings.LastIndex(goType, ".")
+		if lastDot == -1 {
+			return goType
+		}
+
+		packagePath := goType[:lastDot]
+		typeName := goType[lastDot+1:]
+
+		alias := templates.CurrentImports.Lookup(packagePath)
+		if alias == "" {
+			return typeName
+		}
+
+		return alias + "." + typeName
+	}
+
+	return goType
+}
+
 func (f *Field) ShortResolverDeclaration() string {
 	return f.ShortResolverSignature(nil)
 }
@@ -538,8 +568,24 @@ func (f *Field) ShortResolverSignature(ft *goast.FuncType) string {
 		res += fmt.Sprintf(", obj %s", templates.CurrentImports.LookupType(f.Object.Reference()))
 	}
 	var resSb540 strings.Builder
-	for _, arg := range f.Args {
-		resSb540.WriteString(fmt.Sprintf(", %s %s", arg.VarName, templates.CurrentImports.LookupType(arg.TypeReference.GO)))
+
+	var inlineInfo *InlineArgsInfo
+	if f.Object != nil && f.Object.Definition != nil {
+		inlineInfo = GetInlineArgsMetadata(f.Object.Name, f.Name)
+	}
+	if inlineInfo != nil {
+		goType := formatGoType(inlineInfo.GoType)
+		resSb540.WriteString(fmt.Sprintf(", %s %s", inlineInfo.OriginalArgName, goType))
+
+		for _, arg := range f.Args {
+			if !contains(inlineInfo.ExpandedArgs, arg.Name) {
+				resSb540.WriteString(fmt.Sprintf(", %s %s", arg.VarName, templates.CurrentImports.LookupType(arg.TypeReference.GO)))
+			}
+		}
+	} else {
+		for _, arg := range f.Args {
+			resSb540.WriteString(fmt.Sprintf(", %s %s", arg.VarName, templates.CurrentImports.LookupType(arg.TypeReference.GO)))
+		}
 	}
 	res += resSb540.String()
 
@@ -557,7 +603,11 @@ func (f *Field) ShortResolverSignature(ft *goast.FuncType) string {
 			namedE = ft.Results.List[1].Names[0].Name
 		}
 	}
-	res += fmt.Sprintf(") (%s %s, %s error)", namedV, result, namedE)
+	if namedV != "" || namedE != "" {
+		res += fmt.Sprintf(") (%s %s, %s error)", namedV, result, namedE)
+	} else {
+		res += fmt.Sprintf(") (%s, error)", result)
+	}
 	return res
 }
 
@@ -601,21 +651,96 @@ func (f *Field) CallArgs() string {
 		args = append(args, "ctx")
 	}
 
-	for _, arg := range f.Args {
-		tmp := "fc.Args[" + strconv.Quote(arg.Name) + "].(" + templates.CurrentImports.LookupType(arg.TypeReference.GO) + ")"
+	var inlineInfo *InlineArgsInfo
+	if f.Object != nil && f.Object.Definition != nil {
+		inlineInfo = GetInlineArgsMetadata(f.Object.Name, f.Name)
+	}
+	if inlineInfo != nil {
+		isMap := strings.Contains(inlineInfo.GoType, "map[")
 
-		if iface, ok := arg.TypeReference.GO.(*types.Interface); ok && iface.Empty() {
-			tmp = fmt.Sprintf(`
+		var entries []string
+		for _, argName := range inlineInfo.ExpandedArgs {
+			var argRef *FieldArgument
+			for _, arg := range f.Args {
+				if arg.Name == argName {
+					argRef = arg
+					break
+				}
+			}
+			if argRef != nil {
+				goType := templates.CurrentImports.LookupType(argRef.TypeReference.GO)
+				var entry string
+				if isMap {
+					entry = fmt.Sprintf("%q: fc.Args[%q].(%s)", argName, argName, goType)
+				} else {
+					fieldName := templates.ToGo(argName)
+					entry = fmt.Sprintf("%s: fc.Args[%q].(%s)", fieldName, argName, goType)
+				}
+				entries = append(entries, entry)
+			}
+		}
+
+		goType := formatGoType(inlineInfo.GoType)
+		bundled := fmt.Sprintf("%s{\n\t\t%s,\n\t}", goType, strings.Join(entries, ",\n\t\t"))
+		args = append(args, bundled)
+
+		for _, arg := range f.Args {
+			if !contains(inlineInfo.ExpandedArgs, arg.Name) {
+				tmp := "fc.Args[" + strconv.Quote(arg.Name) + "].(" + templates.CurrentImports.LookupType(arg.TypeReference.GO) + ")"
+
+				if iface, ok := arg.TypeReference.GO.(*types.Interface); ok && iface.Empty() {
+					tmp = fmt.Sprintf(`
 				func () any {
 					if fc.Args["%s"] == nil {
 						return nil
 					}
 					return fc.Args["%s"].(any)
 				}()`, arg.Name, arg.Name,
-			)
-		}
+					)
+				}
 
-		args = append(args, tmp)
+				args = append(args, tmp)
+			}
+		}
+	} else {
+		for _, arg := range f.Args {
+			tmp := "fc.Args[" + strconv.Quote(arg.Name) + "].(" + templates.CurrentImports.LookupType(arg.TypeReference.GO) + ")"
+
+			if iface, ok := arg.TypeReference.GO.(*types.Interface); ok && iface.Empty() {
+				tmp = fmt.Sprintf(`
+				func () any {
+					if fc.Args["%s"] == nil {
+						return nil
+					}
+					return fc.Args["%s"].(any)
+				}()`, arg.Name, arg.Name,
+				)
+			}
+
+			args = append(args, tmp)
+		}
+	}
+
+	return strings.Join(args, ", ")
+}
+
+// StubCallArgs returns a comma-separated list of argument variable names for stub code.
+func (f *Field) StubCallArgs() string {
+	args := make([]string, 0, len(f.Args)+2)
+
+	inlineInfo := GetInlineArgsMetadata(f.Object.Name, f.Name)
+	if inlineInfo != nil {
+		args = append(args, inlineInfo.OriginalArgName)
+
+		for _, arg := range f.Args {
+			if !contains(inlineInfo.ExpandedArgs, arg.Name) {
+				args = append(args, arg.VarName)
+			}
+		}
+	} else {
+		for _, arg := range f.Args {
+			args = append(args, arg.VarName)
+		}
 	}
 
 	return strings.Join(args, ", ")

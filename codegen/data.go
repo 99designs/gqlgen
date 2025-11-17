@@ -103,7 +103,6 @@ func (d *Data) Directives() DirectiveList {
 }
 
 func BuildData(cfg *config.Config, plugins ...any) (*Data, error) {
-	// We reload all packages to allow packages to be compared correctly.
 	cfg.ReloadAllPackages()
 
 	b := builder{
@@ -197,8 +196,14 @@ func BuildData(cfg *config.Config, plugins ...any) (*Data, error) {
 		// otherwise show a generic error message
 		return nil, errors.New("invalid types were encountered while traversing the go source code, this probably means the invalid code generated isnt correct. add try adding -v to debug")
 	}
+	var sources []*ast.Source
+	sources, err = SerializeTransformedSchema(cfg.Schema, cfg.Sources)
+	if err != nil {
+		return nil, fmt.Errorf("failed to serialize transformed schema: %w", err)
+	}
+
 	aSources := []AugmentedSource{}
-	for _, s := range cfg.Sources {
+	for _, s := range sources {
 		wd, err := os.Getwd()
 		if err != nil {
 			return nil, fmt.Errorf("failed to get working directory: %w", err)

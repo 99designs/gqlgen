@@ -5,9 +5,7 @@ package followschema
 import (
 	"bytes"
 	"context"
-	"embed"
 	"errors"
-	"fmt"
 	"sync/atomic"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -254,6 +252,7 @@ type ComplexityRoot struct {
 	Mutation struct {
 		DefaultInput          func(childComplexity int, input DefaultInput) int
 		OverrideValueViaInput func(childComplexity int, input FieldsOrderInput) int
+		UpdateProduct         func(childComplexity int, id string, name *string, price *float64) int
 		UpdatePtrToPtr        func(childComplexity int, input UpdatePtrToPtrOuter) int
 		UpdateSomething       func(childComplexity int, input SpecialInput) int
 	}
@@ -351,6 +350,8 @@ type ComplexityRoot struct {
 		ErrorList                        func(childComplexity int) int
 		Errors                           func(childComplexity int) int
 		Fallback                         func(childComplexity int, arg FallbackToStringEncoding) int
+		FilterProducts                   func(childComplexity int, query *string, category *string, minPrice *int) int
+		FindProducts                     func(childComplexity int, query *string, category *string, minPrice *int) int
 		Infinity                         func(childComplexity int) int
 		InputNullableSlice               func(childComplexity int, arg []string) int
 		InputOmittable                   func(childComplexity int, arg OmittableInput) int
@@ -378,6 +379,12 @@ type ComplexityRoot struct {
 		PtrToSliceContainer              func(childComplexity int) int
 		Recursive                        func(childComplexity int, input *RecursiveInputSlice) int
 		ScalarSlice                      func(childComplexity int) int
+		SearchMixed                      func(childComplexity int, query *string, category *string, minPrice *int, limit *int, offset *int, sortBy *string) int
+		SearchProducts                   func(childComplexity int, query *string, category *string, minPrice *int) int
+		SearchProductsNormal             func(childComplexity int, filters map[string]any) int
+		SearchRequired                   func(childComplexity int, name string, age int) int
+		SearchWithDefaults               func(childComplexity int, query *string, limit *int, includeArchived *bool) int
+		SearchWithDirectives             func(childComplexity int, oldField *string, newField *string) int
 		ShapeUnion                       func(childComplexity int) int
 		Shapes                           func(childComplexity int) int
 		SkipInclude                      func(childComplexity int) int
@@ -1021,6 +1028,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Mutation.OverrideValueViaInput(childComplexity, args["input"].(FieldsOrderInput)), true
 
+	case "Mutation.updateProduct":
+		if e.complexity.Mutation.UpdateProduct == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_updateProduct_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateProduct(childComplexity, args["id"].(string), args["name"].(*string), args["price"].(*float64)), true
+
 	case "Mutation.updatePtrToPtr":
 		if e.complexity.Mutation.UpdatePtrToPtr == nil {
 			break
@@ -1507,6 +1526,30 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.Fallback(childComplexity, args["arg"].(FallbackToStringEncoding)), true
 
+	case "Query.filterProducts":
+		if e.complexity.Query.FilterProducts == nil {
+			break
+		}
+
+		args, err := ec.field_Query_filterProducts_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.FilterProducts(childComplexity, args["query"].(*string), args["category"].(*string), args["minPrice"].(*int)), true
+
+	case "Query.findProducts":
+		if e.complexity.Query.FindProducts == nil {
+			break
+		}
+
+		args, err := ec.field_Query_findProducts_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.FindProducts(childComplexity, args["query"].(*string), args["category"].(*string), args["minPrice"].(*int)), true
+
 	case "Query.infinity":
 		if e.complexity.Query.Infinity == nil {
 			break
@@ -1740,6 +1783,78 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.ScalarSlice(childComplexity), true
+
+	case "Query.searchMixed":
+		if e.complexity.Query.SearchMixed == nil {
+			break
+		}
+
+		args, err := ec.field_Query_searchMixed_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.SearchMixed(childComplexity, args["query"].(*string), args["category"].(*string), args["minPrice"].(*int), args["limit"].(*int), args["offset"].(*int), args["sortBy"].(*string)), true
+
+	case "Query.searchProducts":
+		if e.complexity.Query.SearchProducts == nil {
+			break
+		}
+
+		args, err := ec.field_Query_searchProducts_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.SearchProducts(childComplexity, args["query"].(*string), args["category"].(*string), args["minPrice"].(*int)), true
+
+	case "Query.searchProductsNormal":
+		if e.complexity.Query.SearchProductsNormal == nil {
+			break
+		}
+
+		args, err := ec.field_Query_searchProductsNormal_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.SearchProductsNormal(childComplexity, args["filters"].(map[string]any)), true
+
+	case "Query.searchRequired":
+		if e.complexity.Query.SearchRequired == nil {
+			break
+		}
+
+		args, err := ec.field_Query_searchRequired_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.SearchRequired(childComplexity, args["name"].(string), args["age"].(int)), true
+
+	case "Query.searchWithDefaults":
+		if e.complexity.Query.SearchWithDefaults == nil {
+			break
+		}
+
+		args, err := ec.field_Query_searchWithDefaults_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.SearchWithDefaults(childComplexity, args["query"].(*string), args["limit"].(*int), args["includeArchived"].(*bool)), true
+
+	case "Query.searchWithDirectives":
+		if e.complexity.Query.SearchWithDirectives == nil {
+			break
+		}
+
+		args, err := ec.field_Query_searchWithDirectives_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.SearchWithDirectives(childComplexity, args["oldField"].(*string), args["newField"].(*string)), true
 
 	case "Query.shapeUnion":
 		if e.complexity.Query.ShapeUnion == nil {
@@ -2188,6 +2303,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputChanges,
 		ec.unmarshalInputDefaultInput,
+		ec.unmarshalInputDirectiveInput,
 		ec.unmarshalInputFieldsOrderInput,
 		ec.unmarshalInputInnerDirectives,
 		ec.unmarshalInputInnerInput,
@@ -2200,7 +2316,11 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputOmittableInput,
 		ec.unmarshalInputOuterInput,
 		ec.unmarshalInputRecursiveInputSlice,
+		ec.unmarshalInputRequiredFilters,
+		ec.unmarshalInputSearchFilters,
+		ec.unmarshalInputSearchWithDefaults,
 		ec.unmarshalInputSpecialInput,
+		ec.unmarshalInputUpdateProductInput,
 		ec.unmarshalInputUpdatePtrToPtrInner,
 		ec.unmarshalInputUpdatePtrToPtrOuter,
 		ec.unmarshalInputValidInput,
@@ -2317,48 +2437,563 @@ func (ec *executionContext) introspectType(name string) (*introspection.Type, er
 	return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
 }
 
-//go:embed "builtinscalar.graphql" "complexity.graphql" "defaults.graphql" "defer.graphql" "directive.graphql" "embedded.graphql" "enum.graphql" "fields_order.graphql" "interfaces.graphql" "issue896.graphql" "loops.graphql" "maps.graphql" "mutation_with_custom_scalar.graphql" "nulls.graphql" "panics.graphql" "primitive_objects.graphql" "ptr_to_any.graphql" "ptr_to_ptr_input.graphql" "ptr_to_slice.graphql" "scalar_context.graphql" "scalar_default.graphql" "schema.graphql" "skip-include.graphql" "slices.graphql" "typefallback.graphql" "useptr.graphql" "v-ok.graphql" "validtypes.graphql" "variadic.graphql" "weird_type_cases.graphql" "wrapped_type.graphql"
-var sourcesFS embed.FS
-
-func sourceData(filename string) string {
-	data, err := sourcesFS.ReadFile(filename)
-	if err != nil {
-		panic(fmt.Sprintf("codegen problem: %s not available", filename))
-	}
-	return string(data)
-}
-
 var sources = []*ast.Source{
-	{Name: "builtinscalar.graphql", Input: sourceData("builtinscalar.graphql"), BuiltIn: false},
-	{Name: "complexity.graphql", Input: sourceData("complexity.graphql"), BuiltIn: false},
-	{Name: "defaults.graphql", Input: sourceData("defaults.graphql"), BuiltIn: false},
-	{Name: "defer.graphql", Input: sourceData("defer.graphql"), BuiltIn: false},
-	{Name: "directive.graphql", Input: sourceData("directive.graphql"), BuiltIn: false},
-	{Name: "embedded.graphql", Input: sourceData("embedded.graphql"), BuiltIn: false},
-	{Name: "enum.graphql", Input: sourceData("enum.graphql"), BuiltIn: false},
-	{Name: "fields_order.graphql", Input: sourceData("fields_order.graphql"), BuiltIn: false},
-	{Name: "interfaces.graphql", Input: sourceData("interfaces.graphql"), BuiltIn: false},
-	{Name: "issue896.graphql", Input: sourceData("issue896.graphql"), BuiltIn: false},
-	{Name: "loops.graphql", Input: sourceData("loops.graphql"), BuiltIn: false},
-	{Name: "maps.graphql", Input: sourceData("maps.graphql"), BuiltIn: false},
-	{Name: "mutation_with_custom_scalar.graphql", Input: sourceData("mutation_with_custom_scalar.graphql"), BuiltIn: false},
-	{Name: "nulls.graphql", Input: sourceData("nulls.graphql"), BuiltIn: false},
-	{Name: "panics.graphql", Input: sourceData("panics.graphql"), BuiltIn: false},
-	{Name: "primitive_objects.graphql", Input: sourceData("primitive_objects.graphql"), BuiltIn: false},
-	{Name: "ptr_to_any.graphql", Input: sourceData("ptr_to_any.graphql"), BuiltIn: false},
-	{Name: "ptr_to_ptr_input.graphql", Input: sourceData("ptr_to_ptr_input.graphql"), BuiltIn: false},
-	{Name: "ptr_to_slice.graphql", Input: sourceData("ptr_to_slice.graphql"), BuiltIn: false},
-	{Name: "scalar_context.graphql", Input: sourceData("scalar_context.graphql"), BuiltIn: false},
-	{Name: "scalar_default.graphql", Input: sourceData("scalar_default.graphql"), BuiltIn: false},
-	{Name: "schema.graphql", Input: sourceData("schema.graphql"), BuiltIn: false},
-	{Name: "skip-include.graphql", Input: sourceData("skip-include.graphql"), BuiltIn: false},
-	{Name: "slices.graphql", Input: sourceData("slices.graphql"), BuiltIn: false},
-	{Name: "typefallback.graphql", Input: sourceData("typefallback.graphql"), BuiltIn: false},
-	{Name: "useptr.graphql", Input: sourceData("useptr.graphql"), BuiltIn: false},
-	{Name: "v-ok.graphql", Input: sourceData("v-ok.graphql"), BuiltIn: false},
-	{Name: "validtypes.graphql", Input: sourceData("validtypes.graphql"), BuiltIn: false},
-	{Name: "variadic.graphql", Input: sourceData("variadic.graphql"), BuiltIn: false},
-	{Name: "weird_type_cases.graphql", Input: sourceData("weird_type_cases.graphql"), BuiltIn: false},
-	{Name: "wrapped_type.graphql", Input: sourceData("wrapped_type.graphql"), BuiltIn: false},
+	{Name: "inline_arguments_transformed_schema.graphql", Input: `directive @custom on ARGUMENT_DEFINITION
+directive @defer(if: Boolean = true, label: String) on FRAGMENT_SPREAD | INLINE_FRAGMENT
+directive @directive1 on FIELD_DEFINITION
+directive @directive2 on FIELD_DEFINITION
+directive @directive3 on INPUT_OBJECT
+directive @goField(forceResolver: Boolean, name: String, omittable: Boolean, type: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+directive @inlineArguments on ARGUMENT_DEFINITION
+directive @length(min: Int!, max: Int, message: String) on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+directive @logged(id: UUID!) on FIELD
+directive @makeNil on FIELD_DEFINITION
+directive @makeTypedNil on FIELD_DEFINITION
+directive @noop on ARGUMENT_DEFINITION
+directive @order1(location: String!) repeatable on FIELD_DEFINITION | OBJECT
+directive @order2(location: String!) on OBJECT
+directive @populate(value: String!) on ARGUMENT_DEFINITION
+directive @range(min: Int = 0, max: Int) on ARGUMENT_DEFINITION
+directive @toNull on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+directive @unimplemented on FIELD_DEFINITION
+type A {
+	id: ID!
+}
+type AIt {
+	id: ID!
+}
+type AbIt {
+	id: ID!
+}
+interface Animal {
+	species: String!
+	size: Size!
+}
+scalar Any
+type Autobind {
+	int: Int!
+	int32: Int!
+	int64: Int!
+	idStr: ID!
+	idInt: ID!
+}
+type B {
+	id: ID!
+}
+type BackedByInterface {
+	id: String!
+	thisShouldBind: String!
+	thisShouldBindWithError: String!
+}
+scalar Bytes
+type Cat implements Animal {
+	species: String!
+	size: Size!
+	catBreed: String!
+}
+input Changes @goModel(model: "map[string]interface{}") {
+	a: Int
+	b: Int
+}
+type CheckIssue896 {
+	id: Int
+}
+type Circle implements Shape {
+	radius: Float
+	area: Float
+	coordinates: Coordinates
+}
+type ConcreteNodeA implements Node {
+	id: ID!
+	child: Node!
+	name: String!
+}
+"""
+ Implements the Node interface with another interface 
+"""
+type ConcreteNodeInterface implements Node {
+	id: ID!
+	child: Node!
+}
+union Content_Child = Content_User | Content_Post
+type Content_Post {
+	foo: String
+}
+type Content_User {
+	foo: String
+}
+type Coordinates {
+	x: Float!
+	y: Float!
+}
+scalar CustomScalar @goModel(model: "followschema.CustomScalar")
+input DefaultInput {
+	falsyBoolean: Boolean = false
+	truthyBoolean: Boolean = true
+}
+type DefaultParametersMirror {
+	falsyBoolean: Boolean
+	truthyBoolean: Boolean
+}
+"""
+ This doesnt have an implementation in the typemap, so it should act like a string 
+"""
+scalar DefaultScalarImplementation
+type DeferModel {
+	id: ID!
+	name: String!
+	values: [String!]! @goField(forceResolver: true)
+}
+input DirectiveInput @goModel(model: "map[string]interface{}") {
+	oldField: String @deprecated(reason: "Use newField instead")
+	newField: String
+}
+type Dog implements Animal {
+	species: String!
+	size: Size!
+	dogBreed: String!
+}
+scalar Email
+type EmbeddedCase1 @goModel(model: "followschema.EmbeddedCase1") {
+	exportedEmbeddedPointerExportedMethod: String!
+}
+type EmbeddedCase2 @goModel(model: "followschema.EmbeddedCase2") {
+	unexportedEmbeddedPointerExportedMethod: String!
+}
+type EmbeddedCase3 @goModel(model: "followschema.EmbeddedCase3") {
+	unexportedEmbeddedInterfaceExportedMethod: String!
+}
+type EmbeddedDefaultScalar {
+	value: DefaultScalarImplementation
+}
+type EmbeddedPointer @goModel(model: "followschema.EmbeddedPointerModel") {
+	ID: String
+	Title: String
+}
+enum EnumTest {
+	OK
+	NG
+}
+type Error {
+	id: ID!
+	errorOnNonRequiredField: String
+	errorOnRequiredField: String!
+	nilOnRequiredField: String!
+}
+type Errors {
+	a: Error!
+	b: Error!
+	c: Error!
+	d: Error!
+	e: Error!
+}
+enum FallbackToStringEncoding {
+	A
+	B
+	C
+}
+input FieldsOrderInput {
+	firstField: String
+	overrideFirstField: String
+}
+type FieldsOrderPayload {
+	firstFieldValue: String
+}
+type ForcedResolver {
+	field: Circle @goField(forceResolver: true)
+}
+type Horse implements Mammalian & Animal {
+	species: String!
+	size: Size!
+	horseBreed: String!
+}
+input InnerDirectives {
+	message: String! @length(min: 1, message: "not valid")
+}
+input InnerInput {
+	id: Int!
+}
+type InnerObject {
+	id: Int!
+}
+input InputDirectives @directive3 {
+	text: String! @length(min: 0, max: 7, message: "not valid")
+	nullableText: String @toNull
+	inner: InnerDirectives!
+	innerNullable: InnerDirectives
+	thirdParty: ThirdParty @length(min: 0, max: 7)
+}
+input InputWithEnumValue {
+	enum: EnumTest!
+}
+type InvalidIdentifier {
+	id: Int!
+}
+type It {
+	id: ID!
+}
+type LoopA {
+	b: LoopB!
+}
+type LoopB {
+	a: LoopA!
+}
+interface Mammalian implements Animal {
+	species: String!
+	size: Size!
+}
+"""
+Since gqlgen defines default implementation for a Map scalar, this tests that the builtin is _not_
+added to the TypeMap
+"""
+type Map {
+	id: ID!
+}
+type MapNested @goModel(model: "followschema.MapNested") {
+	value: CustomScalar!
+}
+input MapNestedInput @goModel(model: "followschema.MapNested") {
+	value: CustomScalar!
+}
+input MapStringInterfaceInput @goModel(model: "map[string]interface{}") {
+	a: String!
+	b: Int
+	c: CustomScalar
+	nested: MapNestedInput
+}
+type MapStringInterfaceType @goModel(model: "map[string]interface{}") {
+	a: String
+	b: Int
+	c: CustomScalar
+	nested: MapNested
+}
+scalar MarshalPanic
+type ModelMethods {
+	resolverField: Boolean!
+	noContext: Boolean!
+	withContext: Boolean!
+}
+type Mutation {
+	defaultInput(input: DefaultInput!): DefaultParametersMirror!
+	overrideValueViaInput(input: FieldsOrderInput!): FieldsOrderPayload!
+	updateProduct(id: ID!, name: String, price: Float): String!
+	updateSomething(input: SpecialInput!): String!
+	updatePtrToPtr(input: UpdatePtrToPtrOuter!): PtrToPtrOuter!
+}
+input NestedInput {
+	field: Email!
+}
+input NestedMapInput {
+	map: MapStringInterfaceInput
+}
+interface Node {
+	id: ID!
+	child: Node!
+}
+type ObjectDirectives @order1(location: "order1_1") @order1(location: "order1_2") @order2(location: "order2_1") {
+	text: String! @length(min: 0, max: 7, message: "not valid")
+	nullableText: String @toNull
+	order: [String!]!
+}
+type ObjectDirectivesWithCustomGoModel {
+	nullableText: String @toNull
+}
+input OmittableInput {
+	id: ID @goField(omittable: true)
+	bool: Boolean @goField(omittable: true)
+	str: String @goField(omittable: true)
+	int: Int @goField(omittable: true)
+	time: Time @goField(omittable: true)
+	enum: Status @goField(omittable: true)
+	scalar: ThirdParty @goField(omittable: true)
+	object: OuterInput @goField(omittable: true)
+}
+input OuterInput {
+	inner: InnerInput!
+}
+type OuterObject {
+	inner: InnerObject!
+}
+type OverlappingFields {
+	oneFoo: Int! @goField(name: "foo")
+	twoFoo: Int! @goField(name: "foo")
+	oldFoo: Int! @goField(name: "foo", forceResolver: true)
+	newFoo: Int!
+	new_foo: Int!
+}
+type Panics {
+	fieldScalarMarshal: [MarshalPanic!]!
+	fieldFuncMarshal(u: [MarshalPanic!]!): [MarshalPanic!]!
+	argUnmarshal(u: [MarshalPanic!]!): Boolean!
+}
+type Pet {
+	id: Int!
+	friends(limit: Int): [Pet!] @goField(forceResolver: true)
+}
+type Primitive {
+	value: Int!
+	squared: Int!
+}
+type PrimitiveString {
+	value: String!
+	doubled: String!
+	len: Int!
+}
+type PtrToAnyContainer {
+	ptrToAny: Any
+	binding: Any
+}
+type PtrToPtrInner {
+	key: String!
+	value: String!
+}
+type PtrToPtrOuter {
+	name: String!
+	inner: PtrToPtrInner
+	stupidInner: PtrToPtrInner
+}
+type PtrToSliceContainer {
+	ptrToSlice: [String!]
+}
+type Query {
+	invalidIdentifier: InvalidIdentifier
+	collision: It
+	mapInput(input: Changes): Boolean
+	recursive(input: RecursiveInputSlice): Boolean
+	nestedInputs(input: [[OuterInput]] = [[{inner:{id:1}}]]): Boolean
+	nestedOutputs: [[OuterObject]]
+	modelMethods: ModelMethods
+	user(id: Int!): User!
+	nullableArg(arg: Int = 123): String
+	inputSlice(arg: [String!]!): Boolean!
+	inputNullableSlice(arg: [String!]): Boolean!
+	inputOmittable(arg: OmittableInput!): String!
+	shapeUnion: ShapeUnion!
+	autobind: Autobind
+	deprecatedField: String! @deprecated(reason: "test deprecated directive")
+	overlapping: OverlappingFields
+	defaultParameters(falsyBoolean: Boolean = false, truthyBoolean: Boolean = true): DefaultParametersMirror!
+	deferSingle: DeferModel
+	deferMultiple: [DeferModel!]
+	directiveArg(arg: String! @length(min: 1, max: 255, message: "invalid length")): String
+	directiveNullableArg(arg: Int @range(min: 0), arg2: Int @range, arg3: String @toNull): String
+	directiveSingleNullableArg(arg1: String @populate(value: "test") @noop): String
+	directiveInputNullable(arg: InputDirectives): String
+	directiveInput(arg: InputDirectives!): String
+	directiveInputType(arg: InnerInput! @custom): String
+	directiveObject: ObjectDirectives @order1(location: "Query_field")
+	directiveObjectWithCustomGoModel: ObjectDirectivesWithCustomGoModel
+	directiveFieldDef(ret: String!): String! @length(min: 1, message: "not valid")
+	directiveField: String
+	directiveDouble: String @directive1 @directive2
+	directiveUnimplemented: String @unimplemented
+	embeddedCase1: EmbeddedCase1
+	embeddedCase2: EmbeddedCase2
+	embeddedCase3: EmbeddedCase3
+	enumInInput(input: InputWithEnumValue): EnumTest!
+	searchProducts(query: String, category: String, minPrice: Int): [String!]!
+	searchRequired(name: String!, age: Int!): [String!]!
+	searchProductsNormal(filters: SearchFilters): [String!]!
+	searchWithDefaults(query: String = "default search", limit: Int = 20, includeArchived: Boolean = false): [String!]!
+	searchMixed(query: String, category: String, minPrice: Int, limit: Int = 10, offset: Int = 0, sortBy: String): [String!]!
+	filterProducts(query: String, category: String, minPrice: Int): [String!]!
+	findProducts(query: String, category: String, minPrice: Int): [String!]!
+	searchWithDirectives(oldField: String @deprecated(reason: "Use newField instead"), newField: String): [String!]!
+	shapes: [Shape]
+	noShape: Shape @makeNil
+	node: Node!
+	noShapeTypedNil: Shape @makeTypedNil
+	animal: Animal @makeTypedNil
+	notAnInterface: BackedByInterface
+	dog: Dog
+	issue896a: [CheckIssue896!]
+	mapStringInterface(in: MapStringInterfaceInput): MapStringInterfaceType
+	mapNestedStringInterface(in: NestedMapInput): MapStringInterfaceType
+	errorBubble: Error
+	errorBubbleList: [Error!]
+	errorList: [Error]
+	errors: Errors
+	valid: String!
+	invalid: String!
+	panics: Panics
+	primitiveObject: [Primitive!]!
+	primitiveStringObject: [PrimitiveString!]!
+	ptrToAnyContainer: PtrToAnyContainer!
+	ptrToSliceContainer: PtrToSliceContainer!
+	infinity: Float!
+	stringFromContextInterface: StringFromContextInterface!
+	stringFromContextFunction: StringFromContextFunction!
+	defaultScalar(arg: DefaultScalarImplementation! = "default"): DefaultScalarImplementation!
+	skipInclude: SkipIncludeTestType
+	slices: Slices
+	scalarSlice: Bytes!
+	fallback(arg: FallbackToStringEncoding!): FallbackToStringEncoding!
+	optionalUnion: TestUnion
+	vOkCaseValue: VOkCaseValue
+	vOkCaseNil: VOkCaseNil
+	validType: ValidType
+	variadicModel: VariadicModel
+	wrappedStruct: WrappedStruct!
+	wrappedScalar: WrappedScalar!
+	wrappedMap: WrappedMap!
+	wrappedSlice: WrappedSlice!
+}
+type Rectangle implements Shape {
+	length: Float
+	width: Float
+	area: Float
+	coordinates: Coordinates
+}
+input RecursiveInputSlice {
+	self: [RecursiveInputSlice!]
+}
+input RequiredFilters @goModel(model: "map[string]interface{}") {
+	name: String!
+	age: Int!
+}
+input SearchFilters @goModel(model: "map[string]interface{}") {
+	query: String
+	category: String
+	minPrice: Int
+}
+input SearchWithDefaults @goModel(model: "map[string]interface{}") {
+	query: String = "default search"
+	limit: Int = 20
+	includeArchived: Boolean = false
+}
+interface Shape {
+	area: Float
+	coordinates: Coordinates
+}
+union ShapeUnion @goModel(model: "followschema.ShapeUnion") = Circle | Rectangle
+type Size {
+	height: Int!
+	weight: Int!
+}
+type SkipIncludeTestType {
+	a: String
+	b: String
+}
+type Slices {
+	test1: [String]
+	test2: [String!]
+	test3: [String]!
+	test4: [String!]!
+}
+input SpecialInput {
+	nesting: NestedInput!
+}
+enum Status {
+	OK
+	ERROR
+}
+scalar StringFromContextFunction
+scalar StringFromContextInterface
+type Subscription {
+	updated: String!
+	initPayload: String!
+	directiveArg(arg: String! @length(min: 1, max: 255, message: "invalid length")): String
+	directiveNullableArg(arg: Int @range(min: 0), arg2: Int @range, arg3: String @toNull): String
+	directiveDouble: String @directive1 @directive2
+	directiveUnimplemented: String @unimplemented
+	issue896b: [CheckIssue896]
+	errorRequired: Error!
+}
+union TestUnion = A | B
+scalar ThirdParty @goModel(model: "followschema.ThirdParty")
+scalar Time
+scalar UUID
+input UpdateProductInput @goModel(model: "map[string]interface{}") {
+	id: ID!
+	name: String
+	price: Float
+}
+input UpdatePtrToPtrInner {
+	key: String
+	value: String
+}
+input UpdatePtrToPtrOuter {
+	name: String
+	inner: UpdatePtrToPtrInner
+	stupidInner: UpdatePtrToPtrInner
+}
+type User {
+	id: Int!
+	friends: [User!]! @goField(forceResolver: true)
+	created: Time!
+	updated: Time
+	pets(limit: Int): [Pet!] @goField(forceResolver: true)
+}
+type VOkCaseNil @goModel(model: "followschema.VOkCaseNil") {
+	value: String
+}
+type VOkCaseValue @goModel(model: "followschema.VOkCaseValue") {
+	value: String
+}
+input ValidInput {
+	break: String!
+	default: String!
+	func: String!
+	interface: String!
+	select: String!
+	case: String!
+	defer: String!
+	go: String!
+	map: String!
+	struct: String!
+	chan: String!
+	else: String!
+	goto: String!
+	package: String!
+	switch: String!
+	const: String!
+	fallthrough: String!
+	if: String!
+	range: String!
+	type: String!
+	continue: String!
+	for: String!
+	import: String!
+	return: String!
+	var: String!
+	_: String! @goField(name: "Underscore")
+}
+"""
+ These things are all valid, but without care generate invalid go code 
+"""
+type ValidType {
+	differentCase: String!
+	different_case: String! @goField(name: "DifferentCaseOld")
+	validInputKeywords(input: ValidInput): Boolean!
+	validArgs(break: String!, default: String!, func: String!, interface: String!, select: String!, case: String!, defer: String!, go: String!, map: String!, struct: String!, chan: String!, else: String!, goto: String!, package: String!, switch: String!, const: String!, fallthrough: String!, if: String!, range: String!, type: String!, continue: String!, for: String!, import: String!, return: String!, var: String!, _: String!): Boolean!
+}
+type VariadicModel {
+	value(rank: Int!): String
+}
+type WrappedMap {
+	get(key: String!): String!
+}
+scalar WrappedScalar
+type WrappedSlice {
+	get(idx: Int!): String!
+}
+type WrappedStruct {
+	name: WrappedScalar!
+	desc: WrappedScalar
+}
+type XXIt {
+	id: ID!
+}
+type XxIt {
+	id: ID!
+}
+type asdfIt {
+	id: ID!
+}
+type iIt {
+	id: ID!
+}
+`, BuiltIn: true},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)

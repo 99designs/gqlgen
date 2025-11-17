@@ -33,6 +33,7 @@ type Stub struct {
 	MutationResolver struct {
 		DefaultInput          func(ctx context.Context, input DefaultInput) (*DefaultParametersMirror, error)
 		OverrideValueViaInput func(ctx context.Context, input FieldsOrderInput) (*FieldsOrderPayload, error)
+		UpdateProduct         func(ctx context.Context, input map[string]interface{}) (string, error)
 		UpdateSomething       func(ctx context.Context, input SpecialInput) (string, error)
 		UpdatePtrToPtr        func(ctx context.Context, input UpdatePtrToPtrOuter) (*PtrToPtrOuter, error)
 	}
@@ -89,6 +90,14 @@ type Stub struct {
 		EmbeddedCase2                    func(ctx context.Context) (*EmbeddedCase2, error)
 		EmbeddedCase3                    func(ctx context.Context) (*EmbeddedCase3, error)
 		EnumInInput                      func(ctx context.Context, input *InputWithEnumValue) (EnumTest, error)
+		SearchProducts                   func(ctx context.Context, filters map[string]interface{}) ([]string, error)
+		SearchRequired                   func(ctx context.Context, filters map[string]interface{}) ([]string, error)
+		SearchProductsNormal             func(ctx context.Context, filters map[string]any) ([]string, error)
+		SearchWithDefaults               func(ctx context.Context, filters map[string]interface{}) ([]string, error)
+		SearchMixed                      func(ctx context.Context, filters map[string]interface{}, limit *int, offset *int, sortBy *string) ([]string, error)
+		FilterProducts                   func(ctx context.Context, filters map[string]interface{}) ([]string, error)
+		FindProducts                     func(ctx context.Context, filters map[string]interface{}) ([]string, error)
+		SearchWithDirectives             func(ctx context.Context, input map[string]interface{}) ([]string, error)
 		Shapes                           func(ctx context.Context) ([]Shape, error)
 		NoShape                          func(ctx context.Context) (Shape, error)
 		Node                             func(ctx context.Context) (Node, error)
@@ -257,6 +266,9 @@ func (r *stubMutation) DefaultInput(ctx context.Context, input DefaultInput) (*D
 func (r *stubMutation) OverrideValueViaInput(ctx context.Context, input FieldsOrderInput) (*FieldsOrderPayload, error) {
 	return r.MutationResolver.OverrideValueViaInput(ctx, input)
 }
+func (r *stubMutation) UpdateProduct(ctx context.Context, input map[string]interface{}) (string, error) {
+	return r.MutationResolver.UpdateProduct(ctx, input)
+}
 func (r *stubMutation) UpdateSomething(ctx context.Context, input SpecialInput) (string, error) {
 	return r.MutationResolver.UpdateSomething(ctx, input)
 }
@@ -406,6 +418,30 @@ func (r *stubQuery) EmbeddedCase3(ctx context.Context) (*EmbeddedCase3, error) {
 }
 func (r *stubQuery) EnumInInput(ctx context.Context, input *InputWithEnumValue) (EnumTest, error) {
 	return r.QueryResolver.EnumInInput(ctx, input)
+}
+func (r *stubQuery) SearchProducts(ctx context.Context, filters map[string]interface{}) ([]string, error) {
+	return r.QueryResolver.SearchProducts(ctx, filters)
+}
+func (r *stubQuery) SearchRequired(ctx context.Context, filters map[string]interface{}) ([]string, error) {
+	return r.QueryResolver.SearchRequired(ctx, filters)
+}
+func (r *stubQuery) SearchProductsNormal(ctx context.Context, filters map[string]any) ([]string, error) {
+	return r.QueryResolver.SearchProductsNormal(ctx, filters)
+}
+func (r *stubQuery) SearchWithDefaults(ctx context.Context, filters map[string]interface{}) ([]string, error) {
+	return r.QueryResolver.SearchWithDefaults(ctx, filters)
+}
+func (r *stubQuery) SearchMixed(ctx context.Context, filters map[string]interface{}, limit *int, offset *int, sortBy *string) ([]string, error) {
+	return r.QueryResolver.SearchMixed(ctx, filters, limit, offset, sortBy)
+}
+func (r *stubQuery) FilterProducts(ctx context.Context, filters map[string]interface{}) ([]string, error) {
+	return r.QueryResolver.FilterProducts(ctx, filters)
+}
+func (r *stubQuery) FindProducts(ctx context.Context, filters map[string]interface{}) ([]string, error) {
+	return r.QueryResolver.FindProducts(ctx, filters)
+}
+func (r *stubQuery) SearchWithDirectives(ctx context.Context, input map[string]interface{}) ([]string, error) {
+	return r.QueryResolver.SearchWithDirectives(ctx, input)
 }
 func (r *stubQuery) Shapes(ctx context.Context) ([]Shape, error) {
 	return r.QueryResolver.Shapes(ctx)

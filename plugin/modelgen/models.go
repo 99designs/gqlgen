@@ -130,7 +130,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		switch schemaType.Kind {
 		case ast.Interface, ast.Union:
 			if !userDefined {
-				it, err := m.getInterface(cfg, schemaType, b)
+				it, err := m.getInterface(cfg, schemaType)
 				if err != nil {
 					return err
 				}
@@ -779,7 +779,6 @@ func readModelTemplate(customModelTemplate string) string {
 func (m *Plugin) getInterface(
 	cfg *config.Config,
 	schemaType *ast.Definition,
-	b *ModelBuild,
 ) (*Interface, error) {
 	var fields []*Field
 	var err error

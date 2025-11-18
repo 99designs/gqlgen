@@ -628,7 +628,7 @@ func beforeUnmarshalUint(v any) (uint, error) {
 }
 
 func BenchmarkUnmarshalUintInitial(b *testing.B) {
-	numbers := makeRandomNumberSlice(LENGTH, false)
+	numbers := makeRandomNumberSlice(false)
 
 	for range b.N {
 		for i := range numbers {
@@ -638,7 +638,7 @@ func BenchmarkUnmarshalUintInitial(b *testing.B) {
 }
 
 func BenchmarkUnmarshalUintNew(b *testing.B) {
-	numbers := makeRandomNumberSlice(LENGTH, false)
+	numbers := makeRandomNumberSlice(false)
 
 	for range b.N {
 		for i := range numbers {

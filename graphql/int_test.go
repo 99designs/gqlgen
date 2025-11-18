@@ -395,7 +395,7 @@ func beforeUnmarshalInt(v any) (int, error) {
 }
 
 func BenchmarkUnmarshalIntInitial(b *testing.B) {
-	numbers := makeRandomNumberSlice(LENGTH, true)
+	numbers := makeRandomNumberSlice(true)
 
 	for range b.N {
 		for i := range numbers {
@@ -405,7 +405,7 @@ func BenchmarkUnmarshalIntInitial(b *testing.B) {
 }
 
 func BenchmarkUnmarshalIntNew(b *testing.B) {
-	numbers := makeRandomNumberSlice(LENGTH, true)
+	numbers := makeRandomNumberSlice(true)
 
 	for range b.N {
 		for i := range numbers {
@@ -414,8 +414,8 @@ func BenchmarkUnmarshalIntNew(b *testing.B) {
 	}
 }
 
-func makeRandomNumberSlice(length int, signed bool) []any {
-	numbers := make([]any, length)
+func makeRandomNumberSlice(signed bool) []any {
+	numbers := make([]any, LENGTH)
 	for i := range numbers {
 		numbers[i] = randomNumber(signed)
 	}

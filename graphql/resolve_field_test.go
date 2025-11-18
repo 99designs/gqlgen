@@ -129,6 +129,7 @@ func TestResolveField(t *testing.T) {
 		ResolveField,
 		false,
 		func(t *testing.T, test ResolveFieldTest, result Marshaler) {
+			t.Helper()
 			var sb strings.Builder
 			if result != nil {
 				result.MarshalGQL(&sb)

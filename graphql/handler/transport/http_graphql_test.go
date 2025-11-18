@@ -122,7 +122,7 @@ func TestGRAPHQL(t *testing.T) {
 
 func doGraphqlRequest(
 	handler http.Handler,
-	method, target, body string,
+	method, target, body string, //nolint:unparam // expected to always get POST for GraphQL
 ) *httptest.ResponseRecorder {
 	r := httptest.NewRequest(method, target, strings.NewReader(body))
 	r.Header.Set("Content-Type", "application/graphql")

@@ -4,11 +4,8 @@ import (
 	"fmt"
 	"os"
 
-
 	_ "github.com/jackc/pgx/v5/stdlib"
-
 	"github.com/jmoiron/sqlx"
-
 	"github.com/rs/zerolog/log"
 )
 

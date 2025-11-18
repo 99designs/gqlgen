@@ -3,13 +3,13 @@ package starwars
 import (
 	"testing"
 
-	"github.com/99designs/gqlgen/graphql/handler/extension"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/_examples/starwars/generated"
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/introspection"
 )
 

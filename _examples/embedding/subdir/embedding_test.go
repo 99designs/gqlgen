@@ -3,12 +3,12 @@ package subdir
 import (
 	"testing"
 
-	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/_examples/embedding/subdir/gendir"
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
 
 func TestEmbeddingWorks(t *testing.T) {

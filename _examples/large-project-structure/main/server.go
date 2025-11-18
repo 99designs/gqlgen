@@ -5,16 +5,16 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/vektah/gqlparser/v2/ast"
+
+	"github.com/99designs/gqlgen/_examples/large-project-structure/integration"
+	"github.com/99designs/gqlgen/_examples/large-project-structure/main/graph"
+	_ "github.com/99designs/gqlgen/_examples/large-project-structure/shared"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
-	"github.com/99designs/gqlgen/_examples/large-project-structure/main/graph"
-	"github.com/vektah/gqlparser/v2/ast"
-
-	"github.com/99designs/gqlgen/_examples/large-project-structure/integration"
-	_ "github.com/99designs/gqlgen/_examples/large-project-structure/shared"
 )
 
 const defaultPort = "8080"

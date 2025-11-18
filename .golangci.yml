@@ -14,6 +14,12 @@ issues:
   max-same-issues: 0
   new: false
 formatters:
+  exclusions:
+    paths:
+        - codegen/testserver/followschema/resolver.go
+        - codegen/testserver/singlefile/resolver.go
+        - codegen/testserver/usefunctionsyntaxforexecutioncontext/resolver.go
+        - generated
   enable:
     - golines
     - gofumpt

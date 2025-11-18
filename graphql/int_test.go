@@ -69,17 +69,17 @@ func TestInt8(t *testing.T) {
 					t,
 					err,
 					tc.err,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.ErrorAs(
 					t,
 					err,
 					&numberOverflowErr,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.ErrorAs(
 					t,
 					err,
 					&intErr,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.Equal(t, int8(0), res)
 			})
 		}
@@ -93,7 +93,7 @@ func TestInt8(t *testing.T) {
 			t,
 			err,
 			"strconv.ParseInt: parsing \"-1.03\": invalid syntax",
-		) //nolint:testifylint // An error assertion makes more sense.
+		)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, int8(0), res)
 
@@ -102,7 +102,7 @@ func TestInt8(t *testing.T) {
 			t,
 			err,
 			"strconv.ParseInt: parsing \" 1\": invalid syntax",
-		) //nolint:testifylint // An error assertion makes more sense.
+		)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, int8(0), res)
 	})
@@ -169,17 +169,17 @@ func TestInt16(t *testing.T) {
 					t,
 					err,
 					tc.err,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.ErrorAs(
 					t,
 					err,
 					&numberOverflowErr,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.ErrorAs(
 					t,
 					err,
 					&intErr,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.Equal(t, int16(0), res)
 			})
 		}
@@ -193,7 +193,7 @@ func TestInt16(t *testing.T) {
 			t,
 			err,
 			"strconv.ParseInt: parsing \"-1.03\": invalid syntax",
-		) //nolint:testifylint // An error assertion makes more sense.
+		)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, int16(0), res)
 
@@ -202,7 +202,7 @@ func TestInt16(t *testing.T) {
 			t,
 			err,
 			"strconv.ParseInt: parsing \" 1\": invalid syntax",
-		) //nolint:testifylint // An error assertion makes more sense.
+		)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, int16(0), res)
 	})
@@ -306,17 +306,17 @@ func TestInt32(t *testing.T) {
 					t,
 					err,
 					tc.err,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.ErrorAs(
 					t,
 					err,
 					&numberOverflowErr,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.ErrorAs(
 					t,
 					err,
 					&intErr,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.Equal(t, int32(0), res)
 			})
 		}
@@ -330,7 +330,7 @@ func TestInt32(t *testing.T) {
 			t,
 			err,
 			"strconv.ParseInt: parsing \"-1.03\": invalid syntax",
-		) //nolint:testifylint // An error assertion makes more sense.
+		)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, int32(0), res)
 
@@ -339,7 +339,7 @@ func TestInt32(t *testing.T) {
 			t,
 			err,
 			"strconv.ParseInt: parsing \" 1\": invalid syntax",
-		) //nolint:testifylint // An error assertion makes more sense.
+		)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, int32(0), res)
 	})

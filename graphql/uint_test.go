@@ -49,17 +49,17 @@ func TestUint(t *testing.T) {
 					t,
 					err,
 					tc.err,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.ErrorAs(
 					t,
 					err,
 					&uintSignErr,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.ErrorAs(
 					t,
 					err,
 					&intErr,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.Equal(t, uint(0), res)
 			})
 		}
@@ -85,7 +85,7 @@ func TestUint(t *testing.T) {
 					t,
 					err,
 					tc.err,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.NotErrorAs(t, err, &uintSignErr)
 				assert.NotErrorAs(t, err, &intErr)
 				assert.Equal(t, uint(0), res)
@@ -142,17 +142,17 @@ func TestUint8(t *testing.T) {
 					t,
 					err,
 					tc.err,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.ErrorAs(
 					t,
 					err,
 					&uintSignErr,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.ErrorAs(
 					t,
 					err,
 					&intErr,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.Equal(t, uint8(0), res)
 			})
 		}
@@ -167,7 +167,7 @@ func TestUint8(t *testing.T) {
 			t,
 			err,
 			"strconv.ParseUint: parsing \"-1.03\": invalid syntax",
-		) //nolint:testifylint // An error assertion makes more sense.
+		)
 		assert.NotErrorAs(t, err, &uintSignErr)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, uint8(0), res)
@@ -177,7 +177,7 @@ func TestUint8(t *testing.T) {
 			t,
 			err,
 			"strconv.ParseUint: parsing \" 1\": invalid syntax",
-		) //nolint:testifylint // An error assertion makes more sense.
+		)
 		assert.NotErrorAs(t, err, &uintSignErr)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, uint8(0), res)
@@ -204,17 +204,17 @@ func TestUint8(t *testing.T) {
 					t,
 					err,
 					tc.err,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.ErrorAs(
 					t,
 					err,
 					&numberOverflowErr,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.ErrorAs(
 					t,
 					err,
 					&intErr,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.Equal(t, uint8(0), res)
 			})
 		}
@@ -269,17 +269,17 @@ func TestUint16(t *testing.T) {
 					t,
 					err,
 					tc.err,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.ErrorAs(
 					t,
 					err,
 					&uintSignErr,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.ErrorAs(
 					t,
 					err,
 					&intErr,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.Equal(t, uint16(0), res)
 			})
 		}
@@ -294,7 +294,7 @@ func TestUint16(t *testing.T) {
 			t,
 			err,
 			"strconv.ParseUint: parsing \"-1.03\": invalid syntax",
-		) //nolint:testifylint // An error assertion makes more sense.
+		)
 		assert.NotErrorAs(t, err, &uintSignErr)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, uint16(0), res)
@@ -304,7 +304,7 @@ func TestUint16(t *testing.T) {
 			t,
 			err,
 			"strconv.ParseUint: parsing \" 1\": invalid syntax",
-		) //nolint:testifylint // An error assertion makes more sense.
+		)
 		assert.NotErrorAs(t, err, &uintSignErr)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, uint16(0), res)
@@ -339,17 +339,17 @@ func TestUint16(t *testing.T) {
 					t,
 					err,
 					tc.err,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.ErrorAs(
 					t,
 					err,
 					&numberOverflowErr,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.ErrorAs(
 					t,
 					err,
 					&intErr,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.Equal(t, uint16(0), res)
 			})
 		}
@@ -404,17 +404,17 @@ func TestUint32(t *testing.T) {
 					t,
 					err,
 					tc.err,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.ErrorAs(
 					t,
 					err,
 					&uintSignErr,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.ErrorAs(
 					t,
 					err,
 					&intErr,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.Equal(t, uint32(0), res)
 			})
 		}
@@ -429,7 +429,7 @@ func TestUint32(t *testing.T) {
 			t,
 			err,
 			"strconv.ParseUint: parsing \"-1.03\": invalid syntax",
-		) //nolint:testifylint // An error assertion makes more sense.
+		)
 		assert.NotErrorAs(t, err, &uintSignErr)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, uint32(0), res)
@@ -439,7 +439,7 @@ func TestUint32(t *testing.T) {
 			t,
 			err,
 			"strconv.ParseUint: parsing \" 1\": invalid syntax",
-		) //nolint:testifylint // An error assertion makes more sense.
+		)
 		assert.NotErrorAs(t, err, &uintSignErr)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, uint32(0), res)
@@ -474,17 +474,17 @@ func TestUint32(t *testing.T) {
 					t,
 					err,
 					tc.err,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.ErrorAs(
 					t,
 					err,
 					&numberOverflowErr,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.ErrorAs(
 					t,
 					err,
 					&intErr,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.Equal(t, uint32(0), res)
 			})
 		}
@@ -537,17 +537,17 @@ func TestUint64(t *testing.T) {
 					t,
 					err,
 					tc.err,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.ErrorAs(
 					t,
 					err,
 					&uintSignErr,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.ErrorAs(
 					t,
 					err,
 					&intErr,
-				) //nolint:testifylint // An error assertion makes more sense.
+				)
 				assert.Equal(t, uint64(0), res)
 			})
 		}
@@ -562,7 +562,7 @@ func TestUint64(t *testing.T) {
 			t,
 			err,
 			"strconv.ParseUint: parsing \"-1.03\": invalid syntax",
-		) //nolint:testifylint // An error assertion makes more sense.
+		)
 		assert.NotErrorAs(t, err, &uintSignErr)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, uint64(0), res)
@@ -572,7 +572,7 @@ func TestUint64(t *testing.T) {
 			t,
 			err,
 			"strconv.ParseUint: parsing \" 1\": invalid syntax",
-		) //nolint:testifylint // An error assertion makes more sense.
+		)
 		assert.NotErrorAs(t, err, &uintSignErr)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, uint64(0), res)

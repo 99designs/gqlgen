@@ -7,6 +7,7 @@ cd "$(mktemp -d)"
 go mod init inittest
 go get -tool github.com/99designs/gqlgen
 go mod edit -replace=github.com/99designs/gqlgen="$gqlgen_dir"
+go mod tidy
 
 if ! go tool gqlgen init ; then
     echo "gqlgen init failed"

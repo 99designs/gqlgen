@@ -8,12 +8,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
 
 // isNil checks if the given value is nil
@@ -247,7 +247,11 @@ func TestDirectives(t *testing.T) {
 
 			err := c.Post(`query { directiveArg(arg: "") }`, &resp)
 
-			require.EqualError(t, err, `[{"message":"invalid length","path":["directiveArg","arg"]}]`)
+			require.EqualError(
+				t,
+				err,
+				`[{"message":"invalid length","path":["directiveArg","arg"]}]`,
+			)
 			require.Nil(t, resp.DirectiveArg)
 		})
 		t.Run("when function errors on nullable arg directives", func(t *testing.T) {
@@ -257,7 +261,11 @@ func TestDirectives(t *testing.T) {
 
 			err := c.Post(`query { directiveNullableArg(arg: -100) }`, &resp)
 
-			require.EqualError(t, err, `[{"message":"too small","path":["directiveNullableArg","arg"]}]`)
+			require.EqualError(
+				t,
+				err,
+				`[{"message":"too small","path":["directiveNullableArg","arg"]}]`,
+			)
 			require.Nil(t, resp.DirectiveNullableArg)
 		})
 		t.Run("when function success on nullable arg directives", func(t *testing.T) {
@@ -334,7 +342,11 @@ func TestDirectives(t *testing.T) {
 
 			err := c.Post(`query { directiveUnimplemented }`, &resp)
 
-			require.EqualError(t, err, `[{"message":"directive unimplemented is not implemented","path":["directiveUnimplemented"]}]`)
+			require.EqualError(
+				t,
+				err,
+				`[{"message":"directive unimplemented is not implemented","path":["directiveUnimplemented"]}]`,
+			)
 		})
 
 		t.Run("ok", func(t *testing.T) {
@@ -373,9 +385,16 @@ func TestDirectives(t *testing.T) {
 				DirectiveInputNullable *string
 			}
 
-			err := c.Post(`query { directiveInputNullable(arg: {text:"invalid text",inner:{message:"123"}}) }`, &resp)
+			err := c.Post(
+				`query { directiveInputNullable(arg: {text:"invalid text",inner:{message:"123"}}) }`,
+				&resp,
+			)
 
-			require.EqualError(t, err, `[{"message":"not valid","path":["directiveInputNullable","arg","text"]}]`)
+			require.EqualError(
+				t,
+				err,
+				`[{"message":"not valid","path":["directiveInputNullable","arg","text"]}]`,
+			)
 			require.Nil(t, resp.DirectiveInputNullable)
 		})
 		t.Run("when function errors on inner directives", func(t *testing.T) {
@@ -383,9 +402,16 @@ func TestDirectives(t *testing.T) {
 				DirectiveInputNullable *string
 			}
 
-			err := c.Post(`query { directiveInputNullable(arg: {text:"2",inner:{message:""}}) }`, &resp)
+			err := c.Post(
+				`query { directiveInputNullable(arg: {text:"2",inner:{message:""}}) }`,
+				&resp,
+			)
 
-			require.EqualError(t, err, `[{"message":"not valid","path":["directiveInputNullable","arg","inner","message"]}]`)
+			require.EqualError(
+				t,
+				err,
+				`[{"message":"not valid","path":["directiveInputNullable","arg","inner","message"]}]`,
+			)
 			require.Nil(t, resp.DirectiveInputNullable)
 		})
 		t.Run("when function errors on nullable inner directives", func(t *testing.T) {
@@ -393,9 +419,16 @@ func TestDirectives(t *testing.T) {
 				DirectiveInputNullable *string
 			}
 
-			err := c.Post(`query { directiveInputNullable(arg: {text:"success",inner:{message:"1"},innerNullable:{message:""}}) }`, &resp)
+			err := c.Post(
+				`query { directiveInputNullable(arg: {text:"success",inner:{message:"1"},innerNullable:{message:""}}) }`,
+				&resp,
+			)
 
-			require.EqualError(t, err, `[{"message":"not valid","path":["directiveInputNullable","arg","innerNullable","message"]}]`)
+			require.EqualError(
+				t,
+				err,
+				`[{"message":"not valid","path":["directiveInputNullable","arg","innerNullable","message"]}]`,
+			)
 			require.Nil(t, resp.DirectiveInputNullable)
 		})
 		t.Run("when function success", func(t *testing.T) {
@@ -403,7 +436,10 @@ func TestDirectives(t *testing.T) {
 				DirectiveInputNullable *string
 			}
 
-			err := c.Post(`query { directiveInputNullable(arg: {text:"23",inner:{message:"1"}}) }`, &resp)
+			err := c.Post(
+				`query { directiveInputNullable(arg: {text:"23",inner:{message:"1"}}) }`,
+				&resp,
+			)
 
 			require.NoError(t, err)
 			require.Equal(t, "Ok", *resp.DirectiveInputNullable)
@@ -413,7 +449,10 @@ func TestDirectives(t *testing.T) {
 				DirectiveInputNullable *string
 			}
 
-			err := c.Post(`query { directiveInputNullable(arg: {text:"23",nullableText:"23",inner:{message:"1"},innerNullable:{message:"success"}}) }`, &resp)
+			err := c.Post(
+				`query { directiveInputNullable(arg: {text:"23",nullableText:"23",inner:{message:"1"},innerNullable:{message:"success"}}) }`,
+				&resp,
+			)
 
 			require.NoError(t, err)
 			require.Equal(t, "Ok", *resp.DirectiveInputNullable)
@@ -472,7 +511,11 @@ func TestDirectives(t *testing.T) {
 
 				err := c.WebsocketOnce(`subscription { directiveArg(arg: "") }`, &resp)
 
-				require.EqualError(t, err, `[{"message":"invalid length","path":["directiveArg","arg"]}]`)
+				require.EqualError(
+					t,
+					err,
+					`[{"message":"invalid length","path":["directiveArg","arg"]}]`,
+				)
 				require.Nil(t, resp.DirectiveArg)
 			})
 			t.Run("when function errors on nullable arg directives", func(t *testing.T) {
@@ -482,7 +525,11 @@ func TestDirectives(t *testing.T) {
 
 				err := c.WebsocketOnce(`subscription { directiveNullableArg(arg: -100) }`, &resp)
 
-				require.EqualError(t, err, `[{"message":"too small","path":["directiveNullableArg","arg"]}]`)
+				require.EqualError(
+					t,
+					err,
+					`[{"message":"too small","path":["directiveNullableArg","arg"]}]`,
+				)
 				require.Nil(t, resp.DirectiveNullableArg)
 			})
 			t.Run("when function success on nullable arg directives", func(t *testing.T) {

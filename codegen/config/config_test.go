@@ -36,7 +36,11 @@ func TestReadConfig(t *testing.T) {
 		_, err = ReadConfig(cfgFile)
 
 		actualErr := strings.ReplaceAll(err.Error(), "\r\n", "\n")
-		require.Equal(t, "unable to parse config: [1:1] string was used where mapping is expected\n>  1 | asdf\n       ^\n", actualErr)
+		require.Equal(
+			t,
+			"unable to parse config: [1:1] string was used where mapping is expected\n>  1 | asdf\n       ^\n",
+			actualErr,
+		)
 	})
 
 	t.Run("unknown keys", func(t *testing.T) {
@@ -46,7 +50,11 @@ func TestReadConfig(t *testing.T) {
 		_, err = ReadConfig(cfgFile)
 
 		actualErr := strings.ReplaceAll(err.Error(), "\r\n", "\n")
-		require.Equal(t, "unable to parse config: [2:1] unknown field \"unknown\"\n   1 | schema: outer\n>  2 | unknown: foo\n       ^\n", actualErr)
+		require.Equal(
+			t,
+			"unable to parse config: [2:1] unknown field \"unknown\"\n   1 | schema: outer\n>  2 | unknown: foo\n       ^\n",
+			actualErr,
+		)
 	})
 
 	t.Run("globbed filenames", func(t *testing.T) {
@@ -75,7 +83,11 @@ func TestReadConfig(t *testing.T) {
 			require.ErrorContains(t, err, "failed to walk schema at root not_walkable/: ")
 			// Go 1.24 and below report "CreateFile" but 1.25 and above report "GetFileAttributesEx" in error
 			// See https://go.dev/doc/go1.25#ospkgos
-			require.ErrorContains(t, err, " not_walkable/: The system cannot find the file specified.")
+			require.ErrorContains(
+				t,
+				err,
+				" not_walkable/: The system cannot find the file specified.",
+			)
 		} else {
 			require.EqualError(t, err, "failed to walk schema at root not_walkable/: lstat not_walkable/: no such file or directory")
 		}
@@ -162,38 +174,74 @@ func TestConfigCheck(t *testing.T) {
 		t.Run(string(execLayout), func(t *testing.T) {
 			t.Run("invalid config format due to conflicting package names", func(t *testing.T) {
 				config := Config{
-					Exec:  ExecConfig{Layout: execLayout, Filename: "generated/exec.go", DirName: "generated", Package: "graphql"},
+					Exec: ExecConfig{
+						Layout:   execLayout,
+						Filename: "generated/exec.go",
+						DirName:  "generated",
+						Package:  "graphql",
+					},
 					Model: PackageConfig{Filename: "generated/models.go"},
 				}
 
-				require.EqualError(t, config.check(), "exec and model define the same import path (github.com/99designs/gqlgen/codegen/config/generated) with different package names (graphql vs generated)")
+				require.EqualError(
+					t,
+					config.check(),
+					"exec and model define the same import path (github.com/99designs/gqlgen/codegen/config/generated) with different package names (graphql vs generated)",
+				)
 			})
 
 			t.Run("federation must be in exec package", func(t *testing.T) {
 				config := Config{
-					Exec:       ExecConfig{Layout: execLayout, Filename: "generated/exec.go", DirName: "generated"},
+					Exec: ExecConfig{
+						Layout:   execLayout,
+						Filename: "generated/exec.go",
+						DirName:  "generated",
+					},
 					Federation: PackageConfig{Filename: "anotherpkg/federation.go"},
 				}
 
-				require.EqualError(t, config.check(), "federation and exec must be in the same package")
+				require.EqualError(
+					t,
+					config.check(),
+					"federation and exec must be in the same package",
+				)
 			})
 
 			t.Run("federation must have same package name as exec", func(t *testing.T) {
 				config := Config{
-					Exec:       ExecConfig{Layout: execLayout, Filename: "generated/exec.go", DirName: "generated"},
-					Federation: PackageConfig{Filename: "generated/federation.go", Package: "federation"},
+					Exec: ExecConfig{
+						Layout:   execLayout,
+						Filename: "generated/exec.go",
+						DirName:  "generated",
+					},
+					Federation: PackageConfig{
+						Filename: "generated/federation.go",
+						Package:  "federation",
+					},
 				}
 
-				require.EqualError(t, config.check(), "exec and federation define the same import path (github.com/99designs/gqlgen/codegen/config/generated) with different package names (generated vs federation)")
+				require.EqualError(
+					t,
+					config.check(),
+					"exec and federation define the same import path (github.com/99designs/gqlgen/codegen/config/generated) with different package names (generated vs federation)",
+				)
 			})
 
 			t.Run("deprecated federated flag raises an error", func(t *testing.T) {
 				config := Config{
-					Exec:      ExecConfig{Layout: execLayout, Filename: "generated/exec.go", DirName: "generated"},
+					Exec: ExecConfig{
+						Layout:   execLayout,
+						Filename: "generated/exec.go",
+						DirName:  "generated",
+					},
 					Federated: true,
 				}
 
-				require.EqualError(t, config.check(), "federated has been removed, instead use\nfederation:\n    filename: path/to/federated.go")
+				require.EqualError(
+					t,
+					config.check(),
+					"federated has been removed, instead use\nfederation:\n    filename: path/to/federated.go",
+				)
 			})
 		})
 	}
@@ -217,8 +265,16 @@ func TestAutobinding(t *testing.T) {
 
 		require.NoError(t, cfg.autobind())
 
-		require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata/autobinding/scalars/model.Banned", cfg.Models["Banned"].Model[0])
-		require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat.Message", cfg.Models["Message"].Model[0])
+		require.Equal(
+			t,
+			"github.com/99designs/gqlgen/codegen/config/testdata/autobinding/scalars/model.Banned",
+			cfg.Models["Banned"].Model[0],
+		)
+		require.Equal(
+			t,
+			"github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat.Message",
+			cfg.Models["Message"].Model[0],
+		)
 	})
 
 	t.Run("normalized type names", func(t *testing.T) {
@@ -240,10 +296,26 @@ func TestAutobinding(t *testing.T) {
 
 		require.NoError(t, cfg.autobind())
 
-		require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata/autobinding/scalars/model.Banned", cfg.Models["Banned"].Model[0])
-		require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat.Message", cfg.Models["Message"].Model[0])
-		require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat.ProductSku", cfg.Models["ProductSKU"].Model[0])
-		require.Equal(t, "github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat.ChatAPI", cfg.Models["ChatAPI"].Model[0])
+		require.Equal(
+			t,
+			"github.com/99designs/gqlgen/codegen/config/testdata/autobinding/scalars/model.Banned",
+			cfg.Models["Banned"].Model[0],
+		)
+		require.Equal(
+			t,
+			"github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat.Message",
+			cfg.Models["Message"].Model[0],
+		)
+		require.Equal(
+			t,
+			"github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat.ProductSku",
+			cfg.Models["ProductSKU"].Model[0],
+		)
+		require.Equal(
+			t,
+			"github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat.ChatAPI",
+			cfg.Models["ChatAPI"].Model[0],
+		)
 	})
 
 	t.Run("with file path", func(t *testing.T) {
@@ -260,7 +332,11 @@ func TestAutobinding(t *testing.T) {
 			type Message { id: ID }
 		`})
 
-		require.EqualError(t, cfg.autobind(), "unable to load ../chat - make sure you're using an import path to a package that exists")
+		require.EqualError(
+			t,
+			cfg.autobind(),
+			"unable to load ../chat - make sure you're using an import path to a package that exists",
+		)
 	})
 }
 

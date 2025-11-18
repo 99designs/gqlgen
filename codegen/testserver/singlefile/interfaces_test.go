@@ -6,12 +6,12 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
 
 func TestInterfaces(t *testing.T) {
@@ -177,7 +177,11 @@ func TestInterfaces(t *testing.T) {
 			}
 		}
 		err := c.Post(`{ notAnInterface { id, thisShouldBind, thisShouldBindWithError } }`, &resp)
-		require.EqualError(t, err, `[{"message":"boom","path":["notAnInterface","thisShouldBindWithError"]}]`)
+		require.EqualError(
+			t,
+			err,
+			`[{"message":"boom","path":["notAnInterface","thisShouldBindWithError"]}]`,
+		)
 	})
 
 	t.Run("interfaces can implement other interfaces", func(t *testing.T) {

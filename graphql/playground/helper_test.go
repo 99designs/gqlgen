@@ -40,7 +40,12 @@ func testResourceIntegrity(t *testing.T, handler func(title, endpoint string) ht
 	assertNodesIntegrity(t, baseUrl, doc, "link", "href", "integrity")
 }
 
-func assertNodesIntegrity(t *testing.T, baseUrl string, doc *goquery.Document, selector, urlAttrKey, integrityAttrKey string) {
+func assertNodesIntegrity(
+	t *testing.T,
+	baseUrl string,
+	doc *goquery.Document,
+	selector, urlAttrKey, integrityAttrKey string,
+) {
 	selection := doc.Find(selector)
 	for _, node := range selection.Nodes {
 		var url string

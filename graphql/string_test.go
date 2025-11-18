@@ -16,7 +16,11 @@ func TestString(t *testing.T) {
 		assert.Equal(t, `"he\nllo"`, m2s(MarshalString("he\nllo")))
 		assert.Equal(t, `"he\r\nllo"`, m2s(MarshalString("he\r\nllo")))
 		assert.Equal(t, `"he\\llo"`, m2s(MarshalString(`he\llo`)))
-		assert.Equal(t, `"quotes\"nested\"in\"quotes\""`, m2s(MarshalString(`quotes"nested"in"quotes"`)))
+		assert.Equal(
+			t,
+			`"quotes\"nested\"in\"quotes\""`,
+			m2s(MarshalString(`quotes"nested"in"quotes"`)),
+		)
 		assert.Equal(t, `"\u0000"`, m2s(MarshalString("\u0000")))
 		assert.Equal(t, `"\u0000"`, m2s(MarshalString("\u0000")))
 		assert.Equal(t, "\"\U000fe4ed\"", m2s(MarshalString("\U000fe4ed")))

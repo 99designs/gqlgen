@@ -5,10 +5,11 @@ import (
 	"math"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/stretchr/testify/require"
 )
 
 func TestFloatInfAndNaN(t *testing.T) {

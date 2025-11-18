@@ -58,7 +58,10 @@ func (c *ComplexityLimit) Validate(schema graphql.ExecutableSchema) error {
 	return nil
 }
 
-func (c ComplexityLimit) MutateOperationContext(ctx context.Context, opCtx *graphql.OperationContext) *gqlerror.Error {
+func (c ComplexityLimit) MutateOperationContext(
+	ctx context.Context,
+	opCtx *graphql.OperationContext,
+) *gqlerror.Error {
 	op := opCtx.Doc.Operations.ForName(opCtx.OperationName)
 	complexityCalcs := complexity.Calculate(ctx, c.es, op, opCtx.Variables)
 
@@ -70,7 +73,11 @@ func (c ComplexityLimit) MutateOperationContext(ctx context.Context, opCtx *grap
 	})
 
 	if complexityCalcs > limit {
-		err := gqlerror.Errorf("operation has complexity %d, which exceeds the limit of %d", complexityCalcs, limit)
+		err := gqlerror.Errorf(
+			"operation has complexity %d, which exceeds the limit of %d",
+			complexityCalcs,
+			limit,
+		)
 		errcode.Set(err, errComplexityLimit)
 		return err
 	}

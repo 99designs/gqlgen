@@ -46,7 +46,10 @@ func New(raw string, prefix []string) Set {
 }
 
 // FieldDefinition looks up a field in the type.
-func (f Field) FieldDefinition(schemaType *ast.Definition, schema *ast.Schema) *ast.FieldDefinition {
+func (f Field) FieldDefinition(
+	schemaType *ast.Definition,
+	schema *ast.Schema,
+) *ast.FieldDefinition {
 	objType := schemaType
 	def := objType.Fields.ForName(f[0])
 
@@ -153,7 +156,10 @@ func parseUnnestedKeyFieldSet(raw string, prefix []string) Set {
 			unionField = false
 		}
 
-		next := append(prefix[0:len(prefix):len(prefix)], s) //nolint:gocritic // set cap=len in order to force slice reallocation
+		next := append(
+			prefix[0:len(prefix):len(prefix)],
+			s,
+		) //nolint:gocritic // set cap=len in order to force slice reallocation
 		ret = append(ret, next)
 	}
 	return ret
@@ -167,7 +173,13 @@ func extractSubs(str string) (string, string, string) {
 	if start < 0 || end < 0 {
 		panic("invalid key fieldSet: " + str)
 	}
-	return trimArgumentFromFieldName(strings.TrimSpace(str[:start])), strings.TrimSpace(str[start+1 : end]), strings.TrimSpace(str[end+1:])
+	return trimArgumentFromFieldName(
+			strings.TrimSpace(str[:start]),
+		), strings.TrimSpace(
+			str[start+1 : end],
+		), strings.TrimSpace(
+			str[end+1:],
+		)
 }
 
 // matchingBracketIndex returns the index of the closing bracket, assuming an open bracket at start.

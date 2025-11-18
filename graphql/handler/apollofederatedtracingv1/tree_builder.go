@@ -7,12 +7,12 @@ import (
 	"sync"
 	"time"
 
+	"github.com/vektah/gqlparser/v2/gqlerror"
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler/apollofederatedtracingv1/generated"
 	tracing_logger "github.com/99designs/gqlgen/graphql/handler/apollofederatedtracingv1/logger"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 type TreeBuilder struct {

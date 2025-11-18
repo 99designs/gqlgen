@@ -12,13 +12,22 @@ import (
 type ExecutableSchema interface {
 	Schema() *ast.Schema
 
-	Complexity(ctx context.Context, typeName, fieldName string, childComplexity int, args map[string]any) (int, bool)
+	Complexity(
+		ctx context.Context,
+		typeName, fieldName string,
+		childComplexity int,
+		args map[string]any,
+	) (int, bool)
 	Exec(ctx context.Context) ResponseHandler
 }
 
 // CollectFields returns the set of fields from an ast.SelectionSet where all collected fields satisfy at least one of the GraphQL types
 // passed through satisfies. Providing an empty slice for satisfies will collect all fields regardless of fragment type conditions.
-func CollectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies []string) []CollectedField {
+func CollectFields(
+	reqCtx *OperationContext,
+	selSet ast.SelectionSet,
+	satisfies []string,
+) []CollectedField {
 	cacheKey := makeCollectFieldsCacheKey(selSet, satisfies)
 
 	if cached, ok := reqCtx.collectFieldsCache.Get(cacheKey); ok {
@@ -30,7 +39,12 @@ func CollectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies 
 	return reqCtx.collectFieldsCache.Add(cacheKey, result)
 }
 
-func collectFields(reqCtx *OperationContext, selSet ast.SelectionSet, satisfies []string, visited map[string]bool) []CollectedField {
+func collectFields(
+	reqCtx *OperationContext,
+	selSet ast.SelectionSet,
+	satisfies []string,
+	visited map[string]bool,
+) []CollectedField {
 	groupedFields := make([]CollectedField, 0, len(selSet))
 
 	for _, sel := range selSet {
@@ -135,7 +149,12 @@ func doesFragmentConditionMatch(typeCondition string, satisfies []string) bool {
 	return false
 }
 
-func getOrCreateAndAppendField(c *[]CollectedField, name, alias string, objectDefinition *ast.Definition, creator func() CollectedField) *CollectedField {
+func getOrCreateAndAppendField(
+	c *[]CollectedField,
+	name, alias string,
+	objectDefinition *ast.Definition,
+	creator func() CollectedField,
+) *CollectedField {
 	for i, cf := range *c {
 		if cf.Name == name && cf.Alias == alias {
 			if cf.ObjectDefinition == objectDefinition {
@@ -187,7 +206,10 @@ func shouldIncludeNode(directives ast.DirectiveList, variables map[string]any) b
 	return !skip && include
 }
 
-func deferrable(directives ast.DirectiveList, variables map[string]any) (shouldDefer bool, label string) {
+func deferrable(
+	directives ast.DirectiveList,
+	variables map[string]any,
+) (shouldDefer bool, label string) {
 	d := directives.ForName("defer")
 	if d == nil {
 		return false, ""

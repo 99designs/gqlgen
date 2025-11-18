@@ -542,7 +542,9 @@ func wordWalker(str string, f func(*wordInfo)) {
 			// do NOT count this as an initialism.
 			switch upperWord {
 			case "ID", "IP":
-				if remainingRunes := runes[w:]; word == string(remainingRunes[:2]) && !eow && len(remainingRunes) > 3 && unicode.IsUpper(remainingRunes[3]) {
+				if remainingRunes := runes[w:]; word == string(remainingRunes[:2]) && !eow &&
+					len(remainingRunes) > 3 &&
+					unicode.IsUpper(remainingRunes[3]) {
 					continue
 				}
 			}

@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
-	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/introspection"
 )
@@ -24,7 +24,11 @@ func TestIntrospection(t *testing.T) {
 
 		var resp any
 		err := c.Post(introspection.Query, &resp)
-		require.EqualError(t, err, "[{\"message\":\"introspection disabled\",\"path\":[\"__schema\"]}]")
+		require.EqualError(
+			t,
+			err,
+			"[{\"message\":\"introspection disabled\",\"path\":[\"__schema\"]}]",
+		)
 	})
 
 	t.Run("enabled by adding extension", func(t *testing.T) {
@@ -71,14 +75,20 @@ func TestIntrospection(t *testing.T) {
 		srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
 		srv.AddTransport(transport.POST{})
 		srv.Use(extension.Introspection{})
-		srv.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
-			graphql.GetOperationContext(ctx).DisableIntrospection = true
-			return next(ctx)
-		})
+		srv.AroundOperations(
+			func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+				graphql.GetOperationContext(ctx).DisableIntrospection = true
+				return next(ctx)
+			},
+		)
 		c := client.New(srv)
 
 		var resp any
 		err := c.Post(introspection.Query, &resp)
-		require.EqualError(t, err, "[{\"message\":\"introspection disabled\",\"path\":[\"__schema\"]}]")
+		require.EqualError(
+			t,
+			err,
+			"[{\"message\":\"introspection disabled\",\"path\":[\"__schema\"]}]",
+		)
 	})
 }

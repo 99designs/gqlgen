@@ -7,8 +7,10 @@ import (
 	"net/http"
 )
 
-const apolloSandboxMainJs = "https://embeddable-sandbox.cdn.apollographql.com/02e2da0fccbe0240ef03d2396d6c98559bab5b06/embeddable-sandbox.umd.production.min.js"
-const apolloSandboxMainSri = "sha256-asj/scPAF8jmMGj1J+YwCHps3uI57AZ78cHs0bJkML4="
+const (
+	apolloSandboxMainJs  = "https://embeddable-sandbox.cdn.apollographql.com/02e2da0fccbe0240ef03d2396d6c98559bab5b06/embeddable-sandbox.umd.production.min.js"
+	apolloSandboxMainSri = "sha256-asj/scPAF8jmMGj1J+YwCHps3uI57AZ78cHs0bJkML4="
+)
 
 // NOTE: New version available at https://embeddable-sandbox.cdn.apollographql.com/ -->
 var apolloSandboxPage = template.Must(template.New("ApolloSandbox").Parse(`<!doctype html>
@@ -173,7 +175,9 @@ func WithApolloSandboxInitialStateHeaders(headers map[string]any) ApolloSandboxO
 // WithApolloSandboxInitialStateCollectionIdAndOperationId The ID of a collection, paired with an operation ID to populate in the Sandbox on load.
 //
 // You can find these values from a registered graph in Studio by clicking the ... menu next to an operation in the Explorer of that graph and selecting View operation details.
-func WithApolloSandboxInitialStateCollectionIdAndOperationId(collectionId, operationId string) ApolloSandboxOption {
+func WithApolloSandboxInitialStateCollectionIdAndOperationId(
+	collectionId, operationId string,
+) ApolloSandboxOption {
 	return func(options *apolloSandboxHandlerOptions) {
 		options.ApolloSandboxOption.InitialState.CollectionId = collectionId
 		options.ApolloSandboxOption.InitialState.OperationId = operationId
@@ -183,7 +187,9 @@ func WithApolloSandboxInitialStateCollectionIdAndOperationId(collectionId, opera
 // WithApolloSandboxInitialStatePollForSchemaUpdates If true, the embedded Sandbox periodically polls your initialEndpoint for schema updates.
 //
 // The default value is false.
-func WithApolloSandboxInitialStatePollForSchemaUpdates(pollForSchemaUpdates bool) ApolloSandboxOption {
+func WithApolloSandboxInitialStatePollForSchemaUpdates(
+	pollForSchemaUpdates bool,
+) ApolloSandboxOption {
 	return func(options *apolloSandboxHandlerOptions) {
 		options.ApolloSandboxOption.InitialState.PollForSchemaUpdates = pollForSchemaUpdates
 	}

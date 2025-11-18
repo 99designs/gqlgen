@@ -5,10 +5,11 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/stretchr/testify/require"
 )
 
 func TestNullBubbling(t *testing.T) {
@@ -46,7 +47,11 @@ func TestNullBubbling(t *testing.T) {
 		}
 		err := c.Post(`query { valid, errorBubble { id, errorOnNonRequiredField } }`, &resp)
 
-		require.EqualError(t, err, `[{"message":"boom","path":["errorBubble","errorOnNonRequiredField"]}]`)
+		require.EqualError(
+			t,
+			err,
+			`[{"message":"boom","path":["errorBubble","errorOnNonRequiredField"]}]`,
+		)
 		require.Equal(t, "E1234", resp.ErrorBubble.Id)
 		require.Nil(t, resp.ErrorBubble.ErrorOnNonRequiredField)
 		require.Equal(t, "Ok", resp.Valid)
@@ -61,7 +66,11 @@ func TestNullBubbling(t *testing.T) {
 		}
 		err := c.Post(`query { valid, errorBubble { id, errorOnRequiredField } }`, &resp)
 
-		require.EqualError(t, err, `[{"message":"boom","path":["errorBubble","errorOnRequiredField"]}]`)
+		require.EqualError(
+			t,
+			err,
+			`[{"message":"boom","path":["errorBubble","errorOnRequiredField"]}]`,
+		)
 		require.Nil(t, resp.ErrorBubble)
 		require.Equal(t, "Ok", resp.Valid)
 	})
@@ -75,7 +84,11 @@ func TestNullBubbling(t *testing.T) {
 		}
 		err := c.Post(`query { valid, errorBubble { id, nilOnRequiredField } }`, &resp)
 
-		require.EqualError(t, err, `[{"message":"the requested element is null which the schema does not allow","path":["errorBubble","nilOnRequiredField"]}]`)
+		require.EqualError(
+			t,
+			err,
+			`[{"message":"the requested element is null which the schema does not allow","path":["errorBubble","nilOnRequiredField"]}]`,
+		)
 		require.Nil(t, resp.ErrorBubble)
 		require.Equal(t, "Ok", resp.Valid)
 	})
@@ -100,8 +113,16 @@ func TestNullBubbling(t *testing.T) {
 		}
 		err := c.Post(`query { valid, errorBubbleList { id } }`, &resp)
 
-		require.Contains(t, err.Error(), `{"message":"the requested element is null which the schema does not allow","path":["errorBubbleList",2]}`)
-		require.Contains(t, err.Error(), `{"message":"the requested element is null which the schema does not allow","path":["errorBubbleList",1]}`)
+		require.Contains(
+			t,
+			err.Error(),
+			`{"message":"the requested element is null which the schema does not allow","path":["errorBubbleList",2]}`,
+		)
+		require.Contains(
+			t,
+			err.Error(),
+			`{"message":"the requested element is null which the schema does not allow","path":["errorBubbleList",1]}`,
+		)
 		require.Nil(t, resp.ErrorBubbleList)
 		require.Equal(t, "Ok", resp.Valid)
 	})
@@ -137,7 +158,11 @@ func TestNullBubbling(t *testing.T) {
 		} }`, &resp)
 
 		require.Error(t, err)
-		require.Contains(t, err.Error(), "the requested element is null which the schema does not allow")
+		require.Contains(
+			t,
+			err.Error(),
+			"the requested element is null which the schema does not allow",
+		)
 	})
 
 	t.Run("when non-nullable field returns content while error occurred", func(t *testing.T) {

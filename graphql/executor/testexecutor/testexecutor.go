@@ -80,17 +80,19 @@ func New() *TestExecutor {
 							},
 						},
 					})
-					data := graphql.GetOperationContext(ctx).RootResolverMiddleware(ctx, func(ctx context.Context) graphql.Marshaler {
-						res, err := graphql.GetOperationContext(ctx).ResolverMiddleware(ctx, func(ctx context.Context) (any, error) {
-							// return &graphql.Response{Data: []byte(`{"name":"test"}`)}, nil
-							return &MockResponse{Name: "test"}, nil
-						})
-						if err != nil {
-							panic(err)
-						}
+					data := graphql.GetOperationContext(ctx).
+						RootResolverMiddleware(ctx, func(ctx context.Context) graphql.Marshaler {
+							res, err := graphql.GetOperationContext(ctx).
+								ResolverMiddleware(ctx, func(ctx context.Context) (any, error) {
+									// return &graphql.Response{Data: []byte(`{"name":"test"}`)}, nil
+									return &MockResponse{Name: "test"}, nil
+								})
+							if err != nil {
+								panic(err)
+							}
 
-						return res.(*MockResponse)
-					})
+							return res.(*MockResponse)
+						})
 
 					var buf bytes.Buffer
 					data.MarshalGQL(&buf)

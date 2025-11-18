@@ -62,14 +62,22 @@ func TestResolverConfig(t *testing.T) {
 			p := ResolverConfig{Filename: "wololo.sql"}
 			require.True(t, p.IsDefined())
 
-			require.EqualError(t, p.Check(), "filename should be path to a go source file with layout=single-file")
+			require.EqualError(
+				t,
+				p.Check(),
+				"filename should be path to a go source file with layout=single-file",
+			)
 		})
 
 		t.Run("when package includes a filename", func(t *testing.T) {
 			p := ResolverConfig{Filename: "foo.go", Package: "foo/foo.go"}
 			require.True(t, p.IsDefined())
 
-			require.EqualError(t, p.Check(), "package should be the output package name only, do not include the output filename")
+			require.EqualError(
+				t,
+				p.Check(),
+				"package should be the output package name only, do not include the output filename",
+			)
 		})
 	})
 
@@ -109,7 +117,11 @@ func TestResolverConfig(t *testing.T) {
 		})
 
 		t.Run("when given a filename", func(t *testing.T) {
-			p := ResolverConfig{Layout: LayoutFollowSchema, DirName: "testdata", Filename: "testdata/asdf.go"}
+			p := ResolverConfig{
+				Layout:   LayoutFollowSchema,
+				DirName:  "testdata",
+				Filename: "testdata/asdf.go",
+			}
 			require.True(t, p.IsDefined())
 
 			require.NoError(t, p.Check())
@@ -145,6 +157,10 @@ func TestResolverConfig(t *testing.T) {
 		p := ResolverConfig{Layout: "pies", Filename: "asdf.go"}
 		require.True(t, p.IsDefined())
 
-		require.EqualError(t, p.Check(), "invalid layout pies. must be single-file or follow-schema")
+		require.EqualError(
+			t,
+			p.Check(),
+			"invalid layout pies. must be single-file or follow-schema",
+		)
 	})
 }

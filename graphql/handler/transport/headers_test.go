@@ -107,7 +107,14 @@ func TestHeadersWithFormUrlEncoded(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.UrlEncodedForm{})
 
-		resp := doRequest(h, "POST", "/graphql", `{ name }`, "", "application/x-www-form-urlencoded")
+		resp := doRequest(
+			h,
+			"POST",
+			"/graphql",
+			`{ name }`,
+			"",
+			"application/x-www-form-urlencoded",
+		)
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Len(t, resp.Header(), 1)
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
@@ -122,7 +129,14 @@ func TestHeadersWithFormUrlEncoded(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.UrlEncodedForm{ResponseHeaders: headers})
 
-		resp := doRequest(h, "POST", "/graphql", `{ name }`, "", "application/x-www-form-urlencoded")
+		resp := doRequest(
+			h,
+			"POST",
+			"/graphql",
+			`{ name }`,
+			"",
+			"application/x-www-form-urlencoded",
+		)
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Len(t, resp.Header(), 2)
 		assert.Equal(t, "application/json; charset: utf8", resp.Header().Get("Content-Type"))

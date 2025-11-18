@@ -89,7 +89,11 @@ func (b *builder) buildInterface(typ *ast.Definition) (*Interface, error) {
 		}
 
 		if !anyValid {
-			return nil, fmt.Errorf("%s does not satisfy the interface %s", implementorType.String(), i.Type.String())
+			return nil, fmt.Errorf(
+				"%s does not satisfy the interface %s",
+				implementorType.String(),
+				i.Type.String(),
+			)
 		}
 	}
 

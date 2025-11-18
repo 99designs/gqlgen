@@ -140,7 +140,10 @@ func (r aroundOpFunc) Validate(schema graphql.ExecutableSchema) error {
 	return nil
 }
 
-func (r aroundOpFunc) InterceptOperation(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+func (r aroundOpFunc) InterceptOperation(
+	ctx context.Context,
+	next graphql.OperationHandler,
+) graphql.ResponseHandler {
 	return r(ctx, next)
 }
 
@@ -157,7 +160,10 @@ func (r aroundRespFunc) Validate(schema graphql.ExecutableSchema) error {
 	return nil
 }
 
-func (r aroundRespFunc) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+func (r aroundRespFunc) InterceptResponse(
+	ctx context.Context,
+	next graphql.ResponseHandler,
+) *graphql.Response {
 	return r(ctx, next)
 }
 
@@ -174,7 +180,10 @@ func (f aroundFieldFunc) Validate(schema graphql.ExecutableSchema) error {
 	return nil
 }
 
-func (f aroundFieldFunc) InterceptField(ctx context.Context, next graphql.Resolver) (res any, err error) {
+func (f aroundFieldFunc) InterceptField(
+	ctx context.Context,
+	next graphql.Resolver,
+) (res any, err error) {
 	return f(ctx, next)
 }
 
@@ -191,6 +200,9 @@ func (f aroundRootFieldFunc) Validate(schema graphql.ExecutableSchema) error {
 	return nil
 }
 
-func (f aroundRootFieldFunc) InterceptRootField(ctx context.Context, next graphql.RootResolver) graphql.Marshaler {
+func (f aroundRootFieldFunc) InterceptRootField(
+	ctx context.Context,
+	next graphql.RootResolver,
+) graphql.Marshaler {
 	return f(ctx, next)
 }

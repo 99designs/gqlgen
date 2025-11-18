@@ -29,8 +29,15 @@ func TestImports(t *testing.T) {
 	t.Run("lookup by type", func(t *testing.T) {
 		a := Imports{destDir: wd, packages: code.NewPackages()}
 
-		pkg := types.NewPackage("github.com/99designs/gqlgen/codegen/templates/testdata/b/bar", "bar")
-		typ := types.NewNamed(types.NewTypeName(0, pkg, "Boolean", types.Typ[types.Bool]), types.Typ[types.Bool], nil)
+		pkg := types.NewPackage(
+			"github.com/99designs/gqlgen/codegen/templates/testdata/b/bar",
+			"bar",
+		)
+		typ := types.NewNamed(
+			types.NewTypeName(0, pkg, "Boolean", types.Typ[types.Bool]),
+			types.Typ[types.Bool],
+			nil,
+		)
 
 		require.Equal(t, "bar.Boolean", a.LookupType(typ))
 	})

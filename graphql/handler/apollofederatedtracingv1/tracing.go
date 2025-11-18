@@ -5,11 +5,11 @@ import (
 	"encoding/base64"
 	"fmt"
 
+	"github.com/vektah/gqlparser/v2/gqlerror"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/99designs/gqlgen/graphql"
 	tracing_logger "github.com/99designs/gqlgen/graphql/handler/apollofederatedtracingv1/logger"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 const (
@@ -80,7 +80,10 @@ func (t *Tracer) getTreeBuilder(ctx context.Context) *TreeBuilder {
 }
 
 // InterceptOperation acts on each Graph operation; on each operation, start a tree builder and start the tree's timer for tracing
-func (t *Tracer) InterceptOperation(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+func (t *Tracer) InterceptOperation(
+	ctx context.Context,
+	next graphql.OperationHandler,
+) graphql.ResponseHandler {
 	if !t.shouldTrace(ctx) {
 		return next(ctx)
 	}
@@ -106,7 +109,10 @@ func (t *Tracer) InterceptField(ctx context.Context, next graphql.Resolver) (any
 
 // InterceptResponse is called before the overall response is sent, but before each field resolves; as a result
 // the final marshaling is deferred to happen at the end of the operation
-func (t *Tracer) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+func (t *Tracer) InterceptResponse(
+	ctx context.Context,
+	next graphql.ResponseHandler,
+) *graphql.Response {
 	if !t.shouldTrace(ctx) {
 		return next(ctx)
 	}

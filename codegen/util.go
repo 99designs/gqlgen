@@ -14,7 +14,11 @@ func findGoNamedType(def types.Type) (*types.Named, error) {
 	namedType, ok := def.(*types.Named)
 	//nolint:staticcheck // yes, it is bad to end in newline here
 	if !ok {
-		return nil, fmt.Errorf("expected %s to be a named type, instead found %T\n", def.String(), def)
+		return nil, fmt.Errorf(
+			"expected %s to be a named type, instead found %T\n",
+			def.String(),
+			def,
+		)
 	}
 
 	return namedType, nil
@@ -34,7 +38,11 @@ func findGoInterface(def types.Type) (*types.Interface, error) {
 
 	underlying, ok := namedType.Underlying().(*types.Interface)
 	if !ok {
-		return nil, fmt.Errorf("expected %s to be a named interface, instead found %s", def.String(), namedType.String())
+		return nil, fmt.Errorf(
+			"expected %s to be a named interface, instead found %s",
+			def.String(),
+			namedType.String(),
+		)
 	}
 
 	return underlying, nil

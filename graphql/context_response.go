@@ -29,7 +29,11 @@ func getResponseContext(ctx context.Context) *responseContext {
 	return val
 }
 
-func WithResponseContext(ctx context.Context, presenterFunc ErrorPresenterFunc, recoverFunc RecoverFunc) context.Context {
+func WithResponseContext(
+	ctx context.Context,
+	presenterFunc ErrorPresenterFunc,
+	recoverFunc RecoverFunc,
+) context.Context {
 	return context.WithValue(ctx, resultCtx, &responseContext{
 		errorPresenter: presenterFunc,
 		recover:        recoverFunc,

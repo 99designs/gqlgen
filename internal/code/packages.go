@@ -228,7 +228,6 @@ func (p *Packages) LoadAllNames(importPaths ...string) {
 			Mode:       packages.NeedName,
 			BuildFlags: p.buildFlags,
 		}, missing...)
-
 		if err != nil {
 			p.loadErrors = append(p.loadErrors, err)
 		}

@@ -69,7 +69,9 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 	for _, o := range data.Objects {
 		if o.HasResolvers() {
 			caser := cases.Title(language.English, cases.NoLower)
-			rewriter.MarkStructCopied(templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type))
+			rewriter.MarkStructCopied(
+				templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type),
+			)
 			rewriter.GetMethodBody(data.Config.Resolver.Type, caser.String(o.Name))
 
 			file.Objects = append(file.Objects, o)
@@ -81,10 +83,19 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 			}
 
 			structName := templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type)
-			comment := strings.TrimSpace(strings.TrimLeft(rewriter.GetMethodComment(structName, f.GoFieldName), `\`))
+			comment := strings.TrimSpace(
+				strings.TrimLeft(rewriter.GetMethodComment(structName, f.GoFieldName), `\`),
+			)
 			implementation := strings.TrimSpace(rewriter.GetMethodBody(structName, f.GoFieldName))
 			if implementation != "" {
-				resolver := Resolver{o, f, rewriter.GetPrevDecl(structName, f.GoFieldName), comment, implementation, nil}
+				resolver := Resolver{
+					o,
+					f,
+					rewriter.GetPrevDecl(structName, f.GoFieldName),
+					comment,
+					implementation,
+					nil,
+				}
 				file.Resolvers = append(file.Resolvers, &resolver)
 			} else {
 				resolver := Resolver{o, f, nil, "", `panic("not implemented")`, nil}
@@ -141,7 +152,11 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 
 	for _, o := range objects {
 		if o.HasResolvers() {
-			fnCase := gqlToResolverName(data.Config.Resolver.Dir(), o.Position.Src.Name, data.Config.Resolver.FilenameTemplate)
+			fnCase := gqlToResolverName(
+				data.Config.Resolver.Dir(),
+				o.Position.Src.Name,
+				data.Config.Resolver.FilenameTemplate,
+			)
 			fn := strings.ToLower(fnCase)
 			if files[fn] == nil {
 				files[fn] = &File{
@@ -150,7 +165,9 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 			}
 
 			caser := cases.Title(language.English, cases.NoLower)
-			rewriter.MarkStructCopied(templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type))
+			rewriter.MarkStructCopied(
+				templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type),
+			)
 			rewriter.GetMethodBody(data.Config.Resolver.Type, caser.String(o.Name))
 			files[fn].Objects = append(files[fn].Objects, o)
 		}
@@ -160,9 +177,18 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 			}
 			structName := templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type)
 			// TODO(steve): Why do we need to trimLeft "\" here? Some bazel thing?
-			comment := strings.TrimSpace(strings.TrimLeft(rewriter.GetMethodComment(structName, f.GoFieldName), `\`))
+			comment := strings.TrimSpace(
+				strings.TrimLeft(rewriter.GetMethodComment(structName, f.GoFieldName), `\`),
+			)
 			implementation := strings.TrimSpace(rewriter.GetMethodBody(structName, f.GoFieldName))
-			resolver := Resolver{o, f, rewriter.GetPrevDecl(structName, f.GoFieldName), comment, implementation, nil}
+			resolver := Resolver{
+				o,
+				f,
+				rewriter.GetPrevDecl(structName, f.GoFieldName),
+				comment,
+				implementation,
+				nil,
+			}
 			var implExists bool
 			for _, p := range data.Plugins {
 				rImpl, ok := p.(plugin.ResolverImplementer)
@@ -175,7 +201,11 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 				implExists = true
 				resolver.ImplementationRender = rImpl.Implement
 			}
-			fnCase := gqlToResolverName(data.Config.Resolver.Dir(), f.Position.Src.Name, data.Config.Resolver.FilenameTemplate)
+			fnCase := gqlToResolverName(
+				data.Config.Resolver.Dir(),
+				f.Position.Src.Name,
+				data.Config.Resolver.FilenameTemplate,
+			)
 			fn := strings.ToLower(fnCase)
 			if files[fn] == nil {
 				files[fn] = &File{
@@ -196,7 +226,8 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 			allImports = append(allImports, i.ImportPath)
 		}
 	}
-	data.Config.Packages.LoadAllNames(allImports...) // Preload all names in one Load call for performance reasons
+	data.Config.Packages.LoadAllNames(
+		allImports...) // Preload all names in one Load call for performance reasons
 
 	newResolverTemplate := resolverTemplate
 	if data.Config.Resolver.ResolverTemplate != "" {
@@ -307,7 +338,11 @@ func (r *Resolver) Implementation() string {
 	// if not implementation was previously used, use default implementation
 	if r.ImplementationStr == "" {
 		// use default implementation, if no implementation was previously used
-		return fmt.Sprintf("panic(fmt.Errorf(\"not implemented: %v - %v\"))", r.Field.GoFieldName, r.Field.Name)
+		return fmt.Sprintf(
+			"panic(fmt.Errorf(\"not implemented: %v - %v\"))",
+			r.Field.GoFieldName,
+			r.Field.Name,
+		)
 	}
 	// use previously used implementation
 	return r.ImplementationStr

@@ -16,13 +16,14 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/99designs/gqlgen/client"
 	gencompliant "github.com/99designs/gqlgen/codegen/testserver/compliant-int/generated-compliant-strict"
 	gendefault "github.com/99designs/gqlgen/codegen/testserver/compliant-int/generated-default"
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/stretchr/testify/require"
 )
 
 func TestCodegen(t *testing.T) {
@@ -141,8 +142,10 @@ func TestIntegration(t *testing.T) {
 			willError: false,
 		},
 		{
-			name:      "strict compliant generation does not allow int32 overflow inputs",
-			exec:      gencompliant.NewExecutableSchema(gencompliant.Config{Resolvers: strictCompliantStub}),
+			name: "strict compliant generation does not allow int32 overflow inputs",
+			exec: gencompliant.NewExecutableSchema(
+				gencompliant.Config{Resolvers: strictCompliantStub},
+			),
 			willError: true,
 		},
 	}
@@ -158,7 +161,11 @@ func TestIntegration(t *testing.T) {
 			}
 			err := c.Post(`query { echoIntToInt(n: 2147483648) }`, &resp)
 			if tc.willError {
-				require.EqualError(t, err, `[{"message":"2147483648 overflows signed 32-bit integer","path":["echoIntToInt","n"]}]`)
+				require.EqualError(
+					t,
+					err,
+					`[{"message":"2147483648 overflows signed 32-bit integer","path":["echoIntToInt","n"]}]`,
+				)
 				require.Equal(t, 0, resp.EchoIntToInt)
 				return
 			}

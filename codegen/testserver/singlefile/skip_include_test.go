@@ -4,10 +4,11 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestSkipInclude(t *testing.T) {
@@ -57,50 +58,74 @@ func TestSkipInclude(t *testing.T) {
 	t.Run("works on fragment spreads", func(t *testing.T) {
 		t.Run("if false omits fragment spread", func(t *testing.T) {
 			var r struct{ SkipInclude *SkipIncludeTestType }
-			c.MustPost(`query { skipInclude { a ...Frag @include(if: false) } } fragment Frag on SkipIncludeTestType { b }`, &r)
+			c.MustPost(
+				`query { skipInclude { a ...Frag @include(if: false) } } fragment Frag on SkipIncludeTestType { b }`,
+				&r,
+			)
 			assert.Equal(t, &SkipIncludeTestType{A: a}, r.SkipInclude)
 		})
 
 		t.Run("if true includes fragment spread", func(t *testing.T) {
 			var r struct{ SkipInclude *SkipIncludeTestType }
-			c.MustPost(`query { skipInclude { a ...Frag @include(if: true) } } fragment Frag on SkipIncludeTestType { b }`, &r)
+			c.MustPost(
+				`query { skipInclude { a ...Frag @include(if: true) } } fragment Frag on SkipIncludeTestType { b }`,
+				&r,
+			)
 			assert.Equal(t, &SkipIncludeTestType{a, b}, r.SkipInclude)
 		})
 
 		t.Run("unless false includes fragment spread", func(t *testing.T) {
 			var r struct{ SkipInclude *SkipIncludeTestType }
-			c.MustPost(`query { skipInclude { a ...Frag @skip(if: false) } } fragment Frag on SkipIncludeTestType { b }`, &r)
+			c.MustPost(
+				`query { skipInclude { a ...Frag @skip(if: false) } } fragment Frag on SkipIncludeTestType { b }`,
+				&r,
+			)
 			assert.Equal(t, &SkipIncludeTestType{a, b}, r.SkipInclude)
 		})
 
 		t.Run("unless true omits fragment spread", func(t *testing.T) {
 			var r struct{ SkipInclude *SkipIncludeTestType }
-			c.MustPost(`query { skipInclude { a ...Frag @skip(if: true) } } fragment Frag on SkipIncludeTestType { b }`, &r)
+			c.MustPost(
+				`query { skipInclude { a ...Frag @skip(if: true) } } fragment Frag on SkipIncludeTestType { b }`,
+				&r,
+			)
 			assert.Equal(t, &SkipIncludeTestType{A: a}, r.SkipInclude)
 		})
 	})
 	t.Run("works on inline fragment", func(t *testing.T) {
 		t.Run("if false omits inline fragment", func(t *testing.T) {
 			var r struct{ SkipInclude *SkipIncludeTestType }
-			c.MustPost(`query { skipInclude { a ... on SkipIncludeTestType @include(if: false) { b } } }`, &r)
+			c.MustPost(
+				`query { skipInclude { a ... on SkipIncludeTestType @include(if: false) { b } } }`,
+				&r,
+			)
 			assert.Equal(t, &SkipIncludeTestType{A: a}, r.SkipInclude)
 		})
 
 		t.Run("if true includes inline fragment", func(t *testing.T) {
 			var r struct{ SkipInclude *SkipIncludeTestType }
-			c.MustPost(`query { skipInclude { a ... on SkipIncludeTestType @include(if: true) { b } } }`, &r)
+			c.MustPost(
+				`query { skipInclude { a ... on SkipIncludeTestType @include(if: true) { b } } }`,
+				&r,
+			)
 			assert.Equal(t, &SkipIncludeTestType{a, b}, r.SkipInclude)
 		})
 
 		t.Run("unless false includes inline fragment", func(t *testing.T) {
 			var r struct{ SkipInclude *SkipIncludeTestType }
-			c.MustPost(`query { skipInclude { a ... on SkipIncludeTestType @skip(if: false) { b } } }`, &r)
+			c.MustPost(
+				`query { skipInclude { a ... on SkipIncludeTestType @skip(if: false) { b } } }`,
+				&r,
+			)
 			assert.Equal(t, &SkipIncludeTestType{a, b}, r.SkipInclude)
 		})
 
 		t.Run("unless true includes inline fragment", func(t *testing.T) {
 			var r struct{ SkipInclude *SkipIncludeTestType }
-			c.MustPost(`query { skipInclude { a ... on SkipIncludeTestType @skip(if: true) { b } } }`, &r)
+			c.MustPost(
+				`query { skipInclude { a ... on SkipIncludeTestType @skip(if: true) { b } } }`,
+				&r,
+			)
 			assert.Equal(t, &SkipIncludeTestType{A: a}, r.SkipInclude)
 		})
 	})

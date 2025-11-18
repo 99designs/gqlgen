@@ -11,7 +11,11 @@ const (
 	acceptApplicationGraphqlResponseJson = "application/graphql-response+json"
 )
 
-func determineResponseContentType(explicitHeaders map[string][]string, r *http.Request, useGrapQLResponseJsonByDefault bool) string {
+func determineResponseContentType(
+	explicitHeaders map[string][]string,
+	r *http.Request,
+	useGrapQLResponseJsonByDefault bool,
+) string {
 	for k, v := range explicitHeaders {
 		if strings.EqualFold(k, "Content-Type") {
 			return v[0]

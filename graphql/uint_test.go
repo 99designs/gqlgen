@@ -32,7 +32,11 @@ func TestUint(t *testing.T) {
 		}{
 			{"negative int", -1, "-1 is an invalid unsigned integer: includes sign"},
 			{"negative int64", int64(-1), "-1 is an invalid unsigned integer: includes sign"},
-			{"negative json.Number", json.Number("-1"), "-1 is an invalid unsigned integer: includes sign"},
+			{
+				"negative json.Number",
+				json.Number("-1"),
+				"-1 is an invalid unsigned integer: includes sign",
+			},
 			{"negative string", "-1", "-1 is an invalid unsigned integer: includes sign"},
 		}
 		for _, tc := range cases {
@@ -41,9 +45,21 @@ func TestUint(t *testing.T) {
 				var intErr *IntegerError
 
 				res, err := UnmarshalUint(tc.v)
-				assert.EqualError(t, err, tc.err)    //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &uintSignErr) //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &intErr)      //nolint:testifylint // An error assertion makes more sense.
+				assert.EqualError(
+					t,
+					err,
+					tc.err,
+				) //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(
+					t,
+					err,
+					&uintSignErr,
+				) //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(
+					t,
+					err,
+					&intErr,
+				) //nolint:testifylint // An error assertion makes more sense.
 				assert.Equal(t, uint(0), res)
 			})
 		}
@@ -65,7 +81,11 @@ func TestUint(t *testing.T) {
 				var intErr *IntegerError
 
 				res, err := UnmarshalUint(tc.v)
-				assert.EqualError(t, err, tc.err) //nolint:testifylint // An error assertion makes more sense.
+				assert.EqualError(
+					t,
+					err,
+					tc.err,
+				) //nolint:testifylint // An error assertion makes more sense.
 				assert.NotErrorAs(t, err, &uintSignErr)
 				assert.NotErrorAs(t, err, &intErr)
 				assert.Equal(t, uint(0), res)
@@ -105,7 +125,11 @@ func TestUint8(t *testing.T) {
 		}{
 			{"negative int", -1, "-1 is an invalid unsigned integer: includes sign"},
 			{"negative int64", int64(-1), "-1 is an invalid unsigned integer: includes sign"},
-			{"negative json.Number", json.Number("-1"), "-1 is an invalid unsigned integer: includes sign"},
+			{
+				"negative json.Number",
+				json.Number("-1"),
+				"-1 is an invalid unsigned integer: includes sign",
+			},
 			{"negative string", "-1", "-1 is an invalid unsigned integer: includes sign"},
 		}
 		for _, tc := range cases {
@@ -114,9 +138,21 @@ func TestUint8(t *testing.T) {
 				var intErr *IntegerError
 
 				res, err := UnmarshalUint8(tc.v)
-				assert.EqualError(t, err, tc.err)    //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &uintSignErr) //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &intErr)      //nolint:testifylint // An error assertion makes more sense.
+				assert.EqualError(
+					t,
+					err,
+					tc.err,
+				) //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(
+					t,
+					err,
+					&uintSignErr,
+				) //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(
+					t,
+					err,
+					&intErr,
+				) //nolint:testifylint // An error assertion makes more sense.
 				assert.Equal(t, uint8(0), res)
 			})
 		}
@@ -127,13 +163,21 @@ func TestUint8(t *testing.T) {
 		var intErr *IntegerError
 
 		res, err := UnmarshalUint8("-1.03")
-		assert.EqualError(t, err, "strconv.ParseUint: parsing \"-1.03\": invalid syntax") //nolint:testifylint // An error assertion makes more sense.
+		assert.EqualError(
+			t,
+			err,
+			"strconv.ParseUint: parsing \"-1.03\": invalid syntax",
+		) //nolint:testifylint // An error assertion makes more sense.
 		assert.NotErrorAs(t, err, &uintSignErr)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, uint8(0), res)
 
 		res, err = UnmarshalUint8(json.Number(" 1"))
-		assert.EqualError(t, err, "strconv.ParseUint: parsing \" 1\": invalid syntax") //nolint:testifylint // An error assertion makes more sense.
+		assert.EqualError(
+			t,
+			err,
+			"strconv.ParseUint: parsing \" 1\": invalid syntax",
+		) //nolint:testifylint // An error assertion makes more sense.
 		assert.NotErrorAs(t, err, &uintSignErr)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, uint8(0), res)
@@ -156,9 +200,21 @@ func TestUint8(t *testing.T) {
 				var intErr *IntegerError
 
 				res, err := UnmarshalUint8(tc.v)
-				assert.EqualError(t, err, tc.err)          //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &numberOverflowErr) //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &intErr)            //nolint:testifylint // An error assertion makes more sense.
+				assert.EqualError(
+					t,
+					err,
+					tc.err,
+				) //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(
+					t,
+					err,
+					&numberOverflowErr,
+				) //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(
+					t,
+					err,
+					&intErr,
+				) //nolint:testifylint // An error assertion makes more sense.
 				assert.Equal(t, uint8(0), res)
 			})
 		}
@@ -196,7 +252,11 @@ func TestUint16(t *testing.T) {
 		}{
 			{"negative int", -1, "-1 is an invalid unsigned integer: includes sign"},
 			{"negative int64", int64(-1), "-1 is an invalid unsigned integer: includes sign"},
-			{"negative json.Number", json.Number("-1"), "-1 is an invalid unsigned integer: includes sign"},
+			{
+				"negative json.Number",
+				json.Number("-1"),
+				"-1 is an invalid unsigned integer: includes sign",
+			},
 			{"negative string", "-1", "-1 is an invalid unsigned integer: includes sign"},
 		}
 		for _, tc := range cases {
@@ -205,9 +265,21 @@ func TestUint16(t *testing.T) {
 				var intErr *IntegerError
 
 				res, err := UnmarshalUint16(tc.v)
-				assert.EqualError(t, err, tc.err)    //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &uintSignErr) //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &intErr)      //nolint:testifylint // An error assertion makes more sense.
+				assert.EqualError(
+					t,
+					err,
+					tc.err,
+				) //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(
+					t,
+					err,
+					&uintSignErr,
+				) //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(
+					t,
+					err,
+					&intErr,
+				) //nolint:testifylint // An error assertion makes more sense.
 				assert.Equal(t, uint16(0), res)
 			})
 		}
@@ -218,13 +290,21 @@ func TestUint16(t *testing.T) {
 		var intErr *IntegerError
 
 		res, err := UnmarshalUint16("-1.03")
-		assert.EqualError(t, err, "strconv.ParseUint: parsing \"-1.03\": invalid syntax") //nolint:testifylint // An error assertion makes more sense.
+		assert.EqualError(
+			t,
+			err,
+			"strconv.ParseUint: parsing \"-1.03\": invalid syntax",
+		) //nolint:testifylint // An error assertion makes more sense.
 		assert.NotErrorAs(t, err, &uintSignErr)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, uint16(0), res)
 
 		res, err = UnmarshalUint16(json.Number(" 1"))
-		assert.EqualError(t, err, "strconv.ParseUint: parsing \" 1\": invalid syntax") //nolint:testifylint // An error assertion makes more sense.
+		assert.EqualError(
+			t,
+			err,
+			"strconv.ParseUint: parsing \" 1\": invalid syntax",
+		) //nolint:testifylint // An error assertion makes more sense.
 		assert.NotErrorAs(t, err, &uintSignErr)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, uint16(0), res)
@@ -237,8 +317,16 @@ func TestUint16(t *testing.T) {
 			err  string
 		}{
 			{"int overflow", math.MaxUint16 + 1, "65536 overflows unsigned 16-bit integer"},
-			{"int64 overflow", int64(math.MaxUint16 + 1), "65536 overflows unsigned 16-bit integer"},
-			{"json.Number overflow", json.Number("65536"), "65536 overflows unsigned 16-bit integer"},
+			{
+				"int64 overflow",
+				int64(math.MaxUint16 + 1),
+				"65536 overflows unsigned 16-bit integer",
+			},
+			{
+				"json.Number overflow",
+				json.Number("65536"),
+				"65536 overflows unsigned 16-bit integer",
+			},
 			{"string overflow", "65536", "65536 overflows unsigned 16-bit integer"},
 		}
 		for _, tc := range cases {
@@ -247,9 +335,21 @@ func TestUint16(t *testing.T) {
 				var intErr *IntegerError
 
 				res, err := UnmarshalUint16(tc.v)
-				assert.EqualError(t, err, tc.err)          //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &numberOverflowErr) //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &intErr)            //nolint:testifylint // An error assertion makes more sense.
+				assert.EqualError(
+					t,
+					err,
+					tc.err,
+				) //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(
+					t,
+					err,
+					&numberOverflowErr,
+				) //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(
+					t,
+					err,
+					&intErr,
+				) //nolint:testifylint // An error assertion makes more sense.
 				assert.Equal(t, uint16(0), res)
 			})
 		}
@@ -287,7 +387,11 @@ func TestUint32(t *testing.T) {
 		}{
 			{"negative int", -1, "-1 is an invalid unsigned integer: includes sign"},
 			{"negative int64", int64(-1), "-1 is an invalid unsigned integer: includes sign"},
-			{"negative json.Number", json.Number("-1"), "-1 is an invalid unsigned integer: includes sign"},
+			{
+				"negative json.Number",
+				json.Number("-1"),
+				"-1 is an invalid unsigned integer: includes sign",
+			},
 			{"negative string", "-1", "-1 is an invalid unsigned integer: includes sign"},
 		}
 		for _, tc := range cases {
@@ -296,9 +400,21 @@ func TestUint32(t *testing.T) {
 				var intErr *IntegerError
 
 				res, err := UnmarshalUint32(tc.v)
-				assert.EqualError(t, err, tc.err)    //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &uintSignErr) //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &intErr)      //nolint:testifylint // An error assertion makes more sense.
+				assert.EqualError(
+					t,
+					err,
+					tc.err,
+				) //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(
+					t,
+					err,
+					&uintSignErr,
+				) //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(
+					t,
+					err,
+					&intErr,
+				) //nolint:testifylint // An error assertion makes more sense.
 				assert.Equal(t, uint32(0), res)
 			})
 		}
@@ -309,13 +425,21 @@ func TestUint32(t *testing.T) {
 		var intErr *IntegerError
 
 		res, err := UnmarshalUint32("-1.03")
-		assert.EqualError(t, err, "strconv.ParseUint: parsing \"-1.03\": invalid syntax") //nolint:testifylint // An error assertion makes more sense.
+		assert.EqualError(
+			t,
+			err,
+			"strconv.ParseUint: parsing \"-1.03\": invalid syntax",
+		) //nolint:testifylint // An error assertion makes more sense.
 		assert.NotErrorAs(t, err, &uintSignErr)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, uint32(0), res)
 
 		res, err = UnmarshalUint32(json.Number(" 1"))
-		assert.EqualError(t, err, "strconv.ParseUint: parsing \" 1\": invalid syntax") //nolint:testifylint // An error assertion makes more sense.
+		assert.EqualError(
+			t,
+			err,
+			"strconv.ParseUint: parsing \" 1\": invalid syntax",
+		) //nolint:testifylint // An error assertion makes more sense.
 		assert.NotErrorAs(t, err, &uintSignErr)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, uint32(0), res)
@@ -328,8 +452,16 @@ func TestUint32(t *testing.T) {
 			err  string
 		}{
 			{"int overflow", math.MaxUint32 + 1, "4294967296 overflows unsigned 32-bit integer"},
-			{"int64 overflow", int64(math.MaxUint32 + 1), "4294967296 overflows unsigned 32-bit integer"},
-			{"json.Number overflow", json.Number("4294967296"), "4294967296 overflows unsigned 32-bit integer"},
+			{
+				"int64 overflow",
+				int64(math.MaxUint32 + 1),
+				"4294967296 overflows unsigned 32-bit integer",
+			},
+			{
+				"json.Number overflow",
+				json.Number("4294967296"),
+				"4294967296 overflows unsigned 32-bit integer",
+			},
 			{"string overflow", "4294967296", "4294967296 overflows unsigned 32-bit integer"},
 		}
 		for _, tc := range cases {
@@ -338,9 +470,21 @@ func TestUint32(t *testing.T) {
 				var intErr *IntegerError
 
 				res, err := UnmarshalUint32(tc.v)
-				assert.EqualError(t, err, tc.err)          //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &numberOverflowErr) //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &intErr)            //nolint:testifylint // An error assertion makes more sense.
+				assert.EqualError(
+					t,
+					err,
+					tc.err,
+				) //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(
+					t,
+					err,
+					&numberOverflowErr,
+				) //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(
+					t,
+					err,
+					&intErr,
+				) //nolint:testifylint // An error assertion makes more sense.
 				assert.Equal(t, uint32(0), res)
 			})
 		}
@@ -376,7 +520,11 @@ func TestUint64(t *testing.T) {
 		}{
 			{"negative int", -1, "-1 is an invalid unsigned integer: includes sign"},
 			{"negative int64", int64(-1), "-1 is an invalid unsigned integer: includes sign"},
-			{"negative json.Number", json.Number("-1"), "-1 is an invalid unsigned integer: includes sign"},
+			{
+				"negative json.Number",
+				json.Number("-1"),
+				"-1 is an invalid unsigned integer: includes sign",
+			},
 			{"negative string", "-1", "-1 is an invalid unsigned integer: includes sign"},
 		}
 		for _, tc := range cases {
@@ -385,9 +533,21 @@ func TestUint64(t *testing.T) {
 				var intErr *IntegerError
 
 				res, err := UnmarshalUint64(tc.v)
-				assert.EqualError(t, err, tc.err)    //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &uintSignErr) //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &intErr)      //nolint:testifylint // An error assertion makes more sense.
+				assert.EqualError(
+					t,
+					err,
+					tc.err,
+				) //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(
+					t,
+					err,
+					&uintSignErr,
+				) //nolint:testifylint // An error assertion makes more sense.
+				assert.ErrorAs(
+					t,
+					err,
+					&intErr,
+				) //nolint:testifylint // An error assertion makes more sense.
 				assert.Equal(t, uint64(0), res)
 			})
 		}
@@ -398,13 +558,21 @@ func TestUint64(t *testing.T) {
 		var intErr *IntegerError
 
 		res, err := UnmarshalUint64("-1.03")
-		assert.EqualError(t, err, "strconv.ParseUint: parsing \"-1.03\": invalid syntax") //nolint:testifylint // An error assertion makes more sense.
+		assert.EqualError(
+			t,
+			err,
+			"strconv.ParseUint: parsing \"-1.03\": invalid syntax",
+		) //nolint:testifylint // An error assertion makes more sense.
 		assert.NotErrorAs(t, err, &uintSignErr)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, uint64(0), res)
 
 		res, err = UnmarshalUint64(json.Number(" 1"))
-		assert.EqualError(t, err, "strconv.ParseUint: parsing \" 1\": invalid syntax") //nolint:testifylint // An error assertion makes more sense.
+		assert.EqualError(
+			t,
+			err,
+			"strconv.ParseUint: parsing \" 1\": invalid syntax",
+		) //nolint:testifylint // An error assertion makes more sense.
 		assert.NotErrorAs(t, err, &uintSignErr)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, uint64(0), res)

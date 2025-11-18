@@ -48,7 +48,11 @@ func TestHandlerComplexity(t *testing.T) {
 		h.SetCalculatedComplexity(4)
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
-		require.JSONEq(t, `{"errors":[{"message":"operation has complexity 4, which exceeds the limit of 2","extensions":{"code":"COMPLEXITY_LIMIT_EXCEEDED"}}],"data":null}`, resp.Body.String())
+		require.JSONEq(
+			t,
+			`{"errors":[{"message":"operation has complexity 4, which exceeds the limit of 2","extensions":{"code":"COMPLEXITY_LIMIT_EXCEEDED"}}],"data":null}`,
+			resp.Body.String(),
+		)
 
 		require.Equal(t, 2, stats.ComplexityLimit)
 		require.Equal(t, 4, stats.Complexity)
@@ -91,7 +95,11 @@ func TestFixedComplexity(t *testing.T) {
 		h.SetCalculatedComplexity(4)
 		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
-		require.JSONEq(t, `{"errors":[{"message":"operation has complexity 4, which exceeds the limit of 2","extensions":{"code":"COMPLEXITY_LIMIT_EXCEEDED"}}],"data":null}`, resp.Body.String())
+		require.JSONEq(
+			t,
+			`{"errors":[{"message":"operation has complexity 4, which exceeds the limit of 2","extensions":{"code":"COMPLEXITY_LIMIT_EXCEEDED"}}],"data":null}`,
+			resp.Body.String(),
+		)
 
 		require.Equal(t, 2, stats.ComplexityLimit)
 		require.Equal(t, 4, stats.Complexity)
@@ -99,7 +107,12 @@ func TestFixedComplexity(t *testing.T) {
 
 	t.Run("bypass __schema field", func(t *testing.T) {
 		h.SetCalculatedComplexity(4)
-		resp := doRequest(h, "POST", "/graphql", `{ "operationName":"IntrospectionQuery", "query":"query IntrospectionQuery { __schema { queryType { name } mutationType { name }}}"}`)
+		resp := doRequest(
+			h,
+			"POST",
+			"/graphql",
+			`{ "operationName":"IntrospectionQuery", "query":"query IntrospectionQuery { __schema { queryType { name } mutationType { name }}}"}`,
+		)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 		require.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 

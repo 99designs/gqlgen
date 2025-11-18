@@ -4,11 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
 
 func TestErrorInsideMutationArgument(t *testing.T) {
@@ -49,6 +49,10 @@ func TestErrorInsideMutationArgument(t *testing.T) {
 			&resp,
 			client.Var("input", input),
 		)
-		require.EqualError(t, err, `[{"message":"invalid email format","path":["updateSomething","input","nesting","field"]}]`)
+		require.EqualError(
+			t,
+			err,
+			`[{"message":"invalid email format","path":["updateSomething","input","nesting","field"]}]`,
+		)
 	})
 }

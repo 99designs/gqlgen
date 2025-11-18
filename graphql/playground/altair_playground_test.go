@@ -6,5 +6,8 @@ import (
 )
 
 func TestAltairHandler_Integrity(t *testing.T) {
-	testResourceIntegrity(t, func(title, endpoint string) http.HandlerFunc { return AltairHandler(title, endpoint, nil) })
+	testResourceIntegrity(
+		t,
+		func(title, endpoint string) http.HandlerFunc { return AltairHandler(title, endpoint, nil) },
+	)
 }

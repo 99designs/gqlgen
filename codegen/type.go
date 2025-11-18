@@ -21,7 +21,14 @@ func processType(ret map[string]*config.TypeReference, ref *config.TypeReference
 		existingGQL := fmt.Sprintf("%v", existing.GQL)
 		newGQL := fmt.Sprintf("%v", ref.GQL)
 		if existingGQL != newGQL {
-			panic(fmt.Sprintf("non-unique key \"%s\", trying to replace %s with %s", key, existingGQL, newGQL))
+			panic(
+				fmt.Sprintf(
+					"non-unique key \"%s\", trying to replace %s with %s",
+					key,
+					existingGQL,
+					newGQL,
+				),
+			)
 		}
 	}
 	ret[key] = ref

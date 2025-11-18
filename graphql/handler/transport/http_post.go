@@ -37,7 +37,7 @@ func (h POST) Supports(r *http.Request) bool {
 		return false
 	}
 
-	return r.Method == "POST" && mediaType == "application/json"
+	return r.Method == http.MethodPost && mediaType == "application/json"
 }
 
 func getRequestBody(r *http.Request) (string, error) {
@@ -59,7 +59,11 @@ var pool = sync.Pool{
 
 func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
 	ctx := r.Context()
-	contentType := determineResponseContentType(h.ResponseHeaders, r, h.UseGrapQLResponseJsonByDefault)
+	contentType := determineResponseContentType(
+		h.ResponseHeaders,
+		r,
+		h.UseGrapQLResponseJsonByDefault,
+	)
 	responseHeaders := mergeHeaders(
 		map[string][]string{
 			"Content-Type": {contentType},

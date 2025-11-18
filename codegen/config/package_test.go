@@ -66,6 +66,10 @@ func TestPackageConfig(t *testing.T) {
 		p := PackageConfig{Filename: "foo.go", Package: "foo/foo.go"}
 		require.True(t, p.IsDefined())
 
-		require.EqualError(t, p.Check(), "package should be the output package name only, do not include the output filename")
+		require.EqualError(
+			t,
+			p.Check(),
+			"package should be the output package name only, do not include the output filename",
+		)
 	})
 }

@@ -69,12 +69,24 @@ func TestCollectFields(t *testing.T) {
 	}
 
 	var (
-		trueVal      = &ast.Value{Kind: ast.BooleanValue, Raw: "true"}
-		falseVal     = &ast.Value{Kind: ast.BooleanValue, Raw: "false"}
-		skipTrue     = &ast.Directive{Name: "skip", Arguments: ast.ArgumentList{{Name: "if", Value: trueVal}}}
-		skipFalse    = &ast.Directive{Name: "skip", Arguments: ast.ArgumentList{{Name: "if", Value: falseVal}}}
-		includeTrue  = &ast.Directive{Name: "include", Arguments: ast.ArgumentList{{Name: "if", Value: trueVal}}}
-		includeFalse = &ast.Directive{Name: "include", Arguments: ast.ArgumentList{{Name: "if", Value: falseVal}}}
+		trueVal  = &ast.Value{Kind: ast.BooleanValue, Raw: "true"}
+		falseVal = &ast.Value{Kind: ast.BooleanValue, Raw: "false"}
+		skipTrue = &ast.Directive{
+			Name:      "skip",
+			Arguments: ast.ArgumentList{{Name: "if", Value: trueVal}},
+		}
+		skipFalse = &ast.Directive{
+			Name:      "skip",
+			Arguments: ast.ArgumentList{{Name: "if", Value: falseVal}},
+		}
+		includeTrue = &ast.Directive{
+			Name:      "include",
+			Arguments: ast.ArgumentList{{Name: "if", Value: trueVal}},
+		}
+		includeFalse = &ast.Directive{
+			Name:      "include",
+			Arguments: ast.ArgumentList{{Name: "if", Value: falseVal}},
+		}
 	)
 
 	t.Run("handles fields", func(t *testing.T) {
@@ -138,7 +150,11 @@ func TestCollectFields(t *testing.T) {
 			},
 		})
 		resCtx := GetFieldContext(ctx)
-		collected := CollectFields(GetOperationContext(ctx), resCtx.Field.Selections, []string{"ExampleTypeB"})
+		collected := CollectFields(
+			GetOperationContext(ctx),
+			resCtx.Field.Selections,
+			[]string{"ExampleTypeB"},
+		)
 		require.Equal(t, []string{"fieldB", "fieldC"}, getNames(collected))
 	})
 
@@ -165,7 +181,11 @@ func TestCollectFields(t *testing.T) {
 			},
 		})
 		resCtx := GetFieldContext(ctx)
-		collected := CollectFields(GetOperationContext(ctx), resCtx.Field.Selections, []string{"ExampleTypeB"})
+		collected := CollectFields(
+			GetOperationContext(ctx),
+			resCtx.Field.Selections,
+			[]string{"ExampleTypeB"},
+		)
 		require.Equal(t, []string{"fieldA", "fieldB", "fieldC"}, getNames(collected))
 	})
 
@@ -411,57 +431,68 @@ func TestCollectFields(t *testing.T) {
 				},
 			},
 		}
-		collected := CollectFields(reqCtx, resCtx.Field.Selections, []string{"ExampleTypeA", "ExampleTypeB"})
+		collected := CollectFields(
+			reqCtx,
+			resCtx.Field.Selections,
+			[]string{"ExampleTypeA", "ExampleTypeB"},
+		)
 		require.Equal(t, []string{"fieldA", "fieldD"}, getNames(collected))
 	})
 }
 
 func TestCollectAllFields(t *testing.T) {
-	t.Run("collects all fields incl inline fragments and fragment spreads regardless of type", func(t *testing.T) {
-		ctx := testContext(ast.SelectionSet{
-			&ast.Field{
-				Name: "fieldA",
-			},
-			&ast.InlineFragment{
-				SelectionSet: ast.SelectionSet{
-					&ast.Field{
-						Name: "fieldB",
-					},
+	t.Run(
+		"collects all fields incl inline fragments and fragment spreads regardless of type",
+		func(t *testing.T) {
+			ctx := testContext(ast.SelectionSet{
+				&ast.Field{
+					Name: "fieldA",
 				},
-				Directives: ast.DirectiveList{
-					&ast.Directive{Name: "someDirective"},
-				},
-			},
-			&ast.InlineFragment{
-				TypeCondition: "ExampleTypeC",
-				SelectionSet: ast.SelectionSet{
-					&ast.Field{
-						Name: "fieldC",
-					},
-				},
-				ObjectDefinition: &ast.Definition{Name: "ExampleTypeC"},
-			},
-			&ast.FragmentSpread{
-				Name: "FragmentD",
-			},
-		})
-		reqCtx := GetOperationContext(ctx)
-		reqCtx.Doc = &ast.QueryDocument{
-			Fragments: []*ast.FragmentDefinition{
-				{
-					Name:          "FragmentD",
-					TypeCondition: "ExampleTypeD",
+				&ast.InlineFragment{
 					SelectionSet: ast.SelectionSet{
 						&ast.Field{
-							Name: "fieldD",
+							Name: "fieldB",
+						},
+					},
+					Directives: ast.DirectiveList{
+						&ast.Directive{Name: "someDirective"},
+					},
+				},
+				&ast.InlineFragment{
+					TypeCondition: "ExampleTypeC",
+					SelectionSet: ast.SelectionSet{
+						&ast.Field{
+							Name: "fieldC",
+						},
+					},
+					ObjectDefinition: &ast.Definition{Name: "ExampleTypeC"},
+				},
+				&ast.FragmentSpread{
+					Name: "FragmentD",
+				},
+			})
+			reqCtx := GetOperationContext(ctx)
+			reqCtx.Doc = &ast.QueryDocument{
+				Fragments: []*ast.FragmentDefinition{
+					{
+						Name:          "FragmentD",
+						TypeCondition: "ExampleTypeD",
+						SelectionSet: ast.SelectionSet{
+							&ast.Field{
+								Name: "fieldD",
+							},
 						},
 					},
 				},
-			},
-		}
-		ctx = WithOperationContext(ctx, reqCtx)
-		require.Equal(t, []string{"fieldA", "fieldB", "fieldC", "fieldD"}, CollectAllFields(ctx))
-	})
+			}
+			ctx = WithOperationContext(ctx, reqCtx)
+			require.Equal(
+				t,
+				[]string{"fieldA", "fieldB", "fieldC", "fieldD"},
+				CollectAllFields(ctx),
+			)
+		},
+	)
 
 	t.Run("de-dupes aliased field names", func(t *testing.T) {
 		ctx := testContext(ast.SelectionSet{

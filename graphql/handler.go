@@ -33,8 +33,14 @@ type (
 	}
 
 	GraphExecutor interface {
-		CreateOperationContext(ctx context.Context, params *RawParams) (*OperationContext, gqlerror.List)
-		DispatchOperation(ctx context.Context, opCtx *OperationContext) (ResponseHandler, context.Context)
+		CreateOperationContext(
+			ctx context.Context,
+			params *RawParams,
+		) (*OperationContext, gqlerror.List)
+		DispatchOperation(
+			ctx context.Context,
+			opCtx *OperationContext,
+		) (ResponseHandler, context.Context)
 		DispatchError(ctx context.Context, list gqlerror.List) *Response
 	}
 
@@ -110,7 +116,11 @@ func (p *RawParams) AddUpload(upload Upload, key, path string) *gqlerror.Error {
 	for i, p := range parts[1:] {
 		last := i == len(parts)-2
 		if ptr == nil {
-			return gqlerror.Errorf("path is missing \"variables.\" prefix, key: %s, path: %s", key, path)
+			return gqlerror.Errorf(
+				"path is missing \"variables.\" prefix, key: %s, path: %s",
+				key,
+				path,
+			)
 		}
 		if index, parseNbrErr := strconv.Atoi(p); parseNbrErr == nil {
 			if last {

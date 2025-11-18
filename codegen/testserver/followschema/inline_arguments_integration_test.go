@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/stretchr/testify/require"
 )
 
 func TestInlineArguments(t *testing.T) {
@@ -117,19 +118,22 @@ func TestInlineArguments(t *testing.T) {
 		require.Empty(t, resp.SearchProducts)
 	})
 
-	t.Run("with @inlineArguments - required input type with all required fields", func(t *testing.T) {
-		var resp struct {
-			SearchRequired []string
-		}
-		// Required fields must be provided as individual arguments
-		c.MustPost(`query {
+	t.Run(
+		"with @inlineArguments - required input type with all required fields",
+		func(t *testing.T) {
+			var resp struct {
+				SearchRequired []string
+			}
+			// Required fields must be provided as individual arguments
+			c.MustPost(`query {
 			searchRequired(name: "John", age: 30)
 		}`, &resp)
 
-		require.Len(t, resp.SearchRequired, 2)
-		require.Contains(t, resp.SearchRequired, "name:John")
-		require.Contains(t, resp.SearchRequired, "age:30")
-	})
+			require.Len(t, resp.SearchRequired, 2)
+			require.Contains(t, resp.SearchRequired, "name:John")
+			require.Contains(t, resp.SearchRequired, "age:30")
+		},
+	)
 
 	t.Run("mutation with @inlineArguments", func(t *testing.T) {
 		// Implement the UpdateProduct mutation resolver
@@ -171,7 +175,8 @@ func TestInlineArguments(t *testing.T) {
 			if limit, ok := filters["limit"].(*int); ok && limit != nil {
 				results = append(results, fmt.Sprintf("limit:%d", *limit))
 			}
-			if includeArchived, ok := filters["includeArchived"].(*bool); ok && includeArchived != nil {
+			if includeArchived, ok := filters["includeArchived"].(*bool); ok &&
+				includeArchived != nil {
 				results = append(results, fmt.Sprintf("includeArchived:%v", *includeArchived))
 			}
 			return results, nil
@@ -401,8 +406,12 @@ func TestInlineArguments(t *testing.T) {
 			actualArgs[arg.Name] = true
 		}
 
-		require.Equal(t, expectedArgs, actualArgs,
-			"Introspection should show individual arguments (query, category, minPrice), not bundled 'filters' input")
+		require.Equal(
+			t,
+			expectedArgs,
+			actualArgs,
+			"Introspection should show individual arguments (query, category, minPrice), not bundled 'filters' input",
+		)
 
 		// Verify we DON'T see the original 'filters' argument
 		for _, arg := range searchField.Args {

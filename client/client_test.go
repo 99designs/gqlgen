@@ -53,10 +53,18 @@ func TestClientMultipartFormData(t *testing.T) {
 		}
 
 		assert.Contains(t, string(bodyBytes), `Content-Disposition: form-data; name="operations"`)
-		assert.Contains(t, string(bodyBytes), `{"query":"mutation ($input: Input!) {}","variables":{"file":{}}`)
+		assert.Contains(
+			t,
+			string(bodyBytes),
+			`{"query":"mutation ($input: Input!) {}","variables":{"file":{}}`,
+		)
 		assert.Contains(t, string(bodyBytes), `Content-Disposition: form-data; name="map"`)
 		assert.Contains(t, string(bodyBytes), `{"0":["variables.file"]}`)
-		assert.Contains(t, string(bodyBytes), `Content-Disposition: form-data; name="0"; filename="example.txt"`)
+		assert.Contains(
+			t,
+			string(bodyBytes),
+			`Content-Disposition: form-data; name="0"; filename="example.txt"`,
+		)
 		assert.Contains(t, string(bodyBytes), `Content-Type: text/plain`)
 		assert.Contains(t, string(bodyBytes), `Hello World`)
 
@@ -70,7 +78,10 @@ func TestClientMultipartFormData(t *testing.T) {
 		func(bd *client.Request) {
 			bodyBuf := &bytes.Buffer{}
 			bodyWriter := multipart.NewWriter(bodyBuf)
-			bodyWriter.WriteField("operations", `{"query":"mutation ($input: Input!) {}","variables":{"file":{}}`)
+			bodyWriter.WriteField(
+				"operations",
+				`{"query":"mutation ($input: Input!) {}","variables":{"file":{}}`,
+			)
 			bodyWriter.WriteField("map", `{"0":["variables.file"]}`)
 
 			h := make(textproto.MIMEHeader)
@@ -157,7 +168,11 @@ func TestAddExtensions(t *testing.T) {
 		if !assert.NoError(t, err) {
 			return
 		}
-		assert.JSONEq(t, `{"query":"user(id:1){name}","extensions":{"persistedQuery":{"sha256Hash":"ceec2897e2da519612279e63f24658c3e91194cbb2974744fa9007a7e1e9f9e7","version":1}}}`, string(b))
+		assert.JSONEq(
+			t,
+			`{"query":"user(id:1){name}","extensions":{"persistedQuery":{"sha256Hash":"ceec2897e2da519612279e63f24658c3e91194cbb2974744fa9007a7e1e9f9e7","version":1}}}`,
+			string(b),
+		)
 		err = json.NewEncoder(w).Encode(map[string]any{
 			"data": map[string]any{
 				"Name": "Bob",
@@ -171,8 +186,17 @@ func TestAddExtensions(t *testing.T) {
 	var resp struct {
 		Name string
 	}
-	c.MustPost("user(id:1){name}", &resp,
-		client.Extensions(map[string]any{"persistedQuery": map[string]any{"version": 1, "sha256Hash": "ceec2897e2da519612279e63f24658c3e91194cbb2974744fa9007a7e1e9f9e7"}}),
+	c.MustPost(
+		"user(id:1){name}",
+		&resp,
+		client.Extensions(
+			map[string]any{
+				"persistedQuery": map[string]any{
+					"version":    1,
+					"sha256Hash": "ceec2897e2da519612279e63f24658c3e91194cbb2974744fa9007a7e1e9f9e7",
+				},
+			},
+		),
 	)
 }
 

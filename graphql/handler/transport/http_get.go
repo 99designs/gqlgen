@@ -32,7 +32,7 @@ func (h GET) Supports(r *http.Request) bool {
 		return false
 	}
 
-	return r.Method == "GET"
+	return r.Method == http.MethodGet
 }
 
 func (h GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
@@ -42,7 +42,11 @@ func (h GET) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 		writeJsonError(w, err.Error())
 		return
 	}
-	contentType := determineResponseContentType(h.ResponseHeaders, r, h.UseGrapQLResponseJsonByDefault)
+	contentType := determineResponseContentType(
+		h.ResponseHeaders,
+		r,
+		h.UseGrapQLResponseJsonByDefault,
+	)
 	responseHeaders := mergeHeaders(
 		map[string][]string{
 			"Content-Type": {contentType},

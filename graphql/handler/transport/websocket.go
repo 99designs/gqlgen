@@ -103,7 +103,10 @@ func (t Websocket) Do(w http.ResponseWriter, r *http.Request, exec graphql.Graph
 	var me messageExchanger
 	switch ws.Subprotocol() {
 	default:
-		msg := websocket.FormatCloseMessage(websocket.CloseProtocolError, fmt.Sprintf("unsupported negotiated subprotocol %s", ws.Subprotocol()))
+		msg := websocket.FormatCloseMessage(
+			websocket.CloseProtocolError,
+			fmt.Sprintf("unsupported negotiated subprotocol %s", ws.Subprotocol()),
+		)
 		_ = ws.WriteMessage(websocket.CloseMessage, msg)
 		return
 	case graphqlwsSubprotocol, "":
@@ -245,7 +248,8 @@ func (c *wsConnection) run() {
 
 	// If we're running in graphql-ws mode, create a timer that will trigger a
 	// keep alive message every interval
-	if (c.conn.Subprotocol() == "" || c.conn.Subprotocol() == graphqlwsSubprotocol) && c.KeepAlivePingInterval != 0 {
+	if (c.conn.Subprotocol() == "" || c.conn.Subprotocol() == graphqlwsSubprotocol) &&
+		c.KeepAlivePingInterval != 0 {
 		c.mu.Lock()
 		c.keepAliveTicker = time.NewTicker(c.KeepAlivePingInterval)
 		c.mu.Unlock()
@@ -498,7 +502,10 @@ func (c *wsConnection) close(closeCode int, message string) {
 		c.mu.Unlock()
 		return
 	}
-	_ = c.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(closeCode, message))
+	_ = c.conn.WriteMessage(
+		websocket.CloseMessage,
+		websocket.FormatCloseMessage(closeCode, message),
+	)
 	for _, closer := range c.active {
 		closer()
 	}

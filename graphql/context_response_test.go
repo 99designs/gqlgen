@@ -104,13 +104,17 @@ func TestAddError_NilUserPresenter(t *testing.T) {
 }
 
 func TestGetErrorFromPresenter(t *testing.T) {
-	ctx := WithResponseContext(context.Background(), func(ctx context.Context, err error) *gqlerror.Error {
-		errs := GetErrors(ctx)
+	ctx := WithResponseContext(
+		context.Background(),
+		func(ctx context.Context, err error) *gqlerror.Error {
+			errs := GetErrors(ctx)
 
-		// because we are still presenting the error it is not expected to be returned, but this should not deadlock.
-		require.Empty(t, errs)
-		return DefaultErrorPresenter(ctx, err)
-	}, nil)
+			// because we are still presenting the error it is not expected to be returned, but this should not deadlock.
+			require.Empty(t, errs)
+			return DefaultErrorPresenter(ctx, err)
+		},
+		nil,
+	)
 
 	ctx = WithFieldContext(ctx, &FieldContext{})
 	AddError(ctx, errors.New("foo1"))

@@ -48,7 +48,10 @@ func stringify(value any) string {
 	return fmt.Sprint(value)
 }
 
-func (a Tracer) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+func (a Tracer) InterceptResponse(
+	ctx context.Context,
+	next graphql.ResponseHandler,
+) *graphql.Response {
 	opCtx := graphql.GetOperationContext(ctx)
 
 	_, _ = fmt.Fprintln(a.out, "GraphQL Request {")
@@ -63,7 +66,12 @@ func (a Tracer) InterceptResponse(ctx context.Context, next graphql.ResponseHand
 	_, _ = fmt.Fprintln(a.out, "  resp:", aurora.Green(stringify(resp)))
 	if resp != nil {
 		for _, err := range resp.Errors {
-			_, _ = fmt.Fprintln(a.out, "  error:", aurora.Bold(err.Path.String()+":"), aurora.Red(err.Message))
+			_, _ = fmt.Fprintln(
+				a.out,
+				"  error:",
+				aurora.Bold(err.Path.String()+":"),
+				aurora.Red(err.Message),
+			)
 		}
 	}
 

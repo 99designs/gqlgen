@@ -44,7 +44,9 @@ func (c *PackageConfig) IsDefined() bool {
 
 func (c *PackageConfig) Check() error {
 	if strings.ContainsAny(c.Package, "./\\") {
-		return errors.New("package should be the output package name only, do not include the output filename")
+		return errors.New(
+			"package should be the output package name only, do not include the output filename",
+		)
 	}
 	if c.Filename == "" {
 		return errors.New("filename must be specified")

@@ -50,7 +50,11 @@ func ExpandInlineArguments(schema *ast.Schema) error {
 				if inputType.Kind != ast.InputObject {
 					return fmt.Errorf(
 						"@inlineArguments on %s.%s(%s): type %s must be an INPUT_OBJECT (input types only), got %s. The directive can only expand input object types into individual arguments",
-						typeName, field.Name, arg.Name, argTypeName, inputType.Kind,
+						typeName,
+						field.Name,
+						arg.Name,
+						argTypeName,
+						inputType.Kind,
 					)
 				}
 
@@ -130,7 +134,10 @@ func ClearInlineArgsMetadata() {
 	inlineArgsMetadata = make(map[string]*InlineArgsInfo)
 }
 
-func SerializeTransformedSchema(schema *ast.Schema, originalSources []*ast.Source) ([]*ast.Source, error) {
+func SerializeTransformedSchema(
+	schema *ast.Schema,
+	originalSources []*ast.Source,
+) ([]*ast.Source, error) {
 	if len(inlineArgsMetadata) == 0 {
 		return originalSources, nil
 	}

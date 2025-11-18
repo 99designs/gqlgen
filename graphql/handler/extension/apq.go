@@ -52,7 +52,10 @@ func (a AutomaticPersistedQuery) Validate(schema graphql.ExecutableSchema) error
 	return nil
 }
 
-func (a AutomaticPersistedQuery) MutateOperationParameters(ctx context.Context, rawParams *graphql.RawParams) *gqlerror.Error {
+func (a AutomaticPersistedQuery) MutateOperationParameters(
+	ctx context.Context,
+	rawParams *graphql.RawParams,
+) *gqlerror.Error {
 	if rawParams.Extensions["persistedQuery"] == nil {
 		return nil
 	}

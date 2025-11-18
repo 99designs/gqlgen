@@ -6,10 +6,11 @@ import (
 	"log"
 	"sort"
 
+	"github.com/vektah/gqlparser/v2/ast"
+
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/99designs/gqlgen/internal/code"
-	"github.com/vektah/gqlparser/v2/ast"
 )
 
 // embeddedInterfaceGenerator generates Base structs for interfaces to enable embedding.
@@ -21,7 +22,12 @@ type embeddedInterfaceGenerator struct {
 	graph      *interfaceGraph
 }
 
-func newEmbeddedInterfaceGenerator(cfg *config.Config, binder *config.Binder, schemaType *ast.Definition, model *ModelBuild) *embeddedInterfaceGenerator {
+func newEmbeddedInterfaceGenerator(
+	cfg *config.Config,
+	binder *config.Binder,
+	schemaType *ast.Definition,
+	model *ModelBuild,
+) *embeddedInterfaceGenerator {
 	return &embeddedInterfaceGenerator{
 		cfg:        cfg,
 		binder:     binder,
@@ -72,9 +78,14 @@ type baseStructSpec struct {
 	ImplementsInterfaces []string
 }
 
-func (g *embeddedInterfaceGenerator) generateBaseStructForInterface(schemaType *ast.Definition) (*baseStructSpec, error) {
+func (g *embeddedInterfaceGenerator) generateBaseStructForInterface(
+	schemaType *ast.Definition,
+) (*baseStructSpec, error) {
 	if schemaType.Kind != ast.Interface {
-		return nil, fmt.Errorf("generateBaseStructForInterface called on non-interface type: %s", schemaType.Name)
+		return nil, fmt.Errorf(
+			"generateBaseStructForInterface called on non-interface type: %s",
+			schemaType.Name,
+		)
 	}
 
 	spec := &baseStructSpec{
@@ -87,7 +98,12 @@ func (g *embeddedInterfaceGenerator) generateBaseStructForInterface(schemaType *
 	embedInfo := g.graph.getEmbeddingInfo(schemaType.Name)
 
 	if len(embedInfo.Parents) > 1 {
-		log.Printf("WARN: Base%s: implements %d interfaces %v (potential diamond problem)", schemaType.Name, len(embedInfo.Parents), embedInfo.Parents)
+		log.Printf(
+			"WARN: Base%s: implements %d interfaces %v (potential diamond problem)",
+			schemaType.Name,
+			len(embedInfo.Parents),
+			embedInfo.Parents,
+		)
 	}
 
 	for _, parent := range embedInfo.Parents {
@@ -131,7 +147,9 @@ func (g *embeddedInterfaceGenerator) createParentBaseType(interfaceName string) 
 
 // generateEmbeddedFields returns map: field name -> embedded Base struct (or nil for subsequent fields).
 // Covariant overrides prevent embedding and require explicit field generation.
-func (g *embeddedInterfaceGenerator) generateEmbeddedFields(fields []*ast.FieldDefinition) map[string]*Field {
+func (g *embeddedInterfaceGenerator) generateEmbeddedFields(
+	fields []*ast.FieldDefinition,
+) map[string]*Field {
 	if g.model == nil || g.schemaType.Kind != ast.Object {
 		return nil
 	}
@@ -157,7 +175,9 @@ func (g *embeddedInterfaceGenerator) generateEmbeddedFields(fields []*ast.FieldD
 	return result
 }
 
-func (g *embeddedInterfaceGenerator) findInterfacesWithCovariantOverrides(fields []*ast.FieldDefinition) map[string]bool {
+func (g *embeddedInterfaceGenerator) findInterfacesWithCovariantOverrides(
+	fields []*ast.FieldDefinition,
+) map[string]bool {
 	result := make(map[string]bool)
 
 	for _, implField := range fields {
@@ -172,13 +192,20 @@ func (g *embeddedInterfaceGenerator) findInterfacesWithCovariantOverrides(fields
 			}
 
 			for _, ifaceField := range iface.Fields {
-				if ifaceField.Name != implField.Name || typesMatch(ifaceField.Type, implField.Type) {
+				if ifaceField.Name != implField.Name ||
+					typesMatch(ifaceField.Type, implField.Type) {
 					continue
 				}
 
 				if !result[interfaceName] {
-					log.Printf("WARN: %s.%s: covariant override %s -> %s (skipping Base%s embedding)",
-						g.schemaType.Name, implField.Name, ifaceField.Type.Name(), implField.Type.Name(), interfaceName)
+					log.Printf(
+						"WARN: %s.%s: covariant override %s -> %s (skipping Base%s embedding)",
+						g.schemaType.Name,
+						implField.Name,
+						ifaceField.Type.Name(),
+						implField.Type.Name(),
+						interfaceName,
+					)
 				}
 				result[interfaceName] = true
 				break
@@ -209,7 +236,8 @@ func (g *embeddedInterfaceGenerator) findInterfaceForField(field *ast.FieldDefin
 	}
 
 	for _, ifaceName := range interfaces {
-		if iface := g.cfg.Schema.Types[ifaceName]; iface != nil && (iface.Kind == ast.Interface || iface.Kind == ast.Union) {
+		if iface := g.cfg.Schema.Types[ifaceName]; iface != nil &&
+			(iface.Kind == ast.Interface || iface.Kind == ast.Union) {
 			if !g.graph.isEmbeddable(ifaceName) {
 				continue
 			}

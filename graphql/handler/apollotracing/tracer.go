@@ -85,7 +85,10 @@ func (Tracer) InterceptField(ctx context.Context, next graphql.Resolver) (any, e
 	return next(ctx)
 }
 
-func (Tracer) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+func (Tracer) InterceptResponse(
+	ctx context.Context,
+	next graphql.ResponseHandler,
+) *graphql.Response {
 	if !graphql.HasOperationContext(ctx) {
 		return next(ctx)
 	}

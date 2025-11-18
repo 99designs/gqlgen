@@ -35,12 +35,16 @@ func TestHandler_createsAbsoluteURLs(t *testing.T) {
 		t.Errorf("no match for %s in response body", want.String())
 	}
 
-	wantSubURL := regexp.MustCompile(`(?m)^.*subscriptionUrl\s*=\s*['"]wss:\/\/example\.org\/query["'].*$`)
+	wantSubURL := regexp.MustCompile(
+		`(?m)^.*subscriptionUrl\s*=\s*['"]wss:\/\/example\.org\/query["'].*$`,
+	)
 	if !wantSubURL.Match(b) {
 		t.Errorf("no match for %s in response body", wantSubURL.String())
 	}
 
-	wantMetaCharsetElement := regexp.MustCompile(`<head>\n\s{0,}<meta charset="utf-8">\n\s{0,}.*<title>`) // <meta> element must be in <head> and before <title>
+	wantMetaCharsetElement := regexp.MustCompile(
+		`<head>\n\s{0,}<meta charset="utf-8">\n\s{0,}.*<title>`,
+	) // <meta> element must be in <head> and before <title>
 	if !wantMetaCharsetElement.Match(b) {
 		t.Errorf("no match for %s in response body", wantMetaCharsetElement.String())
 	}
@@ -58,7 +62,11 @@ func TestHandler_createsRelativeURLs(t *testing.T) {
 		t.Errorf("res.StatusCode = %d; want %d", res.StatusCode, http.StatusOK)
 	}
 	if res.Header.Get("Content-Type") != "text/html; charset=UTF-8" {
-		t.Errorf("res.Header.Get(\"Content-Type\") = %q; want %q", res.Header.Get("Content-Type"), "text/html; charset=UTF-8")
+		t.Errorf(
+			"res.Header.Get(\"Content-Type\") = %q; want %q",
+			res.Header.Get("Content-Type"),
+			"text/html; charset=UTF-8",
+		)
 	}
 
 	b, err := io.ReadAll(res.Body)
@@ -70,7 +78,9 @@ func TestHandler_createsRelativeURLs(t *testing.T) {
 	if !wantURL.Match(b) {
 		t.Errorf("no match for %s in response body", wantURL.String())
 	}
-	wantSubURL := regexp.MustCompile(`(?m)^.*subscriptionUrl\s*=\s*wsProto.*['"]\/customquery['"].*$`)
+	wantSubURL := regexp.MustCompile(
+		`(?m)^.*subscriptionUrl\s*=\s*wsProto.*['"]\/customquery['"].*$`,
+	)
 	if !wantSubURL.Match(b) {
 		t.Errorf("no match for %s in response body", wantSubURL.String())
 	}
@@ -207,7 +217,13 @@ func TestHandler_WithOptions(t *testing.T) {
 				WithGraphiqlFetcherHeaders(map[string]string{"Authorization": "Bearer token"}),
 			},
 			assert: func(t *testing.T, body string) {
-				assert.True(t, strings.Contains(body, `const fetcherHeaders = {"Authorization":"Bearer token"};`))
+				assert.True(
+					t,
+					strings.Contains(
+						body,
+						`const fetcherHeaders = {"Authorization":"Bearer token"};`,
+					),
+				)
 			},
 		},
 		{
@@ -216,13 +232,21 @@ func TestHandler_WithOptions(t *testing.T) {
 				WithGraphiqlUiHeaders(map[string]string{"X-Custom-Header": "value"}),
 			},
 			assert: func(t *testing.T, body string) {
-				assert.True(t, strings.Contains(body, `const uiHeaders = {"X-Custom-Header":"value"};`))
+				assert.True(
+					t,
+					strings.Contains(body, `const uiHeaders = {"X-Custom-Header":"value"};`),
+				)
 			},
 		},
 		{
 			name: "WithGraphiqlVersion",
 			options: []GraphiqlConfigOption{
-				WithGraphiqlVersion("https://example.com/graphiql.js", "https://example.com/graphiql.css", "sha256-js", "sha256-css"),
+				WithGraphiqlVersion(
+					"https://example.com/graphiql.js",
+					"https://example.com/graphiql.css",
+					"sha256-js",
+					"sha256-css",
+				),
 			},
 			assert: func(t *testing.T, body string) {
 				assert.True(t, strings.Contains(body, `src="https://example.com/graphiql.js"`))
@@ -234,7 +258,12 @@ func TestHandler_WithOptions(t *testing.T) {
 		{
 			name: "WithGraphiqlReactVersion",
 			options: []GraphiqlConfigOption{
-				WithGraphiqlReactVersion("https://example.com/react.js", "https://example.com/react-dom.js", "sha256-react", "sha256-react-dom"),
+				WithGraphiqlReactVersion(
+					"https://example.com/react.js",
+					"https://example.com/react-dom.js",
+					"sha256-react",
+					"sha256-react-dom",
+				),
 			},
 			assert: func(t *testing.T, body string) {
 				assert.True(t, strings.Contains(body, `src="https://example.com/react.js"`))
@@ -247,11 +276,22 @@ func TestHandler_WithOptions(t *testing.T) {
 			name: "WithGraphiqlPluginExplorerVersion",
 			options: []GraphiqlConfigOption{
 				WithGraphiqlEnablePluginExplorer(true),
-				WithGraphiqlPluginExplorerVersion("https://example.com/plugin-explorer.js", "https://example.com/plugin-explorer.css", "sha256-plugin-js", "sha256-plugin-css"),
+				WithGraphiqlPluginExplorerVersion(
+					"https://example.com/plugin-explorer.js",
+					"https://example.com/plugin-explorer.css",
+					"sha256-plugin-js",
+					"sha256-plugin-css",
+				),
 			},
 			assert: func(t *testing.T, body string) {
-				assert.True(t, strings.Contains(body, `src="https://example.com/plugin-explorer.js"`))
-				assert.True(t, strings.Contains(body, `href="https://example.com/plugin-explorer.css"`))
+				assert.True(
+					t,
+					strings.Contains(body, `src="https://example.com/plugin-explorer.js"`),
+				)
+				assert.True(
+					t,
+					strings.Contains(body, `href="https://example.com/plugin-explorer.css"`),
+				)
 				assert.True(t, strings.Contains(body, `integrity="sha256-plugin-js"`))
 				assert.True(t, strings.Contains(body, `integrity="sha256-plugin-css"`))
 			},

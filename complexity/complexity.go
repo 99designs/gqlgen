@@ -8,7 +8,12 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
-func Calculate(ctx context.Context, es graphql.ExecutableSchema, op *ast.OperationDefinition, vars map[string]any) int {
+func Calculate(
+	ctx context.Context,
+	es graphql.ExecutableSchema,
+	op *ast.OperationDefinition,
+	vars map[string]any,
+) int {
 	walker := complexityWalker{
 		es:     es,
 		schema: es.Schema(),
@@ -23,7 +28,10 @@ type complexityWalker struct {
 	vars   map[string]any
 }
 
-func (cw complexityWalker) selectionSetComplexity(ctx context.Context, selectionSet ast.SelectionSet) int {
+func (cw complexityWalker) selectionSetComplexity(
+	ctx context.Context,
+	selectionSet ast.SelectionSet,
+) int {
 	var complexity int
 	for _, selection := range selectionSet {
 		switch s := selection.(type) {
@@ -59,7 +67,13 @@ func (cw complexityWalker) selectionSetComplexity(ctx context.Context, selection
 	return complexity
 }
 
-func (cw complexityWalker) interfaceFieldComplexity(ctx context.Context, def *ast.Definition, field string, childComplexity int, args map[string]any) int {
+func (cw complexityWalker) interfaceFieldComplexity(
+	ctx context.Context,
+	def *ast.Definition,
+	field string,
+	childComplexity int,
+	args map[string]any,
+) int {
 	// Interfaces don't have their own separate field costs, so they have to assume the worst case.
 	// We iterate over all implementors and choose the most expensive one.
 	maxComplexity := 0
@@ -73,8 +87,14 @@ func (cw complexityWalker) interfaceFieldComplexity(ctx context.Context, def *as
 	return maxComplexity
 }
 
-func (cw complexityWalker) fieldComplexity(ctx context.Context, object, field string, childComplexity int, args map[string]any) int {
-	if customComplexity, ok := cw.es.Complexity(ctx, object, field, childComplexity, args); ok && customComplexity >= 1 {
+func (cw complexityWalker) fieldComplexity(
+	ctx context.Context,
+	object, field string,
+	childComplexity int,
+	args map[string]any,
+) int {
+	if customComplexity, ok := cw.es.Complexity(ctx, object, field, childComplexity, args); ok &&
+		customComplexity >= 1 {
 		return customComplexity
 	}
 	// default complexity calculation

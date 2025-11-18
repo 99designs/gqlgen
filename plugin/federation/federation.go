@@ -135,7 +135,10 @@ func (f *Federation) Name() string {
 func (f *Federation) MutateConfig(cfg *config.Config) error {
 	for typeName, entry := range builtins {
 		if cfg.Models.Exists(typeName) {
-			return fmt.Errorf("%v already exists which must be reserved when Federation is enabled", typeName)
+			return fmt.Errorf(
+				"%v already exists which must be reserved when Federation is enabled",
+				typeName,
+			)
 		}
 		cfg.Models[typeName] = entry
 	}
@@ -162,7 +165,9 @@ func (f *Federation) MutateConfig(cfg *config.Config) error {
 
 	if f.usesRequires && f.PackageOptions.ComputedRequires {
 		cfg.Schema.Directives[dirPopulateFromRepresentations.Name] = dirPopulateFromRepresentations
-		cfg.Directives[dirPopulateFromRepresentations.Name] = config.DirectiveConfig{Implementation: &populateFromRepresentationsImplementation}
+		cfg.Directives[dirPopulateFromRepresentations.Name] = config.DirectiveConfig{
+			Implementation: &populateFromRepresentationsImplementation,
+		}
 
 		cfg.Schema.Directives[dirEntityReference.Name] = dirEntityReference
 		cfg.Directives[dirEntityReference.Name] = config.DirectiveConfig{SkipRuntime: true}
@@ -213,7 +218,10 @@ func (f *Federation) InjectSourcesLate(schema *ast.Schema) ([]*ast.Source, error
 			resolverSDL, entityResolverInputSDL := buildResolverSDL(r, e.Multi)
 			resolvers = append(resolvers, resolverSDL)
 			if entityResolverInputSDL != "" {
-				entityResolverInputDefinitions = append(entityResolverInputDefinitions, entityResolverInputSDL)
+				entityResolverInputDefinitions = append(
+					entityResolverInputDefinitions,
+					entityResolverInputSDL,
+				)
 			}
 		}
 	}
@@ -428,7 +436,10 @@ func (f *Federation) buildEntity(
 	}
 
 	if (schemaType.Kind == ast.Interface) && (len(schema.GetPossibleTypes(schemaType)) == 0) {
-		fmt.Printf("@key directive found on unused \"interface %s\". Will be ignored.\n", schemaType.Name)
+		fmt.Printf(
+			"@key directive found on unused \"interface %s\". Will be ignored.\n",
+			schemaType.Name,
+		)
 		return nil
 	}
 
@@ -648,12 +659,22 @@ func (f *Federation) generateExplicitRequires(
 			Entity:   entity,
 		}
 
-		populator.Comment = strings.TrimSpace(strings.TrimLeft(rewriter.GetMethodComment("executionContext", populator.FuncName), `\`))
-		populator.Implementation = strings.TrimSpace(rewriter.GetMethodBody("executionContext", populator.FuncName))
+		populator.Comment = strings.TrimSpace(
+			strings.TrimLeft(
+				rewriter.GetMethodComment("executionContext", populator.FuncName),
+				`\`,
+			),
+		)
+		populator.Implementation = strings.TrimSpace(
+			rewriter.GetMethodBody("executionContext", populator.FuncName),
+		)
 
 		if populator.Implementation == "" {
 			populator.Exists = false
-			populator.Implementation = fmt.Sprintf("panic(fmt.Errorf(\"not implemented: %v\"))", populator.FuncName)
+			populator.Implementation = fmt.Sprintf(
+				"panic(fmt.Errorf(\"not implemented: %v\"))",
+				populator.FuncName,
+			)
 		}
 		populators = append(populators, populator)
 	}
@@ -697,17 +718,29 @@ func buildResolverSDL(
 ) (resolverSDL, entityResolverInputSDL string) {
 	if multi {
 		entityResolverInputSDL = buildEntityResolverInputDefinitionSDL(resolver)
-		resolverSDL := fmt.Sprintf("\t%s(reps: [%s]!): [%s]", resolver.ResolverName, resolver.InputTypeName, resolver.ReturnTypeName)
+		resolverSDL := fmt.Sprintf(
+			"\t%s(reps: [%s]!): [%s]",
+			resolver.ResolverName,
+			resolver.InputTypeName,
+			resolver.ReturnTypeName,
+		)
 		return resolverSDL, entityResolverInputSDL
 	}
 
 	resolverArgs := ""
 	var resolverArgsSb705 strings.Builder
 	for _, keyField := range resolver.KeyFields {
-		resolverArgsSb705.WriteString(fmt.Sprintf("%s: %s,", keyField.Field.ToGoPrivate(), keyField.Definition.Type.String()))
+		resolverArgsSb705.WriteString(
+			fmt.Sprintf("%s: %s,", keyField.Field.ToGoPrivate(), keyField.Definition.Type.String()),
+		)
 	}
 	resolverArgs += resolverArgsSb705.String()
-	resolverSDL = fmt.Sprintf("\t%s(%s): %s!", resolver.ResolverName, resolverArgs, resolver.ReturnTypeName)
+	resolverSDL = fmt.Sprintf(
+		"\t%s(%s): %s!",
+		resolver.ResolverName,
+		resolverArgs,
+		resolver.ReturnTypeName,
+	)
 	return resolverSDL, ""
 }
 

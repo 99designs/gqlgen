@@ -32,7 +32,7 @@ func TestMultipartMixed(t *testing.T) {
 	}
 
 	createHTTPRequest := func(url string, query string) *http.Request {
-		req, err := http.NewRequest("POST", url, strings.NewReader(query))
+		req, err := http.NewRequest(http.MethodPost, url, strings.NewReader(query))
 		require.NoError(t, err, "Request threw error -> %s", err)
 		req.Header.Set("Accept", "multipart/mixed")
 		req.Header.Set("content-type", "application/json; charset=utf-8")

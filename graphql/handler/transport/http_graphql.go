@@ -33,7 +33,7 @@ func (h GRAPHQL) Supports(r *http.Request) bool {
 		return false
 	}
 
-	return r.Method == "POST" && mediaType == "application/graphql"
+	return r.Method == http.MethodPost && mediaType == "application/graphql"
 }
 
 func (h GRAPHQL) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {

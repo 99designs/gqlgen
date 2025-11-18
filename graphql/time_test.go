@@ -21,7 +21,13 @@ func TestTime(t *testing.T) {
 		newTime, err := UnmarshalTime(str)
 		require.NoError(t, err)
 
-		require.True(t, initialTime.Equal(newTime), "expected times %v and %v to equal", initialTime, newTime)
+		require.True(
+			t,
+			initialTime.Equal(newTime),
+			"expected times %v and %v to equal",
+			initialTime,
+			newTime,
+		)
 	})
 }
 
@@ -131,7 +137,13 @@ func TestUnmarshalTime(t *testing.T) {
 			t.Run(tt.name, func(t *testing.T) {
 				result, err := UnmarshalTime(tt.input)
 				require.NoError(t, err)
-				assert.True(t, tt.expected.Equal(result), "expected %v, got %v", tt.expected, result)
+				assert.True(
+					t,
+					tt.expected.Equal(result),
+					"expected %v, got %v",
+					tt.expected,
+					result,
+				)
 			})
 		}
 	})
@@ -163,7 +175,13 @@ func TestUnmarshalTime(t *testing.T) {
 			t.Run(tt.name, func(t *testing.T) {
 				result, err := UnmarshalTime(tt.input)
 				require.NoError(t, err)
-				assert.True(t, tt.expected.Equal(result), "expected %v, got %v", tt.expected, result)
+				assert.True(
+					t,
+					tt.expected.Equal(result),
+					"expected %v, got %v",
+					tt.expected,
+					result,
+				)
 			})
 		}
 	})
@@ -190,7 +208,13 @@ func TestUnmarshalTime(t *testing.T) {
 			t.Run(tt.name, func(t *testing.T) {
 				result, err := UnmarshalTime(tt.input)
 				require.NoError(t, err)
-				assert.True(t, tt.expected.Equal(result), "expected %v, got %v", tt.expected, result)
+				assert.True(
+					t,
+					tt.expected.Equal(result),
+					"expected %v, got %v",
+					tt.expected,
+					result,
+				)
 			})
 		}
 	})
@@ -473,7 +497,13 @@ func TestUnmarshalDate(t *testing.T) {
 			t.Run(tt.name, func(t *testing.T) {
 				result, err := UnmarshalDate(tt.input)
 				require.NoError(t, err)
-				assert.True(t, tt.expected.Equal(result), "expected %v, got %v", tt.expected, result)
+				assert.True(
+					t,
+					tt.expected.Equal(result),
+					"expected %v, got %v",
+					tt.expected,
+					result,
+				)
 			})
 		}
 	})
@@ -599,7 +629,16 @@ func TestUnmarshalDate(t *testing.T) {
 				require.NoError(t, err)
 
 				// Compare - dates should match (time components are dropped)
-				expectedDate := time.Date(originalTime.Year(), originalTime.Month(), originalTime.Day(), 0, 0, 0, 0, time.UTC)
+				expectedDate := time.Date(
+					originalTime.Year(),
+					originalTime.Month(),
+					originalTime.Day(),
+					0,
+					0,
+					0,
+					0,
+					time.UTC,
+				)
 				assert.True(t, expectedDate.Equal(parsedTime),
 					"round trip failed: expected=%v, parsed=%v", expectedDate, parsedTime)
 			})

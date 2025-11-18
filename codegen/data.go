@@ -194,7 +194,9 @@ func BuildData(cfg *config.Config, plugins ...any) (*Data, error) {
 		}
 
 		// otherwise show a generic error message
-		return nil, errors.New("invalid types were encountered while traversing the go source code, this probably means the invalid code generated isnt correct. add try adding -v to debug")
+		return nil, errors.New(
+			"invalid types were encountered while traversing the go source code, this probably means the invalid code generated isnt correct. add try adding -v to debug",
+		)
 	}
 	var sources []*ast.Source
 	sources, err = SerializeTransformedSchema(cfg.Schema, cfg.Sources)
@@ -212,7 +214,12 @@ func BuildData(cfg *config.Config, plugins ...any) (*Data, error) {
 		sourcePath := filepath.Join(wd, s.Name)
 		relative, err := filepath.Rel(outputDir, sourcePath)
 		if err != nil {
-			return nil, fmt.Errorf("failed to compute path of %s relative to %s: %w", sourcePath, outputDir, err)
+			return nil, fmt.Errorf(
+				"failed to compute path of %s relative to %s: %w",
+				sourcePath,
+				outputDir,
+				err,
+			)
 		}
 		relative = filepath.ToSlash(relative)
 		embeddable := true

@@ -43,7 +43,11 @@ func Prune(filename string, src []byte, packages *code.Packages) ([]byte, error)
 		return nil, err
 	}
 
-	return imports.Process(filename, buf.Bytes(), &imports.Options{FormatOnly: true, Comments: true, TabIndent: true, TabWidth: 8})
+	return imports.Process(
+		filename,
+		buf.Bytes(),
+		&imports.Options{FormatOnly: true, Comments: true, TabIndent: true, TabWidth: 8},
+	)
 }
 
 func getUnusedImports(file ast.Node, packages *code.Packages) map[string]string {

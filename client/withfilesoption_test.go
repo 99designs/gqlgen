@@ -61,7 +61,8 @@ func TestWithFiles(t *testing.T) {
 				if contentDisposition == `form-data; name="map"` {
 					assert.JSONEq(t, `{"0":["variables.file"]}`, string(slurp))
 				}
-				if regexp.MustCompile(`form-data; name="0"; filename=.*`).MatchString(contentDisposition) {
+				if regexp.MustCompile(`form-data; name="0"; filename=.*`).
+					MatchString(contentDisposition) {
 					assert.Equal(t, `text/plain; charset=utf-8`, p.Header.Get("Content-Type"))
 					assert.EqualValues(t, `The quick brown fox jumps over the lazy dog`, slurp)
 				}
@@ -104,7 +105,11 @@ func TestWithFiles(t *testing.T) {
 				contentDisposition := p.Header.Get("Content-Disposition")
 
 				if contentDisposition == `form-data; name="operations"` {
-					assert.JSONEq(t, `{"query":"{ id }","variables":{"input":{"files":[{},{}]}}}`, string(slurp))
+					assert.JSONEq(
+						t,
+						`{"query":"{ id }","variables":{"input":{"files":[{},{}]}}}`,
+						string(slurp),
+					)
 				}
 				if contentDisposition == `form-data; name="map"` {
 					// returns `{"0":["variables.input.files.0"],"1":["variables.input.files.1"]}`
@@ -115,7 +120,8 @@ func TestWithFiles(t *testing.T) {
 					assert.Contains(t, string(slurp), `["variables.input.files.1"]`)
 					assert.Contains(t, string(slurp), `}`)
 				}
-				if regexp.MustCompile(`form-data; name="[0,1]"; filename=.*`).MatchString(contentDisposition) {
+				if regexp.MustCompile(`form-data; name="[0,1]"; filename=.*`).
+					MatchString(contentDisposition) {
 					assert.Equal(t, `text/plain; charset=utf-8`, p.Header.Get("Content-Type"))
 					assert.Contains(t, []string{
 						`The quick brown fox jumps over the lazy dog`,
@@ -163,7 +169,11 @@ func TestWithFiles(t *testing.T) {
 				contentDisposition := p.Header.Get("Content-Disposition")
 
 				if contentDisposition == `form-data; name="operations"` {
-					assert.JSONEq(t, `{"query":"{ id }","variables":{"req":{"files":[{},{}],"foo":{"bar":{}}}}}`, string(slurp))
+					assert.JSONEq(
+						t,
+						`{"query":"{ id }","variables":{"req":{"files":[{},{}],"foo":{"bar":{}}}}}`,
+						string(slurp),
+					)
 				}
 				if contentDisposition == `form-data; name="map"` {
 					// returns `{"0":["variables.req.files.0"],"1":["variables.req.files.1"],"2":["variables.req.foo.bar"]}`
@@ -176,7 +186,8 @@ func TestWithFiles(t *testing.T) {
 					assert.Contains(t, string(slurp), `["variables.req.foo.bar"]`)
 					assert.Contains(t, string(slurp), `}`)
 				}
-				if regexp.MustCompile(`form-data; name="[0,1,2]"; filename=.*`).MatchString(contentDisposition) {
+				if regexp.MustCompile(`form-data; name="[0,1,2]"; filename=.*`).
+					MatchString(contentDisposition) {
 					assert.Equal(t, `text/plain; charset=utf-8`, p.Header.Get("Content-Type"))
 					assert.Contains(t, []string{
 						`The quick brown fox jumps over the lazy dog`,
@@ -228,10 +239,18 @@ func TestWithFiles(t *testing.T) {
 				contentDisposition := p.Header.Get("Content-Disposition")
 
 				if contentDisposition == `form-data; name="operations"` {
-					assert.JSONEq(t, `{"query":"{ id }","variables":{"files":[{},{},{}]}}`, string(slurp))
+					assert.JSONEq(
+						t,
+						`{"query":"{ id }","variables":{"files":[{},{},{}]}}`,
+						string(slurp),
+					)
 				}
 				if contentDisposition == `form-data; name="map"` {
-					assert.JSONEq(t, `{"0":["variables.files.0","variables.files.2"],"1":["variables.files.1"]}`, string(slurp))
+					assert.JSONEq(
+						t,
+						`{"0":["variables.files.0","variables.files.2"],"1":["variables.files.1"]}`,
+						string(slurp),
+					)
 					// returns `{"0":["variables.files.0","variables.files.2"],"1":["variables.files.1"]}`
 					// but the order of file inputs is unpredictable between different OS systems
 					assert.Contains(t, string(slurp), `{"0":`)
@@ -242,14 +261,19 @@ func TestWithFiles(t *testing.T) {
 					assert.NotContains(t, string(slurp), `,"2":`)
 					assert.Contains(t, string(slurp), `}`)
 				}
-				if regexp.MustCompile(`form-data; name="[0,1]"; filename=.*`).MatchString(contentDisposition) {
+				if regexp.MustCompile(`form-data; name="[0,1]"; filename=.*`).
+					MatchString(contentDisposition) {
 					assert.Equal(t, `text/plain; charset=utf-8`, p.Header.Get("Content-Type"))
 					assert.Contains(t, []string{
 						`The quick brown fox jumps over the lazy dog`,
 						`hello world`,
 					}, string(slurp))
 				}
-				assert.False(t, regexp.MustCompile(`form-data; name="2"; filename=.*`).MatchString(contentDisposition))
+				assert.False(
+					t,
+					regexp.MustCompile(`form-data; name="2"; filename=.*`).
+						MatchString(contentDisposition),
+				)
 			}
 			w.Write([]byte(`{}`))
 		})

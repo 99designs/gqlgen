@@ -31,7 +31,7 @@ func (h UrlEncodedForm) Supports(r *http.Request) bool {
 		return false
 	}
 
-	return r.Method == "POST" && mediaType == "application/x-www-form-urlencoded"
+	return r.Method == http.MethodPost && mediaType == "application/x-www-form-urlencoded"
 }
 
 func (h UrlEncodedForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {

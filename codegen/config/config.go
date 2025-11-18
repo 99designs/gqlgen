@@ -108,7 +108,10 @@ func LoadDefaultConfig() (*Config, error) {
 			return nil, fmt.Errorf("unable to open schema: %w", err)
 		}
 
-		config.Sources = append(config.Sources, &ast.Source{Name: filename, Input: string(schemaRaw)})
+		config.Sources = append(
+			config.Sources,
+			&ast.Source{Name: filename, Input: string(schemaRaw)},
+		)
 	}
 
 	return config, nil
@@ -238,7 +241,10 @@ func CompleteConfig(config *Config) error {
 			return fmt.Errorf("unable to open schema: %w", err)
 		}
 
-		config.Sources = append(config.Sources, &ast.Source{Name: filename, Input: string(schemaRaw)})
+		config.Sources = append(
+			config.Sources,
+			&ast.Source{Name: filename, Input: string(schemaRaw)},
+		)
 	}
 
 	config.GoInitialisms.setInitialisms()
@@ -431,7 +437,10 @@ func (c *Config) injectTypesFromSchema() error {
 
 						if extraFieldName == "" {
 							// Embeddable fields
-							typeMapEntry.EmbedExtraFields = append(typeMapEntry.EmbedExtraFields, extraField)
+							typeMapEntry.EmbedExtraFields = append(
+								typeMapEntry.EmbedExtraFields,
+								extraField,
+							)
 						} else {
 							// Regular fields
 							if typeMapEntry.ExtraFields == nil {
@@ -607,34 +616,43 @@ func (c *Config) check() error {
 		if err := c.Resolver.Check(); err != nil {
 			return fmt.Errorf("config.resolver: %w", err)
 		}
-		fileList[c.Resolver.ImportPath()] = append(fileList[c.Resolver.ImportPath()], FilenamePackage{
-			Filename: c.Resolver.Filename,
-			Package:  c.Resolver.Package,
-			Declaree: "resolver",
-		})
+		fileList[c.Resolver.ImportPath()] = append(
+			fileList[c.Resolver.ImportPath()],
+			FilenamePackage{
+				Filename: c.Resolver.Filename,
+				Package:  c.Resolver.Package,
+				Declaree: "resolver",
+			},
+		)
 	}
 	if c.Federation.IsDefined() {
 		if err := c.Federation.Check(); err != nil {
 			return fmt.Errorf("config.federation: %w", err)
 		}
-		fileList[c.Federation.ImportPath()] = append(fileList[c.Federation.ImportPath()], FilenamePackage{
-			Filename: c.Federation.Filename,
-			Package:  c.Federation.Package,
-			Declaree: "federation",
-		})
+		fileList[c.Federation.ImportPath()] = append(
+			fileList[c.Federation.ImportPath()],
+			FilenamePackage{
+				Filename: c.Federation.Filename,
+				Package:  c.Federation.Package,
+				Declaree: "federation",
+			},
+		)
 		if c.Federation.ImportPath() != c.Exec.ImportPath() {
 			return errors.New("federation and exec must be in the same package")
 		}
 	}
 	if c.Federated {
-		return errors.New("federated has been removed, instead use\nfederation:\n    filename: path/to/federated.go")
+		return errors.New(
+			"federated has been removed, instead use\nfederation:\n    filename: path/to/federated.go",
+		)
 	}
 
 	for importPath, pkg := range fileList {
 		for _, file1 := range pkg {
 			for _, file2 := range pkg {
 				if file1.Package != file2.Package {
-					return fmt.Errorf("%s and %s define the same import path (%s) with different package names (%s vs %s)",
+					return fmt.Errorf(
+						"%s and %s define the same import path (%s) with different package names (%s vs %s)",
 						file1.Declaree,
 						file2.Declaree,
 						importPath,
@@ -665,14 +683,22 @@ func (tm TypeMap) Check() error {
 	for typeName, entry := range tm {
 		for _, model := range entry.Model {
 			if strings.LastIndex(model, ".") < strings.LastIndex(model, "/") {
-				return fmt.Errorf("model %s: invalid type specifier \"%s\" - you need to specify a struct to map to", typeName, entry.Model)
+				return fmt.Errorf(
+					"model %s: invalid type specifier \"%s\" - you need to specify a struct to map to",
+					typeName,
+					entry.Model,
+				)
 			}
 		}
 
 		if len(entry.Model) == 0 {
 			for enum, v := range entry.EnumValues {
 				if v.Value != "" {
-					return fmt.Errorf("model is empty for: %v, but enum value is specified for %v", typeName, enum)
+					return fmt.Errorf(
+						"model is empty for: %v, but enum value is specified for %v",
+						typeName,
+						enum,
+					)
 				}
 			}
 		}
@@ -787,7 +813,10 @@ func (c *Config) autobind() error {
 
 		for i, p := range ps {
 			if p == nil || p.Module == nil {
-				return fmt.Errorf("unable to load %s - make sure you're using an import path to a package that exists", c.AutoBind[i])
+				return fmt.Errorf(
+					"unable to load %s - make sure you're using an import path to a package that exists",
+					c.AutoBind[i],
+				)
 			}
 
 			autobindType := c.lookupAutobindType(p, t)
@@ -839,17 +868,31 @@ func (c *Config) lookupAutobindType(p *packages.Package, schemaType *ast.Definit
 
 func (c *Config) injectBuiltins() {
 	builtins := TypeMap{
-		"__Directive":         {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.Directive"}},
+		"__Directive": {
+			Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.Directive"},
+		},
 		"__DirectiveLocation": {Model: StringList{"github.com/99designs/gqlgen/graphql.String"}},
-		"__Type":              {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.Type"}},
-		"__TypeKind":          {Model: StringList{"github.com/99designs/gqlgen/graphql.String"}},
-		"__Field":             {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.Field"}},
-		"__EnumValue":         {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.EnumValue"}},
-		"__InputValue":        {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.InputValue"}},
-		"__Schema":            {Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.Schema"}},
-		"Float":               {Model: StringList{"github.com/99designs/gqlgen/graphql.FloatContext"}},
-		"String":              {Model: StringList{"github.com/99designs/gqlgen/graphql.String"}},
-		"Boolean":             {Model: StringList{"github.com/99designs/gqlgen/graphql.Boolean"}},
+		"__Type": {
+			Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.Type"},
+		},
+		"__TypeKind": {Model: StringList{"github.com/99designs/gqlgen/graphql.String"}},
+		"__Field": {
+			Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.Field"},
+		},
+		"__EnumValue": {
+			Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.EnumValue"},
+		},
+		"__InputValue": {
+			Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.InputValue"},
+		},
+		"__Schema": {
+			Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.Schema"},
+		},
+		"Float": {
+			Model: StringList{"github.com/99designs/gqlgen/graphql.FloatContext"},
+		},
+		"String":  {Model: StringList{"github.com/99designs/gqlgen/graphql.String"}},
+		"Boolean": {Model: StringList{"github.com/99designs/gqlgen/graphql.Boolean"}},
 		"Int": {
 			// FIXME: using int / int64 for Int is not spec compliant and introduces
 			// security risks. We should default to int32.
@@ -888,7 +931,8 @@ func (c *Config) injectBuiltins() {
 	}
 
 	for typeName, entry := range extraBuiltins {
-		if t, ok := c.Schema.Types[typeName]; !c.Models.Exists(typeName) && ok && t.Kind == ast.Scalar {
+		if t, ok := c.Schema.Types[typeName]; !c.Models.Exists(typeName) && ok &&
+			t.Kind == ast.Scalar {
 			c.Models[typeName] = entry
 		}
 	}

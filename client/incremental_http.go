@@ -84,7 +84,11 @@ func errorIncremental(err error) *IncrementalHandler {
 // use at all.
 //
 // [incremental delivery over HTTP spec]: https://github.com/graphql/graphql-over-http/blob/main/rfcs/IncrementalDelivery.md
-func (p *Client) IncrementalHTTP(ctx context.Context, query string, options ...Option) *IncrementalHandler {
+func (p *Client) IncrementalHTTP(
+	ctx context.Context,
+	query string,
+	options ...Option,
+) *IncrementalHandler {
 	r, err := p.newRequest(query, options...)
 	if err != nil {
 		return errorIncremental(fmt.Errorf("request: %w", err))
@@ -104,7 +108,9 @@ func (p *Client) IncrementalHTTP(ctx context.Context, query string, options ...O
 		return errorIncremental(fmt.Errorf("parse content-type: %w", err))
 	}
 	if mediaType != "multipart/mixed" {
-		return errorIncremental(fmt.Errorf("expected content-type multipart/mixed, got %s", mediaType))
+		return errorIncremental(
+			fmt.Errorf("expected content-type multipart/mixed, got %s", mediaType),
+		)
 	}
 
 	// TODO: worth checking the deferSpec either to confirm this client

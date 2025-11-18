@@ -29,7 +29,12 @@ func TestModelGenerationNoDirective(t *testing.T) {
 		require.NotEmpty(t, embedder.graph.parentInterfaces, "graph should contain all interfaces")
 
 		for name := range embedder.graph.parentInterfaces {
-			require.False(t, embedder.graph.isEmbeddable(name), "interface %s should not be embeddable", name)
+			require.False(
+				t,
+				embedder.graph.isEmbeddable(name),
+				"interface %s should not be embeddable",
+				name,
+			)
 		}
 	})
 }
@@ -70,7 +75,11 @@ func TestModelGenerationDirectiveEmbedding(t *testing.T) {
 				{"Molecule", []string{"out_directive_embedding_models.BaseNode"}, nil},
 			},
 			additionalChecks: func(t *testing.T, generated string) {
-				require.Contains(t, generated, "github.com/99designs/gqlgen/plugin/modelgen/out_directive_embedding_models")
+				require.Contains(
+					t,
+					generated,
+					"github.com/99designs/gqlgen/plugin/modelgen/out_directive_embedding_models",
+				)
 			},
 		},
 	}
@@ -82,7 +91,13 @@ func TestModelGenerationDirectiveEmbedding(t *testing.T) {
 			assertBaseStructPresence(t, generated, tc.expectedBases, tc.unexpectedBases)
 
 			for _, check := range tc.structChecks {
-				assertStructFields(t, generated, check.structName, check.mustContain, check.mustNotContain)
+				assertStructFields(
+					t,
+					generated,
+					check.structName,
+					check.mustContain,
+					check.mustNotContain,
+				)
 			}
 
 			if tc.additionalChecks != nil {
@@ -179,7 +194,13 @@ func TestModelGenerationSkippedParents(t *testing.T) {
 			assertBaseStructPresence(t, generated, tc.expectedBases, tc.unexpectedBases)
 
 			for _, check := range tc.structChecks {
-				assertStructFields(t, generated, check.structName, check.mustContain, check.mustNotContain)
+				assertStructFields(
+					t,
+					generated,
+					check.structName,
+					check.mustContain,
+					check.mustNotContain,
+				)
 			}
 		})
 	}
@@ -223,24 +244,52 @@ func setupTestGeneration(t *testing.T, configPath, outputDir, generatedFile stri
 	return string(generated)
 }
 
-func assertBaseStructPresence(t *testing.T, generated string, expectedBases, unexpectedBases []string) {
+func assertBaseStructPresence(
+	t *testing.T,
+	generated string,
+	expectedBases, unexpectedBases []string,
+) {
 	t.Helper()
 	for _, base := range expectedBases {
 		require.Contains(t, generated, "type "+base, "Expected Base struct %s to be present", base)
 	}
 	for _, base := range unexpectedBases {
-		require.NotContains(t, generated, "type "+base, "Expected Base struct %s to be absent", base)
+		require.NotContains(
+			t,
+			generated,
+			"type "+base,
+			"Expected Base struct %s to be absent",
+			base,
+		)
 	}
 }
 
-func assertStructFields(t *testing.T, generated, structName string, mustContain, mustNotContain []string) {
+func assertStructFields(
+	t *testing.T,
+	generated, structName string,
+	mustContain, mustNotContain []string,
+) {
 	t.Helper()
 	structStr := getStringInBetween(generated, "type "+structName+" struct {", "}")
 	require.NotEmpty(t, structStr, "Struct %s should exist", structName)
 	for _, field := range mustContain {
-		require.Contains(t, structStr, field, "Struct %s should contain field %s", structName, field)
+		require.Contains(
+			t,
+			structStr,
+			field,
+			"Struct %s should contain field %s",
+			structName,
+			field,
+		)
 	}
 	for _, field := range mustNotContain {
-		require.NotContains(t, structStr, field, "Struct %s should not contain field %s", structName, field)
+		require.NotContains(
+			t,
+			structStr,
+			field,
+			"Struct %s should not contain field %s",
+			structName,
+			field,
+		)
 	}
 }

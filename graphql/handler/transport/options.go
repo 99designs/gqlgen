@@ -16,7 +16,7 @@ type Options struct {
 var _ graphql.Transport = Options{}
 
 func (o Options) Supports(r *http.Request) bool {
-	return r.Method == "HEAD" || r.Method == "OPTIONS"
+	return r.Method == http.MethodHead || r.Method == http.MethodOptions
 }
 
 func (o Options) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {

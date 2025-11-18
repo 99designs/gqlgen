@@ -74,7 +74,9 @@ func TestFileUpload(t *testing.T) {
 			op := graphql.GetOperationContext(ctx).Operation
 			require.Len(t, op.VariableDefinitions, 1)
 			require.Equal(t, "req", op.VariableDefinitions[0].Variable)
-			return graphql.OneShot(&graphql.Response{Data: []byte(`{"singleUploadWithPayload":"test"}`)})
+			return graphql.OneShot(
+				&graphql.Response{Data: []byte(`{"singleUploadWithPayload":"test"}`)},
+			)
 		}
 
 		operations := `{ "query": "mutation ($req: UploadFile!) { singleUploadWithPayload(req: $req) }", "variables": { "req": {"file": null, "id": 1 } } }`
@@ -100,7 +102,9 @@ func TestFileUpload(t *testing.T) {
 			op := graphql.GetOperationContext(ctx).Operation
 			require.Len(t, op.VariableDefinitions, 1)
 			require.Equal(t, "files", op.VariableDefinitions[0].Variable)
-			return graphql.OneShot(&graphql.Response{Data: []byte(`{"multipleUpload":[{"id":1},{"id":2}]}`)})
+			return graphql.OneShot(
+				&graphql.Response{Data: []byte(`{"multipleUpload":[{"id":1},{"id":2}]}`)},
+			)
 		}
 
 		operations := `{ "query": "mutation($files: [Upload!]!) { multipleUpload(files: $files) }", "variables": { "files": [null, null] } }`
@@ -132,7 +136,11 @@ func TestFileUpload(t *testing.T) {
 			op := graphql.GetOperationContext(ctx).Operation
 			require.Len(t, op.VariableDefinitions, 1)
 			require.Equal(t, "req", op.VariableDefinitions[0].Variable)
-			return graphql.OneShot(&graphql.Response{Data: []byte(`{"multipleUploadWithPayload":[{"id":1},{"id":2}]}`)})
+			return graphql.OneShot(
+				&graphql.Response{
+					Data: []byte(`{"multipleUploadWithPayload":[{"id":1},{"id":2}]}`),
+				},
+			)
 		}
 
 		operations := `{ "query": "mutation($req: [UploadFile!]!) { multipleUploadWithPayload(req: $req) }", "variables": { "req": [ { "id": 1, "file": null }, { "id": 2, "file": null } ] } }`
@@ -156,7 +164,11 @@ func TestFileUpload(t *testing.T) {
 		resp := httptest.NewRecorder()
 		h.ServeHTTP(resp, req)
 		require.Equal(t, http.StatusOK, resp.Code)
-		require.JSONEq(t, `{"data":{"multipleUploadWithPayload":[{"id":1},{"id":2}]}}`, resp.Body.String())
+		require.JSONEq(
+			t,
+			`{"data":{"multipleUploadWithPayload":[{"id":1},{"id":2}]}}`,
+			resp.Body.String(),
+		)
 	})
 
 	t.Run("valid file list upload with payload and file reuse", func(t *testing.T) {
@@ -165,7 +177,11 @@ func TestFileUpload(t *testing.T) {
 				op := graphql.GetOperationContext(ctx).Operation
 				require.Len(t, op.VariableDefinitions, 1)
 				require.Equal(t, "req", op.VariableDefinitions[0].Variable)
-				return graphql.OneShot(&graphql.Response{Data: []byte(`{"multipleUploadWithPayload":[{"id":1},{"id":2}]}`)})
+				return graphql.OneShot(
+					&graphql.Response{
+						Data: []byte(`{"multipleUploadWithPayload":[{"id":1},{"id":2}]}`),
+					},
+				)
 			}
 			multipartForm.MaxMemory = uploadMaxMemory
 
@@ -184,7 +200,11 @@ func TestFileUpload(t *testing.T) {
 			resp := httptest.NewRecorder()
 			h.ServeHTTP(resp, req)
 			require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
-			require.JSONEq(t, `{"data":{"multipleUploadWithPayload":[{"id":1},{"id":2}]}}`, resp.Body.String())
+			require.JSONEq(
+				t,
+				`{"data":{"multipleUploadWithPayload":[{"id":1},{"id":2}]}}`,
+				resp.Body.String(),
+			)
 		}
 
 		t.Run("payload smaller than UploadMaxMemory, stored in memory", func(t *testing.T) {
@@ -209,14 +229,18 @@ func TestFileUpload(t *testing.T) {
 
 	t.Run("failed invalid multipart", func(t *testing.T) {
 		req := &http.Request{
-			Method: "POST",
+			Method: http.MethodPost,
 			Header: http.Header{"Content-Type": {`multipart/form-data; boundary="foo123"`}},
 			Body:   io.NopCloser(new(bytes.Buffer)),
 		}
 		resp := httptest.NewRecorder()
 		h.ServeHTTP(resp, req)
 		require.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
-		require.JSONEq(t, `{"errors":[{"message":"first part must be operations"}],"data":null}`, resp.Body.String())
+		require.JSONEq(
+			t,
+			`{"errors":[{"message":"first part must be operations"}],"data":null}`,
+			resp.Body.String(),
+		)
 	})
 
 	t.Run("fail parse operation", func(t *testing.T) {
@@ -226,7 +250,11 @@ func TestFileUpload(t *testing.T) {
 		resp := httptest.NewRecorder()
 		h.ServeHTTP(resp, req)
 		require.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
-		require.JSONEq(t, `{"errors":[{"message":"operations form field could not be decoded"}],"data":null}`, resp.Body.String())
+		require.JSONEq(
+			t,
+			`{"errors":[{"message":"operations form field could not be decoded"}],"data":null}`,
+			resp.Body.String(),
+		)
 	})
 
 	t.Run("fail parse map", func(t *testing.T) {
@@ -236,7 +264,11 @@ func TestFileUpload(t *testing.T) {
 		resp := httptest.NewRecorder()
 		h.ServeHTTP(resp, req)
 		require.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
-		require.JSONEq(t, `{"errors":[{"message":"map form field could not be decoded"}],"data":null}`, resp.Body.String())
+		require.JSONEq(
+			t,
+			`{"errors":[{"message":"map form field could not be decoded"}],"data":null}`,
+			resp.Body.String(),
+		)
 	})
 
 	t.Run("fail missing file", func(t *testing.T) {
@@ -246,7 +278,11 @@ func TestFileUpload(t *testing.T) {
 		resp := httptest.NewRecorder()
 		h.ServeHTTP(resp, req)
 		require.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
-		require.JSONEq(t, `{"errors":[{"message":"failed to get key 0 from form"}],"data":null}`, resp.Body.String())
+		require.JSONEq(
+			t,
+			`{"errors":[{"message":"failed to get key 0 from form"}],"data":null}`,
+			resp.Body.String(),
+		)
 	})
 
 	t.Run("fail map entry with invalid operations paths prefix", func(t *testing.T) {
@@ -256,7 +292,11 @@ func TestFileUpload(t *testing.T) {
 		resp := httptest.NewRecorder()
 		h.ServeHTTP(resp, req)
 		require.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
-		require.JSONEq(t, `{"errors":[{"message":"invalid operations paths for key 0"}],"data":null}`, resp.Body.String())
+		require.JSONEq(
+			t,
+			`{"errors":[{"message":"invalid operations paths for key 0"}],"data":null}`,
+			resp.Body.String(),
+		)
 	})
 
 	t.Run("fail parse request big body", func(t *testing.T) {
@@ -266,7 +306,11 @@ func TestFileUpload(t *testing.T) {
 		resp := httptest.NewRecorder()
 		h.ServeHTTP(resp, req)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
-		require.JSONEq(t, `{"errors":[{"message":"failed to parse multipart form, request body too large"}],"data":null}`, resp.Body.String())
+		require.JSONEq(
+			t,
+			`{"errors":[{"message":"failed to parse multipart form, request body too large"}],"data":null}`,
+			resp.Body.String(),
+		)
 	})
 }
 
@@ -289,7 +333,10 @@ func createUploadRequest(t *testing.T, operations, mapData string, files []file)
 
 	for i := range files {
 		h := make(textproto.MIMEHeader)
-		h.Set("Content-Disposition", fmt.Sprintf(`form-data; name="%s"; filename="%s"`, files[i].mapKey, files[i].name))
+		h.Set(
+			"Content-Disposition",
+			fmt.Sprintf(`form-data; name="%s"; filename="%s"`, files[i].mapKey, files[i].name),
+		)
 		h.Set("Content-Type", files[i].contentType)
 		ff, err := bodyWriter.CreatePart(h)
 		require.NoError(t, err)
@@ -299,7 +346,7 @@ func createUploadRequest(t *testing.T, operations, mapData string, files []file)
 	err = bodyWriter.Close()
 	require.NoError(t, err)
 
-	req, err := http.NewRequest("POST", "/graphql", bodyBuf)
+	req, err := http.NewRequest(http.MethodPost, "/graphql", bodyBuf)
 	require.NoError(t, err)
 
 	req.Header.Set("Content-Type", bodyWriter.FormDataContentType())

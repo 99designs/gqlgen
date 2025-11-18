@@ -107,7 +107,8 @@ func buildPackageOptions(cfg *config.Config) (PackageOptions, error) {
 			)
 		}
 
-		// We rely on injecting a null argument with a directives for fields with @requires, so we need to ensure
+		// We rely on injecting a null argument with a directives for fields with @requires, so we
+		// need to ensure
 		// our directive is always called.
 		if !cfg.CallArgumentDirectivesWithNull {
 			return PackageOptions{}, fmt.Errorf(
@@ -117,7 +118,8 @@ func buildPackageOptions(cfg *config.Config) (PackageOptions, error) {
 		}
 	}
 
-	// We rely on injecting a null argument with a directives for fields with @requires, so we need to ensure
+	// We rely on injecting a null argument with a directives for fields with @requires, so we need
+	// to ensure
 	// our directive is always called.
 	return PackageOptions{
 		ExplicitRequires:    explicitRequires,
@@ -182,7 +184,8 @@ func (f *Federation) MutateConfig(cfg *config.Config) error {
 func (f *Federation) InjectSourcesEarly() ([]*ast.Source, error) {
 	input := ``
 
-	// add version-specific changes on key directive, as well as adding the new directives for federation 2
+	// add version-specific changes on key directive, as well as adding the new directives for
+	// federation 2
 	switch f.version {
 	case 1:
 		input += federationVersion1Schema
@@ -541,7 +544,8 @@ func extractFields(
 ) (string, error) {
 	var arg *ast.Argument
 
-	// since directives are able to now have multiple arguments, we need to check both possible for a possible @key(fields="" fields="")
+	// since directives are able to now have multiple arguments, we need to check both possible for
+	// a possible @key(fields="" fields="")
 	for _, a := range dir.Arguments {
 		if a.Name == DirArgFields {
 			if arg != nil {

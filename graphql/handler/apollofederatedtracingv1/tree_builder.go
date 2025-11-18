@@ -33,7 +33,8 @@ type NodeMap struct {
 	parent *generated.Trace_Node
 }
 
-// NewTreeBuilder is used to start the node tree with a default root node, along with the related tree nodes map entry
+// NewTreeBuilder is used to start the node tree with a default root node, along with the related
+// tree nodes map entry
 func NewTreeBuilder(errorOptions *ErrorOptions, logger tracing_logger.Logger) *TreeBuilder {
 	if errorOptions == nil {
 		errorOptions = &ErrorOptions{
@@ -96,7 +97,8 @@ func (tb *TreeBuilder) StartTimer(ctx context.Context) {
 	tb.startTime = &start
 }
 
-// StopTimer marks the end of the timer, along with setting the related fields in the protobuf representation
+// StopTimer marks the end of the timer, along with setting the related fields in the protobuf
+// representation
 func (tb *TreeBuilder) StopTimer(ctx context.Context) {
 	tb.logger.Print("StopTimer called")
 	if tb.startTime == nil {
@@ -112,8 +114,9 @@ func (tb *TreeBuilder) StopTimer(ctx context.Context) {
 	tb.stopped = true
 }
 
-// On each field, it calculates the time started at as now - tree.StartTime, as well as a deferred function upon full resolution of the
-// field as (now - tree.StartTime); these are used by Apollo to calculate how fields are being resolved in the AST
+// On each field, it calculates the time started at as now - tree.StartTime, as well as a deferred
+// function upon full resolution of the field as (now - tree.StartTime); these are used by Apollo to
+// calculate how fields are being resolved in the AST
 func (tb *TreeBuilder) WillResolveField(ctx context.Context) func() {
 	if tb.startTime == nil {
 		tb.logger.Println(errors.New("WillResolveField called before StartTimer"))
@@ -152,7 +155,8 @@ func (tb *TreeBuilder) DidEncounterErrors(ctx context.Context, gqlErrors gqlerro
 	}
 }
 
-// newNode is called on each new node within the AST and sets related values such as the entry in the tree.node map and ID attribute
+// newNode is called on each new node within the AST and sets related values such as the entry in
+// the tree.node map and ID attribute
 func (tb *TreeBuilder) newNode(path *graphql.FieldContext) *generated.Trace_Node {
 	// if the path is empty, it is the root node of the operation
 	if path.Path().String() == "" {

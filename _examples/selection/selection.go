@@ -49,7 +49,7 @@ func (r *queryResolver) Events(ctx context.Context) ([]Event, error) {
 		} else {
 			events = append(events, &Post{
 				Selection: sels,
-				Collected: formatCollected(graphql.CollectFieldsCtx(ctx, []string{"Post"})),
+				Collected: formatCollected(graphql.CollectFieldsCtx(ctx, []string{http.MethodPost})),
 				Message:   "Hey",
 				Sent:      time.Now(),
 			})

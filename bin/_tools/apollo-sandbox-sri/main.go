@@ -64,7 +64,8 @@ func main() {
 	}
 }
 
-// updateApolloSandbox finds the latest version of apollo sandbox js and updates the apollo_sandbox_playground.go.
+// updateApolloSandbox finds the latest version of apollo sandbox js and updates the
+// apollo_sandbox_playground.go.
 func updateApolloSandbox() error {
 	repoRootPath, err := findRepoRootPath()
 	if err != nil {
@@ -86,7 +87,12 @@ func updateApolloSandbox() error {
 		return fmt.Errorf("failed to compute latestJsSri hash: %w", err)
 	}
 
-	apolloSandBoxFile := filepath.Join(repoRootPath, "graphql", "playground", "apollo_sandbox_playground.go")
+	apolloSandBoxFile := filepath.Join(
+		repoRootPath,
+		"graphql",
+		"playground",
+		"apollo_sandbox_playground.go",
+	)
 
 	goFileBytes, err := alterApolloSandboxContents(apolloSandBoxFile, latestJsUrl, latestJsSri)
 	if err != nil {
@@ -222,7 +228,10 @@ func newHasher(algo string) (hash.Hash, error) {
 	case "sha512":
 		return sha512.New(), nil
 	default:
-		return nil, fmt.Errorf("unsupported crypto algo: %q, use either md5, sha256 or sha512", algo)
+		return nil, fmt.Errorf(
+			"unsupported crypto algo: %q, use either md5, sha256 or sha512",
+			algo,
+		)
 	}
 }
 
@@ -232,7 +241,8 @@ func integrity(algo string, sum []byte) string {
 	return fmt.Sprintf("%s-%s", algo, encoded)
 }
 
-// alterApolloSandboxContents alters the apollo sandbox source code contents to use the latest JS URL and SRI.
+// alterApolloSandboxContents alters the apollo sandbox source code contents to use the latest JS
+// URL and SRI.
 func alterApolloSandboxContents(filename, latestJsUrl, latestJsSri string) ([]byte, error) {
 	tokenFileSet := token.NewFileSet()
 	node, err := parser.ParseFile(tokenFileSet, filename, nil, parser.ParseComments)
@@ -270,7 +280,9 @@ func alterApolloSandboxContents(filename, latestJsUrl, latestJsSri string) ([]by
 		}
 	}
 	if !mainJsUpdated || !mainSriUpdated {
-		return nil, errors.New("failed to find apolloSandboxMainJs or apolloSandboxMainSri constants")
+		return nil, errors.New(
+			"failed to find apolloSandboxMainJs or apolloSandboxMainSri constants",
+		)
 	}
 
 	var buf bytes.Buffer

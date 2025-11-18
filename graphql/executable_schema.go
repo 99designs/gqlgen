@@ -21,8 +21,9 @@ type ExecutableSchema interface {
 	Exec(ctx context.Context) ResponseHandler
 }
 
-// CollectFields returns the set of fields from an ast.SelectionSet where all collected fields satisfy at least one of the GraphQL types
-// passed through satisfies. Providing an empty slice for satisfies will collect all fields regardless of fragment type conditions.
+// CollectFields returns the set of fields from an ast.SelectionSet where all collected fields
+// satisfy at least one of the GraphQL types passed through satisfies. Providing an empty slice for
+// satisfies will collect all fields regardless of fragment type conditions.
 func CollectFields(
 	reqCtx *OperationContext,
 	selSet ast.SelectionSet,

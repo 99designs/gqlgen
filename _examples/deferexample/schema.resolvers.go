@@ -57,6 +57,8 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 // Todo returns TodoResolver implementation.
 func (r *Resolver) Todo() TodoResolver { return &todoResolver{r} }
 
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
-type todoResolver struct{ *Resolver }
+type (
+	mutationResolver struct{ *Resolver }
+	queryResolver    struct{ *Resolver }
+	todoResolver     struct{ *Resolver }
+)

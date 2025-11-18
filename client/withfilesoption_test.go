@@ -176,7 +176,8 @@ func TestWithFiles(t *testing.T) {
 					)
 				}
 				if contentDisposition == `form-data; name="map"` {
-					// returns `{"0":["variables.req.files.0"],"1":["variables.req.files.1"],"2":["variables.req.foo.bar"]}`
+					// returns
+					// `{"0":["variables.req.files.0"],"1":["variables.req.files.1"],"2":["variables.req.foo.bar"]}`
 					// but the order of file inputs is unpredictable between different OS systems
 					assert.Contains(t, string(slurp), `{"0":`)
 					assert.Contains(t, string(slurp), `["variables.req.files.0"]`)
@@ -251,7 +252,8 @@ func TestWithFiles(t *testing.T) {
 						`{"0":["variables.files.0","variables.files.2"],"1":["variables.files.1"]}`,
 						string(slurp),
 					)
-					// returns `{"0":["variables.files.0","variables.files.2"],"1":["variables.files.1"]}`
+					// returns
+					// `{"0":["variables.files.0","variables.files.2"],"1":["variables.files.1"]}`
 					// but the order of file inputs is unpredictable between different OS systems
 					assert.Contains(t, string(slurp), `{"0":`)
 					assert.Contains(t, string(slurp), `["variables.files.0"`)

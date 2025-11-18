@@ -79,7 +79,7 @@ func TestInterfaces(t *testing.T) {
 		resolvers := &Stub{}
 		resolvers.QueryResolver.NoShapeTypedNil = func(ctx context.Context) (shapes Shape, e error) {
 			t.Fatal("should not be called")
-			return
+			return shapes, e
 		}
 
 		srv := handler.New(
@@ -104,7 +104,7 @@ func TestInterfaces(t *testing.T) {
 		resolvers := &Stub{}
 		resolvers.QueryResolver.Animal = func(ctx context.Context) (animal Animal, e error) {
 			t.Fatal("should not be called")
-			return
+			return animal, e
 		}
 
 		srv := handler.New(

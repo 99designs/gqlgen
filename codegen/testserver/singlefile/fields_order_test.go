@@ -33,7 +33,7 @@ func TestFieldsOrder(t *testing.T) {
 		ret = &FieldsOrderPayload{
 			FirstFieldValue: in.FirstField,
 		}
-		return
+		return ret, err
 	}
 
 	t.Run("firstField", func(t *testing.T) {

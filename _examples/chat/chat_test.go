@@ -83,7 +83,8 @@ func TestChatSubscriptions(t *testing.T) {
 	}
 	wg.Wait()
 
-	// 1 for the main thread, 1 for the testing package and remainder is reserved for the HTTP server threads
+	// 1 for the main thread, 1 for the testing package and remainder is reserved for the HTTP
+	// server threads
 	// TODO: use something like runtime.Stack to filter out HTTP server threads,
 	// TODO: which is required for proper concurrency and leaks testing
 	require.Less(t, runtime.NumGoroutine(), 1+1+batchSize*2, "goroutine leak")

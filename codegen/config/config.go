@@ -69,8 +69,9 @@ type Config struct {
 
 var cfgFilenames = []string{".gqlgen.yml", "gqlgen.yml", "gqlgen.yaml"}
 
-// templatePackageNames is a list of packages names that the default templates use, in order to preload those for performance considerations
-// any additional package added to the base templates should be added here to improve performance and load all packages in bulk
+// templatePackageNames is a list of packages names that the default templates use, in order to
+// preload those for performance considerations any additional package added to the base templates
+// should be added here to improve performance and load all packages in bulk
 var templatePackageNames = []string{
 	"context", "fmt", "io", "strconv", "time", "sync", "strings", "sync/atomic", "embed", "golang.org/x/sync/semaphore",
 	"errors", "bytes", "github.com/vektah/gqlparser/v2", "github.com/vektah/gqlparser/v2/ast",
@@ -117,7 +118,8 @@ func LoadDefaultConfig() (*Config, error) {
 	return config, nil
 }
 
-// LoadConfigFromDefaultLocations looks for a config file in the current directory, and all parent directories
+// LoadConfigFromDefaultLocations looks for a config file in the current directory, and all parent
+// directories
 // walking up the tree. The closest config file will be returned.
 func LoadConfigFromDefaultLocations() (*Config, error) {
 	cfgFile, err := findCfg()
@@ -200,20 +202,24 @@ func CompleteConfig(config *Config) error {
 			pathParts := strings.SplitN(f, "**", 2)
 			rest := strings.TrimPrefix(strings.TrimPrefix(pathParts[1], `\`), `/`)
 			// turn the rest of the glob into a regex, anchored only at the end because ** allows
-			// for any number of dirs in between and walk will let us match against the full path name
+			// for any number of dirs in between and walk will let us match against the full path
+			// name
 			globRe := regexp.MustCompile(path2regex.Replace(rest) + `$`)
 
-			if err := filepath.Walk(pathParts[0], func(path string, info os.FileInfo, err error) error {
-				if err != nil {
-					return err
-				}
+			if err := filepath.Walk(
+				pathParts[0],
+				func(path string, info os.FileInfo, err error) error {
+					if err != nil {
+						return err
+					}
 
-				if globRe.MatchString(strings.TrimPrefix(path, pathParts[0])) {
-					matches = append(matches, path)
-				}
+					if globRe.MatchString(strings.TrimPrefix(path, pathParts[0])) {
+						matches = append(matches, path)
+					}
 
-				return nil
-			}); err != nil {
+					return nil
+				},
+			); err != nil {
 				return fmt.Errorf("failed to walk schema at root %s: %w", pathParts[0], err)
 			}
 		} else {
@@ -753,7 +759,8 @@ type DirectiveConfig struct {
 	// The function implemmentation should be provided here as a string.
 	//
 	// The function should have the following signature:
-	// func(ctx context.Context, obj any, next graphql.Resolver[, directive arguments if any]) (res any, err error)
+	// func(ctx context.Context, obj any, next graphql.Resolver[, directive arguments if any]) (res
+	// any, err error)
 	Implementation *string
 }
 

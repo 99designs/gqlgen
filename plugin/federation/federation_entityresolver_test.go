@@ -660,7 +660,8 @@ func TestMultiEntityResolver(t *testing.T) {
 
 func entityQuery(queries []string) string {
 	// What we want!
-	// query($representations:[_Any!]!){_entities(representations:$representations){ ...on Hello{secondary} }}
+	// query($representations:[_Any!]!){_entities(representations:$representations){ ...on
+	// Hello{secondary} }}
 	entityQueries := make([]string, len(queries))
 	for i, query := range queries {
 		entityQueries[i] = " ... on " + query

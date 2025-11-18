@@ -33,7 +33,8 @@ type ExecLayout string
 var (
 	// Write all generated code to a single file.
 	ExecLayoutSingleFile ExecLayout = "single-file"
-	// Write generated code to a directory, generating one Go source file for each GraphQL schema file.
+	// Write generated code to a directory, generating one Go source file for each GraphQL schema
+	// file.
 	ExecLayoutFollowSchema ExecLayout = "follow-schema"
 )
 

@@ -29,22 +29,26 @@ func (e *Executor) Use(extension graphql.HandlerExtension) {
 	}
 }
 
-// AroundFields is a convenience method for creating an extension that only implements field middleware
+// AroundFields is a convenience method for creating an extension that only implements field
+// middleware
 func (e *Executor) AroundFields(f graphql.FieldMiddleware) {
 	e.Use(aroundFieldFunc(f))
 }
 
-// AroundRootFields is a convenience method for creating an extension that only implements root field middleware
+// AroundRootFields is a convenience method for creating an extension that only implements root
+// field middleware
 func (e *Executor) AroundRootFields(f graphql.RootFieldMiddleware) {
 	e.Use(aroundRootFieldFunc(f))
 }
 
-// AroundOperations is a convenience method for creating an extension that only implements operation middleware
+// AroundOperations is a convenience method for creating an extension that only implements operation
+// middleware
 func (e *Executor) AroundOperations(f graphql.OperationMiddleware) {
 	e.Use(aroundOpFunc(f))
 }
 
-// AroundResponses is a convenience method for creating an extension that only implements response middleware
+// AroundResponses is a convenience method for creating an extension that only implements response
+// middleware
 func (e *Executor) AroundResponses(f graphql.ResponseMiddleware) {
 	e.Use(aroundRespFunc(f))
 }

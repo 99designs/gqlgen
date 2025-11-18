@@ -10,7 +10,8 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
-// MultipartForm the Multipart request spec https://github.com/jaydenseric/graphql-multipart-request-spec
+// MultipartForm the Multipart request spec
+// https://github.com/jaydenseric/graphql-multipart-request-spec
 type MultipartForm struct {
 	// MaxUploadSize sets the maximum number of bytes used to parse a request body
 	// as multipart/form-data.

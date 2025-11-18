@@ -110,8 +110,9 @@ func RecoverFunc(recoverFn graphql.RecoverFunc) Option {
 	}
 }
 
-// ErrorPresenter transforms errors found while resolving into errors that will be returned to the user. It provides
-// a good place to add any extra fields, like error.type, that might be desired by your frontend. Check the default
+// ErrorPresenter transforms errors found while resolving into errors that will be returned to the
+// user. It provides a good place to add any extra fields, like error.type, that might be desired by
+// your frontend. Check the default
 // implementation in graphql.DefaultErrorPresenter for an example.
 //
 // Deprecated: switch to graphql/handler.New
@@ -121,7 +122,8 @@ func ErrorPresenter(f graphql.ErrorPresenterFunc) Option {
 	}
 }
 
-// IntrospectionEnabled = false will forbid clients from calling introspection endpoints. Can be useful in prod when you don't
+// IntrospectionEnabled = false will forbid clients from calling introspection endpoints. Can be
+// useful in prod when you don't
 // want clients introspecting the full schema.
 //
 // Deprecated: switch to graphql/handler.New
@@ -141,7 +143,8 @@ func ComplexityLimit(limit int) Option {
 	}
 }
 
-// ComplexityLimitFunc allows you to define a function to dynamically set the maximum query complexity that is allowed
+// ComplexityLimitFunc allows you to define a function to dynamically set the maximum query
+// complexity that is allowed
 // to be executed.
 // If a query is submitted that exceeds the limit, a 422 status code will be returned.
 //

@@ -35,7 +35,7 @@ func TestHandlerComplexity(t *testing.T) {
 	t.Run("below complexity limit", func(t *testing.T) {
 		stats = nil
 		h.SetCalculatedComplexity(2)
-		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
+		resp := doRequest(h, http.MethodPost, "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 		require.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 
@@ -46,7 +46,7 @@ func TestHandlerComplexity(t *testing.T) {
 	t.Run("above complexity limit", func(t *testing.T) {
 		stats = nil
 		h.SetCalculatedComplexity(4)
-		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
+		resp := doRequest(h, http.MethodPost, "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 		require.JSONEq(
 			t,
@@ -61,7 +61,7 @@ func TestHandlerComplexity(t *testing.T) {
 	t.Run("within dynamic complexity limit", func(t *testing.T) {
 		stats = nil
 		h.SetCalculatedComplexity(4)
-		resp := doRequest(h, "POST", "/graphql", `{"query":"{ ok: name }"}`)
+		resp := doRequest(h, http.MethodPost, "/graphql", `{"query":"{ ok: name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 		require.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 
@@ -83,7 +83,7 @@ func TestFixedComplexity(t *testing.T) {
 
 	t.Run("below complexity limit", func(t *testing.T) {
 		h.SetCalculatedComplexity(2)
-		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
+		resp := doRequest(h, http.MethodPost, "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 		require.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 
@@ -93,7 +93,7 @@ func TestFixedComplexity(t *testing.T) {
 
 	t.Run("above complexity limit", func(t *testing.T) {
 		h.SetCalculatedComplexity(4)
-		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
+		resp := doRequest(h, http.MethodPost, "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 		require.JSONEq(
 			t,
@@ -109,7 +109,7 @@ func TestFixedComplexity(t *testing.T) {
 		h.SetCalculatedComplexity(4)
 		resp := doRequest(
 			h,
-			"POST",
+			http.MethodPost,
 			"/graphql",
 			`{ "operationName":"IntrospectionQuery", "query":"query IntrospectionQuery { __schema { queryType { name } mutationType { name }}}"}`,
 		)

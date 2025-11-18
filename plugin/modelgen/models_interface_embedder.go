@@ -145,7 +145,8 @@ func (g *embeddedInterfaceGenerator) createParentBaseType(interfaceName string) 
 	)
 }
 
-// generateEmbeddedFields returns map: field name -> embedded Base struct (or nil for subsequent fields).
+// generateEmbeddedFields returns map: field name -> embedded Base struct (or nil for subsequent
+// fields).
 // Covariant overrides prevent embedding and require explicit field generation.
 func (g *embeddedInterfaceGenerator) generateEmbeddedFields(
 	fields []*ast.FieldDefinition,
@@ -252,7 +253,8 @@ func (g *embeddedInterfaceGenerator) findInterfaceForField(field *ast.FieldDefin
 	return ""
 }
 
-// typesMatch checks if two GraphQL types are identical (same base type, nullability, and list wrapping).
+// typesMatch checks if two GraphQL types are identical (same base type, nullability, and list
+// wrapping).
 func typesMatch(a, b *ast.Type) bool {
 	if a.Name() != b.Name() || a.NonNull != b.NonNull {
 		return false
@@ -282,7 +284,9 @@ func (g *embeddedInterfaceGenerator) createEmbeddedBaseType(interfaceName string
 	// Check if interface is bound to external package
 	if g.cfg.Models.UserDefined(interfaceName) {
 		if pkgPath, _ := code.PkgAndType(g.cfg.Models[interfaceName].Model[0]); pkgPath != "" {
-			if boundType, _ := g.binder.FindTypeFromName(pkgPath + "." + baseName); boundType != nil {
+			if boundType, _ := g.binder.FindTypeFromName(
+				pkgPath + "." + baseName,
+			); boundType != nil {
 				return boundType
 			}
 		}

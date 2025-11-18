@@ -50,7 +50,8 @@ func TestTodo(t *testing.T) {
 		}, resp.Torture2d)
 	})
 
-	// Input coercion on arrays should convert non array values into an array of the appropriate depth
+	// Input coercion on arrays should convert non array values into an array of the appropriate
+	// depth
 	// http://facebook.github.io/graphql/June2018/#sec-Type-System.List
 	t.Run("array coercion", func(t *testing.T) {
 		t.Run("1d", func(t *testing.T) {
@@ -88,6 +89,10 @@ func TestTodo(t *testing.T) {
 		}
 		err := c.Post(`{ torture2d(customerIds:{}) { id name } }`, &resp)
 
-		require.EqualError(t, err, "[{\"message\":\"map[string]interface {} is not an int\",\"path\":[\"torture2d\",\"customerIds\",0,0]}]")
+		require.EqualError(
+			t,
+			err,
+			"[{\"message\":\"map[string]interface {} is not an int\",\"path\":[\"torture2d\",\"customerIds\",0,0]}]",
+		)
 	})
 }

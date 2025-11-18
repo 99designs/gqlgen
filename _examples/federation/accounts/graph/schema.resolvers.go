@@ -34,5 +34,7 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 // User returns UserResolver implementation.
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
-type queryResolver struct{ *Resolver }
-type userResolver struct{ *Resolver }
+type (
+	queryResolver struct{ *Resolver }
+	userResolver  struct{ *Resolver }
+)

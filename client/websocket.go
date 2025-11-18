@@ -109,7 +109,9 @@ func (p *Client) WebsocketWithPayload(
 		return errorSubscription(fmt.Errorf("expected ack message, got %#v", ack))
 	}
 
-	if err = c.WriteJSON(operationMessage{Type: startMsg, ID: "1", Payload: requestBody}); err != nil {
+	if err = c.WriteJSON(
+		operationMessage{Type: startMsg, ID: "1", Payload: requestBody},
+	); err != nil {
 		return errorSubscription(fmt.Errorf("start: %w", err))
 	}
 

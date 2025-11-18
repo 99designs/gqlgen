@@ -61,7 +61,10 @@ func RunServer(storage storage.StorageImp) {
 				if origin == "" || origin == r.Header.Get("Host") {
 					return true
 				}
-				return slices.Contains([]string{"http://localhost:8080", "https://ozonhabr.com"}, origin)
+				return slices.Contains(
+					[]string{"http://localhost:8080", "https://ozonhabr.com"},
+					origin,
+				)
 			},
 		},
 	})
@@ -74,7 +77,9 @@ func RunServer(storage storage.StorageImp) {
 	srv.Use(extension.AutomaticPersistedQuery{
 		Cache: lru.New[string](100),
 	})
-	srv.Use(extension.FixedComplexityLimit(450)) // limit to +- 50 commments because there is not much space on web page
+	srv.Use(
+		extension.FixedComplexityLimit(450),
+	) // limit to +- 50 commments because there is not much space on web page
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
 

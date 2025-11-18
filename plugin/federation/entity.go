@@ -63,8 +63,9 @@ func (e *Entity) isFieldImplicitlyExternal(field *ast.FieldDefinition, federatio
 	if federationVersion != 2 {
 		return false
 	}
-	// TODO: From the spec, it seems like if an entity is not resolvable then it should not only not have a resolver, but should not appear in the _Entity union.
-	// The current implementation is a less drastic departure from the previous behavior, but should probably be reviewed.
+	// TODO: From the spec, it seems like if an entity is not resolvable then it should not only not
+	// have a resolver, but should not appear in the _Entity union. The current implementation is a
+	// less drastic departure from the previous behavior, but should probably be reviewed.
 	// See https://www.apollographql.com/docs/federation/subgraph-spec/
 	if e.isResolvable() {
 		return false
@@ -89,7 +90,8 @@ func (e *Entity) isResolvable() bool {
 		// If there is no resolvable argument, the entity is resolvable.
 		return true
 	}
-	// only if resolvable: false has been set on the @key directive do we consider the entity non-resolvable.
+	// only if resolvable: false has been set on the @key directive do we consider the entity
+	// non-resolvable.
 	return resolvable.Value.Raw != "false"
 }
 

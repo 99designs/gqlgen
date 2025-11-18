@@ -37,7 +37,8 @@ func Generate(cfg *config.Config, option ...Option) error {
 	plugins = append(plugins, resolvergen.New())
 	if cfg.Federation.IsDefined() {
 		if cfg.Federation.Version == 0 { // default to using the user's choice of version, but if unset, try to sort out which federation version to use
-			// check the sources, and if one is marked as federation v2, we mark the entirety to be generated using that format
+			// check the sources, and if one is marked as federation v2, we mark the entirety to be
+			// generated using that format
 			for _, v := range cfg.Sources {
 				cfg.Federation.Version = 1
 				urlString := urlRegex.FindStringSubmatch(v.Input)

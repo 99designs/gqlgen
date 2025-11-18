@@ -109,7 +109,8 @@ func TestGetErrorFromPresenter(t *testing.T) {
 		func(ctx context.Context, err error) *gqlerror.Error {
 			errs := GetErrors(ctx)
 
-			// because we are still presenting the error it is not expected to be returned, but this should not deadlock.
+			// because we are still presenting the error it is not expected to be returned, but this
+			// should not deadlock.
 			require.Empty(t, errs)
 			return DefaultErrorPresenter(ctx, err)
 		},

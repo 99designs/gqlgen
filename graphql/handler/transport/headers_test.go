@@ -22,7 +22,14 @@ func TestHeadersWithPOST(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.POST{})
 
-		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`, "", "application/json")
+		resp := doRequest(
+			h,
+			http.MethodPost,
+			"/graphql",
+			`{"query":"{ name }"}`,
+			"",
+			"application/json",
+		)
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Len(t, resp.Header(), 1)
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
@@ -37,7 +44,14 @@ func TestHeadersWithPOST(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.POST{ResponseHeaders: headers})
 
-		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`, "", "application/json")
+		resp := doRequest(
+			h,
+			http.MethodPost,
+			"/graphql",
+			`{"query":"{ name }"}`,
+			"",
+			"application/json",
+		)
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Len(t, resp.Header(), 2)
 		assert.Equal(t, "application/json; charset: utf8", resp.Header().Get("Content-Type"))
@@ -79,7 +93,7 @@ func TestHeadersWithGRAPHQL(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.GRAPHQL{})
 
-		resp := doRequest(h, "POST", "/graphql", `{ name }`, "", "application/graphql")
+		resp := doRequest(h, http.MethodPost, "/graphql", `{ name }`, "", "application/graphql")
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Len(t, resp.Header(), 1)
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
@@ -94,7 +108,7 @@ func TestHeadersWithGRAPHQL(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.GRAPHQL{ResponseHeaders: headers})
 
-		resp := doRequest(h, "POST", "/graphql", `{ name }`, "", "application/graphql")
+		resp := doRequest(h, http.MethodPost, "/graphql", `{ name }`, "", "application/graphql")
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Len(t, resp.Header(), 2)
 		assert.Equal(t, "application/json; charset: utf8", resp.Header().Get("Content-Type"))
@@ -109,7 +123,7 @@ func TestHeadersWithFormUrlEncoded(t *testing.T) {
 
 		resp := doRequest(
 			h,
-			"POST",
+			http.MethodPost,
 			"/graphql",
 			`{ name }`,
 			"",
@@ -131,7 +145,7 @@ func TestHeadersWithFormUrlEncoded(t *testing.T) {
 
 		resp := doRequest(
 			h,
-			"POST",
+			http.MethodPost,
 			"/graphql",
 			`{ name }`,
 			"",

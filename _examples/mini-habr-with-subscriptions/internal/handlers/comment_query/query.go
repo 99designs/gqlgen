@@ -16,7 +16,10 @@ func NewCommentQuery(commentQueryImp CommentQueryImp) *CommentQuery {
 	return &CommentQuery{commentQueryImp: commentQueryImp}
 }
 
-func (h *CommentQuery) GetCommentsBranchToPost(postID int64, path string) ([]*model.Comment, error) {
+func (h *CommentQuery) GetCommentsBranchToPost(
+	postID int64,
+	path string,
+) ([]*model.Comment, error) {
 	op := "internal.handlers.commentquery.GetCommentsBranchToPost()"
 
 	log.Debug().Msgf("%s start", op)

@@ -20,7 +20,7 @@ func (s *CustomScalar) UnmarshalGQL(v any) (err error) {
 	case int64:
 		s.value = v
 	}
-	return
+	return err
 }
 
 func (s CustomScalar) MarshalGQL(w io.Writer) {

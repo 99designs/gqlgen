@@ -30,7 +30,7 @@ func TestPOST(t *testing.T) {
 	t.Run("success with accept application/json", func(t *testing.T) {
 		resp := doRequest(
 			h,
-			"POST",
+			http.MethodPost,
 			"/graphql",
 			`{"query":"{ name }"}`,
 			"application/json",
@@ -44,7 +44,7 @@ func TestPOST(t *testing.T) {
 	t.Run("success with accept application/graphql-response+json", func(t *testing.T) {
 		resp := doRequest(
 			h,
-			"POST",
+			http.MethodPost,
 			"/graphql",
 			`{"query":"{ name }"}`,
 			"application/graphql-response+json; charset=utf-8",
@@ -60,7 +60,7 @@ func TestPOST(t *testing.T) {
 		func(t *testing.T) {
 			resp := doRequest(
 				graphqlResponseH,
-				"POST",
+				http.MethodPost,
 				"/graphql",
 				`{"query":"{ name }"}`,
 				"*/*",
@@ -77,7 +77,7 @@ func TestPOST(t *testing.T) {
 		func(t *testing.T) {
 			resp := doRequest(
 				h,
-				"POST",
+				http.MethodPost,
 				"/graphql",
 				`{"query":"{ name }"}`,
 				"*/*",
@@ -90,14 +90,28 @@ func TestPOST(t *testing.T) {
 	)
 
 	t.Run("success with json only", func(t *testing.T) {
-		resp := doRequest(jsonH, "POST", "/graphql", `{"query":"{ name }"}`, "", "application/json")
+		resp := doRequest(
+			jsonH,
+			http.MethodPost,
+			"/graphql",
+			`{"query":"{ name }"}`,
+			"",
+			"application/json",
+		)
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 		assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 	})
 
 	t.Run("decode failure", func(t *testing.T) {
-		resp := doRequest(h, "POST", "/graphql", "notjson", "application/json", "application/json")
+		resp := doRequest(
+			h,
+			http.MethodPost,
+			"/graphql",
+			"notjson",
+			"application/json",
+			"application/json",
+		)
 		assert.Equal(t, http.StatusBadRequest, resp.Code, resp.Body.String())
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 		assert.JSONEq(
@@ -108,7 +122,7 @@ func TestPOST(t *testing.T) {
 	})
 
 	t.Run("parse failure", func(t *testing.T) {
-		resp := doRequest(h, "POST", "/graphql", `{"query": "!"}`, "", "application/json")
+		resp := doRequest(h, http.MethodPost, "/graphql", `{"query": "!"}`, "", "application/json")
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 		assert.JSONEq(
@@ -119,7 +133,14 @@ func TestPOST(t *testing.T) {
 	})
 
 	t.Run("parse failure with json only", func(t *testing.T) {
-		resp := doRequest(jsonH, "POST", "/graphql", `{"query": "!"}`, "", "application/json")
+		resp := doRequest(
+			jsonH,
+			http.MethodPost,
+			"/graphql",
+			`{"query": "!"}`,
+			"",
+			"application/json",
+		)
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 		assert.JSONEq(
@@ -130,7 +151,14 @@ func TestPOST(t *testing.T) {
 	})
 
 	t.Run("validation failure", func(t *testing.T) {
-		resp := doRequest(h, "POST", "/graphql", `{"query": "{ title }"}`, "", "application/json")
+		resp := doRequest(
+			h,
+			http.MethodPost,
+			"/graphql",
+			`{"query": "{ title }"}`,
+			"",
+			"application/json",
+		)
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 		assert.JSONEq(
@@ -143,7 +171,7 @@ func TestPOST(t *testing.T) {
 	t.Run("validation failure with json only", func(t *testing.T) {
 		resp := doRequest(
 			jsonH,
-			"POST",
+			http.MethodPost,
 			"/graphql",
 			`{"query": "{ title }"}`,
 			"",
@@ -161,7 +189,7 @@ func TestPOST(t *testing.T) {
 	t.Run("invalid variable", func(t *testing.T) {
 		resp := doRequest(
 			h,
-			"POST",
+			http.MethodPost,
 			"/graphql",
 			`{"query": "query($id:Int!){find(id:$id)}","variables":{"id":false}}`,
 			"",
@@ -179,7 +207,7 @@ func TestPOST(t *testing.T) {
 	t.Run("invalid variable with json only", func(t *testing.T) {
 		resp := doRequest(
 			jsonH,
-			"POST",
+			http.MethodPost,
 			"/graphql",
 			`{"query": "query($id:Int!){find(id:$id)}","variables":{"id":false}}`,
 			"",
@@ -197,7 +225,7 @@ func TestPOST(t *testing.T) {
 	t.Run("execution failure", func(t *testing.T) {
 		resp := doRequest(
 			h,
-			"POST",
+			http.MethodPost,
 			"/graphql",
 			`{"query": "mutation { name }"}`,
 			"",
@@ -215,7 +243,7 @@ func TestPOST(t *testing.T) {
 	t.Run("execution failure with json only", func(t *testing.T) {
 		resp := doRequest(
 			jsonH,
-			"POST",
+			http.MethodPost,
 			"/graphql",
 			`{"query": "mutation { name }"}`,
 			"",
@@ -249,7 +277,7 @@ func TestPOST(t *testing.T) {
 
 		for _, contentType := range validContentTypes {
 			t.Run(fmt.Sprintf("allow for content type %s", contentType), func(t *testing.T) {
-				resp := doReq(h, "POST", "/graphql", `{"query":"{ name }"}`, contentType)
+				resp := doReq(h, http.MethodPost, "/graphql", `{"query":"{ name }"}`, contentType)
 				assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 				assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 			})
@@ -262,7 +290,7 @@ func TestPOST(t *testing.T) {
 
 		for _, tc := range invalidContentTypes {
 			t.Run(fmt.Sprintf("reject for content type %s", tc), func(t *testing.T) {
-				resp := doReq(h, "POST", "/graphql", `{"query":"{ name }"}`, tc)
+				resp := doReq(h, http.MethodPost, "/graphql", `{"query":"{ name }"}`, tc)
 				assert.Equal(t, http.StatusBadRequest, resp.Code, resp.Body.String())
 				assert.JSONEq(
 					t,
@@ -287,7 +315,7 @@ func TestPOST(t *testing.T) {
 			return w
 		}
 
-		resp := doReq(h, "POST", "/graphql", `{"query":"{ name }"}`)
+		resp := doReq(h, http.MethodPost, "/graphql", `{"query":"{ name }"}`)
 		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 		assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 	})

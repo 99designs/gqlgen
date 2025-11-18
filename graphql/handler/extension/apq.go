@@ -18,8 +18,9 @@ const (
 	errPersistedQueryNotFoundCode = "PERSISTED_QUERY_NOT_FOUND"
 )
 
-// AutomaticPersistedQuery saves client upload by optimistically sending only the hashes of queries, if the server
-// does not yet know what the query is for the hash it will respond telling the client to send the query along with the
+// AutomaticPersistedQuery saves client upload by optimistically sending only the hashes of queries,
+// if the server does not yet know what the query is for the hash it will respond telling the client
+// to send the query along with the
 // hash in the next request.
 // see https://github.com/apollographql/apollo-link-persisted-queries
 type AutomaticPersistedQuery struct {

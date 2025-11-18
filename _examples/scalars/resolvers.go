@@ -23,7 +23,11 @@ func (r *Resolver) User() UserResolver {
 
 type queryResolver struct{ *Resolver }
 
-func (r *queryResolver) UserByTier(ctx context.Context, tier model.Tier, darkMode *model.Prefs) ([]*model.User, error) {
+func (r *queryResolver) UserByTier(
+	ctx context.Context,
+	tier model.Tier,
+	darkMode *model.Prefs,
+) ([]*model.User, error) {
 	panic("implement me")
 }
 
@@ -37,7 +41,10 @@ func (r *queryResolver) User(ctx context.Context, id external.ObjectID) (*model.
 	}, nil
 }
 
-func (r *queryResolver) Search(ctx context.Context, input *model.SearchArgs) ([]*model.User, error) {
+func (r *queryResolver) Search(
+	ctx context.Context,
+	input *model.SearchArgs,
+) ([]*model.User, error) {
 	location := model.Point{X: 1, Y: 2}
 	if input.Location != nil {
 		location = *input.Location

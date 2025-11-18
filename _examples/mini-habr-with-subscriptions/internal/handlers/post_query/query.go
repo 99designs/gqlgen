@@ -22,7 +22,6 @@ func (h *PostQuery) GetAllPosts() ([]*model.Post, error) {
 	log.Debug().Msgf("%s start", op)
 
 	posts, err := h.postQueryImp.GetAllPosts()
-
 	if err != nil {
 		if err == errs.ErrPostsNotExist {
 			return nil, err
@@ -40,7 +39,6 @@ func (h *PostQuery) GetPost(postID int64) (*model.Post, error) {
 	log.Debug().Msgf("%s start", op)
 
 	post, err := h.postQueryImp.GetPost(postID)
-
 	if err != nil {
 		if err == errs.ErrPostNotExist {
 			return nil, err

@@ -355,7 +355,8 @@ func TestWebsocketInitFunc(t *testing.T) {
 			assert.Equal(t, connectionAckMsg, readOp(c).Type)
 			assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
 
-			// Cancel should contain an actual value now, so let's call it when we exit this scope (to make the linter happy)
+			// Cancel should contain an actual value now, so let's call it when we exit this scope
+			// (to make the linter happy)
 			defer cancel()
 
 			time.Sleep(time.Millisecond * 10)
@@ -550,7 +551,8 @@ func TestWebSocketErrorFunc(t *testing.T) {
 		assert.Equal(t, connectionAckMsg, readOp(c).Type)
 		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
 
-		// Cancel should contain an actual value now, so let's call it when we exit this scope (to make the linter happy)
+		// Cancel should contain an actual value now, so let's call it when we exit this scope (to
+		// make the linter happy)
 		defer cancel()
 
 		time.Sleep(time.Millisecond * 20)
@@ -720,7 +722,8 @@ func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {
 		)
 		assert.Equal(t, graphqltransportwsConnectionAckMsg, readOp(c).Type)
 
-		// If the keep-alives are sent, this deadline will not be used, and no timeout error will be found
+		// If the keep-alives are sent, this deadline will not be used, and no timeout error will be
+		// found
 		c.SetReadDeadline(time.Now().UTC().Add(50 * time.Millisecond))
 		var msg operationMessage
 		err := c.ReadJSON(&msg)
@@ -807,7 +810,8 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 			case res := <-closeFuncCalled:
 				assert.True(t, res)
 			case <-time.NewTimer(time.Millisecond * 20).C:
-				// with a 5ms interval 10ms should be the timeout, double that to make the test less likely to flake under load
+				// with a 5ms interval 10ms should be the timeout, double that to make the test less
+				// likely to flake under load
 				assert.Fail(t, "The close handler was not called in time")
 			}
 		},
@@ -852,7 +856,8 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 	t.Run("ping-pongs are not sent when the graphql-ws sub protocol is used", func(t *testing.T) {
 		// Regression test
 		// ---
-		// Before the refactor, the code would try to convert a ping message to a graphql-ws message type
+		// Before the refactor, the code would try to convert a ping message to a graphql-ws message
+		// type
 		// But since this message type does not exist in the graphql-ws sub protocol, it would fail
 
 		_, srv := initialize(transport.Websocket{

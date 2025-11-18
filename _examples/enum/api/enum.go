@@ -21,7 +21,10 @@ func (r *queryResolver) IntUntyped(ctx context.Context, arg int) (int, error) {
 }
 
 // IntTypedN is the resolver for the intTypedN field.
-func (r *queryResolver) IntTypedN(ctx context.Context, arg *model.IntTyped) (*model.IntTyped, error) {
+func (r *queryResolver) IntTypedN(
+	ctx context.Context,
+	arg *model.IntTyped,
+) (*model.IntTyped, error) {
 	return arg, nil
 }
 
@@ -31,7 +34,10 @@ func (r *queryResolver) IntUntypedN(ctx context.Context, arg *int) (*int, error)
 }
 
 // StringTyped is the resolver for the stringTyped field.
-func (r *queryResolver) StringTyped(ctx context.Context, arg model.StringTyped) (model.StringTyped, error) {
+func (r *queryResolver) StringTyped(
+	ctx context.Context,
+	arg model.StringTyped,
+) (model.StringTyped, error) {
 	return arg, nil
 }
 
@@ -41,7 +47,10 @@ func (r *queryResolver) StringUntyped(ctx context.Context, arg string) (string, 
 }
 
 // StringTypedN is the resolver for the stringTypedN field.
-func (r *queryResolver) StringTypedN(ctx context.Context, arg *model.StringTyped) (*model.StringTyped, error) {
+func (r *queryResolver) StringTypedN(
+	ctx context.Context,
+	arg *model.StringTyped,
+) (*model.StringTyped, error) {
 	return arg, nil
 }
 
@@ -51,7 +60,10 @@ func (r *queryResolver) StringUntypedN(ctx context.Context, arg *string) (*strin
 }
 
 // BoolTyped is the resolver for the boolTyped field.
-func (r *queryResolver) BoolTyped(ctx context.Context, arg model.BoolTyped) (model.BoolTyped, error) {
+func (r *queryResolver) BoolTyped(
+	ctx context.Context,
+	arg model.BoolTyped,
+) (model.BoolTyped, error) {
 	return arg, nil
 }
 
@@ -61,7 +73,10 @@ func (r *queryResolver) BoolUntyped(ctx context.Context, arg bool) (bool, error)
 }
 
 // BoolTypedN is the resolver for the boolTypedN field.
-func (r *queryResolver) BoolTypedN(ctx context.Context, arg *model.BoolTyped) (*model.BoolTyped, error) {
+func (r *queryResolver) BoolTypedN(
+	ctx context.Context,
+	arg *model.BoolTyped,
+) (*model.BoolTyped, error) {
 	return arg, nil
 }
 

@@ -19,7 +19,10 @@ import (
 	"github.com/99designs/gqlgen/graphql/playground"
 )
 
-func webSocketInit(ctx context.Context, initPayload transport.InitPayload) (context.Context, *transport.InitPayload, error) {
+func webSocketInit(
+	ctx context.Context,
+	initPayload transport.InitPayload,
+) (context.Context, *transport.InitPayload, error) {
 	// Get the token from payload
 	payload := initPayload["authToken"]
 	token, ok := payload.(string)

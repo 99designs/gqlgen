@@ -53,5 +53,4 @@ func NewCacheConnection() (*Cache, error) {
 	}
 
 	return cache, nil
-
 }

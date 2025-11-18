@@ -19,7 +19,7 @@ func (r *bytesReader) Read(b []byte) (n int, err error) {
 	}
 	n = copy(b, (*r.s)[r.i:])
 	r.i += int64(n)
-	return
+	return n, err
 }
 
 func (r *bytesReader) Seek(offset int64, whence int) (int64, error) {

@@ -27,8 +27,7 @@ func New() Config {
 	return c
 }
 
-type Resolver struct {
-}
+type Resolver struct{}
 
 func (r *Resolver) Query() QueryResolver {
 	return r

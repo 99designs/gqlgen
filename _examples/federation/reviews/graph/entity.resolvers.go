@@ -10,8 +10,12 @@ import (
 	"github.com/99designs/gqlgen/_examples/federation/reviews/graph/model"
 )
 
-// FindManyProductByManufacturerIDAndIDs is the resolver for the findManyProductByManufacturerIDAndIDs field.
-func (r *entityResolver) FindManyProductByManufacturerIDAndIDs(ctx context.Context, reps []*model.ProductByManufacturerIDAndIDsInput) ([]*model.Product, error) {
+// FindManyProductByManufacturerIDAndIDs is the resolver for the
+// findManyProductByManufacturerIDAndIDs field.
+func (r *entityResolver) FindManyProductByManufacturerIDAndIDs(
+	ctx context.Context,
+	reps []*model.ProductByManufacturerIDAndIDsInput,
+) ([]*model.Product, error) {
 	products := make([]*model.Product, 0, len(reps))
 	for idx := range reps {
 		rep := reps[len(reps)-idx-1]

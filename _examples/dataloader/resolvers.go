@@ -85,7 +85,11 @@ func (r *queryResolver) Torture2d(ctx context.Context, customerIds [][]int) ([][
 	for i := range customerIds {
 		inner := make([]*Customer, len(customerIds[i]))
 		for j := range customerIds[i] {
-			inner[j] = &Customer{ID: customerIds[i][j], Name: fmt.Sprintf("%d %d", i, j), AddressID: rand.Int() % 10}
+			inner[j] = &Customer{
+				ID:        customerIds[i][j],
+				Name:      fmt.Sprintf("%d %d", i, j),
+				AddressID: rand.Int() % 10,
+			}
 		}
 		result[i] = inner
 	}

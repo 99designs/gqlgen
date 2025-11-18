@@ -143,7 +143,10 @@ func TestStarwars(t *testing.T) {
 				}
 			}
 		}
-		c.MustPost(`{ droid(id:"2001") { friendsConnection { edges { cursor, node { name } } } } }`, &resp)
+		c.MustPost(
+			`{ droid(id:"2001") { friendsConnection { edges { cursor, node { name } } } } }`,
+			&resp,
+		)
 
 		require.Equal(t, "Y3Vyc29yMQ==", resp.Droid.FriendsConnection.Edges[0].Cursor)
 		require.Equal(t, "Luke Skywalker", resp.Droid.FriendsConnection.Edges[0].Node.Name)
@@ -220,7 +223,11 @@ func TestStarwars(t *testing.T) {
 		  }
 		}`, &resp, client.Var("episode", "INVALID"))
 
-		require.EqualError(t, err, `http 422: {"errors":[{"message":"INVALID is not a valid Episode","path":["variable","episode"],"extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`)
+		require.EqualError(
+			t,
+			err,
+			`http 422: {"errors":[{"message":"INVALID is not a valid Episode","path":["variable","episode"],"extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`,
+		)
 	})
 
 	t.Run("introspection", func(t *testing.T) {

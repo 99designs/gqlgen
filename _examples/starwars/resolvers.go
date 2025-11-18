@@ -46,7 +46,10 @@ func (r *Resolver) Starship() generated.StarshipResolver {
 	return &starshipResolver{r}
 }
 
-func (r *Resolver) resolveCharacters(ctx context.Context, ids []string) ([]models.Character, error) {
+func (r *Resolver) resolveCharacters(
+	ctx context.Context,
+	ids []string,
+) ([]models.Character, error) {
 	result := make([]models.Character, len(ids))
 	for i, id := range ids {
 		char, err := r.Query().Character(ctx, id)
@@ -60,17 +63,30 @@ func (r *Resolver) resolveCharacters(ctx context.Context, ids []string) ([]model
 
 type droidResolver struct{ *Resolver }
 
-func (r *droidResolver) Friends(ctx context.Context, obj *models.Droid) ([]models.Character, error) {
+func (r *droidResolver) Friends(
+	ctx context.Context,
+	obj *models.Droid,
+) ([]models.Character, error) {
 	return r.resolveCharacters(ctx, obj.FriendIds)
 }
 
-func (r *droidResolver) FriendsConnection(ctx context.Context, obj *models.Droid, first *int, after *string) (*models.FriendsConnection, error) {
+func (r *droidResolver) FriendsConnection(
+	ctx context.Context,
+	obj *models.Droid,
+	first *int,
+	after *string,
+) (*models.FriendsConnection, error) {
 	return r.resolveFriendConnection(ctx, obj.FriendIds, first, after)
 }
 
 type friendsConnectionResolver struct{ *Resolver }
 
-func (r *Resolver) resolveFriendConnection(_ context.Context, ids []string, first *int, after *string) (*models.FriendsConnection, error) {
+func (r *Resolver) resolveFriendConnection(
+	_ context.Context,
+	ids []string,
+	first *int,
+	after *string,
+) (*models.FriendsConnection, error) {
 	from := 0
 	if after != nil {
 		b, err := base64.StdEncoding.DecodeString(*after)
@@ -99,7 +115,10 @@ func (r *Resolver) resolveFriendConnection(_ context.Context, ids []string, firs
 	}, nil
 }
 
-func (r *friendsConnectionResolver) Edges(ctx context.Context, obj *models.FriendsConnection) ([]*models.FriendsEdge, error) {
+func (r *friendsConnectionResolver) Edges(
+	ctx context.Context,
+	obj *models.FriendsConnection,
+) ([]*models.FriendsEdge, error) {
 	friends, err := r.resolveCharacters(ctx, obj.Ids)
 	if err != nil {
 		return nil, err
@@ -115,21 +134,35 @@ func (r *friendsConnectionResolver) Edges(ctx context.Context, obj *models.Frien
 	return edges, nil
 }
 
-func (r *friendsConnectionResolver) Friends(ctx context.Context, obj *models.FriendsConnection) ([]models.Character, error) {
+func (r *friendsConnectionResolver) Friends(
+	ctx context.Context,
+	obj *models.FriendsConnection,
+) ([]models.Character, error) {
 	return r.resolveCharacters(ctx, obj.Ids)
 }
 
 type humanResolver struct{ *Resolver }
 
-func (r *humanResolver) Friends(ctx context.Context, obj *models.Human) ([]models.Character, error) {
+func (r *humanResolver) Friends(
+	ctx context.Context,
+	obj *models.Human,
+) ([]models.Character, error) {
 	return r.resolveCharacters(ctx, obj.FriendIds)
 }
 
-func (r *humanResolver) FriendsConnection(ctx context.Context, obj *models.Human, first *int, after *string) (*models.FriendsConnection, error) {
+func (r *humanResolver) FriendsConnection(
+	ctx context.Context,
+	obj *models.Human,
+	first *int,
+	after *string,
+) (*models.FriendsConnection, error) {
 	return r.resolveFriendConnection(ctx, obj.FriendIds, first, after)
 }
 
-func (r *humanResolver) Starships(ctx context.Context, obj *models.Human) ([]*models.Starship, error) {
+func (r *humanResolver) Starships(
+	ctx context.Context,
+	obj *models.Human,
+) ([]*models.Starship, error) {
 	var result []*models.Starship
 	for _, id := range obj.StarshipIds {
 		char, err := r.Query().Starship(ctx, id)
@@ -145,7 +178,11 @@ func (r *humanResolver) Starships(ctx context.Context, obj *models.Human) ([]*mo
 
 type mutationResolver struct{ *Resolver }
 
-func (r *mutationResolver) CreateReview(ctx context.Context, episode models.Episode, review models.Review) (*models.Review, error) {
+func (r *mutationResolver) CreateReview(
+	ctx context.Context,
+	episode models.Episode,
+	review models.Review,
+) (*models.Review, error) {
 	review.Time = time.Now()
 	time.Sleep(1 * time.Second)
 	r.reviews[episode] = append(r.reviews[episode], &review)
@@ -154,14 +191,21 @@ func (r *mutationResolver) CreateReview(ctx context.Context, episode models.Epis
 
 type queryResolver struct{ *Resolver }
 
-func (r *queryResolver) Hero(ctx context.Context, episode *models.Episode) (models.Character, error) {
+func (r *queryResolver) Hero(
+	ctx context.Context,
+	episode *models.Episode,
+) (models.Character, error) {
 	if *episode == models.EpisodeEmpire {
 		return r.humans["1000"], nil
 	}
 	return r.droid["2001"], nil
 }
 
-func (r *queryResolver) Reviews(ctx context.Context, episode models.Episode, since *time.Time) ([]*models.Review, error) {
+func (r *queryResolver) Reviews(
+	ctx context.Context,
+	episode models.Episode,
+	since *time.Time,
+) ([]*models.Review, error) {
 	if since == nil {
 		return r.reviews[episode], nil
 	}
@@ -228,7 +272,11 @@ func (r *queryResolver) Starship(ctx context.Context, id string) (*models.Starsh
 
 type starshipResolver struct{ *Resolver }
 
-func (r *starshipResolver) Length(ctx context.Context, obj *models.Starship, unit *models.LengthUnit) (float64, error) {
+func (r *starshipResolver) Length(
+	ctx context.Context,
+	obj *models.Starship,
+	unit *models.LengthUnit,
+) (float64, error) {
 	switch *unit {
 	case models.LengthUnitMeter, "":
 		return obj.Length, nil
@@ -247,7 +295,11 @@ func NewResolver() generated.Config {
 				ID:        "1000",
 				Name:      "Luke Skywalker",
 				FriendIds: []string{"1002", "1003", "2000", "2001"},
-				AppearsIn: []models.Episode{models.EpisodeNewhope, models.EpisodeEmpire, models.EpisodeJedi},
+				AppearsIn: []models.Episode{
+					models.EpisodeNewhope,
+					models.EpisodeEmpire,
+					models.EpisodeJedi,
+				},
 			},
 			HeightMeters: 1.72,
 			Mass:         77,
@@ -258,7 +310,11 @@ func NewResolver() generated.Config {
 				ID:        "1001",
 				Name:      "Darth Vader",
 				FriendIds: []string{"1004"},
-				AppearsIn: []models.Episode{models.EpisodeNewhope, models.EpisodeEmpire, models.EpisodeJedi},
+				AppearsIn: []models.Episode{
+					models.EpisodeNewhope,
+					models.EpisodeEmpire,
+					models.EpisodeJedi,
+				},
 			},
 			HeightMeters: 2.02,
 			Mass:         136,
@@ -269,7 +325,11 @@ func NewResolver() generated.Config {
 				ID:        "1002",
 				Name:      "Han Solo",
 				FriendIds: []string{"1000", "1003", "2001"},
-				AppearsIn: []models.Episode{models.EpisodeNewhope, models.EpisodeEmpire, models.EpisodeJedi},
+				AppearsIn: []models.Episode{
+					models.EpisodeNewhope,
+					models.EpisodeEmpire,
+					models.EpisodeJedi,
+				},
 			},
 			HeightMeters: 1.8,
 			Mass:         80,
@@ -280,7 +340,11 @@ func NewResolver() generated.Config {
 				ID:        "1003",
 				Name:      "Leia Organa",
 				FriendIds: []string{"1000", "1002", "2000", "2001"},
-				AppearsIn: []models.Episode{models.EpisodeNewhope, models.EpisodeEmpire, models.EpisodeJedi},
+				AppearsIn: []models.Episode{
+					models.EpisodeNewhope,
+					models.EpisodeEmpire,
+					models.EpisodeJedi,
+				},
 			},
 			HeightMeters: 1.5,
 			Mass:         49,
@@ -303,7 +367,11 @@ func NewResolver() generated.Config {
 				ID:        "2000",
 				Name:      "C-3PO",
 				FriendIds: []string{"1000", "1002", "1003", "2001"},
-				AppearsIn: []models.Episode{models.EpisodeNewhope, models.EpisodeEmpire, models.EpisodeJedi},
+				AppearsIn: []models.Episode{
+					models.EpisodeNewhope,
+					models.EpisodeEmpire,
+					models.EpisodeJedi,
+				},
 			},
 			PrimaryFunction: "Protocol",
 		},
@@ -312,7 +380,11 @@ func NewResolver() generated.Config {
 				ID:        "2001",
 				Name:      "R2-D2",
 				FriendIds: []string{"1000", "1002", "1003"},
-				AppearsIn: []models.Episode{models.EpisodeNewhope, models.EpisodeEmpire, models.EpisodeJedi},
+				AppearsIn: []models.Episode{
+					models.EpisodeNewhope,
+					models.EpisodeEmpire,
+					models.EpisodeJedi,
+				},
 			},
 			PrimaryFunction: "Astromech",
 		},

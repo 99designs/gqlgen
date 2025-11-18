@@ -20,7 +20,8 @@ type POST struct {
 	// set, only one header: Content-Type: application/graphql-response+json will be set.
 	ResponseHeaders map[string][]string
 
-	// UseGrapQLResponseJsonByDefault determines whether to use 'application/graphql-response+json' as the response content type
+	// UseGrapQLResponseJsonByDefault determines whether to use 'application/graphql-response+json'
+	// as the response content type
 	// when the Accept header is empty or 'application/*' or '*/*'.
 	UseGrapQLResponseJsonByDefault bool
 }

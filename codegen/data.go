@@ -13,7 +13,8 @@ import (
 	"github.com/99designs/gqlgen/codegen/config"
 )
 
-// Data is a unified model of the code to be generated. Plugins may modify this structure to do things like implement
+// Data is a unified model of the code to be generated. Plugins may modify this structure to do
+// things like implement
 // resolvers or directives automatically (eg grpc, validation)
 type Data struct {
 	Config *config.Config
@@ -48,7 +49,8 @@ func (d *Data) HasEmbeddableSources() bool {
 	return hasEmbeddableSources
 }
 
-// AugmentedSource contains extra information about graphql schema files which is not known directly from the Config.Sources data
+// AugmentedSource contains extra information about graphql schema files which is not known directly
+// from the Config.Sources data
 type AugmentedSource struct {
 	// path relative to Config.Exec.Filename
 	RelativePath string

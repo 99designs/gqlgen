@@ -11,7 +11,10 @@ import (
 )
 
 // FindManufacturerByID is the resolver for the findManufacturerByID field.
-func (r *entityResolver) FindManufacturerByID(ctx context.Context, id string) (*model.Manufacturer, error) {
+func (r *entityResolver) FindManufacturerByID(
+	ctx context.Context,
+	id string,
+) (*model.Manufacturer, error) {
 	return &model.Manufacturer{
 		ID:   id,
 		Name: "Millinery " + id,
@@ -19,7 +22,11 @@ func (r *entityResolver) FindManufacturerByID(ctx context.Context, id string) (*
 }
 
 // FindProductByManufacturerIDAndID is the resolver for the findProductByManufacturerIDAndID field.
-func (r *entityResolver) FindProductByManufacturerIDAndID(ctx context.Context, manufacturerID string, id string) (*model.Product, error) {
+func (r *entityResolver) FindProductByManufacturerIDAndID(
+	ctx context.Context,
+	manufacturerID string,
+	id string,
+) (*model.Product, error) {
 	for _, hat := range hats {
 		if hat.ID == id && hat.Manufacturer.ID == manufacturerID {
 			return hat, nil

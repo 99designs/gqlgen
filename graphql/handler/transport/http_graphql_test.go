@@ -18,19 +18,19 @@ func TestGRAPHQL(t *testing.T) {
 	h.AddTransport(transport.GRAPHQL{})
 
 	t.Run("success", func(t *testing.T) {
-		resp := doGraphqlRequest(h, "POST", "/graphql", `{ name }`)
+		resp := doGraphqlRequest(h, http.MethodPost, "/graphql", `{ name }`)
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 	})
 
 	t.Run("success even if url encoded", func(t *testing.T) {
-		resp := doGraphqlRequest(h, "POST", "/graphql", `%7B%20name%20%7D`)
+		resp := doGraphqlRequest(h, http.MethodPost, "/graphql", `%7B%20name%20%7D`)
 		assert.Equal(t, http.StatusOK, resp.Code)
 		assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 	})
 
 	t.Run("parse failure", func(t *testing.T) {
-		resp := doGraphqlRequest(h, "POST", "/graphql", `{"!"}`)
+		resp := doGraphqlRequest(h, http.MethodPost, "/graphql", `{"!"}`)
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 		assert.JSONEq(
@@ -41,7 +41,7 @@ func TestGRAPHQL(t *testing.T) {
 	})
 
 	t.Run("parse query failure", func(t *testing.T) {
-		resp := doGraphqlRequest(h, "POST", "/graphql", `%7B%H7U6Z`)
+		resp := doGraphqlRequest(h, http.MethodPost, "/graphql", `%7B%H7U6Z`)
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 		assert.JSONEq(
@@ -52,7 +52,7 @@ func TestGRAPHQL(t *testing.T) {
 	})
 
 	t.Run("validation failure", func(t *testing.T) {
-		resp := doGraphqlRequest(h, "POST", "/graphql", `{ title }`)
+		resp := doGraphqlRequest(h, http.MethodPost, "/graphql", `{ title }`)
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 		assert.JSONEq(
@@ -63,7 +63,7 @@ func TestGRAPHQL(t *testing.T) {
 	})
 
 	t.Run("execution failure", func(t *testing.T) {
-		resp := doGraphqlRequest(h, "POST", "/graphql", `mutation { name }`)
+		resp := doGraphqlRequest(h, http.MethodPost, "/graphql", `mutation { name }`)
 		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 		assert.JSONEq(
@@ -92,7 +92,7 @@ func TestGRAPHQL(t *testing.T) {
 
 		for _, contentType := range validContentTypes {
 			t.Run(fmt.Sprintf("allow for content type %s", contentType), func(t *testing.T) {
-				resp := doReq(h, "POST", "/graphql", `{ name }`, contentType)
+				resp := doReq(h, http.MethodPost, "/graphql", `{ name }`, contentType)
 				assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 				assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 			})
@@ -105,7 +105,7 @@ func TestGRAPHQL(t *testing.T) {
 
 		for _, tc := range invalidContentTypes {
 			t.Run(fmt.Sprintf("reject for content type %s", tc), func(t *testing.T) {
-				resp := doReq(h, "POST", "/graphql", `{"query":"{ name }"}`, tc)
+				resp := doReq(h, http.MethodPost, "/graphql", `{"query":"{ name }"}`, tc)
 				assert.Equal(t, http.StatusBadRequest, resp.Code, resp.Body.String())
 				assert.JSONEq(
 					t,

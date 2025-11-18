@@ -83,7 +83,8 @@ func errorIncremental(err error) *IncrementalHandler {
 // IncrementalHandler is not safe for concurrent use, or for production
 // use at all.
 //
-// [incremental delivery over HTTP spec]: https://github.com/graphql/graphql-over-http/blob/main/rfcs/IncrementalDelivery.md
+// [incremental delivery over HTTP spec]:
+// https://github.com/graphql/graphql-over-http/blob/main/rfcs/IncrementalDelivery.md
 func (p *Client) IncrementalHTTP(
 	ctx context.Context,
 	query string,

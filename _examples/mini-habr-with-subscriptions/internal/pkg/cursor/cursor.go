@@ -34,7 +34,6 @@ func CreateCursorFromComment(comment *model.Comment) string {
 
 	cursor := base64.RawStdEncoding.EncodeToString(cursorLine)
 	return cursor
-
 }
 
 func GetPath(after *string) (string, error) {

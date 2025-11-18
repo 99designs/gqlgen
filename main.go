@@ -32,7 +32,8 @@ var configFileTemplate string
 
 func getConfigFileContent(pkgName string) string {
 	var buf bytes.Buffer
-	if err := template.Must(template.New("gqlgen.yml").Parse(configFileTemplate)).Execute(&buf, pkgName); err != nil {
+	if err := template.Must(template.New("gqlgen.yml").Parse(configFileTemplate)).
+		Execute(&buf, pkgName); err != nil {
 		panic(err)
 	}
 	return buf.String()

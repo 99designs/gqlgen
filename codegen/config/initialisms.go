@@ -6,7 +6,8 @@ import (
 	"github.com/99designs/gqlgen/codegen/templates"
 )
 
-// GoInitialismsConfig allows to modify the default behavior of naming Go methods, types and properties
+// GoInitialismsConfig allows to modify the default behavior of naming Go methods, types and
+// properties
 type GoInitialismsConfig struct {
 	// If true, the Initialisms won't get appended to the default ones but replace them
 	ReplaceDefaults bool `yaml:"replace_defaults"`

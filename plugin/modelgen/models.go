@@ -24,7 +24,8 @@ type (
 	FieldMutateHook = func(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field, error)
 )
 
-// DefaultFieldMutateHook is the default hook for the Plugin which applies the GoFieldHook and GoTagFieldHook.
+// DefaultFieldMutateHook is the default hook for the Plugin which applies the GoFieldHook and
+// GoTagFieldHook.
 func DefaultFieldMutateHook(td *ast.Definition, fd *ast.FieldDefinition, f *Field) (*Field, error) {
 	return GoTagFieldHook(td, fd, f)
 }
@@ -180,7 +181,8 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		func(i, j int) bool { return b.Interfaces[i].Name < b.Interfaces[j].Name },
 	)
 
-	// if we are not just turning all struct-type fields in generated structs into pointers, we need to at least
+	// if we are not just turning all struct-type fields in generated structs into pointers, we need
+	// to at least
 	// check for cyclical relationships and recursive structs
 	if !cfg.StructFieldsAlwaysPointers {
 		findAndHandleCyclicalRelationships(b)
@@ -346,7 +348,8 @@ func (m *Plugin) generateFields(
 			if embeddedField != nil {
 				fields = append(fields, embeddedField)
 			}
-			// Skip this field (either it's first with embedded field, or subsequent field from same interface)
+			// Skip this field (either it's first with embedded field, or subsequent field from same
+			// interface)
 			continue
 		}
 
@@ -666,7 +669,8 @@ func removeDuplicateTags(t string) string {
 	// iterate backwards through tags so appended goTag directives are prioritized
 	for i := len(tt) - 1; i >= 0; i-- {
 		ti := tt[i]
-		// check if ti contains ":", and not contains any empty space. if not, tag is in wrong format
+		// check if ti contains ":", and not contains any empty space. if not, tag is in wrong
+		// format
 		// correct example: json:"name"
 		if !strings.Contains(ti, ":") {
 			panic(
@@ -716,7 +720,8 @@ func isStruct(t types.Type) bool {
 	return is
 }
 
-// findAndHandleCyclicalRelationships checks for cyclical relationships between generated structs and replaces them
+// findAndHandleCyclicalRelationships checks for cyclical relationships between generated structs
+// and replaces them
 // with pointers. These relationships will produce compilation errors if they are not pointers.
 // Also handles recursive structs.
 func findAndHandleCyclicalRelationships(b *ModelBuild) {
@@ -729,9 +734,11 @@ func findAndHandleCyclicalRelationships(b *ModelBuild) {
 				continue
 			}
 
-			// the field Type string will be in the form "github.com/99designs/gqlgen/codegen/testserver/followschema.LoopA"
+			// the field Type string will be in the form
+			// "github.com/99designs/gqlgen/codegen/testserver/followschema.LoopA"
 			// we only want the part after the last dot: "LoopA"
-			// this could lead to false positives, as we are only checking the name of the struct type, but these
+			// this could lead to false positives, as we are only checking the name of the struct
+			// type, but these
 			// should be extremely rare, if it is even possible at all.
 			fieldAStructNameParts := strings.Split(fieldA.Type.String(), ".")
 			fieldAStructName := fieldAStructNameParts[len(fieldAStructNameParts)-1]
@@ -758,7 +765,8 @@ func findAndHandleCyclicalRelationships(b *ModelBuild) {
 					}
 				}
 
-				// if this is a recursive struct (i.e. structA == structB), ensure that we only change this field to a pointer once
+				// if this is a recursive struct (i.e. structA == structB), ensure that we only
+				// change this field to a pointer once
 				if cyclicalReferenceFound && ii != jj {
 					fieldA.Type = types.NewPointer(fieldA.Type)
 					break

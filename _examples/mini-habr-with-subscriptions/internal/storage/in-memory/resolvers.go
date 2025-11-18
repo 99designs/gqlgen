@@ -99,7 +99,11 @@ func (r *Storage) AddComment(postID int64, newComment *model.NewComment) (*model
 	return comment, nil
 }
 
-func (r *Storage) UpdateEnableCommentToPost(postID int64, authorID uuid.UUID, commentsEnabled bool) (*model.Post, error) {
+func (r *Storage) UpdateEnableCommentToPost(
+	postID int64,
+	authorID uuid.UUID,
+	commentsEnabled bool,
+) (*model.Post, error) {
 	op := "internal.storage.inmemory.UpdateEnableCommentToPost()"
 
 	log.Debug().Msgf("%s start", op)
@@ -175,7 +179,6 @@ func (r *Storage) GetCommentsBranch(postID int64, path string) ([]*model.Comment
 	}
 
 	return comments, nil
-
 }
 
 func (r *Storage) GetCommentPath(commentID int64) (string, error) {

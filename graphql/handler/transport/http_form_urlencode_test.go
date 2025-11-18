@@ -20,7 +20,7 @@ func TestUrlEncodedForm(t *testing.T) {
 	t.Run("success json", func(t *testing.T) {
 		resp := doRequest(
 			h,
-			"POST",
+			http.MethodPost,
 			"/graphql",
 			`{"query":"{ name }"}`,
 			"",
@@ -33,7 +33,7 @@ func TestUrlEncodedForm(t *testing.T) {
 	t.Run("success urlencoded", func(t *testing.T) {
 		resp := doRequest(
 			h,
-			"POST",
+			http.MethodPost,
 			"/graphql",
 			`query=%7B%20name%20%7D`,
 			"",
@@ -46,7 +46,7 @@ func TestUrlEncodedForm(t *testing.T) {
 	t.Run("success plain", func(t *testing.T) {
 		resp := doRequest(
 			h,
-			"POST",
+			http.MethodPost,
 			"/graphql",
 			`query={ name }`,
 			"",
@@ -57,7 +57,14 @@ func TestUrlEncodedForm(t *testing.T) {
 	})
 
 	t.Run("decode failure json", func(t *testing.T) {
-		resp := doRequest(h, "POST", "/graphql", "notjson", "", "application/x-www-form-urlencoded")
+		resp := doRequest(
+			h,
+			http.MethodPost,
+			"/graphql",
+			"notjson",
+			"",
+			"application/x-www-form-urlencoded",
+		)
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
 		assert.JSONEq(
@@ -70,7 +77,7 @@ func TestUrlEncodedForm(t *testing.T) {
 	t.Run("decode failure urlencoded", func(t *testing.T) {
 		resp := doRequest(
 			h,
-			"POST",
+			http.MethodPost,
 			"/graphql",
 			"query=%7Bnot-good",
 			"",
@@ -88,7 +95,7 @@ func TestUrlEncodedForm(t *testing.T) {
 	t.Run("parse query failure", func(t *testing.T) {
 		resp := doRequest(
 			h,
-			"POST",
+			http.MethodPost,
 			"/graphql",
 			`{"query":{"wrong": "format"}}`,
 			"",
@@ -121,7 +128,7 @@ func TestUrlEncodedForm(t *testing.T) {
 
 		for _, contentType := range validContentTypes {
 			t.Run(fmt.Sprintf("allow for content type %s", contentType), func(t *testing.T) {
-				resp := doReq(h, "POST", "/graphql", `{"query":"{ name }"}`, contentType)
+				resp := doReq(h, http.MethodPost, "/graphql", `{"query":"{ name }"}`, contentType)
 				assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 				assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 			})
@@ -134,7 +141,7 @@ func TestUrlEncodedForm(t *testing.T) {
 
 		for _, tc := range invalidContentTypes {
 			t.Run(fmt.Sprintf("reject for content type %s", tc), func(t *testing.T) {
-				resp := doReq(h, "POST", "/graphql", `{"query":"{ name }"}`, tc)
+				resp := doReq(h, http.MethodPost, "/graphql", `{"query":"{ name }"}`, tc)
 				assert.Equal(t, http.StatusBadRequest, resp.Code, resp.Body.String())
 				assert.JSONEq(
 					t,

@@ -1712,7 +1712,7 @@ func (ec *executionContext) _Post_id(ctx context.Context, field graphql.Collecte
 
 func (ec *executionContext) fieldContext_Post_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Post",
+		Object:     http.MethodPost,
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1756,7 +1756,7 @@ func (ec *executionContext) _Post_authorID(ctx context.Context, field graphql.Co
 
 func (ec *executionContext) fieldContext_Post_authorID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Post",
+		Object:     http.MethodPost,
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1800,7 +1800,7 @@ func (ec *executionContext) _Post_title(ctx context.Context, field graphql.Colle
 
 func (ec *executionContext) fieldContext_Post_title(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Post",
+		Object:     http.MethodPost,
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1844,7 +1844,7 @@ func (ec *executionContext) _Post_text(ctx context.Context, field graphql.Collec
 
 func (ec *executionContext) fieldContext_Post_text(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Post",
+		Object:     http.MethodPost,
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1888,7 +1888,7 @@ func (ec *executionContext) _Post_commentsEnabled(ctx context.Context, field gra
 
 func (ec *executionContext) fieldContext_Post_commentsEnabled(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Post",
+		Object:     http.MethodPost,
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -1929,7 +1929,7 @@ func (ec *executionContext) _Post_comments(ctx context.Context, field graphql.Co
 
 func (ec *executionContext) fieldContext_Post_comments(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Post",
+		Object:     http.MethodPost,
 		Field:      field,
 		IsMethod:   true,
 		IsResolver: true,
@@ -1990,7 +1990,7 @@ func (ec *executionContext) _Post_createDate(ctx context.Context, field graphql.
 
 func (ec *executionContext) fieldContext_Post_createDate(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     "Post",
+		Object:     http.MethodPost,
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -4686,7 +4686,7 @@ func (ec *executionContext) _PageInfo(ctx context.Context, sel ast.SelectionSet,
 	return out
 }
 
-var postImplementors = []string{"Post"}
+var postImplementors = []string{http.MethodPost}
 
 func (ec *executionContext) _Post(ctx context.Context, sel ast.SelectionSet, obj *model.Post) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, postImplementors)
@@ -4696,7 +4696,7 @@ func (ec *executionContext) _Post(ctx context.Context, sel ast.SelectionSet, obj
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("Post")
+			out.Values[i] = graphql.MarshalString(http.MethodPost)
 		case "id":
 			out.Values[i] = ec._Post_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -4824,7 +4824,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "post":
+		case http.MethodPost:
 			field := field
 
 			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {

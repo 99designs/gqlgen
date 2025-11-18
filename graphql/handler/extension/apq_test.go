@@ -27,7 +27,7 @@ func TestAPQIntegration(t *testing.T) {
 
 	resp := doRequest(
 		h,
-		"POST",
+		http.MethodPost,
 		"/graphql",
 		`{"query":"{ name }","extensions":{"persistedQuery":{"version":1,"sha256Hash":"30166fc3298853f22709fce1e4a00e98f1b6a3160eaaaf9cb3b7db6a16073b07"}}}`,
 	)

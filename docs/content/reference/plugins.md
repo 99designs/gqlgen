@@ -49,7 +49,9 @@ func main() {
 
 ```
 
-In `resolver.go`, add `//go:generate go run generate.go`. Now you can run `go generate ./...` instead of `go run github.com/99designs/gqlgen generate` to generate the code.
+In `resolver.go`, add `//go:generate go run generate.go` (or replace `//go:generate go tool gqlgen` if you have it there).
+
+Now you can run `go generate ./...` to generate code using your plugin.
 
 ## Writing a plugin
 

@@ -226,8 +226,6 @@ For testing the API, you can use any GraphQL clients, such as Insomnia, Postman,
 `│       └──` [`interface.go`](./internal/storage/interface.go)            (Interface for data storage (PostgreSQL, in-memory))<br>
 `├── migrations/`<br>
 `│   └──` [`001_create_tables.up.sql`](./migrations/001_create_tables.up.sql)    (SQL script for database migration (creating tables))<br>
-`├── tools/`<br>
-`│    └──` [`tools.go`](./tools/tools.go)                   (Tools for gqlgen code generation)<br>
 `├──` [`.env`](./.env)                            (Environment variables file (database settings, Redis, etc.))<br>
 `├──` [`.gitignore`](./.gitignore)                      (List of ignored files and directories for Git)<br>
 `├──` [`docker-compose.yml`](./docker-compose.yml)              (Docker Compose configuration for launching the application and dependencies)<br>

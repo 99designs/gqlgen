@@ -121,6 +121,7 @@ func TestFixedComplexity(t *testing.T) {
 	})
 }
 
+//nolint:unparam // expected to always get POST for GraphQL
 func doRequest(handler http.Handler, method, target, body string) *httptest.ResponseRecorder {
 	r := httptest.NewRequest(method, target, strings.NewReader(body))
 	r.Header.Set("Content-Type", "application/json")

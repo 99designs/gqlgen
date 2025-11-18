@@ -114,6 +114,7 @@ func TestApolloTracing_withUnexpectedEOF(t *testing.T) {
 	assert.Equal(t, http.StatusOK, resp.Code)
 }
 
+//nolint:unparam // expected to always get POST for GraphQL
 func doRequest(handler http.Handler, method, target, body string) *httptest.ResponseRecorder {
 	return doRequestWithReader(handler, method, target, strings.NewReader(body))
 }

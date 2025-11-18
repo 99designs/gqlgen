@@ -453,7 +453,7 @@ func TestWebSocketErrorFunc(t *testing.T) {
 		h.AddTransport(transport.Websocket{
 			ErrorFunc: func(_ context.Context, err error) {
 				require.EqualError(t, err, "websocket read: invalid message received")
-				assert.ErrorAs(t, err, &transport.WebsocketError{IsReadError: true})
+				require.ErrorAs(t, err, &transport.WebsocketError{IsReadError: true})
 				errFuncCalled <- true
 			},
 		})

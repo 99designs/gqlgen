@@ -210,6 +210,7 @@ func testResolveField[R any](
 	stream bool,
 	assertResult func(t *testing.T, test ResolveFieldTest, result R),
 ) {
+	t.Helper()
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			calls := 0

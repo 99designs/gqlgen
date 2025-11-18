@@ -171,6 +171,7 @@ func overWriteFile(t *testing.T, sourceFile, destinationFile string) {
 }
 
 func assertNoErrors(t *testing.T, pkg string) {
+	t.Helper()
 	pkgs, err := packages.Load(&packages.Config{
 		Mode: packages.NeedName |
 			packages.NeedFiles |

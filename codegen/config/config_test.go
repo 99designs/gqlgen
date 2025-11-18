@@ -100,8 +100,7 @@ func TestLoadConfigFromDefaultLocation(t *testing.T) {
 	var cfg *Config
 
 	t.Run("will find closest match", func(t *testing.T) {
-		err = os.Chdir(filepath.Join(testDir, "testdata", "cfg", "subdir"))
-		require.NoError(t, err)
+		t.Chdir(filepath.Join(testDir, "testdata", "cfg", "subdir"))
 
 		cfg, err = LoadConfigFromDefaultLocations()
 		require.NoError(t, err)
@@ -109,8 +108,7 @@ func TestLoadConfigFromDefaultLocation(t *testing.T) {
 	})
 
 	t.Run("will find config in parent dirs", func(t *testing.T) {
-		err = os.Chdir(filepath.Join(testDir, "testdata", "cfg", "otherdir"))
-		require.NoError(t, err)
+		t.Chdir(filepath.Join(testDir, "testdata", "cfg", "otherdir"))
 
 		cfg, err = LoadConfigFromDefaultLocations()
 		require.NoError(t, err)
@@ -118,8 +116,7 @@ func TestLoadConfigFromDefaultLocation(t *testing.T) {
 	})
 
 	t.Run("will return error if config doesn't exist", func(t *testing.T) {
-		err = os.Chdir(testDir)
-		require.NoError(t, err)
+		t.Chdir(testDir)
 
 		cfg, err = LoadConfigFromDefaultLocations()
 		require.ErrorIs(t, err, fs.ErrNotExist)
@@ -132,8 +129,7 @@ func TestLoadDefaultConfig(t *testing.T) {
 	var cfg *Config
 
 	t.Run("will find the schema", func(t *testing.T) {
-		err = os.Chdir(filepath.Join(testDir, "testdata", "defaultconfig"))
-		require.NoError(t, err)
+		t.Chdir(filepath.Join(testDir, "testdata", "defaultconfig"))
 
 		cfg, err = LoadDefaultConfig()
 		require.NoError(t, err)
@@ -141,8 +137,7 @@ func TestLoadDefaultConfig(t *testing.T) {
 	})
 
 	t.Run("will return error if schema doesn't exist", func(t *testing.T) {
-		err = os.Chdir(testDir)
-		require.NoError(t, err)
+		t.Chdir(testDir)
 
 		cfg, err = LoadDefaultConfig()
 		require.ErrorIs(t, err, fs.ErrNotExist)

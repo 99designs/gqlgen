@@ -156,10 +156,8 @@ func parseUnnestedKeyFieldSet(raw string, prefix []string) Set {
 			unionField = false
 		}
 
-		next := append(
-			prefix[0:len(prefix):len(prefix)],
-			s,
-		)
+		var next = prefix[0:len(prefix):len(prefix)]
+		next = append(next, s)
 		ret = append(ret, next)
 	}
 	return ret

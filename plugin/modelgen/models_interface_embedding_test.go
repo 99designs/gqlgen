@@ -75,6 +75,7 @@ func TestModelGenerationDirectiveEmbedding(t *testing.T) {
 				{"Molecule", []string{"out_directive_embedding_models.BaseNode"}, nil},
 			},
 			additionalChecks: func(t *testing.T, generated string) {
+				t.Helper()
 				require.Contains(
 					t,
 					generated,

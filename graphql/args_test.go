@@ -57,7 +57,7 @@ func TestProcessArgField(t *testing.T) {
 				test.valueMapperFn,
 			)
 			if test.expectedErr != "" {
-				assert.EqualError(t, err, test.expectedErr)
+				require.EqualError(t, err, test.expectedErr)
 			} else {
 				require.NoError(t, err)
 				assert.Equal(t, test.expected, actual)
@@ -124,7 +124,7 @@ func TestProcessArgFieldWithEC(t *testing.T) {
 				test.valueMapperFn,
 			)
 			if test.expectedErr != "" {
-				assert.EqualError(t, err, test.expectedErr)
+				require.EqualError(t, err, test.expectedErr)
 			} else {
 				require.NoError(t, err)
 				assert.Equal(t, test.expected, actual)

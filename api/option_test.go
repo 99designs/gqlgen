@@ -25,6 +25,7 @@ func (t *testPlugin) MutateConfig(_ *config.Config) error {
 }
 
 func mustFederationPlugin(t *testing.T) plugin.Plugin {
+	t.Helper()
 	p, err := federation.New(1, &config.Config{
 		Federation: config.PackageConfig{},
 	})

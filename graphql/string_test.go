@@ -39,6 +39,7 @@ func TestString(t *testing.T) {
 }
 
 func mustUnmarshalString(t *testing.T, v any) string {
+	t.Helper()
 	res, err := UnmarshalString(v)
 	require.NoError(t, err)
 	return res

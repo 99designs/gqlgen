@@ -65,17 +65,17 @@ func TestInt8(t *testing.T) {
 				var intErr *IntegerError
 
 				res, err := UnmarshalInt8(tc.v)
-				assert.EqualError(
+				require.EqualError(
 					t,
 					err,
 					tc.err,
 				)
-				assert.ErrorAs(
+				require.ErrorAs(
 					t,
 					err,
 					&numberOverflowErr,
 				)
-				assert.ErrorAs(
+				require.ErrorAs(
 					t,
 					err,
 					&intErr,
@@ -89,7 +89,7 @@ func TestInt8(t *testing.T) {
 		var intErr *IntegerError
 
 		res, err := UnmarshalInt8("-1.03")
-		assert.EqualError(
+		require.EqualError(
 			t,
 			err,
 			"strconv.ParseInt: parsing \"-1.03\": invalid syntax",
@@ -98,7 +98,7 @@ func TestInt8(t *testing.T) {
 		assert.Equal(t, int8(0), res)
 
 		res, err = UnmarshalInt8(json.Number(" 1"))
-		assert.EqualError(
+		require.EqualError(
 			t,
 			err,
 			"strconv.ParseInt: parsing \" 1\": invalid syntax",
@@ -109,6 +109,7 @@ func TestInt8(t *testing.T) {
 }
 
 func mustUnmarshalInt8(t *testing.T, v any) int8 {
+	t.Helper()
 	res, err := UnmarshalInt8(v)
 	require.NoError(t, err)
 	return res
@@ -165,17 +166,17 @@ func TestInt16(t *testing.T) {
 				var intErr *IntegerError
 
 				res, err := UnmarshalInt16(tc.v)
-				assert.EqualError(
+				require.EqualError(
 					t,
 					err,
 					tc.err,
 				)
-				assert.ErrorAs(
+				require.ErrorAs(
 					t,
 					err,
 					&numberOverflowErr,
 				)
-				assert.ErrorAs(
+				require.ErrorAs(
 					t,
 					err,
 					&intErr,
@@ -189,7 +190,7 @@ func TestInt16(t *testing.T) {
 		var intErr *IntegerError
 
 		res, err := UnmarshalInt16("-1.03")
-		assert.EqualError(
+		require.EqualError(
 			t,
 			err,
 			"strconv.ParseInt: parsing \"-1.03\": invalid syntax",
@@ -198,7 +199,7 @@ func TestInt16(t *testing.T) {
 		assert.Equal(t, int16(0), res)
 
 		res, err = UnmarshalInt16(json.Number(" 1"))
-		assert.EqualError(
+		require.EqualError(
 			t,
 			err,
 			"strconv.ParseInt: parsing \" 1\": invalid syntax",
@@ -209,6 +210,7 @@ func TestInt16(t *testing.T) {
 }
 
 func mustUnmarshalInt16(t *testing.T, v any) int16 {
+	t.Helper()
 	res, err := UnmarshalInt16(v)
 	require.NoError(t, err)
 	return res
@@ -230,6 +232,7 @@ func TestInt(t *testing.T) {
 }
 
 func mustUnmarshalInt(t *testing.T, v any) int {
+	t.Helper()
 	res, err := UnmarshalInt(v)
 	require.NoError(t, err)
 	return res
@@ -302,17 +305,17 @@ func TestInt32(t *testing.T) {
 				var intErr *IntegerError
 
 				res, err := UnmarshalInt32(tc.v)
-				assert.EqualError(
+				require.EqualError(
 					t,
 					err,
 					tc.err,
 				)
-				assert.ErrorAs(
+				require.ErrorAs(
 					t,
 					err,
 					&numberOverflowErr,
 				)
-				assert.ErrorAs(
+				require.ErrorAs(
 					t,
 					err,
 					&intErr,
@@ -326,7 +329,7 @@ func TestInt32(t *testing.T) {
 		var intErr *IntegerError
 
 		res, err := UnmarshalInt32("-1.03")
-		assert.EqualError(
+		require.EqualError(
 			t,
 			err,
 			"strconv.ParseInt: parsing \"-1.03\": invalid syntax",
@@ -335,7 +338,7 @@ func TestInt32(t *testing.T) {
 		assert.Equal(t, int32(0), res)
 
 		res, err = UnmarshalInt32(json.Number(" 1"))
-		assert.EqualError(
+		require.EqualError(
 			t,
 			err,
 			"strconv.ParseInt: parsing \" 1\": invalid syntax",
@@ -346,6 +349,7 @@ func TestInt32(t *testing.T) {
 }
 
 func mustUnmarshalInt32(t *testing.T, v any) int32 {
+	t.Helper()
 	res, err := UnmarshalInt32(v)
 	require.NoError(t, err)
 	return res
@@ -367,6 +371,7 @@ func TestInt64(t *testing.T) {
 }
 
 func mustUnmarshalInt64(t *testing.T, v any) int64 {
+	t.Helper()
 	res, err := UnmarshalInt64(v)
 	require.NoError(t, err)
 	return res

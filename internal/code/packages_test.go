@@ -95,6 +95,7 @@ func TestLoadAllNames(t *testing.T) {
 }
 
 func initialState(t *testing.T, opts ...Option) *Packages {
+	t.Helper()
 	p := NewPackages(opts...)
 	pkgs := p.LoadAll(
 		"github.com/99designs/gqlgen/internal/code/testdata/a",

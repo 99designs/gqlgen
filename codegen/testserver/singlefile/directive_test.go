@@ -89,7 +89,7 @@ func TestDirectives(t *testing.T) {
 		return &ok, nil
 	}
 
-	okchan := func() (<-chan *string, error) {
+	okchan := func() (<-chan *string, error) { //nolint:unparam // interface purposes
 		res := make(chan *string, 1)
 		res <- &ok
 		close(res)

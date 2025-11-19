@@ -319,3 +319,50 @@ func testResolveField[R any](
 		})
 	}
 }
+
+func TestResolveFieldMiddlewareReturningMarshaler(t *testing.T) {
+	t.Run(
+		"should not call field resolver when field resolver returns a Marshaler",
+		func(t *testing.T) {
+			oc := &OperationContext{
+				ResolverMiddleware: func(ctx context.Context, next Resolver) (res any, err error) {
+					return next(ctx)
+				},
+			}
+			field := CollectedField{
+				Field: &ast.Field{
+					Alias: "testField",
+				},
+			}
+			result := ResolveField(
+				context.Background(),
+				oc,
+				field,
+				func(ctx context.Context, field CollectedField) (*FieldContext, error) {
+					return &FieldContext{
+						Object: "Test",
+						Field:  field,
+					}, nil
+				},
+				func(ctx context.Context) (any, error) {
+					t.Error("should not call field resolver")
+					return nil, nil
+				},
+				func(ctx context.Context, next Resolver) Resolver {
+					return func(ctx context.Context) (res any, err error) {
+						return MarshalString("test value"), nil
+					}
+				},
+				func(ctx context.Context, sel ast.SelectionSet, v string) Marshaler {
+					t.Error("should not call marshal")
+					return nil
+				},
+				false,
+				false,
+			)
+			var sb strings.Builder
+			result.MarshalGQL(&sb)
+			assert.Equal(t, `"test value"`, sb.String())
+		},
+	)
+}

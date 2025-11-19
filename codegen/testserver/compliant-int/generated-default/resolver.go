@@ -1,7 +1,6 @@
 package generated
 
-// THIS CODE WILL BE UPDATED WITH SCHEMA CHANGES. PREVIOUS IMPLEMENTATION FOR SCHEMA CHANGES WILL BE
-// KEPT IN THE COMMENT SECTION. IMPLEMENTATION FOR UNCHANGED SCHEMA WILL BE KEPT.
+// THIS CODE WILL BE UPDATED WITH SCHEMA CHANGES. PREVIOUS IMPLEMENTATION FOR SCHEMA CHANGES WILL BE KEPT IN THE COMMENT SECTION. IMPLEMENTATION FOR UNCHANGED SCHEMA WILL BE KEPT.
 
 import (
 	"context"
@@ -25,10 +24,7 @@ func (r *queryResolver) EchoIntInputToIntObject(ctx context.Context, input Input
 }
 
 // EchoInt64InputToInt64Object is the resolver for the echoInt64InputToInt64Object field.
-func (r *queryResolver) EchoInt64InputToInt64Object(
-	ctx context.Context,
-	input Input64,
-) (*Result64, error) {
+func (r *queryResolver) EchoInt64InputToInt64Object(ctx context.Context, input Input64) (*Result64, error) {
 	panic("not implemented")
 }
 
@@ -38,8 +34,7 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 type queryResolver struct{ *Resolver }
 
 // !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you
-// have
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
 // one last chance to move it out of harms way if you want. There are two reasons this happens:
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.

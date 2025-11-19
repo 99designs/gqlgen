@@ -19,7 +19,7 @@ formatters:
         - codegen/testserver/followschema/resolver.go
         - codegen/testserver/singlefile/resolver.go
         - codegen/testserver/usefunctionsyntaxforexecutioncontext/resolver.go
-        - generated$
+        - generated
   enable:
     - golines
     - gofumpt

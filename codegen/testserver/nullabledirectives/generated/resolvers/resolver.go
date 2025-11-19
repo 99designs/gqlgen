@@ -1,7 +1,6 @@
 package resolver
 
-// THIS CODE WILL BE UPDATED WITH SCHEMA CHANGES. PREVIOUS IMPLEMENTATION FOR SCHEMA CHANGES WILL BE
-// KEPT IN THE COMMENT SECTION. IMPLEMENTATION FOR UNCHANGED SCHEMA WILL BE KEPT.
+// THIS CODE WILL BE UPDATED WITH SCHEMA CHANGES. PREVIOUS IMPLEMENTATION FOR SCHEMA CHANGES WILL BE KEPT IN THE COMMENT SECTION. IMPLEMENTATION FOR UNCHANGED SCHEMA WILL BE KEPT.
 
 import (
 	"context"
@@ -12,10 +11,7 @@ import (
 type Resolver struct{}
 
 // DirectiveSingleNullableArg is the resolver for the directiveSingleNullableArg field.
-func (r *queryResolver) DirectiveSingleNullableArg(
-	ctx context.Context,
-	arg1 *string,
-) (*string, error) {
+func (r *queryResolver) DirectiveSingleNullableArg(ctx context.Context, arg1 *string) (*string, error) {
 	panic("not implemented")
 }
 
@@ -25,8 +21,7 @@ func (r *Resolver) Query() nullabledirectives.QueryResolver { return &queryResol
 type queryResolver struct{ *Resolver }
 
 // !!! WARNING !!!
-// The code below was going to be deleted when updating resolvers. It has been copied here so you
-// have
+// The code below was going to be deleted when updating resolvers. It has been copied here so you have
 // one last chance to move it out of harms way if you want. There are two reasons this happens:
 //  - When renaming or deleting a resolver the old code will be put in here. You can safely delete
 //    it when you're done.

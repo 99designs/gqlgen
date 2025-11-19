@@ -95,7 +95,6 @@ func TestMaps(t *testing.T) {
 }
 
 func validateMapItemsType(t *testing.T, in map[string]any) {
-	t.Helper()
 	for k, v := range in {
 		switch k {
 		case "a":

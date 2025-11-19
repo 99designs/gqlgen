@@ -217,7 +217,6 @@ func TestHandler_WithOptions(t *testing.T) {
 				WithGraphiqlFetcherHeaders(map[string]string{"Authorization": "Bearer token"}),
 			},
 			assert: func(t *testing.T, body string) {
-				t.Helper()
 				assert.True(
 					t,
 					strings.Contains(
@@ -233,7 +232,6 @@ func TestHandler_WithOptions(t *testing.T) {
 				WithGraphiqlUiHeaders(map[string]string{"X-Custom-Header": "value"}),
 			},
 			assert: func(t *testing.T, body string) {
-				t.Helper()
 				assert.True(
 					t,
 					strings.Contains(body, `const uiHeaders = {"X-Custom-Header":"value"};`),
@@ -251,7 +249,6 @@ func TestHandler_WithOptions(t *testing.T) {
 				),
 			},
 			assert: func(t *testing.T, body string) {
-				t.Helper()
 				assert.True(t, strings.Contains(body, `src="https://example.com/graphiql.js"`))
 				assert.True(t, strings.Contains(body, `href="https://example.com/graphiql.css"`))
 				assert.True(t, strings.Contains(body, `integrity="sha256-js"`))
@@ -269,7 +266,6 @@ func TestHandler_WithOptions(t *testing.T) {
 				),
 			},
 			assert: func(t *testing.T, body string) {
-				t.Helper()
 				assert.True(t, strings.Contains(body, `src="https://example.com/react.js"`))
 				assert.True(t, strings.Contains(body, `src="https://example.com/react-dom.js"`))
 				assert.True(t, strings.Contains(body, `integrity="sha256-react"`))
@@ -288,7 +284,6 @@ func TestHandler_WithOptions(t *testing.T) {
 				),
 			},
 			assert: func(t *testing.T, body string) {
-				t.Helper()
 				assert.True(
 					t,
 					strings.Contains(body, `src="https://example.com/plugin-explorer.js"`),
@@ -307,7 +302,6 @@ func TestHandler_WithOptions(t *testing.T) {
 				WithGraphiqlEnablePluginExplorer(true),
 			},
 			assert: func(t *testing.T, body string) {
-				t.Helper()
 				assert.True(t, strings.Contains(body, `GraphiQLPluginExplorer.explorerPlugin()`))
 			},
 		},
@@ -317,7 +311,6 @@ func TestHandler_WithOptions(t *testing.T) {
 				WithStoragePrefix("my-prefix"),
 			},
 			assert: func(t *testing.T, body string) {
-				t.Helper()
 				assert.True(t, strings.Contains(body, `new PrefixedStorage('my-prefix')`))
 			},
 		},

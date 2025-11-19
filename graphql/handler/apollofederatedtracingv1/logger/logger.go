@@ -2,7 +2,8 @@ package logger
 
 import "log"
 
-// Logger is an interface that can be implemented to log errors that occur during the tracing process
+// Logger is an interface that can be implemented to log errors that occur during the tracing
+// process
 // This can use the default Go logger or a custom logger (e.g. logrus or zap)
 type Logger interface {
 	Print(args any)

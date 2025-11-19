@@ -19,7 +19,12 @@ type Resolver struct {
 	Subscribers     *Subscribers
 }
 
-func NewResolver(postMutation *postmutation.PostMutation, postQuery *postquery.PostQuery, commentMutation *commentmutation.CommentMutation, commentQuery *commentquery.CommentQuery) *Resolver {
+func NewResolver(
+	postMutation *postmutation.PostMutation,
+	postQuery *postquery.PostQuery,
+	commentMutation *commentmutation.CommentMutation,
+	commentQuery *commentquery.CommentQuery,
+) *Resolver {
 	return &Resolver{
 		PostMutation:    postMutation,
 		PostQuery:       postQuery,

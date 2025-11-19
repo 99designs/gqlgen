@@ -57,9 +57,23 @@ type Embed struct {
 		ShouldError bool
 	}{
 		{"Finds a field by name with no tag", std, "name", "", "Name", false},
-		{"Finds a field by name when passed tag but tag not used", std, "name", "gqlgen", "Name", false},
+		{
+			"Finds a field by name when passed tag but tag not used",
+			std,
+			"name",
+			"gqlgen",
+			"Name",
+			false,
+		},
 		{"Ignores tags when not passed a tag", tags, "foo", "", "Foo", false},
-		{"Picks field with tag over field name when passed a tag", tags, "foo", "gqlgen", "Bar", false},
+		{
+			"Picks field with tag over field name when passed a tag",
+			tags,
+			"foo",
+			"gqlgen",
+			"Bar",
+			false,
+		},
 		{"Errors when ambiguous", amb, "foo", "gqlgen", "", true},
 		{"Finds a field that is in embedded struct", anon, "bar", "", "Bar", false},
 		{"Finds field that is not in embedded struct", embed, "test", "", "Test", false},

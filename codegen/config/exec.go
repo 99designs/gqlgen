@@ -33,7 +33,8 @@ type ExecLayout string
 var (
 	// Write all generated code to a single file.
 	ExecLayoutSingleFile ExecLayout = "single-file"
-	// Write generated code to a directory, generating one Go source file for each GraphQL schema file.
+	// Write generated code to a directory, generating one Go source file for each GraphQL schema
+	// file.
 	ExecLayoutFollowSchema ExecLayout = "follow-schema"
 )
 
@@ -48,7 +49,9 @@ func (r *ExecConfig) Check() error {
 			return errors.New("filename must be specified when using single-file layout")
 		}
 		if !strings.HasSuffix(r.Filename, ".go") {
-			return errors.New("filename should be path to a go source file when using single-file layout")
+			return errors.New(
+				"filename should be path to a go source file when using single-file layout",
+			)
 		}
 		r.Filename = abs(r.Filename)
 	case ExecLayoutFollowSchema:
@@ -61,7 +64,9 @@ func (r *ExecConfig) Check() error {
 	}
 
 	if strings.ContainsAny(r.Package, "./\\") {
-		return errors.New("package should be the output package name only, do not include the output filename")
+		return errors.New(
+			"package should be the output package name only, do not include the output filename",
+		)
 	}
 
 	if r.Package == "" && r.Dir() != "" {

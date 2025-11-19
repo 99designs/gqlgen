@@ -7,9 +7,9 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlparser/v2/ast"
 
 	"github.com/99designs/gqlgen/codegen/config"
-	"github.com/vektah/gqlparser/v2/ast"
 )
 
 func cleanup(workDir string) {
@@ -45,10 +45,9 @@ func TestGenerate(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Cleanup(func() {
 				cleanup(tt.workDir)
-				_ = os.Chdir(wd)
+				t.Chdir(wd)
 			})
-			err = os.Chdir(tt.workDir)
-			require.NoError(t, err)
+			t.Chdir(tt.workDir)
 			cfg, err := config.LoadConfigFromDefaultLocations()
 			require.NoError(t, err, "failed to load config")
 			err = Generate(cfg)
@@ -109,11 +108,10 @@ func TestGenerateWithSchemaMutator(t *testing.T) {
 			workDir := filepath.Join(wd, "testdata", "default")
 			t.Cleanup(func() {
 				cleanup(workDir)
-				_ = os.Chdir(wd)
+				t.Chdir(wd)
 			})
 
-			err := os.Chdir(workDir)
-			require.NoError(t, err)
+			t.Chdir(workDir)
 
 			cfg, err := config.LoadConfigFromDefaultLocations()
 			require.NoError(t, err)

@@ -18,7 +18,8 @@ type FieldContext struct {
 	Parent *FieldContext
 	// The name of the type this field belongs to
 	Object string
-	// These are the args after processing, they can be mutated in middleware to change what the resolver will get.
+	// These are the args after processing, they can be mutated in middleware to change what the
+	// resolver will get.
 	Args map[string]any
 	// The raw field
 	Field CollectedField

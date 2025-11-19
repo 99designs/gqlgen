@@ -27,7 +27,8 @@ func Extensions(extensions map[string]any) Option {
 	}
 }
 
-// Path sets the url that this request will be made against, useful if you are mounting your entire router
+// Path sets the url that this request will be made against, useful if you are mounting your entire
+// router
 // and need to specify the url to the graphql endpoint.
 func Path(url string) Option {
 	return func(bd *Request) {
@@ -35,7 +36,8 @@ func Path(url string) Option {
 	}
 }
 
-// AddHeader adds a header to the outgoing request. This is useful for setting expected Authentication headers for example.
+// AddHeader adds a header to the outgoing request. This is useful for setting expected
+// Authentication headers for example.
 func AddHeader(key, value string) Option {
 	return func(bd *Request) {
 		bd.HTTP.Header.Add(key, value)

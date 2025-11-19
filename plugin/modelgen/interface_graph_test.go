@@ -79,7 +79,11 @@ func TestInterfaceGraph(t *testing.T) {
 
 		// But isEmbeddable should filter by directive
 		assert.True(t, graph.isEmbeddable("Node"), "Node should be embeddable (has directive)")
-		assert.False(t, graph.isEmbeddable("Element"), "Element should NOT be embeddable (no directive)")
+		assert.False(
+			t,
+			graph.isEmbeddable("Element"),
+			"Element should NOT be embeddable (no directive)",
+		)
 		assert.True(t, graph.isEmbeddable("Metal"), "Metal should be embeddable (has directive)")
 	})
 
@@ -101,7 +105,11 @@ func TestInterfaceGraph(t *testing.T) {
 		schema := createNodeElementMetalSchema("Node")
 		graph := newInterfaceGraph(schema)
 
-		assert.False(t, graph.isEmbeddable("NonExistent"), "Non-existent interface should not be embeddable")
+		assert.False(
+			t,
+			graph.isEmbeddable("NonExistent"),
+			"Non-existent interface should not be embeddable",
+		)
 	})
 }
 
@@ -153,7 +161,13 @@ func TestInterfaceGraphGetEmbeddableParents(t *testing.T) {
 			}
 
 			for _, unexpected := range tc.unexpectedParents {
-				assert.NotContains(t, info.Parents, unexpected, "should not contain parent %s", unexpected)
+				assert.NotContains(
+					t,
+					info.Parents,
+					unexpected,
+					"should not contain parent %s",
+					unexpected,
+				)
 			}
 
 			if tc.shouldHaveSkippedFields {
@@ -163,7 +177,12 @@ func TestInterfaceGraphGetEmbeddableParents(t *testing.T) {
 					fieldNames[field.Name] = true
 				}
 				for _, expectedField := range tc.expectedSkippedFields {
-					assert.True(t, fieldNames[expectedField], "should contain skipped field %s", expectedField)
+					assert.True(
+						t,
+						fieldNames[expectedField],
+						"should contain skipped field %s",
+						expectedField,
+					)
 				}
 			} else {
 				assert.Empty(t, info.SkippedFields, "should not have skipped fields")
@@ -204,7 +223,11 @@ func createNodeElementMetalSchema(embeddable ...string) *ast.Schema {
 				Name:       "Metal",
 				Kind:       ast.Interface,
 				Interfaces: []string{"Element"},
-				Fields:     []*ast.FieldDefinition{{Name: "id"}, {Name: "name"}, {Name: "atomicNumber"}},
+				Fields: []*ast.FieldDefinition{
+					{Name: "id"},
+					{Name: "name"},
+					{Name: "atomicNumber"},
+				},
 				Directives: directives(hasDirective("Metal")),
 			},
 		},
@@ -239,7 +262,11 @@ func createABCChainSchema(embeddable ...string) *ast.Schema {
 				Name:       "C",
 				Kind:       ast.Interface,
 				Interfaces: []string{"B"},
-				Fields:     []*ast.FieldDefinition{{Name: "fieldA"}, {Name: "fieldB"}, {Name: "fieldC"}},
+				Fields: []*ast.FieldDefinition{
+					{Name: "fieldA"},
+					{Name: "fieldB"},
+					{Name: "fieldC"},
+				},
 				Directives: directives(embeddableSet["C"]),
 			},
 		},
@@ -274,14 +301,23 @@ func createABCDChainSchema(embeddable ...string) *ast.Schema {
 				Name:       "C",
 				Kind:       ast.Interface,
 				Interfaces: []string{"B"},
-				Fields:     []*ast.FieldDefinition{{Name: "fieldA"}, {Name: "fieldB"}, {Name: "fieldC"}},
+				Fields: []*ast.FieldDefinition{
+					{Name: "fieldA"},
+					{Name: "fieldB"},
+					{Name: "fieldC"},
+				},
 				Directives: directives(embeddableSet["C"]),
 			},
 			"D": {
 				Name:       "D",
 				Kind:       ast.Interface,
 				Interfaces: []string{"C"},
-				Fields:     []*ast.FieldDefinition{{Name: "fieldA"}, {Name: "fieldB"}, {Name: "fieldC"}, {Name: "fieldD"}},
+				Fields: []*ast.FieldDefinition{
+					{Name: "fieldA"},
+					{Name: "fieldB"},
+					{Name: "fieldC"},
+					{Name: "fieldD"},
+				},
 				Directives: directives(embeddableSet["D"]),
 			},
 		},

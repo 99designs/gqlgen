@@ -22,7 +22,12 @@ func main() {
 
 	var storageType string
 	const defaultStorageType = "postgres"
-	flag.StringVar(&storageType, "storage", "postgres", "set storage type 'memory'('m') or postgres('p')")
+	flag.StringVar(
+		&storageType,
+		"storage",
+		"postgres",
+		"set storage type 'memory'('m') or postgres('p')",
+	)
 	flag.StringVar(&storageType, "s", "p", "set storage type 'memory'('m') or postgres('p')")
 	flag.Parse()
 
@@ -49,14 +54,14 @@ func main() {
 		log.Warn().Msg("Default storage type is selected for further work")
 	}
 
-	//load enviroments
+	// load enviroments
 	err := loadEnv()
 	if err != nil {
 		log.Error().Err(err).Msg("Don't found configuration")
 		os.Exit(1)
 	}
 
-	//creating storage according to the settings of the parameters
+	// creating storage according to the settings of the parameters
 	storage, err := createStorage(storageType)
 	if err != nil {
 		log.Error().Err(err).Msg("Failed init storage")
@@ -64,7 +69,7 @@ func main() {
 	}
 
 	server.RunServer(storage)
-	//TODO: RUN SERVER
+	// TODO: RUN SERVER
 }
 
 func loadEnv() error {
@@ -77,10 +82,8 @@ func loadEnv() error {
 }
 
 func createStorage(storageType string) (storage.StorageImp, error) {
-
 	if storageType == "memory" {
 		return createResolverInMemory()
-
 	} else {
 		return createResolverWithDB()
 	}

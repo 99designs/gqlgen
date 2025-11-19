@@ -25,7 +25,8 @@ type (
 
 	// Option implements a visitor that mutates an outgoing GraphQL request
 	//
-	// This is the Option pattern - https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis
+	// This is the Option pattern -
+	// https://dave.cheney.net/2014/10/17/functional-options-for-friendly-apis
 	Option func(bd *Request)
 
 	// Request represents an outgoing GraphQL request

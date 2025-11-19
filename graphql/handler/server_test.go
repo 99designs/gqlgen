@@ -26,7 +26,11 @@ func TestServer(t *testing.T) {
 	t.Run("returns an error if no transport matches", func(t *testing.T) {
 		resp := post(srv, "/foo", "application/json")
 		assert.Equal(t, http.StatusBadRequest, resp.Code)
-		assert.JSONEq(t, `{"errors":[{"message":"transport not supported"}],"data":null}`, resp.Body.String())
+		assert.JSONEq(
+			t,
+			`{"errors":[{"message":"transport not supported"}],"data":null}`,
+			resp.Body.String(),
+		)
 	})
 
 	t.Run("calls query on executable schema", func(t *testing.T) {
@@ -38,25 +42,37 @@ func TestServer(t *testing.T) {
 	t.Run("mutations are forbidden", func(t *testing.T) {
 		resp := get(srv, "/foo?query=mutation{name}")
 		assert.Equal(t, http.StatusNotAcceptable, resp.Code)
-		assert.JSONEq(t, `{"errors":[{"message":"GET requests only allow query operations"}],"data":null}`, resp.Body.String())
+		assert.JSONEq(
+			t,
+			`{"errors":[{"message":"GET requests only allow query operations"}],"data":null}`,
+			resp.Body.String(),
+		)
 	})
 
 	t.Run("subscriptions are forbidden", func(t *testing.T) {
 		resp := get(srv, "/foo?query=subscription{name}")
 		assert.Equal(t, http.StatusNotAcceptable, resp.Code)
-		assert.JSONEq(t, `{"errors":[{"message":"GET requests only allow query operations"}],"data":null}`, resp.Body.String())
+		assert.JSONEq(
+			t,
+			`{"errors":[{"message":"GET requests only allow query operations"}],"data":null}`,
+			resp.Body.String(),
+		)
 	})
 
 	t.Run("invokes operation middleware in order", func(t *testing.T) {
 		var calls []string
-		srv.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
-			calls = append(calls, "first")
-			return next(ctx)
-		})
-		srv.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
-			calls = append(calls, "second")
-			return next(ctx)
-		})
+		srv.AroundOperations(
+			func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+				calls = append(calls, "first")
+				return next(ctx)
+			},
+		)
+		srv.AroundOperations(
+			func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+				calls = append(calls, "second")
+				return next(ctx)
+			},
+		)
 
 		resp := get(srv, "/foo?query={name}")
 		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
@@ -65,14 +81,18 @@ func TestServer(t *testing.T) {
 
 	t.Run("invokes response middleware in order", func(t *testing.T) {
 		var calls []string
-		srv.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
-			calls = append(calls, "first")
-			return next(ctx)
-		})
-		srv.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
-			calls = append(calls, "second")
-			return next(ctx)
-		})
+		srv.AroundResponses(
+			func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+				calls = append(calls, "first")
+				return next(ctx)
+			},
+		)
+		srv.AroundResponses(
+			func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+				calls = append(calls, "second")
+				return next(ctx)
+			},
+		)
 
 		resp := get(srv, "/foo?query={name}")
 		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
@@ -98,12 +118,14 @@ func TestServer(t *testing.T) {
 	t.Run("get query parse error in AroundResponses", func(t *testing.T) {
 		var errors1 gqlerror.List
 		var errors2 gqlerror.List
-		srv.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
-			resp := next(ctx)
-			errors1 = graphql.GetErrors(ctx)
-			errors2 = resp.Errors
-			return resp
-		})
+		srv.AroundResponses(
+			func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+				resp := next(ctx)
+				errors1 = graphql.GetErrors(ctx)
+				errors2 = resp.Errors
+				return resp
+			},
+		)
 
 		resp := get(srv, "/foo?query=invalid")
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
@@ -150,12 +172,14 @@ func TestErrorServer(t *testing.T) {
 	t.Run("get resolver error in AroundResponses", func(t *testing.T) {
 		var errors1 gqlerror.List
 		var errors2 gqlerror.List
-		srv.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
-			resp := next(ctx)
-			errors1 = graphql.GetErrors(ctx)
-			errors2 = resp.Errors
-			return resp
-		})
+		srv.AroundResponses(
+			func(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+				resp := next(ctx)
+				errors1 = graphql.GetErrors(ctx)
+				errors2 = resp.Errors
+				return resp
+			},
+		)
 
 		resp := get(srv, "/foo?query={name}")
 		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
@@ -186,7 +210,7 @@ func TestRecover(t *testing.T) {
 }
 
 func get(handler http.Handler, target string) *httptest.ResponseRecorder {
-	r := httptest.NewRequest("GET", target, http.NoBody)
+	r := httptest.NewRequest(http.MethodGet, target, http.NoBody)
 	w := httptest.NewRecorder()
 
 	handler.ServeHTTP(w, r)
@@ -194,7 +218,7 @@ func get(handler http.Handler, target string) *httptest.ResponseRecorder {
 }
 
 func post(handler http.Handler, target, contentType string) *httptest.ResponseRecorder {
-	r := httptest.NewRequest("POST", target, http.NoBody)
+	r := httptest.NewRequest(http.MethodPost, target, http.NoBody)
 	r.Header.Set("Content-Type", contentType)
 	w := httptest.NewRecorder()
 

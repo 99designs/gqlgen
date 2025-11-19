@@ -20,7 +20,8 @@ type POST struct {
 	// set, only one header: Content-Type: application/graphql-response+json will be set.
 	ResponseHeaders map[string][]string
 
-	// UseGrapQLResponseJsonByDefault determines whether to use 'application/graphql-response+json' as the response content type
+	// UseGrapQLResponseJsonByDefault determines whether to use 'application/graphql-response+json'
+	// as the response content type
 	// when the Accept header is empty or 'application/*' or '*/*'.
 	UseGrapQLResponseJsonByDefault bool
 }
@@ -37,7 +38,7 @@ func (h POST) Supports(r *http.Request) bool {
 		return false
 	}
 
-	return r.Method == "POST" && mediaType == "application/json"
+	return r.Method == http.MethodPost && mediaType == "application/json"
 }
 
 func getRequestBody(r *http.Request) (string, error) {
@@ -59,7 +60,11 @@ var pool = sync.Pool{
 
 func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
 	ctx := r.Context()
-	contentType := determineResponseContentType(h.ResponseHeaders, r, h.UseGrapQLResponseJsonByDefault)
+	contentType := determineResponseContentType(
+		h.ResponseHeaders,
+		r,
+		h.UseGrapQLResponseJsonByDefault,
+	)
 	responseHeaders := mergeHeaders(
 		map[string][]string{
 			"Content-Type": {contentType},

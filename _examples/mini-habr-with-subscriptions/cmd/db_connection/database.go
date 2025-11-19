@@ -4,11 +4,8 @@ import (
 	"fmt"
 	"os"
 
-
 	_ "github.com/jackc/pgx/v5/stdlib"
-
 	"github.com/jmoiron/sqlx"
-
 	"github.com/rs/zerolog/log"
 )
 
@@ -62,7 +59,7 @@ func (db *DatabaseConnection) PingDatabase() error {
 		return fmt.Errorf("%s:%s", op, "database isn`t established")
 	}
 
-	var pingError = db.DB.Ping()
+	pingError := db.DB.Ping()
 	if pingError != nil {
 		return fmt.Errorf("%s:%w", op, pingError)
 	}
@@ -75,7 +72,7 @@ func (db *DatabaseConnection) CloseDatabase() error {
 	const op = "cmd.dbconnection.CloseDatabase()"
 
 	log.Info().Msg("Attempting to close database")
-	var closingError = db.DB.Close()
+	closingError := db.DB.Close()
 	if closingError != nil {
 		return fmt.Errorf("%s:%w", op, closingError)
 	}

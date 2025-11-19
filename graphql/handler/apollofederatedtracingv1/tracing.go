@@ -5,11 +5,11 @@ import (
 	"encoding/base64"
 	"fmt"
 
+	"github.com/vektah/gqlparser/v2/gqlerror"
 	"google.golang.org/protobuf/proto"
 
 	"github.com/99designs/gqlgen/graphql"
 	tracing_logger "github.com/99designs/gqlgen/graphql/handler/apollofederatedtracingv1/logger"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 const (
@@ -25,7 +25,8 @@ type (
 		Hostname     string
 		ErrorOptions *ErrorOptions
 
-		// Logger is used to log errors that occur during the tracing process; if nil, no logging will occur
+		// Logger is used to log errors that occur during the tracing process; if nil, no logging
+		// will occur
 		// This can use the default Go logger or a custom logger (e.g. logrus or zap)
 		Logger tracing_logger.Logger
 	}
@@ -37,7 +38,8 @@ type ErrorOptions struct {
 	// ErrorOptions is the option to handle errors in the trace, it can be one of the following:
 	// - "masked": masks all errors
 	// - "all": includes all errors
-	// - "transform": includes all errors but transforms them using TransformFunction, which can allow users to redact sensitive information
+	// - "transform": includes all errors but transforms them using TransformFunction, which can
+	// allow users to redact sensitive information
 	ErrorOption       string
 	TransformFunction func(g *gqlerror.Error) *gqlerror.Error
 }
@@ -58,7 +60,8 @@ func (Tracer) ExtensionName() string {
 	return "ApolloFederatedTracingV1"
 }
 
-// Validate returns errors based on the schema; since this extension doesn't require validation, we return nil
+// Validate returns errors based on the schema; since this extension doesn't require validation, we
+// return nil
 func (Tracer) Validate(graphql.ExecutableSchema) error {
 	return nil
 }
@@ -79,8 +82,12 @@ func (t *Tracer) getTreeBuilder(ctx context.Context) *TreeBuilder {
 	return nil
 }
 
-// InterceptOperation acts on each Graph operation; on each operation, start a tree builder and start the tree's timer for tracing
-func (t *Tracer) InterceptOperation(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+// InterceptOperation acts on each Graph operation; on each operation, start a tree builder and
+// start the tree's timer for tracing
+func (t *Tracer) InterceptOperation(
+	ctx context.Context,
+	next graphql.OperationHandler,
+) graphql.ResponseHandler {
 	if !t.shouldTrace(ctx) {
 		return next(ctx)
 	}
@@ -88,7 +95,8 @@ func (t *Tracer) InterceptOperation(ctx context.Context, next graphql.OperationH
 	return next(context.WithValue(ctx, key, NewTreeBuilder(t.ErrorOptions, t.Logger)))
 }
 
-// InterceptField is called on each field's resolution, including information about the path and parent node.
+// InterceptField is called on each field's resolution, including information about the path and
+// parent node.
 // This information is then used to build the relevant Node Tree used in the FTV1 tracing format
 func (t *Tracer) InterceptField(ctx context.Context, next graphql.Resolver) (any, error) {
 	if !t.shouldTrace(ctx) {
@@ -104,9 +112,13 @@ func (t *Tracer) InterceptField(ctx context.Context, next graphql.Resolver) (any
 	return next(ctx)
 }
 
-// InterceptResponse is called before the overall response is sent, but before each field resolves; as a result
+// InterceptResponse is called before the overall response is sent, but before each field resolves;
+// as a result
 // the final marshaling is deferred to happen at the end of the operation
-func (t *Tracer) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+func (t *Tracer) InterceptResponse(
+	ctx context.Context,
+	next graphql.ResponseHandler,
+) *graphql.Response {
 	if !t.shouldTrace(ctx) {
 		return next(ctx)
 	}
@@ -134,7 +146,8 @@ func (t *Tracer) InterceptResponse(ctx context.Context, next graphql.ResponseHan
 			fmt.Print(err)
 		}
 
-		// ... then set the previously instantiated string as the base64 formatted string as required
+		// ... then set the previously instantiated string as the base64 formatted string as
+		// required
 		*val = base64.StdEncoding.EncodeToString(p)
 	}(val)
 	resp := next(ctx)

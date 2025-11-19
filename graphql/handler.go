@@ -33,13 +33,20 @@ type (
 	}
 
 	GraphExecutor interface {
-		CreateOperationContext(ctx context.Context, params *RawParams) (*OperationContext, gqlerror.List)
-		DispatchOperation(ctx context.Context, opCtx *OperationContext) (ResponseHandler, context.Context)
+		CreateOperationContext(
+			ctx context.Context,
+			params *RawParams,
+		) (*OperationContext, gqlerror.List)
+		DispatchOperation(
+			ctx context.Context,
+			opCtx *OperationContext,
+		) (ResponseHandler, context.Context)
 		DispatchError(ctx context.Context, list gqlerror.List) *Response
 	}
 
-	// HandlerExtension adds functionality to the http handler. See the list of possible hook points below
-	// Its important to understand the lifecycle of a graphql request and the terminology we use in gqlgen
+	// HandlerExtension adds functionality to the http handler. See the list of possible hook points
+	// below Its important to understand the lifecycle of a graphql request and the terminology we
+	// use in gqlgen
 	// before working with these
 	//
 	//  +--- REQUEST   POST /graphql --------------------------------------------+
@@ -51,30 +58,36 @@ type (
 	//  | +--------------------------------------------------------------------+ |
 	//  +------------------------------------------------------------------------+
 	HandlerExtension interface {
-		// ExtensionName should be a CamelCase string version of the extension which may be shown in stats and logging.
+		// ExtensionName should be a CamelCase string version of the extension which may be shown in
+		// stats and logging.
 		ExtensionName() string
-		// Validate is called when adding an extension to the server, it allows validation against the servers schema.
+		// Validate is called when adding an extension to the server, it allows validation against
+		// the servers schema.
 		Validate(schema ExecutableSchema) error
 	}
 
-	// OperationParameterMutator is called before creating a request context. allows manipulating the raw query
+	// OperationParameterMutator is called before creating a request context. allows manipulating
+	// the raw query
 	// on the way in.
 	OperationParameterMutator interface {
 		MutateOperationParameters(ctx context.Context, request *RawParams) *gqlerror.Error
 	}
 
-	// OperationContextMutator is called after creating the request context, but before executing the root resolver.
+	// OperationContextMutator is called after creating the request context, but before executing
+	// the root resolver.
 	OperationContextMutator interface {
 		MutateOperationContext(ctx context.Context, opCtx *OperationContext) *gqlerror.Error
 	}
 
-	// OperationInterceptor is called for each incoming query, for basic requests the writer will be invoked once,
+	// OperationInterceptor is called for each incoming query, for basic requests the writer will be
+	// invoked once,
 	// for subscriptions it will be invoked multiple times.
 	OperationInterceptor interface {
 		InterceptOperation(ctx context.Context, next OperationHandler) ResponseHandler
 	}
 
-	// ResponseInterceptor is called around each graphql operation response. This can be called many times for a single
+	// ResponseInterceptor is called around each graphql operation response. This can be called many
+	// times for a single
 	// operation the case of subscriptions.
 	ResponseInterceptor interface {
 		InterceptResponse(ctx context.Context, next ResponseHandler) *Response
@@ -89,7 +102,8 @@ type (
 		InterceptField(ctx context.Context, next Resolver) (res any, err error)
 	}
 
-	// Transport provides support for different wire level encodings of graphql requests, eg Form, Get, Post, Websocket
+	// Transport provides support for different wire level encodings of graphql requests, eg Form,
+	// Get, Post, Websocket
 	Transport interface {
 		Supports(r *http.Request) bool
 		Do(w http.ResponseWriter, r *http.Request, exec GraphExecutor)
@@ -110,7 +124,11 @@ func (p *RawParams) AddUpload(upload Upload, key, path string) *gqlerror.Error {
 	for i, p := range parts[1:] {
 		last := i == len(parts)-2
 		if ptr == nil {
-			return gqlerror.Errorf("path is missing \"variables.\" prefix, key: %s, path: %s", key, path)
+			return gqlerror.Errorf(
+				"path is missing \"variables.\" prefix, key: %s, path: %s",
+				key,
+				path,
+			)
 		}
 		if index, parseNbrErr := strconv.Atoi(p); parseNbrErr == nil {
 			if last {

@@ -11,7 +11,8 @@ type Cache[T any] interface {
 	Add(ctx context.Context, key string, value T)
 }
 
-// MapCache is the simplest implementation of a cache, because it can not evict it should only be used in tests
+// MapCache is the simplest implementation of a cache, because it can not evict it should only be
+// used in tests
 type MapCache[T any] map[string]T
 
 // Get looks up a key's value from the cache.

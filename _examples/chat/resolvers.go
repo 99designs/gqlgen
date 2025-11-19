@@ -62,7 +62,10 @@ type Chatroom struct {
 
 type mutationResolver struct{ *resolver }
 
-func (r *mutationResolver) Post(ctx context.Context, text, username, roomName string) (*Message, error) {
+func (r *mutationResolver) Post(
+	ctx context.Context,
+	text, username, roomName string,
+) (*Message, error) {
 	room := r.getRoom(roomName)
 
 	message := &Message{
@@ -99,7 +102,10 @@ func (r *queryResolver) Room(ctx context.Context, name string) (*Chatroom, error
 
 type subscriptionResolver struct{ *resolver }
 
-func (r *subscriptionResolver) MessageAdded(ctx context.Context, roomName string) (<-chan *Message, error) {
+func (r *subscriptionResolver) MessageAdded(
+	ctx context.Context,
+	roomName string,
+) (<-chan *Message, error) {
 	room := r.getRoom(roomName)
 
 	id := randString(8)

@@ -22,8 +22,9 @@ import (
 	"github.com/99designs/gqlgen/internal/imports"
 )
 
-// CurrentImports keeps track of all the import declarations that are needed during the execution of a plugin.
-// this is done with a global because subtemplates currently get called in functions. Lets aim to remove this eventually.
+// CurrentImports keeps track of all the import declarations that are needed during the execution of
+// a plugin. this is done with a global because subtemplates currently get called in functions. Lets
+// aim to remove this eventually.
 var CurrentImports *Imports
 
 // Options specify various parameters to rendering a template.
@@ -542,7 +543,9 @@ func wordWalker(str string, f func(*wordInfo)) {
 			// do NOT count this as an initialism.
 			switch upperWord {
 			case "ID", "IP":
-				if remainingRunes := runes[w:]; word == string(remainingRunes[:2]) && !eow && len(remainingRunes) > 3 && unicode.IsUpper(remainingRunes[3]) {
+				if remainingRunes := runes[w:]; word == string(remainingRunes[:2]) && !eow &&
+					len(remainingRunes) > 3 &&
+					unicode.IsUpper(remainingRunes[3]) {
 					continue
 				}
 			}
@@ -811,7 +814,8 @@ var CommonInitialisms = map[string]bool{
 	"GCP":   true,
 }
 
-// GetInitialisms returns the initialisms to capitalize in Go names. If unchanged, default initialisms will be returned
+// GetInitialisms returns the initialisms to capitalize in Go names. If unchanged, default
+// initialisms will be returned
 var GetInitialisms = func() map[string]bool {
 	return CommonInitialisms
 }

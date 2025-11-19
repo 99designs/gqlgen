@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
-	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
 
 func TestComplexityCollisions(t *testing.T) {
@@ -77,7 +77,11 @@ func TestComplexityFuncs(t *testing.T) {
 		}
 		err := c.Post(`query { overlapping { oneFoo, twoFoo, oldFoo, newFoo, new_foo } }`, &resp)
 
-		require.EqualError(t, err, `[{"message":"operation has complexity 2012, which exceeds the limit of 10","extensions":{"code":"COMPLEXITY_LIMIT_EXCEEDED"}}]`)
+		require.EqualError(
+			t,
+			err,
+			`[{"message":"operation has complexity 2012, which exceeds the limit of 10","extensions":{"code":"COMPLEXITY_LIMIT_EXCEEDED"}}]`,
+		)
 		require.False(t, ran)
 	})
 
@@ -116,7 +120,11 @@ func TestComplexityFuncs(t *testing.T) {
 			c: overlapping { newFoo },
 		}`, &resp)
 
-		require.EqualError(t, err, `[{"message":"operation has complexity 18, which exceeds the limit of 10","extensions":{"code":"COMPLEXITY_LIMIT_EXCEEDED"}}]`)
+		require.EqualError(
+			t,
+			err,
+			`[{"message":"operation has complexity 18, which exceeds the limit of 10","extensions":{"code":"COMPLEXITY_LIMIT_EXCEEDED"}}]`,
+		)
 		require.False(t, ran)
 	})
 }

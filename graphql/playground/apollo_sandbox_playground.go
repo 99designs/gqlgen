@@ -7,8 +7,10 @@ import (
 	"net/http"
 )
 
-const apolloSandboxMainJs = "https://embeddable-sandbox.cdn.apollographql.com/02e2da0fccbe0240ef03d2396d6c98559bab5b06/embeddable-sandbox.umd.production.min.js"
-const apolloSandboxMainSri = "sha256-asj/scPAF8jmMGj1J+YwCHps3uI57AZ78cHs0bJkML4="
+const (
+	apolloSandboxMainJs  = "https://embeddable-sandbox.cdn.apollographql.com/02e2da0fccbe0240ef03d2396d6c98559bab5b06/embeddable-sandbox.umd.production.min.js"
+	apolloSandboxMainSri = "sha256-asj/scPAF8jmMGj1J+YwCHps3uI57AZ78cHs0bJkML4="
+)
 
 // NOTE: New version available at https://embeddable-sandbox.cdn.apollographql.com/ -->
 var apolloSandboxPage = template.Must(template.New("ApolloSandbox").Parse(`<!doctype html>
@@ -112,38 +114,47 @@ type apolloSandboxInitialState struct {
 
 type ApolloSandboxOption func(options *apolloSandboxHandlerOptions)
 
-// WithApolloSandboxHideCookieToggle By default, the embedded Sandbox does not show the Include cookies toggle in its connection settings.
+// WithApolloSandboxHideCookieToggle By default, the embedded Sandbox does not show the Include
+// cookies toggle in its connection settings.
 //
-// Set hideCookieToggle to false to enable users of your embedded Sandbox instance to toggle the Include cookies setting.
+// Set hideCookieToggle to false to enable users of your embedded Sandbox instance to toggle the
+// Include cookies setting.
 func WithApolloSandboxHideCookieToggle(hideCookieToggle bool) ApolloSandboxOption {
 	return func(options *apolloSandboxHandlerOptions) {
 		options.ApolloSandboxOption.HideCookieToggle = hideCookieToggle
 	}
 }
 
-// WithApolloSandboxEndpointIsEditable By default, the embedded Sandbox has a URL input box that is editable by users.
+// WithApolloSandboxEndpointIsEditable By default, the embedded Sandbox has a URL input box that is
+// editable by users.
 //
-// Set endpointIsEditable to false to prevent users of your embedded Sandbox instance from changing the endpoint URL.
+// Set endpointIsEditable to false to prevent users of your embedded Sandbox instance from changing
+// the endpoint URL.
 func WithApolloSandboxEndpointIsEditable(endpointIsEditable bool) ApolloSandboxOption {
 	return func(options *apolloSandboxHandlerOptions) {
 		options.ApolloSandboxOption.EndpointIsEditable = endpointIsEditable
 	}
 }
 
-// WithApolloSandboxInitialStateIncludeCookies Set this value to true if you want the Sandbox to pass { credentials: 'include' } for its requests by default.
+// WithApolloSandboxInitialStateIncludeCookies Set this value to true if you want the Sandbox to
+// pass { credentials: 'include' } for its requests by default.
 //
-// If you set hideCookieToggle to false, users can override this default setting with the Include cookies toggle. (By default, the embedded Sandbox does not show the Include cookies toggle in its connection settings.)
+// If you set hideCookieToggle to false, users can override this default setting with the Include
+// cookies toggle. (By default, the embedded Sandbox does not show the Include cookies toggle in its
+// connection settings.)
 //
 // If you also pass the handleRequest option, this option is ignored.
 //
-// Read more about the fetch API and credentials here https://developer.mozilla.org/en-US/docs/Web/API/fetch#credentials
+// Read more about the fetch API and credentials here
+// https://developer.mozilla.org/en-US/docs/Web/API/fetch#credentials
 func WithApolloSandboxInitialStateIncludeCookies(includeCookies bool) ApolloSandboxOption {
 	return func(options *apolloSandboxHandlerOptions) {
 		options.ApolloSandboxOption.InitialState.IncludeCookies = includeCookies
 	}
 }
 
-// WithApolloSandboxInitialStateDocument Document operation to populate in the Sandbox's editor on load.
+// WithApolloSandboxInitialStateDocument Document operation to populate in the Sandbox's editor on
+// load.
 //
 // If you omit this, the Sandbox initially loads an example query based on your schema.
 func WithApolloSandboxInitialStateDocument(document string) ApolloSandboxOption {
@@ -152,7 +163,8 @@ func WithApolloSandboxInitialStateDocument(document string) ApolloSandboxOption 
 	}
 }
 
-// WithApolloSandboxInitialStateVariables Variables containing initial variable values to populate in the Sandbox on load.
+// WithApolloSandboxInitialStateVariables Variables containing initial variable values to populate
+// in the Sandbox on load.
 //
 // If provided, these variables should apply to the initial query you provide for document.
 func WithApolloSandboxInitialStateVariables(variables map[string]any) ApolloSandboxOption {
@@ -161,7 +173,8 @@ func WithApolloSandboxInitialStateVariables(variables map[string]any) ApolloSand
 	}
 }
 
-// WithApolloSandboxInitialStateHeaders Headers containing initial variable values to populate in the Sandbox on load.
+// WithApolloSandboxInitialStateHeaders Headers containing initial variable values to populate in
+// the Sandbox on load.
 //
 // If provided, these variables should apply to the initial query you provide for document.
 func WithApolloSandboxInitialStateHeaders(headers map[string]any) ApolloSandboxOption {
@@ -170,30 +183,39 @@ func WithApolloSandboxInitialStateHeaders(headers map[string]any) ApolloSandboxO
 	}
 }
 
-// WithApolloSandboxInitialStateCollectionIdAndOperationId The ID of a collection, paired with an operation ID to populate in the Sandbox on load.
+// WithApolloSandboxInitialStateCollectionIdAndOperationId The ID of a collection, paired with an
+// operation ID to populate in the Sandbox on load.
 //
-// You can find these values from a registered graph in Studio by clicking the ... menu next to an operation in the Explorer of that graph and selecting View operation details.
-func WithApolloSandboxInitialStateCollectionIdAndOperationId(collectionId, operationId string) ApolloSandboxOption {
+// You can find these values from a registered graph in Studio by clicking the ... menu next to an
+// operation in the Explorer of that graph and selecting View operation details.
+func WithApolloSandboxInitialStateCollectionIdAndOperationId(
+	collectionId, operationId string,
+) ApolloSandboxOption {
 	return func(options *apolloSandboxHandlerOptions) {
 		options.ApolloSandboxOption.InitialState.CollectionId = collectionId
 		options.ApolloSandboxOption.InitialState.OperationId = operationId
 	}
 }
 
-// WithApolloSandboxInitialStatePollForSchemaUpdates If true, the embedded Sandbox periodically polls your initialEndpoint for schema updates.
+// WithApolloSandboxInitialStatePollForSchemaUpdates If true, the embedded Sandbox periodically
+// polls your initialEndpoint for schema updates.
 //
 // The default value is false.
-func WithApolloSandboxInitialStatePollForSchemaUpdates(pollForSchemaUpdates bool) ApolloSandboxOption {
+func WithApolloSandboxInitialStatePollForSchemaUpdates(
+	pollForSchemaUpdates bool,
+) ApolloSandboxOption {
 	return func(options *apolloSandboxHandlerOptions) {
 		options.ApolloSandboxOption.InitialState.PollForSchemaUpdates = pollForSchemaUpdates
 	}
 }
 
-// WithApolloSandboxInitialStateSharedHeaders Headers that are applied by default to every operation executed by the embedded Sandbox.
+// WithApolloSandboxInitialStateSharedHeaders Headers that are applied by default to every operation
+// executed by the embedded Sandbox.
 //
 // Users can disable the application of these headers, but they can't modify their values.
 //
-// The embedded Sandbox always includes these headers in its introspection queries to your initialEndpoint.
+// The embedded Sandbox always includes these headers in its introspection queries to your
+// initialEndpoint.
 func WithApolloSandboxInitialStateSharedHeaders(sharedHeaders map[string]any) ApolloSandboxOption {
 	return func(options *apolloSandboxHandlerOptions) {
 		options.ApolloSandboxOption.InitialState.SharedHeaders = sharedHeaders

@@ -175,9 +175,10 @@ func indexDefs(pkg *packages.Package) map[string]types.Object {
 		}
 
 		if _, ok := res[astNode.Name]; !ok {
-			// The above check may not be really needed, it is only here to have a consistent behavior with
-			// previous implementation of FindObject() function which only honored the first inclusion of a def.
-			// If this is still needed, we can consider something like sync.Map.LoadOrStore() to avoid two lookups.
+			// The above check may not be really needed, it is only here to have a consistent
+			// behavior with previous implementation of FindObject() function which only honored the
+			// first inclusion of a def. If this is still needed, we can consider something like
+			// sync.Map.LoadOrStore() to avoid two lookups.
 			res[astNode.Name] = def
 		}
 	}
@@ -192,7 +193,8 @@ func (b *Binder) PointerTo(ref *TypeReference) *TypeReference {
 	return &newRef
 }
 
-// TypeReference is used by args and field types. The Definition can refer to both input and output types.
+// TypeReference is used by args and field types. The Definition can refer to both input and output
+// types.
 type TypeReference struct {
 	Definition               *ast.Definition
 	GQL                      *ast.Type
@@ -230,7 +232,8 @@ func (ref *TypeReference) IsPtr() bool {
 	return isPtr
 }
 
-// fix for https://github.com/golang/go/issues/31103 may make it possible to remove this (may still be useful)
+// fix for https://github.com/golang/go/issues/31103 may make it possible to remove this (may still
+// be useful)
 func (ref *TypeReference) IsPtrToPtr() bool {
 	if p, isPtr := ref.GO.(*types.Pointer); isPtr {
 		_, isPtr := p.Elem().(*types.Pointer)
@@ -293,7 +296,9 @@ func (ref *TypeReference) UniquenessKey() string {
 		// Fix for #896
 		elemNullability = "ᚄ"
 	}
-	return nullability + ref.Definition.Name + "2" + templates.TypeIdentifier(ref.GO) + elemNullability
+	return nullability + ref.Definition.Name + "2" + templates.TypeIdentifier(
+		ref.GO,
+	) + elemNullability
 }
 
 func (ref *TypeReference) MarshalFunc() string {
@@ -370,7 +375,10 @@ func unwrapOmittable(t types.Type) (types.Type, bool) {
 	return named.TypeArgs().At(0), true
 }
 
-func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret *TypeReference, err error) {
+func (b *Binder) TypeReference(
+	schemaType *ast.Type,
+	bindTarget types.Type,
+) (ret *TypeReference, err error) {
 	if bindTarget != nil {
 		bindTarget = code.Unalias(bindTarget)
 	}
@@ -464,7 +472,8 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 			ref.GO = t
 			ref.IsMarshaler = true
 		} else if underlying := basicUnderlying(t); def.IsLeafType() && underlying != nil && underlying.Kind() == types.String {
-			// TODO delete before v1. Backwards compatibility case for named types wrapping strings (see #595)
+			// TODO delete before v1. Backwards compatibility case for named types wrapping strings
+			// (see #595)
 
 			ref.GO = t
 			ref.CastType = underlying
@@ -485,8 +494,11 @@ func (b *Binder) TypeReference(schemaType *ast.Type, bindTarget types.Type) (ret
 
 		if bindTarget != nil {
 			if err = code.CompatibleTypes(ref.GO, bindTarget); err != nil {
-				// if the bind type implements the graphql.ContextMarshaler/graphql.ContextUnmarshaler/graphql.Marshaler/graphql.Unmarshaler interface, we can use it
-				if hasMethod(bindTarget, "MarshalGQLContext") && hasMethod(bindTarget, "UnmarshalGQLContext") {
+				// if the bind type implements the
+				// graphql.ContextMarshaler/graphql.ContextUnmarshaler/graphql.Marshaler/graphql.Unmarshaler
+				// interface, we can use it
+				if hasMethod(bindTarget, "MarshalGQLContext") &&
+					hasMethod(bindTarget, "UnmarshalGQLContext") {
 					ref.IsContext = true
 					ref.IsMarshaler = true
 					ref.Marshaler = nil
@@ -523,7 +535,8 @@ func (b *Binder) CopyModifiersFromAst(t *ast.Type, base types.Type) types.Type {
 	base = types.Unalias(base)
 	if t.Elem != nil {
 		child := b.CopyModifiersFromAst(t.Elem, base)
-		if _, isStruct := child.Underlying().(*types.Struct); isStruct && !b.cfg.OmitSliceElementPointers {
+		if _, isStruct := child.Underlying().(*types.Struct); isStruct &&
+			!b.cfg.OmitSliceElementPointers {
 			child = types.NewPointer(child)
 		}
 		return types.NewSlice(child)
@@ -613,7 +626,11 @@ func (b *Binder) enumValues(def *ast.Definition) map[string]EnumValue {
 	return model.EnumValues
 }
 
-func (b *Binder) enumReference(ref *TypeReference, obj types.Object, values map[string]EnumValue) error {
+func (b *Binder) enumReference(
+	ref *TypeReference,
+	obj types.Object,
+	values map[string]EnumValue,
+) error {
 	if len(ref.Definition.EnumValues) != len(values) {
 		return fmt.Errorf("not all enum values are binded for %v", ref.Definition.Name)
 	}
@@ -637,7 +654,11 @@ func (b *Binder) enumReference(ref *TypeReference, obj types.Object, values map[
 	for _, value := range ref.Definition.EnumValues {
 		v, ok := values[value.Name]
 		if !ok {
-			return fmt.Errorf("enum value not found for: %v, of enum: %v", value.Name, ref.Definition.Name)
+			return fmt.Errorf(
+				"enum value not found for: %v, of enum: %v",
+				value.Name,
+				ref.Definition.Name,
+			)
 		}
 
 		pkgName, typeName := code.PkgAndType(v.Value)

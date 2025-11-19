@@ -4,11 +4,11 @@ package federation
 import (
 	"testing"
 
-	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/plugin/federation/testdata/usefunctionsyntaxforexecutioncontext"
 	"github.com/99designs/gqlgen/plugin/federation/testdata/usefunctionsyntaxforexecutioncontext/generated"
 )

@@ -4,11 +4,11 @@ import (
 	"context"
 	"testing"
 
-	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
 
 func TestMaps(t *testing.T) {
@@ -50,7 +50,11 @@ func TestMaps(t *testing.T) {
 		var resp struct {
 			MapStringInterface map[string]any
 		}
-		err := c.Post(`query($value: CustomScalar!) { mapStringInterface(in: { a: "a", b: null, c: 42, nested: { value: $value } }) { a, b, c, nested { value } } }`, &resp, client.Var("value", "17"))
+		err := c.Post(
+			`query($value: CustomScalar!) { mapStringInterface(in: { a: "a", b: null, c: 42, nested: { value: $value } }) { a, b, c, nested { value } } }`,
+			&resp,
+			client.Var("value", "17"),
+		)
 		require.NoError(t, err)
 		require.Equal(t, "a", resp.MapStringInterface["a"])
 		require.Nil(t, resp.MapStringInterface["b"])
@@ -64,7 +68,10 @@ func TestMaps(t *testing.T) {
 		var resp struct {
 			MapNestedStringInterface map[string]any
 		}
-		err := c.Post(`query { mapNestedStringInterface(in: { map: { a: "a", c: "42", nested: { value: 31 } } }) { a, b, c, nested { value } } }`, &resp)
+		err := c.Post(
+			`query { mapNestedStringInterface(in: { map: { a: "a", c: "42", nested: { value: 31 } } }) { a, b, c, nested { value } } }`,
+			&resp,
+		)
 		require.NoError(t, err)
 		require.Equal(t, "a", resp.MapNestedStringInterface["a"])
 		require.Nil(t, resp.MapNestedStringInterface["b"])
@@ -78,7 +85,10 @@ func TestMaps(t *testing.T) {
 		var resp struct {
 			MapNestedStringInterface map[string]any
 		}
-		err := c.Post(`query { mapNestedStringInterface(in: { map: null }) { a, b, c, nested { value } } }`, &resp)
+		err := c.Post(
+			`query { mapNestedStringInterface(in: { map: null }) { a, b, c, nested { value } } }`,
+			&resp,
+		)
 		require.NoError(t, err)
 		require.Nil(t, resp.MapNestedStringInterface)
 	})

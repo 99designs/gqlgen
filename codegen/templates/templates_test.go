@@ -128,19 +128,42 @@ func TestToGoModelName(t *testing.T) {
 			expected: []string{"MyEnumNameValue", "MyEnumNameValue0"},
 		},
 		{
-			input:    [][]string{{"MyEnumName", "Value"}, {"MyEnumName", "value"}, {"MyEnumName", "vALue"}, {"MyEnumName", "VALue"}},
-			expected: []string{"MyEnumNameValue", "MyEnumNamevalue", "MyEnumNameVALue", "MyEnumNameVALue0"},
+			input: [][]string{
+				{"MyEnumName", "Value"},
+				{"MyEnumName", "value"},
+				{"MyEnumName", "vALue"},
+				{"MyEnumName", "VALue"},
+			},
+			expected: []string{
+				"MyEnumNameValue",
+				"MyEnumNamevalue",
+				"MyEnumNameVALue",
+				"MyEnumNameVALue0",
+			},
 		},
 		{
-			input:    [][]string{{"MyEnumName", "TitleValue"}, {"MyEnumName", "title_value"}, {"MyEnumName", "title_Value"}, {"MyEnumName", "Title_Value"}},
-			expected: []string{"MyEnumNameTitleValue", "MyEnumNametitle_value", "MyEnumNametitle_Value", "MyEnumNameTitle_Value"},
+			input: [][]string{
+				{"MyEnumName", "TitleValue"},
+				{"MyEnumName", "title_value"},
+				{"MyEnumName", "title_Value"},
+				{"MyEnumName", "Title_Value"},
+			},
+			expected: []string{
+				"MyEnumNameTitleValue",
+				"MyEnumNametitle_value",
+				"MyEnumNametitle_Value",
+				"MyEnumNameTitle_Value",
+			},
 		},
 		{
 			input:    [][]string{{"MyEnumName", "TitleValue", "OtherValue"}},
 			expected: []string{"MyEnumNameTitleValueOtherValue"},
 		},
 		{
-			input:    [][]string{{"MyEnumName", "TitleValue", "OtherValue"}, {"MyEnumName", "title_value", "OtherValue"}},
+			input: [][]string{
+				{"MyEnumName", "TitleValue", "OtherValue"},
+				{"MyEnumName", "title_value", "OtherValue"},
+			},
 			expected: []string{"MyEnumNameTitleValueOtherValue", "MyEnumNametitle_valueOtherValue"},
 		},
 	}
@@ -188,19 +211,42 @@ func TestToGoPrivateModelName(t *testing.T) {
 			expected: []string{"myEnumNameValue", "myEnumNameValue0"},
 		},
 		{
-			input:    [][]string{{"MyEnumName", "Value"}, {"MyEnumName", "value"}, {"MyEnumName", "vALue"}, {"MyEnumName", "VALue"}},
-			expected: []string{"myEnumNameValue", "myEnumNamevalue", "myEnumNameVALue", "myEnumNameVALue0"},
+			input: [][]string{
+				{"MyEnumName", "Value"},
+				{"MyEnumName", "value"},
+				{"MyEnumName", "vALue"},
+				{"MyEnumName", "VALue"},
+			},
+			expected: []string{
+				"myEnumNameValue",
+				"myEnumNamevalue",
+				"myEnumNameVALue",
+				"myEnumNameVALue0",
+			},
 		},
 		{
-			input:    [][]string{{"MyEnumName", "TitleValue"}, {"MyEnumName", "title_value"}, {"MyEnumName", "title_Value"}, {"MyEnumName", "Title_Value"}},
-			expected: []string{"myEnumNameTitleValue", "myEnumNametitle_value", "myEnumNametitle_Value", "myEnumNameTitle_Value"},
+			input: [][]string{
+				{"MyEnumName", "TitleValue"},
+				{"MyEnumName", "title_value"},
+				{"MyEnumName", "title_Value"},
+				{"MyEnumName", "Title_Value"},
+			},
+			expected: []string{
+				"myEnumNameTitleValue",
+				"myEnumNametitle_value",
+				"myEnumNametitle_Value",
+				"myEnumNameTitle_Value",
+			},
 		},
 		{
 			input:    [][]string{{"MyEnumName", "TitleValue", "OtherValue"}},
 			expected: []string{"myEnumNameTitleValueOtherValue"},
 		},
 		{
-			input:    [][]string{{"MyEnumName", "TitleValue", "OtherValue"}, {"MyEnumName", "title_value", "OtherValue"}},
+			input: [][]string{
+				{"MyEnumName", "TitleValue", "OtherValue"},
+				{"MyEnumName", "title_value", "OtherValue"},
+			},
 			expected: []string{"myEnumNameTitleValueOtherValue", "myEnumNametitle_valueOtherValue"},
 		},
 	}
@@ -252,36 +298,60 @@ func Test_wordWalker(t *testing.T) {
 			expected: []*wordInfo{{Word: "to"}, {WordOffset: 1, Word: "camel"}},
 		},
 		{
-			input:    makeInput("RelatedURLs"),
-			expected: []*wordInfo{{Word: "Related"}, {WordOffset: 1, Word: "URLs", HasCommonInitial: true}},
+			input: makeInput("RelatedURLs"),
+			expected: []*wordInfo{
+				{Word: "Related"},
+				{WordOffset: 1, Word: "URLs", HasCommonInitial: true},
+			},
 		},
 		{
-			input:    makeInput("ImageIDs"),
-			expected: []*wordInfo{{Word: "Image"}, {WordOffset: 1, Word: "IDs", HasCommonInitial: true}},
+			input: makeInput("ImageIDs"),
+			expected: []*wordInfo{
+				{Word: "Image"},
+				{WordOffset: 1, Word: "IDs", HasCommonInitial: true},
+			},
 		},
 		{
-			input:    makeInput("FooID"),
-			expected: []*wordInfo{{Word: "Foo"}, {WordOffset: 1, Word: "ID", HasCommonInitial: true, MatchCommonInitial: true}},
+			input: makeInput("FooID"),
+			expected: []*wordInfo{
+				{Word: "Foo"},
+				{WordOffset: 1, Word: "ID", HasCommonInitial: true, MatchCommonInitial: true},
+			},
 		},
 		{
-			input:    makeInput("IDFoo"),
-			expected: []*wordInfo{{Word: "ID", HasCommonInitial: true, MatchCommonInitial: true}, {WordOffset: 1, Word: "Foo"}},
+			input: makeInput("IDFoo"),
+			expected: []*wordInfo{
+				{Word: "ID", HasCommonInitial: true, MatchCommonInitial: true},
+				{WordOffset: 1, Word: "Foo"},
+			},
 		},
 		{
-			input:    makeInput("FooASCII"),
-			expected: []*wordInfo{{Word: "Foo"}, {WordOffset: 1, Word: "ASCII", HasCommonInitial: true, MatchCommonInitial: true}},
+			input: makeInput("FooASCII"),
+			expected: []*wordInfo{
+				{Word: "Foo"},
+				{WordOffset: 1, Word: "ASCII", HasCommonInitial: true, MatchCommonInitial: true},
+			},
 		},
 		{
-			input:    makeInput("ASCIIFoo"),
-			expected: []*wordInfo{{Word: "ASCII", HasCommonInitial: true, MatchCommonInitial: true}, {WordOffset: 1, Word: "Foo"}},
+			input: makeInput("ASCIIFoo"),
+			expected: []*wordInfo{
+				{Word: "ASCII", HasCommonInitial: true, MatchCommonInitial: true},
+				{WordOffset: 1, Word: "Foo"},
+			},
 		},
 		{
-			input:    makeInput("FooUTF8"),
-			expected: []*wordInfo{{Word: "Foo"}, {WordOffset: 1, Word: "UTF8", HasCommonInitial: true, MatchCommonInitial: true}},
+			input: makeInput("FooUTF8"),
+			expected: []*wordInfo{
+				{Word: "Foo"},
+				{WordOffset: 1, Word: "UTF8", HasCommonInitial: true, MatchCommonInitial: true},
+			},
 		},
 		{
-			input:    makeInput("UTF8Foo"),
-			expected: []*wordInfo{{Word: "UTF8", HasCommonInitial: true, MatchCommonInitial: true}, {WordOffset: 1, Word: "Foo"}},
+			input: makeInput("UTF8Foo"),
+			expected: []*wordInfo{
+				{Word: "UTF8", HasCommonInitial: true, MatchCommonInitial: true},
+				{WordOffset: 1, Word: "Foo"},
+			},
 		},
 		{
 			input:    makeInput("A"),

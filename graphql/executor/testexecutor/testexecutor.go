@@ -36,8 +36,9 @@ func (mr *MockResponse) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, ba)
 }
 
-// New provides a server for use in tests that isn't relying on generated code. It isnt a perfect reproduction of
-// a generated server, but it aims to be good enough to test the handler package without relying on codegen.
+// New provides a server for use in tests that isn't relying on generated code. It isnt a perfect
+// reproduction of a generated server, but it aims to be good enough to test the handler package
+// without relying on codegen.
 func New() *TestExecutor {
 	next := make(chan struct{})
 
@@ -80,17 +81,20 @@ func New() *TestExecutor {
 							},
 						},
 					})
-					data := graphql.GetOperationContext(ctx).RootResolverMiddleware(ctx, func(ctx context.Context) graphql.Marshaler {
-						res, err := graphql.GetOperationContext(ctx).ResolverMiddleware(ctx, func(ctx context.Context) (any, error) {
-							// return &graphql.Response{Data: []byte(`{"name":"test"}`)}, nil
-							return &MockResponse{Name: "test"}, nil
-						})
-						if err != nil {
-							panic(err)
-						}
+					data := graphql.GetOperationContext(ctx).
+						RootResolverMiddleware(ctx, func(ctx context.Context) graphql.Marshaler {
+							res, err := graphql.GetOperationContext(ctx).
+								ResolverMiddleware(ctx, func(ctx context.Context) (any, error) {
+									// return &graphql.Response{Data: []byte(`{"name":"test"}`)},
+									// nil
+									return &MockResponse{Name: "test"}, nil
+								})
+							if err != nil {
+								panic(err)
+							}
 
-						return res.(*MockResponse)
-					})
+							return res.(*MockResponse)
+						})
 
 					var buf bytes.Buffer
 					data.MarshalGQL(&buf)
@@ -126,8 +130,9 @@ func New() *TestExecutor {
 	return exec
 }
 
-// NewError provides a server for use in resolver error tests that isn't relying on generated code. It isnt a perfect reproduction of
-// a generated server, but it aims to be good enough to test the handler package without relying on codegen.
+// NewError provides a server for use in resolver error tests that isn't relying on generated code.
+// It isnt a perfect reproduction of a generated server, but it aims to be good enough to test the
+// handler package without relying on codegen.
 func NewError() *TestExecutor {
 	next := make(chan struct{})
 

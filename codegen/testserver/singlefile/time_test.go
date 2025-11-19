@@ -5,10 +5,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/stretchr/testify/require"
 )
 
 func TestTime(t *testing.T) {
@@ -43,7 +44,11 @@ func TestTime(t *testing.T) {
 		}
 
 		err := c.Post(`query { user(id: 1) { created } }`, &resp)
-		require.EqualError(t, err, `[{"message":"the requested element is null which the schema does not allow","path":["user","created"]}]`)
+		require.EqualError(
+			t,
+			err,
+			`[{"message":"the requested element is null which the schema does not allow","path":["user","created"]}]`,
+		)
 	})
 
 	t.Run("with values", func(t *testing.T) {

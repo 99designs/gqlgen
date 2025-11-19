@@ -56,7 +56,11 @@ func (p *Client) WebsocketOnce(query string, resp any, options ...Option) error 
 	return sock.Next(&resp)
 }
 
-func (p *Client) WebsocketWithPayload(query string, initPayload map[string]any, options ...Option) *Subscription {
+func (p *Client) WebsocketWithPayload(
+	query string,
+	initPayload map[string]any,
+	options ...Option,
+) *Subscription {
 	r, err := p.newRequest(query, options...)
 	if err != nil {
 		return errorSubscription(fmt.Errorf("request: %w", err))
@@ -105,7 +109,9 @@ func (p *Client) WebsocketWithPayload(query string, initPayload map[string]any, 
 		return errorSubscription(fmt.Errorf("expected ack message, got %#v", ack))
 	}
 
-	if err = c.WriteJSON(operationMessage{Type: startMsg, ID: "1", Payload: requestBody}); err != nil {
+	if err = c.WriteJSON(
+		operationMessage{Type: startMsg, ID: "1", Payload: requestBody},
+	); err != nil {
 		return errorSubscription(fmt.Errorf("start: %w", err))
 	}
 

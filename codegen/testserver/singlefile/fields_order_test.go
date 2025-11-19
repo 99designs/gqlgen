@@ -4,10 +4,11 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/stretchr/testify/require"
 )
 
 type FieldsOrderPayloadResults struct {
@@ -32,7 +33,7 @@ func TestFieldsOrder(t *testing.T) {
 		ret = &FieldsOrderPayload{
 			FirstFieldValue: in.FirstField,
 		}
-		return
+		return ret, err
 	}
 
 	t.Run("firstField", func(t *testing.T) {

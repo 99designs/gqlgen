@@ -1,13 +1,50 @@
+# All settings can be found here https://github.com/golangci/golangci-lint/blob/HEAD/.golangci.reference.yml
 version: "2"
 run:
+  concurrency: 8
+  modules-download-mode: readonly
+  issues-exit-code: 1
   tests: true
+  allow-parallel-runners: false
+issues:
+  # Maximum count of issues with the same text.
+  # Set to 0 to disable.
+  # Default: 3
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  new: false
+formatters:
+  exclusions:
+    paths:
+        - codegen/testserver/followschema/resolver.go
+        - codegen/testserver/singlefile/resolver.go
+        - codegen/testserver/usefunctionsyntaxforexecutioncontext/resolver.go
+        - generated
+  enable:
+    - golines
+    - gofumpt
+    - gci
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/99designs/gqlgen)
+    golines:
+      # Target maximum line length.
+      # Default: 100
+      max-len: 100
 linters:
   default: none
   enable:
+    - asasalint
+    - asciicheck
+    - bidichk
     - bodyclose
     - copyloopvar
     - dupl
     - dupword
+    - durationcheck
     - errcheck
     - gocritic
     - govet
@@ -17,17 +54,28 @@ linters:
     - nolintlint
     - perfsprint
     - prealloc
+    - reassign
     - revive
     - staticcheck
+    - testableexamples
     - testifylint
     - unconvert
+    - unparam
     - unused
+    - usestdlibvars
+    - usetesting
+    - wastedassign
   settings:
     errcheck:
       exclude-functions:
         - (io.Writer).Write
+        - (http.ResponseWriter).Write
+        - (*bytes.Buffer).WriteByte
+        - (*strings.Builder).WriteByte
+        - (*strings.Builder).WriteString
         - io.Copy
         - io.WriteString
+        - fmt.Fprintln
     gocritic:
       enabled-checks:
         - emptyStringTest
@@ -136,17 +184,4 @@ linters:
       - third_party$
       - builtin$
       - examples$
-formatters:
-  enable:
-    - gofmt
-    - goimports
-  exclusions:
-    generated: lax
-    paths:
-      - bin
-      - third_party$
-      - builtin$
-      - examples$
-issues:
-  max-issues-per-linter: 0
-  max-same-issues: 0
+      - generated$

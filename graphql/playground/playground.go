@@ -219,7 +219,9 @@ func WithGraphiqlVersion(jsUrl, cssUrl, jsSri, cssSri string) GraphiqlConfigOpti
 	}
 }
 
-func WithGraphiqlReactVersion(reactJsUrl, reactDomJsUrl, reactJsSri, reactDomJsSri string) GraphiqlConfigOption {
+func WithGraphiqlReactVersion(
+	reactJsUrl, reactDomJsUrl, reactJsSri, reactDomJsSri string,
+) GraphiqlConfigOption {
 	return func(config *GraphiqlConfig) {
 		config.ReactUrl = template.URL(reactJsUrl)
 		config.ReactDOMUrl = template.URL(reactDomJsUrl)
@@ -251,7 +253,7 @@ func WithStoragePrefix(prefix string) GraphiqlConfigOption {
 
 // Handler responsible for setting up the playground
 func Handler(title, endpoint string, opts ...GraphiqlConfigOption) http.HandlerFunc {
-	var data = GraphiqlConfig{
+	data := GraphiqlConfig{
 		Title:                title,
 		Endpoint:             endpoint,
 		EndpointIsAbsolute:   endpointHasScheme(endpoint),
@@ -268,9 +270,13 @@ func Handler(title, endpoint string, opts ...GraphiqlConfigOption) http.HandlerF
 		ReactDOMUrl: "https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js",
 		ReactDOMSRI: "sha256-IXWO0ITNDjfnNXIu5POVfqlgYoop36bDzhodR6LW5Pc=",
 		// https://www.jsdelivr.com/package/npm/@graphiql/plugin-explorer?tab=files
-		PluginExplorerJsUrl:  template.URL("https://cdn.jsdelivr.net/npm/@graphiql/plugin-explorer@4.0.6/dist/index.umd.js"),
-		PluginExplorerJsSRI:  "sha256-UM8sWOS0Xa9yLY85q6Clh0pF4qpxX+TOcJ41flECqBs=",
-		PluginExplorerCssUrl: template.URL("https://cdn.jsdelivr.net/npm/@graphiql/plugin-explorer@4.0.6/dist/style.min.css"),
+		PluginExplorerJsUrl: template.URL(
+			"https://cdn.jsdelivr.net/npm/@graphiql/plugin-explorer@4.0.6/dist/index.umd.js",
+		),
+		PluginExplorerJsSRI: "sha256-UM8sWOS0Xa9yLY85q6Clh0pF4qpxX+TOcJ41flECqBs=",
+		PluginExplorerCssUrl: template.URL(
+			"https://cdn.jsdelivr.net/npm/@graphiql/plugin-explorer@4.0.6/dist/style.min.css",
+		),
 		PluginExplorerCssSRI: "sha256-b0izygy8aEMY3fCLmtNkm9PKdE3kRD4Qjn6Q8gw5xKI=",
 	}
 	for _, opt := range opts {
@@ -293,7 +299,12 @@ func HandlerWithHeaders(
 	title, endpoint string,
 	fetcherHeaders, uiHeaders map[string]string,
 ) http.HandlerFunc {
-	return Handler(title, endpoint, WithGraphiqlFetcherHeaders(fetcherHeaders), WithGraphiqlUiHeaders(uiHeaders))
+	return Handler(
+		title,
+		endpoint,
+		WithGraphiqlFetcherHeaders(fetcherHeaders),
+		WithGraphiqlUiHeaders(uiHeaders),
+	)
 }
 
 // endpointHasScheme checks if the endpoint has a scheme.

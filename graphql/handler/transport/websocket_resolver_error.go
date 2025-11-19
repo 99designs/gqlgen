@@ -18,7 +18,8 @@ type subscriptionError struct {
 	errs []*gqlerror.Error
 }
 
-// AddSubscriptionError is used to let websocket return an error message after subscription resolver returns a channel.
+// AddSubscriptionError is used to let websocket return an error message after subscription resolver
+// returns a channel.
 // for example:
 //
 //	func (r *subscriptionResolver) Method(ctx context.Context) (<-chan *model.Message, error) {

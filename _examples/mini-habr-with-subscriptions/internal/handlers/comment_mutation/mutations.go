@@ -16,7 +16,10 @@ func NewCommentMutation(commentMutationImp CommentMutationImp) *CommentMutation 
 	return &CommentMutation{commentMutationImp: commentMutationImp}
 }
 
-func (h *CommentMutation) AddComment(postID int64, newComment *model.NewComment) (*model.Comment, error) {
+func (h *CommentMutation) AddComment(
+	postID int64,
+	newComment *model.NewComment,
+) (*model.Comment, error) {
 	op := "internal.handlers.commentmutation.AddComment()"
 
 	log.Debug().Msgf("%s start", op)
@@ -27,7 +30,8 @@ func (h *CommentMutation) AddComment(postID int64, newComment *model.NewComment)
 
 	comment, err := h.commentMutationImp.AddComment(postID, newComment)
 	if err != nil {
-		if err == errs.ErrPostNotExist || err == errs.ErrParentCommentNotExist || err == errs.ErrCommentsNotEnabled {
+		if err == errs.ErrPostNotExist || err == errs.ErrParentCommentNotExist ||
+			err == errs.ErrCommentsNotEnabled {
 			return nil, err
 		}
 		return nil, fmt.Errorf("%s:%w", op, err)

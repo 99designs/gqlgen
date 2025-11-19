@@ -104,7 +104,12 @@ func TestApolloTracing_withFail(t *testing.T) {
 	h.Use(extension.AutomaticPersistedQuery{Cache: lru.New[string](100)})
 	h.Use(&apollofederatedtracingv1.Tracer{})
 
-	resp := doRequest(h, http.MethodPost, "/graphql", `{"operationName":"A","extensions":{"persistedQuery":{"version":1,"sha256Hash":"338bbc16ac780daf81845339fbf0342061c1e9d2b702c96d3958a13a557083a6"}}}`)
+	resp := doRequest(
+		h,
+		http.MethodPost,
+		"/graphql",
+		`{"operationName":"A","extensions":{"persistedQuery":{"version":1,"sha256Hash":"338bbc16ac780daf81845339fbf0342061c1e9d2b702c96d3958a13a557083a6"}}}`,
+	)
 	assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 	b := resp.Body.Bytes()
 	var respData struct {
@@ -147,6 +152,7 @@ func TestApolloTracing_withUnexpectedEOF(t *testing.T) {
 	assert.Equal(t, http.StatusOK, resp.Code)
 }
 
+//nolint:unparam // expected to always get POST for GraphQL
 func doRequest(handler http.Handler, method, target, body string) *httptest.ResponseRecorder {
 	return doRequestWithReader(handler, method, target, strings.NewReader(body))
 }
@@ -165,7 +171,10 @@ func doRequestWithReader(handler http.Handler, method string, target string,
 
 type delayMiddleware struct{}
 
-func (*delayMiddleware) InterceptOperation(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+func (*delayMiddleware) InterceptOperation(
+	ctx context.Context,
+	next graphql.OperationHandler,
+) graphql.ResponseHandler {
 	time.Sleep(time.Millisecond)
 	return next(ctx)
 }

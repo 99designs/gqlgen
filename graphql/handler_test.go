@@ -23,7 +23,11 @@ func TestAddUploadToOperations(t *testing.T) {
 		}
 		path := "variables.req.0.file"
 		err := params.AddUpload(upload, key, path)
-		require.EqualError(t, err, "input: path is missing \"variables.\" prefix, key: 0, path: variables.req.0.file")
+		require.EqualError(
+			t,
+			err,
+			"input: path is missing \"variables.\" prefix, key: 0, path: variables.req.0.file",
+		)
 	})
 
 	t.Run("valid variable", func(t *testing.T) {

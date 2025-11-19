@@ -18,7 +18,13 @@ func TestDirectiveCallArgs(t *testing.T) {
 					Name: "def1",
 				},
 				TypeReference: &config.TypeReference{
-					GO: types.Default(types.NewNamed(types.NewTypeName(0, nil, "string", nil), types.Typ[types.String], nil)),
+					GO: types.Default(
+						types.NewNamed(
+							types.NewTypeName(0, nil, "string", nil),
+							types.Typ[types.String],
+							nil,
+						),
+					),
 				},
 			},
 			{

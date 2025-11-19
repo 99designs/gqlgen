@@ -4,12 +4,12 @@ import (
 	"context"
 	"testing"
 
-	"github.com/99designs/gqlgen/client"
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
+	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/codegen/testserver/singlefile/otherpkg"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
 
 func TestWrappedTypes(t *testing.T) {

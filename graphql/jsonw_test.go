@@ -44,5 +44,9 @@ func TestJsonWriter(t *testing.T) {
 	b := &bytes.Buffer{}
 	obj.MarshalGQL(b)
 
-	require.JSONEq(t, `{"test":10,"array":[1,"2",true,false,null,1.3,true],"emptyArray":[],"child":{"child":{"child":null}}}`, b.String())
+	require.JSONEq(
+		t,
+		`{"test":10,"array":[1,"2",true,false,null,1.3,true],"emptyArray":[],"child":{"child":{"child":null}}}`,
+		b.String(),
+	)
 }

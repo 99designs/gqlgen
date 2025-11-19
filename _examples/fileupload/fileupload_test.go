@@ -104,7 +104,12 @@ func TestFileUpload(t *testing.T) {
 			SingleUploadWithPayload *model.File
 		}
 
-		err := gql.Post(mutation, &result, gqlclient.Var("req", map[string]any{"id": 1, "file": aTxtFile}), gqlclient.WithFiles())
+		err := gql.Post(
+			mutation,
+			&result,
+			gqlclient.Var("req", map[string]any{"id": 1, "file": aTxtFile}),
+			gqlclient.WithFiles(),
+		)
 		require.NoError(t, err)
 		require.Equal(t, 1, result.SingleUploadWithPayload.ID)
 		require.Contains(t, result.SingleUploadWithPayload.Name, "a.txt")
@@ -145,7 +150,12 @@ func TestFileUpload(t *testing.T) {
 			MultipleUpload []*model.File
 		}
 
-		err := gql.Post(mutation, &result, gqlclient.Var("files", []*os.File{a1TxtFile, b1TxtFile}), gqlclient.WithFiles())
+		err := gql.Post(
+			mutation,
+			&result,
+			gqlclient.Var("files", []*os.File{a1TxtFile, b1TxtFile}),
+			gqlclient.WithFiles(),
+		)
 		require.NoError(t, err)
 		require.Equal(t, 1, result.MultipleUpload[0].ID)
 		require.Equal(t, 2, result.MultipleUpload[1].ID)
@@ -280,11 +290,19 @@ func TestFileUpload(t *testing.T) {
 			require.Equal(t, 1, result.MultipleUploadWithPayload[0].ID)
 			require.Contains(t, result.MultipleUploadWithPayload[0].Name, "a.txt")
 			require.Equal(t, "test1", result.MultipleUploadWithPayload[0].Content)
-			require.Equal(t, "text/plain; charset=utf-8", result.MultipleUploadWithPayload[0].ContentType)
+			require.Equal(
+				t,
+				"text/plain; charset=utf-8",
+				result.MultipleUploadWithPayload[0].ContentType,
+			)
 			require.Equal(t, 2, result.MultipleUploadWithPayload[1].ID)
 			require.Contains(t, result.MultipleUploadWithPayload[1].Name, "a.txt")
 			require.Equal(t, "test1", result.MultipleUploadWithPayload[1].Content)
-			require.Equal(t, "text/plain; charset=utf-8", result.MultipleUploadWithPayload[1].ContentType)
+			require.Equal(
+				t,
+				"text/plain; charset=utf-8",
+				result.MultipleUploadWithPayload[1].ContentType,
+			)
 		}
 
 		t.Run("payload smaller than UploadMaxMemory, stored in memory", func(t *testing.T) {

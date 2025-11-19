@@ -64,12 +64,23 @@ func TestModelGeneration(t *testing.T) {
 	})
 
 	t.Run("description is generated", func(t *testing.T) {
-		node, err := parser.ParseFile(token.NewFileSet(), "./out/generated.go", nil, parser.ParseComments)
+		node, err := parser.ParseFile(
+			token.NewFileSet(),
+			"./out/generated.go",
+			nil,
+			parser.ParseComments,
+		)
 		require.NoError(t, err)
 		for _, commentGroup := range node.Comments {
 			text := commentGroup.Text()
 			words := strings.Split(text, " ")
-			require.Greaterf(t, len(words), 1, "expected description %q to have more than one word", text)
+			require.Greaterf(
+				t,
+				len(words),
+				1,
+				"expected description %q to have more than one word",
+				text,
+			)
 		}
 	})
 
@@ -420,11 +431,31 @@ func TestModelGenerationNullableInputOmittable(t *testing.T) {
 	require.NoError(t, p.MutateConfig(cfg))
 
 	t.Run("nullable input fields are omittable", func(t *testing.T) {
-		require.IsType(t, graphql.Omittable[*string]{}, out_nullable_input_omittable.MissingInput{}.Name)
-		require.IsType(t, graphql.Omittable[*out_nullable_input_omittable.MissingEnum]{}, out_nullable_input_omittable.MissingInput{}.Enum)
-		require.IsType(t, graphql.Omittable[*string]{}, out_nullable_input_omittable.MissingInput{}.NullString)
-		require.IsType(t, graphql.Omittable[*out_nullable_input_omittable.MissingEnum]{}, out_nullable_input_omittable.MissingInput{}.NullEnum)
-		require.IsType(t, graphql.Omittable[*out_nullable_input_omittable.ExistingInput]{}, out_nullable_input_omittable.MissingInput{}.NullObject)
+		require.IsType(
+			t,
+			graphql.Omittable[*string]{},
+			out_nullable_input_omittable.MissingInput{}.Name,
+		)
+		require.IsType(
+			t,
+			graphql.Omittable[*out_nullable_input_omittable.MissingEnum]{},
+			out_nullable_input_omittable.MissingInput{}.Enum,
+		)
+		require.IsType(
+			t,
+			graphql.Omittable[*string]{},
+			out_nullable_input_omittable.MissingInput{}.NullString,
+		)
+		require.IsType(
+			t,
+			graphql.Omittable[*out_nullable_input_omittable.MissingEnum]{},
+			out_nullable_input_omittable.MissingInput{}.NullEnum,
+		)
+		require.IsType(
+			t,
+			graphql.Omittable[*out_nullable_input_omittable.ExistingInput]{},
+			out_nullable_input_omittable.MissingInput{}.NullObject,
+		)
 	})
 
 	t.Run("non-nullable input fields are not omittable", func(t *testing.T) {
@@ -699,7 +730,11 @@ func TestRemoveDuplicate(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			if tt.wantPanic {
-				assert.Panics(t, func() { removeDuplicateTags(tt.args.t) }, "The code did not panic")
+				assert.Panics(
+					t,
+					func() { removeDuplicateTags(tt.args.t) },
+					"The code did not panic",
+				)
 			} else {
 				if got := removeDuplicateTags(tt.args.t); got != tt.want {
 					t.Errorf("removeDuplicate() = %v, want %v", got, tt.want)
@@ -742,7 +777,13 @@ func Test_containsInvalidSpace(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equalf(t, tt.want, containsInvalidSpace(tt.args.valuesString), "containsInvalidSpace(%v)", tt.args.valuesString)
+			assert.Equalf(
+				t,
+				tt.want,
+				containsInvalidSpace(tt.args.valuesString),
+				"containsInvalidSpace(%v)",
+				tt.args.valuesString,
+			)
 		})
 	}
 }
@@ -794,7 +835,13 @@ func Test_splitTagsBySpace(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			assert.Equalf(t, tt.want, splitTagsBySpace(tt.args.tagsString), "splitTagsBySpace(%v)", tt.args.tagsString)
+			assert.Equalf(
+				t,
+				tt.want,
+				splitTagsBySpace(tt.args.tagsString),
+				"splitTagsBySpace(%v)",
+				tt.args.tagsString,
+			)
 		})
 	}
 }

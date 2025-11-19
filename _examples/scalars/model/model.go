@@ -80,7 +80,8 @@ func (p Point) MarshalGQL(w io.Writer) {
 	fmt.Fprintf(w, `"%d,%d"`, p.X, p.Y)
 }
 
-// if the type referenced in .gqlgen.yml is a function that returns a marshaller we can use it to encode and decode
+// if the type referenced in .gqlgen.yml is a function that returns a marshaller we can use it to
+// encode and decode
 // onto any existing go type.
 func MarshalTimestamp(t time.Time) graphql.Marshaler {
 	return graphql.WriterFunc(func(w io.Writer) {
@@ -88,7 +89,8 @@ func MarshalTimestamp(t time.Time) graphql.Marshaler {
 	})
 }
 
-// Unmarshal{Typename} is only required if the scalar appears as an input. The raw values have already been decoded
+// Unmarshal{Typename} is only required if the scalar appears as an input. The raw values have
+// already been decoded
 // from json into int/float64/bool/nil/map[string]interface/[]interface
 func UnmarshalTimestamp(v any) (time.Time, error) {
 	if tmpStr, ok := v.(int64); ok {
@@ -120,7 +122,8 @@ type SearchArgs struct {
 	IsBanned     Banned
 }
 
-// A custom enum that uses integers to represent the values in memory but serialize as string for graphql
+// A custom enum that uses integers to represent the values in memory but serialize as string for
+// graphql
 type Tier uint
 
 const (

@@ -10,7 +10,8 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 )
 
-// SendError sends a best effort error to a raw response writer. It assumes the client can understand the standard
+// SendError sends a best effort error to a raw response writer. It assumes the client can
+// understand the standard
 // json error response
 func SendError(w http.ResponseWriter, code int, errors ...*gqlerror.Error) {
 	w.WriteHeader(code)

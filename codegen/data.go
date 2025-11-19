@@ -13,7 +13,8 @@ import (
 	"github.com/99designs/gqlgen/codegen/config"
 )
 
-// Data is a unified model of the code to be generated. Plugins may modify this structure to do things like implement
+// Data is a unified model of the code to be generated. Plugins may modify this structure to do
+// things like implement
 // resolvers or directives automatically (eg grpc, validation)
 type Data struct {
 	Config *config.Config
@@ -48,7 +49,8 @@ func (d *Data) HasEmbeddableSources() bool {
 	return hasEmbeddableSources
 }
 
-// AugmentedSource contains extra information about graphql schema files which is not known directly from the Config.Sources data
+// AugmentedSource contains extra information about graphql schema files which is not known directly
+// from the Config.Sources data
 type AugmentedSource struct {
 	// path relative to Config.Exec.Filename
 	RelativePath string
@@ -194,7 +196,9 @@ func BuildData(cfg *config.Config, plugins ...any) (*Data, error) {
 		}
 
 		// otherwise show a generic error message
-		return nil, errors.New("invalid types were encountered while traversing the go source code, this probably means the invalid code generated isnt correct. add try adding -v to debug")
+		return nil, errors.New(
+			"invalid types were encountered while traversing the go source code, this probably means the invalid code generated isnt correct. add try adding -v to debug",
+		)
 	}
 	var sources []*ast.Source
 	sources, err = SerializeTransformedSchema(cfg.Schema, cfg.Sources)
@@ -212,7 +216,12 @@ func BuildData(cfg *config.Config, plugins ...any) (*Data, error) {
 		sourcePath := filepath.Join(wd, s.Name)
 		relative, err := filepath.Rel(outputDir, sourcePath)
 		if err != nil {
-			return nil, fmt.Errorf("failed to compute path of %s relative to %s: %w", sourcePath, outputDir, err)
+			return nil, fmt.Errorf(
+				"failed to compute path of %s relative to %s: %w",
+				sourcePath,
+				outputDir,
+				err,
+			)
 		}
 		relative = filepath.ToSlash(relative)
 		embeddable := true

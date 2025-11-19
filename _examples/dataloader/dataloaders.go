@@ -48,7 +48,10 @@ func LoaderMiddleware(next http.Handler) http.Handler {
 				addresses := make([]*Address, len(keys))
 				errors := make([]error, len(keys))
 				for i, key := range keys {
-					addresses[i] = &Address{Street: "home street", Country: "hometon " + strconv.Itoa(key)}
+					addresses[i] = &Address{
+						Street:  "home street",
+						Country: "hometon " + strconv.Itoa(key),
+					}
 				}
 				return addresses, errors
 			},
@@ -64,7 +67,10 @@ func LoaderMiddleware(next http.Handler) http.Handler {
 					keySql = append(keySql, strconv.Itoa(key))
 				}
 
-				fmt.Printf("SELECT * FROM orders WHERE customer_id IN (%s)\n", strings.Join(keySql, ","))
+				fmt.Printf(
+					"SELECT * FROM orders WHERE customer_id IN (%s)\n",
+					strings.Join(keySql, ","),
+				)
 				time.Sleep(5 * time.Millisecond)
 
 				orders := make([][]*Order, len(keys))
@@ -72,8 +78,16 @@ func LoaderMiddleware(next http.Handler) http.Handler {
 				for i, key := range keys {
 					id := 10 + rand.Int()%3
 					orders[i] = []*Order{
-						{ID: id, Amount: rand.Float64(), Date: time.Now().Add(-time.Duration(key) * time.Hour)},
-						{ID: id + 1, Amount: rand.Float64(), Date: time.Now().Add(-time.Duration(key) * time.Hour)},
+						{
+							ID:     id,
+							Amount: rand.Float64(),
+							Date:   time.Now().Add(-time.Duration(key) * time.Hour),
+						},
+						{
+							ID:     id + 1,
+							Amount: rand.Float64(),
+							Date:   time.Now().Add(-time.Duration(key) * time.Hour),
+						},
 					}
 
 					// if you had another customer loader you would prime its cache here
@@ -94,7 +108,10 @@ func LoaderMiddleware(next http.Handler) http.Handler {
 					keySql = append(keySql, strconv.Itoa(key))
 				}
 
-				fmt.Printf("SELECT * FROM items JOIN item_order WHERE item_order.order_id IN (%s)\n", strings.Join(keySql, ","))
+				fmt.Printf(
+					"SELECT * FROM items JOIN item_order WHERE item_order.order_id IN (%s)\n",
+					strings.Join(keySql, ","),
+				)
 				time.Sleep(5 * time.Millisecond)
 
 				items := make([][]*Item, len(keys))

@@ -3,12 +3,12 @@ package todo
 import (
 	"testing"
 
-	"github.com/99designs/gqlgen/graphql/handler/extension"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/introspection"
 )
 
@@ -66,7 +66,10 @@ func TestTodo(t *testing.T) {
 				Done bool
 			}
 		}
-		c.MustPost(`mutation @user(id:2){ updateTodo(id: 3, changes:{done:true}) { text, done } }`, &resp)
+		c.MustPost(
+			`mutation @user(id:2){ updateTodo(id: 3, changes:{done:true}) { text, done } }`,
+			&resp,
+		)
 
 		require.Equal(t, "Somebody else's todo", resp.UpdateTodo.Text)
 	})
@@ -78,7 +81,10 @@ func TestTodo(t *testing.T) {
 				Done bool
 			}
 		}
-		c.MustPost(`mutation { updateTodo(id: 3, changes:{done:true})@user(id:2) { text, done } }`, &resp)
+		c.MustPost(
+			`mutation { updateTodo(id: 3, changes:{done:true})@user(id:2) { text, done } }`,
+			&resp,
+		)
 
 		require.Equal(t, "Somebody else's todo", resp.UpdateTodo.Text)
 	})
@@ -91,7 +97,11 @@ func TestTodo(t *testing.T) {
 			}
 		}
 		err := c.Post(`mutation { updateTodo(id: 3, changes:{done:true}) { text, done } }`, &resp)
-		require.EqualError(t, err, "[{\"message\":\"you don't own that\",\"path\":[\"updateTodo\",\"done\"]}]")
+		require.EqualError(
+			t,
+			err,
+			"[{\"message\":\"you don't own that\",\"path\":[\"updateTodo\",\"done\"]}]",
+		)
 
 		require.Nil(t, resp.UpdateTodo)
 	})
@@ -179,7 +189,10 @@ func TestTodo(t *testing.T) {
 		var resp struct {
 			CreateTodo struct{ Text string }
 		}
-		c.MustPost(`mutation { createTodo(todo:{text:"Completed todo", number:5, done: null}) { text } }`, &resp)
+		c.MustPost(
+			`mutation { createTodo(todo:{text:"Completed todo", number:5, done: null}) { text } }`,
+			&resp,
+		)
 
 		require.Equal(t, "Completed todo", resp.CreateTodo.Text)
 	})
@@ -280,7 +293,10 @@ func TestSkipAndIncludeDirectives(t *testing.T) {
 
 	t.Run("skip with default query argument", func(t *testing.T) {
 		var resp map[string]any
-		c.MustPost(`query Test($skip: Boolean = true) { todo(id: 1) @skip(if: $skip) { __typename } }`, &resp)
+		c.MustPost(
+			`query Test($skip: Boolean = true) { todo(id: 1) @skip(if: $skip) { __typename } }`,
+			&resp,
+		)
 		_, ok := resp["todo"]
 		require.False(t, ok)
 	})

@@ -4,10 +4,11 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/stretchr/testify/require"
 )
 
 type UpdatePtrToPtrResults struct {
@@ -76,7 +77,10 @@ func TestPtrToPtr(t *testing.T) {
 	t.Run("pointer to pointer input missing", func(t *testing.T) {
 		var resp UpdatePtrToPtrResults
 
-		err := c.Post(`mutation { updatePtrToPtr(input: { name: "newName" }) { name, inner { key, value }, stupidInner { key, value }}}`, &resp)
+		err := c.Post(
+			`mutation { updatePtrToPtr(input: { name: "newName" }) { name, inner { key, value }, stupidInner { key, value }}}`,
+			&resp,
+		)
 		require.NoError(t, err)
 
 		require.Equal(t, "newName", resp.UpdatedPtrToPtr.Name)
@@ -116,7 +120,10 @@ func TestPtrToPtr(t *testing.T) {
 	t.Run("pointer to pointer input null", func(t *testing.T) {
 		var resp UpdatePtrToPtrResults
 
-		err := c.Post(`mutation { updatePtrToPtr(input: { inner: null }) { name, inner { key, value }, stupidInner { key, value }}}`, &resp)
+		err := c.Post(
+			`mutation { updatePtrToPtr(input: { inner: null }) { name, inner { key, value }, stupidInner { key, value }}}`,
+			&resp,
+		)
 		require.NoError(t, err)
 
 		require.Equal(t, "oldName", resp.UpdatedPtrToPtr.Name)
@@ -154,7 +161,10 @@ func TestPtrToPtr(t *testing.T) {
 	t.Run("many pointers input null", func(t *testing.T) {
 		var resp UpdatePtrToPtrResults
 
-		err := c.Post(`mutation { updatePtrToPtr(input: { stupidInner: null }) { name, inner { key, value }, stupidInner { key, value }}}`, &resp)
+		err := c.Post(
+			`mutation { updatePtrToPtr(input: { stupidInner: null }) { name, inner { key, value }, stupidInner { key, value }}}`,
+			&resp,
+		)
 		require.NoError(t, err)
 
 		require.Equal(t, "oldName", resp.UpdatedPtrToPtr.Name)

@@ -43,7 +43,10 @@ func (r *ResolverConfig) Check() error {
 			return fmt.Errorf("filename must be specified with layout=%s", r.Layout)
 		}
 		if !strings.HasSuffix(r.Filename, ".go") {
-			return fmt.Errorf("filename should be path to a go source file with layout=%s", r.Layout)
+			return fmt.Errorf(
+				"filename should be path to a go source file with layout=%s",
+				r.Layout,
+			)
 		}
 		r.Filename = abs(r.Filename)
 	case LayoutFollowSchema:
@@ -57,11 +60,18 @@ func (r *ResolverConfig) Check() error {
 			r.Filename = abs(r.Filename)
 		}
 	default:
-		return fmt.Errorf("invalid layout %s. must be %s or %s", r.Layout, LayoutSingleFile, LayoutFollowSchema)
+		return fmt.Errorf(
+			"invalid layout %s. must be %s or %s",
+			r.Layout,
+			LayoutSingleFile,
+			LayoutFollowSchema,
+		)
 	}
 
 	if strings.ContainsAny(r.Package, "./\\") {
-		return errors.New("package should be the output package name only, do not include the output filename")
+		return errors.New(
+			"package should be the output package name only, do not include the output filename",
+		)
 	}
 
 	if r.Package == "" && r.Dir() != "" {

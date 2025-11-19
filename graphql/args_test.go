@@ -50,9 +50,14 @@ func TestProcessArgField(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			actual, err := ProcessArgField(context.Background(), test.rawArgs, test.fieldName, test.valueMapperFn)
+			actual, err := ProcessArgField(
+				context.Background(),
+				test.rawArgs,
+				test.fieldName,
+				test.valueMapperFn,
+			)
 			if test.expectedErr != "" {
-				assert.EqualError(t, err, test.expectedErr)
+				require.EqualError(t, err, test.expectedErr)
 			} else {
 				require.NoError(t, err)
 				assert.Equal(t, test.expected, actual)
@@ -111,9 +116,15 @@ func TestProcessArgFieldWithEC(t *testing.T) {
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			actual, err := ProcessArgFieldWithEC(context.Background(), test.ec, test.rawArgs, test.fieldName, test.valueMapperFn)
+			actual, err := ProcessArgFieldWithEC(
+				context.Background(),
+				test.ec,
+				test.rawArgs,
+				test.fieldName,
+				test.valueMapperFn,
+			)
 			if test.expectedErr != "" {
-				assert.EqualError(t, err, test.expectedErr)
+				require.EqualError(t, err, test.expectedErr)
 			} else {
 				require.NoError(t, err)
 				assert.Equal(t, test.expected, actual)

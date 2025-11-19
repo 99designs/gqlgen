@@ -51,7 +51,13 @@ func TestMapCacheMultipleEntries(t *testing.T) {
 		for key, expectedValue := range entries {
 			gotValue, ok := cache.Get(ctx, key)
 			assert.True(t, ok, "Get should find the key %s", key)
-			assert.Equal(t, expectedValue, gotValue, "Get should return the correct value for key %s", key)
+			assert.Equal(
+				t,
+				expectedValue,
+				gotValue,
+				"Get should return the correct value for key %s",
+				key,
+			)
 		}
 	})
 }

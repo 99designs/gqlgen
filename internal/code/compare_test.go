@@ -81,5 +81,6 @@ func parseTypeStr(t *testing.T, s string) types.Type {
 	pkg, err := conf.Check("test", fset, []*ast.File{f}, nil)
 	require.NoError(t, err)
 
-	return pkg.Scope().Lookup("Foo").Type().(*types.Named).Underlying().(*types.Struct).Field(0).Type()
+	return pkg.Scope().Lookup("Foo").Type().(*types.Named).Underlying().(*types.Struct).Field(0).
+		Type()
 }

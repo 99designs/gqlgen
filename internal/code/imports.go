@@ -21,7 +21,8 @@ func init() {
 	}
 }
 
-// NameForDir manually looks for package stanzas in files located in the given directory. This can be
+// NameForDir manually looks for package stanzas in files located in the given directory. This can
+// be
 // much faster than having to consult go list, because we already know exactly where to look.
 func NameForDir(dir string) string {
 	dir, err := filepath.Abs(dir)
@@ -55,7 +56,8 @@ type goModuleSearchResult struct {
 
 var goModuleRootCache = map[string]goModuleSearchResult{}
 
-// goModuleRoot returns the root of the current go module if there is a go.mod file in the directory tree
+// goModuleRoot returns the root of the current go module if there is a go.mod file in the directory
+// tree
 // If not, it returns false
 func goModuleRoot(dir string) (string, bool) {
 	dir, err := filepath.Abs(dir)
@@ -99,7 +101,8 @@ func goModuleRoot(dir string) (string, bool) {
 	// create a cache for each path in a tree traversed, except the top one as it is already cached
 	for _, d := range dirs[:len(dirs)-1] {
 		if result.moduleName == "" {
-			// go.mod is not found in the tree, so the same sentinel value fits all the directories in a tree
+			// go.mod is not found in the tree, so the same sentinel value fits all the directories
+			// in a tree
 			goModuleRootCache[d] = result
 		} else {
 			relPath, err := filepath.Rel(result.goModPath, d)

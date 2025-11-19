@@ -48,7 +48,10 @@ func TestLayoutSingleFileWithEnableRewrite(t *testing.T) {
 	require.NoError(t, err)
 
 	require.NoError(t, p.GenerateCode(data))
-	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/testdata/singlefile_preserve/out")
+	assertNoErrors(
+		t,
+		"github.com/99designs/gqlgen/plugin/resolvergen/testdata/singlefile_preserve/out",
+	)
 }
 
 func TestLayoutFollowSchema(t *testing.T) {
@@ -104,7 +107,10 @@ func TestOmitTemplateComment(t *testing.T) {
 	require.NoError(t, err)
 
 	require.NoError(t, p.GenerateCode(data))
-	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/testdata/omit_template_comment/out")
+	assertNoErrors(
+		t,
+		"github.com/99designs/gqlgen/plugin/resolvergen/testdata/omit_template_comment/out",
+	)
 }
 
 func TestResolver_Implementation(t *testing.T) {
@@ -120,7 +126,10 @@ func TestResolver_Implementation(t *testing.T) {
 	require.NoError(t, err)
 
 	require.NoError(t, p.GenerateCode(data))
-	assertNoErrors(t, "github.com/99designs/gqlgen/plugin/resolvergen/testdata/resolver_implementor/out")
+	assertNoErrors(
+		t,
+		"github.com/99designs/gqlgen/plugin/resolvergen/testdata/resolver_implementor/out",
+	)
 }
 
 func TestCustomResolverTemplate(t *testing.T) {
@@ -162,6 +171,7 @@ func overWriteFile(t *testing.T, sourceFile, destinationFile string) {
 }
 
 func assertNoErrors(t *testing.T, pkg string) {
+	t.Helper()
 	pkgs, err := packages.Load(&packages.Config{
 		Mode: packages.NeedName |
 			packages.NeedFiles |

@@ -76,7 +76,8 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 		log.Println(err.Error())
 	}
 
-	if f.IsResolver && b.Config.ResolversAlwaysReturnPointers && !f.TypeReference.IsPtr() && f.TypeReference.IsStruct() {
+	if f.IsResolver && b.Config.ResolversAlwaysReturnPointers && !f.TypeReference.IsPtr() &&
+		f.TypeReference.IsStruct() {
 		f.TypeReference = b.Binder.PointerTo(f.TypeReference)
 	}
 
@@ -317,7 +318,11 @@ func (b *builder) findBindMethodTarget(in types.Type, name string) (types.Object
 	return nil, nil
 }
 
-func (b *builder) findBindMethoderTarget(methodFunc func(i int) *types.Func, methodCount int, name string) (types.Object, error) {
+func (b *builder) findBindMethoderTarget(
+	methodFunc func(i int) *types.Func,
+	methodCount int,
+	name string,
+) (types.Object, error) {
 	var found types.Object
 	for i := range methodCount {
 		method := methodFunc(i)
@@ -373,7 +378,10 @@ func (b *builder) findBindEmbedsTarget(in types.Type, name string) (types.Object
 	return nil, nil
 }
 
-func (b *builder) findBindStructEmbedsTarget(strukt *types.Struct, name string) (types.Object, error) {
+func (b *builder) findBindStructEmbedsTarget(
+	strukt *types.Struct,
+	name string,
+) (types.Object, error) {
 	var found types.Object
 	for i := 0; i < strukt.NumFields(); i++ {
 		field := strukt.Field(i)
@@ -403,7 +411,10 @@ func (b *builder) findBindStructEmbedsTarget(strukt *types.Struct, name string) 
 	return found, nil
 }
 
-func (b *builder) findBindInterfaceEmbedsTarget(iface *types.Interface, name string) (types.Object, error) {
+func (b *builder) findBindInterfaceEmbedsTarget(
+	iface *types.Interface,
+	name string,
+) (types.Object, error) {
 	var found types.Object
 	for i := 0; i < iface.NumEmbeddeds(); i++ {
 		embeddedType := iface.EmbeddedType(i)
@@ -579,7 +590,13 @@ func (f *Field) ShortResolverSignature(ft *goast.FuncType) string {
 
 		for _, arg := range f.Args {
 			if !contains(inlineInfo.ExpandedArgs, arg.Name) {
-				resSb540.WriteString(fmt.Sprintf(", %s %s", arg.VarName, templates.CurrentImports.LookupType(arg.TypeReference.GO)))
+				resSb540.WriteString(
+					fmt.Sprintf(
+						", %s %s",
+						arg.VarName,
+						templates.CurrentImports.LookupType(arg.TypeReference.GO),
+					),
+				)
 			}
 		}
 	} else {
@@ -622,7 +639,13 @@ func (f *Field) ComplexitySignature() string {
 	res := "func(childComplexity int"
 	var resSb571 strings.Builder
 	for _, arg := range f.Args {
-		resSb571.WriteString(fmt.Sprintf(", %s %s", arg.VarName, templates.CurrentImports.LookupType(arg.TypeReference.GO)))
+		resSb571.WriteString(
+			fmt.Sprintf(
+				", %s %s",
+				arg.VarName,
+				templates.CurrentImports.LookupType(arg.TypeReference.GO),
+			),
+		)
 	}
 	res += resSb571.String()
 	res += ") int"
@@ -632,7 +655,11 @@ func (f *Field) ComplexitySignature() string {
 func (f *Field) ComplexityArgs() string {
 	args := make([]string, len(f.Args))
 	for i, arg := range f.Args {
-		args[i] = "args[" + strconv.Quote(arg.Name) + "].(" + templates.CurrentImports.LookupType(arg.TypeReference.GO) + ")"
+		args[i] = "args[" + strconv.Quote(
+			arg.Name,
+		) + "].(" + templates.CurrentImports.LookupType(
+			arg.TypeReference.GO,
+		) + ")"
 	}
 
 	return strings.Join(args, ", ")
@@ -686,7 +713,11 @@ func (f *Field) CallArgs() string {
 
 		for _, arg := range f.Args {
 			if !contains(inlineInfo.ExpandedArgs, arg.Name) {
-				tmp := "fc.Args[" + strconv.Quote(arg.Name) + "].(" + templates.CurrentImports.LookupType(arg.TypeReference.GO) + ")"
+				tmp := "fc.Args[" + strconv.Quote(
+					arg.Name,
+				) + "].(" + templates.CurrentImports.LookupType(
+					arg.TypeReference.GO,
+				) + ")"
 
 				if iface, ok := arg.TypeReference.GO.(*types.Interface); ok && iface.Empty() {
 					tmp = fmt.Sprintf(`

@@ -29,22 +29,26 @@ func (e *Executor) Use(extension graphql.HandlerExtension) {
 	}
 }
 
-// AroundFields is a convenience method for creating an extension that only implements field middleware
+// AroundFields is a convenience method for creating an extension that only implements field
+// middleware
 func (e *Executor) AroundFields(f graphql.FieldMiddleware) {
 	e.Use(aroundFieldFunc(f))
 }
 
-// AroundRootFields is a convenience method for creating an extension that only implements root field middleware
+// AroundRootFields is a convenience method for creating an extension that only implements root
+// field middleware
 func (e *Executor) AroundRootFields(f graphql.RootFieldMiddleware) {
 	e.Use(aroundRootFieldFunc(f))
 }
 
-// AroundOperations is a convenience method for creating an extension that only implements operation middleware
+// AroundOperations is a convenience method for creating an extension that only implements operation
+// middleware
 func (e *Executor) AroundOperations(f graphql.OperationMiddleware) {
 	e.Use(aroundOpFunc(f))
 }
 
-// AroundResponses is a convenience method for creating an extension that only implements response middleware
+// AroundResponses is a convenience method for creating an extension that only implements response
+// middleware
 func (e *Executor) AroundResponses(f graphql.ResponseMiddleware) {
 	e.Use(aroundRespFunc(f))
 }
@@ -140,7 +144,10 @@ func (r aroundOpFunc) Validate(schema graphql.ExecutableSchema) error {
 	return nil
 }
 
-func (r aroundOpFunc) InterceptOperation(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+func (r aroundOpFunc) InterceptOperation(
+	ctx context.Context,
+	next graphql.OperationHandler,
+) graphql.ResponseHandler {
 	return r(ctx, next)
 }
 
@@ -157,7 +164,10 @@ func (r aroundRespFunc) Validate(schema graphql.ExecutableSchema) error {
 	return nil
 }
 
-func (r aroundRespFunc) InterceptResponse(ctx context.Context, next graphql.ResponseHandler) *graphql.Response {
+func (r aroundRespFunc) InterceptResponse(
+	ctx context.Context,
+	next graphql.ResponseHandler,
+) *graphql.Response {
 	return r(ctx, next)
 }
 
@@ -174,7 +184,10 @@ func (f aroundFieldFunc) Validate(schema graphql.ExecutableSchema) error {
 	return nil
 }
 
-func (f aroundFieldFunc) InterceptField(ctx context.Context, next graphql.Resolver) (res any, err error) {
+func (f aroundFieldFunc) InterceptField(
+	ctx context.Context,
+	next graphql.Resolver,
+) (res any, err error) {
 	return f(ctx, next)
 }
 
@@ -191,6 +204,9 @@ func (f aroundRootFieldFunc) Validate(schema graphql.ExecutableSchema) error {
 	return nil
 }
 
-func (f aroundRootFieldFunc) InterceptRootField(ctx context.Context, next graphql.RootResolver) graphql.Marshaler {
+func (f aroundRootFieldFunc) InterceptRootField(
+	ctx context.Context,
+	next graphql.RootResolver,
+) graphql.Marshaler {
 	return f(ctx, next)
 }

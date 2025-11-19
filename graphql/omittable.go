@@ -46,8 +46,9 @@ func (o Omittable[T]) IsSet() bool {
 }
 
 // IsZero returns true then json.Marshal will omit this value.
-// > The "omitzero" option specifies that the field should be omitted from the encoding if the field has a zero value, according to rules:
-// > 1) If the field type has an "IsZero() bool" method, that will be used to determine whether the value is zero.
+// > The "omitzero" option specifies that the field should be omitted from the encoding if the field
+// has a zero value, according to rules: > 1) If the field type has an "IsZero() bool" method, that
+// will be used to determine whether the value is zero.
 // > 2) Otherwise, the value is zero if it is the zero value for its type.
 // https://pkg.go.dev/encoding/json#Marshal
 func (o Omittable[T]) IsZero() bool {

@@ -10,12 +10,19 @@ import (
 )
 
 // PostMessageTo is the resolver for the postMessageTo field.
-func (r *mutationResolver) PostMessageTo(ctx context.Context, subscriber string, content string) (string, error) {
+func (r *mutationResolver) PostMessageTo(
+	ctx context.Context,
+	subscriber string,
+	content string,
+) (string, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 
 // Subscribe is the resolver for the subscribe field.
-func (r *subscriptionResolver) Subscribe(ctx context.Context, subscriber string) (<-chan string, error) {
+func (r *subscriptionResolver) Subscribe(
+	ctx context.Context,
+	subscriber string,
+) (<-chan string, error) {
 	panic(fmt.Errorf("not implemented"))
 }
 

@@ -4,10 +4,11 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/stretchr/testify/require"
 )
 
 type fakeUnexportedEmbeddedInterface struct{}
@@ -40,7 +41,11 @@ func TestEmbedded(t *testing.T) {
 		}
 		err := c.Post(`query { embeddedCase1 { exportedEmbeddedPointerExportedMethod } }`, &resp)
 		require.NoError(t, err)
-		require.Equal(t, "ExportedEmbeddedPointerExportedMethodResponse", resp.EmbeddedCase1.ExportedEmbeddedPointerExportedMethod)
+		require.Equal(
+			t,
+			"ExportedEmbeddedPointerExportedMethodResponse",
+			resp.EmbeddedCase1.ExportedEmbeddedPointerExportedMethod,
+		)
 	})
 
 	t.Run("embedded case 2", func(t *testing.T) {
@@ -51,7 +56,11 @@ func TestEmbedded(t *testing.T) {
 		}
 		err := c.Post(`query { embeddedCase2 { unexportedEmbeddedPointerExportedMethod } }`, &resp)
 		require.NoError(t, err)
-		require.Equal(t, "UnexportedEmbeddedPointerExportedMethodResponse", resp.EmbeddedCase2.UnexportedEmbeddedPointerExportedMethod)
+		require.Equal(
+			t,
+			"UnexportedEmbeddedPointerExportedMethodResponse",
+			resp.EmbeddedCase2.UnexportedEmbeddedPointerExportedMethod,
+		)
 	})
 
 	t.Run("embedded case 3", func(t *testing.T) {
@@ -60,8 +69,15 @@ func TestEmbedded(t *testing.T) {
 				UnexportedEmbeddedInterfaceExportedMethod string
 			}
 		}
-		err := c.Post(`query { embeddedCase3 { unexportedEmbeddedInterfaceExportedMethod } }`, &resp)
+		err := c.Post(
+			`query { embeddedCase3 { unexportedEmbeddedInterfaceExportedMethod } }`,
+			&resp,
+		)
 		require.NoError(t, err)
-		require.Equal(t, "UnexportedEmbeddedInterfaceExportedMethod", resp.EmbeddedCase3.UnexportedEmbeddedInterfaceExportedMethod)
+		require.Equal(
+			t,
+			"UnexportedEmbeddedInterfaceExportedMethod",
+			resp.EmbeddedCase3.UnexportedEmbeddedInterfaceExportedMethod,
+		)
 	})
 }

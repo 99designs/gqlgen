@@ -10,10 +10,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/99designs/gqlgen/graphql/handler/testserver"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/99designs/gqlgen/graphql/handler/testserver"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
 
 func TestSSE(t *testing.T) {
@@ -46,7 +47,7 @@ func TestSSE(t *testing.T) {
 	}
 
 	createHTTPRequest := func(url string, query string) *http.Request {
-		req, err := http.NewRequest("POST", url, strings.NewReader(query))
+		req, err := http.NewRequest(http.MethodPost, url, strings.NewReader(query))
 		require.NoError(t, err, "Request threw error -> %s", err)
 		req.Header.Set("Accept", "text/event-stream")
 		req.Header.Set("content-type", "application/json; charset=utf-8")
@@ -61,12 +62,20 @@ func TestSSE(t *testing.T) {
 
 	t.Run("stream failure", func(t *testing.T) {
 		h := initialize()
-		req := httptest.NewRequest(http.MethodPost, "/graphql", strings.NewReader(`{"query":"subscription { name }"}`))
+		req := httptest.NewRequest(
+			http.MethodPost,
+			"/graphql",
+			strings.NewReader(`{"query":"subscription { name }"}`),
+		)
 		req.Header.Set("content-type", "application/json; charset=utf-8")
 		w := httptest.NewRecorder()
 		h.ServeHTTP(w, req)
 		assert.Equal(t, 400, w.Code, "Request return wrong status -> %d", w.Code)
-		assert.JSONEq(t, `{"errors":[{"message":"transport not supported"}],"data":null}`, w.Body.String())
+		assert.JSONEq(
+			t,
+			`{"errors":[{"message":"transport not supported"}],"data":null}`,
+			w.Body.String(),
+		)
 	})
 
 	t.Run("decode failure", func(t *testing.T) {
@@ -75,7 +84,11 @@ func TestSSE(t *testing.T) {
 		w := httptest.NewRecorder()
 		h.ServeHTTP(w, req)
 		assert.Equal(t, 400, w.Code, "Request return wrong status -> %d", w.Code)
-		assert.JSONEq(t, `{"errors":[{"message":"json request body could not be decoded: invalid character 'o' in literal null (expecting 'u') body:notjson"}],"data":null}`, w.Body.String())
+		assert.JSONEq(
+			t,
+			`{"errors":[{"message":"json request body could not be decoded: invalid character 'o' in literal null (expecting 'u') body:notjson"}],"data":null}`,
+			w.Body.String(),
+		)
 	})
 
 	t.Run("parse failure", func(t *testing.T) {
@@ -93,7 +106,11 @@ func TestSSE(t *testing.T) {
 		assert.Equal(t, ":\n", readLine(br))
 		assert.Equal(t, "\n", readLine(br))
 		assert.Equal(t, "event: next\n", readLine(br))
-		assert.Equal(t, "data: {\"errors\":[{\"message\":\"Expected Name, found {\",\"locations\":[{\"line\":1,\"column\":15}],\"extensions\":{\"code\":\"GRAPHQL_PARSE_FAILED\"}}],\"data\":null}\n", readLine(br))
+		assert.Equal(
+			t,
+			"data: {\"errors\":[{\"message\":\"Expected Name, found {\",\"locations\":[{\"line\":1,\"column\":15}],\"extensions\":{\"code\":\"GRAPHQL_PARSE_FAILED\"}}],\"data\":null}\n",
+			readLine(br),
+		)
 		assert.Equal(t, "\n", readLine(br))
 		assert.Equal(t, "event: complete\n", readLine(br))
 		assert.Equal(t, "\n", readLine(br))

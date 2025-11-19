@@ -7,20 +7,20 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
-	"github.com/rs/zerolog/log"
-
-	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/99designs/gqlgen/graphql/handler/extension"
-	"github.com/99designs/gqlgen/graphql/handler/lru"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
-	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/gqlgen/_examples/mini-habr-with-subscriptions/graph"
 	commentmutation "github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/handlers/comment_mutation"
 	commentquery "github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/handlers/comment_query"
 	postmutation "github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/handlers/post_mutation"
 	postquery "github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/handlers/post_query"
 	"github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/storage"
+	"github.com/rs/zerolog/log"
 	"github.com/vektah/gqlparser/v2/ast"
+
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/lru"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/99designs/gqlgen/graphql/playground"
 )
 
 const defaultPort = "8080"
@@ -61,7 +61,10 @@ func RunServer(storage storage.StorageImp) {
 				if origin == "" || origin == r.Header.Get("Host") {
 					return true
 				}
-				return slices.Contains([]string{"http://localhost:8080", "https://ozonhabr.com"}, origin)
+				return slices.Contains(
+					[]string{"http://localhost:8080", "https://ozonhabr.com"},
+					origin,
+				)
 			},
 		},
 	})
@@ -74,7 +77,9 @@ func RunServer(storage storage.StorageImp) {
 	srv.Use(extension.AutomaticPersistedQuery{
 		Cache: lru.New[string](100),
 	})
-	srv.Use(extension.FixedComplexityLimit(450)) // limit to +- 50 commments because there is not much space on web page
+	srv.Use(
+		extension.FixedComplexityLimit(450),
+	) // limit to +- 50 commments because there is not much space on web page
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
 	http.Handle("/query", srv)
 

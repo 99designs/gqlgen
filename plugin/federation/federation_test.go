@@ -90,7 +90,19 @@ func TestNew(t *testing.T) {
 func TestWithEntities(t *testing.T) {
 	f, cfg := load(t, "testdata/allthethings/gqlgen.yml")
 
-	require.Equal(t, []string{"ExternalExtension", "Hello", "MoreNesting", "MultiHelloMultiKey", "NestedKey", "VeryNestedKey", "World"}, cfg.Schema.Types["_Entity"].Types)
+	require.Equal(
+		t,
+		[]string{
+			"ExternalExtension",
+			"Hello",
+			"MoreNesting",
+			"MultiHelloMultiKey",
+			"NestedKey",
+			"VeryNestedKey",
+			"World",
+		},
+		cfg.Schema.Types["_Entity"].Types,
+	)
 
 	require.Len(t, cfg.Schema.Types["Entity"].Fields, 8)
 
@@ -101,7 +113,11 @@ func TestWithEntities(t *testing.T) {
 	require.Equal(t, "findManyMultiHelloMultiKeyByNames", cfg.Schema.Types["Entity"].Fields[2].Name)
 	require.Equal(t, "findManyMultiHelloMultiKeyByKey2s", cfg.Schema.Types["Entity"].Fields[3].Name)
 	require.Equal(t, "findNestedKeyByIDAndHelloName", cfg.Schema.Types["Entity"].Fields[4].Name)
-	require.Equal(t, "findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo", cfg.Schema.Types["Entity"].Fields[5].Name)
+	require.Equal(
+		t,
+		"findVeryNestedKeyByIDAndHelloNameAndWorldFooAndWorldBarAndMoreWorldFoo",
+		cfg.Schema.Types["Entity"].Fields[5].Name,
+	)
 	require.Equal(t, "findWorldByFoo", cfg.Schema.Types["Entity"].Fields[6].Name)
 	require.Equal(t, "findWorldByBar", cfg.Schema.Types["Entity"].Fields[7].Name)
 

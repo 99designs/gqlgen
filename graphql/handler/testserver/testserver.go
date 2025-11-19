@@ -14,8 +14,9 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 )
 
-// New provides a server for use in tests that isn't relying on generated code. It isnt a perfect reproduction of
-// a generated server, but it aims to be good enough to test the handler package without relying on codegen.
+// New provides a server for use in tests that isn't relying on generated code. It isnt a perfect
+// reproduction of a generated server, but it aims to be good enough to test the handler package
+// without relying on codegen.
 func New() *TestServer {
 	next := make(chan struct{})
 	completeSubscription := make(chan struct{})
@@ -124,8 +125,9 @@ func New() *TestServer {
 	return srv
 }
 
-// NewError provides a server for use in resolver error tests that isn't relying on generated code. It isnt a perfect reproduction of
-// a generated server, but it aims to be good enough to test the handler package without relying on codegen.
+// NewError provides a server for use in resolver error tests that isn't relying on generated code.
+// It isnt a perfect reproduction of a generated server, but it aims to be good enough to test the
+// handler package without relying on codegen.
 func NewError() *TestServer {
 	next := make(chan struct{})
 

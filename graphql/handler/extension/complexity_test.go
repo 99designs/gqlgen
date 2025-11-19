@@ -35,7 +35,7 @@ func TestHandlerComplexity(t *testing.T) {
 	t.Run("below complexity limit", func(t *testing.T) {
 		stats = nil
 		h.SetCalculatedComplexity(2)
-		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
+		resp := doRequest(h, http.MethodPost, "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 		require.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 
@@ -46,9 +46,13 @@ func TestHandlerComplexity(t *testing.T) {
 	t.Run("above complexity limit", func(t *testing.T) {
 		stats = nil
 		h.SetCalculatedComplexity(4)
-		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
+		resp := doRequest(h, http.MethodPost, "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
-		require.JSONEq(t, `{"errors":[{"message":"operation has complexity 4, which exceeds the limit of 2","extensions":{"code":"COMPLEXITY_LIMIT_EXCEEDED"}}],"data":null}`, resp.Body.String())
+		require.JSONEq(
+			t,
+			`{"errors":[{"message":"operation has complexity 4, which exceeds the limit of 2","extensions":{"code":"COMPLEXITY_LIMIT_EXCEEDED"}}],"data":null}`,
+			resp.Body.String(),
+		)
 
 		require.Equal(t, 2, stats.ComplexityLimit)
 		require.Equal(t, 4, stats.Complexity)
@@ -57,7 +61,7 @@ func TestHandlerComplexity(t *testing.T) {
 	t.Run("within dynamic complexity limit", func(t *testing.T) {
 		stats = nil
 		h.SetCalculatedComplexity(4)
-		resp := doRequest(h, "POST", "/graphql", `{"query":"{ ok: name }"}`)
+		resp := doRequest(h, http.MethodPost, "/graphql", `{"query":"{ ok: name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 		require.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 
@@ -79,7 +83,7 @@ func TestFixedComplexity(t *testing.T) {
 
 	t.Run("below complexity limit", func(t *testing.T) {
 		h.SetCalculatedComplexity(2)
-		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
+		resp := doRequest(h, http.MethodPost, "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 		require.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 
@@ -89,9 +93,13 @@ func TestFixedComplexity(t *testing.T) {
 
 	t.Run("above complexity limit", func(t *testing.T) {
 		h.SetCalculatedComplexity(4)
-		resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }"}`)
+		resp := doRequest(h, http.MethodPost, "/graphql", `{"query":"{ name }"}`)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
-		require.JSONEq(t, `{"errors":[{"message":"operation has complexity 4, which exceeds the limit of 2","extensions":{"code":"COMPLEXITY_LIMIT_EXCEEDED"}}],"data":null}`, resp.Body.String())
+		require.JSONEq(
+			t,
+			`{"errors":[{"message":"operation has complexity 4, which exceeds the limit of 2","extensions":{"code":"COMPLEXITY_LIMIT_EXCEEDED"}}],"data":null}`,
+			resp.Body.String(),
+		)
 
 		require.Equal(t, 2, stats.ComplexityLimit)
 		require.Equal(t, 4, stats.Complexity)
@@ -99,7 +107,12 @@ func TestFixedComplexity(t *testing.T) {
 
 	t.Run("bypass __schema field", func(t *testing.T) {
 		h.SetCalculatedComplexity(4)
-		resp := doRequest(h, "POST", "/graphql", `{ "operationName":"IntrospectionQuery", "query":"query IntrospectionQuery { __schema { queryType { name } mutationType { name }}}"}`)
+		resp := doRequest(
+			h,
+			http.MethodPost,
+			"/graphql",
+			`{ "operationName":"IntrospectionQuery", "query":"query IntrospectionQuery { __schema { queryType { name } mutationType { name }}}"}`,
+		)
 		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 		require.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 
@@ -108,6 +121,7 @@ func TestFixedComplexity(t *testing.T) {
 	})
 }
 
+//nolint:unparam // expected to always get POST for GraphQL
 func doRequest(handler http.Handler, method, target, body string) *httptest.ResponseRecorder {
 	r := httptest.NewRequest(method, target, strings.NewReader(body))
 	r.Header.Set("Content-Type", "application/json")

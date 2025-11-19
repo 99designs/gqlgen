@@ -21,7 +21,13 @@ func TestLayouts(t *testing.T) {
 	followschemaFSet := token.NewFileSet()
 	followschemaPkg := loadPackage(t, "followschema", followschemaFSet)
 
-	eq, msg := eqgo.PackagesEquivalent(singlefilePkg, singlefileFSet, followschemaPkg, followschemaFSet, nil)
+	eq, msg := eqgo.PackagesEquivalent(
+		singlefilePkg,
+		singlefileFSet,
+		followschemaPkg,
+		followschemaFSet,
+		nil,
+	)
 	if !eq {
 		// When msg is too long, require.True(...) omits it entirely.
 		// Therefore use fmt.Fprintln to print it manually instead.
@@ -31,8 +37,6 @@ func TestLayouts(t *testing.T) {
 }
 
 func loadPackage(t *testing.T, name string, fset *token.FileSet) *ast.Package {
-	t.Helper()
-
 	path, err := filepath.Abs(name)
 	require.NoError(t, err)
 	files, err := os.ReadDir(path)

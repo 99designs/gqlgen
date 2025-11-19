@@ -15,6 +15,7 @@ import (
 )
 
 func testResourceIntegrity(t *testing.T, handler func(title, endpoint string) http.HandlerFunc) {
+	t.Helper()
 	recorder := httptest.NewRecorder()
 	request := httptest.NewRequest(http.MethodGet, "http://localhost:8080/", http.NoBody)
 	handler("example.org API", "/query").ServeHTTP(recorder, request)
@@ -40,7 +41,13 @@ func testResourceIntegrity(t *testing.T, handler func(title, endpoint string) ht
 	assertNodesIntegrity(t, baseUrl, doc, "link", "href", "integrity")
 }
 
-func assertNodesIntegrity(t *testing.T, baseUrl string, doc *goquery.Document, selector, urlAttrKey, integrityAttrKey string) {
+func assertNodesIntegrity(
+	t *testing.T,
+	baseUrl string,
+	doc *goquery.Document,
+	selector, urlAttrKey, integrityAttrKey string,
+) {
+	t.Helper()
 	selection := doc.Find(selector)
 	for _, node := range selection.Nodes {
 		var url string

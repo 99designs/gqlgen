@@ -36,10 +36,26 @@ func TestInt8(t *testing.T) {
 		}{
 			{"positive int overflow", math.MaxInt8 + 1, "128 overflows signed 8-bit integer"},
 			{"negative int overflow", math.MinInt8 - 1, "-129 overflows signed 8-bit integer"},
-			{"positive int64 overflow", int64(math.MaxInt8 + 1), "128 overflows signed 8-bit integer"},
-			{"negative int64 overflow", int64(math.MinInt8 - 1), "-129 overflows signed 8-bit integer"},
-			{"positive json.Number overflow", json.Number("128"), "128 overflows signed 8-bit integer"},
-			{"negative json.Number overflow", json.Number("-129"), "-129 overflows signed 8-bit integer"},
+			{
+				"positive int64 overflow",
+				int64(math.MaxInt8 + 1),
+				"128 overflows signed 8-bit integer",
+			},
+			{
+				"negative int64 overflow",
+				int64(math.MinInt8 - 1),
+				"-129 overflows signed 8-bit integer",
+			},
+			{
+				"positive json.Number overflow",
+				json.Number("128"),
+				"128 overflows signed 8-bit integer",
+			},
+			{
+				"negative json.Number overflow",
+				json.Number("-129"),
+				"-129 overflows signed 8-bit integer",
+			},
 			{"positive string overflow", "128", "128 overflows signed 8-bit integer"},
 			{"negative string overflow", "-129", "-129 overflows signed 8-bit integer"},
 		}
@@ -49,9 +65,21 @@ func TestInt8(t *testing.T) {
 				var intErr *IntegerError
 
 				res, err := UnmarshalInt8(tc.v)
-				assert.EqualError(t, err, tc.err)          //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &numberOverflowErr) //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &intErr)            //nolint:testifylint // An error assertion makes more sense.
+				require.EqualError(
+					t,
+					err,
+					tc.err,
+				)
+				require.ErrorAs(
+					t,
+					err,
+					&numberOverflowErr,
+				)
+				require.ErrorAs(
+					t,
+					err,
+					&intErr,
+				)
 				assert.Equal(t, int8(0), res)
 			})
 		}
@@ -61,18 +89,27 @@ func TestInt8(t *testing.T) {
 		var intErr *IntegerError
 
 		res, err := UnmarshalInt8("-1.03")
-		assert.EqualError(t, err, "strconv.ParseInt: parsing \"-1.03\": invalid syntax") //nolint:testifylint // An error assertion makes more sense.
+		require.EqualError(
+			t,
+			err,
+			"strconv.ParseInt: parsing \"-1.03\": invalid syntax",
+		)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, int8(0), res)
 
 		res, err = UnmarshalInt8(json.Number(" 1"))
-		assert.EqualError(t, err, "strconv.ParseInt: parsing \" 1\": invalid syntax") //nolint:testifylint // An error assertion makes more sense.
+		require.EqualError(
+			t,
+			err,
+			"strconv.ParseInt: parsing \" 1\": invalid syntax",
+		)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, int8(0), res)
 	})
 }
 
 func mustUnmarshalInt8(t *testing.T, v any) int8 {
+	t.Helper()
 	res, err := UnmarshalInt8(v)
 	require.NoError(t, err)
 	return res
@@ -100,10 +137,26 @@ func TestInt16(t *testing.T) {
 		}{
 			{"positive int overflow", math.MaxInt16 + 1, "32768 overflows signed 16-bit integer"},
 			{"negative int overflow", math.MinInt16 - 1, "-32769 overflows signed 16-bit integer"},
-			{"positive int64 overflow", int64(math.MaxInt16 + 1), "32768 overflows signed 16-bit integer"},
-			{"negative int64 overflow", int64(math.MinInt16 - 1), "-32769 overflows signed 16-bit integer"},
-			{"positive json.Number overflow", json.Number("32768"), "32768 overflows signed 16-bit integer"},
-			{"negative json.Number overflow", json.Number("-32769"), "-32769 overflows signed 16-bit integer"},
+			{
+				"positive int64 overflow",
+				int64(math.MaxInt16 + 1),
+				"32768 overflows signed 16-bit integer",
+			},
+			{
+				"negative int64 overflow",
+				int64(math.MinInt16 - 1),
+				"-32769 overflows signed 16-bit integer",
+			},
+			{
+				"positive json.Number overflow",
+				json.Number("32768"),
+				"32768 overflows signed 16-bit integer",
+			},
+			{
+				"negative json.Number overflow",
+				json.Number("-32769"),
+				"-32769 overflows signed 16-bit integer",
+			},
 			{"positive string overflow", "32768", "32768 overflows signed 16-bit integer"},
 			{"negative string overflow", "-32769", "-32769 overflows signed 16-bit integer"},
 		}
@@ -113,9 +166,21 @@ func TestInt16(t *testing.T) {
 				var intErr *IntegerError
 
 				res, err := UnmarshalInt16(tc.v)
-				assert.EqualError(t, err, tc.err)          //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &numberOverflowErr) //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &intErr)            //nolint:testifylint // An error assertion makes more sense.
+				require.EqualError(
+					t,
+					err,
+					tc.err,
+				)
+				require.ErrorAs(
+					t,
+					err,
+					&numberOverflowErr,
+				)
+				require.ErrorAs(
+					t,
+					err,
+					&intErr,
+				)
 				assert.Equal(t, int16(0), res)
 			})
 		}
@@ -125,18 +190,27 @@ func TestInt16(t *testing.T) {
 		var intErr *IntegerError
 
 		res, err := UnmarshalInt16("-1.03")
-		assert.EqualError(t, err, "strconv.ParseInt: parsing \"-1.03\": invalid syntax") //nolint:testifylint // An error assertion makes more sense.
+		require.EqualError(
+			t,
+			err,
+			"strconv.ParseInt: parsing \"-1.03\": invalid syntax",
+		)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, int16(0), res)
 
 		res, err = UnmarshalInt16(json.Number(" 1"))
-		assert.EqualError(t, err, "strconv.ParseInt: parsing \" 1\": invalid syntax") //nolint:testifylint // An error assertion makes more sense.
+		require.EqualError(
+			t,
+			err,
+			"strconv.ParseInt: parsing \" 1\": invalid syntax",
+		)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, int16(0), res)
 	})
 }
 
 func mustUnmarshalInt16(t *testing.T, v any) int16 {
+	t.Helper()
 	res, err := UnmarshalInt16(v)
 	require.NoError(t, err)
 	return res
@@ -158,6 +232,7 @@ func TestInt(t *testing.T) {
 }
 
 func mustUnmarshalInt(t *testing.T, v any) int {
+	t.Helper()
 	res, err := UnmarshalInt(v)
 	require.NoError(t, err)
 	return res
@@ -183,14 +258,46 @@ func TestInt32(t *testing.T) {
 			v    any
 			err  string
 		}{
-			{"positive int overflow", math.MaxInt32 + 1, "2147483648 overflows signed 32-bit integer"},
-			{"negative int overflow", math.MinInt32 - 1, "-2147483649 overflows signed 32-bit integer"},
-			{"positive int64 overflow", int64(math.MaxInt32 + 1), "2147483648 overflows signed 32-bit integer"},
-			{"negative int64 overflow", int64(math.MinInt32 - 1), "-2147483649 overflows signed 32-bit integer"},
-			{"positive json.Number overflow", json.Number("2147483648"), "2147483648 overflows signed 32-bit integer"},
-			{"negative json.Number overflow", json.Number("-2147483649"), "-2147483649 overflows signed 32-bit integer"},
-			{"positive string overflow", "2147483648", "2147483648 overflows signed 32-bit integer"},
-			{"negative string overflow", "-2147483649", "-2147483649 overflows signed 32-bit integer"},
+			{
+				"positive int overflow",
+				math.MaxInt32 + 1,
+				"2147483648 overflows signed 32-bit integer",
+			},
+			{
+				"negative int overflow",
+				math.MinInt32 - 1,
+				"-2147483649 overflows signed 32-bit integer",
+			},
+			{
+				"positive int64 overflow",
+				int64(math.MaxInt32 + 1),
+				"2147483648 overflows signed 32-bit integer",
+			},
+			{
+				"negative int64 overflow",
+				int64(math.MinInt32 - 1),
+				"-2147483649 overflows signed 32-bit integer",
+			},
+			{
+				"positive json.Number overflow",
+				json.Number("2147483648"),
+				"2147483648 overflows signed 32-bit integer",
+			},
+			{
+				"negative json.Number overflow",
+				json.Number("-2147483649"),
+				"-2147483649 overflows signed 32-bit integer",
+			},
+			{
+				"positive string overflow",
+				"2147483648",
+				"2147483648 overflows signed 32-bit integer",
+			},
+			{
+				"negative string overflow",
+				"-2147483649",
+				"-2147483649 overflows signed 32-bit integer",
+			},
 		}
 		for _, tc := range cases {
 			t.Run(tc.name, func(t *testing.T) {
@@ -198,9 +305,21 @@ func TestInt32(t *testing.T) {
 				var intErr *IntegerError
 
 				res, err := UnmarshalInt32(tc.v)
-				assert.EqualError(t, err, tc.err)          //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &numberOverflowErr) //nolint:testifylint // An error assertion makes more sense.
-				assert.ErrorAs(t, err, &intErr)            //nolint:testifylint // An error assertion makes more sense.
+				require.EqualError(
+					t,
+					err,
+					tc.err,
+				)
+				require.ErrorAs(
+					t,
+					err,
+					&numberOverflowErr,
+				)
+				require.ErrorAs(
+					t,
+					err,
+					&intErr,
+				)
 				assert.Equal(t, int32(0), res)
 			})
 		}
@@ -210,18 +329,27 @@ func TestInt32(t *testing.T) {
 		var intErr *IntegerError
 
 		res, err := UnmarshalInt32("-1.03")
-		assert.EqualError(t, err, "strconv.ParseInt: parsing \"-1.03\": invalid syntax") //nolint:testifylint // An error assertion makes more sense.
+		require.EqualError(
+			t,
+			err,
+			"strconv.ParseInt: parsing \"-1.03\": invalid syntax",
+		)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, int32(0), res)
 
 		res, err = UnmarshalInt32(json.Number(" 1"))
-		assert.EqualError(t, err, "strconv.ParseInt: parsing \" 1\": invalid syntax") //nolint:testifylint // An error assertion makes more sense.
+		require.EqualError(
+			t,
+			err,
+			"strconv.ParseInt: parsing \" 1\": invalid syntax",
+		)
 		assert.NotErrorAs(t, err, &intErr)
 		assert.Equal(t, int32(0), res)
 	})
 }
 
 func mustUnmarshalInt32(t *testing.T, v any) int32 {
+	t.Helper()
 	res, err := UnmarshalInt32(v)
 	require.NoError(t, err)
 	return res
@@ -243,6 +371,7 @@ func TestInt64(t *testing.T) {
 }
 
 func mustUnmarshalInt64(t *testing.T, v any) int64 {
+	t.Helper()
 	res, err := UnmarshalInt64(v)
 	require.NoError(t, err)
 	return res
@@ -266,7 +395,7 @@ func beforeUnmarshalInt(v any) (int, error) {
 }
 
 func BenchmarkUnmarshalIntInitial(b *testing.B) {
-	numbers := makeRandomNumberSlice(LENGTH, true)
+	numbers := makeRandomNumberSlice(true)
 
 	for range b.N {
 		for i := range numbers {
@@ -276,7 +405,7 @@ func BenchmarkUnmarshalIntInitial(b *testing.B) {
 }
 
 func BenchmarkUnmarshalIntNew(b *testing.B) {
-	numbers := makeRandomNumberSlice(LENGTH, true)
+	numbers := makeRandomNumberSlice(true)
 
 	for range b.N {
 		for i := range numbers {
@@ -285,8 +414,8 @@ func BenchmarkUnmarshalIntNew(b *testing.B) {
 	}
 }
 
-func makeRandomNumberSlice(length int, signed bool) []any {
-	numbers := make([]any, length)
+func makeRandomNumberSlice(signed bool) []any {
+	numbers := make([]any, LENGTH)
 	for i := range numbers {
 		numbers[i] = randomNumber(signed)
 	}

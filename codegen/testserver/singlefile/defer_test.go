@@ -518,7 +518,8 @@ fragment DeferFragment on DeferModel {
 			assert.Equal(t, tc.expectedInitialResponse, resp)
 
 			// If there are no deferred responses, we can stop here.
-			if !reflect.ValueOf(resp).FieldByName("HasNext").Bool() && len(tc.expectedDeferredResponses) == 0 {
+			if !reflect.ValueOf(resp).FieldByName("HasNext").Bool() &&
+				len(tc.expectedDeferredResponses) == 0 {
 				return
 			}
 

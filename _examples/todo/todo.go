@@ -123,7 +123,11 @@ func (r *MutationResolver) CreateTodo(ctx context.Context, todo TodoInput) (*Tod
 	return newTodo, nil
 }
 
-func (r *MutationResolver) UpdateTodo(ctx context.Context, id int, changes map[string]any) (*Todo, error) {
+func (r *MutationResolver) UpdateTodo(
+	ctx context.Context,
+	id int,
+	changes map[string]any,
+) (*Todo, error) {
 	var affectedTodo *Todo
 
 	for i := 0; i < len(r.todos); i++ {

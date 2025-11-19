@@ -1,6 +1,7 @@
 package starwars
 
 import (
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
@@ -17,7 +18,7 @@ func BenchmarkSimpleQueryNoArgs(b *testing.B) {
 	q := `{"query":"{ search(text:\"Luke\") { ... on Human { starships { name } } } }"}`
 
 	var body strings.Reader
-	r := httptest.NewRequest("POST", "/graphql", &body)
+	r := httptest.NewRequest(http.MethodPost, "/graphql", &body)
 	r.Header.Set("Content-Type", "application/json")
 
 	b.ReportAllocs()

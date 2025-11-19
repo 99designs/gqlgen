@@ -40,7 +40,8 @@ func (m *FieldSet) Dispatch(ctx context.Context) {
 		d := m.delayed[0]
 		m.Values[d.i] = d.f(ctx)
 	} else if len(m.delayed) > 1 {
-		// more than one concurrent task, use the main goroutine to do one, only spawn goroutines for the others
+		// more than one concurrent task, use the main goroutine to do one, only spawn goroutines
+		// for the others
 
 		var wg sync.WaitGroup
 		for _, d := range m.delayed[1:] {

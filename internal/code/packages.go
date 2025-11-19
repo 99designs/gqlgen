@@ -20,7 +20,8 @@ var mode = packages.NeedName |
 	packages.NeedModule
 
 type (
-	// Packages is a wrapper around x/tools/go/packages that maintains a (hopefully prewarmed) cache of packages
+	// Packages is a wrapper around x/tools/go/packages that maintains a (hopefully prewarmed) cache
+	// of packages
 	// that can be invalidated as writes are made and packages are known to change.
 	Packages struct {
 		packages              map[string]*packages.Package
@@ -58,7 +59,8 @@ func PackagePrefixToCache(prefixPath string) func(p *Packages) {
 }
 
 // NewPackages creates a new packages cache
-// It will load all packages in the current module, and any packages that are passed to Load or LoadAll
+// It will load all packages in the current module, and any packages that are passed to Load or
+// LoadAll
 func NewPackages(opts ...Option) *Packages {
 	p := &Packages{}
 	for _, opt := range opts {
@@ -169,8 +171,9 @@ func (p *Packages) Load(importPath string) *packages.Package {
 	return pkgs[0]
 }
 
-// LoadWithTypes tries a standard load, which may not have enough type info (TypesInfo== nil) available if the imported package is a
-// second order dependency. Fortunately this doesnt happen very often, so we can just issue a load when we detect it.
+// LoadWithTypes tries a standard load, which may not have enough type info (TypesInfo== nil)
+// available if the imported package is a second order dependency. Fortunately this doesnt happen
+// very often, so we can just issue a load when we detect it.
 func (p *Packages) LoadWithTypes(importPath string) *packages.Package {
 	pkg := p.Load(importPath)
 	if pkg == nil || pkg.TypesInfo == nil {
@@ -189,8 +192,9 @@ func (p *Packages) LoadWithTypes(importPath string) *packages.Package {
 	return pkg
 }
 
-// LoadAllNames will call packages.Load with the NeedName mode only and will store the package name in a cache.
-// it does not return any package data, but after calling this you can call NameForPackage to get the package name without loading the full package data.
+// LoadAllNames will call packages.Load with the NeedName mode only and will store the package name
+// in a cache. it does not return any package data, but after calling this you can call
+// NameForPackage to get the package name without loading the full package data.
 func (p *Packages) LoadAllNames(importPaths ...string) {
 	importPaths = dedupPackages(importPaths)
 	missing := make([]string, 0, len(importPaths))
@@ -228,7 +232,6 @@ func (p *Packages) LoadAllNames(importPaths ...string) {
 			Mode:       packages.NeedName,
 			BuildFlags: p.buildFlags,
 		}, missing...)
-
 		if err != nil {
 			p.loadErrors = append(p.loadErrors, err)
 		}
@@ -243,7 +246,8 @@ func (p *Packages) LoadAllNames(importPaths ...string) {
 	}
 }
 
-// NameForPackage looks up the package name from the package stanza in the go files at the given import path.
+// NameForPackage looks up the package name from the package stanza in the go files at the given
+// import path.
 func (p *Packages) NameForPackage(importPath string) string {
 	p.numNameCalls++
 	p.LoadAllNames(importPath)
@@ -252,7 +256,8 @@ func (p *Packages) NameForPackage(importPath string) string {
 	return p.importToName[importPath]
 }
 
-// Evict removes a given package import path from the cache. Further calls to Load will fetch it from disk.
+// Evict removes a given package import path from the cache. Further calls to Load will fetch it
+// from disk.
 func (p *Packages) Evict(importPath string) {
 	delete(p.packages, importPath)
 }
@@ -268,7 +273,8 @@ func (p *Packages) ModTidy() error {
 	return nil
 }
 
-// Errors returns any errors that were returned by Load, either from the call itself or any of the loaded packages.
+// Errors returns any errors that were returned by Load, either from the call itself or any of the
+// loaded packages.
 func (p *Packages) Errors() PkgErrors {
 	res := append([]error{}, p.loadErrors...)
 	for _, pkg := range p.packages {

@@ -33,7 +33,10 @@ func (s *collectFieldsCacheStore) Get(key collectFieldsCacheKey) ([]CollectedFie
 }
 
 // Add stores the value when absent and returns the cached value.
-func (s *collectFieldsCacheStore) Add(key collectFieldsCacheKey, value []CollectedField) []CollectedField {
+func (s *collectFieldsCacheStore) Add(
+	key collectFieldsCacheKey,
+	value []CollectedField,
+) []CollectedField {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

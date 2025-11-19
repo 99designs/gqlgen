@@ -1,4 +1,5 @@
-// introspection implements the spec defined in https://github.com/facebook/graphql/blob/master/spec/Section%204%20--%20Introspection.md#schema-introspection
+// introspection implements the spec defined in
+// https://github.com/facebook/graphql/blob/master/spec/Section%204%20--%20Introspection.md#schema-introspection
 package introspection
 
 import (

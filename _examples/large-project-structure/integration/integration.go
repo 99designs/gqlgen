@@ -16,7 +16,10 @@ func (r *Resolver) Tezz(ctx context.Context) (*model.Test, error) {
 	return &model.Test{ID: "external-1"}, nil
 }
 
-func (r *Resolver) GetYaSome(ctx context.Context, input *model.CustomInput) ([]*model.CustomZeekIntel, error) {
+func (r *Resolver) GetYaSome(
+	ctx context.Context,
+	input *model.CustomInput,
+) ([]*model.CustomZeekIntel, error) {
 	intels := []*model.CustomZeekIntel{}
 
 	if input.Error != nil && *input.Error {
@@ -38,7 +41,10 @@ func (r *Resolver) GetYaSome(ctx context.Context, input *model.CustomInput) ([]*
 	return intels, nil
 }
 
-func (r *Resolver) AddIndicator(ctx context.Context, input model.IndicatorInput) (*model.Indicator, error) {
+func (r *Resolver) AddIndicator(
+	ctx context.Context,
+	input model.IndicatorInput,
+) (*model.Indicator, error) {
 	return &model.Indicator{
 		ID:            "1234",
 		Indicator:     input.Indicator,

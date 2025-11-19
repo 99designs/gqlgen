@@ -17,7 +17,10 @@ func TestMarshalUUID(t *testing.T) {
 			input    uuid.UUID
 			expected string
 		}{
-			{uuid.MustParse("fd5343a9-0372-11ee-9fb2-0242ac160014"), "\"fd5343a9-0372-11ee-9fb2-0242ac160014\""},
+			{
+				uuid.MustParse("fd5343a9-0372-11ee-9fb2-0242ac160014"),
+				"\"fd5343a9-0372-11ee-9fb2-0242ac160014\"",
+			},
 		}
 		for _, v := range values {
 			assert.Equal(t, v.expected, m2s(MarshalUUID(v.input)))

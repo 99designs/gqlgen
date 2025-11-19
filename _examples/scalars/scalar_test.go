@@ -4,12 +4,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/99designs/gqlgen/graphql/handler/extension"
-	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/introspection"
 )
 
@@ -65,7 +65,11 @@ func TestScalars(t *testing.T) {
 		var resp struct{ Search []RawUser }
 
 		err := c.Post(`{ search(input:{createdAfter:"2014"}) { id } }`, &resp)
-		require.EqualError(t, err, `[{"message":"time should be a unix timestamp","path":["search","input","createdAfter"]}]`)
+		require.EqualError(
+			t,
+			err,
+			`[{"message":"time should be a unix timestamp","path":["search","input","createdAfter"]}]`,
+		)
 	})
 
 	t.Run("scalar resolver methods", func(t *testing.T) {

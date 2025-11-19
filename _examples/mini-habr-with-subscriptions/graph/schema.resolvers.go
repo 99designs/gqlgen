@@ -17,7 +17,12 @@ import (
 )
 
 // Replies is the resolver for the replies field.
-func (r *commentResolver) Replies(ctx context.Context, obj *model.Comment, first *int32, after *string) (*model.CommentConnection, error) {
+func (r *commentResolver) Replies(
+	ctx context.Context,
+	obj *model.Comment,
+	first *int32,
+	after *string,
+) (*model.CommentConnection, error) {
 	const op = "graph.Replies()"
 
 	log.Debug().Msgf("%s start", op)
@@ -65,14 +70,16 @@ func (r *commentResolver) Replies(ctx context.Context, obj *model.Comment, first
 }
 
 // AddPost is the resolver for the addPost field.
-func (r *mutationResolver) AddPost(ctx context.Context, postInput model.NewPost) (*model.Post, error) {
+func (r *mutationResolver) AddPost(
+	ctx context.Context,
+	postInput model.NewPost,
+) (*model.Post, error) {
 	const op = "graph.AddPost()"
 
 	log.Debug().Msgf("%s start", op)
 
 	newPost := newPostToInternalModel(&postInput)
 	post, err := r.PostMutation.AddPost(newPost)
-
 	if err != nil {
 		log.Error().Err(err).Msgf("%s end with error", op)
 
@@ -104,15 +111,22 @@ func postFromInternalModel(internalPost *internalmodel.Post) *model.Post {
 }
 
 // AddComment is the resolver for the addComment field.
-func (r *mutationResolver) AddComment(ctx context.Context, commentInput model.NewComment) (*model.Comment, error) {
+func (r *mutationResolver) AddComment(
+	ctx context.Context,
+	commentInput model.NewComment,
+) (*model.Comment, error) {
 	const op = "graph.AddComment()"
 
 	log.Debug().Msgf("%s start", op)
 
 	newInternalComment := newCommentToInternalModel(&commentInput)
-	internalComment, err := r.CommentMutation.AddComment(newInternalComment.PostID, newInternalComment)
+	internalComment, err := r.CommentMutation.AddComment(
+		newInternalComment.PostID,
+		newInternalComment,
+	)
 	if err != nil {
-		if err != errs.ErrPostNotExist && err != errs.ErrParentCommentNotExist && err != errs.ErrCommentsNotEnabled {
+		if err != errs.ErrPostNotExist && err != errs.ErrParentCommentNotExist &&
+			err != errs.ErrCommentsNotEnabled {
 			err = errors.New("internal server error")
 		}
 		return nil, err
@@ -134,13 +148,17 @@ func newCommentToInternalModel(newComment *model.NewComment) *internalmodel.NewC
 }
 
 // UpdateEnableComment is the resolver for the updateEnableComment field.
-func (r *mutationResolver) UpdateEnableComment(ctx context.Context, postID int64, authorID uuid.UUID, commentsEnabled bool) (*model.Post, error) {
+func (r *mutationResolver) UpdateEnableComment(
+	ctx context.Context,
+	postID int64,
+	authorID uuid.UUID,
+	commentsEnabled bool,
+) (*model.Post, error) {
 	const op = "graph.UpdateEnableComment()"
 
 	log.Debug().Msgf("%s start", op)
 
 	post, err := r.PostMutation.UpdateEnableCommentToPost(postID, authorID, commentsEnabled)
-
 	if err != nil {
 		log.Error().Err(err).Msgf("%s end with error", op)
 		if err != errs.ErrPostNotExist && err != errs.ErrUnauthorizedAccess {
@@ -154,7 +172,12 @@ func (r *mutationResolver) UpdateEnableComment(ctx context.Context, postID int64
 }
 
 // Comments is the resolver for the comments field.
-func (r *postResolver) Comments(ctx context.Context, obj *model.Post, first *int32, after *string) (*model.CommentConnection, error) {
+func (r *postResolver) Comments(
+	ctx context.Context,
+	obj *model.Post,
+	first *int32,
+	after *string,
+) (*model.CommentConnection, error) {
 	const op = "graph.Comments()"
 
 	log.Debug().Msgf("%s start", op)
@@ -190,8 +213,11 @@ func (r *postResolver) Comments(ctx context.Context, obj *model.Post, first *int
 
 const defaultFirst int = 5
 
-func paginateInternalBranch(internalComments []*internalmodel.Comment, firstInput *int32, after *string) (*model.CommentConnection, error) {
-
+func paginateInternalBranch(
+	internalComments []*internalmodel.Comment,
+	firstInput *int32,
+	after *string,
+) (*model.CommentConnection, error) {
 	var first int
 	if firstInput == nil {
 		first = defaultFirst
@@ -199,7 +225,7 @@ func paginateInternalBranch(internalComments []*internalmodel.Comment, firstInpu
 		first = int(*firstInput)
 	}
 
-	var edges = make([]*model.CommentEdge, 0, first)
+	edges := make([]*model.CommentEdge, 0, first)
 
 	start := false
 	var commentID int64
@@ -213,8 +239,8 @@ func paginateInternalBranch(internalComments []*internalmodel.Comment, firstInpu
 		start = true
 	}
 
-	var hasNextPage = false
-	var counter = 0
+	hasNextPage := false
+	counter := 0
 	for i, v := range internalComments {
 		if v.ID == commentID && start == false {
 			start = true
@@ -276,7 +302,6 @@ func (r *queryResolver) Posts(ctx context.Context) ([]*model.Post, error) {
 	log.Debug().Msgf("%s start", op)
 
 	internalPosts, err := r.PostQuery.GetAllPosts()
-
 	if err != nil {
 		log.Error().Err(err).Msgf("%s end with error", op)
 		if err != errs.ErrPostsNotExist {
@@ -300,7 +325,6 @@ func (r *queryResolver) Post(ctx context.Context, postID int64) (*model.Post, er
 	log.Debug().Msgf("%s start", op)
 
 	postInternal, err := r.PostQuery.GetPost(postID)
-
 	if err != nil {
 		log.Error().Err(err).Msgf("%s end with error", op)
 		if err != errs.ErrPostNotExist {
@@ -315,7 +339,10 @@ func (r *queryResolver) Post(ctx context.Context, postID int64) (*model.Post, er
 }
 
 // CommentAdded is the resolver for the commentAdded field.
-func (r *subscriptionResolver) CommentAdded(ctx context.Context, postID int64) (<-chan *model.Comment, error) {
+func (r *subscriptionResolver) CommentAdded(
+	ctx context.Context,
+	postID int64,
+) (<-chan *model.Comment, error) {
 	const op = "graph.CommentAdded()"
 	log.Debug().Msgf("%s subscription init", op)
 	ch := make(chan *model.Comment, 10)
@@ -333,7 +360,6 @@ func (r *subscriptionResolver) CommentAdded(ctx context.Context, postID int64) (
 		}
 	}()
 	return ch, nil
-
 }
 
 // Comment returns CommentResolver implementation.
@@ -351,8 +377,10 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 // Subscription returns SubscriptionResolver implementation.
 func (r *Resolver) Subscription() SubscriptionResolver { return &subscriptionResolver{r} }
 
-type commentResolver struct{ *Resolver }
-type mutationResolver struct{ *Resolver }
-type postResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
-type subscriptionResolver struct{ *Resolver }
+type (
+	commentResolver      struct{ *Resolver }
+	mutationResolver     struct{ *Resolver }
+	postResolver         struct{ *Resolver }
+	queryResolver        struct{ *Resolver }
+	subscriptionResolver struct{ *Resolver }
+)

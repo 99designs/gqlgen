@@ -25,7 +25,12 @@ func TestAPQIntegration(t *testing.T) {
 		return next(ctx)
 	})
 
-	resp := doRequest(h, "POST", "/graphql", `{"query":"{ name }","extensions":{"persistedQuery":{"version":1,"sha256Hash":"30166fc3298853f22709fce1e4a00e98f1b6a3160eaaaf9cb3b7db6a16073b07"}}}`)
+	resp := doRequest(
+		h,
+		http.MethodPost,
+		"/graphql",
+		`{"query":"{ name }","extensions":{"persistedQuery":{"version":1,"sha256Hash":"30166fc3298853f22709fce1e4a00e98f1b6a3160eaaaf9cb3b7db6a16073b07"}}}`,
+	)
 	require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 	require.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 
@@ -44,7 +49,12 @@ func TestAPQ(t *testing.T) {
 			Query: "original query",
 		}
 
-		err := extension.AutomaticPersistedQuery{Cache: graphql.MapCache[string]{}}.MutateOperationParameters(ctx, params)
+		err := extension.AutomaticPersistedQuery{
+			Cache: graphql.MapCache[string]{},
+		}.MutateOperationParameters(
+			ctx,
+			params,
+		)
 
 		require.Equal(t, (*gqlerror.Error)(nil), err)
 		require.Equal(t, "original query", params.Query)
@@ -61,7 +71,12 @@ func TestAPQ(t *testing.T) {
 			},
 		}
 
-		err := extension.AutomaticPersistedQuery{Cache: graphql.MapCache[string]{}}.MutateOperationParameters(ctx, params)
+		err := extension.AutomaticPersistedQuery{
+			Cache: graphql.MapCache[string]{},
+		}.MutateOperationParameters(
+			ctx,
+			params,
+		)
 		require.Equal(t, "PersistedQueryNotFound", err.Message)
 	})
 
@@ -77,7 +92,12 @@ func TestAPQ(t *testing.T) {
 			},
 		}
 		cache := graphql.MapCache[string]{}
-		err := extension.AutomaticPersistedQuery{Cache: cache}.MutateOperationParameters(ctx, params)
+		err := extension.AutomaticPersistedQuery{
+			Cache: cache,
+		}.MutateOperationParameters(
+			ctx,
+			params,
+		)
 
 		require.Equal(t, (*gqlerror.Error)(nil), err)
 		require.Equal(t, "{ me { name } }", params.Query)
@@ -130,7 +150,12 @@ func TestAPQ(t *testing.T) {
 			},
 		}
 
-		err := extension.AutomaticPersistedQuery{graphql.MapCache[string]{}}.MutateOperationParameters(ctx, params)
+		err := extension.AutomaticPersistedQuery{
+			graphql.MapCache[string]{},
+		}.MutateOperationParameters(
+			ctx,
+			params,
+		)
 		require.Equal(t, "invalid APQ extension data", err.Message)
 	})
 
@@ -143,7 +168,12 @@ func TestAPQ(t *testing.T) {
 				},
 			},
 		}
-		err := extension.AutomaticPersistedQuery{graphql.MapCache[string]{}}.MutateOperationParameters(ctx, params)
+		err := extension.AutomaticPersistedQuery{
+			graphql.MapCache[string]{},
+		}.MutateOperationParameters(
+			ctx,
+			params,
+		)
 		require.Equal(t, "unsupported APQ version", err.Message)
 	})
 
@@ -159,7 +189,12 @@ func TestAPQ(t *testing.T) {
 			},
 		}
 
-		err := extension.AutomaticPersistedQuery{graphql.MapCache[string]{}}.MutateOperationParameters(ctx, params)
+		err := extension.AutomaticPersistedQuery{
+			graphql.MapCache[string]{},
+		}.MutateOperationParameters(
+			ctx,
+			params,
+		)
 		require.Equal(t, "provided APQ hash does not match query", err.Message)
 	})
 }

@@ -5,6 +5,7 @@ package selection
 import (
 	"context"
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/vektah/gqlparser/v2/ast"

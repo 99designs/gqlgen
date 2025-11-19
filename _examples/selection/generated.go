@@ -450,7 +450,7 @@ func (ec *executionContext) _Post_message(ctx context.Context, field graphql.Col
 
 func (ec *executionContext) fieldContext_Post_message(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     http.MethodPost,
+		Object:     "POST",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -479,7 +479,7 @@ func (ec *executionContext) _Post_sent(ctx context.Context, field graphql.Collec
 
 func (ec *executionContext) fieldContext_Post_sent(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     http.MethodPost,
+		Object:     "POST",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -508,7 +508,7 @@ func (ec *executionContext) _Post_selection(ctx context.Context, field graphql.C
 
 func (ec *executionContext) fieldContext_Post_selection(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     http.MethodPost,
+		Object:     "POST",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -537,7 +537,7 @@ func (ec *executionContext) _Post_collected(ctx context.Context, field graphql.C
 
 func (ec *executionContext) fieldContext_Post_collected(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
-		Object:     http.MethodPost,
+		Object:     "POST",
 		Field:      field,
 		IsMethod:   false,
 		IsResolver: false,
@@ -2210,7 +2210,7 @@ func (ec *executionContext) _Like(ctx context.Context, sel ast.SelectionSet, obj
 	return out
 }
 
-var postImplementors = []string{http.MethodPost, "Event"}
+var postImplementors = []string{"POST", "Event"}
 
 func (ec *executionContext) _Post(ctx context.Context, sel ast.SelectionSet, obj *Post) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, postImplementors)
@@ -2220,7 +2220,7 @@ func (ec *executionContext) _Post(ctx context.Context, sel ast.SelectionSet, obj
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString(http.MethodPost)
+			out.Values[i] = graphql.MarshalString("POST")
 		case "message":
 			out.Values[i] = ec._Post_message(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

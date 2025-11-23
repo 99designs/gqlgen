@@ -14,6 +14,7 @@ require (
 	github.com/matryer/moq v0.5.2
 	github.com/mattn/go-colorable v0.1.14
 	github.com/mattn/go-isatty v0.0.20
+	github.com/shopspring/decimal v1.4.0
 	github.com/sosodev/duration v1.3.1
 	github.com/stretchr/testify v1.11.1
 	github.com/urfave/cli/v3 v3.6.1

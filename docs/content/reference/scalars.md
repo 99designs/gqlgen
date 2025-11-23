@@ -48,6 +48,21 @@ And then add `scalar UUID` to `schema.graphql`
 
 See the _examples/uuid package for more examples.
 
+### Decimal
+
+```graphql
+scalar Decimal
+```
+
+Maps a `Decimal` scalar value to a `github.com/shopspring/decimal` type.
+
+If you add to gqlgen.yml:
+```yaml
+Decimal:
+  model:
+   - github.com/99designs/gqlgen/graphql.Decimal
+```
+
 ### Map
 
 ```graphql

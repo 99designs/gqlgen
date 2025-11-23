@@ -15,7 +15,7 @@ func TestDecimal(t *testing.T) {
 		require.NoError(t, err)
 		i := d.Cmp(decimal.Zero)
 
-		assert.Equal(t, i, 0)
+		assert.Equal(t, 0, i)
 	})
 	t.Run("MarshalDecimal", func(t *testing.T) {
 		m := MarshalDecimal(decimal.Zero)

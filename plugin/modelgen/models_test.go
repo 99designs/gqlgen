@@ -356,6 +356,22 @@ func TestModelGenerationOmitRootModels(t *testing.T) {
 	require.NotContains(t, string(generated), "type Subscription struct")
 }
 
+func TestModelGenerationOmitEnumJSONMarshalers(t *testing.T) {
+	cfg, err := config.LoadConfig("testdata/gqlgen_omit_json_marshalers.yml")
+	require.NoError(t, err)
+	require.NoError(t, cfg.Init())
+	p := Plugin{
+		MutateHook: mutateHook,
+		FieldHook:  DefaultFieldMutateHook,
+	}
+	require.NoError(t, p.MutateConfig(cfg))
+	require.NoError(t, goBuild(t, "./out_omit_json_enum_marshalers/"))
+	generated, err := os.ReadFile("./out_omit_json_enum_marshalers/generated.go")
+	require.NoError(t, err)
+	require.NotContains(t, string(generated), "MarshalJSON")
+	require.NotContains(t, string(generated), "UnmarshalJSON")
+}
+
 func TestModelGenerationOmitResolverFields(t *testing.T) {
 	cfg, err := config.LoadConfig("testdata/gqlgen_omit_resolver_fields.yml")
 	require.NoError(t, err)

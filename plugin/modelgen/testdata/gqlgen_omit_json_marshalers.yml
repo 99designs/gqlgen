@@ -1,0 +1,7 @@
+schema:
+    - "testdata/schema.graphql"
+
+omit_enum_json_marshalers: true
+
+model:
+    filename: out_omit_json_enum_marshalers/generated.go

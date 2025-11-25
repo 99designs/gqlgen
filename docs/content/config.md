@@ -114,6 +114,9 @@ resolver:
 # Optional: set to skip running `go mod tidy` when generating server code
 # skip_mod_tidy: true
 
+# Optional: set to skip generation of JSON Marshalers and Unmarshalers for enums
+# omit_enum_json_marshalers: false
+
 # Optional: if this is set to true, argument directives that
 # decorate a field with a null value will still be called.
 #

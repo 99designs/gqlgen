@@ -72,9 +72,10 @@ type Field struct {
 }
 
 type Enum struct {
-	Description string
-	Name        string
-	Values      []*EnumValue
+	Description        string
+	Name               string
+	Values             []*EnumValue
+	OmitJSONMarshalers bool
 }
 
 type EnumValue struct {
@@ -157,8 +158,9 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 			b.Models = append(b.Models, it)
 		case ast.Enum:
 			it := &Enum{
-				Name:        schemaType.Name,
-				Description: schemaType.Description,
+				Name:               schemaType.Name,
+				Description:        schemaType.Description,
+				OmitJSONMarshalers: cfg.OmitEnumJSONMarshalers,
 			}
 
 			for _, v := range schemaType.EnumValues {

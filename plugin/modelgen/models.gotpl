@@ -100,19 +100,21 @@
 	func (e {{ goModelName .Name }}) MarshalGQL(w io.Writer) {
 		fmt.Fprint(w, strconv.Quote(e.String()))
 	}
+	{{- if not .OmitJSONMarshalers }}
 
-	func (e *{{ goModelName .Name }})UnmarshalJSON(b []byte) error {
-		s, err := strconv.Unquote(string(b))
-		if err != nil {
-			return err
+		func (e *{{ goModelName .Name }})UnmarshalJSON(b []byte) error {
+			s, err := strconv.Unquote(string(b))
+			if err != nil {
+				return err
+			}
+			return e.UnmarshalGQL(s)
 		}
-		return e.UnmarshalGQL(s)
-	}
 
-	func (e {{ goModelName .Name }}) MarshalJSON() ([]byte, error) {
-		var buf bytes.Buffer
-		e.MarshalGQL(&buf)
-		return buf.Bytes(), nil
-	}
+		func (e {{ goModelName .Name }}) MarshalJSON() ([]byte, error) {
+			var buf bytes.Buffer
+			e.MarshalGQL(&buf)
+			return buf.Bytes(), nil
+		}
+	{{- end }}
 
 {{- end }}

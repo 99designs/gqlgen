@@ -49,7 +49,7 @@ var schema = gqlparser.MustLoadSchema(
 	},
 )
 
-func requireComplexity(t *testing.T, source string, complexity int) {
+func requireComplexity(t *testing.T, source string, complexity int, opts ...Option) {
 	t.Helper()
 	query := gqlparser.MustLoadQueryWithRules(schema, source, rules.NewDefaultRules())
 
@@ -70,7 +70,7 @@ func requireComplexity(t *testing.T, source string, complexity int) {
 		},
 	}
 
-	actualComplexity := Calculate(context.TODO(), es, query.Operations[0], nil)
+	actualComplexity := Calculate(context.TODO(), es, query.Operations[0], nil, opts...)
 	require.Equal(t, complexity, actualComplexity)
 }
 
@@ -201,5 +201,50 @@ func TestCalculate(t *testing.T) {
 		}
 		`
 		requireComplexity(t, query, math.MaxInt64)
+	})
+
+	t.Run("fixed scalar value", func(t *testing.T) {
+		const query = `
+		{
+			scalar
+			object {
+				scalar
+				name
+				list(size: 10) {
+					scalar
+				}
+			}
+		}
+		`
+		// object = 1
+		// list = 1 (each scalar in the list is worth 0, hence 0*10=0,
+		// but when custom complexity is less than 1 the calculation uses the default field value, i.e. 1)
+		requireComplexity(t, query, 2, WithFixedScalarValue(0))
+		// scalar = 2
+		// object = 1
+		// object.scalar = 2
+		// object.name = 2
+		// list = 2*10
+		requireComplexity(t, query, 27, WithFixedScalarValue(2))
+	})
+
+	t.Run("ignore specified", func(t *testing.T) {
+		const query = `
+		{
+			scalar
+			object {
+				scalar
+				name
+				list(size: 10) {
+					scalar
+				}
+			}
+		}
+		`
+		ignore := map[string]struct{}{
+			"Query.scalar": {},
+			"Item.name":    {},
+		}
+		requireComplexity(t, query, 12, WithIgnoreFields(ignore))
 	})
 }

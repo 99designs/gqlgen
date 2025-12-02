@@ -126,17 +126,20 @@ func resolveField[T, R any](
 		}
 		return defaultResult
 	}
-	res, ok := resTmp.(T)
-	if !ok {
-		var t T
-		oc.Errorf(
-			ctx,
-			`unexpected type %T from middleware/directive chain, should be %T`,
-			resTmp,
-			t,
-		)
-		return defaultResult
+	if res, ok := resTmp.(T); ok {
+		fc.Result = res
+		return result(ctx, res)
 	}
-	fc.Result = res
-	return result(ctx, res)
+	if res, ok := resTmp.(R); ok {
+		fc.Result = res
+		return res
+	}
+	var t T
+	oc.Errorf(
+		ctx,
+		`unexpected type %T from middleware/directive chain, should be %T`,
+		resTmp,
+		t,
+	)
+	return defaultResult
 }

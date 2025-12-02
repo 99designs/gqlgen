@@ -359,6 +359,7 @@ type ComplexityRoot struct {
 		ErrorList                        func(childComplexity int) int
 		Errors                           func(childComplexity int) int
 		Fallback                         func(childComplexity int, arg FallbackToStringEncoding) int
+		FieldWithDeprecatedArg           func(childComplexity int, oldArg *int, newArg *int) int
 		FilterProducts                   func(childComplexity int, query *string, category *string, minPrice *int) int
 		FindProducts                     func(childComplexity int, query *string, category *string, minPrice *int) int
 		Infinity                         func(childComplexity int) int
@@ -565,6 +566,7 @@ type QueryResolver interface {
 	ShapeUnion(ctx context.Context) (ShapeUnion, error)
 	Autobind(ctx context.Context) (*Autobind, error)
 	DeprecatedField(ctx context.Context) (string, error)
+	FieldWithDeprecatedArg(ctx context.Context, oldArg *int, newArg *int) (*string, error)
 	Overlapping(ctx context.Context) (*OverlappingFields, error)
 	DefaultParameters(ctx context.Context, falsyBoolean *bool, truthyBoolean *bool) (*DefaultParametersMirror, error)
 	DeferSingle(ctx context.Context) (*DeferModel, error)
@@ -1607,6 +1609,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.Fallback(childComplexity, args["arg"].(FallbackToStringEncoding)), true
+	case "Query.fieldWithDeprecatedArg":
+		if e.complexity.Query.FieldWithDeprecatedArg == nil {
+			break
+		}
+
+		args, err := ec.field_Query_fieldWithDeprecatedArg_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.FieldWithDeprecatedArg(childComplexity, args["oldArg"].(*int), args["newArg"].(*int)), true
 	case "Query.filterProducts":
 		if e.complexity.Query.FilterProducts == nil {
 			break
@@ -2780,6 +2793,7 @@ type Query {
 	shapeUnion: ShapeUnion!
 	autobind: Autobind
 	deprecatedField: String! @deprecated(reason: "test deprecated directive")
+	fieldWithDeprecatedArg(oldArg: Int @deprecated(reason: "old arg"), newArg: Int): String
 	overlapping: OverlappingFields
 	defaultParameters(falsyBoolean: Boolean = false, truthyBoolean: Boolean = true): DefaultParametersMirror!
 	deferSingle: DeferModel
@@ -3644,6 +3658,22 @@ func (ec *executionContext) field_Query_fallback_args(ctx context.Context, rawAr
 		return nil, err
 	}
 	args["arg"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_fieldWithDeprecatedArg_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "oldArg", ec.unmarshalOInt2ᚖint)
+	if err != nil {
+		return nil, err
+	}
+	args["oldArg"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "newArg", ec.unmarshalOInt2ᚖint)
+	if err != nil {
+		return nil, err
+	}
+	args["newArg"] = arg1
 	return args, nil
 }
 
@@ -8528,6 +8558,49 @@ func (ec *executionContext) fieldContext_Query_deprecatedField(_ context.Context
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type String does not have child fields")
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_fieldWithDeprecatedArg(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_fieldWithDeprecatedArg,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().FieldWithDeprecatedArg(ctx, fc.Args["oldArg"].(*int), fc.Args["newArg"].(*int))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, nil, next)
+		},
+		ec.marshalOString2ᚖstring,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_fieldWithDeprecatedArg(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_fieldWithDeprecatedArg_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -18583,6 +18656,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "fieldWithDeprecatedArg":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_fieldWithDeprecatedArg(ctx, field)
 				return res
 			}
 

@@ -81,7 +81,7 @@ func (t *Type) Fields(includeDeprecated bool) []Field {
 				Name:         arg.Name,
 				description:  arg.Description,
 				DefaultValue: defaultValue(arg.DefaultValue),
-				deprecation:  f.Directives.ForName("deprecated"),
+				deprecation:  arg.Directives.ForName("deprecated"),
 			})
 		}
 

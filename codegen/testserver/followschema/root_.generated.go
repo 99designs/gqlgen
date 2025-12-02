@@ -350,6 +350,7 @@ type ComplexityRoot struct {
 		ErrorList                        func(childComplexity int) int
 		Errors                           func(childComplexity int) int
 		Fallback                         func(childComplexity int, arg FallbackToStringEncoding) int
+		FieldWithDeprecatedArg           func(childComplexity int, oldArg *int, newArg *int) int
 		FilterProducts                   func(childComplexity int, query *string, category *string, minPrice *int) int
 		FindProducts                     func(childComplexity int, query *string, category *string, minPrice *int) int
 		Infinity                         func(childComplexity int) int
@@ -1525,6 +1526,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.Fallback(childComplexity, args["arg"].(FallbackToStringEncoding)), true
+
+	case "Query.fieldWithDeprecatedArg":
+		if e.complexity.Query.FieldWithDeprecatedArg == nil {
+			break
+		}
+
+		args, err := ec.field_Query_fieldWithDeprecatedArg_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.FieldWithDeprecatedArg(childComplexity, args["oldArg"].(*int), args["newArg"].(*int)), true
 
 	case "Query.filterProducts":
 		if e.complexity.Query.FilterProducts == nil {
@@ -2772,6 +2785,7 @@ type Query {
 	shapeUnion: ShapeUnion!
 	autobind: Autobind
 	deprecatedField: String! @deprecated(reason: "test deprecated directive")
+	fieldWithDeprecatedArg(oldArg: Int @deprecated(reason: "old arg"), newArg: Int): String
 	overlapping: OverlappingFields
 	defaultParameters(falsyBoolean: Boolean = false, truthyBoolean: Boolean = true): DefaultParametersMirror!
 	deferSingle: DeferModel

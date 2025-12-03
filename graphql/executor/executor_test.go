@@ -19,23 +19,32 @@ func TestExecutor(t *testing.T) {
 	exec := testexecutor.New()
 
 	t.Run("calls query on executable schema", func(t *testing.T) {
-		resp := query(exec, "", "{name}")
+		resp, _ := query(exec, "", "{name}")
 		assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 	})
 
 	t.Run("validates operation", func(t *testing.T) {
 		t.Run("no operation", func(t *testing.T) {
-			resp := query(exec, "", "")
+			resp, _ := query(exec, "", "")
 			assert.Empty(t, string(resp.Data))
 			assert.Len(t, resp.Errors, 1)
 			assert.Equal(t, errcode.ValidationFailed, resp.Errors[0].Extensions["code"])
 		})
 
 		t.Run("bad operation", func(t *testing.T) {
-			resp := query(exec, "badOp", "query test { name }")
+			resp, _ := query(exec, "badOp", "query test { name }")
 			assert.Empty(t, string(resp.Data))
 			assert.Len(t, resp.Errors, 1)
 			assert.Equal(t, errcode.ValidationFailed, resp.Errors[0].Extensions["code"])
+		})
+
+		t.Run("invalid variables", func(t *testing.T) {
+			resp, oc := query(exec, "", "query test($id: Int!) {find(id: $id)}", variable("id", "invalid"))
+			assert.Empty(t, string(resp.Data))
+			assert.Len(t, resp.Errors, 1)
+			assert.Equal(t, errcode.ValidationFailed, resp.Errors[0].Extensions["code"])
+			assert.NotNil(t, oc)
+			assert.Equal(t, "invalid", oc.Variables["id"])
 		})
 	})
 
@@ -54,7 +63,7 @@ func TestExecutor(t *testing.T) {
 			},
 		)
 
-		resp := query(exec, "", "{name}")
+		resp, _ := query(exec, "", "{name}")
 		assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 		assert.Equal(t, []string{"first", "second"}, calls)
 	})
@@ -74,7 +83,7 @@ func TestExecutor(t *testing.T) {
 			},
 		)
 
-		resp := query(exec, "", "{name}")
+		resp, _ := query(exec, "", "{name}")
 		assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 		assert.Equal(t, []string{"first", "second"}, calls)
 	})
@@ -94,7 +103,7 @@ func TestExecutor(t *testing.T) {
 			},
 		)
 
-		resp := query(exec, "", "{name}")
+		resp, _ := query(exec, "", "{name}")
 		assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 		assert.Equal(t, []string{"first", "second"}, calls)
 	})
@@ -110,7 +119,7 @@ func TestExecutor(t *testing.T) {
 			return next(ctx)
 		})
 
-		resp := query(exec, "", "{name}")
+		resp, _ := query(exec, "", "{name}")
 		assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 		assert.Equal(t, []string{"first", "second"}, calls)
 	})
@@ -129,7 +138,7 @@ func TestExecutor(t *testing.T) {
 				return nil
 			},
 		})
-		resp := query(exec, "", "{name}")
+		resp, _ := query(exec, "", "{name}")
 		assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 		assert.Equal(t, []string{"param", "context"}, calls)
 	})
@@ -146,7 +155,7 @@ func TestExecutor(t *testing.T) {
 			},
 		)
 
-		resp := query(exec, "", "invalid")
+		resp, _ := query(exec, "", "invalid")
 		assert.Empty(t, string(resp.Data))
 		assert.Len(t, resp.Errors, 1)
 		assert.Len(t, errors1, 1)
@@ -160,7 +169,7 @@ func TestExecutor(t *testing.T) {
 		qry := `query Foo {name}`
 
 		t.Run("cache miss populates cache", func(t *testing.T) {
-			resp := query(exec, "Foo", qry)
+			resp, _ := query(exec, "Foo", qry)
 			assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 
 			cacheDoc, ok := cache.Get(ctx, qry)
@@ -173,7 +182,7 @@ func TestExecutor(t *testing.T) {
 			require.NoError(t, err)
 			cache.Add(ctx, qry, doc)
 
-			resp := query(exec, "Bar", qry)
+			resp, _ := query(exec, "Bar", qry)
 			assert.JSONEq(t, `{"name":"test"}`, string(resp.Data))
 
 			cacheDoc, ok := cache.Get(ctx, qry)
@@ -186,7 +195,7 @@ func TestExecutor(t *testing.T) {
 func TestExecutorDisableSuggestion(t *testing.T) {
 	t.Run("by default, the error message will include suggestions", func(t *testing.T) {
 		exec := testexecutor.New()
-		resp := query(exec, "", "{nam}")
+		resp, _ := query(exec, "", "{nam}")
 		assert.Empty(t, string(resp.Data))
 		assert.Equal(
 			t,
@@ -198,7 +207,7 @@ func TestExecutorDisableSuggestion(t *testing.T) {
 	t.Run("disable suggestion, the error message will not include suggestions", func(t *testing.T) {
 		exec := testexecutor.New()
 		exec.SetDisableSuggestion(true)
-		resp := query(exec, "", "{nam}")
+		resp, _ := query(exec, "", "{nam}")
 		assert.Empty(t, string(resp.Data))
 		assert.Len(t, resp.Errors, 1)
 		assert.Equal(
@@ -208,7 +217,7 @@ func TestExecutorDisableSuggestion(t *testing.T) {
 		)
 
 		// check if the error message is displayed correctly even if an error occurs multiple times
-		resp = query(exec, "", "{nam}")
+		resp, _ = query(exec, "", "{nam}")
 		assert.Empty(t, string(resp.Data))
 		assert.Len(t, resp.Errors, 1)
 		assert.Equal(
@@ -272,28 +281,39 @@ func TestErrorServer(t *testing.T) {
 			},
 		)
 
-		resp := query(exec, "", "{name}")
+		resp, _ := query(exec, "", "{name}")
 		assert.Equal(t, "null", string(resp.Data))
 		assert.Len(t, errors1, 1)
 		assert.Len(t, errors2, 1)
 	})
 }
 
-func query(exec *testexecutor.TestExecutor, op, q string) *graphql.Response {
+type paramOption func(*graphql.RawParams)
+
+func variable(name string, v any) paramOption {
+	return func(p *graphql.RawParams) {
+		p.Variables[name] = v
+	}
+}
+
+func query(exec *testexecutor.TestExecutor, op, q string, opts ...paramOption) (*graphql.Response, *graphql.OperationContext) {
 	ctx := graphql.StartOperationTrace(context.Background())
 	now := graphql.Now()
-	rc, err := exec.CreateOperationContext(ctx, &graphql.RawParams{
+	params := &graphql.RawParams{
 		Query:         q,
 		OperationName: op,
 		ReadTime: graphql.TraceTiming{
 			Start: now,
 			End:   now,
 		},
-	})
-	if err != nil {
-		return exec.DispatchError(ctx, err)
 	}
-
+	for _, opt := range opts {
+		opt(params)
+	}
+	rc, err := exec.CreateOperationContext(ctx, params)
+	if err != nil {
+		return exec.DispatchError(ctx, err), rc
+	}
 	resp, ctx2 := exec.DispatchOperation(ctx, rc)
-	return resp(ctx2)
+	return resp(ctx2), rc
 }

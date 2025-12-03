@@ -29,6 +29,7 @@ type Query {
     shapeUnion: ShapeUnion!
     autobind: Autobind
     deprecatedField: String! @deprecated(reason: "test deprecated directive")
+    fieldWithDeprecatedArg(oldArg: Int @deprecated(reason: "old arg"), newArg: Int): String
 }
 
 type Subscription {

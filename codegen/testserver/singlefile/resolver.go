@@ -192,6 +192,11 @@ func (r *queryResolver) DeprecatedField(ctx context.Context) (string, error) {
 	panic("not implemented")
 }
 
+// FieldWithDeprecatedArg is the resolver for the fieldWithDeprecatedArg field.
+func (r *queryResolver) FieldWithDeprecatedArg(ctx context.Context, oldArg *int, newArg *int) (*string, error) {
+	panic("not implemented")
+}
+
 // Overlapping is the resolver for the overlapping field.
 func (r *queryResolver) Overlapping(ctx context.Context) (*OverlappingFields, error) {
 	panic("not implemented")

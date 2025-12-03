@@ -67,6 +67,45 @@ func TestIntrospection(t *testing.T) {
 			require.Equal(t, "id", resp.Type.Fields[0].Name)
 			require.Nil(t, resp.Type.Fields[0].DeprecationReason)
 		})
+
+		t.Run("deprecated directive on field arguments", func(t *testing.T) {
+			var resp struct {
+				Type struct {
+					Fields []struct {
+						Name string
+						Args []struct {
+							Name              string
+							DeprecationReason *string
+						}
+					}
+				} `json:"__type"`
+			}
+
+			err := c.Post(
+				`{ __type(name:"Query") { fields { name args { name deprecationReason }}}}`,
+				&resp,
+			)
+			require.NoError(t, err)
+
+			var args []struct {
+				Name              string
+				DeprecationReason *string
+			}
+			for _, f := range resp.Type.Fields {
+				if f.Name == "fieldWithDeprecatedArg" {
+					args = f.Args
+					break
+				}
+			}
+
+			require.Len(t, args, 2)
+			require.Equal(t, "oldArg", args[0].Name)
+			require.NotNil(t, args[0].DeprecationReason)
+			require.Equal(t, "old arg", *args[0].DeprecationReason)
+
+			require.Equal(t, "newArg", args[1].Name)
+			require.Nil(t, args[1].DeprecationReason)
+		})
 	})
 
 	t.Run("disabled by middleware", func(t *testing.T) {

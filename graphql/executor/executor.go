@@ -101,6 +101,7 @@ func (e *Executor) CreateOperationContext(
 		gqlErr, ok := err.(*gqlerror.Error)
 		if ok {
 			errcode.Set(gqlErr, errcode.ValidationFailed)
+			opCtx.Variables = params.Variables
 			return opCtx, gqlerror.List{gqlErr}
 		}
 	}

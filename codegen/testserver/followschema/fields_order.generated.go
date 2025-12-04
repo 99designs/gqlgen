@@ -113,7 +113,10 @@ var fieldsOrderPayloadImplementors = []string{"FieldsOrderPayload"}
 
 func (ec *executionContext) _FieldsOrderPayload(ctx context.Context, sel ast.SelectionSet, obj *FieldsOrderPayload) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, fieldsOrderPayloadImplementors)
+	return ec.__FieldsOrderPayload(ctx, fields, obj)
+}
 
+func (ec *executionContext) __FieldsOrderPayload(ctx context.Context, fields []graphql.CollectedField, obj *FieldsOrderPayload) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {

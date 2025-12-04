@@ -285,7 +285,10 @@ var ptrToPtrInnerImplementors = []string{"PtrToPtrInner"}
 
 func (ec *executionContext) _PtrToPtrInner(ctx context.Context, sel ast.SelectionSet, obj *PtrToPtrInner) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, ptrToPtrInnerImplementors)
+	return ec.__PtrToPtrInner(ctx, fields, obj)
+}
 
+func (ec *executionContext) __PtrToPtrInner(ctx context.Context, fields []graphql.CollectedField, obj *PtrToPtrInner) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -329,7 +332,10 @@ var ptrToPtrOuterImplementors = []string{"PtrToPtrOuter"}
 
 func (ec *executionContext) _PtrToPtrOuter(ctx context.Context, sel ast.SelectionSet, obj *PtrToPtrOuter) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, ptrToPtrOuterImplementors)
+	return ec.__PtrToPtrOuter(ctx, fields, obj)
+}
 
+func (ec *executionContext) __PtrToPtrOuter(ctx context.Context, fields []graphql.CollectedField, obj *PtrToPtrOuter) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {

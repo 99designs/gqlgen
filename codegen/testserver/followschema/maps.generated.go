@@ -253,6 +253,40 @@ func (ec *executionContext) unmarshalInputMapNestedInput(ctx context.Context, ob
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputMapNestedMapSliceInput(ctx context.Context, obj any) (map[string]any, error) {
+	it := make(map[string]any, len(obj.(map[string]any)))
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name", "recurse"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it["name"] = data
+		case "recurse":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("recurse"))
+			data, err := ec.unmarshalOMapNestedMapSliceInput2ᚕmapᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it["recurse"] = data
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Context, obj any) (map[string]any, error) {
 	it := make(map[string]any, len(obj.(map[string]any)))
 	asMap := map[string]any{}
@@ -431,6 +465,11 @@ func (ec *executionContext) marshalNCustomScalar2githubᚗcomᚋ99designsᚋgqlg
 	return v
 }
 
+func (ec *executionContext) unmarshalNMapNestedMapSliceInput2map(ctx context.Context, v any) (map[string]any, error) {
+	res, err := ec.unmarshalInputMapNestedMapSliceInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalOCustomScalar2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCustomScalar(ctx context.Context, v any) (*CustomScalar, error) {
 	if v == nil {
 		return nil, nil
@@ -460,6 +499,32 @@ func (ec *executionContext) unmarshalOMapNestedInput2ᚖgithubᚗcomᚋ99designs
 	}
 	res, err := ec.unmarshalInputMapNestedInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOMapNestedMapSliceInput2map(ctx context.Context, v any) (map[string]any, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputMapNestedMapSliceInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOMapNestedMapSliceInput2ᚕmapᚄ(ctx context.Context, v any) ([]map[string]any, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []any
+	vSlice = graphql.CoerceList(v)
+	var err error
+	res := make([]map[string]any, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNMapNestedMapSliceInput2map(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) unmarshalOMapStringInterfaceInput2map(ctx context.Context, v any) (map[string]any, error) {

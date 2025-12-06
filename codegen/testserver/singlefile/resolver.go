@@ -387,6 +387,11 @@ func (r *queryResolver) MapNestedStringInterface(ctx context.Context, in *Nested
 	panic("not implemented")
 }
 
+// MapNestedMapSlice is the resolver for the mapNestedMapSlice field.
+func (r *queryResolver) MapNestedMapSlice(ctx context.Context, input map[string]any) (*bool, error) {
+	panic("not implemented")
+}
+
 // ErrorBubble is the resolver for the errorBubble field.
 func (r *queryResolver) ErrorBubble(ctx context.Context) (*Error, error) {
 	panic("not implemented")

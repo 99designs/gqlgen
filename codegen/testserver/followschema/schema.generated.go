@@ -84,6 +84,7 @@ type QueryResolver interface {
 	Issue896a(ctx context.Context) ([]*CheckIssue896, error)
 	MapStringInterface(ctx context.Context, in map[string]any) (map[string]any, error)
 	MapNestedStringInterface(ctx context.Context, in *NestedMapInput) (map[string]any, error)
+	MapNestedMapSlice(ctx context.Context, input map[string]any) (*bool, error)
 	ErrorBubble(ctx context.Context) (*Error, error)
 	ErrorBubbleList(ctx context.Context) ([]*Error, error)
 	ErrorList(ctx context.Context) ([]*Error, error)
@@ -697,6 +698,17 @@ func (ec *executionContext) field_Query_mapInput_args(ctx context.Context, rawAr
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalOChanges2map)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_mapNestedMapSlice_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalOMapNestedMapSliceInput2map)
 	if err != nil {
 		return nil, err
 	}
@@ -4004,6 +4016,49 @@ func (ec *executionContext) fieldContext_Query_mapNestedStringInterface(ctx cont
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_mapNestedStringInterface_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_mapNestedMapSlice(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_mapNestedMapSlice,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().MapNestedMapSlice(ctx, fc.Args["input"].(map[string]any))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, nil, next)
+		},
+		ec.marshalOBoolean2ᚖbool,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_mapNestedMapSlice(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_mapNestedMapSlice_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -7436,6 +7491,25 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 					}
 				}()
 				res = ec._Query_mapNestedStringInterface(ctx, field)
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "mapNestedMapSlice":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_mapNestedMapSlice(ctx, field)
 				return res
 			}
 

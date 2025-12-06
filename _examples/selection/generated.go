@@ -2154,7 +2154,11 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 		}
 		return ec._Like(ctx, sel, obj)
 	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
+		if obj, ok := obj.(graphql.Marshaler); ok {
+			return obj
+		} else {
+			panic(fmt.Errorf("unexpected type %T; non-generated variants of Event must implement graphql.Marshaler", obj))
+		}
 	}
 }
 

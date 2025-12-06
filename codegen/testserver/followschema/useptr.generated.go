@@ -116,7 +116,11 @@ func (ec *executionContext) _TestUnion(ctx context.Context, sel ast.SelectionSet
 		}
 		return ec._A(ctx, sel, obj)
 	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
+		if obj, ok := obj.(graphql.Marshaler); ok {
+			return obj
+		} else {
+			panic(fmt.Errorf("unexpected type %T; non-generated variants of TestUnion must implement graphql.Marshaler", obj))
+		}
 	}
 }
 

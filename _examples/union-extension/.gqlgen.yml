@@ -1,0 +1,5 @@
+schema: schema.graphql
+model:
+  filename: models_gen.go
+exec:
+  filename: generated.go

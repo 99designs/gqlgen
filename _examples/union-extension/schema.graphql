@@ -1,0 +1,14 @@
+type Post {
+    message: String!
+}
+
+type Like {
+    from: String!
+}
+
+union Event = Post | Like
+
+type Query {
+    events: [Event!]!
+    cachedEvents: [Event!]!
+}

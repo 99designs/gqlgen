@@ -2470,7 +2470,11 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 		}
 		return ec._EmailHost(ctx, sel, obj)
 	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
+		if obj, ok := obj.(graphql.Marshaler); ok {
+			return obj
+		} else {
+			panic(fmt.Errorf("unexpected type %T; non-generated variants of _Entity must implement graphql.Marshaler", obj))
+		}
 	}
 }
 

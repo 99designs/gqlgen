@@ -611,7 +611,11 @@ func (ec *executionContext) _Content_Child(ctx context.Context, sel ast.Selectio
 		}
 		return ec._Content_Post(ctx, sel, obj)
 	default:
-		panic(fmt.Errorf("unexpected type %T", obj))
+		if obj, ok := obj.(graphql.Marshaler); ok {
+			return obj
+		} else {
+			panic(fmt.Errorf("unexpected type %T; non-generated variants of Content_Child must implement graphql.Marshaler", obj))
+		}
 	}
 }
 

@@ -421,7 +421,7 @@ func (b *Binder) TypeReference(
 			return &TypeReference{
 				Definition: def,
 				GQL:        schemaType,
-				GO:         MapType,
+				GO:         b.CopyModifiersFromAst(schemaType, MapType),
 				IsRoot:     b.cfg.IsRoot(def),
 			}, nil
 		}
@@ -433,7 +433,7 @@ func (b *Binder) TypeReference(
 			return &TypeReference{
 				Definition: def,
 				GQL:        schemaType,
-				GO:         InterfaceType,
+				GO:         b.CopyModifiersFromAst(schemaType, InterfaceType),
 				IsRoot:     b.cfg.IsRoot(def),
 			}, nil
 		}

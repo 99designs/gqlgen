@@ -30,7 +30,7 @@ jobs:
     - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6
       with:
         go-version: ${{ matrix.go }}
-    - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v5
+    - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v5
       with:
         node-version: ${{ matrix.node }}
     - run: go mod download
@@ -53,7 +53,7 @@ jobs:
     - uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6
       with:
         go-version: ${{ matrix.go }}
-    - uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v5
+    - uses: actions/setup-node@395ad3262231945c25e8478fd5baf05154b1d79f # v5
       with:
         node-version: ${{ matrix.node }}
     - run: go mod download

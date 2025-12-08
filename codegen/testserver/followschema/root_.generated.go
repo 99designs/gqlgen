@@ -361,6 +361,7 @@ type ComplexityRoot struct {
 		InvalidIdentifier                func(childComplexity int) int
 		Issue896a                        func(childComplexity int) int
 		MapInput                         func(childComplexity int, input map[string]any) int
+		MapNestedMapSlice                func(childComplexity int, input map[string]any) int
 		MapNestedStringInterface         func(childComplexity int, in *NestedMapInput) int
 		MapStringInterface               func(childComplexity int, in map[string]any) int
 		ModelMethods                     func(childComplexity int) int
@@ -1639,6 +1640,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.complexity.Query.MapInput(childComplexity, args["input"].(map[string]any)), true
 
+	case "Query.mapNestedMapSlice":
+		if e.complexity.Query.MapNestedMapSlice == nil {
+			break
+		}
+
+		args, err := ec.field_Query_mapNestedMapSlice_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.MapNestedMapSlice(childComplexity, args["input"].(map[string]any)), true
+
 	case "Query.mapNestedStringInterface":
 		if e.complexity.Query.MapNestedStringInterface == nil {
 			break
@@ -2323,6 +2336,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputInputDirectives,
 		ec.unmarshalInputInputWithEnumValue,
 		ec.unmarshalInputMapNestedInput,
+		ec.unmarshalInputMapNestedMapSliceInput,
 		ec.unmarshalInputMapStringInterfaceInput,
 		ec.unmarshalInputNestedInput,
 		ec.unmarshalInputNestedMapInput,
@@ -2669,6 +2683,10 @@ type MapNested @goModel(model: "followschema.MapNested") {
 input MapNestedInput @goModel(model: "followschema.MapNested") {
 	value: CustomScalar!
 }
+input MapNestedMapSliceInput @goModel(model: "map[string]interface{}") {
+	name: String
+	recurse: [MapNestedMapSliceInput!]
+}
 input MapStringInterfaceInput @goModel(model: "map[string]interface{}") {
 	a: String!
 	b: Int
@@ -2824,6 +2842,7 @@ type Query {
 	issue896a: [CheckIssue896!]
 	mapStringInterface(in: MapStringInterfaceInput): MapStringInterfaceType
 	mapNestedStringInterface(in: NestedMapInput): MapStringInterfaceType
+	mapNestedMapSlice(input: MapNestedMapSliceInput): Boolean
 	errorBubble: Error
 	errorBubbleList: [Error!]
 	errorList: [Error]

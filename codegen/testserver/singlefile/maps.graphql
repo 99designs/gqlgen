@@ -30,3 +30,12 @@ scalar CustomScalar @goModel(model: "singlefile.CustomScalar")
 input NestedMapInput {
     map: MapStringInterfaceInput
 }
+
+input MapNestedMapSliceInput @goModel(model: "map[string]interface{}") {
+    name: String
+    recurse: [MapNestedMapSliceInput!]
+}
+
+extend type Query {
+    mapNestedMapSlice(input: MapNestedMapSliceInput): Boolean
+}

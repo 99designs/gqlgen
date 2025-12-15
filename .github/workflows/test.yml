@@ -85,7 +85,7 @@ jobs:
       #          test-results: go_test.json
     - name: Publish go-test-action Report
       if: success() || failure() # always run even if the previous step fails
-      uses: robherley/go-test-action@b19f6aadabfb1ad85079065b21aa2af132466468 # v0.6.0
+      uses: robherley/go-test-action@42a1975c97156330b5126c2f35ef0fb78c4c7154 # v0.7.1
       with:
         # Parse an exisiting [test2json](https://pkg.go.dev/cmd/test2json) file, instead of executing go test.
         # Will always exit(0) on successful test file parse.

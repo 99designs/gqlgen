@@ -3995,8 +3995,8 @@ func (ec *executionContext) _Character(ctx context.Context, sel ast.SelectionSet
 		}
 		return ec._Droid(ctx, sel, obj)
 	default:
-		if obj, ok := obj.(graphql.Marshaler); ok {
-			return obj
+		if typedObj, ok := obj.(graphql.Marshaler); ok {
+			return typedObj
 		} else {
 			panic(fmt.Errorf("unexpected type %T; non-generated variants of Character must implement graphql.Marshaler", obj))
 		}
@@ -4029,8 +4029,8 @@ func (ec *executionContext) _SearchResult(ctx context.Context, sel ast.Selection
 		}
 		return ec._Starship(ctx, sel, obj)
 	default:
-		if obj, ok := obj.(graphql.Marshaler); ok {
-			return obj
+		if typedObj, ok := obj.(graphql.Marshaler); ok {
+			return typedObj
 		} else {
 			panic(fmt.Errorf("unexpected type %T; non-generated variants of SearchResult must implement graphql.Marshaler", obj))
 		}

@@ -24,8 +24,8 @@ func (ec *executionContext) _{{$interface.Name}}(ctx context.Context, sel ast.Se
 			{{- end }}
 	{{- end }}
 	default:
-		if obj, ok := obj.(graphql.Marshaler); ok {
-			return obj
+		if typedObj, ok := obj.(graphql.Marshaler); ok {
+			return typedObj
 		} else {
 			panic(fmt.Errorf("unexpected type %T; non-generated variants of {{$interface.Name}} must implement graphql.Marshaler", obj))
 		}

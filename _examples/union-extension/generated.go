@@ -1974,8 +1974,8 @@ func (ec *executionContext) _Event(ctx context.Context, sel ast.SelectionSet, ob
 		}
 		return ec._Like(ctx, sel, obj)
 	default:
-		if obj, ok := obj.(graphql.Marshaler); ok {
-			return obj
+		if typedObj, ok := obj.(graphql.Marshaler); ok {
+			return typedObj
 		} else {
 			panic(fmt.Errorf("unexpected type %T; non-generated variants of Event must implement graphql.Marshaler", obj))
 		}

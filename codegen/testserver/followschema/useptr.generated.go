@@ -116,8 +116,8 @@ func (ec *executionContext) _TestUnion(ctx context.Context, sel ast.SelectionSet
 		}
 		return ec._A(ctx, sel, obj)
 	default:
-		if obj, ok := obj.(graphql.Marshaler); ok {
-			return obj
+		if typedObj, ok := obj.(graphql.Marshaler); ok {
+			return typedObj
 		} else {
 			panic(fmt.Errorf("unexpected type %T; non-generated variants of TestUnion must implement graphql.Marshaler", obj))
 		}

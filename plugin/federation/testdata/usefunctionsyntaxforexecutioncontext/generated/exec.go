@@ -5091,8 +5091,8 @@ func __Entity(ctx context.Context, ec *executionContext, sel ast.SelectionSet, o
 		}
 		return _Hello(ctx, ec, sel, obj)
 	default:
-		if obj, ok := obj.(graphql.Marshaler); ok {
-			return obj
+		if typedObj, ok := obj.(graphql.Marshaler); ok {
+			return typedObj
 		} else {
 			panic(fmt.Errorf("unexpected type %T; non-generated variants of _Entity must implement graphql.Marshaler", obj))
 		}

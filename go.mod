@@ -5,7 +5,7 @@ go 1.24.0
 require (
 	github.com/PuerkitoBio/goquery v1.11.0
 	github.com/go-viper/mapstructure/v2 v2.4.0
-	github.com/goccy/go-yaml v1.19.0
+	github.com/goccy/go-yaml v1.19.1
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.0 // do not upgrade to v1.5.1 as it has serious bugs
 	github.com/hashicorp/golang-lru/v2 v2.0.7

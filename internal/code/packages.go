@@ -174,7 +174,8 @@ func (p *Packages) loadFromCache(importPath string) (*packages.Package, bool) {
 	if strings.HasPrefix(importPath, "./") || strings.HasPrefix(importPath, "../") {
 		wd, err := os.Getwd()
 		if err != nil {
-			p.loadErrors = append(p.loadErrors, fmt.Errorf("unable to get working directory: %w", err))
+			p.loadErrors = append(p.loadErrors,
+				fmt.Errorf("unable to get working directory: %w", err))
 			return nil, false
 		}
 		if pkg, ok := p.packages[filepath.Clean(filepath.Join(wd, importPath))]; ok {

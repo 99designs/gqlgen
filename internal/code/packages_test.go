@@ -57,7 +57,7 @@ func TestPackages(t *testing.T) {
 		require.Equal(t, 1, p.numLoadCalls)
 	})
 
-	t.Run("albe to load relative package again after evict", func(t *testing.T) {
+	t.Run("able to load relative package again after evict", func(t *testing.T) {
 		p := initialState(t)
 		p.Evict("github.com/99designs/gqlgen/internal/code/testdata/b")
 		require.Equal(t, "a", p.Load("./testdata/a").Name)

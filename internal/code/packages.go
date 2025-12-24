@@ -145,7 +145,10 @@ func (p *Packages) LoadAll(importPaths ...string) []*packages.Package {
 
 	res := make([]*packages.Package, 0, len(importPaths))
 	for _, path := range importPaths {
-		res = append(res, p.packages[NormalizeVendor(path)])
+		pkg, ok := p.loadFromCache(path)
+		if ok {
+			res = append(res, pkg)
+		}
 	}
 	return res
 }
@@ -153,17 +156,41 @@ func (p *Packages) LoadAll(importPaths ...string) []*packages.Package {
 func (p *Packages) addToCache(pkg *packages.Package) {
 	imp := NormalizeVendor(pkg.PkgPath)
 	p.packages[imp] = pkg
+	p.packages[pkg.Dir] = pkg // also cache by dir for relative path bindings
+}
+
+func (p *Packages) loadFromCache(importPath string) (*packages.Package, bool) {
+	pkg, ok := p.packages[importPath]
+	if ok {
+		return pkg, true
+	}
+
+	pkg, ok = p.packages[NormalizeVendor(importPath)]
+	if ok {
+		return pkg, true
+	}
+
+	// Special case relative paths. For example "./mypkg" or "../otherpkg"
+	if strings.HasPrefix(importPath, "./") || strings.HasPrefix(importPath, "../") {
+		wd, err := os.Getwd()
+		if err != nil {
+			p.loadErrors = append(p.loadErrors, fmt.Errorf("unable to get working directory: %w", err))
+			return nil, false
+		}
+		if pkg, ok := p.packages[filepath.Clean(filepath.Join(wd, importPath))]; ok {
+			return pkg, true
+		}
+	}
+
+	return nil, false
 }
 
 // Load works the same as LoadAll, except a single package at a time.
 func (p *Packages) Load(importPath string) *packages.Package {
-	// Quick cache check first to avoid expensive allocations of LoadAll()
-	if p.packages != nil {
-		if pkg, ok := p.packages[importPath]; ok {
-			return pkg
-		}
+	pkg, ok := p.loadFromCache(importPath)
+	if ok {
+		return pkg
 	}
-
 	pkgs := p.LoadAll(importPath)
 	if len(pkgs) == 0 {
 		return nil
@@ -259,7 +286,12 @@ func (p *Packages) NameForPackage(importPath string) string {
 // Evict removes a given package import path from the cache. Further calls to Load will fetch it
 // from disk.
 func (p *Packages) Evict(importPath string) {
+	pkg, ok := p.packages[importPath]
+	if !ok {
+		return
+	}
 	delete(p.packages, importPath)
+	delete(p.packages, pkg.Dir)
 }
 
 func (p *Packages) ModTidy() error {

@@ -48,6 +48,23 @@ func TestPackages(t *testing.T) {
 		require.Equal(t, "p", p.Load("github.com/99designs/gqlgen/internal/code/testdata/p").Name)
 		require.Equal(t, 3, p.numLoadCalls)
 	})
+
+	t.Run("able to load packages by relative path", func(t *testing.T) {
+		p := initialState(t)
+		require.Equal(t, "a", p.Load("./testdata/a").Name)
+		require.Equal(t, 1, p.numLoadCalls)
+		require.Equal(t, "b", p.Load("./testdata/b").Name)
+		require.Equal(t, 1, p.numLoadCalls)
+	})
+
+	t.Run("able to load relative package again after evict", func(t *testing.T) {
+		p := initialState(t)
+		p.Evict("github.com/99designs/gqlgen/internal/code/testdata/b")
+		require.Equal(t, "a", p.Load("./testdata/a").Name)
+		require.Equal(t, 1, p.numLoadCalls)
+		require.Equal(t, "b", p.Load("./testdata/b").Name)
+		require.Equal(t, 2, p.numLoadCalls)
+	})
 }
 
 func TestPackagesErrors(t *testing.T) {
@@ -100,6 +117,8 @@ func initialState(t *testing.T, opts ...Option) *Packages {
 	pkgs := p.LoadAll(
 		"github.com/99designs/gqlgen/internal/code/testdata/a",
 		"github.com/99designs/gqlgen/internal/code/testdata/b",
+		"./testdata/a",
+		"./testdata/b",
 	)
 
 	require.Empty(t, p.Errors())

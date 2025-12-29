@@ -150,6 +150,17 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		f.GoFieldName = b.Config.Models[obj.Name].Fields[f.Name].FieldName
 	}
 
+	// Check for protobuf-style haser method (only if enabled and field is nullable)
+	// Use the original field name, not the bound method/field name
+	// (e.g., for field "name" bound to "GetName()", look for "HasName" not "HasGetName")
+	if b.Config.AutobindGetterHaser && !f.Type.NonNull {
+		haser, _ := b.findBindHaserMethod(obj.Type, f.GoFieldName)
+		if haser != nil {
+			f.HasHaser = true
+			f.HaserMethodName = haser.Name()
+		}
+	}
+
 	target, err := b.findBindTarget(obj.Type, f.GoFieldName)
 	if err != nil {
 		return err
@@ -214,6 +225,7 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		f.Args = newArgs
 		f.TypeReference = tr
 
+		return nil
 	case *types.Var:
 		tr, err := b.Binder.TypeReference(f.Type, target.Type())
 		if err != nil {
@@ -225,19 +237,12 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		f.GoReceiverName = "obj"
 		f.GoFieldName = target.Name()
 		f.TypeReference = tr
+
+		return nil
 	default:
 		panic(fmt.Errorf("unknown bind target %T for %s", target, f.Name))
 	}
 
-	// Check for protobuf-style haser method (only if enabled and field is nullable)
-	if b.Config.AutobindGetterHaser && !f.Type.NonNull {
-		haser, _ := b.findBindHaserMethod(obj.Type, f.GoFieldName)
-		if haser != nil {
-			f.HasHaser = true
-			f.HaserMethodName = haser.Name()
-		}
-	}
-	return nil
 }
 
 // findBindTarget attempts to match the name to a field or method on a Type

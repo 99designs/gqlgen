@@ -267,6 +267,10 @@ func (b *builder) findBindTarget(t types.Type, name string) (types.Object, error
 		if err != nil {
 			return nil, err
 		}
+
+		if foundGetter != nil {
+			return foundGetter, nil
+		}
 	}
 
 	// Search for a method to bind to
@@ -281,33 +285,20 @@ func (b *builder) findBindTarget(t types.Type, name string) (types.Object, error
 		return nil, err
 	}
 
-	// Ensure we found exactly one way to bind
-	matches := 0
-	var result types.Object
-	if foundGetter != nil {
-		matches++
-		result = foundGetter
-	}
-	if foundMethod != nil {
-		matches++
-		result = foundMethod
-	}
-	if foundField != nil {
-		matches++
-		result = foundField
-	}
-
-	switch matches {
-	case 0:
-		// No match, try embeds
-		return b.findBindEmbedsTarget(t, name)
-	case 1:
-		// Exactly one match
-		return result, nil
-	default:
-		// Multiple matches - ambiguous
+	switch {
+	case foundField == nil && foundMethod != nil:
+		// Bind to method
+		return foundMethod, nil
+	case foundField != nil && foundMethod == nil:
+		// Bind to field
+		return foundField, nil
+	case foundField != nil && foundMethod != nil:
+		// Error
 		return nil, fmt.Errorf("found more than one way to bind for %s", name)
 	}
+
+	// Search embeds
+	return b.findBindEmbedsTarget(t, name)
 }
 
 func (b *builder) findBindStructTagTarget(in types.Type, name string) (types.Object, error) {

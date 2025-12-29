@@ -177,10 +177,6 @@ func (ec *executionContext) {{ $field.FieldContextFunc }}({{ if not $field.Args 
 			return nil, nil
 		}
 		{{- end -}}
-		{{- if .HasGetter -}}
-		return {{.GoReceiverName}}.{{.GetterMethodName}}(), nil
-		{{- else -}}
 		return {{.GoReceiverName}}.{{.GoFieldName}}, nil
-		{{- end -}}
 	{{- end }}
 {{- end }}

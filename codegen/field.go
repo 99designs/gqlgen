@@ -36,11 +36,9 @@ type Field struct {
 	Stream           bool             // does this field return a channel?
 	Directives       []*Directive
 
-	// Protobuf getter/haser support
-	HasGetter        bool   // Whether a getter method is available (e.g., GetName())
-	GetterMethodName string // Name of the getter method
-	HasHaser         bool   // Whether a haser method is available (e.g., HasName())
-	HaserMethodName  string // Name of the haser method
+	// Protobuf haser support for nullable fields
+	HasHaser        bool   // Whether a haser method is available (e.g., HasName())
+	HaserMethodName string // Name of the haser method
 }
 
 func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, error) {
@@ -216,36 +214,10 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		f.Args = newArgs
 		f.TypeReference = tr
 
-		return nil
-
 	case *types.Var:
 		tr, err := b.Binder.TypeReference(f.Type, target.Type())
 		if err != nil {
 			return err
-		}
-
-		// Check for protobuf-style getter/haser methods (only if enabled in config)
-		if b.Config.AutobindGetterHaser {
-			// Check for protobuf-style getter method
-			getter, _ := b.findBindGetterMethod(obj.Type, f.GoFieldName)
-			if getter != nil {
-				// Validate that the getter's return type is compatible with the GraphQL field type
-				getterSig := getter.Type().(*types.Signature)
-				getterTR, err := b.Binder.TypeReference(f.Type, getterSig.Results().At(0).Type())
-				if err == nil && getterTR != nil {
-					f.HasGetter = true
-					f.GetterMethodName = getter.Name()
-				}
-			}
-
-			// Check for protobuf-style haser method (only for nullable fields)
-			if !f.Type.NonNull {
-				haser, _ := b.findBindHaserMethod(obj.Type, f.GoFieldName)
-				if haser != nil {
-					f.HasHaser = true
-					f.HaserMethodName = haser.Name()
-				}
-			}
 		}
 
 		// success, bind to var
@@ -253,24 +225,43 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		f.GoReceiverName = "obj"
 		f.GoFieldName = target.Name()
 		f.TypeReference = tr
-
-		return nil
 	default:
 		panic(fmt.Errorf("unknown bind target %T for %s", target, f.Name))
 	}
+
+	// Check for protobuf-style haser method (only if enabled and field is nullable)
+	if b.Config.AutobindGetterHaser && !f.Type.NonNull {
+		haser, _ := b.findBindHaserMethod(obj.Type, f.GoFieldName)
+		if haser != nil {
+			f.HasHaser = true
+			f.HaserMethodName = haser.Name()
+		}
+	}
+	return nil
 }
 
 // findBindTarget attempts to match the name to a field or method on a Type
 // with the following priorities:
 // 1. Any Fields with a struct tag (see config.StructTag). Errors if more than one match is found
-// 2. Any method or field with a matching name. Errors if more than one match is found
-// 3. Same logic again for embedded fields
+// 2. If enabled, try getter pattern (GetFieldName)
+// 3. Any method or field with a matching name. Errors if more than one match is found
+// 4. Same logic again for embedded fields
 func (b *builder) findBindTarget(t types.Type, name string) (types.Object, error) {
 	// NOTE: a struct tag will override both methods and fields
 	// Bind to struct tag
 	found, err := b.findBindStructTagTarget(t, name)
 	if found != nil || err != nil {
 		return found, err
+	}
+
+	// If enabled, try getter pattern (GetFieldName) first
+	var foundGetter types.Object
+	if b.Config.AutobindGetterHaser {
+		getterName := "Get" + name
+		foundGetter, err = b.findBindMethodTarget(t, getterName)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	// Search for a method to bind to
@@ -285,20 +276,33 @@ func (b *builder) findBindTarget(t types.Type, name string) (types.Object, error
 		return nil, err
 	}
 
-	switch {
-	case foundField == nil && foundMethod != nil:
-		// Bind to method
-		return foundMethod, nil
-	case foundField != nil && foundMethod == nil:
-		// Bind to field
-		return foundField, nil
-	case foundField != nil && foundMethod != nil:
-		// Error
-		return nil, fmt.Errorf("found more than one way to bind for %s", name)
+	// Ensure we found exactly one way to bind
+	matches := 0
+	var result types.Object
+	if foundGetter != nil {
+		matches++
+		result = foundGetter
+	}
+	if foundMethod != nil {
+		matches++
+		result = foundMethod
+	}
+	if foundField != nil {
+		matches++
+		result = foundField
 	}
 
-	// Search embeds
-	return b.findBindEmbedsTarget(t, name)
+	switch matches {
+	case 0:
+		// No match, try embeds
+		return b.findBindEmbedsTarget(t, name)
+	case 1:
+		// Exactly one match
+		return result, nil
+	default:
+		// Multiple matches - ambiguous
+		return nil, fmt.Errorf("found more than one way to bind for %s", name)
+	}
 }
 
 func (b *builder) findBindStructTagTarget(in types.Type, name string) (types.Object, error) {
@@ -464,48 +468,6 @@ func (b *builder) findBindInterfaceEmbedsTarget(
 	}
 
 	return found, nil
-}
-
-// findBindGetterMethod looks for a protobuf-style getter method (e.g., GetName for field Name)
-func (b *builder) findBindGetterMethod(in types.Type, name string) (types.Object, error) {
-	getterName := "Get" + name
-
-	switch t := in.(type) {
-	case *types.Named:
-		if _, ok := t.Underlying().(*types.Interface); ok {
-			return b.findBindGetterMethod(t.Underlying(), name)
-		}
-
-		// Search for getter method
-		method, err := b.findBindMethoderTarget(t.Method, t.NumMethods(), getterName)
-		if err != nil || method == nil {
-			return nil, err
-		}
-
-		// Verify getter signature: no parameters, one return value (not error)
-		sig := method.Type().(*types.Signature)
-		if sig.Params().Len() != 0 || sig.Results().Len() != 1 {
-			return nil, nil // Not a valid getter
-		}
-
-		return method, nil
-
-	case *types.Interface:
-		method, err := b.findBindMethoderTarget(t.Method, t.NumMethods(), getterName)
-		if err != nil || method == nil {
-			return nil, err
-		}
-
-		// Verify getter signature
-		sig := method.Type().(*types.Signature)
-		if sig.Params().Len() != 0 || sig.Results().Len() != 1 {
-			return nil, nil
-		}
-
-		return method, nil
-	}
-
-	return nil, nil
 }
 
 // findBindHaserMethod looks for a protobuf-style haser method (e.g., HasName for field Name)

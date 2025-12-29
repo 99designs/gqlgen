@@ -22,12 +22,16 @@ import (
 )
 
 type Config struct {
-	SchemaFilename                       StringList                 `yaml:"schema,omitempty"`
-	Exec                                 ExecConfig                 `yaml:"exec"`
-	Model                                PackageConfig              `yaml:"model,omitempty"`
-	Federation                           PackageConfig              `yaml:"federation,omitempty"`
-	Resolver                             ResolverConfig             `yaml:"resolver,omitempty"`
-	AutoBind                             []string                   `yaml:"autobind"`
+	SchemaFilename StringList     `yaml:"schema,omitempty"`
+	Exec           ExecConfig     `yaml:"exec"`
+	Model          PackageConfig  `yaml:"model,omitempty"`
+	Federation     PackageConfig  `yaml:"federation,omitempty"`
+	Resolver       ResolverConfig `yaml:"resolver,omitempty"`
+	AutoBind       []string       `yaml:"autobind"`
+	// AutobindGetterHaser enables automatic binding to protobuf-style getter and haser methods.
+	// When enabled, gqlgen will look for GetFieldName() and HasFieldName() methods
+	// in addition to direct field access.
+	AutobindGetterHaser                  bool                       `yaml:"autobind_getter_haser,omitempty"`
 	Models                               TypeMap                    `yaml:"models,omitempty"`
 	StructTag                            string                     `yaml:"struct_tag,omitempty"`
 	EmbeddedStructsPrefix                string                     `yaml:"embedded_structs_prefix,omitempty"`

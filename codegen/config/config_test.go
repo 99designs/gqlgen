@@ -334,6 +334,33 @@ func TestAutobinding(t *testing.T) {
 			"unable to load ../chat - make sure you're using an import path to a package that exists",
 		)
 	})
+
+	t.Run("protobuf getters and hasers", func(t *testing.T) {
+		cfg := Config{
+			Models: TypeMap{},
+			AutoBind: []string{
+				"github.com/99designs/gqlgen/codegen/config/testdata/autobinding/protomodel",
+			},
+			AutobindGetterHaser: true, // Enable protobuf getter/haser support
+			Packages:            code.NewPackages(),
+		}
+
+		cfg.Schema = gqlparser.MustLoadSchema(&ast.Source{Name: "TestAutobinding.schema", Input: `
+			type ProtoMessage {
+				name: String
+				description: String
+				count: Int!
+			}
+		`})
+
+		require.NoError(t, cfg.autobind())
+
+		require.Equal(
+			t,
+			"github.com/99designs/gqlgen/codegen/config/testdata/autobinding/protomodel.ProtoMessage",
+			cfg.Models["ProtoMessage"].Model[0],
+		)
+	})
 }
 
 func TestLoadSchema(t *testing.T) {

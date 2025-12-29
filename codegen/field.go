@@ -35,6 +35,12 @@ type Field struct {
 	Default          any              // The default value
 	Stream           bool             // does this field return a channel?
 	Directives       []*Directive
+
+	// Protobuf getter/haser support
+	HasGetter        bool   // Whether a getter method is available (e.g., GetName())
+	GetterMethodName string // Name of the getter method
+	HasHaser         bool   // Whether a haser method is available (e.g., HasName())
+	HaserMethodName  string // Name of the haser method
 }
 
 func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, error) {
@@ -216,6 +222,30 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		tr, err := b.Binder.TypeReference(f.Type, target.Type())
 		if err != nil {
 			return err
+		}
+
+		// Check for protobuf-style getter/haser methods (only if enabled in config)
+		if b.Config.AutobindGetterHaser {
+			// Check for protobuf-style getter method
+			getter, _ := b.findBindGetterMethod(obj.Type, f.GoFieldName)
+			if getter != nil {
+				// Validate that the getter's return type is compatible with the GraphQL field type
+				getterSig := getter.Type().(*types.Signature)
+				getterTR, err := b.Binder.TypeReference(f.Type, getterSig.Results().At(0).Type())
+				if err == nil && getterTR != nil {
+					f.HasGetter = true
+					f.GetterMethodName = getter.Name()
+				}
+			}
+
+			// Check for protobuf-style haser method (only for nullable fields)
+			if !f.Type.NonNull {
+				haser, _ := b.findBindHaserMethod(obj.Type, f.GoFieldName)
+				if haser != nil {
+					f.HasHaser = true
+					f.HaserMethodName = haser.Name()
+				}
+			}
 		}
 
 		// success, bind to var
@@ -434,6 +464,97 @@ func (b *builder) findBindInterfaceEmbedsTarget(
 	}
 
 	return found, nil
+}
+
+// findBindGetterMethod looks for a protobuf-style getter method (e.g., GetName for field Name)
+func (b *builder) findBindGetterMethod(in types.Type, name string) (types.Object, error) {
+	getterName := "Get" + name
+
+	switch t := in.(type) {
+	case *types.Named:
+		if _, ok := t.Underlying().(*types.Interface); ok {
+			return b.findBindGetterMethod(t.Underlying(), name)
+		}
+
+		// Search for getter method
+		method, err := b.findBindMethoderTarget(t.Method, t.NumMethods(), getterName)
+		if err != nil || method == nil {
+			return nil, err
+		}
+
+		// Verify getter signature: no parameters, one return value (not error)
+		sig := method.Type().(*types.Signature)
+		if sig.Params().Len() != 0 || sig.Results().Len() != 1 {
+			return nil, nil // Not a valid getter
+		}
+
+		return method, nil
+
+	case *types.Interface:
+		method, err := b.findBindMethoderTarget(t.Method, t.NumMethods(), getterName)
+		if err != nil || method == nil {
+			return nil, err
+		}
+
+		// Verify getter signature
+		sig := method.Type().(*types.Signature)
+		if sig.Params().Len() != 0 || sig.Results().Len() != 1 {
+			return nil, nil
+		}
+
+		return method, nil
+	}
+
+	return nil, nil
+}
+
+// findBindHaserMethod looks for a protobuf-style haser method (e.g., HasName for field Name)
+// Haser methods are used to check if an optional field is set
+func (b *builder) findBindHaserMethod(in types.Type, name string) (types.Object, error) {
+	haserName := "Has" + name
+
+	switch t := in.(type) {
+	case *types.Named:
+		if _, ok := t.Underlying().(*types.Interface); ok {
+			return b.findBindHaserMethod(t.Underlying(), name)
+		}
+
+		// Search for haser method
+		method, err := b.findBindMethoderTarget(t.Method, t.NumMethods(), haserName)
+		if err != nil || method == nil {
+			return nil, err
+		}
+
+		// Verify haser signature: no parameters, returns bool
+		sig := method.Type().(*types.Signature)
+		if sig.Params().Len() != 0 || sig.Results().Len() != 1 {
+			return nil, nil
+		}
+		if sig.Results().At(0).Type().String() != "bool" {
+			return nil, nil
+		}
+
+		return method, nil
+
+	case *types.Interface:
+		method, err := b.findBindMethoderTarget(t.Method, t.NumMethods(), haserName)
+		if err != nil || method == nil {
+			return nil, err
+		}
+
+		// Verify haser signature
+		sig := method.Type().(*types.Signature)
+		if sig.Params().Len() != 0 || sig.Results().Len() != 1 {
+			return nil, nil
+		}
+		if sig.Results().At(0).Type().String() != "bool" {
+			return nil, nil
+		}
+
+		return method, nil
+	}
+
+	return nil, nil
 }
 
 func (f *Field) HasDirectives() bool {

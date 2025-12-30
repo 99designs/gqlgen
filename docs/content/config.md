@@ -145,6 +145,9 @@ call_argument_directives_with_null: true
 autobind:
 #  - "{{.}}/graph/model"
 
+# Optional: turn on to allow binding to getters and hasers (useful for editions protos)
+# autobind_getter_haser: true
+
 # This section declares type mapping between the GraphQL and go type systems
 #
 # The first line in each type will be used as defaults for resolver arguments and

@@ -138,6 +138,7 @@ func (ec *executionContext) _Query__service(ctx context.Context, field graphql.C
 		field,
 		ec.fieldContext_Query__service,
 		func(ctx context.Context) (any, error) {
+
 			return ec.__resolve__service(ctx)
 		},
 		nil,
@@ -172,6 +173,7 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 		ec.fieldContext_Query___type,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
+
 			return ec.introspectType(fc.Args["name"].(string))
 		},
 		nil,
@@ -236,6 +238,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 		field,
 		ec.fieldContext_Query___schema,
 		func(ctx context.Context) (any, error) {
+
 			return ec.introspectSchema()
 		},
 		nil,

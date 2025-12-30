@@ -45,6 +45,7 @@ func (ec *executionContext) _VariadicModel_value(ctx context.Context, field grap
 		ec.fieldContext_VariadicModel_value,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
+
 			return obj.Value(ctx, fc.Args["rank"].(int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {

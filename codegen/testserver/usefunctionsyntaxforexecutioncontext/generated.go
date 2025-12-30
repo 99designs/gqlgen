@@ -1099,6 +1099,7 @@ func _Query___type(ctx context.Context, ec *executionContext, field graphql.Coll
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
+
 			return ec.introspectType(fc.Args["name"].(string))
 		},
 		nil,
@@ -1167,6 +1168,7 @@ func _Query___schema(ctx context.Context, ec *executionContext, field graphql.Co
 			return fieldContext_Query___schema(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return ec.introspectSchema()
 		},
 		nil,
@@ -1510,6 +1512,7 @@ func ___Directive_description(ctx context.Context, ec *executionContext, field g
 			return fieldContext___Directive_description(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.Description(), nil
 		},
 		nil,
@@ -1700,6 +1703,7 @@ func ___EnumValue_description(ctx context.Context, ec *executionContext, field g
 			return fieldContext___EnumValue_description(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.Description(), nil
 		},
 		nil,
@@ -1733,6 +1737,7 @@ func ___EnumValue_isDeprecated(ctx context.Context, ec *executionContext, field 
 			return fieldContext___EnumValue_isDeprecated(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.IsDeprecated(), nil
 		},
 		nil,
@@ -1766,6 +1771,7 @@ func ___EnumValue_deprecationReason(ctx context.Context, ec *executionContext, f
 			return fieldContext___EnumValue_deprecationReason(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.DeprecationReason(), nil
 		},
 		nil,
@@ -1832,6 +1838,7 @@ func ___Field_description(ctx context.Context, ec *executionContext, field graph
 			return fieldContext___Field_description(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.Description(), nil
 		},
 		nil,
@@ -1980,6 +1987,7 @@ func ___Field_isDeprecated(ctx context.Context, ec *executionContext, field grap
 			return fieldContext___Field_isDeprecated(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.IsDeprecated(), nil
 		},
 		nil,
@@ -2013,6 +2021,7 @@ func ___Field_deprecationReason(ctx context.Context, ec *executionContext, field
 			return fieldContext___Field_deprecationReason(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.DeprecationReason(), nil
 		},
 		nil,
@@ -2079,6 +2088,7 @@ func ___InputValue_description(ctx context.Context, ec *executionContext, field 
 			return fieldContext___InputValue_description(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.Description(), nil
 		},
 		nil,
@@ -2202,6 +2212,7 @@ func ___InputValue_isDeprecated(ctx context.Context, ec *executionContext, field
 			return fieldContext___InputValue_isDeprecated(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.IsDeprecated(), nil
 		},
 		nil,
@@ -2235,6 +2246,7 @@ func ___InputValue_deprecationReason(ctx context.Context, ec *executionContext, 
 			return fieldContext___InputValue_deprecationReason(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.DeprecationReason(), nil
 		},
 		nil,
@@ -2268,6 +2280,7 @@ func ___Schema_description(ctx context.Context, ec *executionContext, field grap
 			return fieldContext___Schema_description(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.Description(), nil
 		},
 		nil,
@@ -2301,6 +2314,7 @@ func ___Schema_types(ctx context.Context, ec *executionContext, field graphql.Co
 			return fieldContext___Schema_types(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.Types(), nil
 		},
 		nil,
@@ -2358,6 +2372,7 @@ func ___Schema_queryType(ctx context.Context, ec *executionContext, field graphq
 			return fieldContext___Schema_queryType(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.QueryType(), nil
 		},
 		nil,
@@ -2415,6 +2430,7 @@ func ___Schema_mutationType(ctx context.Context, ec *executionContext, field gra
 			return fieldContext___Schema_mutationType(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.MutationType(), nil
 		},
 		nil,
@@ -2472,6 +2488,7 @@ func ___Schema_subscriptionType(ctx context.Context, ec *executionContext, field
 			return fieldContext___Schema_subscriptionType(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.SubscriptionType(), nil
 		},
 		nil,
@@ -2529,6 +2546,7 @@ func ___Schema_directives(ctx context.Context, ec *executionContext, field graph
 			return fieldContext___Schema_directives(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.Directives(), nil
 		},
 		nil,
@@ -2574,6 +2592,7 @@ func ___Type_kind(ctx context.Context, ec *executionContext, field graphql.Colle
 			return fieldContext___Type_kind(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.Kind(), nil
 		},
 		nil,
@@ -2607,6 +2626,7 @@ func ___Type_name(ctx context.Context, ec *executionContext, field graphql.Colle
 			return fieldContext___Type_name(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.Name(), nil
 		},
 		nil,
@@ -2640,6 +2660,7 @@ func ___Type_description(ctx context.Context, ec *executionContext, field graphq
 			return fieldContext___Type_description(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.Description(), nil
 		},
 		nil,
@@ -2673,6 +2694,7 @@ func ___Type_specifiedByURL(ctx context.Context, ec *executionContext, field gra
 			return fieldContext___Type_specifiedByURL(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.SpecifiedByURL(), nil
 		},
 		nil,
@@ -2707,6 +2729,7 @@ func ___Type_fields(ctx context.Context, ec *executionContext, field graphql.Col
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
+
 			return obj.Fields(fc.Args["includeDeprecated"].(bool)), nil
 		},
 		nil,
@@ -2765,6 +2788,7 @@ func ___Type_interfaces(ctx context.Context, ec *executionContext, field graphql
 			return fieldContext___Type_interfaces(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.Interfaces(), nil
 		},
 		nil,
@@ -2822,6 +2846,7 @@ func ___Type_possibleTypes(ctx context.Context, ec *executionContext, field grap
 			return fieldContext___Type_possibleTypes(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.PossibleTypes(), nil
 		},
 		nil,
@@ -2880,6 +2905,7 @@ func ___Type_enumValues(ctx context.Context, ec *executionContext, field graphql
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
+
 			return obj.EnumValues(fc.Args["includeDeprecated"].(bool)), nil
 		},
 		nil,
@@ -2934,6 +2960,7 @@ func ___Type_inputFields(ctx context.Context, ec *executionContext, field graphq
 			return fieldContext___Type_inputFields(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.InputFields(), nil
 		},
 		nil,
@@ -2981,6 +3008,7 @@ func ___Type_ofType(ctx context.Context, ec *executionContext, field graphql.Col
 			return fieldContext___Type_ofType(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.OfType(), nil
 		},
 		nil,
@@ -3038,6 +3066,7 @@ func ___Type_isOneOf(ctx context.Context, ec *executionContext, field graphql.Co
 			return fieldContext___Type_isOneOf(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
+
 			return obj.IsOneOf(), nil
 		},
 		nil,

@@ -64,6 +64,7 @@ func (ec *executionContext) _PtrToAnyContainer_binding(ctx context.Context, fiel
 		field,
 		ec.fieldContext_PtrToAnyContainer_binding,
 		func(ctx context.Context) (any, error) {
+
 			return obj.Binding(), nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {

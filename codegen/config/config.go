@@ -527,12 +527,11 @@ type TypeMapField struct {
 	// restrictions.
 	Type string `yaml:"type"`
 
-	Resolver        bool   `yaml:"resolver"`
-	FieldName       string `yaml:"fieldName"`
-	Omittable       *bool  `yaml:"omittable"`
-	GeneratedMethod string `yaml:"-"`
-
-	AutoBindGetterHaser *bool `yaml:"autoBindGetterHaser"`
+	Resolver            bool   `yaml:"resolver"`
+	FieldName           string `yaml:"fieldName"`
+	Omittable           *bool  `yaml:"omittable"`
+	GeneratedMethod     string `yaml:"-"`
+	AutoBindGetterHaser *bool  `yaml:"autoBindGetterHaser"`
 }
 
 type EnumValue struct {

@@ -35,10 +35,8 @@ type Field struct {
 	Default          any              // The default value
 	Stream           bool             // does this field return a channel?
 	Directives       []*Directive
-
-	// Protobuf haser support for nullable fields
-	HasHaser        bool   // Whether a haser method is available (e.g., HasName())
-	HaserMethodName string // Name of the haser method
+	HasHaser         bool   // Whether a haser method is available (e.g., HasName())
+	HaserMethodName  string // Name of the haser method
 }
 
 func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, error) {

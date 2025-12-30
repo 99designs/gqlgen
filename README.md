@@ -125,6 +125,7 @@ directive @goField(
 	name: String
 	omittable: Boolean
 	type: String
+  autoBindGetterHaser: Boolean
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 type User @goModel(model: "github.com/you/pkg/model.User") {

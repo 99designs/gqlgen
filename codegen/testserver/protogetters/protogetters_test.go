@@ -4,10 +4,11 @@ package protogetters
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/codegen/testserver/protogetters/models"
 	"github.com/99designs/gqlgen/graphql/handler"
-	"github.com/stretchr/testify/require"
 )
 
 func TestProtoGetters(t *testing.T) {

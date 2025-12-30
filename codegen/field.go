@@ -258,7 +258,11 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 // 2. If enabled, try getter pattern (GetFieldName)
 // 3. Any method or field with a matching name. Errors if more than one match is found
 // 4. Same logic again for embedded fields
-func (b *builder) findBindTarget(t types.Type, name string, autoBindGetterHaser bool) (types.Object, error) {
+func (b *builder) findBindTarget(
+	t types.Type,
+	name string,
+	autoBindGetterHaser bool,
+) (types.Object, error) {
 	// NOTE: a struct tag will override both methods and fields
 	// Bind to struct tag
 	found, err := b.findBindStructTagTarget(t, name)
@@ -402,7 +406,11 @@ func (b *builder) findBindFieldTarget(in types.Type, name string) (types.Object,
 	return nil, nil
 }
 
-func (b *builder) findBindEmbedsTarget(in types.Type, name string, autoBindGetterHaser bool) (types.Object, error) {
+func (b *builder) findBindEmbedsTarget(
+	in types.Type,
+	name string,
+	autoBindGetterHaser bool,
+) (types.Object, error) {
 	switch t := in.(type) {
 	case *types.Named:
 		return b.findBindEmbedsTarget(t.Underlying(), name, autoBindGetterHaser)

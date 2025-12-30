@@ -250,7 +250,6 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 	default:
 		panic(fmt.Errorf("unknown bind target %T for %s", target, f.Name))
 	}
-
 }
 
 // findBindTarget attempts to match the name to a field or method on a Type

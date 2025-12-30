@@ -74,7 +74,6 @@ func (ec *executionContext) _Error_errorOnNonRequiredField(ctx context.Context, 
 		field,
 		ec.fieldContext_Error_errorOnNonRequiredField,
 		func(ctx context.Context) (any, error) {
-
 			return obj.ErrorOnNonRequiredField()
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
@@ -106,7 +105,6 @@ func (ec *executionContext) _Error_errorOnRequiredField(ctx context.Context, fie
 		field,
 		ec.fieldContext_Error_errorOnRequiredField,
 		func(ctx context.Context) (any, error) {
-
 			return obj.ErrorOnRequiredField()
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
@@ -138,7 +136,6 @@ func (ec *executionContext) _Error_nilOnRequiredField(ctx context.Context, field
 		field,
 		ec.fieldContext_Error_nilOnRequiredField,
 		func(ctx context.Context) (any, error) {
-
 			return obj.NilOnRequiredField(), nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {

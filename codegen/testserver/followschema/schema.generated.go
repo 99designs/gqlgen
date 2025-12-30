@@ -1539,7 +1539,6 @@ func (ec *executionContext) _ModelMethods_noContext(ctx context.Context, field g
 		field,
 		ec.fieldContext_ModelMethods_noContext,
 		func(ctx context.Context) (any, error) {
-
 			return obj.NoContext(), nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
@@ -1571,7 +1570,6 @@ func (ec *executionContext) _ModelMethods_withContext(ctx context.Context, field
 		field,
 		ec.fieldContext_ModelMethods_withContext,
 		func(ctx context.Context) (any, error) {
-
 			return obj.WithContext(ctx), nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
@@ -5093,7 +5091,6 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 		ec.fieldContext_Query___type,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-
 			return ec.introspectType(fc.Args["name"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
@@ -5160,7 +5157,6 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 		field,
 		ec.fieldContext_Query___schema,
 		func(ctx context.Context) (any, error) {
-
 			return ec.introspectSchema()
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {

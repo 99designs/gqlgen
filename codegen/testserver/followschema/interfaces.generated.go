@@ -70,7 +70,6 @@ func (ec *executionContext) _BackedByInterface_thisShouldBind(ctx context.Contex
 		field,
 		ec.fieldContext_BackedByInterface_thisShouldBind,
 		func(ctx context.Context) (any, error) {
-
 			return obj.ThisShouldBind(), nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
@@ -102,7 +101,6 @@ func (ec *executionContext) _BackedByInterface_thisShouldBindWithError(ctx conte
 		field,
 		ec.fieldContext_BackedByInterface_thisShouldBindWithError,
 		func(ctx context.Context) (any, error) {
-
 			return obj.ThisShouldBindWithError()
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
@@ -264,7 +262,6 @@ func (ec *executionContext) _Circle_area(ctx context.Context, field graphql.Coll
 		field,
 		ec.fieldContext_Circle_area,
 		func(ctx context.Context) (any, error) {
-
 			return obj.Area(), nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
@@ -364,7 +361,6 @@ func (ec *executionContext) _ConcreteNodeA_child(ctx context.Context, field grap
 		field,
 		ec.fieldContext_ConcreteNodeA_child,
 		func(ctx context.Context) (any, error) {
-
 			return obj.Child()
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
@@ -427,7 +423,6 @@ func (ec *executionContext) _ConcreteNodeInterface_id(ctx context.Context, field
 		field,
 		ec.fieldContext_ConcreteNodeInterface_id,
 		func(ctx context.Context) (any, error) {
-
 			return obj.ID(), nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
@@ -459,7 +454,6 @@ func (ec *executionContext) _ConcreteNodeInterface_child(ctx context.Context, fi
 		field,
 		ec.fieldContext_ConcreteNodeInterface_child,
 		func(ctx context.Context) (any, error) {
-
 			return obj.Child()
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
@@ -813,7 +807,6 @@ func (ec *executionContext) _Rectangle_area(ctx context.Context, field graphql.C
 		field,
 		ec.fieldContext_Rectangle_area,
 		func(ctx context.Context) (any, error) {
-
 			return obj.Area(), nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {

@@ -159,8 +159,8 @@ func (ec *executionContext) {{ $field.FieldContextFunc }}({{ if not $field.Args 
 		default:
 			return nil, fmt.Errorf("unexpected type %T for field %s", v, {{ .Name | quote}})
 		}
-	{{- else if .IsMethod }}
-		{{ if .HasHaser }}
+	{{- else if .IsMethod -}}
+		{{- if .HasHaser -}}
 		if !{{.GoReceiverName}}.{{.HaserMethodName}}() {
 			return nil, nil
 		}

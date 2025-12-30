@@ -93,7 +93,6 @@ func (ec *executionContext) _Panics_fieldFuncMarshal(ctx context.Context, field 
 		ec.fieldContext_Panics_fieldFuncMarshal,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-
 			return obj.FieldFuncMarshal(ctx, fc.Args["u"].([]MarshalPanic)), nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {

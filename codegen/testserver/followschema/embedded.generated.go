@@ -33,7 +33,6 @@ func (ec *executionContext) _EmbeddedCase1_exportedEmbeddedPointerExportedMethod
 		field,
 		ec.fieldContext_EmbeddedCase1_exportedEmbeddedPointerExportedMethod,
 		func(ctx context.Context) (any, error) {
-
 			return obj.ExportedEmbeddedPointerExportedMethod(), nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
@@ -65,7 +64,6 @@ func (ec *executionContext) _EmbeddedCase2_unexportedEmbeddedPointerExportedMeth
 		field,
 		ec.fieldContext_EmbeddedCase2_unexportedEmbeddedPointerExportedMethod,
 		func(ctx context.Context) (any, error) {
-
 			return obj.UnexportedEmbeddedPointerExportedMethod(), nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
@@ -97,7 +95,6 @@ func (ec *executionContext) _EmbeddedCase3_unexportedEmbeddedInterfaceExportedMe
 		field,
 		ec.fieldContext_EmbeddedCase3_unexportedEmbeddedInterfaceExportedMethod,
 		func(ctx context.Context) (any, error) {
-
 			return obj.UnexportedEmbeddedInterfaceExportedMethod(), nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {

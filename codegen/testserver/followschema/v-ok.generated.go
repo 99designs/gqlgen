@@ -33,7 +33,6 @@ func (ec *executionContext) _VOkCaseNil_value(ctx context.Context, field graphql
 		field,
 		ec.fieldContext_VOkCaseNil_value,
 		func(ctx context.Context) (any, error) {
-
 			v, ok := obj.Value()
 			if !ok {
 				return nil, nil
@@ -69,7 +68,6 @@ func (ec *executionContext) _VOkCaseValue_value(ctx context.Context, field graph
 		field,
 		ec.fieldContext_VOkCaseValue_value,
 		func(ctx context.Context) (any, error) {
-
 			v, ok := obj.Value()
 			if !ok {
 				return nil, nil

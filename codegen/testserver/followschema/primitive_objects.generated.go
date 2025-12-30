@@ -74,7 +74,6 @@ func (ec *executionContext) _Primitive_squared(ctx context.Context, field graphq
 		field,
 		ec.fieldContext_Primitive_squared,
 		func(ctx context.Context) (any, error) {
-
 			return obj.Squared(), nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
@@ -137,7 +136,6 @@ func (ec *executionContext) _PrimitiveString_doubled(ctx context.Context, field 
 		field,
 		ec.fieldContext_PrimitiveString_doubled,
 		func(ctx context.Context) (any, error) {
-
 			return obj.Doubled(), nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {

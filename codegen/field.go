@@ -35,6 +35,8 @@ type Field struct {
 	Default          any              // The default value
 	Stream           bool             // does this field return a channel?
 	Directives       []*Directive
+	HasHaser         bool   // Whether a haser method is available (e.g., HasName())
+	HaserMethodName  string // Name of the haser method
 }
 
 func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, error) {
@@ -146,7 +148,26 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		f.GoFieldName = b.Config.Models[obj.Name].Fields[f.Name].FieldName
 	}
 
-	target, err := b.findBindTarget(obj.Type, f.GoFieldName)
+	// Check for protobuf-style haser method (only if enabled and field is nullable)
+	// Use the original field name, not the bound method/field name
+	// (e.g., for field "name" bound to "GetName()", look for "HasName" not "HasGetName")
+	// Check for protobuf-style haser method (only if enabled and field is nullable)
+	// Use the original field name, not the bound method/field name
+	// (e.g., for field "name" bound to "GetName()", look for "HasName" not "HasGetName")
+	autoBindGetterHaser := b.Config.AutobindGetterHaser
+	if val := b.Config.Models[obj.Name].Fields[f.Name].AutoBindGetterHaser; val != nil {
+		autoBindGetterHaser = *val
+	}
+
+	if autoBindGetterHaser && !f.Type.NonNull {
+		haser, _ := b.findBindHaserMethod(obj.Type, f.GoFieldName)
+		if haser != nil {
+			f.HasHaser = true
+			f.HaserMethodName = haser.Name()
+		}
+	}
+
+	target, err := b.findBindTarget(obj.Type, f.GoFieldName, autoBindGetterHaser)
 	if err != nil {
 		return err
 	}
@@ -211,7 +232,6 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		f.TypeReference = tr
 
 		return nil
-
 	case *types.Var:
 		tr, err := b.Binder.TypeReference(f.Type, target.Type())
 		if err != nil {
@@ -233,14 +253,33 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 // findBindTarget attempts to match the name to a field or method on a Type
 // with the following priorities:
 // 1. Any Fields with a struct tag (see config.StructTag). Errors if more than one match is found
-// 2. Any method or field with a matching name. Errors if more than one match is found
-// 3. Same logic again for embedded fields
-func (b *builder) findBindTarget(t types.Type, name string) (types.Object, error) {
+// 2. If enabled, try getter pattern (GetFieldName)
+// 3. Any method or field with a matching name. Errors if more than one match is found
+// 4. Same logic again for embedded fields
+func (b *builder) findBindTarget(
+	t types.Type,
+	name string,
+	autoBindGetterHaser bool,
+) (types.Object, error) {
 	// NOTE: a struct tag will override both methods and fields
 	// Bind to struct tag
 	found, err := b.findBindStructTagTarget(t, name)
 	if found != nil || err != nil {
 		return found, err
+	}
+
+	// If enabled, try getter pattern (GetFieldName) first
+	var foundGetter types.Object
+	if autoBindGetterHaser {
+		getterName := "Get" + name
+		foundGetter, err = b.findBindMethodTarget(t, getterName)
+		if err != nil {
+			return nil, err
+		}
+
+		if foundGetter != nil {
+			return foundGetter, nil
+		}
 	}
 
 	// Search for a method to bind to
@@ -268,7 +307,7 @@ func (b *builder) findBindTarget(t types.Type, name string) (types.Object, error
 	}
 
 	// Search embeds
-	return b.findBindEmbedsTarget(t, name)
+	return b.findBindEmbedsTarget(t, name, autoBindGetterHaser)
 }
 
 func (b *builder) findBindStructTagTarget(in types.Type, name string) (types.Object, error) {
@@ -365,14 +404,18 @@ func (b *builder) findBindFieldTarget(in types.Type, name string) (types.Object,
 	return nil, nil
 }
 
-func (b *builder) findBindEmbedsTarget(in types.Type, name string) (types.Object, error) {
+func (b *builder) findBindEmbedsTarget(
+	in types.Type,
+	name string,
+	autoBindGetterHaser bool,
+) (types.Object, error) {
 	switch t := in.(type) {
 	case *types.Named:
-		return b.findBindEmbedsTarget(t.Underlying(), name)
+		return b.findBindEmbedsTarget(t.Underlying(), name, autoBindGetterHaser)
 	case *types.Struct:
-		return b.findBindStructEmbedsTarget(t, name)
+		return b.findBindStructEmbedsTarget(t, name, autoBindGetterHaser)
 	case *types.Interface:
-		return b.findBindInterfaceEmbedsTarget(t, name)
+		return b.findBindInterfaceEmbedsTarget(t, name, autoBindGetterHaser)
 	}
 
 	return nil, nil
@@ -381,6 +424,7 @@ func (b *builder) findBindEmbedsTarget(in types.Type, name string) (types.Object
 func (b *builder) findBindStructEmbedsTarget(
 	strukt *types.Struct,
 	name string,
+	autoBindGetterHaser bool,
 ) (types.Object, error) {
 	var found types.Object
 	for i := 0; i < strukt.NumFields(); i++ {
@@ -394,7 +438,7 @@ func (b *builder) findBindStructEmbedsTarget(
 			fieldType = ptr.Elem()
 		}
 
-		f, err := b.findBindTarget(fieldType, name)
+		f, err := b.findBindTarget(fieldType, name, autoBindGetterHaser)
 		if err != nil {
 			return nil, err
 		}
@@ -414,12 +458,13 @@ func (b *builder) findBindStructEmbedsTarget(
 func (b *builder) findBindInterfaceEmbedsTarget(
 	iface *types.Interface,
 	name string,
+	autoBindGetterHaser bool,
 ) (types.Object, error) {
 	var found types.Object
 	for i := 0; i < iface.NumEmbeddeds(); i++ {
 		embeddedType := iface.EmbeddedType(i)
 
-		f, err := b.findBindTarget(embeddedType, name)
+		f, err := b.findBindTarget(embeddedType, name, autoBindGetterHaser)
 		if err != nil {
 			return nil, err
 		}
@@ -434,6 +479,55 @@ func (b *builder) findBindInterfaceEmbedsTarget(
 	}
 
 	return found, nil
+}
+
+// findBindHaserMethod looks for a protobuf-style haser method (e.g., HasName for field Name)
+// Haser methods are used to check if an optional field is set
+func (b *builder) findBindHaserMethod(in types.Type, name string) (types.Object, error) {
+	haserName := "Has" + name
+
+	switch t := in.(type) {
+	case *types.Named:
+		if _, ok := t.Underlying().(*types.Interface); ok {
+			return b.findBindHaserMethod(t.Underlying(), name)
+		}
+
+		// Search for haser method
+		method, err := b.findBindMethoderTarget(t.Method, t.NumMethods(), haserName)
+		if err != nil || method == nil {
+			return nil, err
+		}
+
+		// Verify haser signature: no parameters, returns bool
+		sig := method.Type().(*types.Signature)
+		if sig.Params().Len() != 0 || sig.Results().Len() != 1 {
+			return nil, nil
+		}
+		if sig.Results().At(0).Type().String() != "bool" {
+			return nil, nil
+		}
+
+		return method, nil
+
+	case *types.Interface:
+		method, err := b.findBindMethoderTarget(t.Method, t.NumMethods(), haserName)
+		if err != nil || method == nil {
+			return nil, err
+		}
+
+		// Verify haser signature
+		sig := method.Type().(*types.Signature)
+		if sig.Params().Len() != 0 || sig.Results().Len() != 1 {
+			return nil, nil
+		}
+		if sig.Results().At(0).Type().String() != "bool" {
+			return nil, nil
+		}
+
+		return method, nil
+	}
+
+	return nil, nil
 }
 
 func (f *Field) HasDirectives() bool {

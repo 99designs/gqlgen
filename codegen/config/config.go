@@ -28,6 +28,7 @@ type Config struct {
 	Federation                           PackageConfig              `yaml:"federation,omitempty"`
 	Resolver                             ResolverConfig             `yaml:"resolver,omitempty"`
 	AutoBind                             []string                   `yaml:"autobind"`
+	AutobindGetterHaser                  bool                       `yaml:"autobind_getter_haser,omitempty"`
 	Models                               TypeMap                    `yaml:"models,omitempty"`
 	StructTag                            string                     `yaml:"struct_tag,omitempty"`
 	EmbeddedStructsPrefix                string                     `yaml:"embedded_structs_prefix,omitempty"`
@@ -390,6 +391,13 @@ func (c *Config) injectTypesFromSchema() error {
 						}
 					}
 
+					if arg := fd.Arguments.ForName("autoBindGetterHaser"); arg != nil {
+						if k, err := arg.Value.Value(nil); err == nil {
+							val := k.(bool)
+							typeMapFieldEntry.AutoBindGetterHaser = &val
+						}
+					}
+
 					// May be uninitialized, so do it now.
 					if typeMapEntry.Fields == nil {
 						typeMapEntry.Fields = make(map[string]TypeMapField)
@@ -519,10 +527,11 @@ type TypeMapField struct {
 	// restrictions.
 	Type string `yaml:"type"`
 
-	Resolver        bool   `yaml:"resolver"`
-	FieldName       string `yaml:"fieldName"`
-	Omittable       *bool  `yaml:"omittable"`
-	GeneratedMethod string `yaml:"-"`
+	Resolver            bool   `yaml:"resolver"`
+	FieldName           string `yaml:"fieldName"`
+	Omittable           *bool  `yaml:"omittable"`
+	GeneratedMethod     string `yaml:"-"`
+	AutoBindGetterHaser *bool  `yaml:"autoBindGetterHaser"`
 }
 
 type EnumValue struct {

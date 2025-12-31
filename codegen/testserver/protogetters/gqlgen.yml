@@ -1,0 +1,24 @@
+schema:
+  - "*.graphql"
+exec:
+  filename: generated.go
+  package: protogetters
+model:
+  filename: models_gen.go
+  package: protogetters
+resolver:
+  layout: follow-schema
+  dir: .
+  package: protogetters
+  filename_template: "{name}.resolvers.go"
+
+autobind:
+  - github.com/99designs/gqlgen/codegen/testserver/protogetters/models
+
+autobind_getter_haser: true
+
+models:
+  Query:
+    fields:
+      user:
+        resolver: true

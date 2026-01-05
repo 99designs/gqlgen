@@ -101,9 +101,27 @@ func (r *Rewriter) GetPrevDecl(structname, methodname string) *ast.FuncDecl {
 
 func (r *Rewriter) GetMethodComment(structname, methodname string) string {
 	d := r.GetPrevDecl(structname, methodname)
-	if d != nil {
-		return d.Doc.Text()
+	if d != nil && d.Doc != nil {
+		comments := make([]string, len(d.Doc.List))
+
+		for i := range d.Doc.List {
+			c := d.Doc.List[i].Text
+
+			switch c[1] {
+			case '/':
+				//-style comment (no newline at the end)
+				c = c[2:]
+			case '*':
+				/*-style comment */
+				c = c[2 : len(c)-2]
+			}
+
+			comments[i] = c
+		}
+
+		return strings.Join(comments, "\n")
 	}
+
 	return ""
 }
 

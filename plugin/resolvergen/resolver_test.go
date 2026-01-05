@@ -146,6 +146,31 @@ func TestCustomResolverTemplate(t *testing.T) {
 	require.NoError(t, p.GenerateCode(data))
 }
 
+func TestCommentDirective(t *testing.T) {
+	_ = syscall.Unlink("testdata/comment_directive/resolver.go")
+
+	cfg, err := config.LoadConfig("testdata/comment_directive/gqlgen.yml")
+	require.NoError(t, err)
+	p := Plugin{}
+
+	require.NoError(t, cfg.Init())
+
+	data, err := codegen.BuildData(cfg)
+	require.NoError(t, err)
+
+	require.NoError(t, p.GenerateCode(data))
+	assertNoErrors(
+		t,
+		"github.com/99designs/gqlgen/plugin/resolvergen/testdata/comment_directive/out",
+	)
+
+	b, err := os.ReadFile("testdata/comment_directive/out/schema.resolvers.go")
+	require.NoError(t, err)
+	source := string(b)
+
+	require.Contains(t, source, "//nolint:test // test")
+}
+
 func testFollowSchemaPersistence(t *testing.T, dir string) {
 	_ = syscall.Unlink(dir + "/out/resolver.go")
 

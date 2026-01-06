@@ -1,0 +1,217 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "gqlgen Configuration",
+  "description": "Configuration file for gqlgen code generation",
+  "type": "object",
+  "properties": {
+    "schema": {
+      "description": "Where are all the schema files located? globs are supported",
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "exec": {
+      "description": "Where should the generated server code go?",
+      "type": "object",
+      "properties": {
+        "filename": {
+          "type": "string",
+          "description": "Path to the generated file (required for single-file layout)"
+        },
+        "package": {
+          "type": "string",
+          "description": "The go package name"
+        },
+        "layout": {
+          "type": "string",
+          "enum": ["single-file", "follow-schema"],
+          "default": "single-file"
+        },
+        "dir": {
+          "type": "string",
+          "description": "Directory for generated files (required for follow-schema layout)"
+        },
+        "filename_template": {
+          "type": "string",
+          "default": "{name}.generated.go",
+          "description": "Template for filenames (required for follow-schema layout)"
+        },
+        "worker_limit": {
+          "type": "integer",
+          "description": "Maximum number of goroutines in concurrency to use per child resolvers",
+          "default": 1000
+        }
+      }
+    },
+    "federation": {
+      "description": "Federation configuration",
+      "type": "object",
+      "properties": {
+        "filename": { "type": "string" },
+        "package": { "type": "string" },
+        "version": { "type": "integer" },
+        "options": {
+          "type": "object",
+          "properties": {
+            "computed_requires": { "type": "boolean" }
+          }
+        }
+      }
+    },
+    "model": {
+      "description": "Where should any generated models go?",
+      "type": "object",
+      "properties": {
+        "filename": { "type": "string" },
+        "package": { "type": "string" },
+        "model_template": { "type": "string" }
+      }
+    },
+    "resolver": {
+      "description": "Where should the resolver implementations go?",
+      "type": "object",
+      "properties": {
+        "layout": {
+          "type": "string",
+          "enum": ["single-file", "follow-schema"],
+          "default": "follow-schema"
+        },
+        "package": { "type": "string" },
+        "dir": { "type": "string" },
+        "filename": { "type": "string" },
+        "filename_template": {
+          "type": "string",
+          "default": "{name}.resolvers.go"
+        },
+        "omit_template_comment": { "type": "boolean" },
+        "resolver_template": { "type": "string" },
+        "preserve_resolver": { "type": "boolean" }
+      }
+    },
+    "autobind": {
+      "description": "gqlgen will search for any type names in the schema in these go packages",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "models": {
+      "description": "Type mapping between the GraphQL and go type systems",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "model": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "fields": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "resolver": { "type": "boolean" },
+                "fieldName": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "struct_tag": {
+      "description": "Tag to use for model fields (e.g. json)",
+      "type": "string",
+      "default": "json"
+    },
+    "omit_slice_element_pointers": {
+      "description": "Turn on to use []Thing instead of []*Thing",
+      "type": "boolean",
+      "default": false
+    },
+    "omit_interface_checks": {
+      "description": "Turn on to omit Is<Name>() methods to interface and unions",
+      "type": "boolean",
+      "default": true
+    },
+    "omit_complexity": {
+      "description": "Turn on to skip generation of ComplexityRoot struct content and Complexity function",
+      "type": "boolean",
+      "default": false
+    },
+    "omit_gqlgen_file_notice": {
+      "description": "Turn on to not generate any file notice comments in generated files",
+      "type": "boolean",
+      "default": false
+    },
+    "omit_gqlgen_version_in_file_notice": {
+      "description": "Turn on to exclude the gqlgen version in the generated file notice",
+      "type": "boolean",
+      "default": false
+    },
+    "omit_root_models": {
+      "description": "Turn on to exclude root models such as Query and Mutation from the generated models file",
+      "type": "boolean",
+      "default": false
+    },
+    "omit_resolver_fields": {
+      "description": "Turn on to exclude resolver fields from the generated models file",
+      "type": "boolean",
+      "default": false
+    },
+    "struct_fields_always_pointers": {
+      "description": "Turn off to make struct-type struct fields not use pointers",
+      "type": "boolean",
+      "default": true
+    },
+    "resolvers_always_return_pointers": {
+      "description": "Turn off to make resolvers return values instead of pointers for structs",
+      "type": "boolean",
+      "default": true
+    },
+    "return_pointers_in_unmarshalinput": {
+      "description": "Turn on to return pointers instead of values in unmarshalInput",
+      "type": "boolean",
+      "default": false
+    },
+    "nullable_input_omittable": {
+      "description": "Wrap nullable input fields with Omittable",
+      "type": "boolean",
+      "default": true
+    },
+    "skip_validation": {
+      "description": "Set to speed up generation time by not performing a final validation pass",
+      "type": "boolean",
+      "default": false
+    },
+    "skip_mod_tidy": {
+      "description": "Set to skip running 'go mod tidy' when generating server code",
+      "type": "boolean",
+      "default": false
+    },
+    "call_argument_directives_with_null": {
+      "description": "Argument directives decorating a field with a null value will still be called",
+      "type": "boolean",
+      "default": true
+    },
+    "use_function_syntax_for_execution_context": {
+      "description": "Use function syntax for execution context instead of receiver methods",
+      "type": "boolean",
+      "default": false
+    },
+    "go_build_tags": {
+      "description": "Set build tags that will be used to load packages",
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "go_initialisms": {
+      "description": "Set to modify the initialisms regarded for Go names",
+      "type": "object",
+      "properties": {
+        "replace_defaults": { "type": "boolean" },
+        "initialisms": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

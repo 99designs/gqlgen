@@ -31,7 +31,10 @@ func (i GoInitialismsConfig) determineGoInitialisms() (initialismsToUse map[stri
 			initialismsToUse[strings.ToUpper(initialism)] = true
 		}
 	} else {
-		initialismsToUse = make(map[string]bool, len(templates.CommonInitialisms)+len(i.Initialisms))
+		initialismsToUse = make(
+			map[string]bool,
+			len(templates.CommonInitialisms)+len(i.Initialisms),
+		)
 		for initialism, value := range templates.CommonInitialisms {
 			initialismsToUse[strings.ToUpper(initialism)] = value
 		}

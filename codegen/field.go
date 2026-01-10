@@ -328,7 +328,11 @@ func (b *builder) findBindStructTagTarget(in types.Type, name string) (types.Obj
 			tags := reflect.StructTag(t.Tag(i))
 			if val, ok := tags.Lookup(b.Config.StructTag); ok && equalFieldName(val, name) {
 				if found != nil {
-					return nil, fmt.Errorf("tag %s is ambiguous; multiple fields have the same tag value of %s", b.Config.StructTag, val)
+					return nil, fmt.Errorf(
+						"tag %s is ambiguous; multiple fields have the same tag value of %s",
+						b.Config.StructTag,
+						val,
+					)
 				}
 
 				found = field
@@ -695,7 +699,13 @@ func (f *Field) ShortResolverSignature(ft *goast.FuncType) string {
 		}
 	} else {
 		for _, arg := range f.Args {
-			resSb540.WriteString(fmt.Sprintf(", %s %s", arg.VarName, templates.CurrentImports.LookupType(arg.TypeReference.GO)))
+			resSb540.WriteString(
+				fmt.Sprintf(
+					", %s %s",
+					arg.VarName,
+					templates.CurrentImports.LookupType(arg.TypeReference.GO),
+				),
+			)
 		}
 	}
 	res += resSb540.String()
@@ -829,7 +839,11 @@ func (f *Field) CallArgs() string {
 		}
 	} else {
 		for _, arg := range f.Args {
-			tmp := "fc.Args[" + strconv.Quote(arg.Name) + "].(" + templates.CurrentImports.LookupType(arg.TypeReference.GO) + ")"
+			tmp := "fc.Args[" + strconv.Quote(
+				arg.Name,
+			) + "].(" + templates.CurrentImports.LookupType(
+				arg.TypeReference.GO,
+			) + ")"
 
 			if iface, ok := arg.TypeReference.GO.(*types.Interface); ok && iface.Empty() {
 				tmp = fmt.Sprintf(`

@@ -90,7 +90,11 @@ func TestReadConfig(t *testing.T) {
 				" not_walkable/: The system cannot find the file specified.",
 			)
 		} else {
-			require.EqualError(t, err, "failed to walk schema at root not_walkable/: lstat not_walkable/: no such file or directory")
+			require.EqualError(
+				t,
+				err,
+				"failed to walk schema at root not_walkable/: lstat not_walkable/: no such file or directory",
+			)
 		}
 	})
 }

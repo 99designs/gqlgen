@@ -75,9 +75,22 @@ var cfgFilenames = []string{".gqlgen.yml", "gqlgen.yml", "gqlgen.yaml"}
 // preload those for performance considerations any additional package added to the base templates
 // should be added here to improve performance and load all packages in bulk
 var templatePackageNames = []string{
-	"context", "fmt", "io", "strconv", "time", "sync", "strings", "sync/atomic", "embed", "golang.org/x/sync/semaphore",
-	"errors", "bytes", "github.com/vektah/gqlparser/v2", "github.com/vektah/gqlparser/v2/ast",
-	"github.com/99designs/gqlgen/graphql", "github.com/99designs/gqlgen/graphql/introspection",
+	"context",
+	"fmt",
+	"io",
+	"strconv",
+	"time",
+	"sync",
+	"strings",
+	"sync/atomic",
+	"embed",
+	"golang.org/x/sync/semaphore",
+	"errors",
+	"bytes",
+	"github.com/vektah/gqlparser/v2",
+	"github.com/vektah/gqlparser/v2/ast",
+	"github.com/99designs/gqlgen/graphql",
+	"github.com/99designs/gqlgen/graphql/introspection",
 }
 
 // DefaultConfig creates a copy of the default config

@@ -416,7 +416,12 @@ func (m *Plugin) generateField(
 		case ast.Object, ast.InputObject:
 			// no user defined model, must reference a generated struct
 			typ = types.NewNamed(
-				types.NewTypeName(0, cfg.Model.Pkg(), templates.ToGoModelName(field.Type.Name()), nil),
+				types.NewTypeName(
+					0,
+					cfg.Model.Pkg(),
+					templates.ToGoModelName(field.Type.Name()),
+					nil,
+				),
 				types.NewStruct(nil, nil),
 				nil,
 			)

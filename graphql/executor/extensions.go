@@ -25,7 +25,12 @@ func (e *Executor) Use(extension graphql.HandlerExtension) {
 		e.ext = processExtensions(e.extensions)
 
 	default:
-		panic(fmt.Errorf("cannot Use %T as a gqlgen handler extension because it does not implement any extension hooks", extension))
+		panic(
+			fmt.Errorf(
+				"cannot Use %T as a gqlgen handler extension because it does not implement any extension hooks",
+				extension,
+			),
+		)
 	}
 }
 

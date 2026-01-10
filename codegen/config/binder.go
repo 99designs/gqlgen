@@ -461,7 +461,9 @@ func (b *Binder) TypeReference(
 			}
 		} else if fun, isFunc := obj.(*types.Func); isFunc {
 			ref.GO = code.Unalias(t.(*types.Signature).Params().At(0).Type())
-			ref.IsContext = code.Unalias(t.(*types.Signature).Results().At(0).Type()).String() == "github.com/99designs/gqlgen/graphql.ContextMarshaler"
+			ref.IsContext = code.Unalias(t.(*types.Signature).Results().At(0).Type()).
+				String() ==
+				"github.com/99designs/gqlgen/graphql.ContextMarshaler"
 			ref.Marshaler = fun
 			ref.Unmarshaler = types.NewFunc(0, fun.Pkg(), "Unmarshal"+typeName, nil)
 		} else if hasMethod(t, "MarshalGQLContext") && hasMethod(t, "UnmarshalGQLContext") {
@@ -684,8 +686,11 @@ func (b *Binder) enumReference(
 				Object:     valueObj,
 			})
 		default:
-			return fmt.Errorf("unsupported enum value for: %v, of enum: %v, only const and var allowed",
-				value.Name, ref.Definition.Name)
+			return fmt.Errorf(
+				"unsupported enum value for: %v, of enum: %v, only const and var allowed",
+				value.Name,
+				ref.Definition.Name,
+			)
 		}
 	}
 

@@ -24,7 +24,9 @@ func findFiles(parentMapKey string, variables map[string]any) []*fileFormDataMap
 			files = append(files, findFiles(parentMapKey+"."+key, v)...)
 		} else if v, ok := value.([]map[string]any); ok {
 			for i, arr := range v {
-				files = append(files, findFiles(fmt.Sprintf(`%s.%s.%d`, parentMapKey, key, i), arr)...)
+				files = append(
+					files,
+					findFiles(fmt.Sprintf(`%s.%s.%d`, parentMapKey, key, i), arr)...)
 			}
 		} else if v, ok := value.([]*os.File); ok {
 			for i, file := range v {
@@ -86,7 +88,7 @@ func WithFiles() Option {
 			}
 		}
 		if len(filesGroup) > 0 {
-			mapDataFiles := []string{}
+			mapDataFiles := make([]string, 0, len(filesGroup))
 
 			for i, fileData := range filesGroup {
 				mapDataFiles = append(

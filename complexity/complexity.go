@@ -62,14 +62,31 @@ func (cw complexityWalker) selectionSetComplexity(
 			args := s.ArgumentMap(cw.vars)
 			var fieldComplexity int
 			if s.ObjectDefinition.Kind == ast.Interface {
-				fieldComplexity = cw.interfaceFieldComplexity(ctx, s.ObjectDefinition, fieldDefinition.Kind, s.Name, childComplexity, args)
+				fieldComplexity = cw.interfaceFieldComplexity(
+					ctx,
+					s.ObjectDefinition,
+					fieldDefinition.Kind,
+					s.Name,
+					childComplexity,
+					args,
+				)
 			} else {
-				fieldComplexity = cw.fieldComplexity(ctx, s.ObjectDefinition, fieldDefinition.Kind, s.Name, childComplexity, args)
+				fieldComplexity = cw.fieldComplexity(
+					ctx,
+					s.ObjectDefinition,
+					fieldDefinition.Kind,
+					s.Name,
+					childComplexity,
+					args,
+				)
 			}
 			complexity = safeAdd(complexity, fieldComplexity)
 
 		case *ast.FragmentSpread:
-			complexity = safeAdd(complexity, cw.selectionSetComplexity(ctx, s.Definition.SelectionSet))
+			complexity = safeAdd(
+				complexity,
+				cw.selectionSetComplexity(ctx, s.Definition.SelectionSet),
+			)
 
 		case *ast.InlineFragment:
 			complexity = safeAdd(complexity, cw.selectionSetComplexity(ctx, s.SelectionSet))

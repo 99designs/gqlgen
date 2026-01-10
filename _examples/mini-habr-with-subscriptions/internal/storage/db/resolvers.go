@@ -367,7 +367,10 @@ func createCommentMap(
 		if v.ParentID == nil {
 			rootComments = append(rootComments, v)
 		} else {
-			commentsMap[pathMap[*v.ParentID]] = append(commentsMap[pathMap[*v.ParentID]], v) // we know that parent comment exists because of the query is ordered by path
+			commentsMap[pathMap[*v.ParentID]] = append(
+				commentsMap[pathMap[*v.ParentID]],
+				v,
+			) // we know that parent comment exists because of the query is ordered by path
 		}
 	}
 

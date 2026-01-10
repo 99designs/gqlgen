@@ -54,9 +54,15 @@ func collectFields(
 			if !shouldIncludeNode(sel.Directives, reqCtx.Variables) {
 				continue
 			}
-			f := getOrCreateAndAppendField(&groupedFields, sel.Name, sel.Alias, sel.ObjectDefinition, func() CollectedField {
-				return CollectedField{Field: sel}
-			})
+			f := getOrCreateAndAppendField(
+				&groupedFields,
+				sel.Name,
+				sel.Alias,
+				sel.ObjectDefinition,
+				func() CollectedField {
+					return CollectedField{Field: sel}
+				},
+			)
 
 			f.Selections = append(f.Selections, sel.SelectionSet...)
 

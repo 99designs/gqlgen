@@ -163,7 +163,11 @@ func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.G
 			if err != nil {
 				w.WriteHeader(http.StatusUnprocessableEntity)
 				if err := tmpFile.Close(); err != nil {
-					writeJsonErrorf(w, "failed to copy to temp file and close temp file for key %s", key)
+					writeJsonErrorf(
+						w,
+						"failed to copy to temp file and close temp file for key %s",
+						key,
+					)
 					return
 				}
 				writeJsonErrorf(w, "failed to copy to temp file for key %s", key)

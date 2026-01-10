@@ -88,7 +88,7 @@ func WithFiles() Option {
 			}
 		}
 		if len(filesGroup) > 0 {
-			mapDataFiles := []string{}
+			mapDataFiles := make([]string, 0, len(filesGroup))
 
 			for i, fileData := range filesGroup {
 				mapDataFiles = append(

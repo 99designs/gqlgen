@@ -147,7 +147,14 @@ func TestRewriter_GetMethodComment(t *testing.T) {
 				files:  tt.fields.files,
 				copied: tt.fields.copied,
 			}
-			assert.Equalf(t, tt.want, r.GetMethodComment(tt.args.structname, tt.args.methodname), "GetMethodComment(%v, %v)", tt.args.structname, tt.args.methodname)
+			assert.Equalf(
+				t,
+				tt.want,
+				r.GetMethodComment(tt.args.structname, tt.args.methodname),
+				"GetMethodComment(%v, %v)",
+				tt.args.structname,
+				tt.args.methodname,
+			)
 		})
 	}
 }

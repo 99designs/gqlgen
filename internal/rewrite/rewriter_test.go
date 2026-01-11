@@ -98,7 +98,7 @@ func TestRewriter_GetMethodComment(t *testing.T) {
 				structname: "Foo",
 				methodname: "Method",
 			},
-			want: " comment\n comment", // nolint: dupword // this is for the test
+			want: " comment\n comment", //nolint: dupword // this is for the test
 		},
 		{
 			name: "directive in comment",

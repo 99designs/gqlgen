@@ -53,7 +53,6 @@ linters:
     - nakedret
     - nolintlint
     - perfsprint
-    - prealloc
     - reassign
     - revive
     - staticcheck
@@ -65,6 +64,7 @@ linters:
     - usestdlibvars
     - usetesting
     - wastedassign
+#    - prealloc # disabled because it is a huge pain
   settings:
     errcheck:
       exclude-functions:

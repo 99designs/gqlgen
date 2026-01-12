@@ -5,9 +5,9 @@ go 1.24.0
 replace github.com/99designs/gqlgen => ../
 
 require (
-	github.com/99designs/gqlgen v0.17.83
+	github.com/99designs/gqlgen v0.17.85
 	github.com/go-viper/mapstructure/v2 v2.4.0
-	github.com/goccy/go-yaml v1.19.1
+	github.com/goccy/go-yaml v1.19.2
 	github.com/google/uuid v1.6.0
 	github.com/gorilla/websocket v1.5.1
 	github.com/rs/cors v1.11.1
@@ -34,7 +34,7 @@ require (
 
 require (
 	github.com/pkg/errors v0.9.1 // indirect
-	golang.org/x/text v0.32.0
+	golang.org/x/text v0.33.0
 )
 
 replace github.com/gorilla/websocket => github.com/gorilla/websocket v1.5.0

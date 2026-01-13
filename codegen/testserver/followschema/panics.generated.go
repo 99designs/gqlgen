@@ -187,7 +187,10 @@ var panicsImplementors = []string{"Panics"}
 
 func (ec *executionContext) _Panics(ctx context.Context, sel ast.SelectionSet, obj *Panics) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, panicsImplementors)
+	return ec.__Panics(ctx, fields, obj)
+}
 
+func (ec *executionContext) __Panics(ctx context.Context, fields []graphql.CollectedField, obj *Panics) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {

@@ -135,7 +135,10 @@ var embeddedCase1Implementors = []string{"EmbeddedCase1"}
 
 func (ec *executionContext) _EmbeddedCase1(ctx context.Context, sel ast.SelectionSet, obj *EmbeddedCase1) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, embeddedCase1Implementors)
+	return ec.__EmbeddedCase1(ctx, fields, obj)
+}
 
+func (ec *executionContext) __EmbeddedCase1(ctx context.Context, fields []graphql.CollectedField, obj *EmbeddedCase1) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -174,7 +177,10 @@ var embeddedCase2Implementors = []string{"EmbeddedCase2"}
 
 func (ec *executionContext) _EmbeddedCase2(ctx context.Context, sel ast.SelectionSet, obj *EmbeddedCase2) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, embeddedCase2Implementors)
+	return ec.__EmbeddedCase2(ctx, fields, obj)
+}
 
+func (ec *executionContext) __EmbeddedCase2(ctx context.Context, fields []graphql.CollectedField, obj *EmbeddedCase2) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -213,7 +219,10 @@ var embeddedCase3Implementors = []string{"EmbeddedCase3"}
 
 func (ec *executionContext) _EmbeddedCase3(ctx context.Context, sel ast.SelectionSet, obj *EmbeddedCase3) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, embeddedCase3Implementors)
+	return ec.__EmbeddedCase3(ctx, fields, obj)
+}
 
+func (ec *executionContext) __EmbeddedCase3(ctx context.Context, fields []graphql.CollectedField, obj *EmbeddedCase3) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {

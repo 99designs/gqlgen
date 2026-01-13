@@ -207,7 +207,10 @@ var primitiveImplementors = []string{"Primitive"}
 
 func (ec *executionContext) _Primitive(ctx context.Context, sel ast.SelectionSet, obj *Primitive) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, primitiveImplementors)
+	return ec.__Primitive(ctx, fields, obj)
+}
 
+func (ec *executionContext) __Primitive(ctx context.Context, fields []graphql.CollectedField, obj *Primitive) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -282,7 +285,10 @@ var primitiveStringImplementors = []string{"PrimitiveString"}
 
 func (ec *executionContext) _PrimitiveString(ctx context.Context, sel ast.SelectionSet, obj *PrimitiveString) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, primitiveStringImplementors)
+	return ec.__PrimitiveString(ctx, fields, obj)
+}
 
+func (ec *executionContext) __PrimitiveString(ctx context.Context, fields []graphql.CollectedField, obj *PrimitiveString) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -399,6 +405,7 @@ func (ec *executionContext) marshalNPrimitive2githubᚗcomᚋ99designsᚋgqlgen�
 
 func (ec *executionContext) marshalNPrimitive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPrimitiveᚄ(ctx context.Context, sel ast.SelectionSet, v []Primitive) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
+	elemFields := graphql.CollectFields(ec.OperationContext, sel, primitiveImplementors)
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
 	if !isLen1 {
@@ -421,7 +428,7 @@ func (ec *executionContext) marshalNPrimitive2ᚕgithubᚗcomᚋ99designsᚋgqlg
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNPrimitive2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPrimitive(ctx, sel, v[i])
+			ret[i] = ec.__Primitive(ctx, elemFields, &v[i])
 		}
 		if isLen1 {
 			f(i)
@@ -447,6 +454,7 @@ func (ec *executionContext) marshalNPrimitiveString2githubᚗcomᚋ99designsᚋg
 
 func (ec *executionContext) marshalNPrimitiveString2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPrimitiveStringᚄ(ctx context.Context, sel ast.SelectionSet, v []PrimitiveString) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
+	elemFields := graphql.CollectFields(ec.OperationContext, sel, primitiveStringImplementors)
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
 	if !isLen1 {
@@ -469,7 +477,7 @@ func (ec *executionContext) marshalNPrimitiveString2ᚕgithubᚗcomᚋ99designs�
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNPrimitiveString2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPrimitiveString(ctx, sel, v[i])
+			ret[i] = ec.__PrimitiveString(ctx, elemFields, &v[i])
 		}
 		if isLen1 {
 			f(i)

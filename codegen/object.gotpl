@@ -34,18 +34,45 @@ func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.Selec
 }
 {{- else }}
 
+{{- $isIntrospectionType := or (eq $object.Name "__Schema") (eq $object.Name "__Type") (eq $object.Name "__Field") (eq $object.Name "__InputValue") (eq $object.Name "__EnumValue") (eq $object.Name "__Directive") }}
 {{ if $useFunctionSyntaxForExecutionContext -}}
 func _{{$object.Name}}(ctx context.Context, ec *executionContext, sel ast.SelectionSet{{ if not $object.Root }},obj {{$object.Reference | ref }}{{ end }}) graphql.Marshaler {
 {{- else -}}
 func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.SelectionSet{{ if not $object.Root }},obj {{$object.Reference | ref }}{{ end }}) graphql.Marshaler {
 {{- end }}
 	fields := graphql.CollectFields(ec.OperationContext, sel, {{$object.Name|lcFirst}}Implementors)
-	{{- if $object.Root }}
+	{{- if and (ne $object.Name "Entity") (not $isIntrospectionType) (not $object.Root) }}
+	{{ if $useFunctionSyntaxForExecutionContext -}}
+	return __{{$object.Name}}(ctx, ec, fields{{ if not $object.Root }}, obj{{ end }})
+	{{- else -}}
+	return ec.__{{$object.Name}}(ctx, fields{{ if not $object.Root }}, obj{{ end }})
+	{{- end }}
+}
+
+{{ if $useFunctionSyntaxForExecutionContext -}}
+func __{{$object.Name}}(ctx context.Context, ec *executionContext, fields []graphql.CollectedField{{ if not $object.Root }},obj {{$object.Reference | ref }}{{ end }}) graphql.Marshaler {
+{{- else -}}
+func (ec *executionContext) __{{$object.Name}}(ctx context.Context, fields []graphql.CollectedField{{ if not $object.Root }},obj {{$object.Reference | ref }}{{ end }}) graphql.Marshaler {
+{{- end }}
+{{- else if eq $object.Name "Entity" }}
+	{{ if $useFunctionSyntaxForExecutionContext -}}
+	return _{{$object.Name}}_Original(ctx, ec, fields{{ if not $object.Root }}, obj{{ end }})
+	{{- else -}}
+	return ec._{{$object.Name}}_Original(ctx, fields{{ if not $object.Root }}, obj{{ end }})
+	{{- end }}
+}
+
+{{ if $useFunctionSyntaxForExecutionContext -}}
+func _{{$object.Name}}_Original(ctx context.Context, ec *executionContext, fields []graphql.CollectedField{{ if not $object.Root }},obj {{$object.Reference | ref }}{{ end }}) graphql.Marshaler {
+{{- else -}}
+func (ec *executionContext) _{{$object.Name}}_Original(ctx context.Context, fields []graphql.CollectedField{{ if not $object.Root }},obj {{$object.Reference | ref }}{{ end }}) graphql.Marshaler {
+{{- end }}
+	{{- end}}
+	{{- if $object.Root}}
 		ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
 			Object: {{$object.Name|quote}},
 		})
 	{{end}}
-
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {

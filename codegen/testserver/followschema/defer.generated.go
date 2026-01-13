@@ -140,7 +140,10 @@ var deferModelImplementors = []string{"DeferModel"}
 
 func (ec *executionContext) _DeferModel(ctx context.Context, sel ast.SelectionSet, obj *DeferModel) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, deferModelImplementors)
+	return ec.__DeferModel(ctx, fields, obj)
+}
 
+func (ec *executionContext) __DeferModel(ctx context.Context, fields []graphql.CollectedField, obj *DeferModel) graphql.Marshaler {
 	out := graphql.NewFieldSet(fields)
 	deferred := make(map[string]*graphql.FieldSet)
 	for i, field := range fields {
@@ -235,6 +238,7 @@ func (ec *executionContext) marshalODeferModel2ᚕᚖgithubᚗcomᚋ99designsᚋ
 		return graphql.Null
 	}
 	ret := make(graphql.Array, len(v))
+	elemFields := graphql.CollectFields(ec.OperationContext, sel, deferModelImplementors)
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
 	if !isLen1 {
@@ -257,7 +261,14 @@ func (ec *executionContext) marshalODeferModel2ᚕᚖgithubᚗcomᚋ99designsᚋ
 			if !isLen1 {
 				defer wg.Done()
 			}
-			ret[i] = ec.marshalNDeferModel2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐDeferModel(ctx, sel, v[i])
+			if v[i] == nil {
+				if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+					ec.Errorf(ctx, "the requested element is null which the schema does not allow")
+				}
+				ret[i] = graphql.Null
+			} else {
+				ret[i] = ec.__DeferModel(ctx, elemFields, v[i])
+			}
 		}
 		if isLen1 {
 			f(i)

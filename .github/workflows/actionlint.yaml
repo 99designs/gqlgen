@@ -71,7 +71,7 @@ jobs:
       env:
         SHELLCHECK_OPTS: '-e SC2086 -e SC2129 -e SC2164 -e SC2155 -e SC2103'
     - name: Install Go
-      uses: actions/setup-go@4dc6199c7b1a012772edbd06daecab0f50c9053c # v6
+      uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6
     - name: Install GHALINT
       run: go install github.com/suzuki-shunsuke/ghalint/cmd/ghalint@v1.5.3 # v1.5.3
     - run: cd ..; ghalint run

@@ -2,6 +2,7 @@ package federation
 
 import (
 	"go/types"
+	"slices"
 
 	"github.com/vektah/gqlparser/v2/ast"
 
@@ -97,12 +98,7 @@ func (e *Entity) isResolvable() bool {
 
 // Determine if a field is part of the entities key.
 func (e *Entity) isKeyField(field *ast.FieldDefinition) bool {
-	for _, keyField := range e.keyFields() {
-		if keyField == field.Name {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(e.keyFields(), field.Name)
 }
 
 // Get the key fields for this entity.

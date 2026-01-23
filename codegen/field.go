@@ -7,6 +7,7 @@ import (
 	"go/types"
 	"log"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -627,15 +628,6 @@ func (f *Field) IsRoot() bool {
 	return f.Object.Root
 }
 
-func contains(slice []string, str string) bool {
-	for _, s := range slice {
-		if s == str {
-			return true
-		}
-	}
-	return false
-}
-
 func formatGoType(goType string) string {
 	if strings.Contains(goType, "/") {
 		lastDot := strings.LastIndex(goType, ".")
@@ -687,7 +679,7 @@ func (f *Field) ShortResolverSignature(ft *goast.FuncType) string {
 		resSb540.WriteString(fmt.Sprintf(", %s %s", inlineInfo.OriginalArgName, goType))
 
 		for _, arg := range f.Args {
-			if !contains(inlineInfo.ExpandedArgs, arg.Name) {
+			if !slices.Contains(inlineInfo.ExpandedArgs, arg.Name) {
 				resSb540.WriteString(
 					fmt.Sprintf(
 						", %s %s",
@@ -816,7 +808,7 @@ func (f *Field) CallArgs() string {
 		args = append(args, bundled)
 
 		for _, arg := range f.Args {
-			if !contains(inlineInfo.ExpandedArgs, arg.Name) {
+			if !slices.Contains(inlineInfo.ExpandedArgs, arg.Name) {
 				tmp := "fc.Args[" + strconv.Quote(
 					arg.Name,
 				) + "].(" + templates.CurrentImports.LookupType(
@@ -872,7 +864,7 @@ func (f *Field) StubCallArgs() string {
 		args = append(args, inlineInfo.OriginalArgName)
 
 		for _, arg := range f.Args {
-			if !contains(inlineInfo.ExpandedArgs, arg.Name) {
+			if !slices.Contains(inlineInfo.ExpandedArgs, arg.Name) {
 				args = append(args, arg.VarName)
 			}
 		}

@@ -50,6 +50,7 @@ linters:
     - govet
     - ineffassign
     - misspell
+    - modernize
     - nakedret
     - nolintlint
     - perfsprint
@@ -91,6 +92,18 @@ linters:
         - shadow
         - unusedwrite
       enable-all: true
+    modernize:
+      disable:
+        - any
+        - bloop
+        - fmtappendf
+        - minmax
+        - rangeint
+        - reflecttypefor
+        - stditerators
+        - stringscut
+        - stringscutprefix
+        - stringsseq
     perfsprint:
       int-conversion: false
       err-error: false

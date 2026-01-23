@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"go/types"
 	"io/fs"
+	"maps"
 	"os"
 	"path/filepath"
 	"reflect"
 	"regexp"
 	"runtime"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -78,9 +80,7 @@ func Render(cfg Options) error {
 	CurrentImports = &Imports{packages: cfg.Packages, destDir: filepath.Dir(cfg.Filename)}
 
 	funcs := Funcs()
-	for n, f := range cfg.Funcs {
-		funcs[n] = f
-	}
+	maps.Copy(funcs, cfg.Funcs)
 
 	t := template.New("").Funcs(funcs)
 	t, err := parseTemplates(cfg, t)
@@ -596,10 +596,8 @@ var keywords = []string{
 
 // sanitizeKeywords prevents collisions with go keywords for arguments to resolver functions
 func sanitizeKeywords(name string) string {
-	for _, k := range keywords {
-		if name == k {
-			return name + "Arg"
-		}
+	if slices.Contains(keywords, name) {
+		return name + "Arg"
 	}
 	return name
 }

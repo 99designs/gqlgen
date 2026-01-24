@@ -135,11 +135,18 @@ func TestField_Batch(t *testing.T) {
 	t.Run("Batch flag defaults to false", func(t *testing.T) {
 		f := Field{}
 		require.False(t, f.Batch)
+		require.False(t, f.IsBatch())
 	})
 
 	t.Run("Batch flag can be set", func(t *testing.T) {
 		f := Field{Batch: true}
 		require.True(t, f.Batch)
+		require.True(t, f.IsBatch())
+	})
+
+	t.Run("BatchGoFieldName returns correct name", func(t *testing.T) {
+		f := Field{GoFieldName: "Posts"}
+		require.Equal(t, "PostsBatch", f.BatchGoFieldName())
 	})
 }
 

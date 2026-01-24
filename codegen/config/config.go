@@ -592,6 +592,7 @@ type TypeMapField struct {
 	// that accepts multiple parent objects and returns results for all of them
 	// in a single call, reducing N+1 query problems.
 	Batch bool `yaml:"batch,omitempty"`
+
 	// ForceGenerate forces the field to be generated in the model struct
 	// even when OmitResolverFields is enabled and the field has forceResolver: true.
 	ForceGenerate bool `yaml:"forceGenerate"`

@@ -2,6 +2,7 @@ package codegen
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/ast"
@@ -28,10 +29,8 @@ type Directive struct {
 // IsLocation check location directive
 func (d *Directive) IsLocation(location ...ast.DirectiveLocation) bool {
 	for _, l := range d.Locations {
-		for _, a := range location {
-			if l == a {
-				return true
-			}
+		if slices.Contains(location, l) {
+			return true
 		}
 	}
 

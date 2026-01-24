@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"sort"
 	"strings"
 
@@ -598,12 +599,7 @@ func (a *StringList) UnmarshalYAML(unmarshal func(any) error) error {
 }
 
 func (a StringList) Has(file string) bool {
-	for _, existing := range a {
-		if existing == file {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(a, file)
 }
 
 func (c *Config) check() error {
@@ -747,7 +743,7 @@ func (tm TypeMap) ReferencedPackages() []string {
 				continue
 			}
 			pkg, _ := code.PkgAndType(model)
-			if pkg == "" || inStrSlice(pkgs, pkg) {
+			if pkg == "" || slices.Contains(pkgs, pkg) {
 				continue
 			}
 			pkgs = append(pkgs, code.QualifyPackagePath(pkg))
@@ -785,16 +781,6 @@ type DirectiveConfig struct {
 	// func(ctx context.Context, obj any, next graphql.Resolver[, directive arguments if any]) (res
 	// any, err error)
 	Implementation *string
-}
-
-func inStrSlice(haystack []string, needle string) bool {
-	for _, v := range haystack {
-		if needle == v {
-			return true
-		}
-	}
-
-	return false
 }
 
 // findCfg searches for the config file in this directory and all parents up the tree

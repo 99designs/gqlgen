@@ -5,6 +5,7 @@ package graphql
 import (
 	"context"
 	"fmt"
+	"slices"
 
 	"github.com/vektah/gqlparser/v2/ast"
 )
@@ -148,12 +149,7 @@ func doesFragmentConditionMatch(typeCondition string, satisfies []string) bool {
 
 	// To handle abstract types we pass in a list of all known types that the current
 	// type will satisfy.
-	for _, satisfyingType := range satisfies {
-		if typeCondition == satisfyingType {
-			return true
-		}
-	}
-	return false
+	return slices.Contains(satisfies, typeCondition)
 }
 
 func getOrCreateAndAppendField(
@@ -176,15 +172,11 @@ func getOrCreateAndAppendField(
 				return &(*c)[i]
 			}
 
-			for _, ifc := range objectDefinition.Interfaces {
-				if ifc == cf.ObjectDefinition.Name {
-					return &(*c)[i]
-				}
+			if slices.Contains(objectDefinition.Interfaces, cf.ObjectDefinition.Name) {
+				return &(*c)[i]
 			}
-			for _, ifc := range cf.ObjectDefinition.Interfaces {
-				if ifc == objectDefinition.Name {
-					return &(*c)[i]
-				}
+			if slices.Contains(cf.ObjectDefinition.Interfaces, objectDefinition.Name) {
+				return &(*c)[i]
 			}
 		}
 	}

@@ -38,6 +38,7 @@ type Field struct {
 	Directives       []*Directive
 	HasHaser         bool   // Whether a haser method is available (e.g., HasName())
 	HaserMethodName  string // Name of the haser method
+	Batch            bool   // Enable batch resolver for this field
 }
 
 func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, error) {
@@ -82,6 +83,13 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 	if f.IsResolver && b.Config.ResolversAlwaysReturnPointers && !f.TypeReference.IsPtr() &&
 		f.TypeReference.IsStruct() {
 		f.TypeReference = b.Binder.PointerTo(f.TypeReference)
+	}
+
+	// Set Batch flag from config (independent of resolver setting)
+	if fieldCfg, ok := b.Config.Models[obj.Name]; ok {
+		if fieldEntry, ok := fieldCfg.Fields[field.Name]; ok {
+			f.Batch = fieldEntry.Batch
+		}
 	}
 
 	return &f, nil

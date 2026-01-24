@@ -78,28 +78,45 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 		}
 
 		for _, f := range o.Fields {
-			if !f.IsResolver {
+			if !f.IsResolver && !f.IsBatch() {
 				continue
 			}
 
 			structName := templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type)
-			comment := strings.TrimSpace(
-				strings.TrimLeft(rewriter.GetMethodComment(structName, f.GoFieldName), `\`),
-			)
-			implementation := strings.TrimSpace(rewriter.GetMethodBody(structName, f.GoFieldName))
+			var prevDecl *ast.FuncDecl
+			var comment string
+			var implementation string
+
+			if f.IsResolver && !f.IsBatch() {
+				comment = strings.TrimSpace(
+					strings.TrimLeft(
+						rewriter.GetMethodComment(structName, f.GoFieldName),
+						`\`,
+					),
+				)
+				implementation = strings.TrimSpace(
+					rewriter.GetMethodBody(structName, f.GoFieldName),
+				)
+				prevDecl = rewriter.GetPrevDecl(structName, f.GoFieldName)
+			}
 			if implementation != "" {
 				resolver := Resolver{
 					o,
 					f,
-					rewriter.GetPrevDecl(structName, f.GoFieldName),
+					prevDecl,
 					comment,
 					implementation,
 					nil,
 				}
 				file.Resolvers = append(file.Resolvers, &resolver)
 			} else {
-				resolver := Resolver{o, f, nil, "", `panic("not implemented")`, nil}
+				resolver := Resolver{o, f, prevDecl, comment, `panic("not implemented")`, nil}
 				file.Resolvers = append(file.Resolvers, &resolver)
+			}
+
+			// Mark batch resolver method as copied if it exists
+			if f.IsBatch() {
+				rewriter.GetPrevDecl(structName, f.BatchGoFieldName())
 			}
 		}
 	}
@@ -172,34 +189,50 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 			files[fn].Objects = append(files[fn].Objects, o)
 		}
 		for _, f := range o.Fields {
-			if !f.IsResolver {
+			if !f.IsResolver && !f.IsBatch() {
 				continue
 			}
 			structName := templates.LcFirst(o.Name) + templates.UcFirst(data.Config.Resolver.Type)
-			// TODO(steve): Why do we need to trimLeft "\" here? Some bazel thing?
-			comment := strings.TrimSpace(
-				strings.TrimLeft(rewriter.GetMethodComment(structName, f.GoFieldName), `\`),
-			)
-			implementation := strings.TrimSpace(rewriter.GetMethodBody(structName, f.GoFieldName))
+			var comment string
+			var implementation string
+			var prevDecl *ast.FuncDecl
+			if f.IsResolver && !f.IsBatch() {
+				// TODO(steve): Why do we need to trimLeft "\" here? Some bazel thing?
+				comment = strings.TrimSpace(
+					strings.TrimLeft(
+						rewriter.GetMethodComment(structName, f.GoFieldName),
+						`\`,
+					),
+				)
+				implementation = strings.TrimSpace(
+					rewriter.GetMethodBody(structName, f.GoFieldName),
+				)
+				prevDecl = rewriter.GetPrevDecl(structName, f.GoFieldName)
+			}
+			if implementation == "" {
+				implementation = `panic("not implemented")`
+			}
 			resolver := Resolver{
 				o,
 				f,
-				rewriter.GetPrevDecl(structName, f.GoFieldName),
+				prevDecl,
 				comment,
 				implementation,
 				nil,
 			}
-			var implExists bool
-			for _, p := range data.Plugins {
-				rImpl, ok := p.(plugin.ResolverImplementer)
-				if !ok {
-					continue
+			if f.IsResolver && !f.IsBatch() {
+				var implExists bool
+				for _, p := range data.Plugins {
+					rImpl, ok := p.(plugin.ResolverImplementer)
+					if !ok {
+						continue
+					}
+					if implExists {
+						return errors.New("multiple plugins implement ResolverImplementer")
+					}
+					implExists = true
+					resolver.ImplementationRender = rImpl.Implement
 				}
-				if implExists {
-					return errors.New("multiple plugins implement ResolverImplementer")
-				}
-				implExists = true
-				resolver.ImplementationRender = rImpl.Implement
 			}
 			fnCase := gqlToResolverName(
 				data.Config.Resolver.Dir(),
@@ -214,6 +247,11 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 			}
 
 			files[fn].Resolvers = append(files[fn].Resolvers, &resolver)
+
+			// Mark batch resolver method as copied if it exists
+			if f.IsBatch() {
+				rewriter.GetPrevDecl(structName, f.BatchGoFieldName())
+			}
 		}
 	}
 

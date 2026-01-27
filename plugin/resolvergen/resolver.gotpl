@@ -19,7 +19,14 @@
 {{ end }}
 
 {{ range $resolver := .Resolvers -}}
-	{{- if and $resolver.Field.IsResolver (not $resolver.Field.IsBatch) }}
+	{{- if $resolver.Field.IsBatch }}
+	{{ if not $.OmitTemplateComment -}}
+	// {{ $resolver.Field.GoFieldName }} is the batch resolver for the {{ $resolver.Field.Name }} field.
+	{{- end }}
+	func (r *{{lcFirst $resolver.Object.Name}}{{ucFirst $.ResolverType}}) {{$resolver.Field.GoFieldName}}{{ $resolver.Field.ShortBatchResolverDeclaration }}{
+		{{ $resolver.Implementation }}
+	}
+	{{- else }}
 		{{ if $resolver.Comment -}}
 			{{with $resolver.Comment}}{{.|prefixLines "//"}}{{end}}
 		{{- else if not $.OmitTemplateComment -}}
@@ -29,15 +36,6 @@
 			{{ $resolver.Implementation }}
 		}
 	{{- end }}
-
-	{{- if $resolver.Field.IsBatch }}
-	{{ if not $.OmitTemplateComment -}}
-	// {{ $resolver.Field.BatchGoFieldName }} is the batch resolver for the {{ $resolver.Field.Name }} field.
-	{{- end }}
-	func (r *{{lcFirst $resolver.Object.Name}}{{ucFirst $.ResolverType}}) {{$resolver.Field.BatchGoFieldName}}{{ $resolver.Field.ShortBatchResolverDeclaration }}{
-		panic("not implemented: {{ $resolver.Field.BatchGoFieldName }} - {{ $resolver.Field.Name }}")
-	}
-	{{ end }}
 {{ end }}
 
 {{ range $object := .Objects -}}

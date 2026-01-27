@@ -601,11 +601,6 @@ func (f *Field) IsBatch() bool {
 	return f.Batch
 }
 
-// BatchGoFieldName returns the Go method name for the batch resolver (e.g., "PostsBatch").
-func (f *Field) BatchGoFieldName() string {
-	return f.GoFieldName + "Batch"
-}
-
 // ShortBatchResolverDeclaration returns the method signature for a batch resolver.
 // Batch resolvers accept multiple parent objects and return results for all of them.
 // For example, if the normal resolver is:
@@ -614,7 +609,7 @@ func (f *Field) BatchGoFieldName() string {
 //
 // The batch resolver would be:
 //
-//	PostsBatch(ctx context.Context, objs []*User) ([][]*Post, []error)
+//	Posts(ctx context.Context, objs []*User) ([][]*Post, []error)
 func (f *Field) ShortBatchResolverDeclaration() string {
 	if f.Object.Root {
 		// Root fields don't have a parent object, so batch doesn't make sense

@@ -625,29 +625,12 @@ func (f *Field) ShortBatchResolverDeclaration() string {
 
 	parentType := templates.CurrentImports.LookupType(f.Object.Reference())
 	resultType := templates.CurrentImports.LookupType(f.TypeReference.GO)
-	batchResultType := f.batchResultTypeRef()
 
 	return fmt.Sprintf(
-		"(ctx context.Context, objs []%s) ([]%s[%s])",
+		"(ctx context.Context, objs []%s) ([]graphql.BatchResult[%s])",
 		parentType,
-		batchResultType,
 		resultType,
 	)
-}
-
-func (f *Field) batchResultTypeRef() string {
-	if f.Object == nil || f.Object.ResolverInterface == nil {
-		return "BatchResult"
-	}
-	named, ok := f.Object.ResolverInterface.(*types.Named)
-	if !ok || named.Obj() == nil || named.Obj().Pkg() == nil {
-		return "BatchResult"
-	}
-	pkgAlias := templates.CurrentImports.Lookup(named.Obj().Pkg().Path())
-	if pkgAlias == "" {
-		return "BatchResult"
-	}
-	return pkgAlias + ".BatchResult"
 }
 
 func (f *Field) GoNameUnexported() string {

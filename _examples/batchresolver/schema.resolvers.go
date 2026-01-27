@@ -8,6 +8,8 @@ package batchresolver
 import (
 	"context"
 	"errors"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 // Users is the resolver for the users field.
@@ -19,21 +21,21 @@ func (r *queryResolver) Users(ctx context.Context) ([]*User, error) {
 }
 
 // NullableBatch is the batch resolver for the nullableBatch field.
-func (r *userResolver) NullableBatch(ctx context.Context, objs []*User) []BatchResult[*Profile] {
+func (r *userResolver) NullableBatch(ctx context.Context, objs []*User) []graphql.BatchResult[*Profile] {
 	if r.profileWrongLen {
 		if len(objs) == 0 {
 			return nil
 		}
 		idx := r.userIndex(objs[0])
 		value, err := resolveProfile(r.Resolver, idx)
-		return []BatchResult[*Profile]{{Value: value, Err: err}}
+		return []graphql.BatchResult[*Profile]{{Value: value, Err: err}}
 	}
 
-	results := make([]BatchResult[*Profile], len(objs))
+	results := make([]graphql.BatchResult[*Profile], len(objs))
 	for i, obj := range objs {
 		idx := r.userIndex(obj)
 		value, err := resolveProfile(r.Resolver, idx)
-		results[i] = BatchResult[*Profile]{Value: value, Err: err}
+		results[i] = graphql.BatchResult[*Profile]{Value: value, Err: err}
 	}
 	return results
 }
@@ -45,21 +47,21 @@ func (r *userResolver) NullableNonBatch(ctx context.Context, obj *User) (*Profil
 }
 
 // NonNullableBatch is the batch resolver for the nonNullableBatch field.
-func (r *userResolver) NonNullableBatch(ctx context.Context, objs []*User) []BatchResult[*Profile] {
+func (r *userResolver) NonNullableBatch(ctx context.Context, objs []*User) []graphql.BatchResult[*Profile] {
 	if r.profileWrongLen {
 		if len(objs) == 0 {
 			return nil
 		}
 		idx := r.userIndex(objs[0])
 		value, err := resolveProfile(r.Resolver, idx)
-		return []BatchResult[*Profile]{{Value: value, Err: err}}
+		return []graphql.BatchResult[*Profile]{{Value: value, Err: err}}
 	}
 
-	results := make([]BatchResult[*Profile], len(objs))
+	results := make([]graphql.BatchResult[*Profile], len(objs))
 	for i, obj := range objs {
 		idx := r.userIndex(obj)
 		value, err := resolveProfile(r.Resolver, idx)
-		results[i] = BatchResult[*Profile]{Value: value, Err: err}
+		results[i] = graphql.BatchResult[*Profile]{Value: value, Err: err}
 	}
 	return results
 }

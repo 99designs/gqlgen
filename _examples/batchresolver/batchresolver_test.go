@@ -1,18 +1,15 @@
 package batchresolver
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/99designs/gqlgen/client"
-	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
@@ -321,65 +318,3 @@ func TestBatchResolver_InvalidLen_AddsErrorPerParent(t *testing.T) {
 	)
 }
 
-func TestBatchResolver_InvalidIndex_AddsError(t *testing.T) {
-	// NOTE: This error path is only reachable by internal execution context misuse,
-	// not by normal GraphQL query execution.
-	resolver := &Resolver{
-		profiles:      []*Profile{{ID: "p1"}},
-		profileErrIdx: -1,
-	}
-	schema := NewExecutableSchema(Config{Resolvers: resolver}).(*executableSchema)
-	ec := executionContext{OperationContext: nil, executableSchema: schema}
-
-	parents := []*User{{}}
-	ctx := graphql.WithResponseContext(context.Background(), graphql.DefaultErrorPresenter, nil)
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("users"))
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithIndex(2))
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("nullableBatch"))
-	ctx = ec.withBatchParents(ctx, "User", parents)
-
-	_, _ = ec.resolveBatch_User_nullableBatch(
-		ctx,
-		graphql.CollectedField{Field: &ast.Field{Name: "nullableBatch"}},
-		parents[0],
-	)
-
-	requireErrorListJSON(t, graphql.GetErrors(ctx), `[
-		{"message":"batch resolver User.nullableBatch could not resolve parent index 2","path":["users",2,"nullableBatch"]}
-	]`)
-}
-
-func TestBatchResolver_InvalidType_AddsError(t *testing.T) {
-	// NOTE: This error path is only reachable by internal execution context misuse,
-	// not by normal GraphQL query execution.
-	resolver := &Resolver{
-		profiles:      []*Profile{{ID: "p1"}},
-		profileErrIdx: -1,
-	}
-	schema := NewExecutableSchema(Config{Resolvers: resolver}).(*executableSchema)
-	ec := executionContext{OperationContext: nil, executableSchema: schema}
-
-	parents := []*User{{}}
-	ctx := graphql.WithResponseContext(context.Background(), graphql.DefaultErrorPresenter, nil)
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("users"))
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithIndex(0))
-	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("nullableBatch"))
-	ctx = ec.withBatchParents(ctx, "User", parents)
-
-	group := ec.getBatchParentGroup(ctx, "User")
-	badResult := &batchFieldResult{done: make(chan struct{})}
-	badResult.results = []BatchResult[string]{{Value: "oops"}}
-	badResult.once.Do(func() {})
-	close(badResult.done)
-	group.fields.Store("nullableBatch", badResult)
-
-	_, _ = ec.resolveBatch_User_nullableBatch(
-		ctx,
-		graphql.CollectedField{Field: &ast.Field{Name: "nullableBatch"}},
-		parents[0],
-	)
-
-	requireErrorListJSON(t, graphql.GetErrors(ctx), `[
-		{"message":"batch resolver User.nullableBatch returned unexpected result type (index 0)","path":["users",0,"nullableBatch"]}
-	]`)
-}

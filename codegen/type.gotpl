@@ -131,7 +131,7 @@
 				{{- end }}
 				ret := make(graphql.Array, len(v))
 				{{- if and $.HasBatchResolverFields (not $type.IsScalar) (eq $type.Elem.Definition.Kind "OBJECT") }}
-				ctx = ec.withBatchParents(ctx, {{ $type.Elem.Definition.Name | quote }}, v)
+				ctx = graphql.WithBatchParents(ctx, {{ $type.Elem.Definition.Name | quote }}, v)
 				{{- end }}
 				{{- if not $type.IsScalar }}
 					var wg sync.WaitGroup

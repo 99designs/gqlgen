@@ -66,9 +66,9 @@ type QueryResolver interface {
 	Users(ctx context.Context) ([]*User, error)
 }
 type UserResolver interface {
-	NullableBatchBatch(ctx context.Context, objs []*User) ([]*Profile, []error)
+	NullableBatch(ctx context.Context, objs []*User) ([]*Profile, []error)
 	NullableNonBatch(ctx context.Context, obj *User) (*Profile, error)
-	NonNullableBatchBatch(ctx context.Context, objs []*User) ([]*Profile, []error)
+	NonNullableBatch(ctx context.Context, objs []*User) ([]*Profile, []error)
 	NonNullableNonBatch(ctx context.Context, obj *User) (*Profile, error)
 }
 
@@ -485,7 +485,7 @@ func (ec *executionContext) _User_nullableBatch(ctx context.Context, field graph
 		ec.fieldContext_User_nullableBatch,
 		func(ctx context.Context) (any, error) {
 			resolver := ec.resolvers.User()
-			results, errs := resolver.NullableBatchBatch(ctx, []*User{obj})
+			results, errs := resolver.NullableBatch(ctx, []*User{obj})
 			if errs == nil {
 				errs = make([]error, len(results))
 			}
@@ -564,7 +564,7 @@ func (ec *executionContext) _User_nonNullableBatch(ctx context.Context, field gr
 		ec.fieldContext_User_nonNullableBatch,
 		func(ctx context.Context) (any, error) {
 			resolver := ec.resolvers.User()
-			results, errs := resolver.NonNullableBatchBatch(ctx, []*User{obj})
+			results, errs := resolver.NonNullableBatch(ctx, []*User{obj})
 			if errs == nil {
 				errs = make([]error, len(results))
 			}

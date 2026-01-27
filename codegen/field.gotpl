@@ -143,7 +143,7 @@ func (ec *executionContext) {{ $field.FieldContextFunc }}({{ if not $field.Args 
 {{ define "fieldDefinition" }}
 	{{- if and .IsBatch (not .Object.Root) }}
 		resolver := ec.resolvers.{{ ucFirst .Object.Name }}()
-		results, errs := resolver.{{ .BatchGoFieldName }}(ctx, []{{ .Object.Reference | ref }}{obj})
+		results, errs := resolver.{{ .GoFieldName }}(ctx, []{{ .Object.Reference | ref }}{obj})
 		if errs == nil {
 			errs = make([]error, len(results))
 		}

@@ -143,11 +143,6 @@ func TestField_Batch(t *testing.T) {
 		require.True(t, f.Batch)
 		require.True(t, f.IsBatch())
 	})
-
-	t.Run("BatchGoFieldName returns correct name", func(t *testing.T) {
-		f := Field{GoFieldName: "Posts"}
-		require.Equal(t, "PostsBatch", f.BatchGoFieldName())
-	})
 }
 
 func TestField_CallArgs(t *testing.T) {

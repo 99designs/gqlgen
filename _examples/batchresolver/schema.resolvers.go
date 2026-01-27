@@ -15,9 +15,9 @@ func (r *queryResolver) Users(ctx context.Context) ([]*User, error) {
 	panic(fmt.Errorf("not implemented: Users - users"))
 }
 
-// NullableBatchBatch is the batch resolver for the nullableBatch field.
-func (r *userResolver) NullableBatchBatch(ctx context.Context, objs []*User) ([]*Profile, []error) {
-	panic("not implemented: NullableBatchBatch - nullableBatch")
+// NullableBatch is the batch resolver for the nullableBatch field.
+func (r *userResolver) NullableBatch(ctx context.Context, objs []*User) ([]*Profile, []error) {
+	panic("not implemented: NullableBatch - nullableBatch")
 }
 
 // NullableNonBatch is the resolver for the nullableNonBatch field.
@@ -25,9 +25,9 @@ func (r *userResolver) NullableNonBatch(ctx context.Context, obj *User) (*Profil
 	panic("not implemented")
 }
 
-// NonNullableBatchBatch is the batch resolver for the nonNullableBatch field.
-func (r *userResolver) NonNullableBatchBatch(ctx context.Context, objs []*User) ([]*Profile, []error) {
-	panic("not implemented: NonNullableBatchBatch - nonNullableBatch")
+// NonNullableBatch is the batch resolver for the nonNullableBatch field.
+func (r *userResolver) NonNullableBatch(ctx context.Context, objs []*User) ([]*Profile, []error) {
+	panic("not implemented: NonNullableBatch - nonNullableBatch")
 }
 
 // NonNullableNonBatch is the resolver for the nonNullableNonBatch field.

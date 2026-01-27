@@ -49,6 +49,20 @@ func (d *Data) HasEmbeddableSources() bool {
 	return hasEmbeddableSources
 }
 
+func (d *Data) HasBatchResolverFields() bool {
+	for _, obj := range d.Objects {
+		if obj.Root {
+			continue
+		}
+		for _, field := range obj.Fields {
+			if field.IsBatch() {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // AugmentedSource contains extra information about graphql schema files which is not known directly
 // from the Config.Sources data
 type AugmentedSource struct {

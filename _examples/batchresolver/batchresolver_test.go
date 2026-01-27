@@ -2,12 +2,10 @@ package batchresolver
 
 import (
 	"encoding/json"
-	"errors"
 	"sort"
 	"testing"
 
 	"github.com/stretchr/testify/require"
-	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -38,13 +36,6 @@ func requireErrorJSON(t *testing.T, err error, expected string) {
 	actual := normalizeErrorJSON(t, err.Error())
 	expectedNorm := normalizeErrorJSON(t, expected)
 	require.Equal(t, expectedNorm, actual)
-}
-
-func requireErrorListJSON(t *testing.T, errs gqlerror.List, expected string) {
-	t.Helper()
-	require.NotEmpty(t, errs)
-	err := errors.New(marshalJSON(t, errs))
-	requireErrorJSON(t, err, expected)
 }
 
 func normalizeErrorJSON(t *testing.T, jsonStr string) string {

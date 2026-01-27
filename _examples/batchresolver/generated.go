@@ -16,6 +16,7 @@ import (
 	"github.com/99designs/gqlgen/graphql/introspection"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -66,9 +67,9 @@ type QueryResolver interface {
 	Users(ctx context.Context) ([]*User, error)
 }
 type UserResolver interface {
-	NullableBatch(ctx context.Context, objs []*User) ([]*Profile, []error)
+	NullableBatch(ctx context.Context, objs []*User) []BatchResult[*Profile]
 	NullableNonBatch(ctx context.Context, obj *User) (*Profile, error)
-	NonNullableBatch(ctx context.Context, objs []*User) ([]*Profile, []error)
+	NonNullableBatch(ctx context.Context, objs []*User) []BatchResult[*Profile]
 	NonNullableNonBatch(ctx context.Context, obj *User) (*Profile, error)
 }
 
@@ -183,6 +184,126 @@ type executionContext struct {
 	deferred        int32
 	pendingDeferred int32
 	deferredResults chan graphql.DeferredResult
+}
+type batchContextKey struct{}
+
+type batchParentState struct {
+	groups map[string]*batchParentGroup
+}
+
+type batchParentGroup struct {
+	parents any
+	fields  sync.Map
+}
+
+type batchFieldResult struct {
+	once       sync.Once
+	done       chan struct{}
+	results    any
+	invalidErr error
+}
+
+type BatchResult[T any] struct {
+	Value T
+	Err   error
+}
+
+func (ec *executionContext) withBatchParents(ctx context.Context, typeName string, parents any) context.Context {
+
+	prev, _ := ctx.Value(batchContextKey{}).(*batchParentState)
+	var groups map[string]*batchParentGroup
+	if prev != nil {
+		groups = make(map[string]*batchParentGroup, len(prev.groups)+1)
+		for k, v := range prev.groups {
+			groups[k] = v
+		}
+	} else {
+		groups = make(map[string]*batchParentGroup, 1)
+	}
+	groups[typeName] = &batchParentGroup{parents: parents}
+
+	return context.WithValue(ctx, batchContextKey{}, &batchParentState{groups: groups})
+}
+
+func (ec *executionContext) getBatchParentGroup(ctx context.Context, typeName string) *batchParentGroup {
+	state, _ := ctx.Value(batchContextKey{}).(*batchParentState)
+	if state == nil {
+		return nil
+	}
+	return state.groups[typeName]
+}
+
+func (g *batchParentGroup) getFieldResult(key string, resolve func() (any, error)) *batchFieldResult {
+	if g == nil {
+		return nil
+	}
+	res, _ := g.fields.LoadOrStore(key, &batchFieldResult{done: make(chan struct{})})
+	result := res.(*batchFieldResult)
+	result.once.Do(func() {
+		defer close(result.done)
+		result.results, result.invalidErr = resolve()
+	})
+	<-result.done
+	return result
+}
+
+func (ec *executionContext) batchParentIndex(ctx context.Context) (ast.PathIndex, bool) {
+	path := graphql.GetPath(ctx)
+	if len(path) < 2 {
+		return 0, false
+	}
+	if idx, ok := path[len(path)-2].(ast.PathIndex); ok {
+		return idx, true
+	}
+	return 0, false
+}
+
+func (ec *executionContext) batchPathWithIndex(ctx context.Context, index int) ast.Path {
+	path := graphql.GetPath(ctx)
+	if len(path) < 2 {
+		return path
+	}
+	if _, ok := path[len(path)-2].(ast.PathIndex); !ok {
+		return path
+	}
+	copied := make(ast.Path, len(path))
+	copy(copied, path)
+	copied[len(path)-2] = ast.PathIndex(index)
+	return copied
+}
+
+func (ec *executionContext) addBatchError(ctx context.Context, index int, err error) {
+	if err == nil {
+		return
+	}
+	path := ec.batchPathWithIndex(ctx, index)
+	if list, ok := err.(gqlerror.List); ok {
+		for _, item := range list {
+			if item == nil {
+				continue
+			}
+			if item.Path == nil {
+				cloned := *item
+				cloned.Path = path
+				graphql.AddError(ctx, &cloned)
+				continue
+			}
+			graphql.AddError(ctx, item)
+		}
+		return
+	}
+	var gqlErr *gqlerror.Error
+	if errors.As(err, &gqlErr) {
+		if gqlErr.Path == nil {
+			cloned := *gqlErr
+			cloned.Path = path
+			graphql.AddError(ctx, &cloned)
+			return
+		}
+		graphql.AddError(ctx, gqlErr)
+		return
+	}
+	graphql.AddError(ctx, gqlerror.WrapPath(path, err))
 }
 
 func (ec *executionContext) processDeferredGroup(dg graphql.DeferredGroup) {
@@ -484,20 +605,7 @@ func (ec *executionContext) _User_nullableBatch(ctx context.Context, field graph
 		field,
 		ec.fieldContext_User_nullableBatch,
 		func(ctx context.Context) (any, error) {
-			resolver := ec.resolvers.User()
-			results, errs := resolver.NullableBatch(ctx, []*User{obj})
-			if errs == nil {
-				errs = make([]error, len(results))
-			}
-			if len(results) != 1 || len(errs) != 1 {
-				return nil, fmt.Errorf(
-					"batch resolver User.nullableBatch returned %d results and %d errors for %d parents",
-					len(results),
-					len(errs),
-					1,
-				)
-			}
-			return results[0], errs[0]
+			return ec.resolveBatch_User_nullableBatch(ctx, field, obj)
 		},
 		nil,
 		ec.marshalOProfile2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfile,
@@ -521,6 +629,75 @@ func (ec *executionContext) fieldContext_User_nullableBatch(_ context.Context, f
 		},
 	}
 	return fc, nil
+}
+func (ec *executionContext) resolveBatch_User_nullableBatch(ctx context.Context, field graphql.CollectedField, obj *User) (any, error) {
+	resolver := ec.resolvers.User()
+	group := ec.getBatchParentGroup(ctx, "User")
+	if group != nil {
+		parents, ok := group.parents.([]*User)
+		if ok {
+			idx, ok := ec.batchParentIndex(ctx)
+			if ok {
+				idxInt := int(idx)
+				key := field.Alias
+				if key == "" {
+					key = field.Name
+				}
+				result := group.getFieldResult(key, func() (any, error) {
+					results := resolver.NullableBatch(ctx, parents)
+					if len(results) != len(parents) {
+						return results, fmt.Errorf(
+							"batch resolver User.nullableBatch returned %d results for %d parents",
+							len(results),
+							len(parents),
+						)
+					}
+					return results, nil
+				})
+				if result.invalidErr != nil {
+					ec.addBatchError(ctx, idxInt, fmt.Errorf("index %d: %w", idx, result.invalidErr))
+					return nil, nil
+				}
+
+				results, ok := result.results.([]BatchResult[*Profile])
+				if !ok {
+					ec.addBatchError(ctx, idxInt, fmt.Errorf(
+						"batch resolver User.nullableBatch returned unexpected result type (index %d)",
+						idx,
+					))
+					return nil, nil
+				}
+				if idxInt < 0 || idxInt >= len(results) {
+					ec.addBatchError(ctx, idxInt, fmt.Errorf(
+						"batch resolver User.nullableBatch could not resolve parent index %d",
+						idx,
+					))
+					return nil, nil
+				}
+				if results[idxInt].Err != nil {
+					ec.addBatchError(ctx, idxInt, results[idxInt].Err)
+					return nil, nil
+				}
+				return results[idxInt].Value, nil
+			}
+		}
+	}
+
+	results := resolver.NullableBatch(ctx, []*User{obj})
+	if len(results) != 1 {
+		ec.addBatchError(ctx, 0, fmt.Errorf(
+			"batch resolver User.nullableBatch returned %d results for %d parents (index %d)",
+			len(results),
+			1,
+			0,
+		))
+		return nil, nil
+	}
+	if results[0].Err != nil {
+		ec.addBatchError(ctx, 0, results[0].Err)
+		return nil, nil
+	}
+	return results[0].Value, nil
 }
 
 func (ec *executionContext) _User_nullableNonBatch(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -563,20 +740,7 @@ func (ec *executionContext) _User_nonNullableBatch(ctx context.Context, field gr
 		field,
 		ec.fieldContext_User_nonNullableBatch,
 		func(ctx context.Context) (any, error) {
-			resolver := ec.resolvers.User()
-			results, errs := resolver.NonNullableBatch(ctx, []*User{obj})
-			if errs == nil {
-				errs = make([]error, len(results))
-			}
-			if len(results) != 1 || len(errs) != 1 {
-				return nil, fmt.Errorf(
-					"batch resolver User.nonNullableBatch returned %d results and %d errors for %d parents",
-					len(results),
-					len(errs),
-					1,
-				)
-			}
-			return results[0], errs[0]
+			return ec.resolveBatch_User_nonNullableBatch(ctx, field, obj)
 		},
 		nil,
 		ec.marshalNProfile2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfile,
@@ -600,6 +764,75 @@ func (ec *executionContext) fieldContext_User_nonNullableBatch(_ context.Context
 		},
 	}
 	return fc, nil
+}
+func (ec *executionContext) resolveBatch_User_nonNullableBatch(ctx context.Context, field graphql.CollectedField, obj *User) (any, error) {
+	resolver := ec.resolvers.User()
+	group := ec.getBatchParentGroup(ctx, "User")
+	if group != nil {
+		parents, ok := group.parents.([]*User)
+		if ok {
+			idx, ok := ec.batchParentIndex(ctx)
+			if ok {
+				idxInt := int(idx)
+				key := field.Alias
+				if key == "" {
+					key = field.Name
+				}
+				result := group.getFieldResult(key, func() (any, error) {
+					results := resolver.NonNullableBatch(ctx, parents)
+					if len(results) != len(parents) {
+						return results, fmt.Errorf(
+							"batch resolver User.nonNullableBatch returned %d results for %d parents",
+							len(results),
+							len(parents),
+						)
+					}
+					return results, nil
+				})
+				if result.invalidErr != nil {
+					ec.addBatchError(ctx, idxInt, fmt.Errorf("index %d: %w", idx, result.invalidErr))
+					return nil, nil
+				}
+
+				results, ok := result.results.([]BatchResult[*Profile])
+				if !ok {
+					ec.addBatchError(ctx, idxInt, fmt.Errorf(
+						"batch resolver User.nonNullableBatch returned unexpected result type (index %d)",
+						idx,
+					))
+					return nil, nil
+				}
+				if idxInt < 0 || idxInt >= len(results) {
+					ec.addBatchError(ctx, idxInt, fmt.Errorf(
+						"batch resolver User.nonNullableBatch could not resolve parent index %d",
+						idx,
+					))
+					return nil, nil
+				}
+				if results[idxInt].Err != nil {
+					ec.addBatchError(ctx, idxInt, results[idxInt].Err)
+					return nil, nil
+				}
+				return results[idxInt].Value, nil
+			}
+		}
+	}
+
+	results := resolver.NonNullableBatch(ctx, []*User{obj})
+	if len(results) != 1 {
+		ec.addBatchError(ctx, 0, fmt.Errorf(
+			"batch resolver User.nonNullableBatch returned %d results for %d parents (index %d)",
+			len(results),
+			1,
+			0,
+		))
+		return nil, nil
+	}
+	if results[0].Err != nil {
+		ec.addBatchError(ctx, 0, results[0].Err)
+		return nil, nil
+	}
+	return results[0].Value, nil
 }
 
 func (ec *executionContext) _User_nonNullableNonBatch(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -2771,6 +3004,7 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 
 func (ec *executionContext) marshalNUser2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐUserᚄ(ctx context.Context, sel ast.SelectionSet, v []*User) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
+	ctx = ec.withBatchParents(ctx, "User", v)
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
 	if !isLen1 {
@@ -2829,6 +3063,7 @@ func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlge
 
 func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Directive) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
+	ctx = ec.withBatchParents(ctx, "__Directive", v)
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
 	if !isLen1 {
@@ -2960,6 +3195,7 @@ func (ec *executionContext) marshalN__InputValue2githubᚗcomᚋ99designsᚋgqlg
 
 func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
+	ctx = ec.withBatchParents(ctx, "__InputValue", v)
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
 	if !isLen1 {
@@ -3008,6 +3244,7 @@ func (ec *executionContext) marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋg
 
 func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
 	ret := make(graphql.Array, len(v))
+	ctx = ec.withBatchParents(ctx, "__Type", v)
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
 	if !isLen1 {
@@ -3136,6 +3373,7 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 		return graphql.Null
 	}
 	ret := make(graphql.Array, len(v))
+	ctx = ec.withBatchParents(ctx, "__EnumValue", v)
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
 	if !isLen1 {
@@ -3183,6 +3421,7 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 		return graphql.Null
 	}
 	ret := make(graphql.Array, len(v))
+	ctx = ec.withBatchParents(ctx, "__Field", v)
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
 	if !isLen1 {
@@ -3230,6 +3469,7 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 		return graphql.Null
 	}
 	ret := make(graphql.Array, len(v))
+	ctx = ec.withBatchParents(ctx, "__InputValue", v)
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
 	if !isLen1 {
@@ -3284,6 +3524,7 @@ func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 		return graphql.Null
 	}
 	ret := make(graphql.Array, len(v))
+	ctx = ec.withBatchParents(ctx, "__Type", v)
 	var wg sync.WaitGroup
 	isLen1 := len(v) == 1
 	if !isLen1 {

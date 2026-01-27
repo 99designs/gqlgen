@@ -549,7 +549,7 @@ type TypeMapField struct {
 
 	// Batch enables batch resolver generation for this field.
 	// When true, a batch resolver method (e.g., PostsBatch) will be generated
-	// that accepts multiple parent objects and returns results for all of them
+	// that accepts multiple parent objects and returns []BatchResult[T] for all of them
 	// in a single call, reducing N+1 query problems.
 	Batch bool `yaml:"batch,omitempty"`
 }

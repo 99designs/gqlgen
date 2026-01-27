@@ -85,6 +85,13 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 		if fieldEntry, ok := fieldCfg.Fields[field.Name]; ok {
 			f.Batch = fieldEntry.Batch
 			if f.Batch {
+				if f.Object.Root {
+					return nil, fmt.Errorf(
+						"batch resolver is not supported for root field %s.%s",
+						obj.Name,
+						field.Name,
+					)
+				}
 				// batch resolvers are always user-provided
 				f.IsResolver = true
 			}
@@ -618,8 +625,29 @@ func (f *Field) ShortBatchResolverDeclaration() string {
 
 	parentType := templates.CurrentImports.LookupType(f.Object.Reference())
 	resultType := templates.CurrentImports.LookupType(f.TypeReference.GO)
+	batchResultType := f.batchResultTypeRef()
 
-	return fmt.Sprintf("(ctx context.Context, objs []%s) ([]%s, []error)", parentType, resultType)
+	return fmt.Sprintf(
+		"(ctx context.Context, objs []%s) ([]%s[%s])",
+		parentType,
+		batchResultType,
+		resultType,
+	)
+}
+
+func (f *Field) batchResultTypeRef() string {
+	if f.Object == nil || f.Object.ResolverInterface == nil {
+		return "BatchResult"
+	}
+	named, ok := f.Object.ResolverInterface.(*types.Named)
+	if !ok || named.Obj() == nil || named.Obj().Pkg() == nil {
+		return "BatchResult"
+	}
+	pkgAlias := templates.CurrentImports.Lookup(named.Obj().Pkg().Path())
+	if pkgAlias == "" {
+		return "BatchResult"
+	}
+	return pkgAlias + ".BatchResult"
 }
 
 func (f *Field) GoNameUnexported() string {

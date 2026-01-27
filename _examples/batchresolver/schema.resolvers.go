@@ -7,32 +7,67 @@ package batchresolver
 
 import (
 	"context"
-	"fmt"
+	"errors"
 )
 
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*User, error) {
-	panic(fmt.Errorf("not implemented: Users - users"))
+	if r.users == nil {
+		return nil, errors.New("users not set")
+	}
+	return r.users, nil
 }
 
 // NullableBatch is the batch resolver for the nullableBatch field.
-func (r *userResolver) NullableBatch(ctx context.Context, objs []*User) ([]*Profile, []error) {
-	panic("not implemented: NullableBatch - nullableBatch")
+func (r *userResolver) NullableBatch(ctx context.Context, objs []*User) []BatchResult[*Profile] {
+	if r.profileWrongLen {
+		if len(objs) == 0 {
+			return nil
+		}
+		idx := r.userIndex(objs[0])
+		value, err := resolveProfile(r.Resolver, idx)
+		return []BatchResult[*Profile]{{Value: value, Err: err}}
+	}
+
+	results := make([]BatchResult[*Profile], len(objs))
+	for i, obj := range objs {
+		idx := r.userIndex(obj)
+		value, err := resolveProfile(r.Resolver, idx)
+		results[i] = BatchResult[*Profile]{Value: value, Err: err}
+	}
+	return results
 }
 
 // NullableNonBatch is the resolver for the nullableNonBatch field.
 func (r *userResolver) NullableNonBatch(ctx context.Context, obj *User) (*Profile, error) {
-	panic("not implemented")
+	idx := r.userIndex(obj)
+	return resolveProfile(r.Resolver, idx)
 }
 
 // NonNullableBatch is the batch resolver for the nonNullableBatch field.
-func (r *userResolver) NonNullableBatch(ctx context.Context, objs []*User) ([]*Profile, []error) {
-	panic("not implemented: NonNullableBatch - nonNullableBatch")
+func (r *userResolver) NonNullableBatch(ctx context.Context, objs []*User) []BatchResult[*Profile] {
+	if r.profileWrongLen {
+		if len(objs) == 0 {
+			return nil
+		}
+		idx := r.userIndex(objs[0])
+		value, err := resolveProfile(r.Resolver, idx)
+		return []BatchResult[*Profile]{{Value: value, Err: err}}
+	}
+
+	results := make([]BatchResult[*Profile], len(objs))
+	for i, obj := range objs {
+		idx := r.userIndex(obj)
+		value, err := resolveProfile(r.Resolver, idx)
+		results[i] = BatchResult[*Profile]{Value: value, Err: err}
+	}
+	return results
 }
 
 // NonNullableNonBatch is the resolver for the nonNullableNonBatch field.
 func (r *userResolver) NonNullableNonBatch(ctx context.Context, obj *User) (*Profile, error) {
-	panic("not implemented")
+	idx := r.userIndex(obj)
+	return resolveProfile(r.Resolver, idx)
 }
 
 // Query returns QueryResolver implementation.

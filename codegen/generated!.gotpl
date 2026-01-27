@@ -13,6 +13,9 @@
 {{ reserveImport "golang.org/x/sync/semaphore"}}
 {{ reserveImport "github.com/vektah/gqlparser/v2" "gqlparser" }}
 {{ reserveImport "github.com/vektah/gqlparser/v2/ast" }}
+{{- if .HasBatchResolverFields }}
+{{ reserveImport "github.com/vektah/gqlparser/v2/gqlerror" }}
+{{- end }}
 {{ reserveImport "github.com/99designs/gqlgen/graphql" }}
 {{ reserveImport "github.com/99designs/gqlgen/graphql/introspection" }}
 
@@ -290,15 +293,138 @@
 		}
 	}
 
-	type executionContext struct {
-		*graphql.OperationContext
-		*executableSchema
-		deferred        int32
-		pendingDeferred int32
-		deferredResults chan graphql.DeferredResult
+type executionContext struct {
+	*graphql.OperationContext
+	*executableSchema
+	deferred        int32
+	pendingDeferred int32
+	deferredResults chan graphql.DeferredResult
+}
+
+{{- if .HasBatchResolverFields }}
+type batchContextKey struct{}
+
+type batchParentState struct {
+	groups map[string]*batchParentGroup
+}
+
+	type batchParentGroup struct {
+		parents any
+		fields  sync.Map
 	}
 
-	func (ec *executionContext) processDeferredGroup(dg graphql.DeferredGroup) {
+	type batchFieldResult struct {
+		once       sync.Once
+		done       chan struct{}
+		results    any
+		invalidErr error
+	}
+
+	type BatchResult[T any] struct {
+		Value T
+		Err   error
+	}
+
+func (ec *executionContext) withBatchParents(ctx context.Context, typeName string, parents any) context.Context {
+
+		prev, _ := ctx.Value(batchContextKey{}).(*batchParentState)
+		var groups map[string]*batchParentGroup
+		if prev != nil {
+			groups = make(map[string]*batchParentGroup, len(prev.groups)+1)
+			for k, v := range prev.groups {
+				groups[k] = v
+			}
+		} else {
+			groups = make(map[string]*batchParentGroup, 1)
+		}
+		groups[typeName] = &batchParentGroup{parents: parents}
+
+		return context.WithValue(ctx, batchContextKey{}, &batchParentState{groups: groups})
+	}
+
+	func (ec *executionContext) getBatchParentGroup(ctx context.Context, typeName string) *batchParentGroup {
+		state, _ := ctx.Value(batchContextKey{}).(*batchParentState)
+		if state == nil {
+			return nil
+		}
+		return state.groups[typeName]
+	}
+
+	func (g *batchParentGroup) getFieldResult(key string, resolve func() (any, error)) *batchFieldResult {
+		if g == nil {
+			return nil
+		}
+		res, _ := g.fields.LoadOrStore(key, &batchFieldResult{done: make(chan struct{})})
+		result := res.(*batchFieldResult)
+		result.once.Do(func() {
+			defer close(result.done)
+			result.results, result.invalidErr = resolve()
+		})
+		<-result.done
+		return result
+	}
+
+	func (ec *executionContext) batchParentIndex(ctx context.Context) (ast.PathIndex, bool) {
+		path := graphql.GetPath(ctx)
+		if len(path) < 2 {
+			return 0, false
+		}
+		if idx, ok := path[len(path)-2].(ast.PathIndex); ok {
+			return idx, true
+		}
+		return 0, false
+	}
+
+	func (ec *executionContext) batchPathWithIndex(ctx context.Context, index int) ast.Path {
+		path := graphql.GetPath(ctx)
+		if len(path) < 2 {
+			return path
+		}
+		if _, ok := path[len(path)-2].(ast.PathIndex); !ok {
+			return path
+		}
+		copied := make(ast.Path, len(path))
+		copy(copied, path)
+		copied[len(path)-2] = ast.PathIndex(index)
+		return copied
+	}
+
+	func (ec *executionContext) addBatchError(ctx context.Context, index int, err error) {
+		if err == nil {
+			return
+		}
+		path := ec.batchPathWithIndex(ctx, index)
+		if list, ok := err.(gqlerror.List); ok {
+			for _, item := range list {
+				if item == nil {
+					continue
+				}
+				if item.Path == nil {
+					cloned := *item
+					cloned.Path = path
+					graphql.AddError(ctx, &cloned)
+					continue
+				}
+				graphql.AddError(ctx, item)
+			}
+			return
+		}
+		var gqlErr *gqlerror.Error
+		if errors.As(err, &gqlErr) {
+			if gqlErr.Path == nil {
+				cloned := *gqlErr
+				cloned.Path = path
+				graphql.AddError(ctx, &cloned)
+				return
+			}
+			graphql.AddError(ctx, gqlErr)
+			return
+	}
+	graphql.AddError(ctx, gqlerror.WrapPath(path, err))
+}
+{{- end }}
+
+func (ec *executionContext) processDeferredGroup(dg graphql.DeferredGroup) {
 		atomic.AddInt32(&ec.pendingDeferred, 1)
 		go func () {
 			ctx := graphql.WithFreshResponseContext(dg.Context)

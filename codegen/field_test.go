@@ -9,9 +9,11 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlparser/v2"
 	ast2 "github.com/vektah/gqlparser/v2/ast"
 
 	"github.com/99designs/gqlgen/codegen/config"
+	"github.com/99designs/gqlgen/internal/code"
 )
 
 func TestFindField(t *testing.T) {
@@ -143,6 +145,60 @@ func TestField_Batch(t *testing.T) {
 		require.True(t, f.Batch)
 		require.True(t, f.IsBatch())
 	})
+}
+
+func TestField_BatchRootFieldUnsupported(t *testing.T) {
+	cfg := &config.Config{
+		Exec: config.ExecConfig{
+			Layout:   config.ExecLayoutSingleFile,
+			Filename: "generated.go",
+			Package:  "generated",
+		},
+		Models: config.TypeMap{
+			"Query": {
+				Fields: map[string]config.TypeMapField{
+					"version": {Batch: true},
+				},
+			},
+			"Boolean": {
+				Model: config.StringList{"github.com/99designs/gqlgen/graphql.Boolean"},
+			},
+			"Float": {
+				Model: config.StringList{"github.com/99designs/gqlgen/graphql.Float"},
+			},
+			"ID": {
+				Model: config.StringList{"github.com/99designs/gqlgen/graphql.ID"},
+			},
+			"Int": {
+				Model: config.StringList{"github.com/99designs/gqlgen/graphql.Int"},
+			},
+			"String": {
+				Model: config.StringList{"github.com/99designs/gqlgen/graphql.String"},
+			},
+		},
+		Directives: map[string]config.DirectiveConfig{},
+		Packages:   code.NewPackages(),
+	}
+	cfg.Schema = gqlparser.MustLoadSchema(&ast2.Source{
+		Name: "schema.graphql",
+		Input: `
+			schema { query: Query }
+			type Query { version: String }
+		`,
+	})
+
+	b := builder{
+		Config: cfg,
+		Schema: cfg.Schema,
+	}
+	b.Binder = b.Config.NewBinder()
+	var err error
+	b.Directives, err = b.buildDirectives()
+	require.NoError(t, err)
+
+	_, err = b.buildObject(cfg.Schema.Query)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "batch resolver is not supported for root field Query.version")
 }
 
 func TestField_CallArgs(t *testing.T) {

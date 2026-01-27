@@ -3,6 +3,7 @@ package graphql
 import (
 	"context"
 	"errors"
+	"maps"
 	"sync"
 
 	"github.com/vektah/gqlparser/v2/ast"
@@ -42,9 +43,7 @@ func WithBatchParents(ctx context.Context, typeName string, parents any) context
 	var groups map[string]*BatchParentGroup
 	if prev != nil {
 		groups = make(map[string]*BatchParentGroup, len(prev.groups)+1)
-		for k, v := range prev.groups {
-			groups[k] = v
-		}
+		maps.Copy(groups, prev.groups)
 	} else {
 		groups = make(map[string]*BatchParentGroup, 1)
 	}
@@ -63,7 +62,10 @@ func GetBatchParentGroup(ctx context.Context, typeName string) *BatchParentGroup
 }
 
 // GetFieldResult retrieves or computes the result for a batch field.
-func (g *BatchParentGroup) GetFieldResult(key string, resolve func() (any, error)) *BatchFieldResult {
+func (g *BatchParentGroup) GetFieldResult(
+	key string,
+	resolve func() (any, error),
+) *BatchFieldResult {
 	if g == nil {
 		return nil
 	}

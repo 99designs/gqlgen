@@ -107,7 +107,13 @@ func TestBatchResolver_Parity_WithArgs(t *testing.T) {
 		} `json:"users"`
 	}
 
-	err := c.Post(`query { users { nullableBatchWithArg(offset: 1) { id } nullableNonBatchWithArg(offset: 1) { id } } }`, &resp)
+	err := c.Post(`
+query {
+  users {
+    nullableBatchWithArg(offset: 1) { id }
+    nullableNonBatchWithArg(offset: 1) { id }
+  }
+}`, &resp)
 	require.NoError(t, err)
 	require.JSONEq(
 		t,

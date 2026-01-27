@@ -278,3 +278,98 @@ func TestField_CallArgs(t *testing.T) {
 		})
 	}
 }
+
+func TestField_BatchCallArgs(t *testing.T) {
+	tt := []struct {
+		Name     string
+		Field    Field
+		Expected string
+	}{
+		{
+			Name: "Batch args with single int argument",
+			Field: Field{
+				Args: []*FieldArgument{
+					{
+						ArgumentDefinition: &ast2.ArgumentDefinition{
+							Name: "test",
+						},
+						TypeReference: &config.TypeReference{
+							GO: types.Typ[types.Int],
+						},
+					},
+				},
+			},
+			Expected: `ctx, parents, fc.Args["test"].(int)`,
+		},
+		{
+			Name: "Batch args with empty interface and string",
+			Field: Field{
+				Args: []*FieldArgument{
+					{
+						ArgumentDefinition: &ast2.ArgumentDefinition{
+							Name: "test",
+						},
+						TypeReference: &config.TypeReference{
+							GO: (&types.Interface{}).Complete(),
+						},
+					},
+					{
+						ArgumentDefinition: &ast2.ArgumentDefinition{
+							Name: "test2",
+						},
+						TypeReference: &config.TypeReference{
+							GO: types.Typ[types.String],
+						},
+					},
+				},
+			},
+			Expected: `ctx, parents, ` + `
+				func () any {
+					if fc.Args["test"] == nil {
+						return nil
+					}
+					return fc.Args["test"].(any)
+				}(), fc.Args["test2"].(string)`,
+		},
+	}
+
+	for _, tc := range tt {
+		t.Run(tc.Name, func(t *testing.T) {
+			require.Equal(t, tc.Expected, tc.Field.BatchCallArgs("parents"))
+		})
+	}
+}
+
+func TestField_ShortBatchResolverDeclaration(t *testing.T) {
+	f := Field{
+		FieldDefinition: &ast2.FieldDefinition{
+			Name: "value",
+		},
+		Object: &Object{
+			Definition: &ast2.Definition{
+				Name: "User",
+			},
+			Type: types.Typ[types.Int],
+		},
+		TypeReference: &config.TypeReference{
+			GO: types.Typ[types.String],
+		},
+		Args: []*FieldArgument{
+			{
+				ArgumentDefinition: &ast2.ArgumentDefinition{
+					Name: "limit",
+				},
+				VarName: "limit",
+				TypeReference: &config.TypeReference{
+					GO: types.Typ[types.Int],
+				},
+			},
+		},
+	}
+
+	require.Equal(
+		t,
+		"(ctx context.Context, objs []*int, limit int) ([]graphql.BatchResult[string])",
+		f.ShortBatchResolverDeclaration(),
+	)
+}

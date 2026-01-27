@@ -55,10 +55,12 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		NonNullableBatch    func(childComplexity int) int
-		NonNullableNonBatch func(childComplexity int) int
-		NullableBatch       func(childComplexity int) int
-		NullableNonBatch    func(childComplexity int) int
+		NonNullableBatch        func(childComplexity int) int
+		NonNullableNonBatch     func(childComplexity int) int
+		NullableBatch           func(childComplexity int) int
+		NullableBatchWithArg    func(childComplexity int, offset int) int
+		NullableNonBatch        func(childComplexity int) int
+		NullableNonBatchWithArg func(childComplexity int, offset int) int
 	}
 }
 
@@ -68,6 +70,8 @@ type QueryResolver interface {
 type UserResolver interface {
 	NullableBatch(ctx context.Context, objs []*User) []graphql.BatchResult[*Profile]
 	NullableNonBatch(ctx context.Context, obj *User) (*Profile, error)
+	NullableBatchWithArg(ctx context.Context, objs []*User, offset int) []graphql.BatchResult[*Profile]
+	NullableNonBatchWithArg(ctx context.Context, obj *User, offset int) (*Profile, error)
 	NonNullableBatch(ctx context.Context, objs []*User) []graphql.BatchResult[*Profile]
 	NonNullableNonBatch(ctx context.Context, obj *User) (*Profile, error)
 }
@@ -123,12 +127,34 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.User.NullableBatch(childComplexity), true
+	case "User.nullableBatchWithArg":
+		if e.complexity.User.NullableBatchWithArg == nil {
+			break
+		}
+
+		args, err := ec.field_User_nullableBatchWithArg_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.User.NullableBatchWithArg(childComplexity, args["offset"].(int)), true
 	case "User.nullableNonBatch":
 		if e.complexity.User.NullableNonBatch == nil {
 			break
 		}
 
 		return e.complexity.User.NullableNonBatch(childComplexity), true
+	case "User.nullableNonBatchWithArg":
+		if e.complexity.User.NullableNonBatchWithArg == nil {
+			break
+		}
+
+		args, err := ec.field_User_nullableNonBatchWithArg_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.User.NullableNonBatchWithArg(childComplexity, args["offset"].(int)), true
 
 	}
 	return 0, false
@@ -249,6 +275,28 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
+func (ec *executionContext) field_User_nullableBatchWithArg_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "offset", ec.unmarshalNInt2int)
+	if err != nil {
+		return nil, err
+	}
+	args["offset"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_User_nullableNonBatchWithArg_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "offset", ec.unmarshalNInt2int)
+	if err != nil {
+		return nil, err
+	}
+	args["offset"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field___Directive_args_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -358,6 +406,10 @@ func (ec *executionContext) fieldContext_Query_users(_ context.Context, field gr
 				return ec.fieldContext_User_nullableBatch(ctx, field)
 			case "nullableNonBatch":
 				return ec.fieldContext_User_nullableNonBatch(ctx, field)
+			case "nullableBatchWithArg":
+				return ec.fieldContext_User_nullableBatchWithArg(ctx, field)
+			case "nullableNonBatchWithArg":
+				return ec.fieldContext_User_nullableNonBatchWithArg(ctx, field)
 			case "nonNullableBatch":
 				return ec.fieldContext_User_nonNullableBatch(ctx, field)
 			case "nonNullableNonBatch":
@@ -608,6 +660,165 @@ func (ec *executionContext) fieldContext_User_nullableNonBatch(_ context.Context
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_nullableBatchWithArg(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_nullableBatchWithArg,
+		func(ctx context.Context) (any, error) {
+			return ec.resolveBatch_User_nullableBatchWithArg(ctx, field, obj)
+		},
+		nil,
+		ec.marshalOProfile2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfile,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_nullableBatchWithArg(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Profile_id(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_User_nullableBatchWithArg_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+func (ec *executionContext) resolveBatch_User_nullableBatchWithArg(ctx context.Context, field graphql.CollectedField, obj *User) (any, error) {
+	resolver := ec.resolvers.User()
+	fc := graphql.GetFieldContext(ctx)
+	group := graphql.GetBatchParentGroup(ctx, "User")
+	if group != nil {
+		parents, ok := group.Parents.([]*User)
+		if ok {
+			idx, ok := graphql.BatchParentIndex(ctx)
+			if ok {
+				idxInt := int(idx)
+				key := field.Alias
+				if key == "" {
+					key = field.Name
+				}
+				result := group.GetFieldResult(key, func() (any, error) {
+					results := resolver.NullableBatchWithArg(ctx, parents, fc.Args["offset"].(int))
+					if len(results) != len(parents) {
+						return results, fmt.Errorf(
+							"batch resolver User.nullableBatchWithArg returned %d results for %d parents",
+							len(results),
+							len(parents),
+						)
+					}
+					return results, nil
+				})
+				if result.InvalidErr != nil {
+					graphql.AddBatchError(ctx, idxInt, fmt.Errorf("index %d: %w", idx, result.InvalidErr))
+					return nil, nil
+				}
+
+				results, ok := result.Results.([]graphql.BatchResult[*Profile])
+				if !ok {
+					graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
+						"batch resolver User.nullableBatchWithArg returned unexpected result type (index %d)",
+						idx,
+					))
+					return nil, nil
+				}
+				if idxInt < 0 || idxInt >= len(results) {
+					graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
+						"batch resolver User.nullableBatchWithArg could not resolve parent index %d",
+						idx,
+					))
+					return nil, nil
+				}
+				if results[idxInt].Err != nil {
+					graphql.AddBatchError(ctx, idxInt, results[idxInt].Err)
+					return nil, nil
+				}
+				return results[idxInt].Value, nil
+			}
+		}
+	}
+
+	results := resolver.NullableBatchWithArg(ctx, []*User{obj}, fc.Args["offset"].(int))
+	if len(results) != 1 {
+		graphql.AddBatchError(ctx, 0, fmt.Errorf(
+			"batch resolver User.nullableBatchWithArg returned %d results for %d parents (index %d)",
+			len(results),
+			1,
+			0,
+		))
+		return nil, nil
+	}
+	if results[0].Err != nil {
+		graphql.AddBatchError(ctx, 0, results[0].Err)
+		return nil, nil
+	}
+	return results[0].Value, nil
+}
+
+func (ec *executionContext) _User_nullableNonBatchWithArg(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_nullableNonBatchWithArg,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.User().NullableNonBatchWithArg(ctx, obj, fc.Args["offset"].(int))
+		},
+		nil,
+		ec.marshalOProfile2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfile,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_nullableNonBatchWithArg(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Profile_id(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_User_nullableNonBatchWithArg_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -2389,6 +2600,72 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "nullableBatchWithArg":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_nullableBatchWithArg(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "nullableNonBatchWithArg":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_nullableNonBatchWithArg(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "nonNullableBatch":
 			field := field
 
@@ -2843,6 +3120,22 @@ func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (str
 func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
 	_ = sel
 	res := graphql.MarshalID(v)
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v any) (int, error) {
+	res, err := graphql.UnmarshalInt(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.SelectionSet, v int) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalInt(v)
 	if res == graphql.Null {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
 			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")

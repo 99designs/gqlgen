@@ -88,6 +88,34 @@ func TestBatchResolver_Parity_NoError(t *testing.T) {
 	)
 }
 
+func TestBatchResolver_Parity_WithArgs(t *testing.T) {
+	resolver := &Resolver{
+		users:         []*User{{}, {}},
+		profiles:      []*Profile{{ID: "p1"}, {ID: "p2"}, {ID: "p3"}},
+		profileErrIdx: -1,
+	}
+
+	c := newTestClient(resolver)
+	var resp struct {
+		Users []struct {
+			NullableBatchWithArg *struct {
+				ID string `json:"id"`
+			} `json:"nullableBatchWithArg"`
+			NullableNonBatchWithArg *struct {
+				ID string `json:"id"`
+			} `json:"nullableNonBatchWithArg"`
+		} `json:"users"`
+	}
+
+	err := c.Post(`query { users { nullableBatchWithArg(offset: 1) { id } nullableNonBatchWithArg(offset: 1) { id } } }`, &resp)
+	require.NoError(t, err)
+	require.JSONEq(
+		t,
+		`{"users":[{"nullableBatchWithArg":{"id":"p2"},"nullableNonBatchWithArg":{"id":"p2"}},{"nullableBatchWithArg":{"id":"p3"},"nullableNonBatchWithArg":{"id":"p3"}}]}`,
+		marshalJSON(t, resp),
+	)
+}
+
 func TestBatchResolver_Parity_Error(t *testing.T) {
 	resolver := &Resolver{
 		users:         []*User{{}, {}},

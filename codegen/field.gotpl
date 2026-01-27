@@ -141,6 +141,9 @@ func (ec *executionContext) {{ $field.FieldContextFunc }}({{ if not $field.Args 
 {{- if and $field.IsBatch (not $object.Root) }}
 func (ec *executionContext) resolveBatch_{{$object.Name}}_{{$field.Name}}(ctx context.Context, field graphql.CollectedField, obj {{$object.Reference | ref}}) (any, error) {
 	resolver := ec.resolvers.{{ ucFirst $object.Name }}()
+	{{- if $field.Args }}
+	fc := graphql.GetFieldContext(ctx)
+	{{- end }}
 	group := graphql.GetBatchParentGroup(ctx, {{ $object.Name | quote }})
 	if group != nil {
 		parents, ok := group.Parents.([]{{$object.Reference | ref}})
@@ -154,8 +157,8 @@ func (ec *executionContext) resolveBatch_{{$object.Name}}_{{$field.Name}}(ctx co
 				}
 					{{/* TODO: resolveBatch_* runs per parent even when grouped; consider a single
 					dispatch per field if the execution flow can support it. */ -}}
-				result := group.GetFieldResult(key, func() (any, error) {
-					results := resolver.{{ $field.GoFieldName }}(ctx, parents)
+					result := group.GetFieldResult(key, func() (any, error) {
+					results := resolver.{{ $field.GoFieldName }}({{ $field.BatchCallArgs "parents" }})
 					if len(results) != len(parents) {
 						return results, fmt.Errorf(
 							"batch resolver {{ $object.Name }}.{{ $field.Name }} returned %d results for %d parents",
@@ -194,7 +197,7 @@ func (ec *executionContext) resolveBatch_{{$object.Name}}_{{$field.Name}}(ctx co
 		}
 	}
 
-	results := resolver.{{ $field.GoFieldName }}(ctx, []{{$object.Reference | ref}}{obj})
+	results := resolver.{{ $field.GoFieldName }}({{ $field.BatchCallArgs (printf "[]%s{obj}" ($object.Reference | ref)) }})
 	if len(results) != 1 {
 		graphql.AddBatchError(ctx, 0, fmt.Errorf(
 			"batch resolver {{ $object.Name }}.{{ $field.Name }} returned %d results for %d parents (index %d)",

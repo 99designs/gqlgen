@@ -46,6 +46,32 @@ func (r *userResolver) NullableNonBatch(ctx context.Context, obj *User) (*Profil
 	return resolveProfile(r.Resolver, idx)
 }
 
+// NullableBatchWithArg is the batch resolver for the nullableBatchWithArg field.
+func (r *userResolver) NullableBatchWithArg(ctx context.Context, objs []*User, offset int) []graphql.BatchResult[*Profile] {
+	if r.profileWrongLen {
+		if len(objs) == 0 {
+			return nil
+		}
+		idx := r.userIndex(objs[0]) + offset
+		value, err := resolveProfile(r.Resolver, idx)
+		return []graphql.BatchResult[*Profile]{{Value: value, Err: err}}
+	}
+
+	results := make([]graphql.BatchResult[*Profile], len(objs))
+	for i, obj := range objs {
+		idx := r.userIndex(obj) + offset
+		value, err := resolveProfile(r.Resolver, idx)
+		results[i] = graphql.BatchResult[*Profile]{Value: value, Err: err}
+	}
+	return results
+}
+
+// NullableNonBatchWithArg is the resolver for the nullableNonBatchWithArg field.
+func (r *userResolver) NullableNonBatchWithArg(ctx context.Context, obj *User, offset int) (*Profile, error) {
+	idx := r.userIndex(obj) + offset
+	return resolveProfile(r.Resolver, idx)
+}
+
 // NonNullableBatch is the batch resolver for the nonNullableBatch field.
 func (r *userResolver) NonNullableBatch(ctx context.Context, objs []*User) []graphql.BatchResult[*Profile] {
 	if r.profileWrongLen {

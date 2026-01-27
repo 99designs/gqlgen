@@ -616,7 +616,7 @@ func (f *Field) IsBatch() bool {
 //
 // The batch resolver would be:
 //
-//	Posts(ctx context.Context, objs []*User) ([][]*Post, []error)
+//	Posts(ctx context.Context, objs []*User) []graphql.BatchResult[[]*Post]
 func (f *Field) ShortBatchResolverDeclaration() string {
 	if f.Object.Root {
 		// Root fields don't have a parent object, so batch doesn't make sense
@@ -624,12 +624,45 @@ func (f *Field) ShortBatchResolverDeclaration() string {
 	}
 
 	parentType := templates.CurrentImports.LookupType(f.Object.Reference())
-	resultType := templates.CurrentImports.LookupType(f.TypeReference.GO)
+	res := fmt.Sprintf("(ctx context.Context, objs []%s", parentType)
+
+	var resSb strings.Builder
+	var inlineInfo *InlineArgsInfo
+	if f.Object != nil && f.Object.Definition != nil {
+		inlineInfo = GetInlineArgsMetadata(f.Object.Name, f.Name)
+	}
+	if inlineInfo != nil {
+		goType := formatGoType(inlineInfo.GoType)
+		resSb.WriteString(fmt.Sprintf(", %s %s", inlineInfo.OriginalArgName, goType))
+
+		for _, arg := range f.Args {
+			if !slices.Contains(inlineInfo.ExpandedArgs, arg.Name) {
+				resSb.WriteString(
+					fmt.Sprintf(
+						", %s %s",
+						arg.VarName,
+						templates.CurrentImports.LookupType(arg.TypeReference.GO),
+					),
+				)
+			}
+		}
+	} else {
+		for _, arg := range f.Args {
+			resSb.WriteString(
+				fmt.Sprintf(
+					", %s %s",
+					arg.VarName,
+					templates.CurrentImports.LookupType(arg.TypeReference.GO),
+				),
+			)
+		}
+	}
+	res += resSb.String()
 
 	return fmt.Sprintf(
-		"(ctx context.Context, objs []%s) ([]graphql.BatchResult[%s])",
-		parentType,
-		resultType,
+		"%s) ([]graphql.BatchResult[%s])",
+		res,
+		templates.CurrentImports.LookupType(f.TypeReference.GO),
 	)
 }
 
@@ -823,6 +856,12 @@ func (f *Field) CallArgs() string {
 		args = append(args, "ctx")
 	}
 
+	args = append(args, f.callArgExpressions()...)
+	return strings.Join(args, ", ")
+}
+
+func (f *Field) callArgExpressions() []string {
+	args := make([]string, 0, len(f.Args))
 	var inlineInfo *InlineArgsInfo
 	if f.Object != nil && f.Object.Definition != nil {
 		inlineInfo = GetInlineArgsMetadata(f.Object.Name, f.Name)
@@ -901,6 +940,18 @@ func (f *Field) CallArgs() string {
 		}
 	}
 
+	return args
+}
+
+// BatchCallArgs returns a comma-separated list of resolver call arguments for batch resolvers.
+func (f *Field) BatchCallArgs(parentVar string) string {
+	args := make([]string, 0, len(f.Args)+2)
+	args = append(args, "ctx")
+	if parentVar != "" {
+		args = append(args, parentVar)
+	}
+
+	args = append(args, f.callArgExpressions()...)
 	return strings.Join(args, ", ")
 }
 

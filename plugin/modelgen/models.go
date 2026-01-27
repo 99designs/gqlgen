@@ -127,8 +127,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		}
 	}
 
-	schemaTypes := sortedSchemaTypes(cfg.Schema)
-	for _, schemaType := range schemaTypes {
+	for _, schemaType := range cfg.Schema.Types {
 		userDefined := cfg.Models.UserDefined(schemaType.Name)
 		switch schemaType.Kind {
 		case ast.Interface, ast.Union:
@@ -142,7 +141,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		}
 	}
 
-	for _, schemaType := range schemaTypes {
+	for _, schemaType := range cfg.Schema.Types {
 		if cfg.Models.UserDefined(schemaType.Name) {
 			continue
 		}
@@ -332,22 +331,6 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 	cfg.ReloadAllPackages()
 
 	return nil
-}
-
-func sortedSchemaTypes(schema *ast.Schema) []*ast.Definition {
-	types := make([]*ast.Definition, 0, len(schema.Types))
-	for _, schemaType := range schema.Types {
-		types = append(types, schemaType)
-	}
-	sort.Slice(types, func(i, j int) bool {
-		iKey := strings.ReplaceAll(types[i].Name, "_", " ")
-		jKey := strings.ReplaceAll(types[j].Name, "_", " ")
-		if iKey == jKey {
-			return types[i].Name < types[j].Name
-		}
-		return iKey < jKey
-	})
-	return types
 }
 
 func (m *Plugin) generateFields(

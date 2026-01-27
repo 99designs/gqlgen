@@ -317,4 +317,3 @@ func TestBatchResolver_InvalidLen_AddsErrorPerParent(t *testing.T) {
 		marshalJSON(t, resp),
 	)
 }
-

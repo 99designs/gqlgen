@@ -14,6 +14,11 @@ type Resolver struct {
 	profileGqlErrNoPathIdxs map[int]struct{}
 	profileGqlErrPathIdxs   map[int]struct{}
 	profileWrongLen         bool
+	batchErrsWrongLen       bool
+	batchErrsLen            int
+	batchResultsWrongLen    bool
+	batchResultsLen         int
+	batchErrListIdxs        map[int]struct{}
 }
 
 func (r *Resolver) userIndex(obj *User) int {

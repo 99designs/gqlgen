@@ -2,6 +2,7 @@ package batchresolver
 
 import (
 	"encoding/json"
+	"fmt"
 	"sort"
 	"testing"
 
@@ -339,6 +340,107 @@ func TestBatchResolver_InvalidLen_AddsErrorPerParent(t *testing.T) {
 	require.JSONEq(
 		t,
 		`{"users":[{"nullableBatch":null},{"nullableBatch":null}]}`,
+		marshalJSON(t, resp),
+	)
+}
+
+func TestBatchResolver_BatchErrors_ErrLenMismatch_AddsErrorPerParent(t *testing.T) {
+	cases := []struct {
+		name   string
+		errLen int
+	}{
+		{name: "len1", errLen: 1},
+		{name: "len0", errLen: 0},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			resolver := &Resolver{
+				users:             []*User{{}, {}},
+				profiles:          []*Profile{{ID: "p1"}, {ID: "p2"}},
+				profileErrIdx:     -1,
+				batchErrsWrongLen: true,
+				batchErrsLen:      tc.errLen,
+			}
+
+			c := newTestClient(resolver)
+			var resp struct {
+				Users []struct {
+					NullableBatch *struct {
+						ID string `json:"id"`
+					} `json:"nullableBatch"`
+				} `json:"users"`
+			}
+
+			err := c.Post(`query { users { nullableBatch { id } } }`, &resp)
+			requireErrorJSON(t, err, fmt.Sprintf(`[
+				{"message":"index 0: batch resolver User.nullableBatch returned %d errors for 2 parents","path":["users",0,"nullableBatch"]},
+				{"message":"index 1: batch resolver User.nullableBatch returned %d errors for 2 parents","path":["users",1,"nullableBatch"]}
+			]`, tc.errLen, tc.errLen))
+			require.JSONEq(
+				t,
+				`{"users":[{"nullableBatch":null},{"nullableBatch":null}]}`,
+				marshalJSON(t, resp),
+			)
+		})
+	}
+}
+
+func TestBatchResolver_BatchErrors_ResultLenMismatch_AddsErrorPerParent(t *testing.T) {
+	resolver := &Resolver{
+		users:                []*User{{}, {}},
+		profiles:             []*Profile{{ID: "p1"}, {ID: "p2"}},
+		profileErrIdx:        -1,
+		batchResultsWrongLen: true,
+		batchResultsLen:      1,
+	}
+
+	c := newTestClient(resolver)
+	var resp struct {
+		Users []struct {
+			NullableBatch *struct {
+				ID string `json:"id"`
+			} `json:"nullableBatch"`
+		} `json:"users"`
+	}
+
+	err := c.Post(`query { users { nullableBatch { id } } }`, &resp)
+	requireErrorJSON(t, err, `[
+		{"message":"index 0: batch resolver User.nullableBatch returned 1 results for 2 parents","path":["users",0,"nullableBatch"]},
+		{"message":"index 1: batch resolver User.nullableBatch returned 1 results for 2 parents","path":["users",1,"nullableBatch"]}
+	]`)
+	require.JSONEq(
+		t,
+		`{"users":[{"nullableBatch":null},{"nullableBatch":null}]}`,
+		marshalJSON(t, resp),
+	)
+}
+
+func TestBatchResolver_BatchErrors_ListPerIndex_AddsMultipleErrors(t *testing.T) {
+	resolver := &Resolver{
+		users:            []*User{{}, {}},
+		profiles:         []*Profile{{ID: "p1"}, {ID: "p2"}},
+		profileErrIdx:    -1,
+		batchErrListIdxs: map[int]struct{}{0: {}},
+	}
+
+	c := newTestClient(resolver)
+	var resp struct {
+		Users []struct {
+			NullableBatch *struct {
+				ID string `json:"id"`
+			} `json:"nullableBatch"`
+		} `json:"users"`
+	}
+
+	err := c.Post(`query { users { nullableBatch { id } } }`, &resp)
+	requireErrorJSON(t, err, `[
+		{"message":"batch list error 1 at index 0","path":["users",0,"nullableBatch"]},
+		{"message":"batch list error 2 at index 0","path":["users",0,"nullableBatch"]}
+	]`)
+	require.JSONEq(
+		t,
+		`{"users":[{"nullableBatch":null},{"nullableBatch":{"id":"p2"}}]}`,
 		marshalJSON(t, resp),
 	)
 }

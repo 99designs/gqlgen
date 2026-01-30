@@ -10,6 +10,7 @@ import (
 	"errors"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
 // Users is the resolver for the users field.
@@ -21,23 +22,59 @@ func (r *queryResolver) Users(ctx context.Context) ([]*User, error) {
 }
 
 // NullableBatch is the batch resolver for the nullableBatch field.
-func (r *userResolver) NullableBatch(ctx context.Context, objs []*User) []graphql.BatchResult[*Profile] {
+func (r *userResolver) NullableBatch(ctx context.Context, objs []*User) ([]*Profile, error) {
+	if r.batchResultsWrongLen {
+		results := make([]*Profile, r.batchResultsLen)
+		errs := make([]error, len(objs))
+		return results, graphql.BatchErrorList(errs)
+	}
+	if r.batchErrsWrongLen {
+		results := make([]*Profile, len(objs))
+		errs := make([]error, r.batchErrsLen)
+		return results, graphql.BatchErrorList(errs)
+	}
+	if r.batchErrListIdxs != nil {
+		results := make([]*Profile, len(objs))
+		errs := make([]error, len(objs))
+		for i, obj := range objs {
+			idx := r.userIndex(obj)
+			if idx >= 0 && idx < len(r.profiles) {
+				results[i] = r.profiles[idx]
+			}
+			if _, ok := r.batchErrListIdxs[idx]; ok {
+				errs[i] = gqlerror.List{
+					gqlerror.Errorf("batch list error 1 at index %d", idx),
+					gqlerror.Errorf("batch list error 2 at index %d", idx),
+				}
+			}
+		}
+		return results, graphql.BatchErrorList(errs)
+	}
 	if r.profileWrongLen {
 		if len(objs) == 0 {
-			return nil
+			return nil, nil
 		}
 		idx := r.userIndex(objs[0])
-		value, err := resolveProfile(r.Resolver, idx)
-		return []graphql.BatchResult[*Profile]{{Value: value, Err: err}}
+		value, _ := resolveProfile(r.Resolver, idx)
+		return []*Profile{value}, nil
 	}
 
-	results := make([]graphql.BatchResult[*Profile], len(objs))
+	results := make([]*Profile, len(objs))
+	errs := make([]error, len(objs))
+	hasErr := false
 	for i, obj := range objs {
 		idx := r.userIndex(obj)
 		value, err := resolveProfile(r.Resolver, idx)
-		results[i] = graphql.BatchResult[*Profile]{Value: value, Err: err}
+		results[i] = value
+		errs[i] = err
+		if err != nil {
+			hasErr = true
+		}
 	}
-	return results
+	if hasErr {
+		return results, graphql.BatchErrorList(errs)
+	}
+	return results, nil
 }
 
 // NullableNonBatch is the resolver for the nullableNonBatch field.
@@ -47,23 +84,32 @@ func (r *userResolver) NullableNonBatch(ctx context.Context, obj *User) (*Profil
 }
 
 // NullableBatchWithArg is the batch resolver for the nullableBatchWithArg field.
-func (r *userResolver) NullableBatchWithArg(ctx context.Context, objs []*User, offset int) []graphql.BatchResult[*Profile] {
+func (r *userResolver) NullableBatchWithArg(ctx context.Context, objs []*User, offset int) ([]*Profile, error) {
 	if r.profileWrongLen {
 		if len(objs) == 0 {
-			return nil
+			return nil, nil
 		}
 		idx := r.userIndex(objs[0]) + offset
-		value, err := resolveProfile(r.Resolver, idx)
-		return []graphql.BatchResult[*Profile]{{Value: value, Err: err}}
+		value, _ := resolveProfile(r.Resolver, idx)
+		return []*Profile{value}, nil
 	}
 
-	results := make([]graphql.BatchResult[*Profile], len(objs))
+	results := make([]*Profile, len(objs))
+	errs := make([]error, len(objs))
+	hasErr := false
 	for i, obj := range objs {
 		idx := r.userIndex(obj) + offset
 		value, err := resolveProfile(r.Resolver, idx)
-		results[i] = graphql.BatchResult[*Profile]{Value: value, Err: err}
+		results[i] = value
+		errs[i] = err
+		if err != nil {
+			hasErr = true
+		}
 	}
-	return results
+	if hasErr {
+		return results, graphql.BatchErrorList(errs)
+	}
+	return results, nil
 }
 
 // NullableNonBatchWithArg is the resolver for the nullableNonBatchWithArg field.
@@ -73,23 +119,32 @@ func (r *userResolver) NullableNonBatchWithArg(ctx context.Context, obj *User, o
 }
 
 // NonNullableBatch is the batch resolver for the nonNullableBatch field.
-func (r *userResolver) NonNullableBatch(ctx context.Context, objs []*User) []graphql.BatchResult[*Profile] {
+func (r *userResolver) NonNullableBatch(ctx context.Context, objs []*User) ([]*Profile, error) {
 	if r.profileWrongLen {
 		if len(objs) == 0 {
-			return nil
+			return nil, nil
 		}
 		idx := r.userIndex(objs[0])
-		value, err := resolveProfile(r.Resolver, idx)
-		return []graphql.BatchResult[*Profile]{{Value: value, Err: err}}
+		value, _ := resolveProfile(r.Resolver, idx)
+		return []*Profile{value}, nil
 	}
 
-	results := make([]graphql.BatchResult[*Profile], len(objs))
+	results := make([]*Profile, len(objs))
+	errs := make([]error, len(objs))
+	hasErr := false
 	for i, obj := range objs {
 		idx := r.userIndex(obj)
 		value, err := resolveProfile(r.Resolver, idx)
-		results[i] = graphql.BatchResult[*Profile]{Value: value, Err: err}
+		results[i] = value
+		errs[i] = err
+		if err != nil {
+			hasErr = true
+		}
 	}
-	return results
+	if hasErr {
+		return results, graphql.BatchErrorList(errs)
+	}
+	return results, nil
 }
 
 // NonNullableNonBatch is the resolver for the nonNullableNonBatch field.

@@ -616,7 +616,7 @@ func (f *Field) IsBatch() bool {
 //
 // The batch resolver would be:
 //
-//	Posts(ctx context.Context, objs []*User) []graphql.BatchResult[[]*Post]
+//	Posts(ctx context.Context, objs []*User) ([][]*Post, error)
 func (f *Field) ShortBatchResolverDeclaration() string {
 	if f.Object.Root {
 		// Root fields don't have a parent object, so batch doesn't make sense
@@ -660,7 +660,7 @@ func (f *Field) ShortBatchResolverDeclaration() string {
 	res += resSb.String()
 
 	return fmt.Sprintf(
-		"%s) ([]graphql.BatchResult[%s])",
+		"%s) ([]%s, error)",
 		res,
 		templates.CurrentImports.LookupType(f.TypeReference.GO),
 	)

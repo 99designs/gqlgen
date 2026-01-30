@@ -10,11 +10,18 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
-// BatchResult represents the result of a batch resolver for a single item.
-type BatchResult[T any] struct {
-	Value T
-	Err   error
+// BatchErrors represents per-item errors from a batch resolver.
+// The returned slice must be the same length as the results slice, with nils for successes.
+type BatchErrors interface {
+	error
+	Errors() []error
 }
+
+// BatchErrorList is a simple BatchErrors implementation backed by a slice.
+type BatchErrorList []error
+
+func (e BatchErrorList) Error() string   { return "batch resolver returned errors" }
+func (e BatchErrorList) Errors() []error { return []error(e) }
 
 type batchContextKey struct{}
 
@@ -31,10 +38,10 @@ type BatchParentGroup struct {
 
 // BatchFieldResult represents the cached result of a batch field resolution.
 type BatchFieldResult struct {
-	once       sync.Once
-	done       chan struct{}
-	Results    any
-	InvalidErr error
+	once    sync.Once
+	done    chan struct{}
+	Results any
+	Err     error
 }
 
 // WithBatchParents adds a batch parent group to the context.
@@ -73,7 +80,7 @@ func (g *BatchParentGroup) GetFieldResult(
 	result := res.(*BatchFieldResult)
 	result.once.Do(func() {
 		defer close(result.done)
-		result.Results, result.InvalidErr = resolve()
+		result.Results, result.Err = resolve()
 	})
 	<-result.done
 	return result

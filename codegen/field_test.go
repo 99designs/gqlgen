@@ -369,7 +369,7 @@ func TestField_ShortBatchResolverDeclaration(t *testing.T) {
 
 	require.Equal(
 		t,
-		"(ctx context.Context, objs []*int, limit int) ([]graphql.BatchResult[string])",
+		"(ctx context.Context, objs []*int, limit int) ([]string, error)",
 		f.ShortBatchResolverDeclaration(),
 	)
 }

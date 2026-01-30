@@ -68,11 +68,11 @@ type QueryResolver interface {
 	Users(ctx context.Context) ([]*User, error)
 }
 type UserResolver interface {
-	NullableBatch(ctx context.Context, objs []*User) []graphql.BatchResult[*Profile]
+	NullableBatch(ctx context.Context, objs []*User) ([]*Profile, error)
 	NullableNonBatch(ctx context.Context, obj *User) (*Profile, error)
-	NullableBatchWithArg(ctx context.Context, objs []*User, offset int) []graphql.BatchResult[*Profile]
+	NullableBatchWithArg(ctx context.Context, objs []*User, offset int) ([]*Profile, error)
 	NullableNonBatchWithArg(ctx context.Context, obj *User, offset int) (*Profile, error)
-	NonNullableBatch(ctx context.Context, objs []*User) []graphql.BatchResult[*Profile]
+	NonNullableBatch(ctx context.Context, objs []*User) ([]*Profile, error)
 	NonNullableNonBatch(ctx context.Context, obj *User) (*Profile, error)
 }
 
@@ -575,26 +575,69 @@ func (ec *executionContext) resolveBatch_User_nullableBatch(ctx context.Context,
 					key = field.Name
 				}
 				result := group.GetFieldResult(key, func() (any, error) {
-					results := resolver.NullableBatch(ctx, parents)
-					if len(results) != len(parents) {
-						return results, fmt.Errorf(
-							"batch resolver User.nullableBatch returned %d results for %d parents",
-							len(results),
-							len(parents),
-						)
-					}
-					return results, nil
+					results, err := resolver.NullableBatch(ctx, parents)
+					return results, err
 				})
-				if result.InvalidErr != nil {
-					graphql.AddBatchError(ctx, idxInt, fmt.Errorf("index %d: %w", idx, result.InvalidErr))
+				if result.Err != nil {
+					if batchErrs, ok := result.Err.(graphql.BatchErrors); ok {
+						results, ok := result.Results.([]*Profile)
+						if !ok {
+							graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
+								"batch resolver User.nullableBatch returned unexpected result type (index %d)",
+								idx,
+							))
+							return nil, nil
+						}
+						errs := batchErrs.Errors()
+						if len(results) != len(parents) {
+							graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
+								"index %d: batch resolver User.nullableBatch returned %d results for %d parents",
+								idx,
+								len(results),
+								len(parents),
+							))
+							return nil, nil
+						}
+						if len(errs) != len(parents) {
+							graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
+								"index %d: batch resolver User.nullableBatch returned %d errors for %d parents",
+								idx,
+								len(errs),
+								len(parents),
+							))
+							return nil, nil
+						}
+						if idxInt < 0 || idxInt >= len(results) {
+							graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
+								"batch resolver User.nullableBatch could not resolve parent index %d",
+								idx,
+							))
+							return nil, nil
+						}
+						if err := errs[idxInt]; err != nil {
+							graphql.AddBatchError(ctx, idxInt, err)
+							return nil, nil
+						}
+						return results[idxInt], nil
+					}
+					graphql.AddBatchError(ctx, idxInt, result.Err)
 					return nil, nil
 				}
 
-				results, ok := result.Results.([]graphql.BatchResult[*Profile])
+				results, ok := result.Results.([]*Profile)
 				if !ok {
 					graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
 						"batch resolver User.nullableBatch returned unexpected result type (index %d)",
 						idx,
+					))
+					return nil, nil
+				}
+				if len(results) != len(parents) {
+					graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
+						"index %d: batch resolver User.nullableBatch returned %d results for %d parents",
+						idx,
+						len(results),
+						len(parents),
 					))
 					return nil, nil
 				}
@@ -605,16 +648,42 @@ func (ec *executionContext) resolveBatch_User_nullableBatch(ctx context.Context,
 					))
 					return nil, nil
 				}
-				if results[idxInt].Err != nil {
-					graphql.AddBatchError(ctx, idxInt, results[idxInt].Err)
-					return nil, nil
-				}
-				return results[idxInt].Value, nil
+				return results[idxInt], nil
 			}
 		}
 	}
 
-	results := resolver.NullableBatch(ctx, []*User{obj})
+	results, err := resolver.NullableBatch(ctx, []*User{obj})
+	if err != nil {
+		if batchErrs, ok := err.(graphql.BatchErrors); ok {
+			errs := batchErrs.Errors()
+			if len(results) != 1 {
+				graphql.AddBatchError(ctx, 0, fmt.Errorf(
+					"batch resolver User.nullableBatch returned %d results for %d parents (index %d)",
+					len(results),
+					1,
+					0,
+				))
+				return nil, nil
+			}
+			if len(errs) != 1 {
+				graphql.AddBatchError(ctx, 0, fmt.Errorf(
+					"batch resolver User.nullableBatch returned %d errors for %d parents (index %d)",
+					len(errs),
+					1,
+					0,
+				))
+				return nil, nil
+			}
+			if errs[0] != nil {
+				graphql.AddBatchError(ctx, 0, errs[0])
+				return nil, nil
+			}
+			return results[0], nil
+		}
+		graphql.AddBatchError(ctx, 0, err)
+		return nil, nil
+	}
 	if len(results) != 1 {
 		graphql.AddBatchError(ctx, 0, fmt.Errorf(
 			"batch resolver User.nullableBatch returned %d results for %d parents (index %d)",
@@ -624,11 +693,7 @@ func (ec *executionContext) resolveBatch_User_nullableBatch(ctx context.Context,
 		))
 		return nil, nil
 	}
-	if results[0].Err != nil {
-		graphql.AddBatchError(ctx, 0, results[0].Err)
-		return nil, nil
-	}
-	return results[0].Value, nil
+	return results[0], nil
 }
 
 func (ec *executionContext) _User_nullableNonBatch(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -722,26 +787,69 @@ func (ec *executionContext) resolveBatch_User_nullableBatchWithArg(ctx context.C
 					key = field.Name
 				}
 				result := group.GetFieldResult(key, func() (any, error) {
-					results := resolver.NullableBatchWithArg(ctx, parents, fc.Args["offset"].(int))
-					if len(results) != len(parents) {
-						return results, fmt.Errorf(
-							"batch resolver User.nullableBatchWithArg returned %d results for %d parents",
-							len(results),
-							len(parents),
-						)
-					}
-					return results, nil
+					results, err := resolver.NullableBatchWithArg(ctx, parents, fc.Args["offset"].(int))
+					return results, err
 				})
-				if result.InvalidErr != nil {
-					graphql.AddBatchError(ctx, idxInt, fmt.Errorf("index %d: %w", idx, result.InvalidErr))
+				if result.Err != nil {
+					if batchErrs, ok := result.Err.(graphql.BatchErrors); ok {
+						results, ok := result.Results.([]*Profile)
+						if !ok {
+							graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
+								"batch resolver User.nullableBatchWithArg returned unexpected result type (index %d)",
+								idx,
+							))
+							return nil, nil
+						}
+						errs := batchErrs.Errors()
+						if len(results) != len(parents) {
+							graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
+								"index %d: batch resolver User.nullableBatchWithArg returned %d results for %d parents",
+								idx,
+								len(results),
+								len(parents),
+							))
+							return nil, nil
+						}
+						if len(errs) != len(parents) {
+							graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
+								"index %d: batch resolver User.nullableBatchWithArg returned %d errors for %d parents",
+								idx,
+								len(errs),
+								len(parents),
+							))
+							return nil, nil
+						}
+						if idxInt < 0 || idxInt >= len(results) {
+							graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
+								"batch resolver User.nullableBatchWithArg could not resolve parent index %d",
+								idx,
+							))
+							return nil, nil
+						}
+						if err := errs[idxInt]; err != nil {
+							graphql.AddBatchError(ctx, idxInt, err)
+							return nil, nil
+						}
+						return results[idxInt], nil
+					}
+					graphql.AddBatchError(ctx, idxInt, result.Err)
 					return nil, nil
 				}
 
-				results, ok := result.Results.([]graphql.BatchResult[*Profile])
+				results, ok := result.Results.([]*Profile)
 				if !ok {
 					graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
 						"batch resolver User.nullableBatchWithArg returned unexpected result type (index %d)",
 						idx,
+					))
+					return nil, nil
+				}
+				if len(results) != len(parents) {
+					graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
+						"index %d: batch resolver User.nullableBatchWithArg returned %d results for %d parents",
+						idx,
+						len(results),
+						len(parents),
 					))
 					return nil, nil
 				}
@@ -752,16 +860,42 @@ func (ec *executionContext) resolveBatch_User_nullableBatchWithArg(ctx context.C
 					))
 					return nil, nil
 				}
-				if results[idxInt].Err != nil {
-					graphql.AddBatchError(ctx, idxInt, results[idxInt].Err)
-					return nil, nil
-				}
-				return results[idxInt].Value, nil
+				return results[idxInt], nil
 			}
 		}
 	}
 
-	results := resolver.NullableBatchWithArg(ctx, []*User{obj}, fc.Args["offset"].(int))
+	results, err := resolver.NullableBatchWithArg(ctx, []*User{obj}, fc.Args["offset"].(int))
+	if err != nil {
+		if batchErrs, ok := err.(graphql.BatchErrors); ok {
+			errs := batchErrs.Errors()
+			if len(results) != 1 {
+				graphql.AddBatchError(ctx, 0, fmt.Errorf(
+					"batch resolver User.nullableBatchWithArg returned %d results for %d parents (index %d)",
+					len(results),
+					1,
+					0,
+				))
+				return nil, nil
+			}
+			if len(errs) != 1 {
+				graphql.AddBatchError(ctx, 0, fmt.Errorf(
+					"batch resolver User.nullableBatchWithArg returned %d errors for %d parents (index %d)",
+					len(errs),
+					1,
+					0,
+				))
+				return nil, nil
+			}
+			if errs[0] != nil {
+				graphql.AddBatchError(ctx, 0, errs[0])
+				return nil, nil
+			}
+			return results[0], nil
+		}
+		graphql.AddBatchError(ctx, 0, err)
+		return nil, nil
+	}
 	if len(results) != 1 {
 		graphql.AddBatchError(ctx, 0, fmt.Errorf(
 			"batch resolver User.nullableBatchWithArg returned %d results for %d parents (index %d)",
@@ -771,11 +905,7 @@ func (ec *executionContext) resolveBatch_User_nullableBatchWithArg(ctx context.C
 		))
 		return nil, nil
 	}
-	if results[0].Err != nil {
-		graphql.AddBatchError(ctx, 0, results[0].Err)
-		return nil, nil
-	}
-	return results[0].Value, nil
+	return results[0], nil
 }
 
 func (ec *executionContext) _User_nullableNonBatchWithArg(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -869,26 +999,69 @@ func (ec *executionContext) resolveBatch_User_nonNullableBatch(ctx context.Conte
 					key = field.Name
 				}
 				result := group.GetFieldResult(key, func() (any, error) {
-					results := resolver.NonNullableBatch(ctx, parents)
-					if len(results) != len(parents) {
-						return results, fmt.Errorf(
-							"batch resolver User.nonNullableBatch returned %d results for %d parents",
-							len(results),
-							len(parents),
-						)
-					}
-					return results, nil
+					results, err := resolver.NonNullableBatch(ctx, parents)
+					return results, err
 				})
-				if result.InvalidErr != nil {
-					graphql.AddBatchError(ctx, idxInt, fmt.Errorf("index %d: %w", idx, result.InvalidErr))
+				if result.Err != nil {
+					if batchErrs, ok := result.Err.(graphql.BatchErrors); ok {
+						results, ok := result.Results.([]*Profile)
+						if !ok {
+							graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
+								"batch resolver User.nonNullableBatch returned unexpected result type (index %d)",
+								idx,
+							))
+							return nil, nil
+						}
+						errs := batchErrs.Errors()
+						if len(results) != len(parents) {
+							graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
+								"index %d: batch resolver User.nonNullableBatch returned %d results for %d parents",
+								idx,
+								len(results),
+								len(parents),
+							))
+							return nil, nil
+						}
+						if len(errs) != len(parents) {
+							graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
+								"index %d: batch resolver User.nonNullableBatch returned %d errors for %d parents",
+								idx,
+								len(errs),
+								len(parents),
+							))
+							return nil, nil
+						}
+						if idxInt < 0 || idxInt >= len(results) {
+							graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
+								"batch resolver User.nonNullableBatch could not resolve parent index %d",
+								idx,
+							))
+							return nil, nil
+						}
+						if err := errs[idxInt]; err != nil {
+							graphql.AddBatchError(ctx, idxInt, err)
+							return nil, nil
+						}
+						return results[idxInt], nil
+					}
+					graphql.AddBatchError(ctx, idxInt, result.Err)
 					return nil, nil
 				}
 
-				results, ok := result.Results.([]graphql.BatchResult[*Profile])
+				results, ok := result.Results.([]*Profile)
 				if !ok {
 					graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
 						"batch resolver User.nonNullableBatch returned unexpected result type (index %d)",
 						idx,
+					))
+					return nil, nil
+				}
+				if len(results) != len(parents) {
+					graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
+						"index %d: batch resolver User.nonNullableBatch returned %d results for %d parents",
+						idx,
+						len(results),
+						len(parents),
 					))
 					return nil, nil
 				}
@@ -899,16 +1072,42 @@ func (ec *executionContext) resolveBatch_User_nonNullableBatch(ctx context.Conte
 					))
 					return nil, nil
 				}
-				if results[idxInt].Err != nil {
-					graphql.AddBatchError(ctx, idxInt, results[idxInt].Err)
-					return nil, nil
-				}
-				return results[idxInt].Value, nil
+				return results[idxInt], nil
 			}
 		}
 	}
 
-	results := resolver.NonNullableBatch(ctx, []*User{obj})
+	results, err := resolver.NonNullableBatch(ctx, []*User{obj})
+	if err != nil {
+		if batchErrs, ok := err.(graphql.BatchErrors); ok {
+			errs := batchErrs.Errors()
+			if len(results) != 1 {
+				graphql.AddBatchError(ctx, 0, fmt.Errorf(
+					"batch resolver User.nonNullableBatch returned %d results for %d parents (index %d)",
+					len(results),
+					1,
+					0,
+				))
+				return nil, nil
+			}
+			if len(errs) != 1 {
+				graphql.AddBatchError(ctx, 0, fmt.Errorf(
+					"batch resolver User.nonNullableBatch returned %d errors for %d parents (index %d)",
+					len(errs),
+					1,
+					0,
+				))
+				return nil, nil
+			}
+			if errs[0] != nil {
+				graphql.AddBatchError(ctx, 0, errs[0])
+				return nil, nil
+			}
+			return results[0], nil
+		}
+		graphql.AddBatchError(ctx, 0, err)
+		return nil, nil
+	}
 	if len(results) != 1 {
 		graphql.AddBatchError(ctx, 0, fmt.Errorf(
 			"batch resolver User.nonNullableBatch returned %d results for %d parents (index %d)",
@@ -918,11 +1117,7 @@ func (ec *executionContext) resolveBatch_User_nonNullableBatch(ctx context.Conte
 		))
 		return nil, nil
 	}
-	if results[0].Err != nil {
-		graphql.AddBatchError(ctx, 0, results[0].Err)
-		return nil, nil
-	}
-	return results[0].Value, nil
+	return results[0], nil
 }
 
 func (ec *executionContext) _User_nonNullableNonBatch(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {

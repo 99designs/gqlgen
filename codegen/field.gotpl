@@ -158,26 +158,69 @@ func (ec *executionContext) resolveBatch_{{$object.Name}}_{{$field.Name}}(ctx co
 					{{/* TODO: resolveBatch_* runs per parent even when grouped; consider a single
 					dispatch per field if the execution flow can support it. */ -}}
 					result := group.GetFieldResult(key, func() (any, error) {
-					results := resolver.{{ $field.GoFieldName }}({{ $field.BatchCallArgs "parents" }})
-					if len(results) != len(parents) {
-						return results, fmt.Errorf(
-							"batch resolver {{ $object.Name }}.{{ $field.Name }} returned %d results for %d parents",
-							len(results),
-							len(parents),
-						)
-					}
-					return results, nil
+					results, err := resolver.{{ $field.GoFieldName }}({{ $field.BatchCallArgs "parents" }})
+					return results, err
 				})
-				if result.InvalidErr != nil {
-					graphql.AddBatchError(ctx, idxInt, fmt.Errorf("index %d: %w", idx, result.InvalidErr))
+				if result.Err != nil {
+					if batchErrs, ok := result.Err.(graphql.BatchErrors); ok {
+						results, ok := result.Results.([]{{ $field.TypeReference.GO | ref }})
+						if !ok {
+							graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
+								"batch resolver {{ $object.Name }}.{{ $field.Name }} returned unexpected result type (index %d)",
+								idx,
+							))
+							return nil, nil
+						}
+						errs := batchErrs.Errors()
+						if len(results) != len(parents) {
+							graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
+								"index %d: batch resolver {{ $object.Name }}.{{ $field.Name }} returned %d results for %d parents",
+								idx,
+								len(results),
+								len(parents),
+							))
+							return nil, nil
+						}
+						if len(errs) != len(parents) {
+							graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
+								"index %d: batch resolver {{ $object.Name }}.{{ $field.Name }} returned %d errors for %d parents",
+								idx,
+								len(errs),
+								len(parents),
+							))
+							return nil, nil
+						}
+						if idxInt < 0 || idxInt >= len(results) {
+							graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
+								"batch resolver {{ $object.Name }}.{{ $field.Name }} could not resolve parent index %d",
+								idx,
+							))
+							return nil, nil
+						}
+						if err := errs[idxInt]; err != nil {
+							graphql.AddBatchError(ctx, idxInt, err)
+							return nil, nil
+						}
+						return results[idxInt], nil
+					}
+					graphql.AddBatchError(ctx, idxInt, result.Err)
 					return nil, nil
 				}
 
-				results, ok := result.Results.([]graphql.BatchResult[{{ $field.TypeReference.GO | ref }}])
+				results, ok := result.Results.([]{{ $field.TypeReference.GO | ref }})
 				if !ok {
 					graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
 						"batch resolver {{ $object.Name }}.{{ $field.Name }} returned unexpected result type (index %d)",
 						idx,
+					))
+					return nil, nil
+				}
+				if len(results) != len(parents) {
+					graphql.AddBatchError(ctx, idxInt, fmt.Errorf(
+						"index %d: batch resolver {{ $object.Name }}.{{ $field.Name }} returned %d results for %d parents",
+						idx,
+						len(results),
+						len(parents),
 					))
 					return nil, nil
 				}
@@ -188,16 +231,42 @@ func (ec *executionContext) resolveBatch_{{$object.Name}}_{{$field.Name}}(ctx co
 					))
 					return nil, nil
 				}
-				if results[idxInt].Err != nil {
-					graphql.AddBatchError(ctx, idxInt, results[idxInt].Err)
-					return nil, nil
-				}
-				return results[idxInt].Value, nil
+				return results[idxInt], nil
 			}
 		}
 	}
 
-	results := resolver.{{ $field.GoFieldName }}({{ $field.BatchCallArgs (printf "[]%s{obj}" ($object.Reference | ref)) }})
+	results, err := resolver.{{ $field.GoFieldName }}({{ $field.BatchCallArgs (printf "[]%s{obj}" ($object.Reference | ref)) }})
+	if err != nil {
+		if batchErrs, ok := err.(graphql.BatchErrors); ok {
+			errs := batchErrs.Errors()
+			if len(results) != 1 {
+				graphql.AddBatchError(ctx, 0, fmt.Errorf(
+					"batch resolver {{ $object.Name }}.{{ $field.Name }} returned %d results for %d parents (index %d)",
+					len(results),
+					1,
+					0,
+				))
+				return nil, nil
+			}
+			if len(errs) != 1 {
+				graphql.AddBatchError(ctx, 0, fmt.Errorf(
+					"batch resolver {{ $object.Name }}.{{ $field.Name }} returned %d errors for %d parents (index %d)",
+					len(errs),
+					1,
+					0,
+				))
+				return nil, nil
+			}
+			if errs[0] != nil {
+				graphql.AddBatchError(ctx, 0, errs[0])
+				return nil, nil
+			}
+			return results[0], nil
+		}
+		graphql.AddBatchError(ctx, 0, err)
+		return nil, nil
+	}
 	if len(results) != 1 {
 		graphql.AddBatchError(ctx, 0, fmt.Errorf(
 			"batch resolver {{ $object.Name }}.{{ $field.Name }} returned %d results for %d parents (index %d)",
@@ -207,11 +276,7 @@ func (ec *executionContext) resolveBatch_{{$object.Name}}_{{$field.Name}}(ctx co
 		))
 		return nil, nil
 	}
-	if results[0].Err != nil {
-		graphql.AddBatchError(ctx, 0, results[0].Err)
-		return nil, nil
-	}
-	return results[0].Value, nil
+	return results[0], nil
 }
 {{- end }}
 

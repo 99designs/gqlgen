@@ -3,7 +3,8 @@
 package out_omit_resolver_fields
 
 type Base struct {
-	StandardField string `json:"StandardField" database:"BaseStandardField"`
+	StandardField       string `json:"StandardField" database:"BaseStandardField"`
+	ForceGeneratedField string `json:"ForceGeneratedField" database:"BaseForceGeneratedField"`
 }
 
 type Query struct {

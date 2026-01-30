@@ -64,11 +64,12 @@ type Field struct {
 	// Name is the field's name as it appears in the schema
 	Name string
 	// GoName is the field's name as it appears in the generated Go code
-	GoName     string
-	Type       types.Type
-	Tag        string
-	IsResolver bool
-	Omittable  bool
+	GoName        string
+	Type          types.Type
+	Tag           string
+	IsResolver    bool
+	Omittable     bool
+	ForceGenerate bool
 }
 
 type Enum struct {
@@ -457,7 +458,8 @@ func (m *Plugin) generateField(
 		Tag:         getStructTagFromField(cfg, field),
 		Omittable: cfg.NullableInputOmittable && schemaType.Kind == ast.InputObject &&
 			!field.Type.NonNull,
-		IsResolver: cfg.Models[schemaType.Name].Fields[field.Name].Resolver,
+		IsResolver:    cfg.Models[schemaType.Name].Fields[field.Name].Resolver,
+		ForceGenerate: cfg.Models[schemaType.Name].Fields[field.Name].ForceGenerate,
 	}
 
 	if omittable := cfg.Models[schemaType.Name].Fields[field.Name].Omittable; omittable != nil {
@@ -478,7 +480,7 @@ func (m *Plugin) generateField(
 		f = mf
 	}
 
-	if f.IsResolver && cfg.OmitResolverFields {
+	if f.IsResolver && cfg.OmitResolverFields && !f.ForceGenerate {
 		return nil, nil
 	}
 

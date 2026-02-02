@@ -22,6 +22,21 @@ type BatchErrorList []error
 
 func (e BatchErrorList) Error() string   { return "batch resolver returned errors" }
 func (e BatchErrorList) Errors() []error { return []error(e) }
+func (e BatchErrorList) Unwrap() []error {
+	if len(e) == 0 {
+		return nil
+	}
+	out := make([]error, 0, len(e))
+	for _, err := range e {
+		if err != nil {
+			out = append(out, err)
+		}
+	}
+	if len(out) == 0 {
+		return nil
+	}
+	return out
+}
 
 type batchContextKey struct{}
 

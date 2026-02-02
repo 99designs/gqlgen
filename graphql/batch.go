@@ -3,6 +3,7 @@ package graphql
 import (
 	"context"
 	"errors"
+	"fmt"
 	"maps"
 	"sync"
 
@@ -161,4 +162,145 @@ func AddBatchError(ctx context.Context, index int, err error) {
 		return
 	}
 	AddError(ctx, gqlerror.WrapPath(path, err))
+}
+
+// ResolveBatchGroupResult handles batch resolver results for grouped parents.
+func ResolveBatchGroupResult[T any](
+	ctx context.Context,
+	idx ast.PathIndex,
+	parentsLen int,
+	result *BatchFieldResult,
+	fieldName string,
+) (any, error) {
+	idxInt := int(idx)
+	if result.Err != nil {
+		if batchErrs, ok := result.Err.(BatchErrors); ok {
+			results, ok := result.Results.([]T)
+			if !ok {
+				AddBatchError(ctx, idxInt, fmt.Errorf(
+					"batch resolver %s returned unexpected result type (index %d)",
+					fieldName,
+					idx,
+				))
+				return nil, nil
+			}
+			errs := batchErrs.Errors()
+			if len(results) != parentsLen {
+				AddBatchError(ctx, idxInt, fmt.Errorf(
+					"index %d: batch resolver %s returned %d results for %d parents",
+					idx,
+					fieldName,
+					len(results),
+					parentsLen,
+				))
+				return nil, nil
+			}
+			if len(errs) != parentsLen {
+				AddBatchError(ctx, idxInt, fmt.Errorf(
+					"index %d: batch resolver %s returned %d errors for %d parents",
+					idx,
+					fieldName,
+					len(errs),
+					parentsLen,
+				))
+				return nil, nil
+			}
+			if idxInt < 0 || idxInt >= len(results) {
+				AddBatchError(ctx, idxInt, fmt.Errorf(
+					"batch resolver %s could not resolve parent index %d",
+					fieldName,
+					idx,
+				))
+				return nil, nil
+			}
+			if err := errs[idxInt]; err != nil {
+				AddBatchError(ctx, idxInt, err)
+				return nil, nil
+			}
+			return results[idxInt], nil
+		}
+		AddBatchError(ctx, idxInt, result.Err)
+		return nil, nil
+	}
+
+	results, ok := result.Results.([]T)
+	if !ok {
+		AddBatchError(ctx, idxInt, fmt.Errorf(
+			"batch resolver %s returned unexpected result type (index %d)",
+			fieldName,
+			idx,
+		))
+		return nil, nil
+	}
+	if len(results) != parentsLen {
+		AddBatchError(ctx, idxInt, fmt.Errorf(
+			"index %d: batch resolver %s returned %d results for %d parents",
+			idx,
+			fieldName,
+			len(results),
+			parentsLen,
+		))
+		return nil, nil
+	}
+	if idxInt < 0 || idxInt >= len(results) {
+		AddBatchError(ctx, idxInt, fmt.Errorf(
+			"batch resolver %s could not resolve parent index %d",
+			fieldName,
+			idx,
+		))
+		return nil, nil
+	}
+	return results[idxInt], nil
+}
+
+// ResolveBatchSingleResult handles batch resolver results for a single parent.
+func ResolveBatchSingleResult[T any](
+	ctx context.Context,
+	results []T,
+	err error,
+	fieldName string,
+) (any, error) {
+	if err != nil {
+		if batchErrs, ok := err.(BatchErrors); ok {
+			errs := batchErrs.Errors()
+			if len(results) != 1 {
+				AddBatchError(ctx, 0, fmt.Errorf(
+					"batch resolver %s returned %d results for %d parents (index %d)",
+					fieldName,
+					len(results),
+					1,
+					0,
+				))
+				return nil, nil
+			}
+			if len(errs) != 1 {
+				AddBatchError(ctx, 0, fmt.Errorf(
+					"batch resolver %s returned %d errors for %d parents (index %d)",
+					fieldName,
+					len(errs),
+					1,
+					0,
+				))
+				return nil, nil
+			}
+			if errs[0] != nil {
+				AddBatchError(ctx, 0, errs[0])
+				return nil, nil
+			}
+			return results[0], nil
+		}
+		AddBatchError(ctx, 0, err)
+		return nil, nil
+	}
+	if len(results) != 1 {
+		AddBatchError(ctx, 0, fmt.Errorf(
+			"batch resolver %s returned %d results for %d parents (index %d)",
+			fieldName,
+			len(results),
+			1,
+			0,
+		))
+		return nil, nil
+	}
+	return results[0], nil
 }

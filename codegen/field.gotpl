@@ -158,9 +158,8 @@ func (ec *executionContext) resolveBatch_{{$object.Name}}_{{$field.Name}}(ctx co
 					{{/* TODO: resolveBatch_* runs per parent even when grouped; consider a single
 					dispatch per field if the execution flow can support it. */ -}}
 					result := group.GetFieldResult(key, func() (any, error) {
-					results, err := resolver.{{ $field.GoFieldName }}({{ $field.BatchCallArgs "parents" }})
-					return results, err
-				})
+						return resolver.{{ $field.GoFieldName }}({{ $field.BatchCallArgs "parents" }})
+					})
 				if result.Err != nil {
 					if batchErrs, ok := result.Err.(graphql.BatchErrors); ok {
 						results, ok := result.Results.([]{{ $field.TypeReference.GO | ref }})

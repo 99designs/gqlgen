@@ -169,6 +169,43 @@ func TestReferencedPackages(t *testing.T) {
 	})
 }
 
+func TestTypeMapFieldBatch(t *testing.T) {
+	t.Run("batch flag is parsed from config", func(t *testing.T) {
+		cfg, err := ReadConfig(strings.NewReader(`
+schema: schema.graphql
+exec:
+  filename: generated.go
+models:
+  User:
+    fields:
+      posts:
+        resolver: true
+        batch: true
+      name:
+        resolver: false
+`))
+		require.NoError(t, err)
+		require.True(t, cfg.Models["User"].Fields["posts"].Batch)
+		require.True(t, cfg.Models["User"].Fields["posts"].Resolver)
+		require.False(t, cfg.Models["User"].Fields["name"].Batch)
+	})
+
+	t.Run("batch flag defaults to false when not specified", func(t *testing.T) {
+		cfg, err := ReadConfig(strings.NewReader(`
+schema: schema.graphql
+exec:
+  filename: generated.go
+models:
+  User:
+    fields:
+      posts:
+        resolver: true
+`))
+		require.NoError(t, err)
+		require.False(t, cfg.Models["User"].Fields["posts"].Batch)
+	})
+}
+
 func TestConfigCheck(t *testing.T) {
 	for _, execLayout := range []ExecLayout{ExecLayoutSingleFile, ExecLayoutFollowSchema} {
 		t.Run(string(execLayout), func(t *testing.T) {

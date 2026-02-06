@@ -1,0 +1,29 @@
+schema:
+  - schema.graphql
+
+exec:
+  filename: generated.go
+  package: batchresolver
+
+model:
+  filename: models_gen.go
+  package: batchresolver
+
+resolver:
+  dir: .
+  type: Resolver
+  layout: follow-schema
+
+models:
+  User:
+    fields:
+      nullableBatch:
+        resolver: true
+        batch: true
+      nullableNonBatch:
+        resolver: true
+      nonNullableBatch:
+        resolver: true
+        batch: true
+      nonNullableNonBatch:
+        resolver: true

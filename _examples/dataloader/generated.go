@@ -31,12 +31,7 @@ func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 	}
 }
 
-type Config struct {
-	Schema     *ast.Schema
-	Resolvers  ResolverRoot
-	Directives DirectiveRoot
-	Complexity ComplexityRoot
-}
+type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 type ResolverRoot interface {
 	Customer() CustomerResolver

@@ -15,7 +15,7 @@ jobs:
       pull-requests: write
     steps:
     - name: Download Test Report
-      uses: dawidd6/action-download-artifact@0bd50d53a6d7fb5cb921e607957e9cc12b4ce392 # v12
+      uses: dawidd6/action-download-artifact@5c98f0b039f36ef966fdb7dfa9779262785ecb05 # v14
       with:
         name: junit-test-results
         workflow: ${{ github.event.workflow.id }}

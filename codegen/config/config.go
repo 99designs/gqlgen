@@ -546,6 +546,13 @@ type TypeMapField struct {
 	Omittable           *bool  `yaml:"omittable"`
 	GeneratedMethod     string `yaml:"-"`
 	AutoBindGetterHaser *bool  `yaml:"autoBindGetterHaser"`
+
+	// Batch enables batch resolver generation for this field.
+	// When true, a batch resolver method (e.g., PostsBatch) will be generated
+	// that accepts multiple parent objects and returns ([]T, error) for all of them
+	// in a single call, reducing N+1 query problems. For partial failures, return
+	// a graphql.BatchErrors implementation as the error.
+	Batch bool `yaml:"batch,omitempty"`
 }
 
 type EnumValue struct {

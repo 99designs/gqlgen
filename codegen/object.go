@@ -107,7 +107,7 @@ func (o *Object) Implementors() string {
 
 func (o *Object) HasResolvers() bool {
 	for _, f := range o.Fields {
-		if f.IsResolver {
+		if f.IsResolver || f.IsBatch() {
 			return true
 		}
 	}

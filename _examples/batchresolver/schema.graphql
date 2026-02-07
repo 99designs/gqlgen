@@ -1,0 +1,16 @@
+type Query {
+    users: [User!]!
+}
+
+type User {
+    nullableBatch: Profile
+    nullableNonBatch: Profile
+    nullableBatchWithArg(offset: Int!): Profile
+    nullableNonBatchWithArg(offset: Int!): Profile
+    nonNullableBatch: Profile!
+    nonNullableNonBatch: Profile!
+}
+
+type Profile {
+    id: ID!
+}

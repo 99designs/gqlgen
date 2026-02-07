@@ -1,16 +1,17 @@
 package testserver
 
 import (
-	"fmt"
+	"bytes"
 	"go/ast"
 	"go/parser"
+	"go/printer"
 	"go/token"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"testing"
 
-	eqgo "github.com/kevinmbeaulieu/eq-go/eq-go"
 	"github.com/stretchr/testify/require"
 )
 
@@ -21,19 +22,15 @@ func TestLayouts(t *testing.T) {
 	followschemaFSet := token.NewFileSet()
 	followschemaPkg := loadPackage(t, "followschema", followschemaFSet)
 
-	eq, msg := eqgo.PackagesEquivalent(
-		singlefilePkg,
-		singlefileFSet,
-		followschemaPkg,
-		followschemaFSet,
-		nil,
-	)
-	if !eq {
-		// When msg is too long, require.True(...) omits it entirely.
-		// Therefore use fmt.Fprintln to print it manually instead.
-		fmt.Fprintln(os.Stderr, msg)
-		require.Fail(t, "Packages not equivalent")
+	singlefileDecls := collectDeclStrings(singlefilePkg.Files)
+	followschemaDecls := collectDeclStrings(followschemaPkg.Files)
+
+	// Normalize package names so that both sides can be compared.
+	for i, s := range followschemaDecls {
+		followschemaDecls[i] = strings.ReplaceAll(s, "followschema", "singlefile")
 	}
+
+	require.Equal(t, singlefileDecls, followschemaDecls)
 }
 
 func loadPackage(t *testing.T, name string, fset *token.FileSet) *ast.Package {
@@ -61,4 +58,26 @@ func loadPackage(t *testing.T, name string, fset *token.FileSet) *ast.Package {
 	}
 
 	return &pkg
+}
+
+func collectDeclStrings(files map[string]*ast.File) []string {
+	printFSet := token.NewFileSet()
+
+	var strs []string
+	var buf bytes.Buffer
+	for _, f := range files {
+		for _, decl := range f.Decls {
+			if gd, ok := decl.(*ast.GenDecl); ok && gd.Tok == token.IMPORT {
+				continue
+			}
+			buf.Reset()
+			if err := printer.Fprint(&buf, printFSet, decl); err != nil {
+				continue
+			}
+			strs = append(strs, buf.String())
+		}
+	}
+
+	sort.Strings(strs)
+	return strs
 }

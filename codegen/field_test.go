@@ -131,6 +131,18 @@ func TestEqualFieldName(t *testing.T) {
 	}
 }
 
+func TestField_Batch(t *testing.T) {
+	t.Run("Batch flag defaults to false", func(t *testing.T) {
+		f := Field{}
+		require.False(t, f.Batch)
+	})
+
+	t.Run("Batch flag can be set", func(t *testing.T) {
+		f := Field{Batch: true}
+		require.True(t, f.Batch)
+	})
+}
+
 func TestField_CallArgs(t *testing.T) {
 	tt := []struct {
 		Name string

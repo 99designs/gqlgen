@@ -123,10 +123,6 @@ func TestMarshalSliceConcurrently(t *testing.T) {
 	})
 
 	t.Run("context cancellation with worker limit does not deadlock", func(t *testing.T) {
-		// This is the key test for issue #4018.
-		// With the old code, cancelling the context would cause sm.Acquire to
-		// fail, but wg.Done() would never be called for those elements,
-		// causing wg.Wait() to block forever.
 		ctx := withTestResponseContext(context.Background())
 		ctx, cancel := context.WithCancel(ctx)
 

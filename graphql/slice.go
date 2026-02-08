@@ -9,19 +9,11 @@ import (
 )
 
 // MarshalSliceConcurrently marshals a slice of elements concurrently, writing
-// each result into the returned Array. It fixes a WaitGroup deadlock that occurs
-// when context cancellation prevents semaphore acquisition (see issue #4018).
+// each result into the returned Array.
 //
 // The marshalElement callback is called for each index and receives a context
 // that already has a FieldContext with Index set. The callback should set
 // FieldContext.Result and perform the actual marshaling.
-//
-// This function handles:
-//   - Single-element optimization (no goroutine spawned)
-//   - Optional worker limit via semaphore to bound concurrency
-//   - Correct WaitGroup handling: wg.Add(1) only after successful semaphore
-//     acquire, preventing deadlocks on context cancellation
-//   - Panic recovery (unless omitPanicHandler is true)
 //
 // workerLimit of 0 means unlimited concurrency.
 func MarshalSliceConcurrently(
@@ -60,7 +52,7 @@ func MarshalSliceConcurrently(
 		return ret
 	}
 
-	// Multiple elements: use goroutines with correct WaitGroup handling.
+	// Multiple elements: use goroutines.
 	var wg sync.WaitGroup
 	var sm *semaphore.Weighted
 	if workerLimit > 0 {
@@ -96,18 +88,11 @@ func MarshalSliceConcurrently(
 
 		if sm != nil {
 			if err := sm.Acquire(ctx, 1); err != nil {
-				// Context was cancelled. Report the error but do NOT call
-				// wg.Add — this is the fix for issue #4018. The old generated
-				// code called wg.Add(len(v)) upfront and then skipped
-				// wg.Done() here, causing a deadlock.
 				AddError(childCtx, ctx.Err())
 				continue
 			}
 		}
 
-		// Only increment wg after successful semaphore acquire (or when no
-		// semaphore is configured), ensuring wg.Wait() never blocks on
-		// goroutines that were never launched.
 		wg.Add(1)
 		go f(i)
 	}

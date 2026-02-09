@@ -23,24 +23,36 @@ func withTestResponseContext(ctx context.Context) context.Context {
 func TestMarshalSliceConcurrently(t *testing.T) {
 	t.Run("empty slice", func(t *testing.T) {
 		ctx := withTestResponseContext(context.Background())
-		ret := MarshalSliceConcurrently(ctx, 0, 0, false, func(ctx context.Context, i int) Marshaler {
-			t.Fatal("should not be called")
-			return Null
-		})
-		assert.Len(t, ret, 0)
+		ret := MarshalSliceConcurrently(
+			ctx,
+			0,
+			0,
+			false,
+			func(ctx context.Context, i int) Marshaler {
+				t.Fatal("should not be called")
+				return Null
+			},
+		)
+		assert.Empty(t, ret)
 	})
 
 	t.Run("single element runs synchronously", func(t *testing.T) {
 		ctx := withTestResponseContext(context.Background())
 		var called bool
-		ret := MarshalSliceConcurrently(ctx, 1, 0, false, func(ctx context.Context, i int) Marshaler {
-			called = true
-			assert.Equal(t, 0, i)
-			fc := GetFieldContext(ctx)
-			require.NotNil(t, fc)
-			assert.Equal(t, 0, *fc.Index)
-			return MarshalString("hello")
-		})
+		ret := MarshalSliceConcurrently(
+			ctx,
+			1,
+			0,
+			false,
+			func(ctx context.Context, i int) Marshaler {
+				called = true
+				assert.Equal(t, 0, i)
+				fc := GetFieldContext(ctx)
+				require.NotNil(t, fc)
+				assert.Equal(t, 0, *fc.Index)
+				return MarshalString("hello")
+			},
+		)
 		assert.True(t, called)
 		require.Len(t, ret, 1)
 		var buf bytes.Buffer
@@ -52,13 +64,19 @@ func TestMarshalSliceConcurrently(t *testing.T) {
 		ctx := withTestResponseContext(context.Background())
 		n := 10
 		var callCount atomic.Int32
-		ret := MarshalSliceConcurrently(ctx, n, 0, false, func(ctx context.Context, i int) Marshaler {
-			callCount.Add(1)
-			fc := GetFieldContext(ctx)
-			require.NotNil(t, fc)
-			assert.Equal(t, i, *fc.Index)
-			return MarshalString(fmt.Sprintf("item-%d", i))
-		})
+		ret := MarshalSliceConcurrently(
+			ctx,
+			n,
+			0,
+			false,
+			func(ctx context.Context, i int) Marshaler {
+				callCount.Add(1)
+				fc := GetFieldContext(ctx)
+				require.NotNil(t, fc)
+				assert.Equal(t, i, *fc.Index)
+				return MarshalString(fmt.Sprintf("item-%d", i))
+			},
+		)
 		assert.Equal(t, int32(n), callCount.Load())
 		require.Len(t, ret, n)
 		for i := 0; i < n; i++ {
@@ -75,20 +93,26 @@ func TestMarshalSliceConcurrently(t *testing.T) {
 		var concurrent atomic.Int32
 		var maxConcurrent atomic.Int32
 
-		ret := MarshalSliceConcurrently(ctx, n, workerLimit, false, func(ctx context.Context, i int) Marshaler {
-			cur := concurrent.Add(1)
-			defer concurrent.Add(-1)
-			// Track the maximum observed concurrency
-			for {
-				old := maxConcurrent.Load()
-				if cur <= old || maxConcurrent.CompareAndSwap(old, cur) {
-					break
+		ret := MarshalSliceConcurrently(
+			ctx,
+			n,
+			workerLimit,
+			false,
+			func(ctx context.Context, i int) Marshaler {
+				cur := concurrent.Add(1)
+				defer concurrent.Add(-1)
+				// Track the maximum observed concurrency
+				for {
+					old := maxConcurrent.Load()
+					if cur <= old || maxConcurrent.CompareAndSwap(old, cur) {
+						break
+					}
 				}
-			}
-			// Small sleep to allow concurrency to build up
-			time.Sleep(time.Millisecond)
-			return MarshalString(fmt.Sprintf("item-%d", i))
-		})
+				// Small sleep to allow concurrency to build up
+				time.Sleep(time.Millisecond)
+				return MarshalString(fmt.Sprintf("item-%d", i))
+			},
+		)
 
 		require.Len(t, ret, n)
 		assert.LessOrEqual(t, maxConcurrent.Load(), int32(workerLimit))
@@ -96,20 +120,32 @@ func TestMarshalSliceConcurrently(t *testing.T) {
 
 	t.Run("panic recovery sets result to nil", func(t *testing.T) {
 		ctx := withTestResponseContext(context.Background())
-		ret := MarshalSliceConcurrently(ctx, 1, 0, false, func(ctx context.Context, i int) Marshaler {
-			panic("test panic")
-		})
+		ret := MarshalSliceConcurrently(
+			ctx,
+			1,
+			0,
+			false,
+			func(ctx context.Context, i int) Marshaler {
+				panic("test panic")
+			},
+		)
 		assert.Nil(t, ret)
 	})
 
 	t.Run("panic recovery in concurrent mode sets result to nil", func(t *testing.T) {
 		ctx := withTestResponseContext(context.Background())
-		ret := MarshalSliceConcurrently(ctx, 3, 0, false, func(ctx context.Context, i int) Marshaler {
-			if i == 1 {
-				panic("test panic")
-			}
-			return MarshalString("ok")
-		})
+		ret := MarshalSliceConcurrently(
+			ctx,
+			3,
+			0,
+			false,
+			func(ctx context.Context, i int) Marshaler {
+				if i == 1 {
+					panic("test panic")
+				}
+				return MarshalString("ok")
+			},
+		)
 		assert.Nil(t, ret)
 	})
 
@@ -128,15 +164,21 @@ func TestMarshalSliceConcurrently(t *testing.T) {
 
 		done := make(chan Array, 1)
 		go func() {
-			ret := MarshalSliceConcurrently(ctx, 100, 1, false, func(ctx context.Context, i int) Marshaler {
-				if i == 2 {
-					// Cancel context mid-flight to trigger the deadlock scenario
-					cancel()
-					// Small delay to let cancellation propagate
-					time.Sleep(10 * time.Millisecond)
-				}
-				return MarshalString(fmt.Sprintf("item-%d", i))
-			})
+			ret := MarshalSliceConcurrently(
+				ctx,
+				100,
+				1,
+				false,
+				func(ctx context.Context, i int) Marshaler {
+					if i == 2 {
+						// Cancel context mid-flight to trigger the deadlock scenario
+						cancel()
+						// Small delay to let cancellation propagate
+						time.Sleep(10 * time.Millisecond)
+					}
+					return MarshalString(fmt.Sprintf("item-%d", i))
+				},
+			)
 			done <- ret
 		}()
 
@@ -178,9 +220,15 @@ func TestMarshalSliceConcurrently(t *testing.T) {
 		ctx, cancel := context.WithCancel(ctx)
 		cancel()
 
-		ret := MarshalSliceConcurrently(ctx, 5, 0, false, func(ctx context.Context, i int) Marshaler {
-			return MarshalString("ok")
-		})
+		ret := MarshalSliceConcurrently(
+			ctx,
+			5,
+			0,
+			false,
+			func(ctx context.Context, i int) Marshaler {
+				return MarshalString("ok")
+			},
+		)
 		require.Len(t, ret, 5)
 	})
 }

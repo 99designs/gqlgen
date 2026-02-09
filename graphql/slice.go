@@ -64,7 +64,6 @@ func MarshalSliceConcurrently(
 	var retNilFlag atomic.Bool
 
 	for i := range length {
-		i := i
 		fc := &FieldContext{
 			Index: &i,
 		}

@@ -47,6 +47,10 @@ type ComplexityRoot struct {
 	}
 }
 
+type QueryResolver interface {
+	Hello(ctx context.Context, name string) (string, error)
+}
+
 type executableSchema struct {
 	schema     *ast.Schema
 	resolvers  ResolverRoot
@@ -64,20 +68,9 @@ func (e *executableSchema) Schema() *ast.Schema {
 func (e *executableSchema) Complexity(ctx context.Context, typeName, field string, childComplexity int, rawArgs map[string]any) (int, bool) {
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
-	switch typeName + "." + field {
-
-	case "Query.hello":
-		if e.complexity.Query.Hello == nil {
-			break
-		}
-
-		args, err := ec.field_Query_hello_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Hello(childComplexity, args["name"].(string)), true
-
+	handler, ok := shardruntime.LookupComplexity("github.com/99designs/gqlgen/codegen/testserver/splitpackages", typeName, field)
+	if ok {
+		return handler(ctx, &ec, childComplexity, rawArgs)
 	}
 	return 0, false
 }
@@ -85,7 +78,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap()
+	inputUnmarshalMap := graphql.BuildUnmarshalerMap(shardruntime.ListInputUnmarshalers("github.com/99designs/gqlgen/codegen/testserver/splitpackages", &ec)...)
 	first := true
 
 	switch opCtx.Operation.Operation {
@@ -179,251 +172,21 @@ func (ec *executionContext) AddDeferred(delta int32) {
 }
 
 func (ec *executionContext) ResolveField(ctx context.Context, objectName, fieldName string, field graphql.CollectedField, obj any) graphql.Marshaler {
-	switch objectName + "." + fieldName {
-	case "Query.hello":
-		return ec._Query_hello(ctx, field)
-	case "Query.__type":
-		return ec._Query___type(ctx, field)
-	case "Query.__schema":
-		return ec._Query___schema(ctx, field)
-	case "__Directive.name":
-		typedObj, ok := obj.(*introspection.Directive)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Directive", obj))
-		}
-		return ec.___Directive_name(ctx, field, typedObj)
-	case "__Directive.description":
-		typedObj, ok := obj.(*introspection.Directive)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Directive", obj))
-		}
-		return ec.___Directive_description(ctx, field, typedObj)
-	case "__Directive.isRepeatable":
-		typedObj, ok := obj.(*introspection.Directive)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Directive", obj))
-		}
-		return ec.___Directive_isRepeatable(ctx, field, typedObj)
-	case "__Directive.locations":
-		typedObj, ok := obj.(*introspection.Directive)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Directive", obj))
-		}
-		return ec.___Directive_locations(ctx, field, typedObj)
-	case "__Directive.args":
-		typedObj, ok := obj.(*introspection.Directive)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Directive", obj))
-		}
-		return ec.___Directive_args(ctx, field, typedObj)
-	case "__EnumValue.name":
-		typedObj, ok := obj.(*introspection.EnumValue)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __EnumValue", obj))
-		}
-		return ec.___EnumValue_name(ctx, field, typedObj)
-	case "__EnumValue.description":
-		typedObj, ok := obj.(*introspection.EnumValue)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __EnumValue", obj))
-		}
-		return ec.___EnumValue_description(ctx, field, typedObj)
-	case "__EnumValue.isDeprecated":
-		typedObj, ok := obj.(*introspection.EnumValue)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __EnumValue", obj))
-		}
-		return ec.___EnumValue_isDeprecated(ctx, field, typedObj)
-	case "__EnumValue.deprecationReason":
-		typedObj, ok := obj.(*introspection.EnumValue)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __EnumValue", obj))
-		}
-		return ec.___EnumValue_deprecationReason(ctx, field, typedObj)
-	case "__Field.name":
-		typedObj, ok := obj.(*introspection.Field)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Field", obj))
-		}
-		return ec.___Field_name(ctx, field, typedObj)
-	case "__Field.description":
-		typedObj, ok := obj.(*introspection.Field)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Field", obj))
-		}
-		return ec.___Field_description(ctx, field, typedObj)
-	case "__Field.args":
-		typedObj, ok := obj.(*introspection.Field)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Field", obj))
-		}
-		return ec.___Field_args(ctx, field, typedObj)
-	case "__Field.type":
-		typedObj, ok := obj.(*introspection.Field)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Field", obj))
-		}
-		return ec.___Field_type(ctx, field, typedObj)
-	case "__Field.isDeprecated":
-		typedObj, ok := obj.(*introspection.Field)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Field", obj))
-		}
-		return ec.___Field_isDeprecated(ctx, field, typedObj)
-	case "__Field.deprecationReason":
-		typedObj, ok := obj.(*introspection.Field)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Field", obj))
-		}
-		return ec.___Field_deprecationReason(ctx, field, typedObj)
-	case "__InputValue.name":
-		typedObj, ok := obj.(*introspection.InputValue)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __InputValue", obj))
-		}
-		return ec.___InputValue_name(ctx, field, typedObj)
-	case "__InputValue.description":
-		typedObj, ok := obj.(*introspection.InputValue)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __InputValue", obj))
-		}
-		return ec.___InputValue_description(ctx, field, typedObj)
-	case "__InputValue.type":
-		typedObj, ok := obj.(*introspection.InputValue)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __InputValue", obj))
-		}
-		return ec.___InputValue_type(ctx, field, typedObj)
-	case "__InputValue.defaultValue":
-		typedObj, ok := obj.(*introspection.InputValue)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __InputValue", obj))
-		}
-		return ec.___InputValue_defaultValue(ctx, field, typedObj)
-	case "__InputValue.isDeprecated":
-		typedObj, ok := obj.(*introspection.InputValue)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __InputValue", obj))
-		}
-		return ec.___InputValue_isDeprecated(ctx, field, typedObj)
-	case "__InputValue.deprecationReason":
-		typedObj, ok := obj.(*introspection.InputValue)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __InputValue", obj))
-		}
-		return ec.___InputValue_deprecationReason(ctx, field, typedObj)
-	case "__Schema.description":
-		typedObj, ok := obj.(*introspection.Schema)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Schema", obj))
-		}
-		return ec.___Schema_description(ctx, field, typedObj)
-	case "__Schema.types":
-		typedObj, ok := obj.(*introspection.Schema)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Schema", obj))
-		}
-		return ec.___Schema_types(ctx, field, typedObj)
-	case "__Schema.queryType":
-		typedObj, ok := obj.(*introspection.Schema)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Schema", obj))
-		}
-		return ec.___Schema_queryType(ctx, field, typedObj)
-	case "__Schema.mutationType":
-		typedObj, ok := obj.(*introspection.Schema)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Schema", obj))
-		}
-		return ec.___Schema_mutationType(ctx, field, typedObj)
-	case "__Schema.subscriptionType":
-		typedObj, ok := obj.(*introspection.Schema)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Schema", obj))
-		}
-		return ec.___Schema_subscriptionType(ctx, field, typedObj)
-	case "__Schema.directives":
-		typedObj, ok := obj.(*introspection.Schema)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Schema", obj))
-		}
-		return ec.___Schema_directives(ctx, field, typedObj)
-	case "__Type.kind":
-		typedObj, ok := obj.(*introspection.Type)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Type", obj))
-		}
-		return ec.___Type_kind(ctx, field, typedObj)
-	case "__Type.name":
-		typedObj, ok := obj.(*introspection.Type)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Type", obj))
-		}
-		return ec.___Type_name(ctx, field, typedObj)
-	case "__Type.description":
-		typedObj, ok := obj.(*introspection.Type)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Type", obj))
-		}
-		return ec.___Type_description(ctx, field, typedObj)
-	case "__Type.specifiedByURL":
-		typedObj, ok := obj.(*introspection.Type)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Type", obj))
-		}
-		return ec.___Type_specifiedByURL(ctx, field, typedObj)
-	case "__Type.fields":
-		typedObj, ok := obj.(*introspection.Type)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Type", obj))
-		}
-		return ec.___Type_fields(ctx, field, typedObj)
-	case "__Type.interfaces":
-		typedObj, ok := obj.(*introspection.Type)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Type", obj))
-		}
-		return ec.___Type_interfaces(ctx, field, typedObj)
-	case "__Type.possibleTypes":
-		typedObj, ok := obj.(*introspection.Type)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Type", obj))
-		}
-		return ec.___Type_possibleTypes(ctx, field, typedObj)
-	case "__Type.enumValues":
-		typedObj, ok := obj.(*introspection.Type)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Type", obj))
-		}
-		return ec.___Type_enumValues(ctx, field, typedObj)
-	case "__Type.inputFields":
-		typedObj, ok := obj.(*introspection.Type)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Type", obj))
-		}
-		return ec.___Type_inputFields(ctx, field, typedObj)
-	case "__Type.ofType":
-		typedObj, ok := obj.(*introspection.Type)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Type", obj))
-		}
-		return ec.___Type_ofType(ctx, field, typedObj)
-	case "__Type.isOneOf":
-		typedObj, ok := obj.(*introspection.Type)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Type", obj))
-		}
-		return ec.___Type_isOneOf(ctx, field, typedObj)
-	default:
+	handler, ok := shardruntime.LookupField("github.com/99designs/gqlgen/codegen/testserver/splitpackages", objectName, fieldName)
+	if !ok {
 		panic(fmt.Sprintf("unknown field %s.%s", objectName, fieldName))
 	}
+
+	return handler(ctx, ec, field, obj)
 }
 
 func (ec *executionContext) ResolveStreamField(ctx context.Context, objectName, fieldName string, field graphql.CollectedField, _ any) func(ctx context.Context) graphql.Marshaler {
-	switch objectName + "." + fieldName {
-	default:
+	handler, ok := shardruntime.LookupStreamField("github.com/99designs/gqlgen/codegen/testserver/splitpackages", objectName, fieldName)
+	if !ok {
 		panic(fmt.Sprintf("unknown stream field %s.%s", objectName, fieldName))
 	}
+
+	return handler(ctx, ec, field, nil)
 }
 func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
 	handler, ok := shardruntime.LookupObject("github.com/99designs/gqlgen/codegen/testserver/splitpackages", "Query")

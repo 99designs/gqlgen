@@ -9,6 +9,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/executor/shardruntime"
+	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
@@ -90,4 +91,73 @@ func _Query(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast
 	}
 
 	return out
+}
+
+// split_fields_.gotpl
+func __splitField_Query___schema(ctx context.Context, ec shardruntime.ObjectExecutionContext, field graphql.CollectedField, obj any) graphql.Marshaler {
+	_ = ctx
+	_ = ec
+	_ = field
+	_ = obj
+	return graphql.Null
+}
+
+// split_fields_.gotpl
+func __splitField_Query___type(ctx context.Context, ec shardruntime.ObjectExecutionContext, field graphql.CollectedField, obj any) graphql.Marshaler {
+	_ = ctx
+	_ = ec
+	_ = field
+	_ = obj
+	return graphql.Null
+}
+
+// split_fields_.gotpl
+func __splitField_Query_hello(ctx context.Context, ec shardruntime.ObjectExecutionContext, field graphql.CollectedField, obj any) graphql.Marshaler {
+	_ = ctx
+	_ = ec
+	_ = field
+	_ = obj
+	return graphql.Null
+}
+
+// split_args_.gotpl
+func __splitArgs_field_Query___type_args(_ context.Context, _ shardruntime.ObjectExecutionContext, rawArgs map[string]any) (map[string]any, error) {
+	return rawArgs, nil
+}
+
+// split_args_.gotpl
+func __splitArgs_field_Query_hello_args(_ context.Context, _ shardruntime.ObjectExecutionContext, rawArgs map[string]any) (map[string]any, error) {
+	return rawArgs, nil
+}
+
+// split_complexity_.gotpl
+func __splitComplexity_Query___schema(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+	_ = ctx
+	_ = ec
+	_ = childComplexity
+	_ = rawArgs
+	return 0, false
+}
+
+// split_complexity_.gotpl
+func __splitComplexity_Query___type(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+	_ = ctx
+	_ = ec
+	_ = childComplexity
+	_ = rawArgs
+	return 0, false
+}
+
+// split_complexity_.gotpl
+func __splitComplexity_Query_hello(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+	_ = ctx
+	_ = ec
+	_ = childComplexity
+	_ = rawArgs
+	return 0, false
+}
+
+// split_codecs_.gotpl
+func marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(_ context.Context, _ shardruntime.ObjectExecutionContext, _ ast.SelectionSet, _ *introspection.Schema) graphql.Marshaler {
+	return graphql.Null
 }

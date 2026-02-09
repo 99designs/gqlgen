@@ -46,6 +46,53 @@ More help to get started:
 - [Real-world examples](https://github.com/99designs/gqlgen/tree/master/_examples) show how to create GraphQL applications
 - [Reference docs](https://pkg.go.dev/github.com/99designs/gqlgen) for the APIs
 
+## Migration: `follow-schema` to `split-packages`
+
+If you currently use:
+
+```yaml
+exec:
+  layout: follow-schema
+  dir: graph
+  package: graph
+```
+
+and want to move to split execution packages to reduce compile pressure on large schemas, update to:
+
+```yaml
+exec:
+  layout: split-packages
+  filename: graph/generated.go
+  package: graph
+  # optional (default shown):
+  # shard_dir: graph/internal/gqlgenexec/shards
+  # shard_filename_template: "{name}.generated.go"
+```
+
+Recommended migration steps:
+
+1. Update the `exec` block in `gqlgen.yml` as shown above.
+2. Remove old execution generated files from the previous `follow-schema` output directory.
+3. Regenerate with `go tool gqlgen generate` (or your existing generate command).
+4. Keep your `resolver` layout as-is unless you also want to change resolver generation separately.
+
+Example cleanup for a typical `graph/` follow-schema setup:
+
+```bash
+rm -f graph/*.generated.go
+rm -rf graph/internal/gqlgenexec
+```
+
+After migration, expect:
+
+- One root execution file in your public package (`graph/generated.go`).
+- Internal shard packages under `graph/internal/gqlgenexec/shards/...`.
+- Small generated shard import/runtime files in the root package.
+
+Current limitation:
+
+- `exec.layout: split-packages` is not yet compatible with `federation` in the same config.
+
 ## Reporting Issues
 
 If you think you've found a bug, or something isn't behaving the way you think it should, please raise an [issue](https://github.com/99designs/gqlgen/issues) on GitHub.

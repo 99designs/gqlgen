@@ -654,6 +654,9 @@ func (c *Config) check() error {
 		if err := c.Federation.Check(); err != nil {
 			return fmt.Errorf("config.federation: %w", err)
 		}
+		if c.Exec.Layout == ExecLayoutSplitPackages {
+			return errors.New("federation is not supported with exec.layout=split-packages yet")
+		}
 		fileList[c.Federation.ImportPath()] = append(
 			fileList[c.Federation.ImportPath()],
 			FilenamePackage{

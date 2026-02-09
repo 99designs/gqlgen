@@ -18,7 +18,7 @@ schema:
 # Where should the generated server code go?
 exec:
   package: graph
-  layout: single-file # Only other option is "follow-schema," ie multi-file.
+  layout: single-file # Other options: "follow-schema" and "split-packages".
 
   # Only for single-file layout:
   filename: graph/generated.go
@@ -26,6 +26,11 @@ exec:
   # Only for follow-schema layout:
   # dir: graph
   # filename_template: "{name}.generated.go"
+
+  # Only for split-packages layout:
+  # filename: graph/generated.go
+  # shard_dir: graph/internal/gqlgenexec/shards
+  # shard_filename_template: "{name}.generated.go"
 
   # Optional: Maximum number of goroutines in concurrency to use per child resolvers(default: unlimited)
   # worker_limit: 1000
@@ -265,8 +270,11 @@ For a single gqlgen project, what gqlgen config works best really changes at a f
 
 1. quick proof of concept - `single-file` layout
 2. medium-sized team(s) - `follow-schema` layout
-3. many teams - separate schema and resolvers into separate packages as [in this example](https://github.com/99designs/gqlgen/tree/master/_examples/large-project-structure/integration/go.mod) (see below)
-4. very large type systems (more than 65,000 methods) - `use_function_syntax_for_execution_context`
+3. many teams - `split-packages` layout for generated execution code
+4. many teams + custom architecture - separate schema and resolvers into separate packages as [in this example](https://github.com/99designs/gqlgen/tree/master/_examples/large-project-structure/integration/go.mod) (see below)
+5. very large type systems (more than 65,000 methods) - `use_function_syntax_for_execution_context`
+
+> Note: `exec.layout: split-packages` is currently not compatible with `federation` output in the same config.
 However, some will instead choose to adopt GraphQL Federation and split into multiple gqlgen instances before one of these growth points is even reached.
 
 Big projects usually divide into a separate domains, grouping all related files and resources under a folder such as:

@@ -247,6 +247,57 @@ func TestConfigCheck(t *testing.T) {
 	}
 }
 
+func TestConfigCheckSplitPackages(t *testing.T) {
+	t.Run("split-packages requires filename", func(t *testing.T) {
+		cfg := Config{
+			Exec: ExecConfig{
+				Layout: ExecLayoutSplitPackages,
+			},
+		}
+
+		require.EqualError(
+			t,
+			cfg.check(),
+			"config.exec: filename must be specified when using split-packages layout",
+		)
+	})
+
+	t.Run("split-packages sets shard defaults", func(t *testing.T) {
+		cfg := Config{
+			Exec: ExecConfig{
+				Layout:   ExecLayoutSplitPackages,
+				Filename: "generated/exec.go",
+			},
+		}
+
+		require.NoError(t, cfg.check())
+		require.Equal(
+			t,
+			filepath.ToSlash(filepath.Join(cfg.Exec.Dir(), "internal/gqlgenexec/shards")),
+			filepath.ToSlash(cfg.Exec.ShardDir),
+		)
+		require.Equal(t, "{name}.generated.go", cfg.Exec.ShardFilenameTemplate)
+	})
+
+	t.Run("federation unsupported in split-packages", func(t *testing.T) {
+		cfg := Config{
+			Exec: ExecConfig{
+				Layout:   ExecLayoutSplitPackages,
+				Filename: "generated/exec.go",
+			},
+			Federation: PackageConfig{
+				Filename: "generated/federation.go",
+			},
+		}
+
+		require.EqualError(
+			t,
+			cfg.check(),
+			"federation is not supported with exec.layout=split-packages yet",
+		)
+	})
+}
+
 func TestAutobinding(t *testing.T) {
 	t.Run("valid paths", func(t *testing.T) {
 		cfg := Config{

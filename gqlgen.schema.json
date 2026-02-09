@@ -25,7 +25,7 @@
         },
         "layout": {
           "type": "string",
-          "enum": ["single-file", "follow-schema"],
+          "enum": ["single-file", "follow-schema", "split-packages"],
           "default": "single-file"
         },
         "dir": {
@@ -36,6 +36,15 @@
           "type": "string",
           "default": "{name}.generated.go",
           "description": "Template for filenames (required for follow-schema layout)"
+        },
+        "shard_dir": {
+          "type": "string",
+          "description": "Directory for generated split shard packages (only for split-packages layout)"
+        },
+        "shard_filename_template": {
+          "type": "string",
+          "default": "{name}.generated.go",
+          "description": "Template for split shard filenames (only for split-packages layout)"
         },
         "worker_limit": {
           "type": "integer",

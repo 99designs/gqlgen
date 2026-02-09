@@ -1,0 +1,17 @@
+schema:
+  - "*.graphql"
+
+exec:
+  layout: split-packages
+  filename: generated.go
+  package: splitpackages
+
+model:
+  filename: models-gen.go
+  package: splitpackages
+
+resolver:
+  filename: resolver.go
+  package: splitpackages
+  type: Resolver
+

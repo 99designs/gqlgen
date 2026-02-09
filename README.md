@@ -88,6 +88,7 @@ After migration, expect:
 - One root execution file in your public package (`graph/generated.go`).
 - Internal shard packages under `graph/internal/gqlgenexec/shards/...`.
 - Small generated shard import/runtime files in the root package.
+- Existing resolver package paths remain compatible; only split-packages internals move under `graph/internal/...`.
 
 Current limitation:
 

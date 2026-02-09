@@ -1,0 +1,48 @@
+type Query {
+  ping: String!
+  node(id: ID!): Node
+  users(limit: Int!): [User!]!
+}
+
+interface Node {
+  id: ID!
+}
+
+type User implements Node {
+  id: ID!
+  name: String!
+  email: String!
+  profile: Profile!
+  teams: [Team!]!
+}
+
+type Profile {
+  title: String!
+  timezone: String!
+}
+
+type Team implements Node {
+  id: ID!
+  name: String!
+  projects: [Project!]!
+}
+
+type Project implements Node {
+  id: ID!
+  name: String!
+  status: ProjectStatus!
+  tasks: [Task!]!
+}
+
+type Task implements Node {
+  id: ID!
+  title: String!
+  done: Boolean!
+  assignee: User
+}
+
+enum ProjectStatus {
+  PLANNED
+  ACTIVE
+  DONE
+}

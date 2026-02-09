@@ -9,6 +9,7 @@
 /_examples/federation/node_modules
 /codegen/gen
 /gen
+/.sisyphus
 
 /.vscode
 .idea/

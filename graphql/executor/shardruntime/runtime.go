@@ -2,6 +2,7 @@ package shardruntime
 
 import (
 	"context"
+	"sort"
 	"sync"
 
 	"github.com/vektah/gqlparser/v2/ast"
@@ -45,10 +46,35 @@ type StreamObjectHandler func(
 	sel ast.SelectionSet,
 ) func(context.Context) graphql.Marshaler
 
+type FieldHandler func(
+	ctx context.Context,
+	ec ObjectExecutionContext,
+	field graphql.CollectedField,
+	obj any,
+) graphql.Marshaler
+
+type StreamFieldHandler func(
+	ctx context.Context,
+	ec ObjectExecutionContext,
+	field graphql.CollectedField,
+	obj any,
+) func(context.Context) graphql.Marshaler
+
+type ComplexityHandler func(
+	ctx context.Context,
+	ec ObjectExecutionContext,
+	childComplexity int,
+	rawArgs map[string]any,
+) (int, bool)
+
 var (
-	mu            sync.RWMutex
-	objectByScope = map[string]map[string]ObjectHandler{}
-	streamByScope = map[string]map[string]StreamObjectHandler{}
+	mu                    sync.RWMutex
+	objectByScope         = map[string]map[string]ObjectHandler{}
+	streamByScope         = map[string]map[string]StreamObjectHandler{}
+	fieldByScope          = map[string]map[string]map[string]FieldHandler{}
+	streamFieldByScope    = map[string]map[string]map[string]StreamFieldHandler{}
+	complexityByScope     = map[string]map[string]map[string]ComplexityHandler{}
+	inputUnmarshalByScope = map[string]map[string]any{}
 )
 
 func RegisterObject(scope, objectName string, handler ObjectHandler) {
@@ -105,4 +131,163 @@ func LookupStreamObject(scope, objectName string) (StreamObjectHandler, bool) {
 	}
 	handler, ok := scopeHandlers[objectName]
 	return handler, ok
+}
+
+func RegisterField(scope, objectName, fieldName string, handler FieldHandler) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	scopeHandlers := fieldByScope[scope]
+	if scopeHandlers == nil {
+		scopeHandlers = map[string]map[string]FieldHandler{}
+		fieldByScope[scope] = scopeHandlers
+	}
+
+	objectHandlers := scopeHandlers[objectName]
+	if objectHandlers == nil {
+		objectHandlers = map[string]FieldHandler{}
+		scopeHandlers[objectName] = objectHandlers
+	}
+
+	if _, exists := objectHandlers[fieldName]; exists {
+		panic("duplicate field shard handler registration: " + scope + ":" + objectName + ":" + fieldName)
+	}
+	objectHandlers[fieldName] = handler
+}
+
+func LookupField(scope, objectName, fieldName string) (FieldHandler, bool) {
+	mu.RLock()
+	defer mu.RUnlock()
+
+	scopeHandlers := fieldByScope[scope]
+	if scopeHandlers == nil {
+		return nil, false
+	}
+
+	objectHandlers := scopeHandlers[objectName]
+	if objectHandlers == nil {
+		return nil, false
+	}
+
+	handler, ok := objectHandlers[fieldName]
+	return handler, ok
+}
+
+func RegisterStreamField(scope, objectName, fieldName string, handler StreamFieldHandler) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	scopeHandlers := streamFieldByScope[scope]
+	if scopeHandlers == nil {
+		scopeHandlers = map[string]map[string]StreamFieldHandler{}
+		streamFieldByScope[scope] = scopeHandlers
+	}
+
+	objectHandlers := scopeHandlers[objectName]
+	if objectHandlers == nil {
+		objectHandlers = map[string]StreamFieldHandler{}
+		scopeHandlers[objectName] = objectHandlers
+	}
+
+	if _, exists := objectHandlers[fieldName]; exists {
+		panic("duplicate stream field shard handler registration: " + scope + ":" + objectName + ":" + fieldName)
+	}
+	objectHandlers[fieldName] = handler
+}
+
+func LookupStreamField(scope, objectName, fieldName string) (StreamFieldHandler, bool) {
+	mu.RLock()
+	defer mu.RUnlock()
+
+	scopeHandlers := streamFieldByScope[scope]
+	if scopeHandlers == nil {
+		return nil, false
+	}
+
+	objectHandlers := scopeHandlers[objectName]
+	if objectHandlers == nil {
+		return nil, false
+	}
+
+	handler, ok := objectHandlers[fieldName]
+	return handler, ok
+}
+
+func RegisterComplexity(scope, objectName, fieldName string, handler ComplexityHandler) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	scopeHandlers := complexityByScope[scope]
+	if scopeHandlers == nil {
+		scopeHandlers = map[string]map[string]ComplexityHandler{}
+		complexityByScope[scope] = scopeHandlers
+	}
+
+	objectHandlers := scopeHandlers[objectName]
+	if objectHandlers == nil {
+		objectHandlers = map[string]ComplexityHandler{}
+		scopeHandlers[objectName] = objectHandlers
+	}
+
+	if _, exists := objectHandlers[fieldName]; exists {
+		panic("duplicate complexity shard handler registration: " + scope + ":" + objectName + ":" + fieldName)
+	}
+	objectHandlers[fieldName] = handler
+}
+
+func LookupComplexity(scope, objectName, fieldName string) (ComplexityHandler, bool) {
+	mu.RLock()
+	defer mu.RUnlock()
+
+	scopeHandlers := complexityByScope[scope]
+	if scopeHandlers == nil {
+		return nil, false
+	}
+
+	objectHandlers := scopeHandlers[objectName]
+	if objectHandlers == nil {
+		return nil, false
+	}
+
+	handler, ok := objectHandlers[fieldName]
+	return handler, ok
+}
+
+func RegisterInputUnmarshaler(scope, inputName string, fn any) {
+	mu.Lock()
+	defer mu.Unlock()
+
+	scopeHandlers := inputUnmarshalByScope[scope]
+	if scopeHandlers == nil {
+		scopeHandlers = map[string]any{}
+		inputUnmarshalByScope[scope] = scopeHandlers
+	}
+
+	if _, exists := scopeHandlers[inputName]; exists {
+		panic("duplicate input unmarshaler registration: " + scope + ":" + inputName)
+	}
+	scopeHandlers[inputName] = fn
+}
+
+func ListInputUnmarshalers(scope string, _ ObjectExecutionContext) []any {
+	mu.RLock()
+	defer mu.RUnlock()
+
+	scopeHandlers := inputUnmarshalByScope[scope]
+	if scopeHandlers == nil {
+		return nil
+	}
+
+	inputNames := make([]string, 0, len(scopeHandlers))
+	for inputName := range scopeHandlers {
+		inputNames = append(inputNames, inputName)
+	}
+	sort.Strings(inputNames)
+
+	inputUnmarshalers := make([]any, 0, len(scopeHandlers))
+	for _, inputName := range inputNames {
+		inputUnmarshalers = append(inputUnmarshalers, scopeHandlers[inputName])
+	}
+
+	return inputUnmarshalers
 }

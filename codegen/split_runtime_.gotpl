@@ -1,0 +1,4 @@
+{{/* Context object: codegen.Data */}}
+
+// split_runtime.generated.go is intentionally thin for split-packages.
+// Execution dispatch now lives in the generated root gateway and shard packages.

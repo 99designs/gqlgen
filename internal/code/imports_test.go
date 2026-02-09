@@ -61,8 +61,9 @@ func TestImportPathForDir(t *testing.T) {
 func TestNameForDir(t *testing.T) {
 	wd, err := os.Getwd()
 	require.NoError(t, err)
+	tmpDir := t.TempDir()
 
-	assert.Equal(t, "tmp", NameForDir("/tmp"))
+	assert.Equal(t, filepath.Base(tmpDir), NameForDir(tmpDir))
 	assert.Equal(t, "code", NameForDir(wd))
 	assert.Equal(t, "docs", NameForDir(wd+"/../../docs"))
 	assert.Equal(t, "main", NameForDir(wd+"/../.."))

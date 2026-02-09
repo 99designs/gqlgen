@@ -1,0 +1,22 @@
+{{ define "split_codecs_.gotpl" }}
+{{- range $key := .Ownership.CodecOwnerKeys }}
+{{- if eq (index $.Ownership.CodecOwner $key) $.ShardName }}
+{{- with $type := index $.CodecByFunc $key }}
+{{- if eq $key ($type.MarshalFunc) }}
+
+// split_codecs_.gotpl
+func {{ $key }}(_ context.Context, _ shardruntime.ObjectExecutionContext, _ ast.SelectionSet, _ {{ $type.GO | ref }}) graphql.Marshaler {
+	return graphql.Null
+}
+{{- else if eq $key ($type.UnmarshalFunc) }}
+
+// split_codecs_.gotpl
+func {{ $key }}(_ context.Context, _ shardruntime.ObjectExecutionContext, _ any) ({{ $type.GO | ref }}, error) {
+	var zero {{ $type.GO | ref }}
+	return zero, nil
+}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{ end }}

@@ -181,3 +181,10 @@ func _{{$object.Name}}(ctx context.Context, ec shardruntime.ObjectExecutionConte
 {{- end }}
 
 {{- end }}
+
+{{ template "split_fields_.gotpl" . }}
+{{ template "split_args_.gotpl" . }}
+{{ template "split_directives_.gotpl" . }}
+{{ template "split_complexity_.gotpl" . }}
+{{ template "split_inputs_.gotpl" . }}
+{{ template "split_codecs_.gotpl" . }}

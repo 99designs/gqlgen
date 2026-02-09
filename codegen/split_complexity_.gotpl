@@ -1,0 +1,17 @@
+{{ define "split_complexity_.gotpl" }}
+{{- range $key := .Ownership.ComplexityOwnerKeys }}
+{{- if eq (index $.Ownership.ComplexityOwner $key) $.ShardName }}
+{{- with $field := index $.FieldByLookupKey $key }}
+
+// split_complexity_.gotpl
+func __splitComplexity_{{ $field.Object.Name }}_{{ $field.Name }}(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+	_ = ctx
+	_ = ec
+	_ = childComplexity
+	_ = rawArgs
+	return 0, false
+}
+{{- end }}
+{{- end }}
+{{- end }}
+{{ end }}

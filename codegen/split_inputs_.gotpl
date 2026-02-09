@@ -1,0 +1,23 @@
+{{ define "split_inputs_.gotpl" }}
+{{- range $inputName := .Ownership.InputOwnerKeys }}
+{{- if eq (index $.Ownership.InputOwner $inputName) $.ShardName }}
+{{- with $input := index $.InputByName $inputName }}
+{{- if not $input.HasUnmarshal }}
+
+// split_inputs_.gotpl
+func __splitInput_{{ $input.Name }}(_ context.Context, obj any) ({{ if $input.PointersInUnmarshalInput }}*{{ end }}{{ $input.Type | ref }}, error) {
+	{{- if $input.PointersInUnmarshalInput }}
+	var it {{ $input.Type | ref }}
+	_ = obj
+	return &it, nil
+	{{- else }}
+	var it {{ $input.Type | ref }}
+	_ = obj
+	return it, nil
+	{{- end }}
+}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{ end }}

@@ -10,6 +10,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
 	internalcode "github.com/99designs/gqlgen/internal/code"
 )
@@ -20,8 +21,32 @@ var splitRootTemplate string
 //go:embed split_shard_.gotpl
 var splitShardTemplate string
 
+//go:embed split_fields_.gotpl
+var splitFieldsTemplate string
+
+//go:embed split_args_.gotpl
+var splitArgsTemplate string
+
+//go:embed split_directives_.gotpl
+var splitDirectivesTemplate string
+
+//go:embed split_complexity_.gotpl
+var splitComplexityTemplate string
+
+//go:embed split_inputs_.gotpl
+var splitInputsTemplate string
+
+//go:embed split_codecs_.gotpl
+var splitCodecsTemplate string
+
+//go:embed split_register_.gotpl
+var splitRegisterTemplate string
+
 //go:embed split_imports_.gotpl
 var splitImportsTemplate string
+
+//go:embed split_runtime_.gotpl
+var splitRuntimeTemplate string
 
 type splitRootTemplateData struct {
 	*Data
@@ -30,7 +55,12 @@ type splitRootTemplateData struct {
 
 type splitShardTemplateData struct {
 	*Data
-	Scope string
+	Scope            string
+	ShardName        string
+	Ownership        *splitOwnershipPlanner
+	FieldByLookupKey map[string]*Field
+	InputByName      map[string]*Object
+	CodecByFunc      map[string]*config.TypeReference
 }
 
 type splitImportsTemplateData struct {
@@ -38,7 +68,7 @@ type splitImportsTemplateData struct {
 }
 
 func generateSplitPackages(data *Data) error {
-	if err := cleanupSplitRootImports(data); err != nil {
+	if err := cleanupSplitGeneratedOutputs(data); err != nil {
 		return err
 	}
 
@@ -60,17 +90,128 @@ func generateSplitPackages(data *Data) error {
 	return generateSplitShardImports(data, shardImports)
 }
 
-func cleanupSplitRootImports(data *Data) error {
-	pattern := filepath.Join(data.Config.Exec.Dir(), "split_shard_import_*.generated.go")
-	matches, err := filepath.Glob(pattern)
-	if err != nil {
-		return fmt.Errorf("invalid split import cleanup glob %q: %w", pattern, err)
+func cleanupSplitGeneratedOutputs(data *Data) error {
+	if err := removeSplitGeneratedByGlob(filepath.Join(data.Config.Exec.Dir(), "split_shard_import_*.generated.go"), "split import"); err != nil {
+		return err
 	}
-	for _, match := range matches {
-		if err := os.Remove(match); err != nil && !os.IsNotExist(err) {
-			return fmt.Errorf("remove stale split import file %q: %w", match, err)
+
+	runtimePath := filepath.Join(data.Config.Exec.Dir(), "split_runtime.generated.go")
+	if err := os.Remove(runtimePath); err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("remove stale split runtime file %q: %w", runtimePath, err)
+	}
+
+	generatedShardFiles, err := listSplitShardGeneratedFiles(data.Config.Exec.ShardDir)
+	if err != nil {
+		return err
+	}
+	for _, path := range generatedShardFiles {
+		if err := os.Remove(path); err != nil && !os.IsNotExist(err) {
+			return fmt.Errorf("remove stale split shard file %q: %w", path, err)
 		}
 	}
+
+	if err := pruneEmptyDirs(data.Config.Exec.ShardDir); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func removeSplitGeneratedByGlob(pattern string, kind string) error {
+	matches, err := filepath.Glob(pattern)
+	if err != nil {
+		return fmt.Errorf("invalid %s cleanup glob %q: %w", kind, pattern, err)
+	}
+
+	for _, match := range matches {
+		if err := os.Remove(match); err != nil && !os.IsNotExist(err) {
+			return fmt.Errorf("remove stale %s file %q: %w", kind, match, err)
+		}
+	}
+
+	return nil
+}
+
+func listSplitShardGeneratedFiles(root string) ([]string, error) {
+	info, err := os.Stat(root)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("stat split shard root %q: %w", root, err)
+	}
+	if !info.IsDir() {
+		return nil, fmt.Errorf("split shard root %q is not a directory", root)
+	}
+
+	var generated []string
+	err = filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if d.IsDir() || !strings.HasSuffix(path, ".generated.go") {
+			return nil
+		}
+		generated = append(generated, path)
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("walk split shard root %q: %w", root, err)
+	}
+
+	sort.Strings(generated)
+	return generated, nil
+}
+
+func pruneEmptyDirs(root string) error {
+	info, err := os.Stat(root)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return fmt.Errorf("stat split shard root for prune %q: %w", root, err)
+	}
+	if !info.IsDir() {
+		return fmt.Errorf("split shard root %q is not a directory", root)
+	}
+
+	var dirs []string
+	err = filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
+		if walkErr != nil {
+			return walkErr
+		}
+		if d.IsDir() {
+			dirs = append(dirs, path)
+		}
+		return nil
+	})
+	if err != nil {
+		return fmt.Errorf("walk split shard root for prune %q: %w", root, err)
+	}
+
+	sort.Slice(dirs, func(i, j int) bool {
+		if len(dirs[i]) == len(dirs[j]) {
+			return dirs[i] > dirs[j]
+		}
+		return len(dirs[i]) > len(dirs[j])
+	})
+
+	for _, dir := range dirs {
+		entries, readErr := os.ReadDir(dir)
+		if readErr != nil {
+			if os.IsNotExist(readErr) {
+				continue
+			}
+			return fmt.Errorf("read split shard dir %q: %w", dir, readErr)
+		}
+		if len(entries) > 0 {
+			continue
+		}
+		if removeErr := os.Remove(dir); removeErr != nil && !os.IsNotExist(removeErr) {
+			return fmt.Errorf("remove empty split shard dir %q: %w", dir, removeErr)
+		}
+	}
+
 	return nil
 }
 
@@ -91,9 +232,10 @@ func generateSplitRootRuntime(data *Data) error {
 	path := filepath.Join(data.Config.Exec.Dir(), "split_runtime.generated.go")
 	return templates.Render(templates.Options{
 		PackageName:     data.Config.Exec.Package,
+		Template:        splitRuntimeTemplate,
 		Filename:        path,
 		Data:            data,
-		RegionTags:      true,
+		RegionTags:      false,
 		GeneratedHeader: true,
 		Packages:        data.Config.Packages,
 		TemplateFS:      codegenTemplates,
@@ -101,6 +243,11 @@ func generateSplitRootRuntime(data *Data) error {
 }
 
 func generateSplitShardPackages(data *Data, scope string) ([]string, error) {
+	ownership, err := planSplitOwnership(data)
+	if err != nil {
+		return nil, err
+	}
+
 	builds := map[string]*Data{}
 	if err := addObjects(data, &builds); err != nil {
 		return nil, err
@@ -128,6 +275,10 @@ func generateSplitShardPackages(data *Data, scope string) ([]string, error) {
 		shardFile := strings.ReplaceAll(data.Config.Exec.ShardFilenameTemplate, "{name}", shardName)
 		shardPath := filepath.Join(shardDir, shardFile)
 
+		if err := os.MkdirAll(shardDir, 0o755); err != nil {
+			return nil, fmt.Errorf("create split shard dir %q: %w", shardDir, err)
+		}
+
 		pkg := internalcode.NameForDir(shardDir)
 		if pkg == "" {
 			pkg = shardName
@@ -135,10 +286,38 @@ func generateSplitShardPackages(data *Data, scope string) ([]string, error) {
 		build.Config.Exec.Package = pkg
 
 		if err := templates.Render(templates.Options{
-			PackageName:     pkg,
-			Template:        splitShardTemplate,
-			Filename:        shardPath,
-			Data:            splitShardTemplateData{Data: build, Scope: scope},
+			PackageName: pkg,
+			Template:    splitShardTemplate + "\n" + splitFieldsTemplate + "\n" + splitArgsTemplate + "\n" + splitDirectivesTemplate + "\n" + splitComplexityTemplate + "\n" + splitInputsTemplate + "\n" + splitCodecsTemplate,
+			Filename:    shardPath,
+			Data: splitShardTemplateData{
+				Data:             build,
+				Scope:            scope,
+				ShardName:        shardName,
+				Ownership:        ownership,
+				FieldByLookupKey: buildFieldLookupMap(build),
+				InputByName:      buildInputLookupMap(build),
+				CodecByFunc:      buildCodecLookupMap(data),
+			},
+			RegionTags:      false,
+			GeneratedHeader: true,
+			Packages:        data.Config.Packages,
+		}); err != nil {
+			return nil, err
+		}
+
+		registerPath := filepath.Join(shardDir, "register.generated.go")
+		if err := templates.Render(templates.Options{
+			PackageName: pkg,
+			Template:    splitRegisterTemplate,
+			Filename:    registerPath,
+			Data: splitShardTemplateData{
+				Data:             build,
+				Scope:            scope,
+				ShardName:        shardName,
+				Ownership:        ownership,
+				FieldByLookupKey: buildFieldLookupMap(build),
+				InputByName:      buildInputLookupMap(build),
+			},
 			RegionTags:      false,
 			GeneratedHeader: true,
 			Packages:        data.Config.Packages,
@@ -162,6 +341,44 @@ func generateSplitShardPackages(data *Data, scope string) ([]string, error) {
 	}
 
 	return dedup, nil
+}
+
+func buildFieldLookupMap(data *Data) map[string]*Field {
+	fieldByLookupKey := make(map[string]*Field)
+	for _, object := range data.Objects {
+		for _, field := range object.Fields {
+			fieldByLookupKey[object.Name+"."+field.Name] = field
+		}
+	}
+
+	return fieldByLookupKey
+}
+
+func buildInputLookupMap(data *Data) map[string]*Object {
+	inputByName := make(map[string]*Object)
+	for _, input := range data.Inputs {
+		inputByName[input.Name] = input
+	}
+
+	return inputByName
+}
+
+func buildCodecLookupMap(data *Data) map[string]*config.TypeReference {
+	codecByFunc := make(map[string]*config.TypeReference)
+	for _, ref := range data.ReferencedTypes {
+		if ref == nil {
+			continue
+		}
+
+		if marshal := ref.MarshalFunc(); marshal != "" {
+			codecByFunc[marshal] = ref
+		}
+		if unmarshal := ref.UnmarshalFunc(); unmarshal != "" {
+			codecByFunc[unmarshal] = ref
+		}
+	}
+
+	return codecByFunc
 }
 
 func generateSplitShardImports(data *Data, shardImports []string) error {

@@ -32,7 +32,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     continue-on-error: true
     steps:
-    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v5
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v5
       with:
         persist-credentials: "false"
     - uses: actions/setup-go@7a3fe6cf4cb3a834922a1244abfce67bcef6a0c5 # v6
@@ -67,7 +67,7 @@ jobs:
       run: |
         echo "### mikepenz/action-junit-report! :rocket:" >> $GITHUB_STEP_SUMMARY
     - name: Publish Test Report
-      uses: mikepenz/action-junit-report@a294a61c909bd8a4b563024a2faa28897fd53ebc # v5
+      uses: mikepenz/action-junit-report@74626db7353a25a20a72816467ebf035f674c5f8 # v5
       if: success() || failure() # always run even if the previous step fails
       with:
         report_paths: |

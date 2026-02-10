@@ -70,6 +70,27 @@ type Config struct {
 	Federated bool `yaml:"federated,omitempty"`
 }
 
+const (
+	DirGoModel         = "goModel"
+	DirGoExtraField    = "goExtraField"
+	DirGoField         = "goField"
+	DirGoTag           = "goTag"
+	DirGoEnum          = "goEnum"
+	DirInlineArguments = "inlineArguments"
+
+	DirArgName                = "name"
+	DirArgModel               = "model"
+	DirArgModels              = "models"
+	DirArgType                = "type"
+	DirArgValue               = "value"
+	DirArgForceGenerate       = "forceGenerate"
+	DirArgForceResolver       = "forceResolver"
+	DirArgOverrideTags        = "overrideTags"
+	DirArgDescription         = "description"
+	DirArgOmittable           = "omittable"
+	DirArgAutoBindGetterHaser = "autoBindGetterHaser"
+)
+
 var cfgFilenames = []string{".gqlgen.yml", "gqlgen.yml", "gqlgen.yaml"}
 
 // templatePackageNames is a list of packages names that the default templates use, in order to
@@ -332,7 +353,14 @@ func (c *Config) IsRoot(def *ast.Definition) bool {
 }
 
 func (c *Config) injectTypesFromSchema() error {
-	for _, d := range []string{"goModel", "goExtraField", "goField", "goTag", "goEnum", "inlineArguments"} {
+	for _, d := range []string{
+		DirGoModel,
+		DirGoExtraField,
+		DirGoField,
+		DirGoTag,
+		DirGoEnum,
+		DirInlineArguments,
+	} {
 		c.Directives[d] = DirectiveConfig{SkipRuntime: true}
 	}
 
@@ -341,14 +369,14 @@ func (c *Config) injectTypesFromSchema() error {
 			continue
 		}
 
-		if bd := schemaType.Directives.ForName("goModel"); bd != nil {
-			if ma := bd.Arguments.ForName("model"); ma != nil {
+		if bd := schemaType.Directives.ForName(DirGoModel); bd != nil {
+			if ma := bd.Arguments.ForName(DirArgModel); ma != nil {
 				if mv, err := ma.Value.Value(nil); err == nil {
 					c.Models.Add(schemaType.Name, mv.(string))
 				}
 			}
 
-			if ma := bd.Arguments.ForName("models"); ma != nil {
+			if ma := bd.Arguments.ForName(DirArgModels); ma != nil {
 				if mvs, err := ma.Value.Value(nil); err == nil {
 					for _, mv := range mvs.([]any) {
 						c.Models.Add(schemaType.Name, mv.(string))
@@ -356,7 +384,7 @@ func (c *Config) injectTypesFromSchema() error {
 				}
 			}
 
-			if fg := bd.Arguments.ForName("forceGenerate"); fg != nil {
+			if fg := bd.Arguments.ForName(DirArgForceGenerate); fg != nil {
 				if mv, err := fg.Value.Value(nil); err == nil {
 					c.Models.ForceGenerate(schemaType.Name, mv.(bool))
 				}
@@ -367,18 +395,14 @@ func (c *Config) injectTypesFromSchema() error {
 			schemaType.Kind == ast.InputObject ||
 			schemaType.Kind == ast.Interface {
 			for _, field := range schemaType.Fields {
-				if fd := field.Directives.ForName("goField"); fd != nil {
+				if fd := field.Directives.ForName(DirGoField); fd != nil {
 					// First, copy map entry for type and field to do modifications
 					typeMapEntry := c.Models[schemaType.Name]
 					typeMapFieldEntry := typeMapEntry.Fields[field.Name]
 
-					if ta := fd.Arguments.ForName("type"); ta != nil {
+					if ta := fd.Arguments.ForName(DirArgType); ta != nil {
 						if c.Models.UserDefined(schemaType.Name) {
-							return fmt.Errorf(
-								"argument 'type' for directive @goField (src: %s, line: %d) not applicable for user-defined models",
-								fd.Position.Src.Name,
-								fd.Position.Line,
-							)
+							return newNotApplicableError(DirGoField, DirArgType, *fd.Position)
 						}
 
 						if ft, err := ta.Value.Value(nil); err == nil {
@@ -386,29 +410,44 @@ func (c *Config) injectTypesFromSchema() error {
 						}
 					}
 
-					if ra := fd.Arguments.ForName("forceResolver"); ra != nil {
+					if ra := fd.Arguments.ForName(DirArgForceResolver); ra != nil {
 						if fr, err := ra.Value.Value(nil); err == nil {
 							typeMapFieldEntry.Resolver = fr.(bool)
 						}
 					}
 
-					if na := fd.Arguments.ForName("name"); na != nil {
+					if na := fd.Arguments.ForName(DirArgName); na != nil {
 						if fr, err := na.Value.Value(nil); err == nil {
 							typeMapFieldEntry.FieldName = fr.(string)
 						}
 					}
 
-					if arg := fd.Arguments.ForName("omittable"); arg != nil {
+					if arg := fd.Arguments.ForName(DirArgOmittable); arg != nil {
 						if k, err := arg.Value.Value(nil); err == nil {
 							val := k.(bool)
 							typeMapFieldEntry.Omittable = &val
 						}
 					}
 
-					if arg := fd.Arguments.ForName("autoBindGetterHaser"); arg != nil {
+					if arg := fd.Arguments.ForName(DirArgAutoBindGetterHaser); arg != nil {
 						if k, err := arg.Value.Value(nil); err == nil {
 							val := k.(bool)
 							typeMapFieldEntry.AutoBindGetterHaser = &val
+						}
+					}
+
+					if arg := fd.Arguments.ForName(DirArgForceGenerate); arg != nil {
+						if c.Models.UserDefined(schemaType.Name) {
+							return newNotApplicableError(
+								DirGoField,
+								DirArgForceGenerate,
+								*fd.Position,
+							)
+						}
+
+						if k, err := arg.Value.Value(nil); err == nil {
+							val := k.(bool)
+							typeMapFieldEntry.ForceGenerate = val
 						}
 					}
 
@@ -425,9 +464,10 @@ func (c *Config) injectTypesFromSchema() error {
 				}
 			}
 
-			if efds := schemaType.Directives.ForNames("goExtraField"); len(efds) != 0 {
+			if efds := schemaType.Directives.ForNames(DirGoExtraField); len(efds) != 0 {
 				for _, efd := range efds {
-					if t := efd.Arguments.ForName("type"); t != nil {
+					argumentName := "type"
+					if t := efd.Arguments.ForName(argumentName); t != nil {
 						extraField := ModelExtraField{}
 
 						if tv, err := t.Value.Value(nil); err == nil {
@@ -435,27 +475,27 @@ func (c *Config) injectTypesFromSchema() error {
 						}
 
 						if extraField.Type == "" {
-							return fmt.Errorf(
-								"argument 'type' for directive @goExtraField (src: %s, line: %d) cannot by empty",
-								efd.Position.Src.Name,
-								efd.Position.Line,
+							return newCannotBeEmptyError(
+								DirGoExtraField,
+								argumentName,
+								*efd.Position,
 							)
 						}
 
-						if ot := efd.Arguments.ForName("overrideTags"); ot != nil {
+						if ot := efd.Arguments.ForName(DirArgOverrideTags); ot != nil {
 							if otv, err := ot.Value.Value(nil); err == nil {
 								extraField.OverrideTags = otv.(string)
 							}
 						}
 
-						if d := efd.Arguments.ForName("description"); d != nil {
+						if d := efd.Arguments.ForName(DirArgDescription); d != nil {
 							if dv, err := d.Value.Value(nil); err == nil {
 								extraField.Description = dv.(string)
 							}
 						}
 
 						extraFieldName := ""
-						if fn := efd.Arguments.ForName("name"); fn != nil {
+						if fn := efd.Arguments.ForName(DirArgName); fn != nil {
 							if fnv, err := fn.Value.Value(nil); err == nil {
 								extraFieldName = fnv.(string)
 							}
@@ -489,8 +529,8 @@ func (c *Config) injectTypesFromSchema() error {
 			values := make(map[string]EnumValue)
 
 			for _, value := range schemaType.EnumValues {
-				if directive := value.Directives.ForName("goEnum"); directive != nil {
-					if arg := directive.Arguments.ForName("value"); arg != nil {
+				if directive := value.Directives.ForName(DirGoEnum); directive != nil {
+					if arg := directive.Arguments.ForName(DirArgValue); arg != nil {
 						if v, err := arg.Value.Value(nil); err == nil {
 							values[value.Name] = EnumValue{
 								Value: v.(string),
@@ -552,6 +592,9 @@ type TypeMapField struct {
 	// that accepts multiple parent objects and returns results for all of them
 	// in a single call, reducing N+1 query problems.
 	Batch bool `yaml:"batch,omitempty"`
+	// ForceGenerate forces the field to be generated in the model struct
+	// even when OmitResolverFields is enabled and the field has forceResolver: true.
+	ForceGenerate bool `yaml:"forceGenerate"`
 }
 
 type EnumValue struct {
@@ -996,4 +1039,24 @@ func abs(path string) string {
 		panic(err)
 	}
 	return filepath.ToSlash(absPath)
+}
+
+func newNotApplicableError(directive, argument string, pos ast.Position) error {
+	return fmt.Errorf(
+		"argument '%s' for directive @%s (src: %s, line: %d) not applicable for user-defined models",
+		argument,
+		directive,
+		pos.Src.Name,
+		pos.Line,
+	)
+}
+
+func newCannotBeEmptyError(directive, argument string, pos ast.Position) error {
+	return fmt.Errorf(
+		"argument '%s' for directive @%s (src: %s, line: %d) cannot by empty",
+		argument,
+		directive,
+		pos.Src.Name,
+		pos.Line,
+	)
 }

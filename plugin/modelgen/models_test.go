@@ -387,6 +387,8 @@ func TestModelGenerationOmitResolverFields(t *testing.T) {
 	require.Contains(t, string(generated), "type Base struct")
 	require.Contains(t, string(generated), "StandardField")
 	require.NotContains(t, string(generated), "ResolverField")
+	// ForceGeneratedField should be present because forceGenerate: true overrides OmitResolverFields
+	require.Contains(t, string(generated), "ForceGeneratedField")
 }
 
 func TestModelGenerationStructFieldPointers(t *testing.T) {

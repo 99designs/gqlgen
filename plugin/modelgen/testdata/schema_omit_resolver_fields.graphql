@@ -8,9 +8,12 @@ directive @goField(
     name: String
     omittable: Boolean
     type: String
+    forceGenerate: Boolean
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION | INTERFACE
 
 type Base {
     StandardField: String!
     ResolverField: String! @goField(forceResolver: true)
+    ForceGeneratedField: String!
+        @goField(forceResolver: true, forceGenerate: true)
 }

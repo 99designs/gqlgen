@@ -1,0 +1,22 @@
+schema:
+  - "testdata/entitydirectives/schema.graphql"
+
+exec:
+  filename: testdata/entitydirectives/generated/exec.go
+
+model:
+  filename: testdata/entitydirectives/generated/models_gen.go
+
+federation:
+  filename: testdata/entitydirectives/generated/federation.go
+  version: 1
+
+models:
+  _FieldSet:
+    model: github.com/99designs/gqlgen/graphql.String
+
+directives:
+  guard:
+    skip_runtime: false
+  auth:
+    skip_runtime: false

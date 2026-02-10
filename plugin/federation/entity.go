@@ -6,6 +6,7 @@ import (
 
 	"github.com/vektah/gqlparser/v2/ast"
 
+	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/99designs/gqlgen/plugin/federation/fieldset"
@@ -20,6 +21,10 @@ type Entity struct {
 	Requires  []*Requires
 	Multi     bool
 	Type      types.Type
+	// ImplDirectives are the resolved non-federation OBJECT-level directives
+	// with full type information, populated in GenerateCode for use in the
+	// federation template to wrap entity resolver calls.
+	ImplDirectives []*codegen.Directive
 }
 
 type EntityResolver struct {

@@ -438,7 +438,11 @@ func (c *Config) injectTypesFromSchema() error {
 
 					if arg := fd.Arguments.ForName(DirArgForceGenerate); arg != nil {
 						if c.Models.UserDefined(schemaType.Name) {
-							return newNotApplicableError(DirGoField, DirArgForceGenerate, *fd.Position)
+							return newNotApplicableError(
+								DirGoField,
+								DirArgForceGenerate,
+								*fd.Position,
+							)
 						}
 
 						if k, err := arg.Value.Value(nil); err == nil {
@@ -471,7 +475,11 @@ func (c *Config) injectTypesFromSchema() error {
 						}
 
 						if extraField.Type == "" {
-							return newCannotBeEmptyError(DirGoExtraField, argumentName, *efd.Position)
+							return newCannotBeEmptyError(
+								DirGoExtraField,
+								argumentName,
+								*efd.Position,
+							)
 						}
 
 						if ot := efd.Arguments.ForName(DirArgOverrideTags); ot != nil {

@@ -110,7 +110,11 @@
               "type": "object",
               "properties": {
                 "resolver": { "type": "boolean" },
-                "fieldName": { "type": "string" }
+                "fieldName": { "type": "string" },
+                "batch": {
+                  "type": "boolean",
+                  "description": "Enable batch resolver generation for this field to reduce N+1 queries"
+                }
               }
             }
           }

@@ -66,7 +66,11 @@ func WrapEntityResolver[T any](
 	// Type assert the result back to the expected type
 	typedResult, ok := result.(T)
 	if !ok {
-		return zero, fmt.Errorf("unexpected type %T from directive chain, expected %T", result, zero)
+		return zero, fmt.Errorf(
+			"unexpected type %T from directive chain, expected %T",
+			result,
+			zero,
+		)
 	}
 
 	return typedResult, nil

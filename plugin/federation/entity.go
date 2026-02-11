@@ -50,7 +50,7 @@ func (e *EntityResolver) IsPointerReturnType() bool {
 		return false
 	}
 	lookupType := templates.CurrentImports.LookupType(e.ReturnType)
-	return len(lookupType) > 0 && lookupType[0] == '*'
+	return lookupType != "" && lookupType[0] == '*'
 }
 
 type KeyField struct {

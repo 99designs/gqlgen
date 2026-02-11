@@ -282,7 +282,7 @@ func TestWrapEntityResolver_TypeAssertion(t *testing.T) {
 				return nil, err
 			}
 			user := result.(*User)
-			user.Name = user.Name + " (modified)"
+			user.Name += " (modified)"
 			return user, nil
 		}
 
@@ -363,7 +363,7 @@ func TestWrapEntityResolver_ComplexTypes(t *testing.T) {
 
 	t.Run("interface type", func(t *testing.T) {
 		ctx := context.Background()
-		resolver := func(ctx context.Context) (interface{}, error) {
+		resolver := func(ctx context.Context) (any, error) {
 			return map[string]string{"key": "value"}, nil
 		}
 

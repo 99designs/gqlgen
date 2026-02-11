@@ -108,7 +108,10 @@ func getNestedField(rep map[string]any, path []string) (any, error) {
 		if i < len(path)-1 {
 			nextMap, ok := val.(map[string]any)
 			if !ok {
-				return nil, fmt.Errorf("nested Key Field %q value not matching map[string]any", fieldName)
+				return nil, fmt.Errorf(
+					"nested Key Field %q value not matching map[string]any",
+					fieldName,
+				)
 			}
 			current = nextMap
 		} else {

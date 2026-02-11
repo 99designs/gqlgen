@@ -1,0 +1,26 @@
+directive @guard(name: String!) on OBJECT | FIELD_DEFINITION
+directive @auth(requires: String!) on OBJECT | FIELD_DEFINITION
+
+type Person @key(fields: "id") @guard(name: "PersonGuard") {
+    id: String!
+    email: String!
+    phone: String!
+}
+
+type Product @key(fields: "sku") @auth(requires: "admin") @guard(name: "ProductGuard") {
+    sku: String!
+    name: String!
+    price: Float!
+}
+
+# Entity without directives for comparison
+type Basic @key(fields: "id") {
+    id: String!
+    value: String!
+}
+
+type Query {
+    getPerson(id: String!): Person
+    getProduct(sku: String!): Product
+    getBasic(id: String!): Basic
+}

@@ -51,7 +51,7 @@ func (ec *executionContext) _Query_inSchemadir(ctx context.Context, field graphq
 		field,
 		ec.fieldContext_Query_inSchemadir,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().InSchemadir(ctx)
+			return ec.Resolvers.Query().InSchemadir(ctx)
 		},
 		nil,
 		ec.marshalNString2string,
@@ -80,7 +80,7 @@ func (ec *executionContext) _Query_parentdir(ctx context.Context, field graphql.
 		field,
 		ec.fieldContext_Query_parentdir,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Parentdir(ctx)
+			return ec.Resolvers.Query().Parentdir(ctx)
 		},
 		nil,
 		ec.marshalNString2string,
@@ -109,7 +109,7 @@ func (ec *executionContext) _Query_subdir(ctx context.Context, field graphql.Col
 		field,
 		ec.fieldContext_Query_subdir,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Subdir(ctx)
+			return ec.Resolvers.Query().Subdir(ctx)
 		},
 		nil,
 		ec.marshalNString2string,

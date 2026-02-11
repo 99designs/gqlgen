@@ -168,7 +168,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findUserByID(): %w`, err)
 			}
-			entity, err := ec.resolvers.Entity().FindUserByID(ctx, id0)
+			entity, err := ec.Resolvers.Entity().FindUserByID(ctx, id0)
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "User": %w`, err)
 			}
@@ -222,7 +222,7 @@ func (ec *executionContext) resolveManyEntities(
 				}
 			}
 
-			entities, err := ec.resolvers.Entity().FindManyProductByManufacturerIDAndIDs(ctx, typedReps)
+			entities, err := ec.Resolvers.Entity().FindManyProductByManufacturerIDAndIDs(ctx, typedReps)
 			if err != nil {
 				return err
 			}

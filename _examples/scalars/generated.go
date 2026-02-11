@@ -25,12 +25,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -80,16 +75,11 @@ type UserResolver interface {
 	CustomResolver(ctx context.Context, obj *model.User) (*model.Point, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -100,20 +90,20 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "Address.id":
-		if e.complexity.Address.ID == nil {
+		if e.ComplexityRoot.Address.ID == nil {
 			break
 		}
 
-		return e.complexity.Address.ID(childComplexity), true
+		return e.ComplexityRoot.Address.ID(childComplexity), true
 	case "Address.location":
-		if e.complexity.Address.Location == nil {
+		if e.ComplexityRoot.Address.Location == nil {
 			break
 		}
 
-		return e.complexity.Address.Location(childComplexity), true
+		return e.ComplexityRoot.Address.Location(childComplexity), true
 
 	case "Query.search":
-		if e.complexity.Query.Search == nil {
+		if e.ComplexityRoot.Query.Search == nil {
 			break
 		}
 
@@ -122,9 +112,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Search(childComplexity, args["input"].(*model.SearchArgs)), true
+		return e.ComplexityRoot.Query.Search(childComplexity, args["input"].(*model.SearchArgs)), true
 	case "Query.user":
-		if e.complexity.Query.User == nil {
+		if e.ComplexityRoot.Query.User == nil {
 			break
 		}
 
@@ -133,9 +123,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.User(childComplexity, args["id"].(external.ObjectID)), true
+		return e.ComplexityRoot.Query.User(childComplexity, args["id"].(external.ObjectID)), true
 	case "Query.userByTier":
-		if e.complexity.Query.UserByTier == nil {
+		if e.ComplexityRoot.Query.UserByTier == nil {
 			break
 		}
 
@@ -144,74 +134,74 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.UserByTier(childComplexity, args["tier"].(model.Tier), args["darkMode"].(*model.Prefs)), true
+		return e.ComplexityRoot.Query.UserByTier(childComplexity, args["tier"].(model.Tier), args["darkMode"].(*model.Prefs)), true
 
 	case "User.address":
-		if e.complexity.User.Address == nil {
+		if e.ComplexityRoot.User.Address == nil {
 			break
 		}
 
-		return e.complexity.User.Address(childComplexity), true
+		return e.ComplexityRoot.User.Address(childComplexity), true
 	case "User.created":
-		if e.complexity.User.Created == nil {
+		if e.ComplexityRoot.User.Created == nil {
 			break
 		}
 
-		return e.complexity.User.Created(childComplexity), true
+		return e.ComplexityRoot.User.Created(childComplexity), true
 	case "User.customResolver":
-		if e.complexity.User.CustomResolver == nil {
+		if e.ComplexityRoot.User.CustomResolver == nil {
 			break
 		}
 
-		return e.complexity.User.CustomResolver(childComplexity), true
+		return e.ComplexityRoot.User.CustomResolver(childComplexity), true
 	case "User.id":
-		if e.complexity.User.ID == nil {
+		if e.ComplexityRoot.User.ID == nil {
 			break
 		}
 
-		return e.complexity.User.ID(childComplexity), true
+		return e.ComplexityRoot.User.ID(childComplexity), true
 	case "User.isBanned":
-		if e.complexity.User.IsBanned == nil {
+		if e.ComplexityRoot.User.IsBanned == nil {
 			break
 		}
 
-		return e.complexity.User.IsBanned(childComplexity), true
+		return e.ComplexityRoot.User.IsBanned(childComplexity), true
 	case "User.modified":
-		if e.complexity.User.Modified == nil {
+		if e.ComplexityRoot.User.Modified == nil {
 			break
 		}
 
-		return e.complexity.User.Modified(childComplexity), true
+		return e.ComplexityRoot.User.Modified(childComplexity), true
 	case "User.name":
-		if e.complexity.User.Name == nil {
+		if e.ComplexityRoot.User.Name == nil {
 			break
 		}
 
-		return e.complexity.User.Name(childComplexity), true
+		return e.ComplexityRoot.User.Name(childComplexity), true
 	case "User.primitiveResolver":
-		if e.complexity.User.PrimitiveResolver == nil {
+		if e.ComplexityRoot.User.PrimitiveResolver == nil {
 			break
 		}
 
-		return e.complexity.User.PrimitiveResolver(childComplexity), true
+		return e.ComplexityRoot.User.PrimitiveResolver(childComplexity), true
 	case "User.ptrPrefs":
-		if e.complexity.User.PtrPrefs == nil {
+		if e.ComplexityRoot.User.PtrPrefs == nil {
 			break
 		}
 
-		return e.complexity.User.PtrPrefs(childComplexity), true
+		return e.ComplexityRoot.User.PtrPrefs(childComplexity), true
 	case "User.tier":
-		if e.complexity.User.Tier == nil {
+		if e.ComplexityRoot.User.Tier == nil {
 			break
 		}
 
-		return e.complexity.User.Tier(childComplexity), true
+		return e.ComplexityRoot.User.Tier(childComplexity), true
 	case "User.valPrefs":
-		if e.complexity.User.ValPrefs == nil {
+		if e.ComplexityRoot.User.ValPrefs == nil {
 			break
 		}
 
-		return e.complexity.User.ValPrefs(childComplexity), true
+		return e.ComplexityRoot.User.ValPrefs(childComplexity), true
 
 	}
 	return 0, false
@@ -490,7 +480,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 		ec.fieldContext_Query_user,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().User(ctx, fc.Args["id"].(external.ObjectID))
+			return ec.Resolvers.Query().User(ctx, fc.Args["id"].(external.ObjectID))
 		},
 		nil,
 		ec.marshalOUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐUser,
@@ -555,7 +545,7 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 		ec.fieldContext_Query_search,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Search(ctx, fc.Args["input"].(*model.SearchArgs))
+			return ec.Resolvers.Query().Search(ctx, fc.Args["input"].(*model.SearchArgs))
 		},
 		nil,
 		ec.marshalNUser2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐUserᚄ,
@@ -620,7 +610,7 @@ func (ec *executionContext) _Query_userByTier(ctx context.Context, field graphql
 		ec.fieldContext_Query_userByTier,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().UserByTier(ctx, fc.Args["tier"].(model.Tier), fc.Args["darkMode"].(*model.Prefs))
+			return ec.Resolvers.Query().UserByTier(ctx, fc.Args["tier"].(model.Tier), fc.Args["darkMode"].(*model.Prefs))
 		},
 		nil,
 		ec.marshalNUser2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐUserᚄ,
@@ -995,7 +985,7 @@ func (ec *executionContext) _User_primitiveResolver(ctx context.Context, field g
 		field,
 		ec.fieldContext_User_primitiveResolver,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.User().PrimitiveResolver(ctx, obj)
+			return ec.Resolvers.User().PrimitiveResolver(ctx, obj)
 		},
 		nil,
 		ec.marshalNString2string,
@@ -1024,7 +1014,7 @@ func (ec *executionContext) _User_customResolver(ctx context.Context, field grap
 		field,
 		ec.fieldContext_User_customResolver,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.User().CustomResolver(ctx, obj)
+			return ec.Resolvers.User().CustomResolver(ctx, obj)
 		},
 		nil,
 		ec.marshalNPoint2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐPoint,

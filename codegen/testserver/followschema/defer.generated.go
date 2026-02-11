@@ -100,7 +100,7 @@ func (ec *executionContext) _DeferModel_values(ctx context.Context, field graphq
 		field,
 		ec.fieldContext_DeferModel_values,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.DeferModel().Values(ctx, obj)
+			return ec.Resolvers.DeferModel().Values(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)

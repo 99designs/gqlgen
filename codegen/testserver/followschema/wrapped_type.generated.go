@@ -64,7 +64,7 @@ func (ec *executionContext) _WrappedMap_get(ctx context.Context, field graphql.C
 		ec.fieldContext_WrappedMap_get,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.WrappedMap().Get(ctx, obj, fc.Args["key"].(string))
+			return ec.Resolvers.WrappedMap().Get(ctx, obj, fc.Args["key"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -107,7 +107,7 @@ func (ec *executionContext) _WrappedSlice_get(ctx context.Context, field graphql
 		ec.fieldContext_WrappedSlice_get,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.WrappedSlice().Get(ctx, obj, fc.Args["idx"].(int))
+			return ec.Resolvers.WrappedSlice().Get(ctx, obj, fc.Args["idx"].(int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)

@@ -22,12 +22,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -73,16 +68,11 @@ type MyQueryResolver interface {
 	Todo(ctx context.Context, id string) (*Todo, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -93,7 +83,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "MyMutation.createTodo":
-		if e.complexity.MyMutation.CreateTodo == nil {
+		if e.ComplexityRoot.MyMutation.CreateTodo == nil {
 			break
 		}
 
@@ -102,10 +92,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.MyMutation.CreateTodo(childComplexity, args["todo"].(TodoInput)), true
+		return e.ComplexityRoot.MyMutation.CreateTodo(childComplexity, args["todo"].(TodoInput)), true
 
 	case "MyQuery.todo":
-		if e.complexity.MyQuery.Todo == nil {
+		if e.ComplexityRoot.MyQuery.Todo == nil {
 			break
 		}
 
@@ -114,38 +104,38 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.MyQuery.Todo(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.MyQuery.Todo(childComplexity, args["id"].(string)), true
 	case "MyQuery.todos":
-		if e.complexity.MyQuery.Todos == nil {
+		if e.ComplexityRoot.MyQuery.Todos == nil {
 			break
 		}
 
-		return e.complexity.MyQuery.Todos(childComplexity), true
+		return e.ComplexityRoot.MyQuery.Todos(childComplexity), true
 
 	case "Todo.id":
-		if e.complexity.Todo.ID == nil {
+		if e.ComplexityRoot.Todo.ID == nil {
 			break
 		}
 
-		return e.complexity.Todo.ID(childComplexity), true
+		return e.ComplexityRoot.Todo.ID(childComplexity), true
 	case "Todo.state":
-		if e.complexity.Todo.State == nil {
+		if e.ComplexityRoot.Todo.State == nil {
 			break
 		}
 
-		return e.complexity.Todo.State(childComplexity), true
+		return e.ComplexityRoot.Todo.State(childComplexity), true
 	case "Todo.text":
-		if e.complexity.Todo.Text == nil {
+		if e.ComplexityRoot.Todo.Text == nil {
 			break
 		}
 
-		return e.complexity.Todo.Text(childComplexity), true
+		return e.ComplexityRoot.Todo.Text(childComplexity), true
 	case "Todo.verified":
-		if e.complexity.Todo.Verified == nil {
+		if e.ComplexityRoot.Todo.Verified == nil {
 			break
 		}
 
-		return e.complexity.Todo.Verified(childComplexity), true
+		return e.ComplexityRoot.Todo.Verified(childComplexity), true
 
 	}
 	return 0, false
@@ -373,17 +363,17 @@ func (ec *executionContext) _MyMutation_createTodo(ctx context.Context, field gr
 		ec.fieldContext_MyMutation_createTodo,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.MyMutation().CreateTodo(ctx, fc.Args["todo"].(TodoInput))
+			return ec.Resolvers.MyMutation().CreateTodo(ctx, fc.Args["todo"].(TodoInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.ObjectLogging == nil {
+				if ec.Directives.ObjectLogging == nil {
 					var zeroVal *Todo
 					return zeroVal, errors.New("directive objectLogging is not implemented")
 				}
-				return ec.directives.ObjectLogging(ctx, nil, directive0)
+				return ec.Directives.ObjectLogging(ctx, nil, directive0)
 			}
 
 			next = directive1
@@ -436,17 +426,17 @@ func (ec *executionContext) _MyQuery_todos(ctx context.Context, field graphql.Co
 		field,
 		ec.fieldContext_MyQuery_todos,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.MyQuery().Todos(ctx)
+			return ec.Resolvers.MyQuery().Todos(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.ObjectLogging == nil {
+				if ec.Directives.ObjectLogging == nil {
 					var zeroVal []*Todo
 					return zeroVal, errors.New("directive objectLogging is not implemented")
 				}
-				return ec.directives.ObjectLogging(ctx, nil, directive0)
+				return ec.Directives.ObjectLogging(ctx, nil, directive0)
 			}
 
 			next = directive1
@@ -489,17 +479,17 @@ func (ec *executionContext) _MyQuery_todo(ctx context.Context, field graphql.Col
 		ec.fieldContext_MyQuery_todo,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.MyQuery().Todo(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.MyQuery().Todo(ctx, fc.Args["id"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.ObjectLogging == nil {
+				if ec.Directives.ObjectLogging == nil {
 					var zeroVal *Todo
 					return zeroVal, errors.New("directive objectLogging is not implemented")
 				}
-				return ec.directives.ObjectLogging(ctx, nil, directive0)
+				return ec.Directives.ObjectLogging(ctx, nil, directive0)
 			}
 
 			next = directive1
@@ -753,11 +743,11 @@ func (ec *executionContext) _Todo_verified(ctx context.Context, field graphql.Co
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.FieldLogging == nil {
+				if ec.Directives.FieldLogging == nil {
 					var zeroVal bool
 					return zeroVal, errors.New("directive fieldLogging is not implemented")
 				}
-				return ec.directives.FieldLogging(ctx, obj, directive0)
+				return ec.Directives.FieldLogging(ctx, obj, directive0)
 			}
 
 			next = directive1
@@ -2247,11 +2237,11 @@ func (ec *executionContext) unmarshalInputTodoInput(ctx context.Context, obj any
 			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalNString2string(ctx, v) }
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.InputLogging == nil {
+				if ec.Directives.InputLogging == nil {
 					var zeroVal string
 					return zeroVal, errors.New("directive inputLogging is not implemented")
 				}
-				return ec.directives.InputLogging(ctx, obj, directive0)
+				return ec.Directives.InputLogging(ctx, obj, directive0)
 			}
 
 			tmp, err := directive1(ctx)

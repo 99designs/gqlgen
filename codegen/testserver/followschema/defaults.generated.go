@@ -170,7 +170,7 @@ func (ec *executionContext) _Mutation_defaultInput(ctx context.Context, field gr
 		ec.fieldContext_Mutation_defaultInput,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().DefaultInput(ctx, fc.Args["input"].(DefaultInput))
+			return ec.Resolvers.Mutation().DefaultInput(ctx, fc.Args["input"].(DefaultInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -219,7 +219,7 @@ func (ec *executionContext) _Mutation_overrideValueViaInput(ctx context.Context,
 		ec.fieldContext_Mutation_overrideValueViaInput,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().OverrideValueViaInput(ctx, fc.Args["input"].(FieldsOrderInput))
+			return ec.Resolvers.Mutation().OverrideValueViaInput(ctx, fc.Args["input"].(FieldsOrderInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -266,7 +266,7 @@ func (ec *executionContext) _Mutation_updateProduct(ctx context.Context, field g
 		ec.fieldContext_Mutation_updateProduct,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().UpdateProduct(ctx, map[string]interface{}{
+			return ec.Resolvers.Mutation().UpdateProduct(ctx, map[string]interface{}{
 				"id":    fc.Args["id"].(string),
 				"name":  fc.Args["name"].(*string),
 				"price": fc.Args["price"].(*float64),
@@ -313,7 +313,7 @@ func (ec *executionContext) _Mutation_updateSomething(ctx context.Context, field
 		ec.fieldContext_Mutation_updateSomething,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().UpdateSomething(ctx, fc.Args["input"].(SpecialInput))
+			return ec.Resolvers.Mutation().UpdateSomething(ctx, fc.Args["input"].(SpecialInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -356,7 +356,7 @@ func (ec *executionContext) _Mutation_updatePtrToPtr(ctx context.Context, field 
 		ec.fieldContext_Mutation_updatePtrToPtr,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().UpdatePtrToPtr(ctx, fc.Args["input"].(UpdatePtrToPtrOuter))
+			return ec.Resolvers.Mutation().UpdatePtrToPtr(ctx, fc.Args["input"].(UpdatePtrToPtrOuter))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)

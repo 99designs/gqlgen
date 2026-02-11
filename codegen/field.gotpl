@@ -140,7 +140,7 @@ func (ec *executionContext) {{ $field.FieldContextFunc }}({{ if not $field.Args 
 
 {{- if and $field.IsBatch (not $object.Root) }}
 func (ec *executionContext) resolveBatch_{{$object.Name}}_{{$field.Name}}(ctx context.Context, field graphql.CollectedField, obj {{$object.Reference | ref}}) (any, error) {
-	resolver := ec.resolvers.{{ ucFirst $object.Name }}()
+	resolver := ec.Resolvers.{{ ucFirst $object.Name }}()
 	{{- if $field.Args }}
 	fc := graphql.GetFieldContext(ctx)
 	{{- end }}
@@ -197,7 +197,7 @@ func (ec *executionContext) resolveBatch_{{$object.Name}}_{{$field.Name}}(ctx co
 	{{- end }}
 	{{ end }}
 	{{- if .IsResolver -}}
-		return ec.resolvers.{{ .ShortInvocation }}
+		return ec.Resolvers.{{ .ShortInvocation }}
 	{{- else if .IsMap -}}
 		switch v := {{.GoReceiverName}}[{{.Name|quote}}].(type) {
 		case {{if .Stream}}<-chan {{end}}{{.TypeReference.GO | ref}}:

@@ -176,7 +176,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findHelloByName(): %w`, err)
 			}
-			entity, err := ec.resolvers.Entity().FindHelloByName(ctx, id0)
+			entity, err := ec.Resolvers.Entity().FindHelloByName(ctx, id0)
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "Hello": %w`, err)
 			}
@@ -199,7 +199,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 1 for findHelloMultiSingleKeysByKey1AndKey2(): %w`, err)
 			}
-			entity, err := ec.resolvers.Entity().FindHelloMultiSingleKeysByKey1AndKey2(ctx, id0, id1)
+			entity, err := ec.Resolvers.Entity().FindHelloMultiSingleKeysByKey1AndKey2(ctx, id0, id1)
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "HelloMultiSingleKeys": %w`, err)
 			}
@@ -218,7 +218,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findHelloWithErrorsByName(): %w`, err)
 			}
-			entity, err := ec.resolvers.Entity().FindHelloWithErrorsByName(ctx, id0)
+			entity, err := ec.Resolvers.Entity().FindHelloWithErrorsByName(ctx, id0)
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "HelloWithErrors": %w`, err)
 			}
@@ -237,7 +237,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findPersonByName(): %w`, err)
 			}
-			entity, err := ec.resolvers.Entity().FindPersonByName(ctx, id0)
+			entity, err := ec.Resolvers.Entity().FindPersonByName(ctx, id0)
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "Person": %w`, err)
 			}
@@ -256,7 +256,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findPlanetMultipleRequiresByName(): %w`, err)
 			}
-			entity, err := ec.resolvers.Entity().FindPlanetMultipleRequiresByName(ctx, id0)
+			entity, err := ec.Resolvers.Entity().FindPlanetMultipleRequiresByName(ctx, id0)
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "PlanetMultipleRequires": %w`, err)
 			}
@@ -275,7 +275,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findPlanetRequiresByName(): %w`, err)
 			}
-			entity, err := ec.resolvers.Entity().FindPlanetRequiresByName(ctx, id0)
+			entity, err := ec.Resolvers.Entity().FindPlanetRequiresByName(ctx, id0)
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "PlanetRequires": %w`, err)
 			}
@@ -294,7 +294,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findPlanetRequiresNestedByName(): %w`, err)
 			}
-			entity, err := ec.resolvers.Entity().FindPlanetRequiresNestedByName(ctx, id0)
+			entity, err := ec.Resolvers.Entity().FindPlanetRequiresNestedByName(ctx, id0)
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "PlanetRequiresNested": %w`, err)
 			}
@@ -317,7 +317,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 1 for findWorldByHelloNameAndFoo(): %w`, err)
 			}
-			entity, err := ec.resolvers.Entity().FindWorldByHelloNameAndFoo(ctx, id0, id1)
+			entity, err := ec.Resolvers.Entity().FindWorldByHelloNameAndFoo(ctx, id0, id1)
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "World": %w`, err)
 			}
@@ -336,7 +336,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findWorldNameByName(): %w`, err)
 			}
-			entity, err := ec.resolvers.Entity().FindWorldNameByName(ctx, id0)
+			entity, err := ec.Resolvers.Entity().FindWorldNameByName(ctx, id0)
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "WorldName": %w`, err)
 			}
@@ -359,7 +359,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 1 for findWorldWithMultipleKeysByHelloNameAndFoo(): %w`, err)
 			}
-			entity, err := ec.resolvers.Entity().FindWorldWithMultipleKeysByHelloNameAndFoo(ctx, id0, id1)
+			entity, err := ec.Resolvers.Entity().FindWorldWithMultipleKeysByHelloNameAndFoo(ctx, id0, id1)
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "WorldWithMultipleKeys": %w`, err)
 			}
@@ -370,7 +370,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findWorldWithMultipleKeysByBar(): %w`, err)
 			}
-			entity, err := ec.resolvers.Entity().FindWorldWithMultipleKeysByBar(ctx, id0)
+			entity, err := ec.Resolvers.Entity().FindWorldWithMultipleKeysByBar(ctx, id0)
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "WorldWithMultipleKeys": %w`, err)
 			}
@@ -419,7 +419,7 @@ func (ec *executionContext) resolveManyEntities(
 				}
 			}
 
-			entities, err := ec.resolvers.Entity().FindManyMultiHelloByNames(ctx, typedReps)
+			entities, err := ec.Resolvers.Entity().FindManyMultiHelloByNames(ctx, typedReps)
 			if err != nil {
 				return err
 			}
@@ -454,7 +454,7 @@ func (ec *executionContext) resolveManyEntities(
 				}
 			}
 
-			entities, err := ec.resolvers.Entity().FindManyMultiHelloMultipleRequiresByNames(ctx, typedReps)
+			entities, err := ec.Resolvers.Entity().FindManyMultiHelloMultipleRequiresByNames(ctx, typedReps)
 			if err != nil {
 				return err
 			}
@@ -490,7 +490,7 @@ func (ec *executionContext) resolveManyEntities(
 				}
 			}
 
-			entities, err := ec.resolvers.Entity().FindManyMultiHelloRequiresByNames(ctx, typedReps)
+			entities, err := ec.Resolvers.Entity().FindManyMultiHelloRequiresByNames(ctx, typedReps)
 			if err != nil {
 				return err
 			}
@@ -526,7 +526,7 @@ func (ec *executionContext) resolveManyEntities(
 				}
 			}
 
-			entities, err := ec.resolvers.Entity().FindManyMultiHelloWithErrorByNames(ctx, typedReps)
+			entities, err := ec.Resolvers.Entity().FindManyMultiHelloWithErrorByNames(ctx, typedReps)
 			if err != nil {
 				return err
 			}
@@ -561,7 +561,7 @@ func (ec *executionContext) resolveManyEntities(
 				}
 			}
 
-			entities, err := ec.resolvers.Entity().FindManyMultiPlanetRequiresNestedByNames(ctx, typedReps)
+			entities, err := ec.Resolvers.Entity().FindManyMultiPlanetRequiresNestedByNames(ctx, typedReps)
 			if err != nil {
 				return err
 			}

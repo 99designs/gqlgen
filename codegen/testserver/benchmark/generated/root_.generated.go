@@ -17,12 +17,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -64,16 +59,11 @@ type ComplexityRoot struct {
 	}
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -84,35 +74,35 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "PageInfo.endCursor":
-		if e.complexity.PageInfo.EndCursor == nil {
+		if e.ComplexityRoot.PageInfo.EndCursor == nil {
 			break
 		}
 
-		return e.complexity.PageInfo.EndCursor(childComplexity), true
+		return e.ComplexityRoot.PageInfo.EndCursor(childComplexity), true
 
 	case "PageInfo.hasNextPage":
-		if e.complexity.PageInfo.HasNextPage == nil {
+		if e.ComplexityRoot.PageInfo.HasNextPage == nil {
 			break
 		}
 
-		return e.complexity.PageInfo.HasNextPage(childComplexity), true
+		return e.ComplexityRoot.PageInfo.HasNextPage(childComplexity), true
 
 	case "PageInfo.hasPreviousPage":
-		if e.complexity.PageInfo.HasPreviousPage == nil {
+		if e.ComplexityRoot.PageInfo.HasPreviousPage == nil {
 			break
 		}
 
-		return e.complexity.PageInfo.HasPreviousPage(childComplexity), true
+		return e.ComplexityRoot.PageInfo.HasPreviousPage(childComplexity), true
 
 	case "PageInfo.startCursor":
-		if e.complexity.PageInfo.StartCursor == nil {
+		if e.ComplexityRoot.PageInfo.StartCursor == nil {
 			break
 		}
 
-		return e.complexity.PageInfo.StartCursor(childComplexity), true
+		return e.ComplexityRoot.PageInfo.StartCursor(childComplexity), true
 
 	case "Query.users":
-		if e.complexity.Query.Users == nil {
+		if e.ComplexityRoot.Query.Users == nil {
 			break
 		}
 
@@ -121,63 +111,63 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Users(childComplexity, args["query"].(*string), args["first"].(*int), args["last"].(*int), args["before"].(*string), args["after"].(*string), args["orderBy"].(models.UserOrderBy)), true
+		return e.ComplexityRoot.Query.Users(childComplexity, args["query"].(*string), args["first"].(*int), args["last"].(*int), args["before"].(*string), args["after"].(*string), args["orderBy"].(models.UserOrderBy)), true
 
 	case "User.email":
-		if e.complexity.User.Email == nil {
+		if e.ComplexityRoot.User.Email == nil {
 			break
 		}
 
-		return e.complexity.User.Email(childComplexity), true
+		return e.ComplexityRoot.User.Email(childComplexity), true
 
 	case "User.firstName":
-		if e.complexity.User.FirstName == nil {
+		if e.ComplexityRoot.User.FirstName == nil {
 			break
 		}
 
-		return e.complexity.User.FirstName(childComplexity), true
+		return e.ComplexityRoot.User.FirstName(childComplexity), true
 
 	case "User.lastName":
-		if e.complexity.User.LastName == nil {
+		if e.ComplexityRoot.User.LastName == nil {
 			break
 		}
 
-		return e.complexity.User.LastName(childComplexity), true
+		return e.ComplexityRoot.User.LastName(childComplexity), true
 
 	case "UserConnection.edges":
-		if e.complexity.UserConnection.Edges == nil {
+		if e.ComplexityRoot.UserConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.UserConnection.Edges(childComplexity), true
+		return e.ComplexityRoot.UserConnection.Edges(childComplexity), true
 
 	case "UserConnection.pageInfo":
-		if e.complexity.UserConnection.PageInfo == nil {
+		if e.ComplexityRoot.UserConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.UserConnection.PageInfo(childComplexity), true
+		return e.ComplexityRoot.UserConnection.PageInfo(childComplexity), true
 
 	case "UserConnection.totalCount":
-		if e.complexity.UserConnection.TotalCount == nil {
+		if e.ComplexityRoot.UserConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.UserConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.UserConnection.TotalCount(childComplexity), true
 
 	case "UserEdge.cursor":
-		if e.complexity.UserEdge.Cursor == nil {
+		if e.ComplexityRoot.UserEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.UserEdge.Cursor(childComplexity), true
+		return e.ComplexityRoot.UserEdge.Cursor(childComplexity), true
 
 	case "UserEdge.node":
-		if e.complexity.UserEdge.Node == nil {
+		if e.ComplexityRoot.UserEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.UserEdge.Node(childComplexity), true
+		return e.ComplexityRoot.UserEdge.Node(childComplexity), true
 
 	}
 	return 0, false

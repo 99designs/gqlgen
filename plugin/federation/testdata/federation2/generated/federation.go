@@ -165,7 +165,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findExternalExtensionByUpc(): %w`, err)
 			}
-			entity, err := ec.resolvers.Entity().FindExternalExtensionByUpc(ctx, id0)
+			entity, err := ec.Resolvers.Entity().FindExternalExtensionByUpc(ctx, id0)
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "ExternalExtension": %w`, err)
 			}

@@ -22,12 +22,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -71,16 +66,11 @@ type UserResolver interface {
 	NonNullableNonBatch(ctx context.Context, obj *User) (*Profile, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -91,39 +81,39 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "Profile.id":
-		if e.complexity.Profile.ID == nil {
+		if e.ComplexityRoot.Profile.ID == nil {
 			break
 		}
 
-		return e.complexity.Profile.ID(childComplexity), true
+		return e.ComplexityRoot.Profile.ID(childComplexity), true
 
 	case "Query.users":
-		if e.complexity.Query.Users == nil {
+		if e.ComplexityRoot.Query.Users == nil {
 			break
 		}
 
-		return e.complexity.Query.Users(childComplexity), true
+		return e.ComplexityRoot.Query.Users(childComplexity), true
 
 	case "User.nonNullableBatch":
-		if e.complexity.User.NonNullableBatch == nil {
+		if e.ComplexityRoot.User.NonNullableBatch == nil {
 			break
 		}
 
-		return e.complexity.User.NonNullableBatch(childComplexity), true
+		return e.ComplexityRoot.User.NonNullableBatch(childComplexity), true
 	case "User.nonNullableNonBatch":
-		if e.complexity.User.NonNullableNonBatch == nil {
+		if e.ComplexityRoot.User.NonNullableNonBatch == nil {
 			break
 		}
 
-		return e.complexity.User.NonNullableNonBatch(childComplexity), true
+		return e.ComplexityRoot.User.NonNullableNonBatch(childComplexity), true
 	case "User.nullableBatch":
-		if e.complexity.User.NullableBatch == nil {
+		if e.ComplexityRoot.User.NullableBatch == nil {
 			break
 		}
 
-		return e.complexity.User.NullableBatch(childComplexity), true
+		return e.ComplexityRoot.User.NullableBatch(childComplexity), true
 	case "User.nullableBatchWithArg":
-		if e.complexity.User.NullableBatchWithArg == nil {
+		if e.ComplexityRoot.User.NullableBatchWithArg == nil {
 			break
 		}
 
@@ -132,15 +122,15 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.User.NullableBatchWithArg(childComplexity, args["offset"].(int)), true
+		return e.ComplexityRoot.User.NullableBatchWithArg(childComplexity, args["offset"].(int)), true
 	case "User.nullableNonBatch":
-		if e.complexity.User.NullableNonBatch == nil {
+		if e.ComplexityRoot.User.NullableNonBatch == nil {
 			break
 		}
 
-		return e.complexity.User.NullableNonBatch(childComplexity), true
+		return e.ComplexityRoot.User.NullableNonBatch(childComplexity), true
 	case "User.nullableNonBatchWithArg":
-		if e.complexity.User.NullableNonBatchWithArg == nil {
+		if e.ComplexityRoot.User.NullableNonBatchWithArg == nil {
 			break
 		}
 
@@ -149,7 +139,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.User.NullableNonBatchWithArg(childComplexity, args["offset"].(int)), true
+		return e.ComplexityRoot.User.NullableNonBatchWithArg(childComplexity, args["offset"].(int)), true
 
 	}
 	return 0, false
@@ -380,7 +370,7 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 		field,
 		ec.fieldContext_Query_users,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Users(ctx)
+			return ec.Resolvers.Query().Users(ctx)
 		},
 		nil,
 		ec.marshalNUser2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐUserᚄ,
@@ -557,7 +547,7 @@ func (ec *executionContext) fieldContext_User_nullableBatch(_ context.Context, f
 	return fc, nil
 }
 func (ec *executionContext) resolveBatch_User_nullableBatch(ctx context.Context, field graphql.CollectedField, obj *User) (any, error) {
-	resolver := ec.resolvers.User()
+	resolver := ec.Resolvers.User()
 	group := graphql.GetBatchParentGroup(ctx, "User")
 	if group != nil {
 		parents, ok := group.Parents.([]*User)
@@ -598,7 +588,7 @@ func (ec *executionContext) _User_nullableNonBatch(ctx context.Context, field gr
 		field,
 		ec.fieldContext_User_nullableNonBatch,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.User().NullableNonBatch(ctx, obj)
+			return ec.Resolvers.User().NullableNonBatch(ctx, obj)
 		},
 		nil,
 		ec.marshalOProfile2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfile,
@@ -668,7 +658,7 @@ func (ec *executionContext) fieldContext_User_nullableBatchWithArg(ctx context.C
 	return fc, nil
 }
 func (ec *executionContext) resolveBatch_User_nullableBatchWithArg(ctx context.Context, field graphql.CollectedField, obj *User) (any, error) {
-	resolver := ec.resolvers.User()
+	resolver := ec.Resolvers.User()
 	fc := graphql.GetFieldContext(ctx)
 	group := graphql.GetBatchParentGroup(ctx, "User")
 	if group != nil {
@@ -711,7 +701,7 @@ func (ec *executionContext) _User_nullableNonBatchWithArg(ctx context.Context, f
 		ec.fieldContext_User_nullableNonBatchWithArg,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.User().NullableNonBatchWithArg(ctx, obj, fc.Args["offset"].(int))
+			return ec.Resolvers.User().NullableNonBatchWithArg(ctx, obj, fc.Args["offset"].(int))
 		},
 		nil,
 		ec.marshalOProfile2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfile,
@@ -781,7 +771,7 @@ func (ec *executionContext) fieldContext_User_nonNullableBatch(_ context.Context
 	return fc, nil
 }
 func (ec *executionContext) resolveBatch_User_nonNullableBatch(ctx context.Context, field graphql.CollectedField, obj *User) (any, error) {
-	resolver := ec.resolvers.User()
+	resolver := ec.Resolvers.User()
 	group := graphql.GetBatchParentGroup(ctx, "User")
 	if group != nil {
 		parents, ok := group.Parents.([]*User)
@@ -822,7 +812,7 @@ func (ec *executionContext) _User_nonNullableNonBatch(ctx context.Context, field
 		field,
 		ec.fieldContext_User_nonNullableNonBatch,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.User().NonNullableNonBatch(ctx, obj)
+			return ec.Resolvers.User().NonNullableNonBatch(ctx, obj)
 		},
 		nil,
 		ec.marshalNProfile2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfile,

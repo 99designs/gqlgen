@@ -99,7 +99,7 @@ func (ec *executionContext) _OverlappingFields_oldFoo(ctx context.Context, field
 		field,
 		ec.fieldContext_OverlappingFields_oldFoo,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.OverlappingFields().OldFoo(ctx, obj)
+			return ec.Resolvers.OverlappingFields().OldFoo(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)

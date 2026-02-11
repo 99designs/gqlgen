@@ -209,7 +209,7 @@ func (d *Directive) CallPath() string {
 		return "builtInDirective" + d.CallName()
 	}
 
-	return "ec.directives." + d.CallName()
+	return "ec.Directives." + d.CallName()
 }
 
 func (d *Directive) FunctionImpl() string {

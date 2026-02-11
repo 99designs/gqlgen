@@ -22,12 +22,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -77,16 +72,11 @@ type QueryResolver interface {
 	InPackage(ctx context.Context, arg InPackage) (InPackage, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -97,7 +87,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "Query.boolTyped":
-		if e.complexity.Query.BoolTyped == nil {
+		if e.ComplexityRoot.Query.BoolTyped == nil {
 			break
 		}
 
@@ -106,9 +96,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.BoolTyped(childComplexity, args["arg"].(model.BoolTyped)), true
+		return e.ComplexityRoot.Query.BoolTyped(childComplexity, args["arg"].(model.BoolTyped)), true
 	case "Query.boolTypedN":
-		if e.complexity.Query.BoolTypedN == nil {
+		if e.ComplexityRoot.Query.BoolTypedN == nil {
 			break
 		}
 
@@ -117,9 +107,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.BoolTypedN(childComplexity, args["arg"].(*model.BoolTyped)), true
+		return e.ComplexityRoot.Query.BoolTypedN(childComplexity, args["arg"].(*model.BoolTyped)), true
 	case "Query.boolUntyped":
-		if e.complexity.Query.BoolUntyped == nil {
+		if e.ComplexityRoot.Query.BoolUntyped == nil {
 			break
 		}
 
@@ -128,9 +118,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.BoolUntyped(childComplexity, args["arg"].(bool)), true
+		return e.ComplexityRoot.Query.BoolUntyped(childComplexity, args["arg"].(bool)), true
 	case "Query.boolUntypedN":
-		if e.complexity.Query.BoolUntypedN == nil {
+		if e.ComplexityRoot.Query.BoolUntypedN == nil {
 			break
 		}
 
@@ -139,9 +129,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.BoolUntypedN(childComplexity, args["arg"].(*bool)), true
+		return e.ComplexityRoot.Query.BoolUntypedN(childComplexity, args["arg"].(*bool)), true
 	case "Query.inPackage":
-		if e.complexity.Query.InPackage == nil {
+		if e.ComplexityRoot.Query.InPackage == nil {
 			break
 		}
 
@@ -150,9 +140,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.InPackage(childComplexity, args["arg"].(InPackage)), true
+		return e.ComplexityRoot.Query.InPackage(childComplexity, args["arg"].(InPackage)), true
 	case "Query.intTyped":
-		if e.complexity.Query.IntTyped == nil {
+		if e.ComplexityRoot.Query.IntTyped == nil {
 			break
 		}
 
@@ -161,9 +151,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.IntTyped(childComplexity, args["arg"].(model.IntTyped)), true
+		return e.ComplexityRoot.Query.IntTyped(childComplexity, args["arg"].(model.IntTyped)), true
 	case "Query.intTypedN":
-		if e.complexity.Query.IntTypedN == nil {
+		if e.ComplexityRoot.Query.IntTypedN == nil {
 			break
 		}
 
@@ -172,9 +162,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.IntTypedN(childComplexity, args["arg"].(*model.IntTyped)), true
+		return e.ComplexityRoot.Query.IntTypedN(childComplexity, args["arg"].(*model.IntTyped)), true
 	case "Query.intUntyped":
-		if e.complexity.Query.IntUntyped == nil {
+		if e.ComplexityRoot.Query.IntUntyped == nil {
 			break
 		}
 
@@ -183,9 +173,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.IntUntyped(childComplexity, args["arg"].(int)), true
+		return e.ComplexityRoot.Query.IntUntyped(childComplexity, args["arg"].(int)), true
 	case "Query.intUntypedN":
-		if e.complexity.Query.IntUntypedN == nil {
+		if e.ComplexityRoot.Query.IntUntypedN == nil {
 			break
 		}
 
@@ -194,9 +184,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.IntUntypedN(childComplexity, args["arg"].(*int)), true
+		return e.ComplexityRoot.Query.IntUntypedN(childComplexity, args["arg"].(*int)), true
 	case "Query.stringTyped":
-		if e.complexity.Query.StringTyped == nil {
+		if e.ComplexityRoot.Query.StringTyped == nil {
 			break
 		}
 
@@ -205,9 +195,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.StringTyped(childComplexity, args["arg"].(model.StringTyped)), true
+		return e.ComplexityRoot.Query.StringTyped(childComplexity, args["arg"].(model.StringTyped)), true
 	case "Query.stringTypedN":
-		if e.complexity.Query.StringTypedN == nil {
+		if e.ComplexityRoot.Query.StringTypedN == nil {
 			break
 		}
 
@@ -216,9 +206,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.StringTypedN(childComplexity, args["arg"].(*model.StringTyped)), true
+		return e.ComplexityRoot.Query.StringTypedN(childComplexity, args["arg"].(*model.StringTyped)), true
 	case "Query.stringUntyped":
-		if e.complexity.Query.StringUntyped == nil {
+		if e.ComplexityRoot.Query.StringUntyped == nil {
 			break
 		}
 
@@ -227,9 +217,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.StringUntyped(childComplexity, args["arg"].(string)), true
+		return e.ComplexityRoot.Query.StringUntyped(childComplexity, args["arg"].(string)), true
 	case "Query.stringUntypedN":
-		if e.complexity.Query.StringUntypedN == nil {
+		if e.ComplexityRoot.Query.StringUntypedN == nil {
 			break
 		}
 
@@ -238,9 +228,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.StringUntypedN(childComplexity, args["arg"].(*string)), true
+		return e.ComplexityRoot.Query.StringUntypedN(childComplexity, args["arg"].(*string)), true
 	case "Query.varTyped":
-		if e.complexity.Query.VarTyped == nil {
+		if e.ComplexityRoot.Query.VarTyped == nil {
 			break
 		}
 
@@ -249,9 +239,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.VarTyped(childComplexity, args["arg"].(model.VarTyped)), true
+		return e.ComplexityRoot.Query.VarTyped(childComplexity, args["arg"].(model.VarTyped)), true
 	case "Query.varUntyped":
-		if e.complexity.Query.VarUntyped == nil {
+		if e.ComplexityRoot.Query.VarUntyped == nil {
 			break
 		}
 
@@ -260,7 +250,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.VarUntyped(childComplexity, args["arg"].(bool)), true
+		return e.ComplexityRoot.Query.VarUntyped(childComplexity, args["arg"].(bool)), true
 
 	}
 	return 0, false
@@ -670,7 +660,7 @@ func (ec *executionContext) _Query_intTyped(ctx context.Context, field graphql.C
 		ec.fieldContext_Query_intTyped,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().IntTyped(ctx, fc.Args["arg"].(model.IntTyped))
+			return ec.Resolvers.Query().IntTyped(ctx, fc.Args["arg"].(model.IntTyped))
 		},
 		nil,
 		ec.marshalNIntTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped,
@@ -711,7 +701,7 @@ func (ec *executionContext) _Query_intUntyped(ctx context.Context, field graphql
 		ec.fieldContext_Query_intUntyped,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().IntUntyped(ctx, fc.Args["arg"].(int))
+			return ec.Resolvers.Query().IntUntyped(ctx, fc.Args["arg"].(int))
 		},
 		nil,
 		ec.marshalNIntUntyped2int,
@@ -752,7 +742,7 @@ func (ec *executionContext) _Query_intTypedN(ctx context.Context, field graphql.
 		ec.fieldContext_Query_intTypedN,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().IntTypedN(ctx, fc.Args["arg"].(*model.IntTyped))
+			return ec.Resolvers.Query().IntTypedN(ctx, fc.Args["arg"].(*model.IntTyped))
 		},
 		nil,
 		ec.marshalOIntTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped,
@@ -793,7 +783,7 @@ func (ec *executionContext) _Query_intUntypedN(ctx context.Context, field graphq
 		ec.fieldContext_Query_intUntypedN,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().IntUntypedN(ctx, fc.Args["arg"].(*int))
+			return ec.Resolvers.Query().IntUntypedN(ctx, fc.Args["arg"].(*int))
 		},
 		nil,
 		ec.marshalOIntUntyped2ᚖint,
@@ -834,7 +824,7 @@ func (ec *executionContext) _Query_stringTyped(ctx context.Context, field graphq
 		ec.fieldContext_Query_stringTyped,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().StringTyped(ctx, fc.Args["arg"].(model.StringTyped))
+			return ec.Resolvers.Query().StringTyped(ctx, fc.Args["arg"].(model.StringTyped))
 		},
 		nil,
 		ec.marshalNStringTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTyped,
@@ -875,7 +865,7 @@ func (ec *executionContext) _Query_stringUntyped(ctx context.Context, field grap
 		ec.fieldContext_Query_stringUntyped,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().StringUntyped(ctx, fc.Args["arg"].(string))
+			return ec.Resolvers.Query().StringUntyped(ctx, fc.Args["arg"].(string))
 		},
 		nil,
 		ec.marshalNStringUntyped2string,
@@ -916,7 +906,7 @@ func (ec *executionContext) _Query_stringTypedN(ctx context.Context, field graph
 		ec.fieldContext_Query_stringTypedN,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().StringTypedN(ctx, fc.Args["arg"].(*model.StringTyped))
+			return ec.Resolvers.Query().StringTypedN(ctx, fc.Args["arg"].(*model.StringTyped))
 		},
 		nil,
 		ec.marshalOStringTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTyped,
@@ -957,7 +947,7 @@ func (ec *executionContext) _Query_stringUntypedN(ctx context.Context, field gra
 		ec.fieldContext_Query_stringUntypedN,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().StringUntypedN(ctx, fc.Args["arg"].(*string))
+			return ec.Resolvers.Query().StringUntypedN(ctx, fc.Args["arg"].(*string))
 		},
 		nil,
 		ec.marshalOStringUntyped2ᚖstring,
@@ -998,7 +988,7 @@ func (ec *executionContext) _Query_boolTyped(ctx context.Context, field graphql.
 		ec.fieldContext_Query_boolTyped,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().BoolTyped(ctx, fc.Args["arg"].(model.BoolTyped))
+			return ec.Resolvers.Query().BoolTyped(ctx, fc.Args["arg"].(model.BoolTyped))
 		},
 		nil,
 		ec.marshalNBoolTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTyped,
@@ -1039,7 +1029,7 @@ func (ec *executionContext) _Query_boolUntyped(ctx context.Context, field graphq
 		ec.fieldContext_Query_boolUntyped,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().BoolUntyped(ctx, fc.Args["arg"].(bool))
+			return ec.Resolvers.Query().BoolUntyped(ctx, fc.Args["arg"].(bool))
 		},
 		nil,
 		ec.marshalNBoolUntyped2bool,
@@ -1080,7 +1070,7 @@ func (ec *executionContext) _Query_boolTypedN(ctx context.Context, field graphql
 		ec.fieldContext_Query_boolTypedN,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().BoolTypedN(ctx, fc.Args["arg"].(*model.BoolTyped))
+			return ec.Resolvers.Query().BoolTypedN(ctx, fc.Args["arg"].(*model.BoolTyped))
 		},
 		nil,
 		ec.marshalOBoolTyped2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTyped,
@@ -1121,7 +1111,7 @@ func (ec *executionContext) _Query_boolUntypedN(ctx context.Context, field graph
 		ec.fieldContext_Query_boolUntypedN,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().BoolUntypedN(ctx, fc.Args["arg"].(*bool))
+			return ec.Resolvers.Query().BoolUntypedN(ctx, fc.Args["arg"].(*bool))
 		},
 		nil,
 		ec.marshalOBoolUntyped2ᚖbool,
@@ -1162,7 +1152,7 @@ func (ec *executionContext) _Query_varTyped(ctx context.Context, field graphql.C
 		ec.fieldContext_Query_varTyped,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().VarTyped(ctx, fc.Args["arg"].(model.VarTyped))
+			return ec.Resolvers.Query().VarTyped(ctx, fc.Args["arg"].(model.VarTyped))
 		},
 		nil,
 		ec.marshalNVarTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐVarTyped,
@@ -1203,7 +1193,7 @@ func (ec *executionContext) _Query_varUntyped(ctx context.Context, field graphql
 		ec.fieldContext_Query_varUntyped,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().VarUntyped(ctx, fc.Args["arg"].(bool))
+			return ec.Resolvers.Query().VarUntyped(ctx, fc.Args["arg"].(bool))
 		},
 		nil,
 		ec.marshalNVarUntyped2bool,
@@ -1244,7 +1234,7 @@ func (ec *executionContext) _Query_inPackage(ctx context.Context, field graphql.
 		ec.fieldContext_Query_inPackage,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().InPackage(ctx, fc.Args["arg"].(InPackage))
+			return ec.Resolvers.Query().InPackage(ctx, fc.Args["arg"].(InPackage))
 		},
 		nil,
 		ec.marshalNInPackage2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋapiᚐInPackage,

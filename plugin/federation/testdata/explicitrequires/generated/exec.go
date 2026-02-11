@@ -22,12 +22,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -61,16 +56,11 @@ type EntityResolver interface {
 	FindWorldWithMultipleKeysByBar(ctx context.Context, bar int) (*WorldWithMultipleKeys, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -613,7 +603,7 @@ func (ec *executionContext) _Entity_findHelloByName(ctx context.Context, field g
 		ec.fieldContext_Entity_findHelloByName,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindHelloByName(ctx, fc.Args["name"].(string))
+			return ec.Resolvers.Entity().FindHelloByName(ctx, fc.Args["name"].(string))
 		},
 		nil,
 		ec.marshalNHello2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐHello,
@@ -660,7 +650,7 @@ func (ec *executionContext) _Entity_findHelloMultiSingleKeysByKey1AndKey2(ctx co
 		ec.fieldContext_Entity_findHelloMultiSingleKeysByKey1AndKey2,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindHelloMultiSingleKeysByKey1AndKey2(ctx, fc.Args["key1"].(string), fc.Args["key2"].(string))
+			return ec.Resolvers.Entity().FindHelloMultiSingleKeysByKey1AndKey2(ctx, fc.Args["key1"].(string), fc.Args["key2"].(string))
 		},
 		nil,
 		ec.marshalNHelloMultiSingleKeys2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐHelloMultiSingleKeys,
@@ -707,7 +697,7 @@ func (ec *executionContext) _Entity_findHelloWithErrorsByName(ctx context.Contex
 		ec.fieldContext_Entity_findHelloWithErrorsByName,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindHelloWithErrorsByName(ctx, fc.Args["name"].(string))
+			return ec.Resolvers.Entity().FindHelloWithErrorsByName(ctx, fc.Args["name"].(string))
 		},
 		nil,
 		ec.marshalNHelloWithErrors2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐHelloWithErrors,
@@ -752,7 +742,7 @@ func (ec *executionContext) _Entity_findManyMultiHelloByNames(ctx context.Contex
 		ec.fieldContext_Entity_findManyMultiHelloByNames,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindManyMultiHelloByNames(ctx, fc.Args["reps"].([]*MultiHelloByNamesInput))
+			return ec.Resolvers.Entity().FindManyMultiHelloByNames(ctx, fc.Args["reps"].([]*MultiHelloByNamesInput))
 		},
 		nil,
 		ec.marshalOMultiHello2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐMultiHello,
@@ -797,7 +787,7 @@ func (ec *executionContext) _Entity_findManyMultiHelloMultipleRequiresByNames(ct
 		ec.fieldContext_Entity_findManyMultiHelloMultipleRequiresByNames,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindManyMultiHelloMultipleRequiresByNames(ctx, fc.Args["reps"].([]*MultiHelloMultipleRequiresByNamesInput))
+			return ec.Resolvers.Entity().FindManyMultiHelloMultipleRequiresByNames(ctx, fc.Args["reps"].([]*MultiHelloMultipleRequiresByNamesInput))
 		},
 		nil,
 		ec.marshalOMultiHelloMultipleRequires2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐMultiHelloMultipleRequires,
@@ -848,7 +838,7 @@ func (ec *executionContext) _Entity_findManyMultiHelloRequiresByNames(ctx contex
 		ec.fieldContext_Entity_findManyMultiHelloRequiresByNames,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindManyMultiHelloRequiresByNames(ctx, fc.Args["reps"].([]*MultiHelloRequiresByNamesInput))
+			return ec.Resolvers.Entity().FindManyMultiHelloRequiresByNames(ctx, fc.Args["reps"].([]*MultiHelloRequiresByNamesInput))
 		},
 		nil,
 		ec.marshalOMultiHelloRequires2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐMultiHelloRequires,
@@ -897,7 +887,7 @@ func (ec *executionContext) _Entity_findManyMultiHelloWithErrorByNames(ctx conte
 		ec.fieldContext_Entity_findManyMultiHelloWithErrorByNames,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindManyMultiHelloWithErrorByNames(ctx, fc.Args["reps"].([]*MultiHelloWithErrorByNamesInput))
+			return ec.Resolvers.Entity().FindManyMultiHelloWithErrorByNames(ctx, fc.Args["reps"].([]*MultiHelloWithErrorByNamesInput))
 		},
 		nil,
 		ec.marshalOMultiHelloWithError2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐMultiHelloWithError,
@@ -942,7 +932,7 @@ func (ec *executionContext) _Entity_findManyMultiPlanetRequiresNestedByNames(ctx
 		ec.fieldContext_Entity_findManyMultiPlanetRequiresNestedByNames,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindManyMultiPlanetRequiresNestedByNames(ctx, fc.Args["reps"].([]*MultiPlanetRequiresNestedByNamesInput))
+			return ec.Resolvers.Entity().FindManyMultiPlanetRequiresNestedByNames(ctx, fc.Args["reps"].([]*MultiPlanetRequiresNestedByNamesInput))
 		},
 		nil,
 		ec.marshalOMultiPlanetRequiresNested2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐMultiPlanetRequiresNested,
@@ -995,7 +985,7 @@ func (ec *executionContext) _Entity_findPersonByName(ctx context.Context, field 
 		ec.fieldContext_Entity_findPersonByName,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindPersonByName(ctx, fc.Args["name"].(string))
+			return ec.Resolvers.Entity().FindPersonByName(ctx, fc.Args["name"].(string))
 		},
 		nil,
 		ec.marshalNPerson2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐPerson,
@@ -1044,7 +1034,7 @@ func (ec *executionContext) _Entity_findPlanetMultipleRequiresByName(ctx context
 		ec.fieldContext_Entity_findPlanetMultipleRequiresByName,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindPlanetMultipleRequiresByName(ctx, fc.Args["name"].(string))
+			return ec.Resolvers.Entity().FindPlanetMultipleRequiresByName(ctx, fc.Args["name"].(string))
 		},
 		nil,
 		ec.marshalNPlanetMultipleRequires2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐPlanetMultipleRequires,
@@ -1095,7 +1085,7 @@ func (ec *executionContext) _Entity_findPlanetRequiresByName(ctx context.Context
 		ec.fieldContext_Entity_findPlanetRequiresByName,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindPlanetRequiresByName(ctx, fc.Args["name"].(string))
+			return ec.Resolvers.Entity().FindPlanetRequiresByName(ctx, fc.Args["name"].(string))
 		},
 		nil,
 		ec.marshalNPlanetRequires2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐPlanetRequires,
@@ -1144,7 +1134,7 @@ func (ec *executionContext) _Entity_findPlanetRequiresNestedByName(ctx context.C
 		ec.fieldContext_Entity_findPlanetRequiresNestedByName,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindPlanetRequiresNestedByName(ctx, fc.Args["name"].(string))
+			return ec.Resolvers.Entity().FindPlanetRequiresNestedByName(ctx, fc.Args["name"].(string))
 		},
 		nil,
 		ec.marshalNPlanetRequiresNested2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐPlanetRequiresNested,
@@ -1197,7 +1187,7 @@ func (ec *executionContext) _Entity_findWorldByHelloNameAndFoo(ctx context.Conte
 		ec.fieldContext_Entity_findWorldByHelloNameAndFoo,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindWorldByHelloNameAndFoo(ctx, fc.Args["helloName"].(string), fc.Args["foo"].(string))
+			return ec.Resolvers.Entity().FindWorldByHelloNameAndFoo(ctx, fc.Args["helloName"].(string), fc.Args["foo"].(string))
 		},
 		nil,
 		ec.marshalNWorld2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐWorld,
@@ -1246,7 +1236,7 @@ func (ec *executionContext) _Entity_findWorldNameByName(ctx context.Context, fie
 		ec.fieldContext_Entity_findWorldNameByName,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindWorldNameByName(ctx, fc.Args["name"].(string))
+			return ec.Resolvers.Entity().FindWorldNameByName(ctx, fc.Args["name"].(string))
 		},
 		nil,
 		ec.marshalNWorldName2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐWorldName,
@@ -1291,7 +1281,7 @@ func (ec *executionContext) _Entity_findWorldWithMultipleKeysByHelloNameAndFoo(c
 		ec.fieldContext_Entity_findWorldWithMultipleKeysByHelloNameAndFoo,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindWorldWithMultipleKeysByHelloNameAndFoo(ctx, fc.Args["helloName"].(string), fc.Args["foo"].(string))
+			return ec.Resolvers.Entity().FindWorldWithMultipleKeysByHelloNameAndFoo(ctx, fc.Args["helloName"].(string), fc.Args["foo"].(string))
 		},
 		nil,
 		ec.marshalNWorldWithMultipleKeys2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐWorldWithMultipleKeys,
@@ -1340,7 +1330,7 @@ func (ec *executionContext) _Entity_findWorldWithMultipleKeysByBar(ctx context.C
 		ec.fieldContext_Entity_findWorldWithMultipleKeysByBar,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindWorldWithMultipleKeysByBar(ctx, fc.Args["bar"].(int))
+			return ec.Resolvers.Entity().FindWorldWithMultipleKeysByBar(ctx, fc.Args["bar"].(int))
 		},
 		nil,
 		ec.marshalNWorldWithMultipleKeys2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋexplicitrequiresᚋgeneratedᚐWorldWithMultipleKeys,

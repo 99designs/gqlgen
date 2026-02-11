@@ -204,7 +204,7 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 		ec.fieldContext_Query_users,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Users(ctx, fc.Args["query"].(*string), fc.Args["first"].(*int), fc.Args["last"].(*int), fc.Args["before"].(*string), fc.Args["after"].(*string), fc.Args["orderBy"].(models.UserOrderBy))
+			return ec.Resolvers.Query().Users(ctx, fc.Args["query"].(*string), fc.Args["first"].(*int), fc.Args["last"].(*int), fc.Args["before"].(*string), fc.Args["after"].(*string), fc.Args["orderBy"].(models.UserOrderBy))
 		},
 		nil,
 		ec.marshalOUserConnection2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋbenchmarkᚋgeneratedᚋmodelsᚐUserConnection,

@@ -77,18 +77,18 @@ func (ec *executionContext) field_Query_directiveSingleNullableArg_argsArg1(
 			var zeroVal *string
 			return zeroVal, err
 		}
-		if ec.directives.Populate == nil {
+		if ec.Directives.Populate == nil {
 			var zeroVal *string
 			return zeroVal, errors.New("directive populate is not implemented")
 		}
-		return ec.directives.Populate(ctx, rawArgs, directive0, value)
+		return ec.Directives.Populate(ctx, rawArgs, directive0, value)
 	}
 	directive2 := func(ctx context.Context) (any, error) {
-		if ec.directives.Noop == nil {
+		if ec.Directives.Noop == nil {
 			var zeroVal *string
 			return zeroVal, errors.New("directive noop is not implemented")
 		}
-		return ec.directives.Noop(ctx, rawArgs, directive1)
+		return ec.Directives.Noop(ctx, rawArgs, directive1)
 	}
 
 	tmp, err := directive2(ctx)
@@ -123,7 +123,7 @@ func (ec *executionContext) _Query_directiveSingleNullableArg(ctx context.Contex
 		ec.fieldContext_Query_directiveSingleNullableArg,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().DirectiveSingleNullableArg(ctx, fc.Args["arg1"].(*string))
+			return ec.Resolvers.Query().DirectiveSingleNullableArg(ctx, fc.Args["arg1"].(*string))
 		},
 		nil,
 		ec.marshalOString2ᚖstring,

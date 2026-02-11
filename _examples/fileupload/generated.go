@@ -23,12 +23,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -71,16 +66,11 @@ type QueryResolver interface {
 	Empty(ctx context.Context) (string, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -91,32 +81,32 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "File.content":
-		if e.complexity.File.Content == nil {
+		if e.ComplexityRoot.File.Content == nil {
 			break
 		}
 
-		return e.complexity.File.Content(childComplexity), true
+		return e.ComplexityRoot.File.Content(childComplexity), true
 	case "File.contentType":
-		if e.complexity.File.ContentType == nil {
+		if e.ComplexityRoot.File.ContentType == nil {
 			break
 		}
 
-		return e.complexity.File.ContentType(childComplexity), true
+		return e.ComplexityRoot.File.ContentType(childComplexity), true
 	case "File.id":
-		if e.complexity.File.ID == nil {
+		if e.ComplexityRoot.File.ID == nil {
 			break
 		}
 
-		return e.complexity.File.ID(childComplexity), true
+		return e.ComplexityRoot.File.ID(childComplexity), true
 	case "File.name":
-		if e.complexity.File.Name == nil {
+		if e.ComplexityRoot.File.Name == nil {
 			break
 		}
 
-		return e.complexity.File.Name(childComplexity), true
+		return e.ComplexityRoot.File.Name(childComplexity), true
 
 	case "Mutation.multipleUpload":
-		if e.complexity.Mutation.MultipleUpload == nil {
+		if e.ComplexityRoot.Mutation.MultipleUpload == nil {
 			break
 		}
 
@@ -125,9 +115,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.MultipleUpload(childComplexity, args["files"].([]*graphql.Upload)), true
+		return e.ComplexityRoot.Mutation.MultipleUpload(childComplexity, args["files"].([]*graphql.Upload)), true
 	case "Mutation.multipleUploadWithPayload":
-		if e.complexity.Mutation.MultipleUploadWithPayload == nil {
+		if e.ComplexityRoot.Mutation.MultipleUploadWithPayload == nil {
 			break
 		}
 
@@ -136,9 +126,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.MultipleUploadWithPayload(childComplexity, args["req"].([]*model.UploadFile)), true
+		return e.ComplexityRoot.Mutation.MultipleUploadWithPayload(childComplexity, args["req"].([]*model.UploadFile)), true
 	case "Mutation.singleUpload":
-		if e.complexity.Mutation.SingleUpload == nil {
+		if e.ComplexityRoot.Mutation.SingleUpload == nil {
 			break
 		}
 
@@ -147,9 +137,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.SingleUpload(childComplexity, args["file"].(graphql.Upload)), true
+		return e.ComplexityRoot.Mutation.SingleUpload(childComplexity, args["file"].(graphql.Upload)), true
 	case "Mutation.singleUploadWithPayload":
-		if e.complexity.Mutation.SingleUploadWithPayload == nil {
+		if e.ComplexityRoot.Mutation.SingleUploadWithPayload == nil {
 			break
 		}
 
@@ -158,14 +148,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.SingleUploadWithPayload(childComplexity, args["req"].(model.UploadFile)), true
+		return e.ComplexityRoot.Mutation.SingleUploadWithPayload(childComplexity, args["req"].(model.UploadFile)), true
 
 	case "Query.empty":
-		if e.complexity.Query.Empty == nil {
+		if e.ComplexityRoot.Query.Empty == nil {
 			break
 		}
 
-		return e.complexity.Query.Empty(childComplexity), true
+		return e.ComplexityRoot.Query.Empty(childComplexity), true
 
 	}
 	return 0, false
@@ -523,7 +513,7 @@ func (ec *executionContext) _Mutation_singleUpload(ctx context.Context, field gr
 		ec.fieldContext_Mutation_singleUpload,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().SingleUpload(ctx, fc.Args["file"].(graphql.Upload))
+			return ec.Resolvers.Mutation().SingleUpload(ctx, fc.Args["file"].(graphql.Upload))
 		},
 		nil,
 		ec.marshalNFile2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfileuploadᚋmodelᚐFile,
@@ -574,7 +564,7 @@ func (ec *executionContext) _Mutation_singleUploadWithPayload(ctx context.Contex
 		ec.fieldContext_Mutation_singleUploadWithPayload,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().SingleUploadWithPayload(ctx, fc.Args["req"].(model.UploadFile))
+			return ec.Resolvers.Mutation().SingleUploadWithPayload(ctx, fc.Args["req"].(model.UploadFile))
 		},
 		nil,
 		ec.marshalNFile2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfileuploadᚋmodelᚐFile,
@@ -625,7 +615,7 @@ func (ec *executionContext) _Mutation_multipleUpload(ctx context.Context, field 
 		ec.fieldContext_Mutation_multipleUpload,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().MultipleUpload(ctx, fc.Args["files"].([]*graphql.Upload))
+			return ec.Resolvers.Mutation().MultipleUpload(ctx, fc.Args["files"].([]*graphql.Upload))
 		},
 		nil,
 		ec.marshalNFile2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfileuploadᚋmodelᚐFileᚄ,
@@ -676,7 +666,7 @@ func (ec *executionContext) _Mutation_multipleUploadWithPayload(ctx context.Cont
 		ec.fieldContext_Mutation_multipleUploadWithPayload,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().MultipleUploadWithPayload(ctx, fc.Args["req"].([]*model.UploadFile))
+			return ec.Resolvers.Mutation().MultipleUploadWithPayload(ctx, fc.Args["req"].([]*model.UploadFile))
 		},
 		nil,
 		ec.marshalNFile2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfileuploadᚋmodelᚐFileᚄ,
@@ -726,7 +716,7 @@ func (ec *executionContext) _Query_empty(ctx context.Context, field graphql.Coll
 		field,
 		ec.fieldContext_Query_empty,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Empty(ctx)
+			return ec.Resolvers.Query().Empty(ctx)
 		},
 		nil,
 		ec.marshalNString2string,

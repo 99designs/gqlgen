@@ -117,10 +117,10 @@ func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj any, next 
 			}
 			n := next
 			next = func(ctx context.Context) (any, error) {
-				if ec.directives.Logged == nil {
+				if ec.Directives.Logged == nil {
 					return nil, errors.New("directive logged is not implemented")
 				}
-				return ec.directives.Logged(ctx, obj, n, args["id"].(string))
+				return ec.Directives.Logged(ctx, obj, n, args["id"].(string))
 			}
 		}
 	}
@@ -159,11 +159,11 @@ func (ec *executionContext) _ObjectDirectives_text(ctx context.Context, field gr
 					var zeroVal string
 					return zeroVal, err
 				}
-				if ec.directives.Length == nil {
+				if ec.Directives.Length == nil {
 					var zeroVal string
 					return zeroVal, errors.New("directive length is not implemented")
 				}
-				return ec.directives.Length(ctx, obj, directive0, min, max, message)
+				return ec.Directives.Length(ctx, obj, directive0, min, max, message)
 			}
 
 			next = directive1
@@ -201,11 +201,11 @@ func (ec *executionContext) _ObjectDirectives_nullableText(ctx context.Context, 
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.ToNull == nil {
+				if ec.Directives.ToNull == nil {
 					var zeroVal *string
 					return zeroVal, errors.New("directive toNull is not implemented")
 				}
-				return ec.directives.ToNull(ctx, obj, directive0)
+				return ec.Directives.ToNull(ctx, obj, directive0)
 			}
 
 			next = directive1
@@ -274,11 +274,11 @@ func (ec *executionContext) _ObjectDirectivesWithCustomGoModel_nullableText(ctx 
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.ToNull == nil {
+				if ec.Directives.ToNull == nil {
 					var zeroVal string
 					return zeroVal, errors.New("directive toNull is not implemented")
 				}
-				return ec.directives.ToNull(ctx, obj, directive0)
+				return ec.Directives.ToNull(ctx, obj, directive0)
 			}
 
 			next = directive1
@@ -336,11 +336,11 @@ func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, o
 					var zeroVal string
 					return zeroVal, err
 				}
-				if ec.directives.Length == nil {
+				if ec.Directives.Length == nil {
 					var zeroVal string
 					return zeroVal, errors.New("directive length is not implemented")
 				}
-				return ec.directives.Length(ctx, obj, directive0, min, nil, message)
+				return ec.Directives.Length(ctx, obj, directive0, min, nil, message)
 			}
 
 			tmp, err := directive1(ctx)
@@ -378,11 +378,11 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalNString2string(ctx, v) }
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Directive3 == nil {
+				if ec.Directives.Directive3 == nil {
 					var zeroVal string
 					return zeroVal, errors.New("directive directive3 is not implemented")
 				}
-				return ec.directives.Directive3(ctx, obj, directive0)
+				return ec.Directives.Directive3(ctx, obj, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
 				min, err := ec.unmarshalNInt2int(ctx, 0)
@@ -400,11 +400,11 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 					var zeroVal string
 					return zeroVal, err
 				}
-				if ec.directives.Length == nil {
+				if ec.Directives.Length == nil {
 					var zeroVal string
 					return zeroVal, errors.New("directive length is not implemented")
 				}
-				return ec.directives.Length(ctx, obj, directive1, min, max, message)
+				return ec.Directives.Length(ctx, obj, directive1, min, max, message)
 			}
 
 			tmp, err := directive2(ctx)
@@ -422,18 +422,18 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalOString2ᚖstring(ctx, v) }
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Directive3 == nil {
+				if ec.Directives.Directive3 == nil {
 					var zeroVal *string
 					return zeroVal, errors.New("directive directive3 is not implemented")
 				}
-				return ec.directives.Directive3(ctx, obj, directive0)
+				return ec.Directives.Directive3(ctx, obj, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
-				if ec.directives.ToNull == nil {
+				if ec.Directives.ToNull == nil {
 					var zeroVal *string
 					return zeroVal, errors.New("directive toNull is not implemented")
 				}
-				return ec.directives.ToNull(ctx, obj, directive1)
+				return ec.Directives.ToNull(ctx, obj, directive1)
 			}
 
 			tmp, err := directive2(ctx)
@@ -455,11 +455,11 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			}
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Directive3 == nil {
+				if ec.Directives.Directive3 == nil {
 					var zeroVal *InnerDirectives
 					return zeroVal, errors.New("directive directive3 is not implemented")
 				}
-				return ec.directives.Directive3(ctx, obj, directive0)
+				return ec.Directives.Directive3(ctx, obj, directive0)
 			}
 
 			tmp, err := directive1(ctx)
@@ -481,11 +481,11 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			}
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Directive3 == nil {
+				if ec.Directives.Directive3 == nil {
 					var zeroVal *InnerDirectives
 					return zeroVal, errors.New("directive directive3 is not implemented")
 				}
-				return ec.directives.Directive3(ctx, obj, directive0)
+				return ec.Directives.Directive3(ctx, obj, directive0)
 			}
 
 			tmp, err := directive1(ctx)
@@ -507,11 +507,11 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			}
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Directive3 == nil {
+				if ec.Directives.Directive3 == nil {
 					var zeroVal *ThirdParty
 					return zeroVal, errors.New("directive directive3 is not implemented")
 				}
-				return ec.directives.Directive3(ctx, obj, directive0)
+				return ec.Directives.Directive3(ctx, obj, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
 				min, err := ec.unmarshalNInt2int(ctx, 0)
@@ -524,11 +524,11 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 					var zeroVal *ThirdParty
 					return zeroVal, err
 				}
-				if ec.directives.Length == nil {
+				if ec.Directives.Length == nil {
 					var zeroVal *ThirdParty
 					return zeroVal, errors.New("directive length is not implemented")
 				}
-				return ec.directives.Length(ctx, obj, directive1, min, max, nil)
+				return ec.Directives.Length(ctx, obj, directive1, min, max, nil)
 			}
 
 			tmp, err := directive2(ctx)

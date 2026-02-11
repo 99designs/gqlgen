@@ -22,12 +22,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -59,16 +54,11 @@ type QueryResolver interface {
 	CachedEvents(ctx context.Context) ([]Event, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -79,31 +69,31 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "Like.from":
-		if e.complexity.Like.From == nil {
+		if e.ComplexityRoot.Like.From == nil {
 			break
 		}
 
-		return e.complexity.Like.From(childComplexity), true
+		return e.ComplexityRoot.Like.From(childComplexity), true
 
 	case "Post.message":
-		if e.complexity.Post.Message == nil {
+		if e.ComplexityRoot.Post.Message == nil {
 			break
 		}
 
-		return e.complexity.Post.Message(childComplexity), true
+		return e.ComplexityRoot.Post.Message(childComplexity), true
 
 	case "Query.cachedEvents":
-		if e.complexity.Query.CachedEvents == nil {
+		if e.ComplexityRoot.Query.CachedEvents == nil {
 			break
 		}
 
-		return e.complexity.Query.CachedEvents(childComplexity), true
+		return e.ComplexityRoot.Query.CachedEvents(childComplexity), true
 	case "Query.events":
-		if e.complexity.Query.Events == nil {
+		if e.ComplexityRoot.Query.Events == nil {
 			break
 		}
 
-		return e.complexity.Query.Events(childComplexity), true
+		return e.ComplexityRoot.Query.Events(childComplexity), true
 
 	}
 	return 0, false
@@ -341,7 +331,7 @@ func (ec *executionContext) _Query_events(ctx context.Context, field graphql.Col
 		field,
 		ec.fieldContext_Query_events,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Events(ctx)
+			return ec.Resolvers.Query().Events(ctx)
 		},
 		nil,
 		ec.marshalNEvent2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋunionᚑextensionᚐEventᚄ,
@@ -370,7 +360,7 @@ func (ec *executionContext) _Query_cachedEvents(ctx context.Context, field graph
 		field,
 		ec.fieldContext_Query_cachedEvents,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().CachedEvents(ctx)
+			return ec.Resolvers.Query().CachedEvents(ctx)
 		},
 		nil,
 		ec.marshalNEvent2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋunionᚑextensionᚐEventᚄ,

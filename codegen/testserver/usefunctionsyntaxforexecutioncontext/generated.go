@@ -22,12 +22,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -93,16 +88,11 @@ type SubscriptionResolver interface {
 	UserCreated(ctx context.Context) (<-chan *User, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -113,32 +103,32 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "Admin.createdAt":
-		if e.complexity.Admin.CreatedAt == nil {
+		if e.ComplexityRoot.Admin.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.Admin.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.Admin.CreatedAt(childComplexity), true
 	case "Admin.id":
-		if e.complexity.Admin.ID == nil {
+		if e.ComplexityRoot.Admin.ID == nil {
 			break
 		}
 
-		return e.complexity.Admin.ID(childComplexity), true
+		return e.ComplexityRoot.Admin.ID(childComplexity), true
 	case "Admin.name":
-		if e.complexity.Admin.Name == nil {
+		if e.ComplexityRoot.Admin.Name == nil {
 			break
 		}
 
-		return e.complexity.Admin.Name(childComplexity), true
+		return e.ComplexityRoot.Admin.Name(childComplexity), true
 	case "Admin.permissions":
-		if e.complexity.Admin.Permissions == nil {
+		if e.ComplexityRoot.Admin.Permissions == nil {
 			break
 		}
 
-		return e.complexity.Admin.Permissions(childComplexity), true
+		return e.ComplexityRoot.Admin.Permissions(childComplexity), true
 
 	case "Mutation.createUser":
-		if e.complexity.Mutation.CreateUser == nil {
+		if e.ComplexityRoot.Mutation.CreateUser == nil {
 			break
 		}
 
@@ -147,9 +137,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateUser(childComplexity, args["input"].(CreateUserInput)), true
+		return e.ComplexityRoot.Mutation.CreateUser(childComplexity, args["input"].(CreateUserInput)), true
 	case "Mutation.deleteUser":
-		if e.complexity.Mutation.DeleteUser == nil {
+		if e.ComplexityRoot.Mutation.DeleteUser == nil {
 			break
 		}
 
@@ -158,23 +148,23 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteUser(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Mutation.DeleteUser(childComplexity, args["id"].(string)), true
 
 	case "MutationResponse.message":
-		if e.complexity.MutationResponse.Message == nil {
+		if e.ComplexityRoot.MutationResponse.Message == nil {
 			break
 		}
 
-		return e.complexity.MutationResponse.Message(childComplexity), true
+		return e.ComplexityRoot.MutationResponse.Message(childComplexity), true
 	case "MutationResponse.success":
-		if e.complexity.MutationResponse.Success == nil {
+		if e.ComplexityRoot.MutationResponse.Success == nil {
 			break
 		}
 
-		return e.complexity.MutationResponse.Success(childComplexity), true
+		return e.ComplexityRoot.MutationResponse.Success(childComplexity), true
 
 	case "Query.getEntity":
-		if e.complexity.Query.GetEntity == nil {
+		if e.ComplexityRoot.Query.GetEntity == nil {
 			break
 		}
 
@@ -183,9 +173,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.GetEntity(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Query.GetEntity(childComplexity, args["id"].(string)), true
 	case "Query.getUser":
-		if e.complexity.Query.GetUser == nil {
+		if e.ComplexityRoot.Query.GetUser == nil {
 			break
 		}
 
@@ -194,9 +184,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.GetUser(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Query.GetUser(childComplexity, args["id"].(string)), true
 	case "Query.listUsers":
-		if e.complexity.Query.ListUsers == nil {
+		if e.ComplexityRoot.Query.ListUsers == nil {
 			break
 		}
 
@@ -205,51 +195,51 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.ListUsers(childComplexity, args["filter"].(*UserFilter)), true
+		return e.ComplexityRoot.Query.ListUsers(childComplexity, args["filter"].(*UserFilter)), true
 
 	case "Subscription.userCreated":
-		if e.complexity.Subscription.UserCreated == nil {
+		if e.ComplexityRoot.Subscription.UserCreated == nil {
 			break
 		}
 
-		return e.complexity.Subscription.UserCreated(childComplexity), true
+		return e.ComplexityRoot.Subscription.UserCreated(childComplexity), true
 
 	case "User.age":
-		if e.complexity.User.Age == nil {
+		if e.ComplexityRoot.User.Age == nil {
 			break
 		}
 
-		return e.complexity.User.Age(childComplexity), true
+		return e.ComplexityRoot.User.Age(childComplexity), true
 	case "User.createdAt":
-		if e.complexity.User.CreatedAt == nil {
+		if e.ComplexityRoot.User.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.User.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.User.CreatedAt(childComplexity), true
 	case "User.email":
-		if e.complexity.User.Email == nil {
+		if e.ComplexityRoot.User.Email == nil {
 			break
 		}
 
-		return e.complexity.User.Email(childComplexity), true
+		return e.ComplexityRoot.User.Email(childComplexity), true
 	case "User.id":
-		if e.complexity.User.ID == nil {
+		if e.ComplexityRoot.User.ID == nil {
 			break
 		}
 
-		return e.complexity.User.ID(childComplexity), true
+		return e.ComplexityRoot.User.ID(childComplexity), true
 	case "User.name":
-		if e.complexity.User.Name == nil {
+		if e.ComplexityRoot.User.Name == nil {
 			break
 		}
 
-		return e.complexity.User.Name(childComplexity), true
+		return e.ComplexityRoot.User.Name(childComplexity), true
 	case "User.role":
-		if e.complexity.User.Role == nil {
+		if e.ComplexityRoot.User.Role == nil {
 			break
 		}
 
-		return e.complexity.User.Role(childComplexity), true
+		return e.ComplexityRoot.User.Role(childComplexity), true
 
 	}
 	return 0, false
@@ -665,7 +655,7 @@ func _Mutation_createUser(ctx context.Context, ec *executionContext, field graph
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().CreateUser(ctx, fc.Args["input"].(CreateUserInput))
+			return ec.Resolvers.Mutation().CreateUser(ctx, fc.Args["input"].(CreateUserInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -676,11 +666,11 @@ func _Mutation_createUser(ctx context.Context, ec *executionContext, field graph
 					var zeroVal *User
 					return zeroVal, err
 				}
-				if ec.directives.Log == nil {
+				if ec.Directives.Log == nil {
 					var zeroVal *User
 					return zeroVal, errors.New("directive log is not implemented")
 				}
-				return ec.directives.Log(ctx, nil, directive0, message)
+				return ec.Directives.Log(ctx, nil, directive0, message)
 			}
 
 			next = directive1
@@ -742,7 +732,7 @@ func _Mutation_deleteUser(ctx context.Context, ec *executionContext, field graph
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().DeleteUser(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Mutation().DeleteUser(ctx, fc.Args["id"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -753,11 +743,11 @@ func _Mutation_deleteUser(ctx context.Context, ec *executionContext, field graph
 					var zeroVal *MutationResponse
 					return zeroVal, err
 				}
-				if ec.directives.Log == nil {
+				if ec.Directives.Log == nil {
 					var zeroVal *MutationResponse
 					return zeroVal, errors.New("directive log is not implemented")
 				}
-				return ec.directives.Log(ctx, nil, directive0, message)
+				return ec.Directives.Log(ctx, nil, directive0, message)
 			}
 
 			next = directive1
@@ -877,7 +867,7 @@ func _Query_getUser(ctx context.Context, ec *executionContext, field graphql.Col
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().GetUser(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Query().GetUser(ctx, fc.Args["id"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -888,11 +878,11 @@ func _Query_getUser(ctx context.Context, ec *executionContext, field graphql.Col
 					var zeroVal *User
 					return zeroVal, err
 				}
-				if ec.directives.Log == nil {
+				if ec.Directives.Log == nil {
 					var zeroVal *User
 					return zeroVal, errors.New("directive log is not implemented")
 				}
-				return ec.directives.Log(ctx, nil, directive0, message)
+				return ec.Directives.Log(ctx, nil, directive0, message)
 			}
 
 			next = directive1
@@ -954,7 +944,7 @@ func _Query_listUsers(ctx context.Context, ec *executionContext, field graphql.C
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().ListUsers(ctx, fc.Args["filter"].(*UserFilter))
+			return ec.Resolvers.Query().ListUsers(ctx, fc.Args["filter"].(*UserFilter))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -965,11 +955,11 @@ func _Query_listUsers(ctx context.Context, ec *executionContext, field graphql.C
 					var zeroVal []*User
 					return zeroVal, err
 				}
-				if ec.directives.Log == nil {
+				if ec.Directives.Log == nil {
 					var zeroVal []*User
 					return zeroVal, errors.New("directive log is not implemented")
 				}
-				return ec.directives.Log(ctx, nil, directive0, message)
+				return ec.Directives.Log(ctx, nil, directive0, message)
 			}
 
 			next = directive1
@@ -1031,7 +1021,7 @@ func _Query_getEntity(ctx context.Context, ec *executionContext, field graphql.C
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().GetEntity(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Query().GetEntity(ctx, fc.Args["id"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -1042,11 +1032,11 @@ func _Query_getEntity(ctx context.Context, ec *executionContext, field graphql.C
 					var zeroVal Entity
 					return zeroVal, err
 				}
-				if ec.directives.Log == nil {
+				if ec.Directives.Log == nil {
 					var zeroVal Entity
 					return zeroVal, errors.New("directive log is not implemented")
 				}
-				return ec.directives.Log(ctx, nil, directive0, message)
+				return ec.Directives.Log(ctx, nil, directive0, message)
 			}
 
 			next = directive1
@@ -1209,7 +1199,7 @@ func _Subscription_userCreated(ctx context.Context, ec *executionContext, field 
 			return fieldContext_Subscription_userCreated(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Subscription().UserCreated(ctx)
+			return ec.Resolvers.Subscription().UserCreated(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -1220,11 +1210,11 @@ func _Subscription_userCreated(ctx context.Context, ec *executionContext, field 
 					var zeroVal *User
 					return zeroVal, err
 				}
-				if ec.directives.Log == nil {
+				if ec.Directives.Log == nil {
 					var zeroVal *User
 					return zeroVal, errors.New("directive log is not implemented")
 				}
-				return ec.directives.Log(ctx, nil, directive0, message)
+				return ec.Directives.Log(ctx, nil, directive0, message)
 			}
 
 			next = directive1

@@ -25,12 +25,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -96,16 +91,11 @@ type UserResolver interface {
 	Likes(ctx context.Context, obj *remote_api.User) ([]string, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -116,26 +106,26 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "Element.child":
-		if e.complexity.Element.Child == nil {
+		if e.ComplexityRoot.Element.Child == nil {
 			break
 		}
 
-		return e.complexity.Element.Child(childComplexity), true
+		return e.ComplexityRoot.Element.Child(childComplexity), true
 	case "Element.error":
-		if e.complexity.Element.Error == nil {
+		if e.ComplexityRoot.Element.Error == nil {
 			break
 		}
 
-		return e.complexity.Element.Error(childComplexity), true
+		return e.ComplexityRoot.Element.Error(childComplexity), true
 	case "Element.mismatched":
-		if e.complexity.Element.Mismatched == nil {
+		if e.ComplexityRoot.Element.Mismatched == nil {
 			break
 		}
 
-		return e.complexity.Element.Mismatched(childComplexity), true
+		return e.ComplexityRoot.Element.Mismatched(childComplexity), true
 
 	case "Query.coercion":
-		if e.complexity.Query.Coercion == nil {
+		if e.ComplexityRoot.Query.Coercion == nil {
 			break
 		}
 
@@ -144,9 +134,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Coercion(childComplexity, args["value"].([]*models.ListCoercion)), true
+		return e.ComplexityRoot.Query.Coercion(childComplexity, args["value"].([]*models.ListCoercion)), true
 	case "Query.complexity":
-		if e.complexity.Query.Complexity == nil {
+		if e.ComplexityRoot.Query.Complexity == nil {
 			break
 		}
 
@@ -155,9 +145,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Complexity(childComplexity, args["value"].(int)), true
+		return e.ComplexityRoot.Query.Complexity(childComplexity, args["value"].(int)), true
 	case "Query.date":
-		if e.complexity.Query.Date == nil {
+		if e.ComplexityRoot.Query.Date == nil {
 			break
 		}
 
@@ -166,9 +156,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Date(childComplexity, args["filter"].(models.DateFilter)), true
+		return e.ComplexityRoot.Query.Date(childComplexity, args["filter"].(models.DateFilter)), true
 	case "Query.error":
-		if e.complexity.Query.Error == nil {
+		if e.ComplexityRoot.Query.Error == nil {
 			break
 		}
 
@@ -177,64 +167,64 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Error(childComplexity, args["type"].(*models.ErrorType)), true
+		return e.ComplexityRoot.Query.Error(childComplexity, args["type"].(*models.ErrorType)), true
 	case "Query.jsonEncoding":
-		if e.complexity.Query.JSONEncoding == nil {
+		if e.ComplexityRoot.Query.JSONEncoding == nil {
 			break
 		}
 
-		return e.complexity.Query.JSONEncoding(childComplexity), true
+		return e.ComplexityRoot.Query.JSONEncoding(childComplexity), true
 	case "Query.path":
-		if e.complexity.Query.Path == nil {
+		if e.ComplexityRoot.Query.Path == nil {
 			break
 		}
 
-		return e.complexity.Query.Path(childComplexity), true
+		return e.ComplexityRoot.Query.Path(childComplexity), true
 	case "Query.viewer":
-		if e.complexity.Query.Viewer == nil {
+		if e.ComplexityRoot.Query.Viewer == nil {
 			break
 		}
 
-		return e.complexity.Query.Viewer(childComplexity), true
+		return e.ComplexityRoot.Query.Viewer(childComplexity), true
 
 	case "RemoteModelWithOmitempty.newDesc":
-		if e.complexity.RemoteModelWithOmitempty.Description == nil {
+		if e.ComplexityRoot.RemoteModelWithOmitempty.Description == nil {
 			break
 		}
 
-		return e.complexity.RemoteModelWithOmitempty.Description(childComplexity), true
+		return e.ComplexityRoot.RemoteModelWithOmitempty.Description(childComplexity), true
 
 	case "User.likes":
-		if e.complexity.User.Likes == nil {
+		if e.ComplexityRoot.User.Likes == nil {
 			break
 		}
 
-		return e.complexity.User.Likes(childComplexity), true
+		return e.ComplexityRoot.User.Likes(childComplexity), true
 	case "User.name":
-		if e.complexity.User.Name == nil {
+		if e.ComplexityRoot.User.Name == nil {
 			break
 		}
 
-		return e.complexity.User.Name(childComplexity), true
+		return e.ComplexityRoot.User.Name(childComplexity), true
 	case "User.phoneNumber":
-		if e.complexity.User.PhoneNumber == nil {
+		if e.ComplexityRoot.User.PhoneNumber == nil {
 			break
 		}
 
-		return e.complexity.User.PhoneNumber(childComplexity), true
+		return e.ComplexityRoot.User.PhoneNumber(childComplexity), true
 	case "User.query":
-		if e.complexity.User.Query == nil {
+		if e.ComplexityRoot.User.Query == nil {
 			break
 		}
 
-		return e.complexity.User.Query(childComplexity), true
+		return e.ComplexityRoot.User.Query(childComplexity), true
 
 	case "Viewer.user":
-		if e.complexity.Viewer.User == nil {
+		if e.ComplexityRoot.Viewer.User == nil {
 			break
 		}
 
-		return e.complexity.Viewer.User(childComplexity), true
+		return e.ComplexityRoot.Viewer.User(childComplexity), true
 
 	}
 	return 0, false
@@ -474,7 +464,7 @@ func (ec *executionContext) _Element_child(ctx context.Context, field graphql.Co
 		field,
 		ec.fieldContext_Element_child,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Element().Child(ctx, obj)
+			return ec.Resolvers.Element().Child(ctx, obj)
 		},
 		nil,
 		ec.marshalNElement2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋserverᚋmodelsᚑgoᚐElement,
@@ -511,7 +501,7 @@ func (ec *executionContext) _Element_error(ctx context.Context, field graphql.Co
 		field,
 		ec.fieldContext_Element_error,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Element().Error(ctx, obj)
+			return ec.Resolvers.Element().Error(ctx, obj)
 		},
 		nil,
 		ec.marshalNBoolean2bool,
@@ -540,7 +530,7 @@ func (ec *executionContext) _Element_mismatched(ctx context.Context, field graph
 		field,
 		ec.fieldContext_Element_mismatched,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Element().Mismatched(ctx, obj)
+			return ec.Resolvers.Element().Mismatched(ctx, obj)
 		},
 		nil,
 		ec.marshalOBoolean2ᚕboolᚄ,
@@ -569,7 +559,7 @@ func (ec *executionContext) _Query_path(ctx context.Context, field graphql.Colle
 		field,
 		ec.fieldContext_Query_path,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Path(ctx)
+			return ec.Resolvers.Query().Path(ctx)
 		},
 		nil,
 		ec.marshalOElement2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋserverᚋmodelsᚑgoᚐElement,
@@ -607,7 +597,7 @@ func (ec *executionContext) _Query_date(ctx context.Context, field graphql.Colle
 		ec.fieldContext_Query_date,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Date(ctx, fc.Args["filter"].(models.DateFilter))
+			return ec.Resolvers.Query().Date(ctx, fc.Args["filter"].(models.DateFilter))
 		},
 		nil,
 		ec.marshalNBoolean2bool,
@@ -647,7 +637,7 @@ func (ec *executionContext) _Query_viewer(ctx context.Context, field graphql.Col
 		field,
 		ec.fieldContext_Query_viewer,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Viewer(ctx)
+			return ec.Resolvers.Query().Viewer(ctx)
 		},
 		nil,
 		ec.marshalOViewer2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋserverᚋmodelsᚑgoᚐViewer,
@@ -680,7 +670,7 @@ func (ec *executionContext) _Query_jsonEncoding(ctx context.Context, field graph
 		field,
 		ec.fieldContext_Query_jsonEncoding,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().JSONEncoding(ctx)
+			return ec.Resolvers.Query().JSONEncoding(ctx)
 		},
 		nil,
 		ec.marshalNString2string,
@@ -710,7 +700,7 @@ func (ec *executionContext) _Query_error(ctx context.Context, field graphql.Coll
 		ec.fieldContext_Query_error,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Error(ctx, fc.Args["type"].(*models.ErrorType))
+			return ec.Resolvers.Query().Error(ctx, fc.Args["type"].(*models.ErrorType))
 		},
 		nil,
 		ec.marshalNBoolean2bool,
@@ -751,7 +741,7 @@ func (ec *executionContext) _Query_complexity(ctx context.Context, field graphql
 		ec.fieldContext_Query_complexity,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Complexity(ctx, fc.Args["value"].(int))
+			return ec.Resolvers.Query().Complexity(ctx, fc.Args["value"].(int))
 		},
 		nil,
 		ec.marshalNBoolean2bool,
@@ -792,7 +782,7 @@ func (ec *executionContext) _Query_coercion(ctx context.Context, field graphql.C
 		ec.fieldContext_Query_coercion,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Coercion(ctx, fc.Args["value"].([]*models.ListCoercion))
+			return ec.Resolvers.Query().Coercion(ctx, fc.Args["value"].([]*models.ListCoercion))
 		},
 		nil,
 		ec.marshalNBoolean2bool,
@@ -998,7 +988,7 @@ func (ec *executionContext) _User_likes(ctx context.Context, field graphql.Colle
 		field,
 		ec.fieldContext_User_likes,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.User().Likes(ctx, obj)
+			return ec.Resolvers.User().Likes(ctx, obj)
 		},
 		nil,
 		ec.marshalNString2ᚕstringᚄ,

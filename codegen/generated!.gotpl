@@ -21,12 +21,7 @@
 {{ if eq .Config.Exec.Layout "single-file" }}
 	// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 	func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-		return &executableSchema{
-		 	schema: cfg.Schema,
-			resolvers: cfg.Resolvers,
-			directives: cfg.Directives,
-			complexity: cfg.Complexity,
-		}
+		return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 	}
 
 	type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -101,16 +96,11 @@
 {{ end }}
 
 {{ if eq .Config.Exec.Layout "single-file" }}
-	type executableSchema struct {
-		schema    *ast.Schema
-		resolvers  ResolverRoot
-		directives DirectiveRoot
-		complexity ComplexityRoot
-	}
+	type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 	func (e *executableSchema) Schema() *ast.Schema {
-		if e.schema != nil {
-        		return e.schema
+		if e.SchemaData != nil {
+        		return e.SchemaData
 		}
 		return parsedSchema
 	}
@@ -128,7 +118,7 @@
 						{{- $last := eq (add $i 1) $len }}
 						{{- if not $field.IsReserved }}
 							{{- if eq $i 0 }}case {{ end }}"{{$object.Name}}.{{$field.Name}}"{{ if not $last }},{{ else }}:
-								if e.complexity.{{ucFirst $object.Name}}.{{$field.GoFieldName}} == nil {
+								if e.ComplexityRoot.{{ucFirst $object.Name}}.{{$field.GoFieldName}} == nil {
 									break
 								}
 								{{ if $field.Args }}
@@ -141,7 +131,7 @@
 										return 0, false
 									}
 								{{ end }}
-								return e.complexity.{{ucFirst $object.Name}}.{{$field.GoFieldName}}(childComplexity{{if $field.Args}}, {{$field.ComplexityArgs}} {{ end }}), true
+								return e.ComplexityRoot.{{ucFirst $object.Name}}.{{$field.GoFieldName}}(childComplexity{{if $field.Args}}, {{$field.ComplexityArgs}} {{ end }}), true
 							{{- end }}
 						{{- end }}
 					{{- end }}

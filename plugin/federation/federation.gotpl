@@ -180,7 +180,7 @@ func (ec *executionContext) resolveEntity(
 							return nil, fmt.Errorf(`unmarshalling param {{$j}} for {{$resolver.ResolverName}}(): %w`, err)
 							}
 						{{- end}}
-						entity, err := ec.resolvers.Entity().{{.ResolverName | go}}(ctx, {{- range $j, $_ := .KeyFields -}} id{{$j}}, {{end}})
+						entity, err := ec.Resolvers.Entity().{{.ResolverName | go}}(ctx, {{- range $j, $_ := .KeyFields -}} id{{$j}}, {{end}})
 						if err != nil {
 							return nil, fmt.Errorf(`resolving Entity "{{$entity.Def.Name}}": %w`, err)
 						}
@@ -258,7 +258,7 @@ func (ec *executionContext) resolveManyEntities(
 							}
 						}
 
-					entities, err := ec.resolvers.Entity().{{.ResolverName | go}}(ctx, typedReps)
+					entities, err := ec.Resolvers.Entity().{{.ResolverName | go}}(ctx, typedReps)
 						if err != nil {
 							return err
 						}

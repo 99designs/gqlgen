@@ -23,12 +23,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -144,16 +139,11 @@ type StarshipResolver interface {
 	Length(ctx context.Context, obj *models.Starship, unit *models.LengthUnit) (float64, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -164,19 +154,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "Droid.appearsIn":
-		if e.complexity.Droid.AppearsIn == nil {
+		if e.ComplexityRoot.Droid.AppearsIn == nil {
 			break
 		}
 
-		return e.complexity.Droid.AppearsIn(childComplexity), true
+		return e.ComplexityRoot.Droid.AppearsIn(childComplexity), true
 	case "Droid.friends":
-		if e.complexity.Droid.Friends == nil {
+		if e.ComplexityRoot.Droid.Friends == nil {
 			break
 		}
 
-		return e.complexity.Droid.Friends(childComplexity), true
+		return e.ComplexityRoot.Droid.Friends(childComplexity), true
 	case "Droid.friendsConnection":
-		if e.complexity.Droid.FriendsConnection == nil {
+		if e.ComplexityRoot.Droid.FriendsConnection == nil {
 			break
 		}
 
@@ -185,78 +175,78 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Droid.FriendsConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
+		return e.ComplexityRoot.Droid.FriendsConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
 	case "Droid.id":
-		if e.complexity.Droid.ID == nil {
+		if e.ComplexityRoot.Droid.ID == nil {
 			break
 		}
 
-		return e.complexity.Droid.ID(childComplexity), true
+		return e.ComplexityRoot.Droid.ID(childComplexity), true
 	case "Droid.name":
-		if e.complexity.Droid.Name == nil {
+		if e.ComplexityRoot.Droid.Name == nil {
 			break
 		}
 
-		return e.complexity.Droid.Name(childComplexity), true
+		return e.ComplexityRoot.Droid.Name(childComplexity), true
 	case "Droid.primaryFunction":
-		if e.complexity.Droid.PrimaryFunction == nil {
+		if e.ComplexityRoot.Droid.PrimaryFunction == nil {
 			break
 		}
 
-		return e.complexity.Droid.PrimaryFunction(childComplexity), true
+		return e.ComplexityRoot.Droid.PrimaryFunction(childComplexity), true
 
 	case "FriendsConnection.edges":
-		if e.complexity.FriendsConnection.Edges == nil {
+		if e.ComplexityRoot.FriendsConnection.Edges == nil {
 			break
 		}
 
-		return e.complexity.FriendsConnection.Edges(childComplexity), true
+		return e.ComplexityRoot.FriendsConnection.Edges(childComplexity), true
 	case "FriendsConnection.friends":
-		if e.complexity.FriendsConnection.Friends == nil {
+		if e.ComplexityRoot.FriendsConnection.Friends == nil {
 			break
 		}
 
-		return e.complexity.FriendsConnection.Friends(childComplexity), true
+		return e.ComplexityRoot.FriendsConnection.Friends(childComplexity), true
 	case "FriendsConnection.pageInfo":
-		if e.complexity.FriendsConnection.PageInfo == nil {
+		if e.ComplexityRoot.FriendsConnection.PageInfo == nil {
 			break
 		}
 
-		return e.complexity.FriendsConnection.PageInfo(childComplexity), true
+		return e.ComplexityRoot.FriendsConnection.PageInfo(childComplexity), true
 	case "FriendsConnection.totalCount":
-		if e.complexity.FriendsConnection.TotalCount == nil {
+		if e.ComplexityRoot.FriendsConnection.TotalCount == nil {
 			break
 		}
 
-		return e.complexity.FriendsConnection.TotalCount(childComplexity), true
+		return e.ComplexityRoot.FriendsConnection.TotalCount(childComplexity), true
 
 	case "FriendsEdge.cursor":
-		if e.complexity.FriendsEdge.Cursor == nil {
+		if e.ComplexityRoot.FriendsEdge.Cursor == nil {
 			break
 		}
 
-		return e.complexity.FriendsEdge.Cursor(childComplexity), true
+		return e.ComplexityRoot.FriendsEdge.Cursor(childComplexity), true
 	case "FriendsEdge.node":
-		if e.complexity.FriendsEdge.Node == nil {
+		if e.ComplexityRoot.FriendsEdge.Node == nil {
 			break
 		}
 
-		return e.complexity.FriendsEdge.Node(childComplexity), true
+		return e.ComplexityRoot.FriendsEdge.Node(childComplexity), true
 
 	case "Human.appearsIn":
-		if e.complexity.Human.AppearsIn == nil {
+		if e.ComplexityRoot.Human.AppearsIn == nil {
 			break
 		}
 
-		return e.complexity.Human.AppearsIn(childComplexity), true
+		return e.ComplexityRoot.Human.AppearsIn(childComplexity), true
 	case "Human.friends":
-		if e.complexity.Human.Friends == nil {
+		if e.ComplexityRoot.Human.Friends == nil {
 			break
 		}
 
-		return e.complexity.Human.Friends(childComplexity), true
+		return e.ComplexityRoot.Human.Friends(childComplexity), true
 	case "Human.friendsConnection":
-		if e.complexity.Human.FriendsConnection == nil {
+		if e.ComplexityRoot.Human.FriendsConnection == nil {
 			break
 		}
 
@@ -265,9 +255,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Human.FriendsConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
+		return e.ComplexityRoot.Human.FriendsConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
 	case "Human.height":
-		if e.complexity.Human.Height == nil {
+		if e.ComplexityRoot.Human.Height == nil {
 			break
 		}
 
@@ -276,46 +266,46 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Human.Height(childComplexity, args["unit"].(models.LengthUnit)), true
+		return e.ComplexityRoot.Human.Height(childComplexity, args["unit"].(models.LengthUnit)), true
 	case "Human.id":
-		if e.complexity.Human.ID == nil {
+		if e.ComplexityRoot.Human.ID == nil {
 			break
 		}
 
-		return e.complexity.Human.ID(childComplexity), true
+		return e.ComplexityRoot.Human.ID(childComplexity), true
 	case "Human.mass":
-		if e.complexity.Human.Mass == nil {
+		if e.ComplexityRoot.Human.Mass == nil {
 			break
 		}
 
-		return e.complexity.Human.Mass(childComplexity), true
+		return e.ComplexityRoot.Human.Mass(childComplexity), true
 	case "Human.mutation":
-		if e.complexity.Human.Mutation == nil {
+		if e.ComplexityRoot.Human.Mutation == nil {
 			break
 		}
 
-		return e.complexity.Human.Mutation(childComplexity), true
+		return e.ComplexityRoot.Human.Mutation(childComplexity), true
 	case "Human.name":
-		if e.complexity.Human.Name == nil {
+		if e.ComplexityRoot.Human.Name == nil {
 			break
 		}
 
-		return e.complexity.Human.Name(childComplexity), true
+		return e.ComplexityRoot.Human.Name(childComplexity), true
 	case "Human.query":
-		if e.complexity.Human.Query == nil {
+		if e.ComplexityRoot.Human.Query == nil {
 			break
 		}
 
-		return e.complexity.Human.Query(childComplexity), true
+		return e.ComplexityRoot.Human.Query(childComplexity), true
 	case "Human.starships":
-		if e.complexity.Human.Starships == nil {
+		if e.ComplexityRoot.Human.Starships == nil {
 			break
 		}
 
-		return e.complexity.Human.Starships(childComplexity), true
+		return e.ComplexityRoot.Human.Starships(childComplexity), true
 
 	case "Mutation.createReview":
-		if e.complexity.Mutation.CreateReview == nil {
+		if e.ComplexityRoot.Mutation.CreateReview == nil {
 			break
 		}
 
@@ -324,29 +314,29 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateReview(childComplexity, args["episode"].(models.Episode), args["review"].(models.Review)), true
+		return e.ComplexityRoot.Mutation.CreateReview(childComplexity, args["episode"].(models.Episode), args["review"].(models.Review)), true
 
 	case "PageInfo.endCursor":
-		if e.complexity.PageInfo.EndCursor == nil {
+		if e.ComplexityRoot.PageInfo.EndCursor == nil {
 			break
 		}
 
-		return e.complexity.PageInfo.EndCursor(childComplexity), true
+		return e.ComplexityRoot.PageInfo.EndCursor(childComplexity), true
 	case "PageInfo.hasNextPage":
-		if e.complexity.PageInfo.HasNextPage == nil {
+		if e.ComplexityRoot.PageInfo.HasNextPage == nil {
 			break
 		}
 
-		return e.complexity.PageInfo.HasNextPage(childComplexity), true
+		return e.ComplexityRoot.PageInfo.HasNextPage(childComplexity), true
 	case "PageInfo.startCursor":
-		if e.complexity.PageInfo.StartCursor == nil {
+		if e.ComplexityRoot.PageInfo.StartCursor == nil {
 			break
 		}
 
-		return e.complexity.PageInfo.StartCursor(childComplexity), true
+		return e.ComplexityRoot.PageInfo.StartCursor(childComplexity), true
 
 	case "Query.character":
-		if e.complexity.Query.Character == nil {
+		if e.ComplexityRoot.Query.Character == nil {
 			break
 		}
 
@@ -355,9 +345,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Character(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Query.Character(childComplexity, args["id"].(string)), true
 	case "Query.droid":
-		if e.complexity.Query.Droid == nil {
+		if e.ComplexityRoot.Query.Droid == nil {
 			break
 		}
 
@@ -366,9 +356,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Droid(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Query.Droid(childComplexity, args["id"].(string)), true
 	case "Query.hero":
-		if e.complexity.Query.Hero == nil {
+		if e.ComplexityRoot.Query.Hero == nil {
 			break
 		}
 
@@ -377,9 +367,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Hero(childComplexity, args["episode"].(*models.Episode)), true
+		return e.ComplexityRoot.Query.Hero(childComplexity, args["episode"].(*models.Episode)), true
 	case "Query.human":
-		if e.complexity.Query.Human == nil {
+		if e.ComplexityRoot.Query.Human == nil {
 			break
 		}
 
@@ -388,9 +378,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Human(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Query.Human(childComplexity, args["id"].(string)), true
 	case "Query.reviews":
-		if e.complexity.Query.Reviews == nil {
+		if e.ComplexityRoot.Query.Reviews == nil {
 			break
 		}
 
@@ -399,9 +389,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Reviews(childComplexity, args["episode"].(models.Episode), args["since"].(*time.Time)), true
+		return e.ComplexityRoot.Query.Reviews(childComplexity, args["episode"].(models.Episode), args["since"].(*time.Time)), true
 	case "Query.search":
-		if e.complexity.Query.Search == nil {
+		if e.ComplexityRoot.Query.Search == nil {
 			break
 		}
 
@@ -410,9 +400,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Search(childComplexity, args["text"].(string)), true
+		return e.ComplexityRoot.Query.Search(childComplexity, args["text"].(string)), true
 	case "Query.starship":
-		if e.complexity.Query.Starship == nil {
+		if e.ComplexityRoot.Query.Starship == nil {
 			break
 		}
 
@@ -421,41 +411,41 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Starship(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Query.Starship(childComplexity, args["id"].(string)), true
 
 	case "Review.commentary":
-		if e.complexity.Review.Commentary == nil {
+		if e.ComplexityRoot.Review.Commentary == nil {
 			break
 		}
 
-		return e.complexity.Review.Commentary(childComplexity), true
+		return e.ComplexityRoot.Review.Commentary(childComplexity), true
 	case "Review.stars":
-		if e.complexity.Review.Stars == nil {
+		if e.ComplexityRoot.Review.Stars == nil {
 			break
 		}
 
-		return e.complexity.Review.Stars(childComplexity), true
+		return e.ComplexityRoot.Review.Stars(childComplexity), true
 	case "Review.time":
-		if e.complexity.Review.Time == nil {
+		if e.ComplexityRoot.Review.Time == nil {
 			break
 		}
 
-		return e.complexity.Review.Time(childComplexity), true
+		return e.ComplexityRoot.Review.Time(childComplexity), true
 
 	case "Starship.history":
-		if e.complexity.Starship.History == nil {
+		if e.ComplexityRoot.Starship.History == nil {
 			break
 		}
 
-		return e.complexity.Starship.History(childComplexity), true
+		return e.ComplexityRoot.Starship.History(childComplexity), true
 	case "Starship.id":
-		if e.complexity.Starship.ID == nil {
+		if e.ComplexityRoot.Starship.ID == nil {
 			break
 		}
 
-		return e.complexity.Starship.ID(childComplexity), true
+		return e.ComplexityRoot.Starship.ID(childComplexity), true
 	case "Starship.length":
-		if e.complexity.Starship.Length == nil {
+		if e.ComplexityRoot.Starship.Length == nil {
 			break
 		}
 
@@ -464,13 +454,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Starship.Length(childComplexity, args["unit"].(*models.LengthUnit)), true
+		return e.ComplexityRoot.Starship.Length(childComplexity, args["unit"].(*models.LengthUnit)), true
 	case "Starship.name":
-		if e.complexity.Starship.Name == nil {
+		if e.ComplexityRoot.Starship.Name == nil {
 			break
 		}
 
-		return e.complexity.Starship.Name(childComplexity), true
+		return e.ComplexityRoot.Starship.Name(childComplexity), true
 
 	}
 	return 0, false
@@ -1001,7 +991,7 @@ func (ec *executionContext) _Droid_friends(ctx context.Context, field graphql.Co
 		field,
 		ec.fieldContext_Droid_friends,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Droid().Friends(ctx, obj)
+			return ec.Resolvers.Droid().Friends(ctx, obj)
 		},
 		nil,
 		ec.marshalOCharacter2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐCharacterᚄ,
@@ -1031,7 +1021,7 @@ func (ec *executionContext) _Droid_friendsConnection(ctx context.Context, field 
 		ec.fieldContext_Droid_friendsConnection,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Droid().FriendsConnection(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*string))
+			return ec.Resolvers.Droid().FriendsConnection(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*string))
 		},
 		nil,
 		ec.marshalNFriendsConnection2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐFriendsConnection,
@@ -1168,7 +1158,7 @@ func (ec *executionContext) _FriendsConnection_edges(ctx context.Context, field 
 		field,
 		ec.fieldContext_FriendsConnection_edges,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.FriendsConnection().Edges(ctx, obj)
+			return ec.Resolvers.FriendsConnection().Edges(ctx, obj)
 		},
 		nil,
 		ec.marshalOFriendsEdge2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐFriendsEdgeᚄ,
@@ -1203,7 +1193,7 @@ func (ec *executionContext) _FriendsConnection_friends(ctx context.Context, fiel
 		field,
 		ec.fieldContext_FriendsConnection_friends,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.FriendsConnection().Friends(ctx, obj)
+			return ec.Resolvers.FriendsConnection().Friends(ctx, obj)
 		},
 		nil,
 		ec.marshalOCharacter2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐCharacterᚄ,
@@ -1455,7 +1445,7 @@ func (ec *executionContext) _Human_friends(ctx context.Context, field graphql.Co
 		field,
 		ec.fieldContext_Human_friends,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Human().Friends(ctx, obj)
+			return ec.Resolvers.Human().Friends(ctx, obj)
 		},
 		nil,
 		ec.marshalOCharacter2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐCharacterᚄ,
@@ -1485,7 +1475,7 @@ func (ec *executionContext) _Human_friendsConnection(ctx context.Context, field 
 		ec.fieldContext_Human_friendsConnection,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Human().FriendsConnection(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*string))
+			return ec.Resolvers.Human().FriendsConnection(ctx, obj, fc.Args["first"].(*int), fc.Args["after"].(*string))
 		},
 		nil,
 		ec.marshalNFriendsConnection2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐFriendsConnection,
@@ -1564,7 +1554,7 @@ func (ec *executionContext) _Human_starships(ctx context.Context, field graphql.
 		field,
 		ec.fieldContext_Human_starships,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Human().Starships(ctx, obj)
+			return ec.Resolvers.Human().Starships(ctx, obj)
 		},
 		nil,
 		ec.marshalOStarship2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐStarshipᚄ,
@@ -1688,7 +1678,7 @@ func (ec *executionContext) _Mutation_createReview(ctx context.Context, field gr
 		ec.fieldContext_Mutation_createReview,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().CreateReview(ctx, fc.Args["episode"].(models.Episode), fc.Args["review"].(models.Review))
+			return ec.Resolvers.Mutation().CreateReview(ctx, fc.Args["episode"].(models.Episode), fc.Args["review"].(models.Review))
 		},
 		nil,
 		ec.marshalOReview2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐReview,
@@ -1824,7 +1814,7 @@ func (ec *executionContext) _Query_hero(ctx context.Context, field graphql.Colle
 		ec.fieldContext_Query_hero,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Hero(ctx, fc.Args["episode"].(*models.Episode))
+			return ec.Resolvers.Query().Hero(ctx, fc.Args["episode"].(*models.Episode))
 		},
 		nil,
 		ec.marshalOCharacter2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐCharacter,
@@ -1865,7 +1855,7 @@ func (ec *executionContext) _Query_reviews(ctx context.Context, field graphql.Co
 		ec.fieldContext_Query_reviews,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Reviews(ctx, fc.Args["episode"].(models.Episode), fc.Args["since"].(*time.Time))
+			return ec.Resolvers.Query().Reviews(ctx, fc.Args["episode"].(models.Episode), fc.Args["since"].(*time.Time))
 		},
 		nil,
 		ec.marshalNReview2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐReviewᚄ,
@@ -1914,7 +1904,7 @@ func (ec *executionContext) _Query_search(ctx context.Context, field graphql.Col
 		ec.fieldContext_Query_search,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Search(ctx, fc.Args["text"].(string))
+			return ec.Resolvers.Query().Search(ctx, fc.Args["text"].(string))
 		},
 		nil,
 		ec.marshalNSearchResult2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐSearchResultᚄ,
@@ -1955,7 +1945,7 @@ func (ec *executionContext) _Query_character(ctx context.Context, field graphql.
 		ec.fieldContext_Query_character,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Character(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Query().Character(ctx, fc.Args["id"].(string))
 		},
 		nil,
 		ec.marshalOCharacter2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐCharacter,
@@ -1996,7 +1986,7 @@ func (ec *executionContext) _Query_droid(ctx context.Context, field graphql.Coll
 		ec.fieldContext_Query_droid,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Droid(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Query().Droid(ctx, fc.Args["id"].(string))
 		},
 		nil,
 		ec.marshalODroid2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐDroid,
@@ -2051,7 +2041,7 @@ func (ec *executionContext) _Query_human(ctx context.Context, field graphql.Coll
 		ec.fieldContext_Query_human,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Human(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Query().Human(ctx, fc.Args["id"].(string))
 		},
 		nil,
 		ec.marshalOHuman2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐHuman,
@@ -2114,7 +2104,7 @@ func (ec *executionContext) _Query_starship(ctx context.Context, field graphql.C
 		ec.fieldContext_Query_starship,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Starship(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Query().Starship(ctx, fc.Args["id"].(string))
 		},
 		nil,
 		ec.marshalOStarship2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐStarship,
@@ -2418,7 +2408,7 @@ func (ec *executionContext) _Starship_length(ctx context.Context, field graphql.
 		ec.fieldContext_Starship_length,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Starship().Length(ctx, obj, fc.Args["unit"].(*models.LengthUnit))
+			return ec.Resolvers.Starship().Length(ctx, obj, fc.Args["unit"].(*models.LengthUnit))
 		},
 		nil,
 		ec.marshalNFloat2float64,

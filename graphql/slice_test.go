@@ -183,8 +183,10 @@ func TestMarshalSliceConcurrently(t *testing.T) {
 		}()
 
 		select {
-		case <-done:
-			// Success - no deadlock
+		case ret := <-done:
+			// Should return nil because remaining elements were skipped
+			// after context cancellation caused semaphore Acquire to fail.
+			assert.Nil(t, ret)
 		case <-time.After(5 * time.Second):
 			t.Fatal("deadlock detected: MarshalSliceConcurrently did not return within timeout")
 		}
@@ -205,12 +207,34 @@ func TestMarshalSliceConcurrently(t *testing.T) {
 
 		select {
 		case ret := <-done:
-			// Should return without deadlock. Some or all elements may be
-			// zero-value (nil Marshaler) since the context was already cancelled.
-			_ = ret
+			// Should return nil without deadlock since the context was
+			// already cancelled and no elements could be marshaled.
+			assert.Nil(t, ret)
 		case <-time.After(5 * time.Second):
 			t.Fatal("deadlock detected with pre-cancelled context")
 		}
+	})
+
+	t.Run("cancelled context does not panic on MarshalGQL", func(t *testing.T) {
+		ctx := withTestResponseContext(context.Background())
+		ctx, cancel := context.WithCancel(ctx)
+		cancel()
+
+		ret := MarshalSliceConcurrently(
+			ctx,
+			3,
+			1,
+			false,
+			func(ctx context.Context, i int) Marshaler {
+				return MarshalString("ok")
+			},
+		)
+
+		assert.Nil(t, ret)
+		assert.NotPanics(t, func() {
+			var buf bytes.Buffer
+			ret.MarshalGQL(&buf)
+		})
 	})
 
 	t.Run("no worker limit with cancelled context still works", func(t *testing.T) {

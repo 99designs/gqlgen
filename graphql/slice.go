@@ -88,7 +88,8 @@ func MarshalSliceConcurrently(
 		if sm != nil {
 			if err := sm.Acquire(ctx, 1); err != nil {
 				AddError(childCtx, ctx.Err())
-				continue
+				retNilFlag.Store(true)
+				break
 			}
 		}
 

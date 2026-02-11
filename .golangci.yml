@@ -95,7 +95,6 @@ linters:
     modernize:
       disable:
         - any
-        - bloop
         - fmtappendf
         - minmax
         - rangeint

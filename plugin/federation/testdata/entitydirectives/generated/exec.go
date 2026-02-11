@@ -22,12 +22,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -90,16 +85,11 @@ type QueryResolver interface {
 	GetBasic(ctx context.Context, id string) (*Basic, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -110,20 +100,20 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "Basic.id":
-		if e.complexity.Basic.ID == nil {
+		if e.ComplexityRoot.Basic.ID == nil {
 			break
 		}
 
-		return e.complexity.Basic.ID(childComplexity), true
+		return e.ComplexityRoot.Basic.ID(childComplexity), true
 	case "Basic.value":
-		if e.complexity.Basic.Value == nil {
+		if e.ComplexityRoot.Basic.Value == nil {
 			break
 		}
 
-		return e.complexity.Basic.Value(childComplexity), true
+		return e.ComplexityRoot.Basic.Value(childComplexity), true
 
 	case "Entity.findBasicByID":
-		if e.complexity.Entity.FindBasicByID == nil {
+		if e.ComplexityRoot.Entity.FindBasicByID == nil {
 			break
 		}
 
@@ -132,9 +122,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindBasicByID(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Entity.FindBasicByID(childComplexity, args["id"].(string)), true
 	case "Entity.findPersonByID":
-		if e.complexity.Entity.FindPersonByID == nil {
+		if e.ComplexityRoot.Entity.FindPersonByID == nil {
 			break
 		}
 
@@ -143,9 +133,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindPersonByID(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Entity.FindPersonByID(childComplexity, args["id"].(string)), true
 	case "Entity.findProductBySku":
-		if e.complexity.Entity.FindProductBySku == nil {
+		if e.ComplexityRoot.Entity.FindProductBySku == nil {
 			break
 		}
 
@@ -154,48 +144,48 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindProductBySku(childComplexity, args["sku"].(string)), true
+		return e.ComplexityRoot.Entity.FindProductBySku(childComplexity, args["sku"].(string)), true
 
 	case "Person.email":
-		if e.complexity.Person.Email == nil {
+		if e.ComplexityRoot.Person.Email == nil {
 			break
 		}
 
-		return e.complexity.Person.Email(childComplexity), true
+		return e.ComplexityRoot.Person.Email(childComplexity), true
 	case "Person.id":
-		if e.complexity.Person.ID == nil {
+		if e.ComplexityRoot.Person.ID == nil {
 			break
 		}
 
-		return e.complexity.Person.ID(childComplexity), true
+		return e.ComplexityRoot.Person.ID(childComplexity), true
 	case "Person.phone":
-		if e.complexity.Person.Phone == nil {
+		if e.ComplexityRoot.Person.Phone == nil {
 			break
 		}
 
-		return e.complexity.Person.Phone(childComplexity), true
+		return e.ComplexityRoot.Person.Phone(childComplexity), true
 
 	case "Product.name":
-		if e.complexity.Product.Name == nil {
+		if e.ComplexityRoot.Product.Name == nil {
 			break
 		}
 
-		return e.complexity.Product.Name(childComplexity), true
+		return e.ComplexityRoot.Product.Name(childComplexity), true
 	case "Product.price":
-		if e.complexity.Product.Price == nil {
+		if e.ComplexityRoot.Product.Price == nil {
 			break
 		}
 
-		return e.complexity.Product.Price(childComplexity), true
+		return e.ComplexityRoot.Product.Price(childComplexity), true
 	case "Product.sku":
-		if e.complexity.Product.Sku == nil {
+		if e.ComplexityRoot.Product.Sku == nil {
 			break
 		}
 
-		return e.complexity.Product.Sku(childComplexity), true
+		return e.ComplexityRoot.Product.Sku(childComplexity), true
 
 	case "Query.getBasic":
-		if e.complexity.Query.GetBasic == nil {
+		if e.ComplexityRoot.Query.GetBasic == nil {
 			break
 		}
 
@@ -204,9 +194,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.GetBasic(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Query.GetBasic(childComplexity, args["id"].(string)), true
 	case "Query.getPerson":
-		if e.complexity.Query.GetPerson == nil {
+		if e.ComplexityRoot.Query.GetPerson == nil {
 			break
 		}
 
@@ -215,9 +205,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.GetPerson(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Query.GetPerson(childComplexity, args["id"].(string)), true
 	case "Query.getProduct":
-		if e.complexity.Query.GetProduct == nil {
+		if e.ComplexityRoot.Query.GetProduct == nil {
 			break
 		}
 
@@ -226,15 +216,15 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.GetProduct(childComplexity, args["sku"].(string)), true
+		return e.ComplexityRoot.Query.GetProduct(childComplexity, args["sku"].(string)), true
 	case "Query._service":
-		if e.complexity.Query.__resolve__service == nil {
+		if e.ComplexityRoot.Query.__resolve__service == nil {
 			break
 		}
 
-		return e.complexity.Query.__resolve__service(childComplexity), true
+		return e.ComplexityRoot.Query.__resolve__service(childComplexity), true
 	case "Query._entities":
-		if e.complexity.Query.__resolve_entities == nil {
+		if e.ComplexityRoot.Query.__resolve_entities == nil {
 			break
 		}
 
@@ -243,14 +233,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.__resolve_entities(childComplexity, args["representations"].([]map[string]any)), true
+		return e.ComplexityRoot.Query.__resolve_entities(childComplexity, args["representations"].([]map[string]any)), true
 
 	case "_Service.sdl":
-		if e.complexity._Service.SDL == nil {
+		if e.ComplexityRoot._Service.SDL == nil {
 			break
 		}
 
-		return e.complexity._Service.SDL(childComplexity), true
+		return e.ComplexityRoot._Service.SDL(childComplexity), true
 
 	}
 	return 0, false
@@ -632,7 +622,7 @@ func (ec *executionContext) _Entity_findBasicByID(ctx context.Context, field gra
 		ec.fieldContext_Entity_findBasicByID,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindBasicByID(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Entity().FindBasicByID(ctx, fc.Args["id"].(string))
 		},
 		nil,
 		ec.marshalNBasic2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentitydirectivesᚋgeneratedᚐBasic,
@@ -679,7 +669,7 @@ func (ec *executionContext) _Entity_findPersonByID(ctx context.Context, field gr
 		ec.fieldContext_Entity_findPersonByID,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindPersonByID(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Entity().FindPersonByID(ctx, fc.Args["id"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -690,11 +680,11 @@ func (ec *executionContext) _Entity_findPersonByID(ctx context.Context, field gr
 					var zeroVal *Person
 					return zeroVal, err
 				}
-				if ec.directives.Guard == nil {
+				if ec.Directives.Guard == nil {
 					var zeroVal *Person
 					return zeroVal, errors.New("directive guard is not implemented")
 				}
-				return ec.directives.Guard(ctx, nil, directive0, name)
+				return ec.Directives.Guard(ctx, nil, directive0, name)
 			}
 
 			next = directive1
@@ -746,7 +736,7 @@ func (ec *executionContext) _Entity_findProductBySku(ctx context.Context, field 
 		ec.fieldContext_Entity_findProductBySku,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindProductBySku(ctx, fc.Args["sku"].(string))
+			return ec.Resolvers.Entity().FindProductBySku(ctx, fc.Args["sku"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -757,11 +747,11 @@ func (ec *executionContext) _Entity_findProductBySku(ctx context.Context, field 
 					var zeroVal *Product
 					return zeroVal, err
 				}
-				if ec.directives.Auth == nil {
+				if ec.Directives.Auth == nil {
 					var zeroVal *Product
 					return zeroVal, errors.New("directive auth is not implemented")
 				}
-				return ec.directives.Auth(ctx, nil, directive0, requires)
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
 				name, err := ec.unmarshalNString2string(ctx, "ProductGuard")
@@ -769,11 +759,11 @@ func (ec *executionContext) _Entity_findProductBySku(ctx context.Context, field 
 					var zeroVal *Product
 					return zeroVal, err
 				}
-				if ec.directives.Guard == nil {
+				if ec.Directives.Guard == nil {
 					var zeroVal *Product
 					return zeroVal, errors.New("directive guard is not implemented")
 				}
-				return ec.directives.Guard(ctx, nil, directive1, name)
+				return ec.Directives.Guard(ctx, nil, directive1, name)
 			}
 
 			next = directive2
@@ -999,7 +989,7 @@ func (ec *executionContext) _Query_getPerson(ctx context.Context, field graphql.
 		ec.fieldContext_Query_getPerson,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().GetPerson(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Query().GetPerson(ctx, fc.Args["id"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -1010,11 +1000,11 @@ func (ec *executionContext) _Query_getPerson(ctx context.Context, field graphql.
 					var zeroVal *Person
 					return zeroVal, err
 				}
-				if ec.directives.Guard == nil {
+				if ec.Directives.Guard == nil {
 					var zeroVal *Person
 					return zeroVal, errors.New("directive guard is not implemented")
 				}
-				return ec.directives.Guard(ctx, nil, directive0, name)
+				return ec.Directives.Guard(ctx, nil, directive0, name)
 			}
 
 			next = directive1
@@ -1066,7 +1056,7 @@ func (ec *executionContext) _Query_getProduct(ctx context.Context, field graphql
 		ec.fieldContext_Query_getProduct,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().GetProduct(ctx, fc.Args["sku"].(string))
+			return ec.Resolvers.Query().GetProduct(ctx, fc.Args["sku"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -1077,11 +1067,11 @@ func (ec *executionContext) _Query_getProduct(ctx context.Context, field graphql
 					var zeroVal *Product
 					return zeroVal, err
 				}
-				if ec.directives.Auth == nil {
+				if ec.Directives.Auth == nil {
 					var zeroVal *Product
 					return zeroVal, errors.New("directive auth is not implemented")
 				}
-				return ec.directives.Auth(ctx, nil, directive0, requires)
+				return ec.Directives.Auth(ctx, nil, directive0, requires)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
 				name, err := ec.unmarshalNString2string(ctx, "ProductGuard")
@@ -1089,11 +1079,11 @@ func (ec *executionContext) _Query_getProduct(ctx context.Context, field graphql
 					var zeroVal *Product
 					return zeroVal, err
 				}
-				if ec.directives.Guard == nil {
+				if ec.Directives.Guard == nil {
 					var zeroVal *Product
 					return zeroVal, errors.New("directive guard is not implemented")
 				}
-				return ec.directives.Guard(ctx, nil, directive1, name)
+				return ec.Directives.Guard(ctx, nil, directive1, name)
 			}
 
 			next = directive2
@@ -1145,7 +1135,7 @@ func (ec *executionContext) _Query_getBasic(ctx context.Context, field graphql.C
 		ec.fieldContext_Query_getBasic,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().GetBasic(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Query().GetBasic(ctx, fc.Args["id"].(string))
 		},
 		nil,
 		ec.marshalOBasic2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentitydirectivesᚋgeneratedᚐBasic,

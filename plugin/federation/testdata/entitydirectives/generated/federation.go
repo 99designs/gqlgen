@@ -12,6 +12,11 @@ import (
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
 )
 
+var (
+	ErrUnknownType  = errors.New("unknown type")
+	ErrTypeNotFound = errors.New("type not found")
+)
+
 func (ec *executionContext) __resolve__service(ctx context.Context) (fedruntime.Service, error) {
 	if ec.DisableIntrospection {
 		return fedruntime.Service{}, errors.New("federated introspection disabled")
@@ -160,10 +165,11 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findBasicByID(): %w`, err)
 			}
-			entity, err := ec._resolveEntity_Basic_findBasicByID(ctx, rep, id0)
+			entity, err := ec.Resolvers.Entity().FindBasicByID(ctx, id0)
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "Basic": %w`, err)
 			}
+
 			return entity, nil
 		}
 	case "Person":
@@ -178,10 +184,11 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findPersonByID(): %w`, err)
 			}
-			entity, err := ec._resolveEntity_Person_findPersonByID(ctx, rep, id0)
+			entity, err := ec.Resolvers.Entity().FindPersonByID(ctx, id0)
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "Person": %w`, err)
 			}
+
 			return entity, nil
 		}
 	case "Product":
@@ -196,15 +203,16 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findProductBySku(): %w`, err)
 			}
-			entity, err := ec._resolveEntity_Product_findProductBySku(ctx, rep, id0)
+			entity, err := ec.Resolvers.Entity().FindProductBySku(ctx, id0)
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "Product": %w`, err)
 			}
+
 			return entity, nil
 		}
 
 	}
-	return nil, fmt.Errorf("%w: %s", fedruntime.ErrUnknownType, typeName)
+	return nil, fmt.Errorf("%w: %s", ErrUnknownType, typeName)
 }
 
 func (ec *executionContext) resolveManyEntities(
@@ -229,73 +237,106 @@ func (ec *executionContext) resolveManyEntities(
 }
 
 func entityResolverNameForBasic(ctx context.Context, rep EntityRepresentation) (string, error) {
-	resolverChecks := []fedruntime.ResolverKeyCheck{
-		{
-			ResolverName: "findBasicByID",
-			KeyFields: []fedruntime.KeyFieldCheck{
-				{
-					FieldPath: []string{"id"},
-				},
-			},
-		},
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
+	for {
+		var (
+			m   EntityRepresentation
+			val any
+			ok  bool
+		)
+		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
+		m = rep
+		val, ok = m["id"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"id\" for Basic", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for Basic", ErrTypeNotFound))
+			break
+		}
+		return "findBasicByID", nil
 	}
-	return fedruntime.ValidateEntityKeys("Basic", rep, resolverChecks)
+	return "", fmt.Errorf("%w for Basic due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForPerson(ctx context.Context, rep EntityRepresentation) (string, error) {
-	resolverChecks := []fedruntime.ResolverKeyCheck{
-		{
-			ResolverName: "findPersonByID",
-			KeyFields: []fedruntime.KeyFieldCheck{
-				{
-					FieldPath: []string{"id"},
-				},
-			},
-		},
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
+	for {
+		var (
+			m   EntityRepresentation
+			val any
+			ok  bool
+		)
+		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
+		m = rep
+		val, ok = m["id"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"id\" for Person", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for Person", ErrTypeNotFound))
+			break
+		}
+		return "findPersonByID", nil
 	}
-	return fedruntime.ValidateEntityKeys("Person", rep, resolverChecks)
+	return "", fmt.Errorf("%w for Person due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForProduct(ctx context.Context, rep EntityRepresentation) (string, error) {
-	resolverChecks := []fedruntime.ResolverKeyCheck{
-		{
-			ResolverName: "findProductBySku",
-			KeyFields: []fedruntime.KeyFieldCheck{
-				{
-					FieldPath: []string{"sku"},
-				},
-			},
-		},
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
+	for {
+		var (
+			m   EntityRepresentation
+			val any
+			ok  bool
+		)
+		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
+		m = rep
+		val, ok = m["sku"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"sku\" for Product", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for Product", ErrTypeNotFound))
+			break
+		}
+		return "findProductBySku", nil
 	}
-	return fedruntime.ValidateEntityKeys("Product", rep, resolverChecks)
-}
-
-func (ec *executionContext) _resolveEntity_Basic_findBasicByID(
-	ctx context.Context,
-	rep EntityRepresentation,
-	id0 string,
-) (fedruntime.Entity, error) {
-	return fedruntime.WrapEntityResolver(ctx, func(rctx context.Context) (fedruntime.Entity, error) {
-		return ec.resolvers.Entity().FindBasicByID(rctx, id0)
-	}, nil)
-}
-
-func (ec *executionContext) _resolveEntity_Person_findPersonByID(
-	ctx context.Context,
-	rep EntityRepresentation,
-	id0 string,
-) (fedruntime.Entity, error) {
-	return fedruntime.WrapEntityResolver(ctx, func(rctx context.Context) (fedruntime.Entity, error) {
-		return ec.resolvers.Entity().FindPersonByID(rctx, id0)
-	}, nil)
-}
-
-func (ec *executionContext) _resolveEntity_Product_findProductBySku(
-	ctx context.Context,
-	rep EntityRepresentation,
-	id0 string,
-) (fedruntime.Entity, error) {
-	return fedruntime.WrapEntityResolver(ctx, func(rctx context.Context) (fedruntime.Entity, error) {
-		return ec.resolvers.Entity().FindProductBySku(rctx, id0)
-	}, nil)
+	return "", fmt.Errorf("%w for Product due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }

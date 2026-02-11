@@ -12,6 +12,11 @@ import (
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
 )
 
+var (
+	ErrUnknownType  = errors.New("unknown type")
+	ErrTypeNotFound = errors.New("type not found")
+)
+
 func (ec *executionContext) __resolve__service(ctx context.Context) (fedruntime.Service, error) {
 	if ec.DisableIntrospection {
 		return fedruntime.Service{}, errors.New("federated introspection disabled")
@@ -160,10 +165,11 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findHelloByID(): %w`, err)
 			}
-			entity, err := ec._resolveEntity_Hello_findHelloByID(ctx, rep, id0)
+			entity, err := ec.Resolvers.Entity().FindHelloByID(ctx, id0)
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "Hello": %w`, err)
 			}
+
 			return entity, nil
 		}
 	case "World":
@@ -178,15 +184,16 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findWorldByID(): %w`, err)
 			}
-			entity, err := ec._resolveEntity_World_findWorldByID(ctx, rep, id0)
+			entity, err := ec.Resolvers.Entity().FindWorldByID(ctx, id0)
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "World": %w`, err)
 			}
+
 			return entity, nil
 		}
 
 	}
-	return nil, fmt.Errorf("%w: %s", fedruntime.ErrUnknownType, typeName)
+	return nil, fmt.Errorf("%w: %s", ErrUnknownType, typeName)
 }
 
 func (ec *executionContext) resolveManyEntities(
@@ -211,49 +218,71 @@ func (ec *executionContext) resolveManyEntities(
 }
 
 func entityResolverNameForHello(ctx context.Context, rep EntityRepresentation) (string, error) {
-	resolverChecks := []fedruntime.ResolverKeyCheck{
-		{
-			ResolverName: "findHelloByID",
-			KeyFields: []fedruntime.KeyFieldCheck{
-				{
-					FieldPath: []string{"id"},
-				},
-			},
-		},
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
+	for {
+		var (
+			m   EntityRepresentation
+			val any
+			ok  bool
+		)
+		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
+		m = rep
+		val, ok = m["id"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"id\" for Hello", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for Hello", ErrTypeNotFound))
+			break
+		}
+		return "findHelloByID", nil
 	}
-	return fedruntime.ValidateEntityKeys("Hello", rep, resolverChecks)
+	return "", fmt.Errorf("%w for Hello due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForWorld(ctx context.Context, rep EntityRepresentation) (string, error) {
-	resolverChecks := []fedruntime.ResolverKeyCheck{
-		{
-			ResolverName: "findWorldByID",
-			KeyFields: []fedruntime.KeyFieldCheck{
-				{
-					FieldPath: []string{"id"},
-				},
-			},
-		},
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
+	for {
+		var (
+			m   EntityRepresentation
+			val any
+			ok  bool
+		)
+		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
+		m = rep
+		val, ok = m["id"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"id\" for World", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for World", ErrTypeNotFound))
+			break
+		}
+		return "findWorldByID", nil
 	}
-	return fedruntime.ValidateEntityKeys("World", rep, resolverChecks)
-}
-
-func (ec *executionContext) _resolveEntity_Hello_findHelloByID(
-	ctx context.Context,
-	rep EntityRepresentation,
-	id0 string,
-) (fedruntime.Entity, error) {
-	return fedruntime.WrapEntityResolver(ctx, func(rctx context.Context) (fedruntime.Entity, error) {
-		return ec.resolvers.Entity().FindHelloByID(rctx, id0)
-	}, nil)
-}
-
-func (ec *executionContext) _resolveEntity_World_findWorldByID(
-	ctx context.Context,
-	rep EntityRepresentation,
-	id0 string,
-) (fedruntime.Entity, error) {
-	return fedruntime.WrapEntityResolver(ctx, func(rctx context.Context) (fedruntime.Entity, error) {
-		return ec.resolvers.Entity().FindWorldByID(rctx, id0)
-	}, nil)
+	return "", fmt.Errorf("%w for World due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }

@@ -22,12 +22,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -65,16 +60,11 @@ type EntityResolver interface {
 	FindWorldByID(ctx context.Context, id string) (*World, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -85,7 +75,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "Entity.findHelloByID":
-		if e.complexity.Entity.FindHelloByID == nil {
+		if e.ComplexityRoot.Entity.FindHelloByID == nil {
 			break
 		}
 
@@ -94,9 +84,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindHelloByID(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Entity.FindHelloByID(childComplexity, args["id"].(string)), true
 	case "Entity.findWorldByID":
-		if e.complexity.Entity.FindWorldByID == nil {
+		if e.ComplexityRoot.Entity.FindWorldByID == nil {
 			break
 		}
 
@@ -105,16 +95,16 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindWorldByID(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Entity.FindWorldByID(childComplexity, args["id"].(string)), true
 
 	case "Query._service":
-		if e.complexity.Query.__resolve__service == nil {
+		if e.ComplexityRoot.Query.__resolve__service == nil {
 			break
 		}
 
-		return e.complexity.Query.__resolve__service(childComplexity), true
+		return e.ComplexityRoot.Query.__resolve__service(childComplexity), true
 	case "Query._entities":
-		if e.complexity.Query.__resolve_entities == nil {
+		if e.ComplexityRoot.Query.__resolve_entities == nil {
 			break
 		}
 
@@ -123,27 +113,27 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.__resolve_entities(childComplexity, args["representations"].([]map[string]any)), true
+		return e.ComplexityRoot.Query.__resolve_entities(childComplexity, args["representations"].([]map[string]any)), true
 
 	case "World.id":
-		if e.complexity.World.ID == nil {
+		if e.ComplexityRoot.World.ID == nil {
 			break
 		}
 
-		return e.complexity.World.ID(childComplexity), true
+		return e.ComplexityRoot.World.ID(childComplexity), true
 	case "World.title":
-		if e.complexity.World.Title == nil {
+		if e.ComplexityRoot.World.Title == nil {
 			break
 		}
 
-		return e.complexity.World.Title(childComplexity), true
+		return e.ComplexityRoot.World.Title(childComplexity), true
 
 	case "_Service.sdl":
-		if e.complexity._Service.SDL == nil {
+		if e.ComplexityRoot._Service.SDL == nil {
 			break
 		}
 
-		return e.complexity._Service.SDL(childComplexity), true
+		return e.ComplexityRoot._Service.SDL(childComplexity), true
 
 	}
 	return 0, false
@@ -428,7 +418,7 @@ func (ec *executionContext) _Entity_findHelloByID(ctx context.Context, field gra
 		ec.fieldContext_Entity_findHelloByID,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindHelloByID(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Entity().FindHelloByID(ctx, fc.Args["id"].(string))
 		},
 		nil,
 		ec.marshalNHello2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityinterfacesᚋgeneratedᚐHello,
@@ -469,7 +459,7 @@ func (ec *executionContext) _Entity_findWorldByID(ctx context.Context, field gra
 		ec.fieldContext_Entity_findWorldByID,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindWorldByID(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Entity().FindWorldByID(ctx, fc.Args["id"].(string))
 		},
 		nil,
 		ec.marshalNWorld2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityinterfacesᚋgeneratedᚐWorld,

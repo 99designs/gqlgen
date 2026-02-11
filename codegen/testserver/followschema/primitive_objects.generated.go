@@ -43,7 +43,7 @@ func (ec *executionContext) _Primitive_value(ctx context.Context, field graphql.
 		field,
 		ec.fieldContext_Primitive_value,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Primitive().Value(ctx, obj)
+			return ec.Resolvers.Primitive().Value(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -105,7 +105,7 @@ func (ec *executionContext) _PrimitiveString_value(ctx context.Context, field gr
 		field,
 		ec.fieldContext_PrimitiveString_value,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.PrimitiveString().Value(ctx, obj)
+			return ec.Resolvers.PrimitiveString().Value(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -167,7 +167,7 @@ func (ec *executionContext) _PrimitiveString_len(ctx context.Context, field grap
 		field,
 		ec.fieldContext_PrimitiveString_len,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.PrimitiveString().Len(ctx, obj)
+			return ec.Resolvers.PrimitiveString().Len(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)

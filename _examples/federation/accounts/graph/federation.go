@@ -165,7 +165,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findEmailHostByID(): %w`, err)
 			}
-			entity, err := ec.resolvers.Entity().FindEmailHostByID(ctx, id0)
+			entity, err := ec.Resolvers.Entity().FindEmailHostByID(ctx, id0)
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "EmailHost": %w`, err)
 			}
@@ -184,7 +184,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findUserByID(): %w`, err)
 			}
-			entity, err := ec.resolvers.Entity().FindUserByID(ctx, id0)
+			entity, err := ec.Resolvers.Entity().FindUserByID(ctx, id0)
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "User": %w`, err)
 			}

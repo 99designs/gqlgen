@@ -24,12 +24,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -83,16 +78,11 @@ var (
 	}
 )
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -510,7 +500,7 @@ func (ec *executionContext) _Entity_findManyProductByManufacturerIDAndIDs(ctx co
 		ec.fieldContext_Entity_findManyProductByManufacturerIDAndIDs,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindManyProductByManufacturerIDAndIDs(ctx, fc.Args["reps"].([]*model.ProductByManufacturerIDAndIDsInput))
+			return ec.Resolvers.Entity().FindManyProductByManufacturerIDAndIDs(ctx, fc.Args["reps"].([]*model.ProductByManufacturerIDAndIDsInput))
 		},
 		nil,
 		ec.marshalOProduct2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋreviewsᚋgraphᚋmodelᚐProduct,
@@ -561,7 +551,7 @@ func (ec *executionContext) _Entity_findUserByID(ctx context.Context, field grap
 		ec.fieldContext_Entity_findUserByID,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindUserByID(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Entity().FindUserByID(ctx, fc.Args["id"].(string))
 		},
 		nil,
 		ec.marshalNUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋreviewsᚋgraphᚋmodelᚐUser,
@@ -705,7 +695,7 @@ func (ec *executionContext) _Product_manufacturerID(ctx context.Context, field g
 		ec.fieldContext_Product_manufacturerID,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Product().ManufacturerID(ctx, obj, fc.Args["_federationRequires"].(map[string]any))
+			return ec.Resolvers.Product().ManufacturerID(ctx, obj, fc.Args["_federationRequires"].(map[string]any))
 		},
 		nil,
 		ec.marshalOString2ᚖstring,
@@ -1195,7 +1185,7 @@ func (ec *executionContext) _User_username(ctx context.Context, field graphql.Co
 		field,
 		ec.fieldContext_User_username,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.User().Username(ctx, obj)
+			return ec.Resolvers.User().Username(ctx, obj)
 		},
 		nil,
 		ec.marshalNString2string,
@@ -1225,7 +1215,7 @@ func (ec *executionContext) _User_reviews(ctx context.Context, field graphql.Col
 		ec.fieldContext_User_reviews,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.User().Reviews(ctx, obj, fc.Args["_federationRequires"].(map[string]any))
+			return ec.Resolvers.User().Reviews(ctx, obj, fc.Args["_federationRequires"].(map[string]any))
 		},
 		nil,
 		ec.marshalOReview2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋreviewsᚋgraphᚋmodelᚐReview,

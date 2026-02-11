@@ -165,7 +165,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findManufacturerByID(): %w`, err)
 			}
-			entity, err := ec.resolvers.Entity().FindManufacturerByID(ctx, id0)
+			entity, err := ec.Resolvers.Entity().FindManufacturerByID(ctx, id0)
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "Manufacturer": %w`, err)
 			}
@@ -188,7 +188,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 1 for findProductByManufacturerIDAndID(): %w`, err)
 			}
-			entity, err := ec.resolvers.Entity().FindProductByManufacturerIDAndID(ctx, id0, id1)
+			entity, err := ec.Resolvers.Entity().FindProductByManufacturerIDAndID(ctx, id0, id1)
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "Product": %w`, err)
 			}
@@ -199,7 +199,7 @@ func (ec *executionContext) resolveEntity(
 			if err != nil {
 				return nil, fmt.Errorf(`unmarshalling param 0 for findProductByUpc(): %w`, err)
 			}
-			entity, err := ec.resolvers.Entity().FindProductByUpc(ctx, id0)
+			entity, err := ec.Resolvers.Entity().FindProductByUpc(ctx, id0)
 			if err != nil {
 				return nil, fmt.Errorf(`resolving Entity "Product": %w`, err)
 			}

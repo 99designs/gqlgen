@@ -23,12 +23,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -57,16 +52,11 @@ type QueryResolver interface {
 	User(ctx context.Context, id string) (*models.User, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -77,7 +67,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "Query.user":
-		if e.complexity.Query.User == nil {
+		if e.ComplexityRoot.Query.User == nil {
 			break
 		}
 
@@ -86,32 +76,32 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.User(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Query.User(childComplexity, args["id"].(string)), true
 
 	case "User.age":
-		if e.complexity.User.GetAge == nil {
+		if e.ComplexityRoot.User.GetAge == nil {
 			break
 		}
 
-		return e.complexity.User.GetAge(childComplexity), true
+		return e.ComplexityRoot.User.GetAge(childComplexity), true
 	case "User.email":
-		if e.complexity.User.GetEmail == nil {
+		if e.ComplexityRoot.User.GetEmail == nil {
 			break
 		}
 
-		return e.complexity.User.GetEmail(childComplexity), true
+		return e.ComplexityRoot.User.GetEmail(childComplexity), true
 	case "User.id":
-		if e.complexity.User.GetId == nil {
+		if e.ComplexityRoot.User.GetId == nil {
 			break
 		}
 
-		return e.complexity.User.GetId(childComplexity), true
+		return e.ComplexityRoot.User.GetId(childComplexity), true
 	case "User.name":
-		if e.complexity.User.GetName == nil {
+		if e.ComplexityRoot.User.GetName == nil {
 			break
 		}
 
-		return e.complexity.User.GetName(childComplexity), true
+		return e.ComplexityRoot.User.GetName(childComplexity), true
 
 	}
 	return 0, false
@@ -303,7 +293,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 		ec.fieldContext_Query_user,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().User(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Query().User(ctx, fc.Args["id"].(string))
 		},
 		nil,
 		ec.marshalOUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋprotogettersᚋmodelsᚐUser,

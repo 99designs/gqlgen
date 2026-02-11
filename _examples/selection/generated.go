@@ -23,12 +23,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -64,16 +59,11 @@ type QueryResolver interface {
 	Events(ctx context.Context) ([]Event, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -84,61 +74,61 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "Like.collected":
-		if e.complexity.Like.Collected == nil {
+		if e.ComplexityRoot.Like.Collected == nil {
 			break
 		}
 
-		return e.complexity.Like.Collected(childComplexity), true
+		return e.ComplexityRoot.Like.Collected(childComplexity), true
 	case "Like.reaction":
-		if e.complexity.Like.Reaction == nil {
+		if e.ComplexityRoot.Like.Reaction == nil {
 			break
 		}
 
-		return e.complexity.Like.Reaction(childComplexity), true
+		return e.ComplexityRoot.Like.Reaction(childComplexity), true
 	case "Like.selection":
-		if e.complexity.Like.Selection == nil {
+		if e.ComplexityRoot.Like.Selection == nil {
 			break
 		}
 
-		return e.complexity.Like.Selection(childComplexity), true
+		return e.ComplexityRoot.Like.Selection(childComplexity), true
 	case "Like.sent":
-		if e.complexity.Like.Sent == nil {
+		if e.ComplexityRoot.Like.Sent == nil {
 			break
 		}
 
-		return e.complexity.Like.Sent(childComplexity), true
+		return e.ComplexityRoot.Like.Sent(childComplexity), true
 
 	case "Post.collected":
-		if e.complexity.Post.Collected == nil {
+		if e.ComplexityRoot.Post.Collected == nil {
 			break
 		}
 
-		return e.complexity.Post.Collected(childComplexity), true
+		return e.ComplexityRoot.Post.Collected(childComplexity), true
 	case "Post.message":
-		if e.complexity.Post.Message == nil {
+		if e.ComplexityRoot.Post.Message == nil {
 			break
 		}
 
-		return e.complexity.Post.Message(childComplexity), true
+		return e.ComplexityRoot.Post.Message(childComplexity), true
 	case "Post.selection":
-		if e.complexity.Post.Selection == nil {
+		if e.ComplexityRoot.Post.Selection == nil {
 			break
 		}
 
-		return e.complexity.Post.Selection(childComplexity), true
+		return e.ComplexityRoot.Post.Selection(childComplexity), true
 	case "Post.sent":
-		if e.complexity.Post.Sent == nil {
+		if e.ComplexityRoot.Post.Sent == nil {
 			break
 		}
 
-		return e.complexity.Post.Sent(childComplexity), true
+		return e.ComplexityRoot.Post.Sent(childComplexity), true
 
 	case "Query.events":
-		if e.complexity.Query.Events == nil {
+		if e.ComplexityRoot.Query.Events == nil {
 			break
 		}
 
-		return e.complexity.Query.Events(childComplexity), true
+		return e.ComplexityRoot.Query.Events(childComplexity), true
 
 	}
 	return 0, false
@@ -550,7 +540,7 @@ func (ec *executionContext) _Query_events(ctx context.Context, field graphql.Col
 		field,
 		ec.fieldContext_Query_events,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Events(ctx)
+			return ec.Resolvers.Query().Events(ctx)
 		},
 		nil,
 		ec.marshalOEvent2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋselectionᚐEventᚄ,

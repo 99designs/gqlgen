@@ -16,12 +16,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -492,16 +487,11 @@ type ComplexityRoot struct {
 	}
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -512,497 +502,497 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "A.id":
-		if e.complexity.A.ID == nil {
+		if e.ComplexityRoot.A.ID == nil {
 			break
 		}
 
-		return e.complexity.A.ID(childComplexity), true
+		return e.ComplexityRoot.A.ID(childComplexity), true
 
 	case "AIt.id":
-		if e.complexity.AIt.ID == nil {
+		if e.ComplexityRoot.AIt.ID == nil {
 			break
 		}
 
-		return e.complexity.AIt.ID(childComplexity), true
+		return e.ComplexityRoot.AIt.ID(childComplexity), true
 
 	case "AbIt.id":
-		if e.complexity.AbIt.ID == nil {
+		if e.ComplexityRoot.AbIt.ID == nil {
 			break
 		}
 
-		return e.complexity.AbIt.ID(childComplexity), true
+		return e.ComplexityRoot.AbIt.ID(childComplexity), true
 
 	case "Autobind.idInt":
-		if e.complexity.Autobind.IdInt == nil {
+		if e.ComplexityRoot.Autobind.IdInt == nil {
 			break
 		}
 
-		return e.complexity.Autobind.IdInt(childComplexity), true
+		return e.ComplexityRoot.Autobind.IdInt(childComplexity), true
 
 	case "Autobind.idStr":
-		if e.complexity.Autobind.IdStr == nil {
+		if e.ComplexityRoot.Autobind.IdStr == nil {
 			break
 		}
 
-		return e.complexity.Autobind.IdStr(childComplexity), true
+		return e.ComplexityRoot.Autobind.IdStr(childComplexity), true
 
 	case "Autobind.int":
-		if e.complexity.Autobind.Int == nil {
+		if e.ComplexityRoot.Autobind.Int == nil {
 			break
 		}
 
-		return e.complexity.Autobind.Int(childComplexity), true
+		return e.ComplexityRoot.Autobind.Int(childComplexity), true
 
 	case "Autobind.int32":
-		if e.complexity.Autobind.Int32 == nil {
+		if e.ComplexityRoot.Autobind.Int32 == nil {
 			break
 		}
 
-		return e.complexity.Autobind.Int32(childComplexity), true
+		return e.ComplexityRoot.Autobind.Int32(childComplexity), true
 
 	case "Autobind.int64":
-		if e.complexity.Autobind.Int64 == nil {
+		if e.ComplexityRoot.Autobind.Int64 == nil {
 			break
 		}
 
-		return e.complexity.Autobind.Int64(childComplexity), true
+		return e.ComplexityRoot.Autobind.Int64(childComplexity), true
 
 	case "B.id":
-		if e.complexity.B.ID == nil {
+		if e.ComplexityRoot.B.ID == nil {
 			break
 		}
 
-		return e.complexity.B.ID(childComplexity), true
+		return e.ComplexityRoot.B.ID(childComplexity), true
 
 	case "BackedByInterface.id":
-		if e.complexity.BackedByInterface.ID == nil {
+		if e.ComplexityRoot.BackedByInterface.ID == nil {
 			break
 		}
 
-		return e.complexity.BackedByInterface.ID(childComplexity), true
+		return e.ComplexityRoot.BackedByInterface.ID(childComplexity), true
 
 	case "BackedByInterface.thisShouldBind":
-		if e.complexity.BackedByInterface.ThisShouldBind == nil {
+		if e.ComplexityRoot.BackedByInterface.ThisShouldBind == nil {
 			break
 		}
 
-		return e.complexity.BackedByInterface.ThisShouldBind(childComplexity), true
+		return e.ComplexityRoot.BackedByInterface.ThisShouldBind(childComplexity), true
 
 	case "BackedByInterface.thisShouldBindWithError":
-		if e.complexity.BackedByInterface.ThisShouldBindWithError == nil {
+		if e.ComplexityRoot.BackedByInterface.ThisShouldBindWithError == nil {
 			break
 		}
 
-		return e.complexity.BackedByInterface.ThisShouldBindWithError(childComplexity), true
+		return e.ComplexityRoot.BackedByInterface.ThisShouldBindWithError(childComplexity), true
 
 	case "Cat.catBreed":
-		if e.complexity.Cat.CatBreed == nil {
+		if e.ComplexityRoot.Cat.CatBreed == nil {
 			break
 		}
 
-		return e.complexity.Cat.CatBreed(childComplexity), true
+		return e.ComplexityRoot.Cat.CatBreed(childComplexity), true
 
 	case "Cat.size":
-		if e.complexity.Cat.Size == nil {
+		if e.ComplexityRoot.Cat.Size == nil {
 			break
 		}
 
-		return e.complexity.Cat.Size(childComplexity), true
+		return e.ComplexityRoot.Cat.Size(childComplexity), true
 
 	case "Cat.species":
-		if e.complexity.Cat.Species == nil {
+		if e.ComplexityRoot.Cat.Species == nil {
 			break
 		}
 
-		return e.complexity.Cat.Species(childComplexity), true
+		return e.ComplexityRoot.Cat.Species(childComplexity), true
 
 	case "CheckIssue896.id":
-		if e.complexity.CheckIssue896.ID == nil {
+		if e.ComplexityRoot.CheckIssue896.ID == nil {
 			break
 		}
 
-		return e.complexity.CheckIssue896.ID(childComplexity), true
+		return e.ComplexityRoot.CheckIssue896.ID(childComplexity), true
 
 	case "Circle.area":
-		if e.complexity.Circle.Area == nil {
+		if e.ComplexityRoot.Circle.Area == nil {
 			break
 		}
 
-		return e.complexity.Circle.Area(childComplexity), true
+		return e.ComplexityRoot.Circle.Area(childComplexity), true
 
 	case "Circle.coordinates":
-		if e.complexity.Circle.Coordinates == nil {
+		if e.ComplexityRoot.Circle.Coordinates == nil {
 			break
 		}
 
-		return e.complexity.Circle.Coordinates(childComplexity), true
+		return e.ComplexityRoot.Circle.Coordinates(childComplexity), true
 
 	case "Circle.radius":
-		if e.complexity.Circle.Radius == nil {
+		if e.ComplexityRoot.Circle.Radius == nil {
 			break
 		}
 
-		return e.complexity.Circle.Radius(childComplexity), true
+		return e.ComplexityRoot.Circle.Radius(childComplexity), true
 
 	case "ConcreteNodeA.child":
-		if e.complexity.ConcreteNodeA.Child == nil {
+		if e.ComplexityRoot.ConcreteNodeA.Child == nil {
 			break
 		}
 
-		return e.complexity.ConcreteNodeA.Child(childComplexity), true
+		return e.ComplexityRoot.ConcreteNodeA.Child(childComplexity), true
 
 	case "ConcreteNodeA.id":
-		if e.complexity.ConcreteNodeA.ID == nil {
+		if e.ComplexityRoot.ConcreteNodeA.ID == nil {
 			break
 		}
 
-		return e.complexity.ConcreteNodeA.ID(childComplexity), true
+		return e.ComplexityRoot.ConcreteNodeA.ID(childComplexity), true
 
 	case "ConcreteNodeA.name":
-		if e.complexity.ConcreteNodeA.Name == nil {
+		if e.ComplexityRoot.ConcreteNodeA.Name == nil {
 			break
 		}
 
-		return e.complexity.ConcreteNodeA.Name(childComplexity), true
+		return e.ComplexityRoot.ConcreteNodeA.Name(childComplexity), true
 
 	case "ConcreteNodeInterface.child":
-		if e.complexity.ConcreteNodeInterface.Child == nil {
+		if e.ComplexityRoot.ConcreteNodeInterface.Child == nil {
 			break
 		}
 
-		return e.complexity.ConcreteNodeInterface.Child(childComplexity), true
+		return e.ComplexityRoot.ConcreteNodeInterface.Child(childComplexity), true
 
 	case "ConcreteNodeInterface.id":
-		if e.complexity.ConcreteNodeInterface.ID == nil {
+		if e.ComplexityRoot.ConcreteNodeInterface.ID == nil {
 			break
 		}
 
-		return e.complexity.ConcreteNodeInterface.ID(childComplexity), true
+		return e.ComplexityRoot.ConcreteNodeInterface.ID(childComplexity), true
 
 	case "Content_Post.foo":
-		if e.complexity.Content_Post.Foo == nil {
+		if e.ComplexityRoot.Content_Post.Foo == nil {
 			break
 		}
 
-		return e.complexity.Content_Post.Foo(childComplexity), true
+		return e.ComplexityRoot.Content_Post.Foo(childComplexity), true
 
 	case "Content_User.foo":
-		if e.complexity.Content_User.Foo == nil {
+		if e.ComplexityRoot.Content_User.Foo == nil {
 			break
 		}
 
-		return e.complexity.Content_User.Foo(childComplexity), true
+		return e.ComplexityRoot.Content_User.Foo(childComplexity), true
 
 	case "Coordinates.x":
-		if e.complexity.Coordinates.X == nil {
+		if e.ComplexityRoot.Coordinates.X == nil {
 			break
 		}
 
-		return e.complexity.Coordinates.X(childComplexity), true
+		return e.ComplexityRoot.Coordinates.X(childComplexity), true
 
 	case "Coordinates.y":
-		if e.complexity.Coordinates.Y == nil {
+		if e.ComplexityRoot.Coordinates.Y == nil {
 			break
 		}
 
-		return e.complexity.Coordinates.Y(childComplexity), true
+		return e.ComplexityRoot.Coordinates.Y(childComplexity), true
 
 	case "DefaultParametersMirror.falsyBoolean":
-		if e.complexity.DefaultParametersMirror.FalsyBoolean == nil {
+		if e.ComplexityRoot.DefaultParametersMirror.FalsyBoolean == nil {
 			break
 		}
 
-		return e.complexity.DefaultParametersMirror.FalsyBoolean(childComplexity), true
+		return e.ComplexityRoot.DefaultParametersMirror.FalsyBoolean(childComplexity), true
 
 	case "DefaultParametersMirror.truthyBoolean":
-		if e.complexity.DefaultParametersMirror.TruthyBoolean == nil {
+		if e.ComplexityRoot.DefaultParametersMirror.TruthyBoolean == nil {
 			break
 		}
 
-		return e.complexity.DefaultParametersMirror.TruthyBoolean(childComplexity), true
+		return e.ComplexityRoot.DefaultParametersMirror.TruthyBoolean(childComplexity), true
 
 	case "DeferModel.id":
-		if e.complexity.DeferModel.ID == nil {
+		if e.ComplexityRoot.DeferModel.ID == nil {
 			break
 		}
 
-		return e.complexity.DeferModel.ID(childComplexity), true
+		return e.ComplexityRoot.DeferModel.ID(childComplexity), true
 
 	case "DeferModel.name":
-		if e.complexity.DeferModel.Name == nil {
+		if e.ComplexityRoot.DeferModel.Name == nil {
 			break
 		}
 
-		return e.complexity.DeferModel.Name(childComplexity), true
+		return e.ComplexityRoot.DeferModel.Name(childComplexity), true
 
 	case "DeferModel.values":
-		if e.complexity.DeferModel.Values == nil {
+		if e.ComplexityRoot.DeferModel.Values == nil {
 			break
 		}
 
-		return e.complexity.DeferModel.Values(childComplexity), true
+		return e.ComplexityRoot.DeferModel.Values(childComplexity), true
 
 	case "Dog.dogBreed":
-		if e.complexity.Dog.DogBreed == nil {
+		if e.ComplexityRoot.Dog.DogBreed == nil {
 			break
 		}
 
-		return e.complexity.Dog.DogBreed(childComplexity), true
+		return e.ComplexityRoot.Dog.DogBreed(childComplexity), true
 
 	case "Dog.size":
-		if e.complexity.Dog.Size == nil {
+		if e.ComplexityRoot.Dog.Size == nil {
 			break
 		}
 
-		return e.complexity.Dog.Size(childComplexity), true
+		return e.ComplexityRoot.Dog.Size(childComplexity), true
 
 	case "Dog.species":
-		if e.complexity.Dog.Species == nil {
+		if e.ComplexityRoot.Dog.Species == nil {
 			break
 		}
 
-		return e.complexity.Dog.Species(childComplexity), true
+		return e.ComplexityRoot.Dog.Species(childComplexity), true
 
 	case "EmbeddedCase1.exportedEmbeddedPointerExportedMethod":
-		if e.complexity.EmbeddedCase1.ExportedEmbeddedPointerExportedMethod == nil {
+		if e.ComplexityRoot.EmbeddedCase1.ExportedEmbeddedPointerExportedMethod == nil {
 			break
 		}
 
-		return e.complexity.EmbeddedCase1.ExportedEmbeddedPointerExportedMethod(childComplexity), true
+		return e.ComplexityRoot.EmbeddedCase1.ExportedEmbeddedPointerExportedMethod(childComplexity), true
 
 	case "EmbeddedCase2.unexportedEmbeddedPointerExportedMethod":
-		if e.complexity.EmbeddedCase2.UnexportedEmbeddedPointerExportedMethod == nil {
+		if e.ComplexityRoot.EmbeddedCase2.UnexportedEmbeddedPointerExportedMethod == nil {
 			break
 		}
 
-		return e.complexity.EmbeddedCase2.UnexportedEmbeddedPointerExportedMethod(childComplexity), true
+		return e.ComplexityRoot.EmbeddedCase2.UnexportedEmbeddedPointerExportedMethod(childComplexity), true
 
 	case "EmbeddedCase3.unexportedEmbeddedInterfaceExportedMethod":
-		if e.complexity.EmbeddedCase3.UnexportedEmbeddedInterfaceExportedMethod == nil {
+		if e.ComplexityRoot.EmbeddedCase3.UnexportedEmbeddedInterfaceExportedMethod == nil {
 			break
 		}
 
-		return e.complexity.EmbeddedCase3.UnexportedEmbeddedInterfaceExportedMethod(childComplexity), true
+		return e.ComplexityRoot.EmbeddedCase3.UnexportedEmbeddedInterfaceExportedMethod(childComplexity), true
 
 	case "EmbeddedDefaultScalar.value":
-		if e.complexity.EmbeddedDefaultScalar.Value == nil {
+		if e.ComplexityRoot.EmbeddedDefaultScalar.Value == nil {
 			break
 		}
 
-		return e.complexity.EmbeddedDefaultScalar.Value(childComplexity), true
+		return e.ComplexityRoot.EmbeddedDefaultScalar.Value(childComplexity), true
 
 	case "EmbeddedPointer.ID":
-		if e.complexity.EmbeddedPointer.ID == nil {
+		if e.ComplexityRoot.EmbeddedPointer.ID == nil {
 			break
 		}
 
-		return e.complexity.EmbeddedPointer.ID(childComplexity), true
+		return e.ComplexityRoot.EmbeddedPointer.ID(childComplexity), true
 
 	case "EmbeddedPointer.Title":
-		if e.complexity.EmbeddedPointer.Title == nil {
+		if e.ComplexityRoot.EmbeddedPointer.Title == nil {
 			break
 		}
 
-		return e.complexity.EmbeddedPointer.Title(childComplexity), true
+		return e.ComplexityRoot.EmbeddedPointer.Title(childComplexity), true
 
 	case "Error.errorOnNonRequiredField":
-		if e.complexity.Error.ErrorOnNonRequiredField == nil {
+		if e.ComplexityRoot.Error.ErrorOnNonRequiredField == nil {
 			break
 		}
 
-		return e.complexity.Error.ErrorOnNonRequiredField(childComplexity), true
+		return e.ComplexityRoot.Error.ErrorOnNonRequiredField(childComplexity), true
 
 	case "Error.errorOnRequiredField":
-		if e.complexity.Error.ErrorOnRequiredField == nil {
+		if e.ComplexityRoot.Error.ErrorOnRequiredField == nil {
 			break
 		}
 
-		return e.complexity.Error.ErrorOnRequiredField(childComplexity), true
+		return e.ComplexityRoot.Error.ErrorOnRequiredField(childComplexity), true
 
 	case "Error.id":
-		if e.complexity.Error.ID == nil {
+		if e.ComplexityRoot.Error.ID == nil {
 			break
 		}
 
-		return e.complexity.Error.ID(childComplexity), true
+		return e.ComplexityRoot.Error.ID(childComplexity), true
 
 	case "Error.nilOnRequiredField":
-		if e.complexity.Error.NilOnRequiredField == nil {
+		if e.ComplexityRoot.Error.NilOnRequiredField == nil {
 			break
 		}
 
-		return e.complexity.Error.NilOnRequiredField(childComplexity), true
+		return e.ComplexityRoot.Error.NilOnRequiredField(childComplexity), true
 
 	case "Errors.a":
-		if e.complexity.Errors.A == nil {
+		if e.ComplexityRoot.Errors.A == nil {
 			break
 		}
 
-		return e.complexity.Errors.A(childComplexity), true
+		return e.ComplexityRoot.Errors.A(childComplexity), true
 
 	case "Errors.b":
-		if e.complexity.Errors.B == nil {
+		if e.ComplexityRoot.Errors.B == nil {
 			break
 		}
 
-		return e.complexity.Errors.B(childComplexity), true
+		return e.ComplexityRoot.Errors.B(childComplexity), true
 
 	case "Errors.c":
-		if e.complexity.Errors.C == nil {
+		if e.ComplexityRoot.Errors.C == nil {
 			break
 		}
 
-		return e.complexity.Errors.C(childComplexity), true
+		return e.ComplexityRoot.Errors.C(childComplexity), true
 
 	case "Errors.d":
-		if e.complexity.Errors.D == nil {
+		if e.ComplexityRoot.Errors.D == nil {
 			break
 		}
 
-		return e.complexity.Errors.D(childComplexity), true
+		return e.ComplexityRoot.Errors.D(childComplexity), true
 
 	case "Errors.e":
-		if e.complexity.Errors.E == nil {
+		if e.ComplexityRoot.Errors.E == nil {
 			break
 		}
 
-		return e.complexity.Errors.E(childComplexity), true
+		return e.ComplexityRoot.Errors.E(childComplexity), true
 
 	case "FieldsOrderPayload.firstFieldValue":
-		if e.complexity.FieldsOrderPayload.FirstFieldValue == nil {
+		if e.ComplexityRoot.FieldsOrderPayload.FirstFieldValue == nil {
 			break
 		}
 
-		return e.complexity.FieldsOrderPayload.FirstFieldValue(childComplexity), true
+		return e.ComplexityRoot.FieldsOrderPayload.FirstFieldValue(childComplexity), true
 
 	case "ForcedResolver.field":
-		if e.complexity.ForcedResolver.Field == nil {
+		if e.ComplexityRoot.ForcedResolver.Field == nil {
 			break
 		}
 
-		return e.complexity.ForcedResolver.Field(childComplexity), true
+		return e.ComplexityRoot.ForcedResolver.Field(childComplexity), true
 
 	case "Horse.horseBreed":
-		if e.complexity.Horse.HorseBreed == nil {
+		if e.ComplexityRoot.Horse.HorseBreed == nil {
 			break
 		}
 
-		return e.complexity.Horse.HorseBreed(childComplexity), true
+		return e.ComplexityRoot.Horse.HorseBreed(childComplexity), true
 
 	case "Horse.size":
-		if e.complexity.Horse.Size == nil {
+		if e.ComplexityRoot.Horse.Size == nil {
 			break
 		}
 
-		return e.complexity.Horse.Size(childComplexity), true
+		return e.ComplexityRoot.Horse.Size(childComplexity), true
 
 	case "Horse.species":
-		if e.complexity.Horse.Species == nil {
+		if e.ComplexityRoot.Horse.Species == nil {
 			break
 		}
 
-		return e.complexity.Horse.Species(childComplexity), true
+		return e.ComplexityRoot.Horse.Species(childComplexity), true
 
 	case "InnerObject.id":
-		if e.complexity.InnerObject.ID == nil {
+		if e.ComplexityRoot.InnerObject.ID == nil {
 			break
 		}
 
-		return e.complexity.InnerObject.ID(childComplexity), true
+		return e.ComplexityRoot.InnerObject.ID(childComplexity), true
 
 	case "InvalidIdentifier.id":
-		if e.complexity.InvalidIdentifier.ID == nil {
+		if e.ComplexityRoot.InvalidIdentifier.ID == nil {
 			break
 		}
 
-		return e.complexity.InvalidIdentifier.ID(childComplexity), true
+		return e.ComplexityRoot.InvalidIdentifier.ID(childComplexity), true
 
 	case "It.id":
-		if e.complexity.It.ID == nil {
+		if e.ComplexityRoot.It.ID == nil {
 			break
 		}
 
-		return e.complexity.It.ID(childComplexity), true
+		return e.ComplexityRoot.It.ID(childComplexity), true
 
 	case "LoopA.b":
-		if e.complexity.LoopA.B == nil {
+		if e.ComplexityRoot.LoopA.B == nil {
 			break
 		}
 
-		return e.complexity.LoopA.B(childComplexity), true
+		return e.ComplexityRoot.LoopA.B(childComplexity), true
 
 	case "LoopB.a":
-		if e.complexity.LoopB.A == nil {
+		if e.ComplexityRoot.LoopB.A == nil {
 			break
 		}
 
-		return e.complexity.LoopB.A(childComplexity), true
+		return e.ComplexityRoot.LoopB.A(childComplexity), true
 
 	case "Map.id":
-		if e.complexity.Map.ID == nil {
+		if e.ComplexityRoot.Map.ID == nil {
 			break
 		}
 
-		return e.complexity.Map.ID(childComplexity), true
+		return e.ComplexityRoot.Map.ID(childComplexity), true
 
 	case "MapNested.value":
-		if e.complexity.MapNested.Value == nil {
+		if e.ComplexityRoot.MapNested.Value == nil {
 			break
 		}
 
-		return e.complexity.MapNested.Value(childComplexity), true
+		return e.ComplexityRoot.MapNested.Value(childComplexity), true
 
 	case "MapStringInterfaceType.a":
-		if e.complexity.MapStringInterfaceType.A == nil {
+		if e.ComplexityRoot.MapStringInterfaceType.A == nil {
 			break
 		}
 
-		return e.complexity.MapStringInterfaceType.A(childComplexity), true
+		return e.ComplexityRoot.MapStringInterfaceType.A(childComplexity), true
 
 	case "MapStringInterfaceType.b":
-		if e.complexity.MapStringInterfaceType.B == nil {
+		if e.ComplexityRoot.MapStringInterfaceType.B == nil {
 			break
 		}
 
-		return e.complexity.MapStringInterfaceType.B(childComplexity), true
+		return e.ComplexityRoot.MapStringInterfaceType.B(childComplexity), true
 
 	case "MapStringInterfaceType.c":
-		if e.complexity.MapStringInterfaceType.C == nil {
+		if e.ComplexityRoot.MapStringInterfaceType.C == nil {
 			break
 		}
 
-		return e.complexity.MapStringInterfaceType.C(childComplexity), true
+		return e.ComplexityRoot.MapStringInterfaceType.C(childComplexity), true
 
 	case "MapStringInterfaceType.nested":
-		if e.complexity.MapStringInterfaceType.Nested == nil {
+		if e.ComplexityRoot.MapStringInterfaceType.Nested == nil {
 			break
 		}
 
-		return e.complexity.MapStringInterfaceType.Nested(childComplexity), true
+		return e.ComplexityRoot.MapStringInterfaceType.Nested(childComplexity), true
 
 	case "ModelMethods.noContext":
-		if e.complexity.ModelMethods.NoContext == nil {
+		if e.ComplexityRoot.ModelMethods.NoContext == nil {
 			break
 		}
 
-		return e.complexity.ModelMethods.NoContext(childComplexity), true
+		return e.ComplexityRoot.ModelMethods.NoContext(childComplexity), true
 
 	case "ModelMethods.resolverField":
-		if e.complexity.ModelMethods.ResolverField == nil {
+		if e.ComplexityRoot.ModelMethods.ResolverField == nil {
 			break
 		}
 
-		return e.complexity.ModelMethods.ResolverField(childComplexity), true
+		return e.ComplexityRoot.ModelMethods.ResolverField(childComplexity), true
 
 	case "ModelMethods.withContext":
-		if e.complexity.ModelMethods.WithContext == nil {
+		if e.ComplexityRoot.ModelMethods.WithContext == nil {
 			break
 		}
 
-		return e.complexity.ModelMethods.WithContext(childComplexity), true
+		return e.ComplexityRoot.ModelMethods.WithContext(childComplexity), true
 
 	case "Mutation.defaultInput":
-		if e.complexity.Mutation.DefaultInput == nil {
+		if e.ComplexityRoot.Mutation.DefaultInput == nil {
 			break
 		}
 
@@ -1011,10 +1001,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DefaultInput(childComplexity, args["input"].(DefaultInput)), true
+		return e.ComplexityRoot.Mutation.DefaultInput(childComplexity, args["input"].(DefaultInput)), true
 
 	case "Mutation.overrideValueViaInput":
-		if e.complexity.Mutation.OverrideValueViaInput == nil {
+		if e.ComplexityRoot.Mutation.OverrideValueViaInput == nil {
 			break
 		}
 
@@ -1023,10 +1013,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.OverrideValueViaInput(childComplexity, args["input"].(FieldsOrderInput)), true
+		return e.ComplexityRoot.Mutation.OverrideValueViaInput(childComplexity, args["input"].(FieldsOrderInput)), true
 
 	case "Mutation.updateProduct":
-		if e.complexity.Mutation.UpdateProduct == nil {
+		if e.ComplexityRoot.Mutation.UpdateProduct == nil {
 			break
 		}
 
@@ -1035,10 +1025,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateProduct(childComplexity, args["id"].(string), args["name"].(*string), args["price"].(*float64)), true
+		return e.ComplexityRoot.Mutation.UpdateProduct(childComplexity, args["id"].(string), args["name"].(*string), args["price"].(*float64)), true
 
 	case "Mutation.updatePtrToPtr":
-		if e.complexity.Mutation.UpdatePtrToPtr == nil {
+		if e.ComplexityRoot.Mutation.UpdatePtrToPtr == nil {
 			break
 		}
 
@@ -1047,10 +1037,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdatePtrToPtr(childComplexity, args["input"].(UpdatePtrToPtrOuter)), true
+		return e.ComplexityRoot.Mutation.UpdatePtrToPtr(childComplexity, args["input"].(UpdatePtrToPtrOuter)), true
 
 	case "Mutation.updateSomething":
-		if e.complexity.Mutation.UpdateSomething == nil {
+		if e.ComplexityRoot.Mutation.UpdateSomething == nil {
 			break
 		}
 
@@ -1059,66 +1049,66 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateSomething(childComplexity, args["input"].(SpecialInput)), true
+		return e.ComplexityRoot.Mutation.UpdateSomething(childComplexity, args["input"].(SpecialInput)), true
 
 	case "ObjectDirectives.nullableText":
-		if e.complexity.ObjectDirectives.NullableText == nil {
+		if e.ComplexityRoot.ObjectDirectives.NullableText == nil {
 			break
 		}
 
-		return e.complexity.ObjectDirectives.NullableText(childComplexity), true
+		return e.ComplexityRoot.ObjectDirectives.NullableText(childComplexity), true
 
 	case "ObjectDirectives.order":
-		if e.complexity.ObjectDirectives.Order == nil {
+		if e.ComplexityRoot.ObjectDirectives.Order == nil {
 			break
 		}
 
-		return e.complexity.ObjectDirectives.Order(childComplexity), true
+		return e.ComplexityRoot.ObjectDirectives.Order(childComplexity), true
 
 	case "ObjectDirectives.text":
-		if e.complexity.ObjectDirectives.Text == nil {
+		if e.ComplexityRoot.ObjectDirectives.Text == nil {
 			break
 		}
 
-		return e.complexity.ObjectDirectives.Text(childComplexity), true
+		return e.ComplexityRoot.ObjectDirectives.Text(childComplexity), true
 
 	case "ObjectDirectivesWithCustomGoModel.nullableText":
-		if e.complexity.ObjectDirectivesWithCustomGoModel.NullableText == nil {
+		if e.ComplexityRoot.ObjectDirectivesWithCustomGoModel.NullableText == nil {
 			break
 		}
 
-		return e.complexity.ObjectDirectivesWithCustomGoModel.NullableText(childComplexity), true
+		return e.ComplexityRoot.ObjectDirectivesWithCustomGoModel.NullableText(childComplexity), true
 
 	case "OuterObject.inner":
-		if e.complexity.OuterObject.Inner == nil {
+		if e.ComplexityRoot.OuterObject.Inner == nil {
 			break
 		}
 
-		return e.complexity.OuterObject.Inner(childComplexity), true
+		return e.ComplexityRoot.OuterObject.Inner(childComplexity), true
 
 	case "OverlappingFields.oneFoo", "OverlappingFields.twoFoo":
-		if e.complexity.OverlappingFields.Foo == nil {
+		if e.ComplexityRoot.OverlappingFields.Foo == nil {
 			break
 		}
 
-		return e.complexity.OverlappingFields.Foo(childComplexity), true
+		return e.ComplexityRoot.OverlappingFields.Foo(childComplexity), true
 
 	case "OverlappingFields.newFoo", "OverlappingFields.new_foo":
-		if e.complexity.OverlappingFields.NewFoo == nil {
+		if e.ComplexityRoot.OverlappingFields.NewFoo == nil {
 			break
 		}
 
-		return e.complexity.OverlappingFields.NewFoo(childComplexity), true
+		return e.ComplexityRoot.OverlappingFields.NewFoo(childComplexity), true
 
 	case "OverlappingFields.oldFoo":
-		if e.complexity.OverlappingFields.OldFoo == nil {
+		if e.ComplexityRoot.OverlappingFields.OldFoo == nil {
 			break
 		}
 
-		return e.complexity.OverlappingFields.OldFoo(childComplexity), true
+		return e.ComplexityRoot.OverlappingFields.OldFoo(childComplexity), true
 
 	case "Panics.argUnmarshal":
-		if e.complexity.Panics.ArgUnmarshal == nil {
+		if e.ComplexityRoot.Panics.ArgUnmarshal == nil {
 			break
 		}
 
@@ -1127,10 +1117,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Panics.ArgUnmarshal(childComplexity, args["u"].([]MarshalPanic)), true
+		return e.ComplexityRoot.Panics.ArgUnmarshal(childComplexity, args["u"].([]MarshalPanic)), true
 
 	case "Panics.fieldFuncMarshal":
-		if e.complexity.Panics.FieldFuncMarshal == nil {
+		if e.ComplexityRoot.Panics.FieldFuncMarshal == nil {
 			break
 		}
 
@@ -1139,17 +1129,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Panics.FieldFuncMarshal(childComplexity, args["u"].([]MarshalPanic)), true
+		return e.ComplexityRoot.Panics.FieldFuncMarshal(childComplexity, args["u"].([]MarshalPanic)), true
 
 	case "Panics.fieldScalarMarshal":
-		if e.complexity.Panics.FieldScalarMarshal == nil {
+		if e.ComplexityRoot.Panics.FieldScalarMarshal == nil {
 			break
 		}
 
-		return e.complexity.Panics.FieldScalarMarshal(childComplexity), true
+		return e.ComplexityRoot.Panics.FieldScalarMarshal(childComplexity), true
 
 	case "Pet.friends":
-		if e.complexity.Pet.Friends == nil {
+		if e.ComplexityRoot.Pet.Friends == nil {
 			break
 		}
 
@@ -1158,129 +1148,129 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Pet.Friends(childComplexity, args["limit"].(*int)), true
+		return e.ComplexityRoot.Pet.Friends(childComplexity, args["limit"].(*int)), true
 
 	case "Pet.id":
-		if e.complexity.Pet.ID == nil {
+		if e.ComplexityRoot.Pet.ID == nil {
 			break
 		}
 
-		return e.complexity.Pet.ID(childComplexity), true
+		return e.ComplexityRoot.Pet.ID(childComplexity), true
 
 	case "Primitive.squared":
-		if e.complexity.Primitive.Squared == nil {
+		if e.ComplexityRoot.Primitive.Squared == nil {
 			break
 		}
 
-		return e.complexity.Primitive.Squared(childComplexity), true
+		return e.ComplexityRoot.Primitive.Squared(childComplexity), true
 
 	case "Primitive.value":
-		if e.complexity.Primitive.Value == nil {
+		if e.ComplexityRoot.Primitive.Value == nil {
 			break
 		}
 
-		return e.complexity.Primitive.Value(childComplexity), true
+		return e.ComplexityRoot.Primitive.Value(childComplexity), true
 
 	case "PrimitiveString.doubled":
-		if e.complexity.PrimitiveString.Doubled == nil {
+		if e.ComplexityRoot.PrimitiveString.Doubled == nil {
 			break
 		}
 
-		return e.complexity.PrimitiveString.Doubled(childComplexity), true
+		return e.ComplexityRoot.PrimitiveString.Doubled(childComplexity), true
 
 	case "PrimitiveString.len":
-		if e.complexity.PrimitiveString.Len == nil {
+		if e.ComplexityRoot.PrimitiveString.Len == nil {
 			break
 		}
 
-		return e.complexity.PrimitiveString.Len(childComplexity), true
+		return e.ComplexityRoot.PrimitiveString.Len(childComplexity), true
 
 	case "PrimitiveString.value":
-		if e.complexity.PrimitiveString.Value == nil {
+		if e.ComplexityRoot.PrimitiveString.Value == nil {
 			break
 		}
 
-		return e.complexity.PrimitiveString.Value(childComplexity), true
+		return e.ComplexityRoot.PrimitiveString.Value(childComplexity), true
 
 	case "PtrToAnyContainer.binding":
-		if e.complexity.PtrToAnyContainer.Binding == nil {
+		if e.ComplexityRoot.PtrToAnyContainer.Binding == nil {
 			break
 		}
 
-		return e.complexity.PtrToAnyContainer.Binding(childComplexity), true
+		return e.ComplexityRoot.PtrToAnyContainer.Binding(childComplexity), true
 
 	case "PtrToAnyContainer.ptrToAny":
-		if e.complexity.PtrToAnyContainer.PtrToAny == nil {
+		if e.ComplexityRoot.PtrToAnyContainer.PtrToAny == nil {
 			break
 		}
 
-		return e.complexity.PtrToAnyContainer.PtrToAny(childComplexity), true
+		return e.ComplexityRoot.PtrToAnyContainer.PtrToAny(childComplexity), true
 
 	case "PtrToPtrInner.key":
-		if e.complexity.PtrToPtrInner.Key == nil {
+		if e.ComplexityRoot.PtrToPtrInner.Key == nil {
 			break
 		}
 
-		return e.complexity.PtrToPtrInner.Key(childComplexity), true
+		return e.ComplexityRoot.PtrToPtrInner.Key(childComplexity), true
 
 	case "PtrToPtrInner.value":
-		if e.complexity.PtrToPtrInner.Value == nil {
+		if e.ComplexityRoot.PtrToPtrInner.Value == nil {
 			break
 		}
 
-		return e.complexity.PtrToPtrInner.Value(childComplexity), true
+		return e.ComplexityRoot.PtrToPtrInner.Value(childComplexity), true
 
 	case "PtrToPtrOuter.inner":
-		if e.complexity.PtrToPtrOuter.Inner == nil {
+		if e.ComplexityRoot.PtrToPtrOuter.Inner == nil {
 			break
 		}
 
-		return e.complexity.PtrToPtrOuter.Inner(childComplexity), true
+		return e.ComplexityRoot.PtrToPtrOuter.Inner(childComplexity), true
 
 	case "PtrToPtrOuter.name":
-		if e.complexity.PtrToPtrOuter.Name == nil {
+		if e.ComplexityRoot.PtrToPtrOuter.Name == nil {
 			break
 		}
 
-		return e.complexity.PtrToPtrOuter.Name(childComplexity), true
+		return e.ComplexityRoot.PtrToPtrOuter.Name(childComplexity), true
 
 	case "PtrToPtrOuter.stupidInner":
-		if e.complexity.PtrToPtrOuter.StupidInner == nil {
+		if e.ComplexityRoot.PtrToPtrOuter.StupidInner == nil {
 			break
 		}
 
-		return e.complexity.PtrToPtrOuter.StupidInner(childComplexity), true
+		return e.ComplexityRoot.PtrToPtrOuter.StupidInner(childComplexity), true
 
 	case "PtrToSliceContainer.ptrToSlice":
-		if e.complexity.PtrToSliceContainer.PtrToSlice == nil {
+		if e.ComplexityRoot.PtrToSliceContainer.PtrToSlice == nil {
 			break
 		}
 
-		return e.complexity.PtrToSliceContainer.PtrToSlice(childComplexity), true
+		return e.ComplexityRoot.PtrToSliceContainer.PtrToSlice(childComplexity), true
 
 	case "Query.animal":
-		if e.complexity.Query.Animal == nil {
+		if e.ComplexityRoot.Query.Animal == nil {
 			break
 		}
 
-		return e.complexity.Query.Animal(childComplexity), true
+		return e.ComplexityRoot.Query.Animal(childComplexity), true
 
 	case "Query.autobind":
-		if e.complexity.Query.Autobind == nil {
+		if e.ComplexityRoot.Query.Autobind == nil {
 			break
 		}
 
-		return e.complexity.Query.Autobind(childComplexity), true
+		return e.ComplexityRoot.Query.Autobind(childComplexity), true
 
 	case "Query.collision":
-		if e.complexity.Query.Collision == nil {
+		if e.ComplexityRoot.Query.Collision == nil {
 			break
 		}
 
-		return e.complexity.Query.Collision(childComplexity), true
+		return e.ComplexityRoot.Query.Collision(childComplexity), true
 
 	case "Query.defaultParameters":
-		if e.complexity.Query.DefaultParameters == nil {
+		if e.ComplexityRoot.Query.DefaultParameters == nil {
 			break
 		}
 
@@ -1289,10 +1279,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.DefaultParameters(childComplexity, args["falsyBoolean"].(*bool), args["truthyBoolean"].(*bool)), true
+		return e.ComplexityRoot.Query.DefaultParameters(childComplexity, args["falsyBoolean"].(*bool), args["truthyBoolean"].(*bool)), true
 
 	case "Query.defaultScalar":
-		if e.complexity.Query.DefaultScalar == nil {
+		if e.ComplexityRoot.Query.DefaultScalar == nil {
 			break
 		}
 
@@ -1301,31 +1291,31 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.DefaultScalar(childComplexity, args["arg"].(string)), true
+		return e.ComplexityRoot.Query.DefaultScalar(childComplexity, args["arg"].(string)), true
 
 	case "Query.deferMultiple":
-		if e.complexity.Query.DeferMultiple == nil {
+		if e.ComplexityRoot.Query.DeferMultiple == nil {
 			break
 		}
 
-		return e.complexity.Query.DeferMultiple(childComplexity), true
+		return e.ComplexityRoot.Query.DeferMultiple(childComplexity), true
 
 	case "Query.deferSingle":
-		if e.complexity.Query.DeferSingle == nil {
+		if e.ComplexityRoot.Query.DeferSingle == nil {
 			break
 		}
 
-		return e.complexity.Query.DeferSingle(childComplexity), true
+		return e.ComplexityRoot.Query.DeferSingle(childComplexity), true
 
 	case "Query.deprecatedField":
-		if e.complexity.Query.DeprecatedField == nil {
+		if e.ComplexityRoot.Query.DeprecatedField == nil {
 			break
 		}
 
-		return e.complexity.Query.DeprecatedField(childComplexity), true
+		return e.ComplexityRoot.Query.DeprecatedField(childComplexity), true
 
 	case "Query.directiveArg":
-		if e.complexity.Query.DirectiveArg == nil {
+		if e.ComplexityRoot.Query.DirectiveArg == nil {
 			break
 		}
 
@@ -1334,24 +1324,24 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.DirectiveArg(childComplexity, args["arg"].(string)), true
+		return e.ComplexityRoot.Query.DirectiveArg(childComplexity, args["arg"].(string)), true
 
 	case "Query.directiveDouble":
-		if e.complexity.Query.DirectiveDouble == nil {
+		if e.ComplexityRoot.Query.DirectiveDouble == nil {
 			break
 		}
 
-		return e.complexity.Query.DirectiveDouble(childComplexity), true
+		return e.ComplexityRoot.Query.DirectiveDouble(childComplexity), true
 
 	case "Query.directiveField":
-		if e.complexity.Query.DirectiveField == nil {
+		if e.ComplexityRoot.Query.DirectiveField == nil {
 			break
 		}
 
-		return e.complexity.Query.DirectiveField(childComplexity), true
+		return e.ComplexityRoot.Query.DirectiveField(childComplexity), true
 
 	case "Query.directiveFieldDef":
-		if e.complexity.Query.DirectiveFieldDef == nil {
+		if e.ComplexityRoot.Query.DirectiveFieldDef == nil {
 			break
 		}
 
@@ -1360,10 +1350,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.DirectiveFieldDef(childComplexity, args["ret"].(string)), true
+		return e.ComplexityRoot.Query.DirectiveFieldDef(childComplexity, args["ret"].(string)), true
 
 	case "Query.directiveInput":
-		if e.complexity.Query.DirectiveInput == nil {
+		if e.ComplexityRoot.Query.DirectiveInput == nil {
 			break
 		}
 
@@ -1372,10 +1362,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.DirectiveInput(childComplexity, args["arg"].(InputDirectives)), true
+		return e.ComplexityRoot.Query.DirectiveInput(childComplexity, args["arg"].(InputDirectives)), true
 
 	case "Query.directiveInputNullable":
-		if e.complexity.Query.DirectiveInputNullable == nil {
+		if e.ComplexityRoot.Query.DirectiveInputNullable == nil {
 			break
 		}
 
@@ -1384,10 +1374,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.DirectiveInputNullable(childComplexity, args["arg"].(*InputDirectives)), true
+		return e.ComplexityRoot.Query.DirectiveInputNullable(childComplexity, args["arg"].(*InputDirectives)), true
 
 	case "Query.directiveInputType":
-		if e.complexity.Query.DirectiveInputType == nil {
+		if e.ComplexityRoot.Query.DirectiveInputType == nil {
 			break
 		}
 
@@ -1396,10 +1386,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.DirectiveInputType(childComplexity, args["arg"].(InnerInput)), true
+		return e.ComplexityRoot.Query.DirectiveInputType(childComplexity, args["arg"].(InnerInput)), true
 
 	case "Query.directiveNullableArg":
-		if e.complexity.Query.DirectiveNullableArg == nil {
+		if e.ComplexityRoot.Query.DirectiveNullableArg == nil {
 			break
 		}
 
@@ -1408,24 +1398,24 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.DirectiveNullableArg(childComplexity, args["arg"].(*int), args["arg2"].(*int), args["arg3"].(*string)), true
+		return e.ComplexityRoot.Query.DirectiveNullableArg(childComplexity, args["arg"].(*int), args["arg2"].(*int), args["arg3"].(*string)), true
 
 	case "Query.directiveObject":
-		if e.complexity.Query.DirectiveObject == nil {
+		if e.ComplexityRoot.Query.DirectiveObject == nil {
 			break
 		}
 
-		return e.complexity.Query.DirectiveObject(childComplexity), true
+		return e.ComplexityRoot.Query.DirectiveObject(childComplexity), true
 
 	case "Query.directiveObjectWithCustomGoModel":
-		if e.complexity.Query.DirectiveObjectWithCustomGoModel == nil {
+		if e.ComplexityRoot.Query.DirectiveObjectWithCustomGoModel == nil {
 			break
 		}
 
-		return e.complexity.Query.DirectiveObjectWithCustomGoModel(childComplexity), true
+		return e.ComplexityRoot.Query.DirectiveObjectWithCustomGoModel(childComplexity), true
 
 	case "Query.directiveSingleNullableArg":
-		if e.complexity.Query.DirectiveSingleNullableArg == nil {
+		if e.ComplexityRoot.Query.DirectiveSingleNullableArg == nil {
 			break
 		}
 
@@ -1434,45 +1424,45 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.DirectiveSingleNullableArg(childComplexity, args["arg1"].(*string)), true
+		return e.ComplexityRoot.Query.DirectiveSingleNullableArg(childComplexity, args["arg1"].(*string)), true
 
 	case "Query.directiveUnimplemented":
-		if e.complexity.Query.DirectiveUnimplemented == nil {
+		if e.ComplexityRoot.Query.DirectiveUnimplemented == nil {
 			break
 		}
 
-		return e.complexity.Query.DirectiveUnimplemented(childComplexity), true
+		return e.ComplexityRoot.Query.DirectiveUnimplemented(childComplexity), true
 
 	case "Query.dog":
-		if e.complexity.Query.Dog == nil {
+		if e.ComplexityRoot.Query.Dog == nil {
 			break
 		}
 
-		return e.complexity.Query.Dog(childComplexity), true
+		return e.ComplexityRoot.Query.Dog(childComplexity), true
 
 	case "Query.embeddedCase1":
-		if e.complexity.Query.EmbeddedCase1 == nil {
+		if e.ComplexityRoot.Query.EmbeddedCase1 == nil {
 			break
 		}
 
-		return e.complexity.Query.EmbeddedCase1(childComplexity), true
+		return e.ComplexityRoot.Query.EmbeddedCase1(childComplexity), true
 
 	case "Query.embeddedCase2":
-		if e.complexity.Query.EmbeddedCase2 == nil {
+		if e.ComplexityRoot.Query.EmbeddedCase2 == nil {
 			break
 		}
 
-		return e.complexity.Query.EmbeddedCase2(childComplexity), true
+		return e.ComplexityRoot.Query.EmbeddedCase2(childComplexity), true
 
 	case "Query.embeddedCase3":
-		if e.complexity.Query.EmbeddedCase3 == nil {
+		if e.ComplexityRoot.Query.EmbeddedCase3 == nil {
 			break
 		}
 
-		return e.complexity.Query.EmbeddedCase3(childComplexity), true
+		return e.ComplexityRoot.Query.EmbeddedCase3(childComplexity), true
 
 	case "Query.enumInInput":
-		if e.complexity.Query.EnumInInput == nil {
+		if e.ComplexityRoot.Query.EnumInInput == nil {
 			break
 		}
 
@@ -1481,38 +1471,38 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.EnumInInput(childComplexity, args["input"].(*InputWithEnumValue)), true
+		return e.ComplexityRoot.Query.EnumInInput(childComplexity, args["input"].(*InputWithEnumValue)), true
 
 	case "Query.errorBubble":
-		if e.complexity.Query.ErrorBubble == nil {
+		if e.ComplexityRoot.Query.ErrorBubble == nil {
 			break
 		}
 
-		return e.complexity.Query.ErrorBubble(childComplexity), true
+		return e.ComplexityRoot.Query.ErrorBubble(childComplexity), true
 
 	case "Query.errorBubbleList":
-		if e.complexity.Query.ErrorBubbleList == nil {
+		if e.ComplexityRoot.Query.ErrorBubbleList == nil {
 			break
 		}
 
-		return e.complexity.Query.ErrorBubbleList(childComplexity), true
+		return e.ComplexityRoot.Query.ErrorBubbleList(childComplexity), true
 
 	case "Query.errorList":
-		if e.complexity.Query.ErrorList == nil {
+		if e.ComplexityRoot.Query.ErrorList == nil {
 			break
 		}
 
-		return e.complexity.Query.ErrorList(childComplexity), true
+		return e.ComplexityRoot.Query.ErrorList(childComplexity), true
 
 	case "Query.errors":
-		if e.complexity.Query.Errors == nil {
+		if e.ComplexityRoot.Query.Errors == nil {
 			break
 		}
 
-		return e.complexity.Query.Errors(childComplexity), true
+		return e.ComplexityRoot.Query.Errors(childComplexity), true
 
 	case "Query.fallback":
-		if e.complexity.Query.Fallback == nil {
+		if e.ComplexityRoot.Query.Fallback == nil {
 			break
 		}
 
@@ -1521,10 +1511,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Fallback(childComplexity, args["arg"].(FallbackToStringEncoding)), true
+		return e.ComplexityRoot.Query.Fallback(childComplexity, args["arg"].(FallbackToStringEncoding)), true
 
 	case "Query.fieldWithDeprecatedArg":
-		if e.complexity.Query.FieldWithDeprecatedArg == nil {
+		if e.ComplexityRoot.Query.FieldWithDeprecatedArg == nil {
 			break
 		}
 
@@ -1533,10 +1523,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.FieldWithDeprecatedArg(childComplexity, args["oldArg"].(*int), args["newArg"].(*int)), true
+		return e.ComplexityRoot.Query.FieldWithDeprecatedArg(childComplexity, args["oldArg"].(*int), args["newArg"].(*int)), true
 
 	case "Query.filterProducts":
-		if e.complexity.Query.FilterProducts == nil {
+		if e.ComplexityRoot.Query.FilterProducts == nil {
 			break
 		}
 
@@ -1545,10 +1535,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.FilterProducts(childComplexity, args["query"].(*string), args["category"].(*string), args["minPrice"].(*int)), true
+		return e.ComplexityRoot.Query.FilterProducts(childComplexity, args["query"].(*string), args["category"].(*string), args["minPrice"].(*int)), true
 
 	case "Query.findProducts":
-		if e.complexity.Query.FindProducts == nil {
+		if e.ComplexityRoot.Query.FindProducts == nil {
 			break
 		}
 
@@ -1557,17 +1547,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.FindProducts(childComplexity, args["query"].(*string), args["category"].(*string), args["minPrice"].(*int)), true
+		return e.ComplexityRoot.Query.FindProducts(childComplexity, args["query"].(*string), args["category"].(*string), args["minPrice"].(*int)), true
 
 	case "Query.infinity":
-		if e.complexity.Query.Infinity == nil {
+		if e.ComplexityRoot.Query.Infinity == nil {
 			break
 		}
 
-		return e.complexity.Query.Infinity(childComplexity), true
+		return e.ComplexityRoot.Query.Infinity(childComplexity), true
 
 	case "Query.inputNullableSlice":
-		if e.complexity.Query.InputNullableSlice == nil {
+		if e.ComplexityRoot.Query.InputNullableSlice == nil {
 			break
 		}
 
@@ -1576,10 +1566,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.InputNullableSlice(childComplexity, args["arg"].([]string)), true
+		return e.ComplexityRoot.Query.InputNullableSlice(childComplexity, args["arg"].([]string)), true
 
 	case "Query.inputOmittable":
-		if e.complexity.Query.InputOmittable == nil {
+		if e.ComplexityRoot.Query.InputOmittable == nil {
 			break
 		}
 
@@ -1588,10 +1578,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.InputOmittable(childComplexity, args["arg"].(OmittableInput)), true
+		return e.ComplexityRoot.Query.InputOmittable(childComplexity, args["arg"].(OmittableInput)), true
 
 	case "Query.inputSlice":
-		if e.complexity.Query.InputSlice == nil {
+		if e.ComplexityRoot.Query.InputSlice == nil {
 			break
 		}
 
@@ -1600,31 +1590,31 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.InputSlice(childComplexity, args["arg"].([]string)), true
+		return e.ComplexityRoot.Query.InputSlice(childComplexity, args["arg"].([]string)), true
 
 	case "Query.invalid":
-		if e.complexity.Query.Invalid == nil {
+		if e.ComplexityRoot.Query.Invalid == nil {
 			break
 		}
 
-		return e.complexity.Query.Invalid(childComplexity), true
+		return e.ComplexityRoot.Query.Invalid(childComplexity), true
 
 	case "Query.invalidIdentifier":
-		if e.complexity.Query.InvalidIdentifier == nil {
+		if e.ComplexityRoot.Query.InvalidIdentifier == nil {
 			break
 		}
 
-		return e.complexity.Query.InvalidIdentifier(childComplexity), true
+		return e.ComplexityRoot.Query.InvalidIdentifier(childComplexity), true
 
 	case "Query.issue896a":
-		if e.complexity.Query.Issue896a == nil {
+		if e.ComplexityRoot.Query.Issue896a == nil {
 			break
 		}
 
-		return e.complexity.Query.Issue896a(childComplexity), true
+		return e.ComplexityRoot.Query.Issue896a(childComplexity), true
 
 	case "Query.mapInput":
-		if e.complexity.Query.MapInput == nil {
+		if e.ComplexityRoot.Query.MapInput == nil {
 			break
 		}
 
@@ -1633,10 +1623,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.MapInput(childComplexity, args["input"].(map[string]any)), true
+		return e.ComplexityRoot.Query.MapInput(childComplexity, args["input"].(map[string]any)), true
 
 	case "Query.mapNestedMapSlice":
-		if e.complexity.Query.MapNestedMapSlice == nil {
+		if e.ComplexityRoot.Query.MapNestedMapSlice == nil {
 			break
 		}
 
@@ -1645,10 +1635,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.MapNestedMapSlice(childComplexity, args["input"].(map[string]any)), true
+		return e.ComplexityRoot.Query.MapNestedMapSlice(childComplexity, args["input"].(map[string]any)), true
 
 	case "Query.mapNestedStringInterface":
-		if e.complexity.Query.MapNestedStringInterface == nil {
+		if e.ComplexityRoot.Query.MapNestedStringInterface == nil {
 			break
 		}
 
@@ -1657,10 +1647,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.MapNestedStringInterface(childComplexity, args["in"].(*NestedMapInput)), true
+		return e.ComplexityRoot.Query.MapNestedStringInterface(childComplexity, args["in"].(*NestedMapInput)), true
 
 	case "Query.mapStringInterface":
-		if e.complexity.Query.MapStringInterface == nil {
+		if e.ComplexityRoot.Query.MapStringInterface == nil {
 			break
 		}
 
@@ -1669,17 +1659,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.MapStringInterface(childComplexity, args["in"].(map[string]any)), true
+		return e.ComplexityRoot.Query.MapStringInterface(childComplexity, args["in"].(map[string]any)), true
 
 	case "Query.modelMethods":
-		if e.complexity.Query.ModelMethods == nil {
+		if e.ComplexityRoot.Query.ModelMethods == nil {
 			break
 		}
 
-		return e.complexity.Query.ModelMethods(childComplexity), true
+		return e.ComplexityRoot.Query.ModelMethods(childComplexity), true
 
 	case "Query.nestedInputs":
-		if e.complexity.Query.NestedInputs == nil {
+		if e.ComplexityRoot.Query.NestedInputs == nil {
 			break
 		}
 
@@ -1688,45 +1678,45 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.NestedInputs(childComplexity, args["input"].([][]*OuterInput)), true
+		return e.ComplexityRoot.Query.NestedInputs(childComplexity, args["input"].([][]*OuterInput)), true
 
 	case "Query.nestedOutputs":
-		if e.complexity.Query.NestedOutputs == nil {
+		if e.ComplexityRoot.Query.NestedOutputs == nil {
 			break
 		}
 
-		return e.complexity.Query.NestedOutputs(childComplexity), true
+		return e.ComplexityRoot.Query.NestedOutputs(childComplexity), true
 
 	case "Query.noShape":
-		if e.complexity.Query.NoShape == nil {
+		if e.ComplexityRoot.Query.NoShape == nil {
 			break
 		}
 
-		return e.complexity.Query.NoShape(childComplexity), true
+		return e.ComplexityRoot.Query.NoShape(childComplexity), true
 
 	case "Query.noShapeTypedNil":
-		if e.complexity.Query.NoShapeTypedNil == nil {
+		if e.ComplexityRoot.Query.NoShapeTypedNil == nil {
 			break
 		}
 
-		return e.complexity.Query.NoShapeTypedNil(childComplexity), true
+		return e.ComplexityRoot.Query.NoShapeTypedNil(childComplexity), true
 
 	case "Query.node":
-		if e.complexity.Query.Node == nil {
+		if e.ComplexityRoot.Query.Node == nil {
 			break
 		}
 
-		return e.complexity.Query.Node(childComplexity), true
+		return e.ComplexityRoot.Query.Node(childComplexity), true
 
 	case "Query.notAnInterface":
-		if e.complexity.Query.NotAnInterface == nil {
+		if e.ComplexityRoot.Query.NotAnInterface == nil {
 			break
 		}
 
-		return e.complexity.Query.NotAnInterface(childComplexity), true
+		return e.ComplexityRoot.Query.NotAnInterface(childComplexity), true
 
 	case "Query.nullableArg":
-		if e.complexity.Query.NullableArg == nil {
+		if e.ComplexityRoot.Query.NullableArg == nil {
 			break
 		}
 
@@ -1735,59 +1725,59 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.NullableArg(childComplexity, args["arg"].(*int)), true
+		return e.ComplexityRoot.Query.NullableArg(childComplexity, args["arg"].(*int)), true
 
 	case "Query.optionalUnion":
-		if e.complexity.Query.OptionalUnion == nil {
+		if e.ComplexityRoot.Query.OptionalUnion == nil {
 			break
 		}
 
-		return e.complexity.Query.OptionalUnion(childComplexity), true
+		return e.ComplexityRoot.Query.OptionalUnion(childComplexity), true
 
 	case "Query.overlapping":
-		if e.complexity.Query.Overlapping == nil {
+		if e.ComplexityRoot.Query.Overlapping == nil {
 			break
 		}
 
-		return e.complexity.Query.Overlapping(childComplexity), true
+		return e.ComplexityRoot.Query.Overlapping(childComplexity), true
 
 	case "Query.panics":
-		if e.complexity.Query.Panics == nil {
+		if e.ComplexityRoot.Query.Panics == nil {
 			break
 		}
 
-		return e.complexity.Query.Panics(childComplexity), true
+		return e.ComplexityRoot.Query.Panics(childComplexity), true
 
 	case "Query.primitiveObject":
-		if e.complexity.Query.PrimitiveObject == nil {
+		if e.ComplexityRoot.Query.PrimitiveObject == nil {
 			break
 		}
 
-		return e.complexity.Query.PrimitiveObject(childComplexity), true
+		return e.ComplexityRoot.Query.PrimitiveObject(childComplexity), true
 
 	case "Query.primitiveStringObject":
-		if e.complexity.Query.PrimitiveStringObject == nil {
+		if e.ComplexityRoot.Query.PrimitiveStringObject == nil {
 			break
 		}
 
-		return e.complexity.Query.PrimitiveStringObject(childComplexity), true
+		return e.ComplexityRoot.Query.PrimitiveStringObject(childComplexity), true
 
 	case "Query.ptrToAnyContainer":
-		if e.complexity.Query.PtrToAnyContainer == nil {
+		if e.ComplexityRoot.Query.PtrToAnyContainer == nil {
 			break
 		}
 
-		return e.complexity.Query.PtrToAnyContainer(childComplexity), true
+		return e.ComplexityRoot.Query.PtrToAnyContainer(childComplexity), true
 
 	case "Query.ptrToSliceContainer":
-		if e.complexity.Query.PtrToSliceContainer == nil {
+		if e.ComplexityRoot.Query.PtrToSliceContainer == nil {
 			break
 		}
 
-		return e.complexity.Query.PtrToSliceContainer(childComplexity), true
+		return e.ComplexityRoot.Query.PtrToSliceContainer(childComplexity), true
 
 	case "Query.recursive":
-		if e.complexity.Query.Recursive == nil {
+		if e.ComplexityRoot.Query.Recursive == nil {
 			break
 		}
 
@@ -1796,17 +1786,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Recursive(childComplexity, args["input"].(*RecursiveInputSlice)), true
+		return e.ComplexityRoot.Query.Recursive(childComplexity, args["input"].(*RecursiveInputSlice)), true
 
 	case "Query.scalarSlice":
-		if e.complexity.Query.ScalarSlice == nil {
+		if e.ComplexityRoot.Query.ScalarSlice == nil {
 			break
 		}
 
-		return e.complexity.Query.ScalarSlice(childComplexity), true
+		return e.ComplexityRoot.Query.ScalarSlice(childComplexity), true
 
 	case "Query.searchMixed":
-		if e.complexity.Query.SearchMixed == nil {
+		if e.ComplexityRoot.Query.SearchMixed == nil {
 			break
 		}
 
@@ -1815,10 +1805,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.SearchMixed(childComplexity, args["query"].(*string), args["category"].(*string), args["minPrice"].(*int), args["limit"].(*int), args["offset"].(*int), args["sortBy"].(*string)), true
+		return e.ComplexityRoot.Query.SearchMixed(childComplexity, args["query"].(*string), args["category"].(*string), args["minPrice"].(*int), args["limit"].(*int), args["offset"].(*int), args["sortBy"].(*string)), true
 
 	case "Query.searchProducts":
-		if e.complexity.Query.SearchProducts == nil {
+		if e.ComplexityRoot.Query.SearchProducts == nil {
 			break
 		}
 
@@ -1827,10 +1817,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.SearchProducts(childComplexity, args["query"].(*string), args["category"].(*string), args["minPrice"].(*int)), true
+		return e.ComplexityRoot.Query.SearchProducts(childComplexity, args["query"].(*string), args["category"].(*string), args["minPrice"].(*int)), true
 
 	case "Query.searchProductsNormal":
-		if e.complexity.Query.SearchProductsNormal == nil {
+		if e.ComplexityRoot.Query.SearchProductsNormal == nil {
 			break
 		}
 
@@ -1839,10 +1829,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.SearchProductsNormal(childComplexity, args["filters"].(map[string]any)), true
+		return e.ComplexityRoot.Query.SearchProductsNormal(childComplexity, args["filters"].(map[string]any)), true
 
 	case "Query.searchRequired":
-		if e.complexity.Query.SearchRequired == nil {
+		if e.ComplexityRoot.Query.SearchRequired == nil {
 			break
 		}
 
@@ -1851,10 +1841,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.SearchRequired(childComplexity, args["name"].(string), args["age"].(int)), true
+		return e.ComplexityRoot.Query.SearchRequired(childComplexity, args["name"].(string), args["age"].(int)), true
 
 	case "Query.searchWithDefaults":
-		if e.complexity.Query.SearchWithDefaults == nil {
+		if e.ComplexityRoot.Query.SearchWithDefaults == nil {
 			break
 		}
 
@@ -1863,10 +1853,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.SearchWithDefaults(childComplexity, args["query"].(*string), args["limit"].(*int), args["includeArchived"].(*bool)), true
+		return e.ComplexityRoot.Query.SearchWithDefaults(childComplexity, args["query"].(*string), args["limit"].(*int), args["includeArchived"].(*bool)), true
 
 	case "Query.searchWithDirectives":
-		if e.complexity.Query.SearchWithDirectives == nil {
+		if e.ComplexityRoot.Query.SearchWithDirectives == nil {
 			break
 		}
 
@@ -1875,52 +1865,52 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.SearchWithDirectives(childComplexity, args["oldField"].(*string), args["newField"].(*string)), true
+		return e.ComplexityRoot.Query.SearchWithDirectives(childComplexity, args["oldField"].(*string), args["newField"].(*string)), true
 
 	case "Query.shapeUnion":
-		if e.complexity.Query.ShapeUnion == nil {
+		if e.ComplexityRoot.Query.ShapeUnion == nil {
 			break
 		}
 
-		return e.complexity.Query.ShapeUnion(childComplexity), true
+		return e.ComplexityRoot.Query.ShapeUnion(childComplexity), true
 
 	case "Query.shapes":
-		if e.complexity.Query.Shapes == nil {
+		if e.ComplexityRoot.Query.Shapes == nil {
 			break
 		}
 
-		return e.complexity.Query.Shapes(childComplexity), true
+		return e.ComplexityRoot.Query.Shapes(childComplexity), true
 
 	case "Query.skipInclude":
-		if e.complexity.Query.SkipInclude == nil {
+		if e.ComplexityRoot.Query.SkipInclude == nil {
 			break
 		}
 
-		return e.complexity.Query.SkipInclude(childComplexity), true
+		return e.ComplexityRoot.Query.SkipInclude(childComplexity), true
 
 	case "Query.slices":
-		if e.complexity.Query.Slices == nil {
+		if e.ComplexityRoot.Query.Slices == nil {
 			break
 		}
 
-		return e.complexity.Query.Slices(childComplexity), true
+		return e.ComplexityRoot.Query.Slices(childComplexity), true
 
 	case "Query.stringFromContextFunction":
-		if e.complexity.Query.StringFromContextFunction == nil {
+		if e.ComplexityRoot.Query.StringFromContextFunction == nil {
 			break
 		}
 
-		return e.complexity.Query.StringFromContextFunction(childComplexity), true
+		return e.ComplexityRoot.Query.StringFromContextFunction(childComplexity), true
 
 	case "Query.stringFromContextInterface":
-		if e.complexity.Query.StringFromContextInterface == nil {
+		if e.ComplexityRoot.Query.StringFromContextInterface == nil {
 			break
 		}
 
-		return e.complexity.Query.StringFromContextInterface(childComplexity), true
+		return e.ComplexityRoot.Query.StringFromContextInterface(childComplexity), true
 
 	case "Query.user":
-		if e.complexity.Query.User == nil {
+		if e.ComplexityRoot.Query.User == nil {
 			break
 		}
 
@@ -1929,157 +1919,157 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.User(childComplexity, args["id"].(int)), true
+		return e.ComplexityRoot.Query.User(childComplexity, args["id"].(int)), true
 
 	case "Query.vOkCaseNil":
-		if e.complexity.Query.VOkCaseNil == nil {
+		if e.ComplexityRoot.Query.VOkCaseNil == nil {
 			break
 		}
 
-		return e.complexity.Query.VOkCaseNil(childComplexity), true
+		return e.ComplexityRoot.Query.VOkCaseNil(childComplexity), true
 
 	case "Query.vOkCaseValue":
-		if e.complexity.Query.VOkCaseValue == nil {
+		if e.ComplexityRoot.Query.VOkCaseValue == nil {
 			break
 		}
 
-		return e.complexity.Query.VOkCaseValue(childComplexity), true
+		return e.ComplexityRoot.Query.VOkCaseValue(childComplexity), true
 
 	case "Query.valid":
-		if e.complexity.Query.Valid == nil {
+		if e.ComplexityRoot.Query.Valid == nil {
 			break
 		}
 
-		return e.complexity.Query.Valid(childComplexity), true
+		return e.ComplexityRoot.Query.Valid(childComplexity), true
 
 	case "Query.validType":
-		if e.complexity.Query.ValidType == nil {
+		if e.ComplexityRoot.Query.ValidType == nil {
 			break
 		}
 
-		return e.complexity.Query.ValidType(childComplexity), true
+		return e.ComplexityRoot.Query.ValidType(childComplexity), true
 
 	case "Query.variadicModel":
-		if e.complexity.Query.VariadicModel == nil {
+		if e.ComplexityRoot.Query.VariadicModel == nil {
 			break
 		}
 
-		return e.complexity.Query.VariadicModel(childComplexity), true
+		return e.ComplexityRoot.Query.VariadicModel(childComplexity), true
 
 	case "Query.wrappedMap":
-		if e.complexity.Query.WrappedMap == nil {
+		if e.ComplexityRoot.Query.WrappedMap == nil {
 			break
 		}
 
-		return e.complexity.Query.WrappedMap(childComplexity), true
+		return e.ComplexityRoot.Query.WrappedMap(childComplexity), true
 
 	case "Query.wrappedScalar":
-		if e.complexity.Query.WrappedScalar == nil {
+		if e.ComplexityRoot.Query.WrappedScalar == nil {
 			break
 		}
 
-		return e.complexity.Query.WrappedScalar(childComplexity), true
+		return e.ComplexityRoot.Query.WrappedScalar(childComplexity), true
 
 	case "Query.wrappedSlice":
-		if e.complexity.Query.WrappedSlice == nil {
+		if e.ComplexityRoot.Query.WrappedSlice == nil {
 			break
 		}
 
-		return e.complexity.Query.WrappedSlice(childComplexity), true
+		return e.ComplexityRoot.Query.WrappedSlice(childComplexity), true
 
 	case "Query.wrappedStruct":
-		if e.complexity.Query.WrappedStruct == nil {
+		if e.ComplexityRoot.Query.WrappedStruct == nil {
 			break
 		}
 
-		return e.complexity.Query.WrappedStruct(childComplexity), true
+		return e.ComplexityRoot.Query.WrappedStruct(childComplexity), true
 
 	case "Rectangle.area":
-		if e.complexity.Rectangle.Area == nil {
+		if e.ComplexityRoot.Rectangle.Area == nil {
 			break
 		}
 
-		return e.complexity.Rectangle.Area(childComplexity), true
+		return e.ComplexityRoot.Rectangle.Area(childComplexity), true
 
 	case "Rectangle.coordinates":
-		if e.complexity.Rectangle.Coordinates == nil {
+		if e.ComplexityRoot.Rectangle.Coordinates == nil {
 			break
 		}
 
-		return e.complexity.Rectangle.Coordinates(childComplexity), true
+		return e.ComplexityRoot.Rectangle.Coordinates(childComplexity), true
 
 	case "Rectangle.length":
-		if e.complexity.Rectangle.Length == nil {
+		if e.ComplexityRoot.Rectangle.Length == nil {
 			break
 		}
 
-		return e.complexity.Rectangle.Length(childComplexity), true
+		return e.ComplexityRoot.Rectangle.Length(childComplexity), true
 
 	case "Rectangle.width":
-		if e.complexity.Rectangle.Width == nil {
+		if e.ComplexityRoot.Rectangle.Width == nil {
 			break
 		}
 
-		return e.complexity.Rectangle.Width(childComplexity), true
+		return e.ComplexityRoot.Rectangle.Width(childComplexity), true
 
 	case "Size.height":
-		if e.complexity.Size.Height == nil {
+		if e.ComplexityRoot.Size.Height == nil {
 			break
 		}
 
-		return e.complexity.Size.Height(childComplexity), true
+		return e.ComplexityRoot.Size.Height(childComplexity), true
 
 	case "Size.weight":
-		if e.complexity.Size.Weight == nil {
+		if e.ComplexityRoot.Size.Weight == nil {
 			break
 		}
 
-		return e.complexity.Size.Weight(childComplexity), true
+		return e.ComplexityRoot.Size.Weight(childComplexity), true
 
 	case "SkipIncludeTestType.a":
-		if e.complexity.SkipIncludeTestType.A == nil {
+		if e.ComplexityRoot.SkipIncludeTestType.A == nil {
 			break
 		}
 
-		return e.complexity.SkipIncludeTestType.A(childComplexity), true
+		return e.ComplexityRoot.SkipIncludeTestType.A(childComplexity), true
 
 	case "SkipIncludeTestType.b":
-		if e.complexity.SkipIncludeTestType.B == nil {
+		if e.ComplexityRoot.SkipIncludeTestType.B == nil {
 			break
 		}
 
-		return e.complexity.SkipIncludeTestType.B(childComplexity), true
+		return e.ComplexityRoot.SkipIncludeTestType.B(childComplexity), true
 
 	case "Slices.test1":
-		if e.complexity.Slices.Test1 == nil {
+		if e.ComplexityRoot.Slices.Test1 == nil {
 			break
 		}
 
-		return e.complexity.Slices.Test1(childComplexity), true
+		return e.ComplexityRoot.Slices.Test1(childComplexity), true
 
 	case "Slices.test2":
-		if e.complexity.Slices.Test2 == nil {
+		if e.ComplexityRoot.Slices.Test2 == nil {
 			break
 		}
 
-		return e.complexity.Slices.Test2(childComplexity), true
+		return e.ComplexityRoot.Slices.Test2(childComplexity), true
 
 	case "Slices.test3":
-		if e.complexity.Slices.Test3 == nil {
+		if e.ComplexityRoot.Slices.Test3 == nil {
 			break
 		}
 
-		return e.complexity.Slices.Test3(childComplexity), true
+		return e.ComplexityRoot.Slices.Test3(childComplexity), true
 
 	case "Slices.test4":
-		if e.complexity.Slices.Test4 == nil {
+		if e.ComplexityRoot.Slices.Test4 == nil {
 			break
 		}
 
-		return e.complexity.Slices.Test4(childComplexity), true
+		return e.ComplexityRoot.Slices.Test4(childComplexity), true
 
 	case "Subscription.directiveArg":
-		if e.complexity.Subscription.DirectiveArg == nil {
+		if e.ComplexityRoot.Subscription.DirectiveArg == nil {
 			break
 		}
 
@@ -2088,17 +2078,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Subscription.DirectiveArg(childComplexity, args["arg"].(string)), true
+		return e.ComplexityRoot.Subscription.DirectiveArg(childComplexity, args["arg"].(string)), true
 
 	case "Subscription.directiveDouble":
-		if e.complexity.Subscription.DirectiveDouble == nil {
+		if e.ComplexityRoot.Subscription.DirectiveDouble == nil {
 			break
 		}
 
-		return e.complexity.Subscription.DirectiveDouble(childComplexity), true
+		return e.ComplexityRoot.Subscription.DirectiveDouble(childComplexity), true
 
 	case "Subscription.directiveNullableArg":
-		if e.complexity.Subscription.DirectiveNullableArg == nil {
+		if e.ComplexityRoot.Subscription.DirectiveNullableArg == nil {
 			break
 		}
 
@@ -2107,66 +2097,66 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Subscription.DirectiveNullableArg(childComplexity, args["arg"].(*int), args["arg2"].(*int), args["arg3"].(*string)), true
+		return e.ComplexityRoot.Subscription.DirectiveNullableArg(childComplexity, args["arg"].(*int), args["arg2"].(*int), args["arg3"].(*string)), true
 
 	case "Subscription.directiveUnimplemented":
-		if e.complexity.Subscription.DirectiveUnimplemented == nil {
+		if e.ComplexityRoot.Subscription.DirectiveUnimplemented == nil {
 			break
 		}
 
-		return e.complexity.Subscription.DirectiveUnimplemented(childComplexity), true
+		return e.ComplexityRoot.Subscription.DirectiveUnimplemented(childComplexity), true
 
 	case "Subscription.errorRequired":
-		if e.complexity.Subscription.ErrorRequired == nil {
+		if e.ComplexityRoot.Subscription.ErrorRequired == nil {
 			break
 		}
 
-		return e.complexity.Subscription.ErrorRequired(childComplexity), true
+		return e.ComplexityRoot.Subscription.ErrorRequired(childComplexity), true
 
 	case "Subscription.initPayload":
-		if e.complexity.Subscription.InitPayload == nil {
+		if e.ComplexityRoot.Subscription.InitPayload == nil {
 			break
 		}
 
-		return e.complexity.Subscription.InitPayload(childComplexity), true
+		return e.ComplexityRoot.Subscription.InitPayload(childComplexity), true
 
 	case "Subscription.issue896b":
-		if e.complexity.Subscription.Issue896b == nil {
+		if e.ComplexityRoot.Subscription.Issue896b == nil {
 			break
 		}
 
-		return e.complexity.Subscription.Issue896b(childComplexity), true
+		return e.ComplexityRoot.Subscription.Issue896b(childComplexity), true
 
 	case "Subscription.updated":
-		if e.complexity.Subscription.Updated == nil {
+		if e.ComplexityRoot.Subscription.Updated == nil {
 			break
 		}
 
-		return e.complexity.Subscription.Updated(childComplexity), true
+		return e.ComplexityRoot.Subscription.Updated(childComplexity), true
 
 	case "User.created":
-		if e.complexity.User.Created == nil {
+		if e.ComplexityRoot.User.Created == nil {
 			break
 		}
 
-		return e.complexity.User.Created(childComplexity), true
+		return e.ComplexityRoot.User.Created(childComplexity), true
 
 	case "User.friends":
-		if e.complexity.User.Friends == nil {
+		if e.ComplexityRoot.User.Friends == nil {
 			break
 		}
 
-		return e.complexity.User.Friends(childComplexity), true
+		return e.ComplexityRoot.User.Friends(childComplexity), true
 
 	case "User.id":
-		if e.complexity.User.ID == nil {
+		if e.ComplexityRoot.User.ID == nil {
 			break
 		}
 
-		return e.complexity.User.ID(childComplexity), true
+		return e.ComplexityRoot.User.ID(childComplexity), true
 
 	case "User.pets":
-		if e.complexity.User.Pets == nil {
+		if e.ComplexityRoot.User.Pets == nil {
 			break
 		}
 
@@ -2175,45 +2165,45 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.User.Pets(childComplexity, args["limit"].(*int)), true
+		return e.ComplexityRoot.User.Pets(childComplexity, args["limit"].(*int)), true
 
 	case "User.updated":
-		if e.complexity.User.Updated == nil {
+		if e.ComplexityRoot.User.Updated == nil {
 			break
 		}
 
-		return e.complexity.User.Updated(childComplexity), true
+		return e.ComplexityRoot.User.Updated(childComplexity), true
 
 	case "VOkCaseNil.value":
-		if e.complexity.VOkCaseNil.Value == nil {
+		if e.ComplexityRoot.VOkCaseNil.Value == nil {
 			break
 		}
 
-		return e.complexity.VOkCaseNil.Value(childComplexity), true
+		return e.ComplexityRoot.VOkCaseNil.Value(childComplexity), true
 
 	case "VOkCaseValue.value":
-		if e.complexity.VOkCaseValue.Value == nil {
+		if e.ComplexityRoot.VOkCaseValue.Value == nil {
 			break
 		}
 
-		return e.complexity.VOkCaseValue.Value(childComplexity), true
+		return e.ComplexityRoot.VOkCaseValue.Value(childComplexity), true
 
 	case "ValidType.differentCase":
-		if e.complexity.ValidType.DifferentCase == nil {
+		if e.ComplexityRoot.ValidType.DifferentCase == nil {
 			break
 		}
 
-		return e.complexity.ValidType.DifferentCase(childComplexity), true
+		return e.ComplexityRoot.ValidType.DifferentCase(childComplexity), true
 
 	case "ValidType.different_case":
-		if e.complexity.ValidType.DifferentCaseOld == nil {
+		if e.ComplexityRoot.ValidType.DifferentCaseOld == nil {
 			break
 		}
 
-		return e.complexity.ValidType.DifferentCaseOld(childComplexity), true
+		return e.ComplexityRoot.ValidType.DifferentCaseOld(childComplexity), true
 
 	case "ValidType.validArgs":
-		if e.complexity.ValidType.ValidArgs == nil {
+		if e.ComplexityRoot.ValidType.ValidArgs == nil {
 			break
 		}
 
@@ -2222,10 +2212,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.ValidType.ValidArgs(childComplexity, args["break"].(string), args["default"].(string), args["func"].(string), args["interface"].(string), args["select"].(string), args["case"].(string), args["defer"].(string), args["go"].(string), args["map"].(string), args["struct"].(string), args["chan"].(string), args["else"].(string), args["goto"].(string), args["package"].(string), args["switch"].(string), args["const"].(string), args["fallthrough"].(string), args["if"].(string), args["range"].(string), args["type"].(string), args["continue"].(string), args["for"].(string), args["import"].(string), args["return"].(string), args["var"].(string), args["_"].(string)), true
+		return e.ComplexityRoot.ValidType.ValidArgs(childComplexity, args["break"].(string), args["default"].(string), args["func"].(string), args["interface"].(string), args["select"].(string), args["case"].(string), args["defer"].(string), args["go"].(string), args["map"].(string), args["struct"].(string), args["chan"].(string), args["else"].(string), args["goto"].(string), args["package"].(string), args["switch"].(string), args["const"].(string), args["fallthrough"].(string), args["if"].(string), args["range"].(string), args["type"].(string), args["continue"].(string), args["for"].(string), args["import"].(string), args["return"].(string), args["var"].(string), args["_"].(string)), true
 
 	case "ValidType.validInputKeywords":
-		if e.complexity.ValidType.ValidInputKeywords == nil {
+		if e.ComplexityRoot.ValidType.ValidInputKeywords == nil {
 			break
 		}
 
@@ -2234,10 +2224,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.ValidType.ValidInputKeywords(childComplexity, args["input"].(*ValidInput)), true
+		return e.ComplexityRoot.ValidType.ValidInputKeywords(childComplexity, args["input"].(*ValidInput)), true
 
 	case "VariadicModel.value":
-		if e.complexity.VariadicModel.Value == nil {
+		if e.ComplexityRoot.VariadicModel.Value == nil {
 			break
 		}
 
@@ -2246,10 +2236,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.VariadicModel.Value(childComplexity, args["rank"].(int)), true
+		return e.ComplexityRoot.VariadicModel.Value(childComplexity, args["rank"].(int)), true
 
 	case "WrappedMap.get":
-		if e.complexity.WrappedMap.Get == nil {
+		if e.ComplexityRoot.WrappedMap.Get == nil {
 			break
 		}
 
@@ -2258,10 +2248,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.WrappedMap.Get(childComplexity, args["key"].(string)), true
+		return e.ComplexityRoot.WrappedMap.Get(childComplexity, args["key"].(string)), true
 
 	case "WrappedSlice.get":
-		if e.complexity.WrappedSlice.Get == nil {
+		if e.ComplexityRoot.WrappedSlice.Get == nil {
 			break
 		}
 
@@ -2270,49 +2260,49 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.WrappedSlice.Get(childComplexity, args["idx"].(int)), true
+		return e.ComplexityRoot.WrappedSlice.Get(childComplexity, args["idx"].(int)), true
 
 	case "WrappedStruct.desc":
-		if e.complexity.WrappedStruct.Desc == nil {
+		if e.ComplexityRoot.WrappedStruct.Desc == nil {
 			break
 		}
 
-		return e.complexity.WrappedStruct.Desc(childComplexity), true
+		return e.ComplexityRoot.WrappedStruct.Desc(childComplexity), true
 
 	case "WrappedStruct.name":
-		if e.complexity.WrappedStruct.Name == nil {
+		if e.ComplexityRoot.WrappedStruct.Name == nil {
 			break
 		}
 
-		return e.complexity.WrappedStruct.Name(childComplexity), true
+		return e.ComplexityRoot.WrappedStruct.Name(childComplexity), true
 
 	case "XXIt.id":
-		if e.complexity.XXIt.ID == nil {
+		if e.ComplexityRoot.XXIt.ID == nil {
 			break
 		}
 
-		return e.complexity.XXIt.ID(childComplexity), true
+		return e.ComplexityRoot.XXIt.ID(childComplexity), true
 
 	case "XxIt.id":
-		if e.complexity.XxIt.ID == nil {
+		if e.ComplexityRoot.XxIt.ID == nil {
 			break
 		}
 
-		return e.complexity.XxIt.ID(childComplexity), true
+		return e.ComplexityRoot.XxIt.ID(childComplexity), true
 
 	case "asdfIt.id":
-		if e.complexity.AsdfIt.ID == nil {
+		if e.ComplexityRoot.AsdfIt.ID == nil {
 			break
 		}
 
-		return e.complexity.AsdfIt.ID(childComplexity), true
+		return e.ComplexityRoot.AsdfIt.ID(childComplexity), true
 
 	case "iIt.id":
-		if e.complexity.IIt.ID == nil {
+		if e.ComplexityRoot.IIt.ID == nil {
 			break
 		}
 
-		return e.complexity.IIt.ID(childComplexity), true
+		return e.ComplexityRoot.IIt.ID(childComplexity), true
 
 	}
 	return 0, false

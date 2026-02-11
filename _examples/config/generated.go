@@ -22,12 +22,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -85,16 +80,11 @@ type RoleResolver interface {
 	Name(ctx context.Context, obj *UserRole) (string, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -105,7 +95,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "Mutation.createTodo":
-		if e.complexity.Mutation.CreateTodo == nil {
+		if e.ComplexityRoot.Mutation.CreateTodo == nil {
 			break
 		}
 
@@ -114,83 +104,83 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateTodo(childComplexity, args["input"].(NewTodo)), true
+		return e.ComplexityRoot.Mutation.CreateTodo(childComplexity, args["input"].(NewTodo)), true
 
 	case "Query.todos":
-		if e.complexity.Query.Todos == nil {
+		if e.ComplexityRoot.Query.Todos == nil {
 			break
 		}
 
-		return e.complexity.Query.Todos(childComplexity), true
+		return e.ComplexityRoot.Query.Todos(childComplexity), true
 
 	case "Todo.databaseId":
-		if e.complexity.Todo.DatabaseID == nil {
+		if e.ComplexityRoot.Todo.DatabaseID == nil {
 			break
 		}
 
-		return e.complexity.Todo.DatabaseID(childComplexity), true
+		return e.ComplexityRoot.Todo.DatabaseID(childComplexity), true
 	case "Todo.text":
-		if e.complexity.Todo.Description == nil {
+		if e.ComplexityRoot.Todo.Description == nil {
 			break
 		}
 
-		return e.complexity.Todo.Description(childComplexity), true
+		return e.ComplexityRoot.Todo.Description(childComplexity), true
 	case "Todo.done":
-		if e.complexity.Todo.Done == nil {
+		if e.ComplexityRoot.Todo.Done == nil {
 			break
 		}
 
-		return e.complexity.Todo.Done(childComplexity), true
+		return e.ComplexityRoot.Todo.Done(childComplexity), true
 	case "Todo.id":
-		if e.complexity.Todo.ID == nil {
+		if e.ComplexityRoot.Todo.ID == nil {
 			break
 		}
 
-		return e.complexity.Todo.ID(childComplexity), true
+		return e.ComplexityRoot.Todo.ID(childComplexity), true
 	case "Todo.mutation":
-		if e.complexity.Todo.Mutation == nil {
+		if e.ComplexityRoot.Todo.Mutation == nil {
 			break
 		}
 
-		return e.complexity.Todo.Mutation(childComplexity), true
+		return e.ComplexityRoot.Todo.Mutation(childComplexity), true
 	case "Todo.query":
-		if e.complexity.Todo.Query == nil {
+		if e.ComplexityRoot.Todo.Query == nil {
 			break
 		}
 
-		return e.complexity.Todo.Query(childComplexity), true
+		return e.ComplexityRoot.Todo.Query(childComplexity), true
 	case "Todo.user":
-		if e.complexity.Todo.User == nil {
+		if e.ComplexityRoot.Todo.User == nil {
 			break
 		}
 
-		return e.complexity.Todo.User(childComplexity), true
+		return e.ComplexityRoot.Todo.User(childComplexity), true
 
 	case "User.name":
-		if e.complexity.User.FullName == nil {
+		if e.ComplexityRoot.User.FullName == nil {
 			break
 		}
 
-		return e.complexity.User.FullName(childComplexity), true
+		return e.ComplexityRoot.User.FullName(childComplexity), true
 	case "User.id":
-		if e.complexity.User.ID == nil {
+		if e.ComplexityRoot.User.ID == nil {
 			break
 		}
 
-		return e.complexity.User.ID(childComplexity), true
+		return e.ComplexityRoot.User.ID(childComplexity), true
 	case "User.role":
-		if e.complexity.User.Role == nil {
+		if e.ComplexityRoot.User.Role == nil {
 			break
 		}
 
-		return e.complexity.User.Role(childComplexity), true
+		return e.ComplexityRoot.User.Role(childComplexity), true
 
 	case "role.name":
-		if e.complexity.Role.Name == nil {
+		if e.ComplexityRoot.Role.Name == nil {
 			break
 		}
 
-		return e.complexity.Role.Name(childComplexity), true
+		return e.ComplexityRoot.Role.Name(childComplexity), true
 
 	}
 	return 0, false
@@ -401,7 +391,7 @@ func (ec *executionContext) _Mutation_createTodo(ctx context.Context, field grap
 		ec.fieldContext_Mutation_createTodo,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().CreateTodo(ctx, fc.Args["input"].(NewTodo))
+			return ec.Resolvers.Mutation().CreateTodo(ctx, fc.Args["input"].(NewTodo))
 		},
 		nil,
 		ec.marshalNTodo2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋconfigᚐTodo,
@@ -457,7 +447,7 @@ func (ec *executionContext) _Query_todos(ctx context.Context, field graphql.Coll
 		field,
 		ec.fieldContext_Query_todos,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Todos(ctx)
+			return ec.Resolvers.Query().Todos(ctx)
 		},
 		nil,
 		ec.marshalNTodo2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋconfigᚐTodoᚄ,
@@ -610,7 +600,7 @@ func (ec *executionContext) _Todo_id(ctx context.Context, field graphql.Collecte
 		field,
 		ec.fieldContext_Todo_id,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Todo().ID(ctx, obj)
+			return ec.Resolvers.Todo().ID(ctx, obj)
 		},
 		nil,
 		ec.marshalNID2string,
@@ -2368,7 +2358,7 @@ func (ec *executionContext) _role_name(ctx context.Context, field graphql.Collec
 		field,
 		ec.fieldContext_role_name,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Role().Name(ctx, obj)
+			return ec.Resolvers.Role().Name(ctx, obj)
 		},
 		nil,
 		ec.marshalNString2string,

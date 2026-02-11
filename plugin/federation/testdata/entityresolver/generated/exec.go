@@ -23,12 +23,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -163,16 +158,11 @@ type EntityResolver interface {
 	FindWorldWithMultipleKeysByBar(ctx context.Context, bar int) (*model.WorldWithMultipleKeys, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -183,7 +173,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "Entity.findHelloByName":
-		if e.complexity.Entity.FindHelloByName == nil {
+		if e.ComplexityRoot.Entity.FindHelloByName == nil {
 			break
 		}
 
@@ -192,9 +182,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindHelloByName(childComplexity, args["name"].(string)), true
+		return e.ComplexityRoot.Entity.FindHelloByName(childComplexity, args["name"].(string)), true
 	case "Entity.findHelloMultiSingleKeysByKey1AndKey2":
-		if e.complexity.Entity.FindHelloMultiSingleKeysByKey1AndKey2 == nil {
+		if e.ComplexityRoot.Entity.FindHelloMultiSingleKeysByKey1AndKey2 == nil {
 			break
 		}
 
@@ -203,9 +193,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindHelloMultiSingleKeysByKey1AndKey2(childComplexity, args["key1"].(string), args["key2"].(string)), true
+		return e.ComplexityRoot.Entity.FindHelloMultiSingleKeysByKey1AndKey2(childComplexity, args["key1"].(string), args["key2"].(string)), true
 	case "Entity.findHelloWithErrorsByName":
-		if e.complexity.Entity.FindHelloWithErrorsByName == nil {
+		if e.ComplexityRoot.Entity.FindHelloWithErrorsByName == nil {
 			break
 		}
 
@@ -214,9 +204,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindHelloWithErrorsByName(childComplexity, args["name"].(string)), true
+		return e.ComplexityRoot.Entity.FindHelloWithErrorsByName(childComplexity, args["name"].(string)), true
 	case "Entity.findManyMultiHelloByNames":
-		if e.complexity.Entity.FindManyMultiHelloByNames == nil {
+		if e.ComplexityRoot.Entity.FindManyMultiHelloByNames == nil {
 			break
 		}
 
@@ -225,9 +215,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindManyMultiHelloByNames(childComplexity, args["reps"].([]*model.MultiHelloByNamesInput)), true
+		return e.ComplexityRoot.Entity.FindManyMultiHelloByNames(childComplexity, args["reps"].([]*model.MultiHelloByNamesInput)), true
 	case "Entity.findManyMultiHelloMultipleRequiresByNames":
-		if e.complexity.Entity.FindManyMultiHelloMultipleRequiresByNames == nil {
+		if e.ComplexityRoot.Entity.FindManyMultiHelloMultipleRequiresByNames == nil {
 			break
 		}
 
@@ -236,9 +226,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindManyMultiHelloMultipleRequiresByNames(childComplexity, args["reps"].([]*model.MultiHelloMultipleRequiresByNamesInput)), true
+		return e.ComplexityRoot.Entity.FindManyMultiHelloMultipleRequiresByNames(childComplexity, args["reps"].([]*model.MultiHelloMultipleRequiresByNamesInput)), true
 	case "Entity.findManyMultiHelloRequiresByNames":
-		if e.complexity.Entity.FindManyMultiHelloRequiresByNames == nil {
+		if e.ComplexityRoot.Entity.FindManyMultiHelloRequiresByNames == nil {
 			break
 		}
 
@@ -247,9 +237,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindManyMultiHelloRequiresByNames(childComplexity, args["reps"].([]*model.MultiHelloRequiresByNamesInput)), true
+		return e.ComplexityRoot.Entity.FindManyMultiHelloRequiresByNames(childComplexity, args["reps"].([]*model.MultiHelloRequiresByNamesInput)), true
 	case "Entity.findManyMultiHelloWithErrorByNames":
-		if e.complexity.Entity.FindManyMultiHelloWithErrorByNames == nil {
+		if e.ComplexityRoot.Entity.FindManyMultiHelloWithErrorByNames == nil {
 			break
 		}
 
@@ -258,9 +248,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindManyMultiHelloWithErrorByNames(childComplexity, args["reps"].([]*model.MultiHelloWithErrorByNamesInput)), true
+		return e.ComplexityRoot.Entity.FindManyMultiHelloWithErrorByNames(childComplexity, args["reps"].([]*model.MultiHelloWithErrorByNamesInput)), true
 	case "Entity.findManyMultiPlanetRequiresNestedByNames":
-		if e.complexity.Entity.FindManyMultiPlanetRequiresNestedByNames == nil {
+		if e.ComplexityRoot.Entity.FindManyMultiPlanetRequiresNestedByNames == nil {
 			break
 		}
 
@@ -269,9 +259,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindManyMultiPlanetRequiresNestedByNames(childComplexity, args["reps"].([]*model.MultiPlanetRequiresNestedByNamesInput)), true
+		return e.ComplexityRoot.Entity.FindManyMultiPlanetRequiresNestedByNames(childComplexity, args["reps"].([]*model.MultiPlanetRequiresNestedByNamesInput)), true
 	case "Entity.findPlanetMultipleRequiresByName":
-		if e.complexity.Entity.FindPlanetMultipleRequiresByName == nil {
+		if e.ComplexityRoot.Entity.FindPlanetMultipleRequiresByName == nil {
 			break
 		}
 
@@ -280,9 +270,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindPlanetMultipleRequiresByName(childComplexity, args["name"].(string)), true
+		return e.ComplexityRoot.Entity.FindPlanetMultipleRequiresByName(childComplexity, args["name"].(string)), true
 	case "Entity.findPlanetRequiresByName":
-		if e.complexity.Entity.FindPlanetRequiresByName == nil {
+		if e.ComplexityRoot.Entity.FindPlanetRequiresByName == nil {
 			break
 		}
 
@@ -291,9 +281,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindPlanetRequiresByName(childComplexity, args["name"].(string)), true
+		return e.ComplexityRoot.Entity.FindPlanetRequiresByName(childComplexity, args["name"].(string)), true
 	case "Entity.findPlanetRequiresNestedByName":
-		if e.complexity.Entity.FindPlanetRequiresNestedByName == nil {
+		if e.ComplexityRoot.Entity.FindPlanetRequiresNestedByName == nil {
 			break
 		}
 
@@ -302,9 +292,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindPlanetRequiresNestedByName(childComplexity, args["name"].(string)), true
+		return e.ComplexityRoot.Entity.FindPlanetRequiresNestedByName(childComplexity, args["name"].(string)), true
 	case "Entity.findWorldByHelloNameAndFoo":
-		if e.complexity.Entity.FindWorldByHelloNameAndFoo == nil {
+		if e.ComplexityRoot.Entity.FindWorldByHelloNameAndFoo == nil {
 			break
 		}
 
@@ -313,9 +303,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindWorldByHelloNameAndFoo(childComplexity, args["helloName"].(string), args["foo"].(string)), true
+		return e.ComplexityRoot.Entity.FindWorldByHelloNameAndFoo(childComplexity, args["helloName"].(string), args["foo"].(string)), true
 	case "Entity.findWorldNameByName":
-		if e.complexity.Entity.FindWorldNameByName == nil {
+		if e.ComplexityRoot.Entity.FindWorldNameByName == nil {
 			break
 		}
 
@@ -324,9 +314,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindWorldNameByName(childComplexity, args["name"].(string)), true
+		return e.ComplexityRoot.Entity.FindWorldNameByName(childComplexity, args["name"].(string)), true
 	case "Entity.findWorldWithMultipleKeysByBar":
-		if e.complexity.Entity.FindWorldWithMultipleKeysByBar == nil {
+		if e.ComplexityRoot.Entity.FindWorldWithMultipleKeysByBar == nil {
 			break
 		}
 
@@ -335,9 +325,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindWorldWithMultipleKeysByBar(childComplexity, args["bar"].(int)), true
+		return e.ComplexityRoot.Entity.FindWorldWithMultipleKeysByBar(childComplexity, args["bar"].(int)), true
 	case "Entity.findWorldWithMultipleKeysByHelloNameAndFoo":
-		if e.complexity.Entity.FindWorldWithMultipleKeysByHelloNameAndFoo == nil {
+		if e.ComplexityRoot.Entity.FindWorldWithMultipleKeysByHelloNameAndFoo == nil {
 			break
 		}
 
@@ -346,189 +336,189 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindWorldWithMultipleKeysByHelloNameAndFoo(childComplexity, args["helloName"].(string), args["foo"].(string)), true
+		return e.ComplexityRoot.Entity.FindWorldWithMultipleKeysByHelloNameAndFoo(childComplexity, args["helloName"].(string), args["foo"].(string)), true
 
 	case "Hello.name":
-		if e.complexity.Hello.Name == nil {
+		if e.ComplexityRoot.Hello.Name == nil {
 			break
 		}
 
-		return e.complexity.Hello.Name(childComplexity), true
+		return e.ComplexityRoot.Hello.Name(childComplexity), true
 	case "Hello.secondary":
-		if e.complexity.Hello.Secondary == nil {
+		if e.ComplexityRoot.Hello.Secondary == nil {
 			break
 		}
 
-		return e.complexity.Hello.Secondary(childComplexity), true
+		return e.ComplexityRoot.Hello.Secondary(childComplexity), true
 
 	case "HelloMultiSingleKeys.key1":
-		if e.complexity.HelloMultiSingleKeys.Key1 == nil {
+		if e.ComplexityRoot.HelloMultiSingleKeys.Key1 == nil {
 			break
 		}
 
-		return e.complexity.HelloMultiSingleKeys.Key1(childComplexity), true
+		return e.ComplexityRoot.HelloMultiSingleKeys.Key1(childComplexity), true
 	case "HelloMultiSingleKeys.key2":
-		if e.complexity.HelloMultiSingleKeys.Key2 == nil {
+		if e.ComplexityRoot.HelloMultiSingleKeys.Key2 == nil {
 			break
 		}
 
-		return e.complexity.HelloMultiSingleKeys.Key2(childComplexity), true
+		return e.ComplexityRoot.HelloMultiSingleKeys.Key2(childComplexity), true
 
 	case "HelloWithErrors.name":
-		if e.complexity.HelloWithErrors.Name == nil {
+		if e.ComplexityRoot.HelloWithErrors.Name == nil {
 			break
 		}
 
-		return e.complexity.HelloWithErrors.Name(childComplexity), true
+		return e.ComplexityRoot.HelloWithErrors.Name(childComplexity), true
 
 	case "MultiHello.name":
-		if e.complexity.MultiHello.Name == nil {
+		if e.ComplexityRoot.MultiHello.Name == nil {
 			break
 		}
 
-		return e.complexity.MultiHello.Name(childComplexity), true
+		return e.ComplexityRoot.MultiHello.Name(childComplexity), true
 
 	case "MultiHelloMultipleRequires.key1":
-		if e.complexity.MultiHelloMultipleRequires.Key1 == nil {
+		if e.ComplexityRoot.MultiHelloMultipleRequires.Key1 == nil {
 			break
 		}
 
-		return e.complexity.MultiHelloMultipleRequires.Key1(childComplexity), true
+		return e.ComplexityRoot.MultiHelloMultipleRequires.Key1(childComplexity), true
 	case "MultiHelloMultipleRequires.key2":
-		if e.complexity.MultiHelloMultipleRequires.Key2 == nil {
+		if e.ComplexityRoot.MultiHelloMultipleRequires.Key2 == nil {
 			break
 		}
 
-		return e.complexity.MultiHelloMultipleRequires.Key2(childComplexity), true
+		return e.ComplexityRoot.MultiHelloMultipleRequires.Key2(childComplexity), true
 	case "MultiHelloMultipleRequires.key3":
-		if e.complexity.MultiHelloMultipleRequires.Key3 == nil {
+		if e.ComplexityRoot.MultiHelloMultipleRequires.Key3 == nil {
 			break
 		}
 
-		return e.complexity.MultiHelloMultipleRequires.Key3(childComplexity), true
+		return e.ComplexityRoot.MultiHelloMultipleRequires.Key3(childComplexity), true
 	case "MultiHelloMultipleRequires.name":
-		if e.complexity.MultiHelloMultipleRequires.Name == nil {
+		if e.ComplexityRoot.MultiHelloMultipleRequires.Name == nil {
 			break
 		}
 
-		return e.complexity.MultiHelloMultipleRequires.Name(childComplexity), true
+		return e.ComplexityRoot.MultiHelloMultipleRequires.Name(childComplexity), true
 
 	case "MultiHelloRequires.key1":
-		if e.complexity.MultiHelloRequires.Key1 == nil {
+		if e.ComplexityRoot.MultiHelloRequires.Key1 == nil {
 			break
 		}
 
-		return e.complexity.MultiHelloRequires.Key1(childComplexity), true
+		return e.ComplexityRoot.MultiHelloRequires.Key1(childComplexity), true
 	case "MultiHelloRequires.key2":
-		if e.complexity.MultiHelloRequires.Key2 == nil {
+		if e.ComplexityRoot.MultiHelloRequires.Key2 == nil {
 			break
 		}
 
-		return e.complexity.MultiHelloRequires.Key2(childComplexity), true
+		return e.ComplexityRoot.MultiHelloRequires.Key2(childComplexity), true
 	case "MultiHelloRequires.name":
-		if e.complexity.MultiHelloRequires.Name == nil {
+		if e.ComplexityRoot.MultiHelloRequires.Name == nil {
 			break
 		}
 
-		return e.complexity.MultiHelloRequires.Name(childComplexity), true
+		return e.ComplexityRoot.MultiHelloRequires.Name(childComplexity), true
 
 	case "MultiHelloWithError.name":
-		if e.complexity.MultiHelloWithError.Name == nil {
+		if e.ComplexityRoot.MultiHelloWithError.Name == nil {
 			break
 		}
 
-		return e.complexity.MultiHelloWithError.Name(childComplexity), true
+		return e.ComplexityRoot.MultiHelloWithError.Name(childComplexity), true
 
 	case "MultiPlanetRequiresNested.name":
-		if e.complexity.MultiPlanetRequiresNested.Name == nil {
+		if e.ComplexityRoot.MultiPlanetRequiresNested.Name == nil {
 			break
 		}
 
-		return e.complexity.MultiPlanetRequiresNested.Name(childComplexity), true
+		return e.ComplexityRoot.MultiPlanetRequiresNested.Name(childComplexity), true
 	case "MultiPlanetRequiresNested.size":
-		if e.complexity.MultiPlanetRequiresNested.Size == nil {
+		if e.ComplexityRoot.MultiPlanetRequiresNested.Size == nil {
 			break
 		}
 
-		return e.complexity.MultiPlanetRequiresNested.Size(childComplexity), true
+		return e.ComplexityRoot.MultiPlanetRequiresNested.Size(childComplexity), true
 	case "MultiPlanetRequiresNested.world":
-		if e.complexity.MultiPlanetRequiresNested.World == nil {
+		if e.ComplexityRoot.MultiPlanetRequiresNested.World == nil {
 			break
 		}
 
-		return e.complexity.MultiPlanetRequiresNested.World(childComplexity), true
+		return e.ComplexityRoot.MultiPlanetRequiresNested.World(childComplexity), true
 
 	case "PlanetMultipleRequires.density":
-		if e.complexity.PlanetMultipleRequires.Density == nil {
+		if e.ComplexityRoot.PlanetMultipleRequires.Density == nil {
 			break
 		}
 
-		return e.complexity.PlanetMultipleRequires.Density(childComplexity), true
+		return e.ComplexityRoot.PlanetMultipleRequires.Density(childComplexity), true
 	case "PlanetMultipleRequires.diameter":
-		if e.complexity.PlanetMultipleRequires.Diameter == nil {
+		if e.ComplexityRoot.PlanetMultipleRequires.Diameter == nil {
 			break
 		}
 
-		return e.complexity.PlanetMultipleRequires.Diameter(childComplexity), true
+		return e.ComplexityRoot.PlanetMultipleRequires.Diameter(childComplexity), true
 	case "PlanetMultipleRequires.name":
-		if e.complexity.PlanetMultipleRequires.Name == nil {
+		if e.ComplexityRoot.PlanetMultipleRequires.Name == nil {
 			break
 		}
 
-		return e.complexity.PlanetMultipleRequires.Name(childComplexity), true
+		return e.ComplexityRoot.PlanetMultipleRequires.Name(childComplexity), true
 	case "PlanetMultipleRequires.weight":
-		if e.complexity.PlanetMultipleRequires.Weight == nil {
+		if e.ComplexityRoot.PlanetMultipleRequires.Weight == nil {
 			break
 		}
 
-		return e.complexity.PlanetMultipleRequires.Weight(childComplexity), true
+		return e.ComplexityRoot.PlanetMultipleRequires.Weight(childComplexity), true
 
 	case "PlanetRequires.diameter":
-		if e.complexity.PlanetRequires.Diameter == nil {
+		if e.ComplexityRoot.PlanetRequires.Diameter == nil {
 			break
 		}
 
-		return e.complexity.PlanetRequires.Diameter(childComplexity), true
+		return e.ComplexityRoot.PlanetRequires.Diameter(childComplexity), true
 	case "PlanetRequires.name":
-		if e.complexity.PlanetRequires.Name == nil {
+		if e.ComplexityRoot.PlanetRequires.Name == nil {
 			break
 		}
 
-		return e.complexity.PlanetRequires.Name(childComplexity), true
+		return e.ComplexityRoot.PlanetRequires.Name(childComplexity), true
 	case "PlanetRequires.size":
-		if e.complexity.PlanetRequires.Size == nil {
+		if e.ComplexityRoot.PlanetRequires.Size == nil {
 			break
 		}
 
-		return e.complexity.PlanetRequires.Size(childComplexity), true
+		return e.ComplexityRoot.PlanetRequires.Size(childComplexity), true
 
 	case "PlanetRequiresNested.name":
-		if e.complexity.PlanetRequiresNested.Name == nil {
+		if e.ComplexityRoot.PlanetRequiresNested.Name == nil {
 			break
 		}
 
-		return e.complexity.PlanetRequiresNested.Name(childComplexity), true
+		return e.ComplexityRoot.PlanetRequiresNested.Name(childComplexity), true
 	case "PlanetRequiresNested.size":
-		if e.complexity.PlanetRequiresNested.Size == nil {
+		if e.ComplexityRoot.PlanetRequiresNested.Size == nil {
 			break
 		}
 
-		return e.complexity.PlanetRequiresNested.Size(childComplexity), true
+		return e.ComplexityRoot.PlanetRequiresNested.Size(childComplexity), true
 	case "PlanetRequiresNested.world":
-		if e.complexity.PlanetRequiresNested.World == nil {
+		if e.ComplexityRoot.PlanetRequiresNested.World == nil {
 			break
 		}
 
-		return e.complexity.PlanetRequiresNested.World(childComplexity), true
+		return e.ComplexityRoot.PlanetRequiresNested.World(childComplexity), true
 
 	case "Query._service":
-		if e.complexity.Query.__resolve__service == nil {
+		if e.ComplexityRoot.Query.__resolve__service == nil {
 			break
 		}
 
-		return e.complexity.Query.__resolve__service(childComplexity), true
+		return e.ComplexityRoot.Query.__resolve__service(childComplexity), true
 	case "Query._entities":
-		if e.complexity.Query.__resolve_entities == nil {
+		if e.ComplexityRoot.Query.__resolve_entities == nil {
 			break
 		}
 
@@ -537,59 +527,59 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.__resolve_entities(childComplexity, args["representations"].([]map[string]any)), true
+		return e.ComplexityRoot.Query.__resolve_entities(childComplexity, args["representations"].([]map[string]any)), true
 
 	case "World.bar":
-		if e.complexity.World.Bar == nil {
+		if e.ComplexityRoot.World.Bar == nil {
 			break
 		}
 
-		return e.complexity.World.Bar(childComplexity), true
+		return e.ComplexityRoot.World.Bar(childComplexity), true
 	case "World.foo":
-		if e.complexity.World.Foo == nil {
+		if e.ComplexityRoot.World.Foo == nil {
 			break
 		}
 
-		return e.complexity.World.Foo(childComplexity), true
+		return e.ComplexityRoot.World.Foo(childComplexity), true
 	case "World.hello":
-		if e.complexity.World.Hello == nil {
+		if e.ComplexityRoot.World.Hello == nil {
 			break
 		}
 
-		return e.complexity.World.Hello(childComplexity), true
+		return e.ComplexityRoot.World.Hello(childComplexity), true
 
 	case "WorldName.name":
-		if e.complexity.WorldName.Name == nil {
+		if e.ComplexityRoot.WorldName.Name == nil {
 			break
 		}
 
-		return e.complexity.WorldName.Name(childComplexity), true
+		return e.ComplexityRoot.WorldName.Name(childComplexity), true
 
 	case "WorldWithMultipleKeys.bar":
-		if e.complexity.WorldWithMultipleKeys.Bar == nil {
+		if e.ComplexityRoot.WorldWithMultipleKeys.Bar == nil {
 			break
 		}
 
-		return e.complexity.WorldWithMultipleKeys.Bar(childComplexity), true
+		return e.ComplexityRoot.WorldWithMultipleKeys.Bar(childComplexity), true
 	case "WorldWithMultipleKeys.foo":
-		if e.complexity.WorldWithMultipleKeys.Foo == nil {
+		if e.ComplexityRoot.WorldWithMultipleKeys.Foo == nil {
 			break
 		}
 
-		return e.complexity.WorldWithMultipleKeys.Foo(childComplexity), true
+		return e.ComplexityRoot.WorldWithMultipleKeys.Foo(childComplexity), true
 	case "WorldWithMultipleKeys.hello":
-		if e.complexity.WorldWithMultipleKeys.Hello == nil {
+		if e.ComplexityRoot.WorldWithMultipleKeys.Hello == nil {
 			break
 		}
 
-		return e.complexity.WorldWithMultipleKeys.Hello(childComplexity), true
+		return e.ComplexityRoot.WorldWithMultipleKeys.Hello(childComplexity), true
 
 	case "_Service.sdl":
-		if e.complexity._Service.SDL == nil {
+		if e.ComplexityRoot._Service.SDL == nil {
 			break
 		}
 
-		return e.complexity._Service.SDL(childComplexity), true
+		return e.ComplexityRoot._Service.SDL(childComplexity), true
 
 	}
 	return 0, false
@@ -1094,7 +1084,7 @@ func (ec *executionContext) _Entity_findHelloByName(ctx context.Context, field g
 		ec.fieldContext_Entity_findHelloByName,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindHelloByName(ctx, fc.Args["name"].(string))
+			return ec.Resolvers.Entity().FindHelloByName(ctx, fc.Args["name"].(string))
 		},
 		nil,
 		ec.marshalNHello2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐHello,
@@ -1141,7 +1131,7 @@ func (ec *executionContext) _Entity_findHelloMultiSingleKeysByKey1AndKey2(ctx co
 		ec.fieldContext_Entity_findHelloMultiSingleKeysByKey1AndKey2,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindHelloMultiSingleKeysByKey1AndKey2(ctx, fc.Args["key1"].(string), fc.Args["key2"].(string))
+			return ec.Resolvers.Entity().FindHelloMultiSingleKeysByKey1AndKey2(ctx, fc.Args["key1"].(string), fc.Args["key2"].(string))
 		},
 		nil,
 		ec.marshalNHelloMultiSingleKeys2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐHelloMultiSingleKeys,
@@ -1188,7 +1178,7 @@ func (ec *executionContext) _Entity_findHelloWithErrorsByName(ctx context.Contex
 		ec.fieldContext_Entity_findHelloWithErrorsByName,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindHelloWithErrorsByName(ctx, fc.Args["name"].(string))
+			return ec.Resolvers.Entity().FindHelloWithErrorsByName(ctx, fc.Args["name"].(string))
 		},
 		nil,
 		ec.marshalNHelloWithErrors2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐHelloWithErrors,
@@ -1233,7 +1223,7 @@ func (ec *executionContext) _Entity_findManyMultiHelloByNames(ctx context.Contex
 		ec.fieldContext_Entity_findManyMultiHelloByNames,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindManyMultiHelloByNames(ctx, fc.Args["reps"].([]*model.MultiHelloByNamesInput))
+			return ec.Resolvers.Entity().FindManyMultiHelloByNames(ctx, fc.Args["reps"].([]*model.MultiHelloByNamesInput))
 		},
 		nil,
 		ec.marshalOMultiHello2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHello,
@@ -1278,7 +1268,7 @@ func (ec *executionContext) _Entity_findManyMultiHelloMultipleRequiresByNames(ct
 		ec.fieldContext_Entity_findManyMultiHelloMultipleRequiresByNames,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindManyMultiHelloMultipleRequiresByNames(ctx, fc.Args["reps"].([]*model.MultiHelloMultipleRequiresByNamesInput))
+			return ec.Resolvers.Entity().FindManyMultiHelloMultipleRequiresByNames(ctx, fc.Args["reps"].([]*model.MultiHelloMultipleRequiresByNamesInput))
 		},
 		nil,
 		ec.marshalOMultiHelloMultipleRequires2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloMultipleRequires,
@@ -1329,7 +1319,7 @@ func (ec *executionContext) _Entity_findManyMultiHelloRequiresByNames(ctx contex
 		ec.fieldContext_Entity_findManyMultiHelloRequiresByNames,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindManyMultiHelloRequiresByNames(ctx, fc.Args["reps"].([]*model.MultiHelloRequiresByNamesInput))
+			return ec.Resolvers.Entity().FindManyMultiHelloRequiresByNames(ctx, fc.Args["reps"].([]*model.MultiHelloRequiresByNamesInput))
 		},
 		nil,
 		ec.marshalOMultiHelloRequires2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloRequires,
@@ -1378,7 +1368,7 @@ func (ec *executionContext) _Entity_findManyMultiHelloWithErrorByNames(ctx conte
 		ec.fieldContext_Entity_findManyMultiHelloWithErrorByNames,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindManyMultiHelloWithErrorByNames(ctx, fc.Args["reps"].([]*model.MultiHelloWithErrorByNamesInput))
+			return ec.Resolvers.Entity().FindManyMultiHelloWithErrorByNames(ctx, fc.Args["reps"].([]*model.MultiHelloWithErrorByNamesInput))
 		},
 		nil,
 		ec.marshalOMultiHelloWithError2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloWithError,
@@ -1423,7 +1413,7 @@ func (ec *executionContext) _Entity_findManyMultiPlanetRequiresNestedByNames(ctx
 		ec.fieldContext_Entity_findManyMultiPlanetRequiresNestedByNames,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindManyMultiPlanetRequiresNestedByNames(ctx, fc.Args["reps"].([]*model.MultiPlanetRequiresNestedByNamesInput))
+			return ec.Resolvers.Entity().FindManyMultiPlanetRequiresNestedByNames(ctx, fc.Args["reps"].([]*model.MultiPlanetRequiresNestedByNamesInput))
 		},
 		nil,
 		ec.marshalOMultiPlanetRequiresNested2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiPlanetRequiresNested,
@@ -1472,7 +1462,7 @@ func (ec *executionContext) _Entity_findPlanetMultipleRequiresByName(ctx context
 		ec.fieldContext_Entity_findPlanetMultipleRequiresByName,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindPlanetMultipleRequiresByName(ctx, fc.Args["name"].(string))
+			return ec.Resolvers.Entity().FindPlanetMultipleRequiresByName(ctx, fc.Args["name"].(string))
 		},
 		nil,
 		ec.marshalNPlanetMultipleRequires2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐPlanetMultipleRequires,
@@ -1523,7 +1513,7 @@ func (ec *executionContext) _Entity_findPlanetRequiresByName(ctx context.Context
 		ec.fieldContext_Entity_findPlanetRequiresByName,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindPlanetRequiresByName(ctx, fc.Args["name"].(string))
+			return ec.Resolvers.Entity().FindPlanetRequiresByName(ctx, fc.Args["name"].(string))
 		},
 		nil,
 		ec.marshalNPlanetRequires2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐPlanetRequires,
@@ -1572,7 +1562,7 @@ func (ec *executionContext) _Entity_findPlanetRequiresNestedByName(ctx context.C
 		ec.fieldContext_Entity_findPlanetRequiresNestedByName,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindPlanetRequiresNestedByName(ctx, fc.Args["name"].(string))
+			return ec.Resolvers.Entity().FindPlanetRequiresNestedByName(ctx, fc.Args["name"].(string))
 		},
 		nil,
 		ec.marshalNPlanetRequiresNested2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐPlanetRequiresNested,
@@ -1621,7 +1611,7 @@ func (ec *executionContext) _Entity_findWorldByHelloNameAndFoo(ctx context.Conte
 		ec.fieldContext_Entity_findWorldByHelloNameAndFoo,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindWorldByHelloNameAndFoo(ctx, fc.Args["helloName"].(string), fc.Args["foo"].(string))
+			return ec.Resolvers.Entity().FindWorldByHelloNameAndFoo(ctx, fc.Args["helloName"].(string), fc.Args["foo"].(string))
 		},
 		nil,
 		ec.marshalNWorld2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐWorld,
@@ -1670,7 +1660,7 @@ func (ec *executionContext) _Entity_findWorldNameByName(ctx context.Context, fie
 		ec.fieldContext_Entity_findWorldNameByName,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindWorldNameByName(ctx, fc.Args["name"].(string))
+			return ec.Resolvers.Entity().FindWorldNameByName(ctx, fc.Args["name"].(string))
 		},
 		nil,
 		ec.marshalNWorldName2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐWorldName,
@@ -1715,7 +1705,7 @@ func (ec *executionContext) _Entity_findWorldWithMultipleKeysByHelloNameAndFoo(c
 		ec.fieldContext_Entity_findWorldWithMultipleKeysByHelloNameAndFoo,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindWorldWithMultipleKeysByHelloNameAndFoo(ctx, fc.Args["helloName"].(string), fc.Args["foo"].(string))
+			return ec.Resolvers.Entity().FindWorldWithMultipleKeysByHelloNameAndFoo(ctx, fc.Args["helloName"].(string), fc.Args["foo"].(string))
 		},
 		nil,
 		ec.marshalNWorldWithMultipleKeys2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐWorldWithMultipleKeys,
@@ -1764,7 +1754,7 @@ func (ec *executionContext) _Entity_findWorldWithMultipleKeysByBar(ctx context.C
 		ec.fieldContext_Entity_findWorldWithMultipleKeysByBar,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindWorldWithMultipleKeysByBar(ctx, fc.Args["bar"].(int))
+			return ec.Resolvers.Entity().FindWorldWithMultipleKeysByBar(ctx, fc.Args["bar"].(int))
 		},
 		nil,
 		ec.marshalNWorldWithMultipleKeys2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐWorldWithMultipleKeys,

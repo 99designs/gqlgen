@@ -25,12 +25,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -657,16 +652,11 @@ type FieldsOrderInputResolver interface {
 	OverrideFirstField(ctx context.Context, obj *FieldsOrderInput, data *string) error
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -677,463 +667,463 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "A.id":
-		if e.complexity.A.ID == nil {
+		if e.ComplexityRoot.A.ID == nil {
 			break
 		}
 
-		return e.complexity.A.ID(childComplexity), true
+		return e.ComplexityRoot.A.ID(childComplexity), true
 
 	case "AIt.id":
-		if e.complexity.AIt.ID == nil {
+		if e.ComplexityRoot.AIt.ID == nil {
 			break
 		}
 
-		return e.complexity.AIt.ID(childComplexity), true
+		return e.ComplexityRoot.AIt.ID(childComplexity), true
 
 	case "AbIt.id":
-		if e.complexity.AbIt.ID == nil {
+		if e.ComplexityRoot.AbIt.ID == nil {
 			break
 		}
 
-		return e.complexity.AbIt.ID(childComplexity), true
+		return e.ComplexityRoot.AbIt.ID(childComplexity), true
 
 	case "Autobind.idInt":
-		if e.complexity.Autobind.IdInt == nil {
+		if e.ComplexityRoot.Autobind.IdInt == nil {
 			break
 		}
 
-		return e.complexity.Autobind.IdInt(childComplexity), true
+		return e.ComplexityRoot.Autobind.IdInt(childComplexity), true
 	case "Autobind.idStr":
-		if e.complexity.Autobind.IdStr == nil {
+		if e.ComplexityRoot.Autobind.IdStr == nil {
 			break
 		}
 
-		return e.complexity.Autobind.IdStr(childComplexity), true
+		return e.ComplexityRoot.Autobind.IdStr(childComplexity), true
 	case "Autobind.int":
-		if e.complexity.Autobind.Int == nil {
+		if e.ComplexityRoot.Autobind.Int == nil {
 			break
 		}
 
-		return e.complexity.Autobind.Int(childComplexity), true
+		return e.ComplexityRoot.Autobind.Int(childComplexity), true
 	case "Autobind.int32":
-		if e.complexity.Autobind.Int32 == nil {
+		if e.ComplexityRoot.Autobind.Int32 == nil {
 			break
 		}
 
-		return e.complexity.Autobind.Int32(childComplexity), true
+		return e.ComplexityRoot.Autobind.Int32(childComplexity), true
 	case "Autobind.int64":
-		if e.complexity.Autobind.Int64 == nil {
+		if e.ComplexityRoot.Autobind.Int64 == nil {
 			break
 		}
 
-		return e.complexity.Autobind.Int64(childComplexity), true
+		return e.ComplexityRoot.Autobind.Int64(childComplexity), true
 
 	case "B.id":
-		if e.complexity.B.ID == nil {
+		if e.ComplexityRoot.B.ID == nil {
 			break
 		}
 
-		return e.complexity.B.ID(childComplexity), true
+		return e.ComplexityRoot.B.ID(childComplexity), true
 
 	case "BackedByInterface.id":
-		if e.complexity.BackedByInterface.ID == nil {
+		if e.ComplexityRoot.BackedByInterface.ID == nil {
 			break
 		}
 
-		return e.complexity.BackedByInterface.ID(childComplexity), true
+		return e.ComplexityRoot.BackedByInterface.ID(childComplexity), true
 	case "BackedByInterface.thisShouldBind":
-		if e.complexity.BackedByInterface.ThisShouldBind == nil {
+		if e.ComplexityRoot.BackedByInterface.ThisShouldBind == nil {
 			break
 		}
 
-		return e.complexity.BackedByInterface.ThisShouldBind(childComplexity), true
+		return e.ComplexityRoot.BackedByInterface.ThisShouldBind(childComplexity), true
 	case "BackedByInterface.thisShouldBindWithError":
-		if e.complexity.BackedByInterface.ThisShouldBindWithError == nil {
+		if e.ComplexityRoot.BackedByInterface.ThisShouldBindWithError == nil {
 			break
 		}
 
-		return e.complexity.BackedByInterface.ThisShouldBindWithError(childComplexity), true
+		return e.ComplexityRoot.BackedByInterface.ThisShouldBindWithError(childComplexity), true
 
 	case "Cat.catBreed":
-		if e.complexity.Cat.CatBreed == nil {
+		if e.ComplexityRoot.Cat.CatBreed == nil {
 			break
 		}
 
-		return e.complexity.Cat.CatBreed(childComplexity), true
+		return e.ComplexityRoot.Cat.CatBreed(childComplexity), true
 	case "Cat.size":
-		if e.complexity.Cat.Size == nil {
+		if e.ComplexityRoot.Cat.Size == nil {
 			break
 		}
 
-		return e.complexity.Cat.Size(childComplexity), true
+		return e.ComplexityRoot.Cat.Size(childComplexity), true
 	case "Cat.species":
-		if e.complexity.Cat.Species == nil {
+		if e.ComplexityRoot.Cat.Species == nil {
 			break
 		}
 
-		return e.complexity.Cat.Species(childComplexity), true
+		return e.ComplexityRoot.Cat.Species(childComplexity), true
 
 	case "CheckIssue896.id":
-		if e.complexity.CheckIssue896.ID == nil {
+		if e.ComplexityRoot.CheckIssue896.ID == nil {
 			break
 		}
 
-		return e.complexity.CheckIssue896.ID(childComplexity), true
+		return e.ComplexityRoot.CheckIssue896.ID(childComplexity), true
 
 	case "Circle.area":
-		if e.complexity.Circle.Area == nil {
+		if e.ComplexityRoot.Circle.Area == nil {
 			break
 		}
 
-		return e.complexity.Circle.Area(childComplexity), true
+		return e.ComplexityRoot.Circle.Area(childComplexity), true
 	case "Circle.coordinates":
-		if e.complexity.Circle.Coordinates == nil {
+		if e.ComplexityRoot.Circle.Coordinates == nil {
 			break
 		}
 
-		return e.complexity.Circle.Coordinates(childComplexity), true
+		return e.ComplexityRoot.Circle.Coordinates(childComplexity), true
 	case "Circle.radius":
-		if e.complexity.Circle.Radius == nil {
+		if e.ComplexityRoot.Circle.Radius == nil {
 			break
 		}
 
-		return e.complexity.Circle.Radius(childComplexity), true
+		return e.ComplexityRoot.Circle.Radius(childComplexity), true
 
 	case "ConcreteNodeA.child":
-		if e.complexity.ConcreteNodeA.Child == nil {
+		if e.ComplexityRoot.ConcreteNodeA.Child == nil {
 			break
 		}
 
-		return e.complexity.ConcreteNodeA.Child(childComplexity), true
+		return e.ComplexityRoot.ConcreteNodeA.Child(childComplexity), true
 	case "ConcreteNodeA.id":
-		if e.complexity.ConcreteNodeA.ID == nil {
+		if e.ComplexityRoot.ConcreteNodeA.ID == nil {
 			break
 		}
 
-		return e.complexity.ConcreteNodeA.ID(childComplexity), true
+		return e.ComplexityRoot.ConcreteNodeA.ID(childComplexity), true
 	case "ConcreteNodeA.name":
-		if e.complexity.ConcreteNodeA.Name == nil {
+		if e.ComplexityRoot.ConcreteNodeA.Name == nil {
 			break
 		}
 
-		return e.complexity.ConcreteNodeA.Name(childComplexity), true
+		return e.ComplexityRoot.ConcreteNodeA.Name(childComplexity), true
 
 	case "ConcreteNodeInterface.child":
-		if e.complexity.ConcreteNodeInterface.Child == nil {
+		if e.ComplexityRoot.ConcreteNodeInterface.Child == nil {
 			break
 		}
 
-		return e.complexity.ConcreteNodeInterface.Child(childComplexity), true
+		return e.ComplexityRoot.ConcreteNodeInterface.Child(childComplexity), true
 	case "ConcreteNodeInterface.id":
-		if e.complexity.ConcreteNodeInterface.ID == nil {
+		if e.ComplexityRoot.ConcreteNodeInterface.ID == nil {
 			break
 		}
 
-		return e.complexity.ConcreteNodeInterface.ID(childComplexity), true
+		return e.ComplexityRoot.ConcreteNodeInterface.ID(childComplexity), true
 
 	case "Content_Post.foo":
-		if e.complexity.Content_Post.Foo == nil {
+		if e.ComplexityRoot.Content_Post.Foo == nil {
 			break
 		}
 
-		return e.complexity.Content_Post.Foo(childComplexity), true
+		return e.ComplexityRoot.Content_Post.Foo(childComplexity), true
 
 	case "Content_User.foo":
-		if e.complexity.Content_User.Foo == nil {
+		if e.ComplexityRoot.Content_User.Foo == nil {
 			break
 		}
 
-		return e.complexity.Content_User.Foo(childComplexity), true
+		return e.ComplexityRoot.Content_User.Foo(childComplexity), true
 
 	case "Coordinates.x":
-		if e.complexity.Coordinates.X == nil {
+		if e.ComplexityRoot.Coordinates.X == nil {
 			break
 		}
 
-		return e.complexity.Coordinates.X(childComplexity), true
+		return e.ComplexityRoot.Coordinates.X(childComplexity), true
 	case "Coordinates.y":
-		if e.complexity.Coordinates.Y == nil {
+		if e.ComplexityRoot.Coordinates.Y == nil {
 			break
 		}
 
-		return e.complexity.Coordinates.Y(childComplexity), true
+		return e.ComplexityRoot.Coordinates.Y(childComplexity), true
 
 	case "DefaultParametersMirror.falsyBoolean":
-		if e.complexity.DefaultParametersMirror.FalsyBoolean == nil {
+		if e.ComplexityRoot.DefaultParametersMirror.FalsyBoolean == nil {
 			break
 		}
 
-		return e.complexity.DefaultParametersMirror.FalsyBoolean(childComplexity), true
+		return e.ComplexityRoot.DefaultParametersMirror.FalsyBoolean(childComplexity), true
 	case "DefaultParametersMirror.truthyBoolean":
-		if e.complexity.DefaultParametersMirror.TruthyBoolean == nil {
+		if e.ComplexityRoot.DefaultParametersMirror.TruthyBoolean == nil {
 			break
 		}
 
-		return e.complexity.DefaultParametersMirror.TruthyBoolean(childComplexity), true
+		return e.ComplexityRoot.DefaultParametersMirror.TruthyBoolean(childComplexity), true
 
 	case "DeferModel.id":
-		if e.complexity.DeferModel.ID == nil {
+		if e.ComplexityRoot.DeferModel.ID == nil {
 			break
 		}
 
-		return e.complexity.DeferModel.ID(childComplexity), true
+		return e.ComplexityRoot.DeferModel.ID(childComplexity), true
 	case "DeferModel.name":
-		if e.complexity.DeferModel.Name == nil {
+		if e.ComplexityRoot.DeferModel.Name == nil {
 			break
 		}
 
-		return e.complexity.DeferModel.Name(childComplexity), true
+		return e.ComplexityRoot.DeferModel.Name(childComplexity), true
 	case "DeferModel.values":
-		if e.complexity.DeferModel.Values == nil {
+		if e.ComplexityRoot.DeferModel.Values == nil {
 			break
 		}
 
-		return e.complexity.DeferModel.Values(childComplexity), true
+		return e.ComplexityRoot.DeferModel.Values(childComplexity), true
 
 	case "Dog.dogBreed":
-		if e.complexity.Dog.DogBreed == nil {
+		if e.ComplexityRoot.Dog.DogBreed == nil {
 			break
 		}
 
-		return e.complexity.Dog.DogBreed(childComplexity), true
+		return e.ComplexityRoot.Dog.DogBreed(childComplexity), true
 	case "Dog.size":
-		if e.complexity.Dog.Size == nil {
+		if e.ComplexityRoot.Dog.Size == nil {
 			break
 		}
 
-		return e.complexity.Dog.Size(childComplexity), true
+		return e.ComplexityRoot.Dog.Size(childComplexity), true
 	case "Dog.species":
-		if e.complexity.Dog.Species == nil {
+		if e.ComplexityRoot.Dog.Species == nil {
 			break
 		}
 
-		return e.complexity.Dog.Species(childComplexity), true
+		return e.ComplexityRoot.Dog.Species(childComplexity), true
 
 	case "EmbeddedCase1.exportedEmbeddedPointerExportedMethod":
-		if e.complexity.EmbeddedCase1.ExportedEmbeddedPointerExportedMethod == nil {
+		if e.ComplexityRoot.EmbeddedCase1.ExportedEmbeddedPointerExportedMethod == nil {
 			break
 		}
 
-		return e.complexity.EmbeddedCase1.ExportedEmbeddedPointerExportedMethod(childComplexity), true
+		return e.ComplexityRoot.EmbeddedCase1.ExportedEmbeddedPointerExportedMethod(childComplexity), true
 
 	case "EmbeddedCase2.unexportedEmbeddedPointerExportedMethod":
-		if e.complexity.EmbeddedCase2.UnexportedEmbeddedPointerExportedMethod == nil {
+		if e.ComplexityRoot.EmbeddedCase2.UnexportedEmbeddedPointerExportedMethod == nil {
 			break
 		}
 
-		return e.complexity.EmbeddedCase2.UnexportedEmbeddedPointerExportedMethod(childComplexity), true
+		return e.ComplexityRoot.EmbeddedCase2.UnexportedEmbeddedPointerExportedMethod(childComplexity), true
 
 	case "EmbeddedCase3.unexportedEmbeddedInterfaceExportedMethod":
-		if e.complexity.EmbeddedCase3.UnexportedEmbeddedInterfaceExportedMethod == nil {
+		if e.ComplexityRoot.EmbeddedCase3.UnexportedEmbeddedInterfaceExportedMethod == nil {
 			break
 		}
 
-		return e.complexity.EmbeddedCase3.UnexportedEmbeddedInterfaceExportedMethod(childComplexity), true
+		return e.ComplexityRoot.EmbeddedCase3.UnexportedEmbeddedInterfaceExportedMethod(childComplexity), true
 
 	case "EmbeddedDefaultScalar.value":
-		if e.complexity.EmbeddedDefaultScalar.Value == nil {
+		if e.ComplexityRoot.EmbeddedDefaultScalar.Value == nil {
 			break
 		}
 
-		return e.complexity.EmbeddedDefaultScalar.Value(childComplexity), true
+		return e.ComplexityRoot.EmbeddedDefaultScalar.Value(childComplexity), true
 
 	case "EmbeddedPointer.ID":
-		if e.complexity.EmbeddedPointer.ID == nil {
+		if e.ComplexityRoot.EmbeddedPointer.ID == nil {
 			break
 		}
 
-		return e.complexity.EmbeddedPointer.ID(childComplexity), true
+		return e.ComplexityRoot.EmbeddedPointer.ID(childComplexity), true
 	case "EmbeddedPointer.Title":
-		if e.complexity.EmbeddedPointer.Title == nil {
+		if e.ComplexityRoot.EmbeddedPointer.Title == nil {
 			break
 		}
 
-		return e.complexity.EmbeddedPointer.Title(childComplexity), true
+		return e.ComplexityRoot.EmbeddedPointer.Title(childComplexity), true
 
 	case "Error.errorOnNonRequiredField":
-		if e.complexity.Error.ErrorOnNonRequiredField == nil {
+		if e.ComplexityRoot.Error.ErrorOnNonRequiredField == nil {
 			break
 		}
 
-		return e.complexity.Error.ErrorOnNonRequiredField(childComplexity), true
+		return e.ComplexityRoot.Error.ErrorOnNonRequiredField(childComplexity), true
 	case "Error.errorOnRequiredField":
-		if e.complexity.Error.ErrorOnRequiredField == nil {
+		if e.ComplexityRoot.Error.ErrorOnRequiredField == nil {
 			break
 		}
 
-		return e.complexity.Error.ErrorOnRequiredField(childComplexity), true
+		return e.ComplexityRoot.Error.ErrorOnRequiredField(childComplexity), true
 	case "Error.id":
-		if e.complexity.Error.ID == nil {
+		if e.ComplexityRoot.Error.ID == nil {
 			break
 		}
 
-		return e.complexity.Error.ID(childComplexity), true
+		return e.ComplexityRoot.Error.ID(childComplexity), true
 	case "Error.nilOnRequiredField":
-		if e.complexity.Error.NilOnRequiredField == nil {
+		if e.ComplexityRoot.Error.NilOnRequiredField == nil {
 			break
 		}
 
-		return e.complexity.Error.NilOnRequiredField(childComplexity), true
+		return e.ComplexityRoot.Error.NilOnRequiredField(childComplexity), true
 
 	case "Errors.a":
-		if e.complexity.Errors.A == nil {
+		if e.ComplexityRoot.Errors.A == nil {
 			break
 		}
 
-		return e.complexity.Errors.A(childComplexity), true
+		return e.ComplexityRoot.Errors.A(childComplexity), true
 	case "Errors.b":
-		if e.complexity.Errors.B == nil {
+		if e.ComplexityRoot.Errors.B == nil {
 			break
 		}
 
-		return e.complexity.Errors.B(childComplexity), true
+		return e.ComplexityRoot.Errors.B(childComplexity), true
 	case "Errors.c":
-		if e.complexity.Errors.C == nil {
+		if e.ComplexityRoot.Errors.C == nil {
 			break
 		}
 
-		return e.complexity.Errors.C(childComplexity), true
+		return e.ComplexityRoot.Errors.C(childComplexity), true
 	case "Errors.d":
-		if e.complexity.Errors.D == nil {
+		if e.ComplexityRoot.Errors.D == nil {
 			break
 		}
 
-		return e.complexity.Errors.D(childComplexity), true
+		return e.ComplexityRoot.Errors.D(childComplexity), true
 	case "Errors.e":
-		if e.complexity.Errors.E == nil {
+		if e.ComplexityRoot.Errors.E == nil {
 			break
 		}
 
-		return e.complexity.Errors.E(childComplexity), true
+		return e.ComplexityRoot.Errors.E(childComplexity), true
 
 	case "FieldsOrderPayload.firstFieldValue":
-		if e.complexity.FieldsOrderPayload.FirstFieldValue == nil {
+		if e.ComplexityRoot.FieldsOrderPayload.FirstFieldValue == nil {
 			break
 		}
 
-		return e.complexity.FieldsOrderPayload.FirstFieldValue(childComplexity), true
+		return e.ComplexityRoot.FieldsOrderPayload.FirstFieldValue(childComplexity), true
 
 	case "ForcedResolver.field":
-		if e.complexity.ForcedResolver.Field == nil {
+		if e.ComplexityRoot.ForcedResolver.Field == nil {
 			break
 		}
 
-		return e.complexity.ForcedResolver.Field(childComplexity), true
+		return e.ComplexityRoot.ForcedResolver.Field(childComplexity), true
 
 	case "Horse.horseBreed":
-		if e.complexity.Horse.HorseBreed == nil {
+		if e.ComplexityRoot.Horse.HorseBreed == nil {
 			break
 		}
 
-		return e.complexity.Horse.HorseBreed(childComplexity), true
+		return e.ComplexityRoot.Horse.HorseBreed(childComplexity), true
 	case "Horse.size":
-		if e.complexity.Horse.Size == nil {
+		if e.ComplexityRoot.Horse.Size == nil {
 			break
 		}
 
-		return e.complexity.Horse.Size(childComplexity), true
+		return e.ComplexityRoot.Horse.Size(childComplexity), true
 	case "Horse.species":
-		if e.complexity.Horse.Species == nil {
+		if e.ComplexityRoot.Horse.Species == nil {
 			break
 		}
 
-		return e.complexity.Horse.Species(childComplexity), true
+		return e.ComplexityRoot.Horse.Species(childComplexity), true
 
 	case "InnerObject.id":
-		if e.complexity.InnerObject.ID == nil {
+		if e.ComplexityRoot.InnerObject.ID == nil {
 			break
 		}
 
-		return e.complexity.InnerObject.ID(childComplexity), true
+		return e.ComplexityRoot.InnerObject.ID(childComplexity), true
 
 	case "InvalidIdentifier.id":
-		if e.complexity.InvalidIdentifier.ID == nil {
+		if e.ComplexityRoot.InvalidIdentifier.ID == nil {
 			break
 		}
 
-		return e.complexity.InvalidIdentifier.ID(childComplexity), true
+		return e.ComplexityRoot.InvalidIdentifier.ID(childComplexity), true
 
 	case "It.id":
-		if e.complexity.It.ID == nil {
+		if e.ComplexityRoot.It.ID == nil {
 			break
 		}
 
-		return e.complexity.It.ID(childComplexity), true
+		return e.ComplexityRoot.It.ID(childComplexity), true
 
 	case "LoopA.b":
-		if e.complexity.LoopA.B == nil {
+		if e.ComplexityRoot.LoopA.B == nil {
 			break
 		}
 
-		return e.complexity.LoopA.B(childComplexity), true
+		return e.ComplexityRoot.LoopA.B(childComplexity), true
 
 	case "LoopB.a":
-		if e.complexity.LoopB.A == nil {
+		if e.ComplexityRoot.LoopB.A == nil {
 			break
 		}
 
-		return e.complexity.LoopB.A(childComplexity), true
+		return e.ComplexityRoot.LoopB.A(childComplexity), true
 
 	case "Map.id":
-		if e.complexity.Map.ID == nil {
+		if e.ComplexityRoot.Map.ID == nil {
 			break
 		}
 
-		return e.complexity.Map.ID(childComplexity), true
+		return e.ComplexityRoot.Map.ID(childComplexity), true
 
 	case "MapNested.value":
-		if e.complexity.MapNested.Value == nil {
+		if e.ComplexityRoot.MapNested.Value == nil {
 			break
 		}
 
-		return e.complexity.MapNested.Value(childComplexity), true
+		return e.ComplexityRoot.MapNested.Value(childComplexity), true
 
 	case "MapStringInterfaceType.a":
-		if e.complexity.MapStringInterfaceType.A == nil {
+		if e.ComplexityRoot.MapStringInterfaceType.A == nil {
 			break
 		}
 
-		return e.complexity.MapStringInterfaceType.A(childComplexity), true
+		return e.ComplexityRoot.MapStringInterfaceType.A(childComplexity), true
 	case "MapStringInterfaceType.b":
-		if e.complexity.MapStringInterfaceType.B == nil {
+		if e.ComplexityRoot.MapStringInterfaceType.B == nil {
 			break
 		}
 
-		return e.complexity.MapStringInterfaceType.B(childComplexity), true
+		return e.ComplexityRoot.MapStringInterfaceType.B(childComplexity), true
 	case "MapStringInterfaceType.c":
-		if e.complexity.MapStringInterfaceType.C == nil {
+		if e.ComplexityRoot.MapStringInterfaceType.C == nil {
 			break
 		}
 
-		return e.complexity.MapStringInterfaceType.C(childComplexity), true
+		return e.ComplexityRoot.MapStringInterfaceType.C(childComplexity), true
 	case "MapStringInterfaceType.nested":
-		if e.complexity.MapStringInterfaceType.Nested == nil {
+		if e.ComplexityRoot.MapStringInterfaceType.Nested == nil {
 			break
 		}
 
-		return e.complexity.MapStringInterfaceType.Nested(childComplexity), true
+		return e.ComplexityRoot.MapStringInterfaceType.Nested(childComplexity), true
 
 	case "ModelMethods.noContext":
-		if e.complexity.ModelMethods.NoContext == nil {
+		if e.ComplexityRoot.ModelMethods.NoContext == nil {
 			break
 		}
 
-		return e.complexity.ModelMethods.NoContext(childComplexity), true
+		return e.ComplexityRoot.ModelMethods.NoContext(childComplexity), true
 	case "ModelMethods.resolverField":
-		if e.complexity.ModelMethods.ResolverField == nil {
+		if e.ComplexityRoot.ModelMethods.ResolverField == nil {
 			break
 		}
 
-		return e.complexity.ModelMethods.ResolverField(childComplexity), true
+		return e.ComplexityRoot.ModelMethods.ResolverField(childComplexity), true
 	case "ModelMethods.withContext":
-		if e.complexity.ModelMethods.WithContext == nil {
+		if e.ComplexityRoot.ModelMethods.WithContext == nil {
 			break
 		}
 
-		return e.complexity.ModelMethods.WithContext(childComplexity), true
+		return e.ComplexityRoot.ModelMethods.WithContext(childComplexity), true
 
 	case "Mutation.defaultInput":
-		if e.complexity.Mutation.DefaultInput == nil {
+		if e.ComplexityRoot.Mutation.DefaultInput == nil {
 			break
 		}
 
@@ -1142,9 +1132,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DefaultInput(childComplexity, args["input"].(DefaultInput)), true
+		return e.ComplexityRoot.Mutation.DefaultInput(childComplexity, args["input"].(DefaultInput)), true
 	case "Mutation.overrideValueViaInput":
-		if e.complexity.Mutation.OverrideValueViaInput == nil {
+		if e.ComplexityRoot.Mutation.OverrideValueViaInput == nil {
 			break
 		}
 
@@ -1153,9 +1143,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.OverrideValueViaInput(childComplexity, args["input"].(FieldsOrderInput)), true
+		return e.ComplexityRoot.Mutation.OverrideValueViaInput(childComplexity, args["input"].(FieldsOrderInput)), true
 	case "Mutation.updateProduct":
-		if e.complexity.Mutation.UpdateProduct == nil {
+		if e.ComplexityRoot.Mutation.UpdateProduct == nil {
 			break
 		}
 
@@ -1164,9 +1154,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateProduct(childComplexity, args["id"].(string), args["name"].(*string), args["price"].(*float64)), true
+		return e.ComplexityRoot.Mutation.UpdateProduct(childComplexity, args["id"].(string), args["name"].(*string), args["price"].(*float64)), true
 	case "Mutation.updatePtrToPtr":
-		if e.complexity.Mutation.UpdatePtrToPtr == nil {
+		if e.ComplexityRoot.Mutation.UpdatePtrToPtr == nil {
 			break
 		}
 
@@ -1175,9 +1165,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdatePtrToPtr(childComplexity, args["input"].(UpdatePtrToPtrOuter)), true
+		return e.ComplexityRoot.Mutation.UpdatePtrToPtr(childComplexity, args["input"].(UpdatePtrToPtrOuter)), true
 	case "Mutation.updateSomething":
-		if e.complexity.Mutation.UpdateSomething == nil {
+		if e.ComplexityRoot.Mutation.UpdateSomething == nil {
 			break
 		}
 
@@ -1186,62 +1176,62 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.UpdateSomething(childComplexity, args["input"].(SpecialInput)), true
+		return e.ComplexityRoot.Mutation.UpdateSomething(childComplexity, args["input"].(SpecialInput)), true
 
 	case "ObjectDirectives.nullableText":
-		if e.complexity.ObjectDirectives.NullableText == nil {
+		if e.ComplexityRoot.ObjectDirectives.NullableText == nil {
 			break
 		}
 
-		return e.complexity.ObjectDirectives.NullableText(childComplexity), true
+		return e.ComplexityRoot.ObjectDirectives.NullableText(childComplexity), true
 	case "ObjectDirectives.order":
-		if e.complexity.ObjectDirectives.Order == nil {
+		if e.ComplexityRoot.ObjectDirectives.Order == nil {
 			break
 		}
 
-		return e.complexity.ObjectDirectives.Order(childComplexity), true
+		return e.ComplexityRoot.ObjectDirectives.Order(childComplexity), true
 	case "ObjectDirectives.text":
-		if e.complexity.ObjectDirectives.Text == nil {
+		if e.ComplexityRoot.ObjectDirectives.Text == nil {
 			break
 		}
 
-		return e.complexity.ObjectDirectives.Text(childComplexity), true
+		return e.ComplexityRoot.ObjectDirectives.Text(childComplexity), true
 
 	case "ObjectDirectivesWithCustomGoModel.nullableText":
-		if e.complexity.ObjectDirectivesWithCustomGoModel.NullableText == nil {
+		if e.ComplexityRoot.ObjectDirectivesWithCustomGoModel.NullableText == nil {
 			break
 		}
 
-		return e.complexity.ObjectDirectivesWithCustomGoModel.NullableText(childComplexity), true
+		return e.ComplexityRoot.ObjectDirectivesWithCustomGoModel.NullableText(childComplexity), true
 
 	case "OuterObject.inner":
-		if e.complexity.OuterObject.Inner == nil {
+		if e.ComplexityRoot.OuterObject.Inner == nil {
 			break
 		}
 
-		return e.complexity.OuterObject.Inner(childComplexity), true
+		return e.ComplexityRoot.OuterObject.Inner(childComplexity), true
 
 	case "OverlappingFields.oneFoo", "OverlappingFields.twoFoo":
-		if e.complexity.OverlappingFields.Foo == nil {
+		if e.ComplexityRoot.OverlappingFields.Foo == nil {
 			break
 		}
 
-		return e.complexity.OverlappingFields.Foo(childComplexity), true
+		return e.ComplexityRoot.OverlappingFields.Foo(childComplexity), true
 	case "OverlappingFields.newFoo", "OverlappingFields.new_foo":
-		if e.complexity.OverlappingFields.NewFoo == nil {
+		if e.ComplexityRoot.OverlappingFields.NewFoo == nil {
 			break
 		}
 
-		return e.complexity.OverlappingFields.NewFoo(childComplexity), true
+		return e.ComplexityRoot.OverlappingFields.NewFoo(childComplexity), true
 	case "OverlappingFields.oldFoo":
-		if e.complexity.OverlappingFields.OldFoo == nil {
+		if e.ComplexityRoot.OverlappingFields.OldFoo == nil {
 			break
 		}
 
-		return e.complexity.OverlappingFields.OldFoo(childComplexity), true
+		return e.ComplexityRoot.OverlappingFields.OldFoo(childComplexity), true
 
 	case "Panics.argUnmarshal":
-		if e.complexity.Panics.ArgUnmarshal == nil {
+		if e.ComplexityRoot.Panics.ArgUnmarshal == nil {
 			break
 		}
 
@@ -1250,9 +1240,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Panics.ArgUnmarshal(childComplexity, args["u"].([]MarshalPanic)), true
+		return e.ComplexityRoot.Panics.ArgUnmarshal(childComplexity, args["u"].([]MarshalPanic)), true
 	case "Panics.fieldFuncMarshal":
-		if e.complexity.Panics.FieldFuncMarshal == nil {
+		if e.ComplexityRoot.Panics.FieldFuncMarshal == nil {
 			break
 		}
 
@@ -1261,16 +1251,16 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Panics.FieldFuncMarshal(childComplexity, args["u"].([]MarshalPanic)), true
+		return e.ComplexityRoot.Panics.FieldFuncMarshal(childComplexity, args["u"].([]MarshalPanic)), true
 	case "Panics.fieldScalarMarshal":
-		if e.complexity.Panics.FieldScalarMarshal == nil {
+		if e.ComplexityRoot.Panics.FieldScalarMarshal == nil {
 			break
 		}
 
-		return e.complexity.Panics.FieldScalarMarshal(childComplexity), true
+		return e.ComplexityRoot.Panics.FieldScalarMarshal(childComplexity), true
 
 	case "Pet.friends":
-		if e.complexity.Pet.Friends == nil {
+		if e.ComplexityRoot.Pet.Friends == nil {
 			break
 		}
 
@@ -1279,118 +1269,118 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Pet.Friends(childComplexity, args["limit"].(*int)), true
+		return e.ComplexityRoot.Pet.Friends(childComplexity, args["limit"].(*int)), true
 	case "Pet.id":
-		if e.complexity.Pet.ID == nil {
+		if e.ComplexityRoot.Pet.ID == nil {
 			break
 		}
 
-		return e.complexity.Pet.ID(childComplexity), true
+		return e.ComplexityRoot.Pet.ID(childComplexity), true
 
 	case "Primitive.squared":
-		if e.complexity.Primitive.Squared == nil {
+		if e.ComplexityRoot.Primitive.Squared == nil {
 			break
 		}
 
-		return e.complexity.Primitive.Squared(childComplexity), true
+		return e.ComplexityRoot.Primitive.Squared(childComplexity), true
 	case "Primitive.value":
-		if e.complexity.Primitive.Value == nil {
+		if e.ComplexityRoot.Primitive.Value == nil {
 			break
 		}
 
-		return e.complexity.Primitive.Value(childComplexity), true
+		return e.ComplexityRoot.Primitive.Value(childComplexity), true
 
 	case "PrimitiveString.doubled":
-		if e.complexity.PrimitiveString.Doubled == nil {
+		if e.ComplexityRoot.PrimitiveString.Doubled == nil {
 			break
 		}
 
-		return e.complexity.PrimitiveString.Doubled(childComplexity), true
+		return e.ComplexityRoot.PrimitiveString.Doubled(childComplexity), true
 	case "PrimitiveString.len":
-		if e.complexity.PrimitiveString.Len == nil {
+		if e.ComplexityRoot.PrimitiveString.Len == nil {
 			break
 		}
 
-		return e.complexity.PrimitiveString.Len(childComplexity), true
+		return e.ComplexityRoot.PrimitiveString.Len(childComplexity), true
 	case "PrimitiveString.value":
-		if e.complexity.PrimitiveString.Value == nil {
+		if e.ComplexityRoot.PrimitiveString.Value == nil {
 			break
 		}
 
-		return e.complexity.PrimitiveString.Value(childComplexity), true
+		return e.ComplexityRoot.PrimitiveString.Value(childComplexity), true
 
 	case "PtrToAnyContainer.binding":
-		if e.complexity.PtrToAnyContainer.Binding == nil {
+		if e.ComplexityRoot.PtrToAnyContainer.Binding == nil {
 			break
 		}
 
-		return e.complexity.PtrToAnyContainer.Binding(childComplexity), true
+		return e.ComplexityRoot.PtrToAnyContainer.Binding(childComplexity), true
 	case "PtrToAnyContainer.ptrToAny":
-		if e.complexity.PtrToAnyContainer.PtrToAny == nil {
+		if e.ComplexityRoot.PtrToAnyContainer.PtrToAny == nil {
 			break
 		}
 
-		return e.complexity.PtrToAnyContainer.PtrToAny(childComplexity), true
+		return e.ComplexityRoot.PtrToAnyContainer.PtrToAny(childComplexity), true
 
 	case "PtrToPtrInner.key":
-		if e.complexity.PtrToPtrInner.Key == nil {
+		if e.ComplexityRoot.PtrToPtrInner.Key == nil {
 			break
 		}
 
-		return e.complexity.PtrToPtrInner.Key(childComplexity), true
+		return e.ComplexityRoot.PtrToPtrInner.Key(childComplexity), true
 	case "PtrToPtrInner.value":
-		if e.complexity.PtrToPtrInner.Value == nil {
+		if e.ComplexityRoot.PtrToPtrInner.Value == nil {
 			break
 		}
 
-		return e.complexity.PtrToPtrInner.Value(childComplexity), true
+		return e.ComplexityRoot.PtrToPtrInner.Value(childComplexity), true
 
 	case "PtrToPtrOuter.inner":
-		if e.complexity.PtrToPtrOuter.Inner == nil {
+		if e.ComplexityRoot.PtrToPtrOuter.Inner == nil {
 			break
 		}
 
-		return e.complexity.PtrToPtrOuter.Inner(childComplexity), true
+		return e.ComplexityRoot.PtrToPtrOuter.Inner(childComplexity), true
 	case "PtrToPtrOuter.name":
-		if e.complexity.PtrToPtrOuter.Name == nil {
+		if e.ComplexityRoot.PtrToPtrOuter.Name == nil {
 			break
 		}
 
-		return e.complexity.PtrToPtrOuter.Name(childComplexity), true
+		return e.ComplexityRoot.PtrToPtrOuter.Name(childComplexity), true
 	case "PtrToPtrOuter.stupidInner":
-		if e.complexity.PtrToPtrOuter.StupidInner == nil {
+		if e.ComplexityRoot.PtrToPtrOuter.StupidInner == nil {
 			break
 		}
 
-		return e.complexity.PtrToPtrOuter.StupidInner(childComplexity), true
+		return e.ComplexityRoot.PtrToPtrOuter.StupidInner(childComplexity), true
 
 	case "PtrToSliceContainer.ptrToSlice":
-		if e.complexity.PtrToSliceContainer.PtrToSlice == nil {
+		if e.ComplexityRoot.PtrToSliceContainer.PtrToSlice == nil {
 			break
 		}
 
-		return e.complexity.PtrToSliceContainer.PtrToSlice(childComplexity), true
+		return e.ComplexityRoot.PtrToSliceContainer.PtrToSlice(childComplexity), true
 
 	case "Query.animal":
-		if e.complexity.Query.Animal == nil {
+		if e.ComplexityRoot.Query.Animal == nil {
 			break
 		}
 
-		return e.complexity.Query.Animal(childComplexity), true
+		return e.ComplexityRoot.Query.Animal(childComplexity), true
 	case "Query.autobind":
-		if e.complexity.Query.Autobind == nil {
+		if e.ComplexityRoot.Query.Autobind == nil {
 			break
 		}
 
-		return e.complexity.Query.Autobind(childComplexity), true
+		return e.ComplexityRoot.Query.Autobind(childComplexity), true
 	case "Query.collision":
-		if e.complexity.Query.Collision == nil {
+		if e.ComplexityRoot.Query.Collision == nil {
 			break
 		}
 
-		return e.complexity.Query.Collision(childComplexity), true
+		return e.ComplexityRoot.Query.Collision(childComplexity), true
 	case "Query.defaultParameters":
-		if e.complexity.Query.DefaultParameters == nil {
+		if e.ComplexityRoot.Query.DefaultParameters == nil {
 			break
 		}
 
@@ -1399,9 +1389,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.DefaultParameters(childComplexity, args["falsyBoolean"].(*bool), args["truthyBoolean"].(*bool)), true
+		return e.ComplexityRoot.Query.DefaultParameters(childComplexity, args["falsyBoolean"].(*bool), args["truthyBoolean"].(*bool)), true
 	case "Query.defaultScalar":
-		if e.complexity.Query.DefaultScalar == nil {
+		if e.ComplexityRoot.Query.DefaultScalar == nil {
 			break
 		}
 
@@ -1410,27 +1400,27 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.DefaultScalar(childComplexity, args["arg"].(string)), true
+		return e.ComplexityRoot.Query.DefaultScalar(childComplexity, args["arg"].(string)), true
 	case "Query.deferMultiple":
-		if e.complexity.Query.DeferMultiple == nil {
+		if e.ComplexityRoot.Query.DeferMultiple == nil {
 			break
 		}
 
-		return e.complexity.Query.DeferMultiple(childComplexity), true
+		return e.ComplexityRoot.Query.DeferMultiple(childComplexity), true
 	case "Query.deferSingle":
-		if e.complexity.Query.DeferSingle == nil {
+		if e.ComplexityRoot.Query.DeferSingle == nil {
 			break
 		}
 
-		return e.complexity.Query.DeferSingle(childComplexity), true
+		return e.ComplexityRoot.Query.DeferSingle(childComplexity), true
 	case "Query.deprecatedField":
-		if e.complexity.Query.DeprecatedField == nil {
+		if e.ComplexityRoot.Query.DeprecatedField == nil {
 			break
 		}
 
-		return e.complexity.Query.DeprecatedField(childComplexity), true
+		return e.ComplexityRoot.Query.DeprecatedField(childComplexity), true
 	case "Query.directiveArg":
-		if e.complexity.Query.DirectiveArg == nil {
+		if e.ComplexityRoot.Query.DirectiveArg == nil {
 			break
 		}
 
@@ -1439,21 +1429,21 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.DirectiveArg(childComplexity, args["arg"].(string)), true
+		return e.ComplexityRoot.Query.DirectiveArg(childComplexity, args["arg"].(string)), true
 	case "Query.directiveDouble":
-		if e.complexity.Query.DirectiveDouble == nil {
+		if e.ComplexityRoot.Query.DirectiveDouble == nil {
 			break
 		}
 
-		return e.complexity.Query.DirectiveDouble(childComplexity), true
+		return e.ComplexityRoot.Query.DirectiveDouble(childComplexity), true
 	case "Query.directiveField":
-		if e.complexity.Query.DirectiveField == nil {
+		if e.ComplexityRoot.Query.DirectiveField == nil {
 			break
 		}
 
-		return e.complexity.Query.DirectiveField(childComplexity), true
+		return e.ComplexityRoot.Query.DirectiveField(childComplexity), true
 	case "Query.directiveFieldDef":
-		if e.complexity.Query.DirectiveFieldDef == nil {
+		if e.ComplexityRoot.Query.DirectiveFieldDef == nil {
 			break
 		}
 
@@ -1462,9 +1452,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.DirectiveFieldDef(childComplexity, args["ret"].(string)), true
+		return e.ComplexityRoot.Query.DirectiveFieldDef(childComplexity, args["ret"].(string)), true
 	case "Query.directiveInput":
-		if e.complexity.Query.DirectiveInput == nil {
+		if e.ComplexityRoot.Query.DirectiveInput == nil {
 			break
 		}
 
@@ -1473,9 +1463,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.DirectiveInput(childComplexity, args["arg"].(InputDirectives)), true
+		return e.ComplexityRoot.Query.DirectiveInput(childComplexity, args["arg"].(InputDirectives)), true
 	case "Query.directiveInputNullable":
-		if e.complexity.Query.DirectiveInputNullable == nil {
+		if e.ComplexityRoot.Query.DirectiveInputNullable == nil {
 			break
 		}
 
@@ -1484,9 +1474,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.DirectiveInputNullable(childComplexity, args["arg"].(*InputDirectives)), true
+		return e.ComplexityRoot.Query.DirectiveInputNullable(childComplexity, args["arg"].(*InputDirectives)), true
 	case "Query.directiveInputType":
-		if e.complexity.Query.DirectiveInputType == nil {
+		if e.ComplexityRoot.Query.DirectiveInputType == nil {
 			break
 		}
 
@@ -1495,9 +1485,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.DirectiveInputType(childComplexity, args["arg"].(InnerInput)), true
+		return e.ComplexityRoot.Query.DirectiveInputType(childComplexity, args["arg"].(InnerInput)), true
 	case "Query.directiveNullableArg":
-		if e.complexity.Query.DirectiveNullableArg == nil {
+		if e.ComplexityRoot.Query.DirectiveNullableArg == nil {
 			break
 		}
 
@@ -1506,21 +1496,21 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.DirectiveNullableArg(childComplexity, args["arg"].(*int), args["arg2"].(*int), args["arg3"].(*string)), true
+		return e.ComplexityRoot.Query.DirectiveNullableArg(childComplexity, args["arg"].(*int), args["arg2"].(*int), args["arg3"].(*string)), true
 	case "Query.directiveObject":
-		if e.complexity.Query.DirectiveObject == nil {
+		if e.ComplexityRoot.Query.DirectiveObject == nil {
 			break
 		}
 
-		return e.complexity.Query.DirectiveObject(childComplexity), true
+		return e.ComplexityRoot.Query.DirectiveObject(childComplexity), true
 	case "Query.directiveObjectWithCustomGoModel":
-		if e.complexity.Query.DirectiveObjectWithCustomGoModel == nil {
+		if e.ComplexityRoot.Query.DirectiveObjectWithCustomGoModel == nil {
 			break
 		}
 
-		return e.complexity.Query.DirectiveObjectWithCustomGoModel(childComplexity), true
+		return e.ComplexityRoot.Query.DirectiveObjectWithCustomGoModel(childComplexity), true
 	case "Query.directiveSingleNullableArg":
-		if e.complexity.Query.DirectiveSingleNullableArg == nil {
+		if e.ComplexityRoot.Query.DirectiveSingleNullableArg == nil {
 			break
 		}
 
@@ -1529,39 +1519,39 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.DirectiveSingleNullableArg(childComplexity, args["arg1"].(*string)), true
+		return e.ComplexityRoot.Query.DirectiveSingleNullableArg(childComplexity, args["arg1"].(*string)), true
 	case "Query.directiveUnimplemented":
-		if e.complexity.Query.DirectiveUnimplemented == nil {
+		if e.ComplexityRoot.Query.DirectiveUnimplemented == nil {
 			break
 		}
 
-		return e.complexity.Query.DirectiveUnimplemented(childComplexity), true
+		return e.ComplexityRoot.Query.DirectiveUnimplemented(childComplexity), true
 	case "Query.dog":
-		if e.complexity.Query.Dog == nil {
+		if e.ComplexityRoot.Query.Dog == nil {
 			break
 		}
 
-		return e.complexity.Query.Dog(childComplexity), true
+		return e.ComplexityRoot.Query.Dog(childComplexity), true
 	case "Query.embeddedCase1":
-		if e.complexity.Query.EmbeddedCase1 == nil {
+		if e.ComplexityRoot.Query.EmbeddedCase1 == nil {
 			break
 		}
 
-		return e.complexity.Query.EmbeddedCase1(childComplexity), true
+		return e.ComplexityRoot.Query.EmbeddedCase1(childComplexity), true
 	case "Query.embeddedCase2":
-		if e.complexity.Query.EmbeddedCase2 == nil {
+		if e.ComplexityRoot.Query.EmbeddedCase2 == nil {
 			break
 		}
 
-		return e.complexity.Query.EmbeddedCase2(childComplexity), true
+		return e.ComplexityRoot.Query.EmbeddedCase2(childComplexity), true
 	case "Query.embeddedCase3":
-		if e.complexity.Query.EmbeddedCase3 == nil {
+		if e.ComplexityRoot.Query.EmbeddedCase3 == nil {
 			break
 		}
 
-		return e.complexity.Query.EmbeddedCase3(childComplexity), true
+		return e.ComplexityRoot.Query.EmbeddedCase3(childComplexity), true
 	case "Query.enumInInput":
-		if e.complexity.Query.EnumInInput == nil {
+		if e.ComplexityRoot.Query.EnumInInput == nil {
 			break
 		}
 
@@ -1570,33 +1560,33 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.EnumInInput(childComplexity, args["input"].(*InputWithEnumValue)), true
+		return e.ComplexityRoot.Query.EnumInInput(childComplexity, args["input"].(*InputWithEnumValue)), true
 	case "Query.errorBubble":
-		if e.complexity.Query.ErrorBubble == nil {
+		if e.ComplexityRoot.Query.ErrorBubble == nil {
 			break
 		}
 
-		return e.complexity.Query.ErrorBubble(childComplexity), true
+		return e.ComplexityRoot.Query.ErrorBubble(childComplexity), true
 	case "Query.errorBubbleList":
-		if e.complexity.Query.ErrorBubbleList == nil {
+		if e.ComplexityRoot.Query.ErrorBubbleList == nil {
 			break
 		}
 
-		return e.complexity.Query.ErrorBubbleList(childComplexity), true
+		return e.ComplexityRoot.Query.ErrorBubbleList(childComplexity), true
 	case "Query.errorList":
-		if e.complexity.Query.ErrorList == nil {
+		if e.ComplexityRoot.Query.ErrorList == nil {
 			break
 		}
 
-		return e.complexity.Query.ErrorList(childComplexity), true
+		return e.ComplexityRoot.Query.ErrorList(childComplexity), true
 	case "Query.errors":
-		if e.complexity.Query.Errors == nil {
+		if e.ComplexityRoot.Query.Errors == nil {
 			break
 		}
 
-		return e.complexity.Query.Errors(childComplexity), true
+		return e.ComplexityRoot.Query.Errors(childComplexity), true
 	case "Query.fallback":
-		if e.complexity.Query.Fallback == nil {
+		if e.ComplexityRoot.Query.Fallback == nil {
 			break
 		}
 
@@ -1605,9 +1595,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Fallback(childComplexity, args["arg"].(FallbackToStringEncoding)), true
+		return e.ComplexityRoot.Query.Fallback(childComplexity, args["arg"].(FallbackToStringEncoding)), true
 	case "Query.fieldWithDeprecatedArg":
-		if e.complexity.Query.FieldWithDeprecatedArg == nil {
+		if e.ComplexityRoot.Query.FieldWithDeprecatedArg == nil {
 			break
 		}
 
@@ -1616,9 +1606,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.FieldWithDeprecatedArg(childComplexity, args["oldArg"].(*int), args["newArg"].(*int)), true
+		return e.ComplexityRoot.Query.FieldWithDeprecatedArg(childComplexity, args["oldArg"].(*int), args["newArg"].(*int)), true
 	case "Query.filterProducts":
-		if e.complexity.Query.FilterProducts == nil {
+		if e.ComplexityRoot.Query.FilterProducts == nil {
 			break
 		}
 
@@ -1627,9 +1617,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.FilterProducts(childComplexity, args["query"].(*string), args["category"].(*string), args["minPrice"].(*int)), true
+		return e.ComplexityRoot.Query.FilterProducts(childComplexity, args["query"].(*string), args["category"].(*string), args["minPrice"].(*int)), true
 	case "Query.findProducts":
-		if e.complexity.Query.FindProducts == nil {
+		if e.ComplexityRoot.Query.FindProducts == nil {
 			break
 		}
 
@@ -1638,15 +1628,15 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.FindProducts(childComplexity, args["query"].(*string), args["category"].(*string), args["minPrice"].(*int)), true
+		return e.ComplexityRoot.Query.FindProducts(childComplexity, args["query"].(*string), args["category"].(*string), args["minPrice"].(*int)), true
 	case "Query.infinity":
-		if e.complexity.Query.Infinity == nil {
+		if e.ComplexityRoot.Query.Infinity == nil {
 			break
 		}
 
-		return e.complexity.Query.Infinity(childComplexity), true
+		return e.ComplexityRoot.Query.Infinity(childComplexity), true
 	case "Query.inputNullableSlice":
-		if e.complexity.Query.InputNullableSlice == nil {
+		if e.ComplexityRoot.Query.InputNullableSlice == nil {
 			break
 		}
 
@@ -1655,9 +1645,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.InputNullableSlice(childComplexity, args["arg"].([]string)), true
+		return e.ComplexityRoot.Query.InputNullableSlice(childComplexity, args["arg"].([]string)), true
 	case "Query.inputOmittable":
-		if e.complexity.Query.InputOmittable == nil {
+		if e.ComplexityRoot.Query.InputOmittable == nil {
 			break
 		}
 
@@ -1666,9 +1656,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.InputOmittable(childComplexity, args["arg"].(OmittableInput)), true
+		return e.ComplexityRoot.Query.InputOmittable(childComplexity, args["arg"].(OmittableInput)), true
 	case "Query.inputSlice":
-		if e.complexity.Query.InputSlice == nil {
+		if e.ComplexityRoot.Query.InputSlice == nil {
 			break
 		}
 
@@ -1677,27 +1667,27 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.InputSlice(childComplexity, args["arg"].([]string)), true
+		return e.ComplexityRoot.Query.InputSlice(childComplexity, args["arg"].([]string)), true
 	case "Query.invalid":
-		if e.complexity.Query.Invalid == nil {
+		if e.ComplexityRoot.Query.Invalid == nil {
 			break
 		}
 
-		return e.complexity.Query.Invalid(childComplexity), true
+		return e.ComplexityRoot.Query.Invalid(childComplexity), true
 	case "Query.invalidIdentifier":
-		if e.complexity.Query.InvalidIdentifier == nil {
+		if e.ComplexityRoot.Query.InvalidIdentifier == nil {
 			break
 		}
 
-		return e.complexity.Query.InvalidIdentifier(childComplexity), true
+		return e.ComplexityRoot.Query.InvalidIdentifier(childComplexity), true
 	case "Query.issue896a":
-		if e.complexity.Query.Issue896a == nil {
+		if e.ComplexityRoot.Query.Issue896a == nil {
 			break
 		}
 
-		return e.complexity.Query.Issue896a(childComplexity), true
+		return e.ComplexityRoot.Query.Issue896a(childComplexity), true
 	case "Query.mapInput":
-		if e.complexity.Query.MapInput == nil {
+		if e.ComplexityRoot.Query.MapInput == nil {
 			break
 		}
 
@@ -1706,9 +1696,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.MapInput(childComplexity, args["input"].(map[string]any)), true
+		return e.ComplexityRoot.Query.MapInput(childComplexity, args["input"].(map[string]any)), true
 	case "Query.mapNestedMapSlice":
-		if e.complexity.Query.MapNestedMapSlice == nil {
+		if e.ComplexityRoot.Query.MapNestedMapSlice == nil {
 			break
 		}
 
@@ -1717,9 +1707,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.MapNestedMapSlice(childComplexity, args["input"].(map[string]any)), true
+		return e.ComplexityRoot.Query.MapNestedMapSlice(childComplexity, args["input"].(map[string]any)), true
 	case "Query.mapNestedStringInterface":
-		if e.complexity.Query.MapNestedStringInterface == nil {
+		if e.ComplexityRoot.Query.MapNestedStringInterface == nil {
 			break
 		}
 
@@ -1728,9 +1718,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.MapNestedStringInterface(childComplexity, args["in"].(*NestedMapInput)), true
+		return e.ComplexityRoot.Query.MapNestedStringInterface(childComplexity, args["in"].(*NestedMapInput)), true
 	case "Query.mapStringInterface":
-		if e.complexity.Query.MapStringInterface == nil {
+		if e.ComplexityRoot.Query.MapStringInterface == nil {
 			break
 		}
 
@@ -1739,15 +1729,15 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.MapStringInterface(childComplexity, args["in"].(map[string]any)), true
+		return e.ComplexityRoot.Query.MapStringInterface(childComplexity, args["in"].(map[string]any)), true
 	case "Query.modelMethods":
-		if e.complexity.Query.ModelMethods == nil {
+		if e.ComplexityRoot.Query.ModelMethods == nil {
 			break
 		}
 
-		return e.complexity.Query.ModelMethods(childComplexity), true
+		return e.ComplexityRoot.Query.ModelMethods(childComplexity), true
 	case "Query.nestedInputs":
-		if e.complexity.Query.NestedInputs == nil {
+		if e.ComplexityRoot.Query.NestedInputs == nil {
 			break
 		}
 
@@ -1756,39 +1746,39 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.NestedInputs(childComplexity, args["input"].([][]*OuterInput)), true
+		return e.ComplexityRoot.Query.NestedInputs(childComplexity, args["input"].([][]*OuterInput)), true
 	case "Query.nestedOutputs":
-		if e.complexity.Query.NestedOutputs == nil {
+		if e.ComplexityRoot.Query.NestedOutputs == nil {
 			break
 		}
 
-		return e.complexity.Query.NestedOutputs(childComplexity), true
+		return e.ComplexityRoot.Query.NestedOutputs(childComplexity), true
 	case "Query.noShape":
-		if e.complexity.Query.NoShape == nil {
+		if e.ComplexityRoot.Query.NoShape == nil {
 			break
 		}
 
-		return e.complexity.Query.NoShape(childComplexity), true
+		return e.ComplexityRoot.Query.NoShape(childComplexity), true
 	case "Query.noShapeTypedNil":
-		if e.complexity.Query.NoShapeTypedNil == nil {
+		if e.ComplexityRoot.Query.NoShapeTypedNil == nil {
 			break
 		}
 
-		return e.complexity.Query.NoShapeTypedNil(childComplexity), true
+		return e.ComplexityRoot.Query.NoShapeTypedNil(childComplexity), true
 	case "Query.node":
-		if e.complexity.Query.Node == nil {
+		if e.ComplexityRoot.Query.Node == nil {
 			break
 		}
 
-		return e.complexity.Query.Node(childComplexity), true
+		return e.ComplexityRoot.Query.Node(childComplexity), true
 	case "Query.notAnInterface":
-		if e.complexity.Query.NotAnInterface == nil {
+		if e.ComplexityRoot.Query.NotAnInterface == nil {
 			break
 		}
 
-		return e.complexity.Query.NotAnInterface(childComplexity), true
+		return e.ComplexityRoot.Query.NotAnInterface(childComplexity), true
 	case "Query.nullableArg":
-		if e.complexity.Query.NullableArg == nil {
+		if e.ComplexityRoot.Query.NullableArg == nil {
 			break
 		}
 
@@ -1797,51 +1787,51 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.NullableArg(childComplexity, args["arg"].(*int)), true
+		return e.ComplexityRoot.Query.NullableArg(childComplexity, args["arg"].(*int)), true
 	case "Query.optionalUnion":
-		if e.complexity.Query.OptionalUnion == nil {
+		if e.ComplexityRoot.Query.OptionalUnion == nil {
 			break
 		}
 
-		return e.complexity.Query.OptionalUnion(childComplexity), true
+		return e.ComplexityRoot.Query.OptionalUnion(childComplexity), true
 	case "Query.overlapping":
-		if e.complexity.Query.Overlapping == nil {
+		if e.ComplexityRoot.Query.Overlapping == nil {
 			break
 		}
 
-		return e.complexity.Query.Overlapping(childComplexity), true
+		return e.ComplexityRoot.Query.Overlapping(childComplexity), true
 	case "Query.panics":
-		if e.complexity.Query.Panics == nil {
+		if e.ComplexityRoot.Query.Panics == nil {
 			break
 		}
 
-		return e.complexity.Query.Panics(childComplexity), true
+		return e.ComplexityRoot.Query.Panics(childComplexity), true
 	case "Query.primitiveObject":
-		if e.complexity.Query.PrimitiveObject == nil {
+		if e.ComplexityRoot.Query.PrimitiveObject == nil {
 			break
 		}
 
-		return e.complexity.Query.PrimitiveObject(childComplexity), true
+		return e.ComplexityRoot.Query.PrimitiveObject(childComplexity), true
 	case "Query.primitiveStringObject":
-		if e.complexity.Query.PrimitiveStringObject == nil {
+		if e.ComplexityRoot.Query.PrimitiveStringObject == nil {
 			break
 		}
 
-		return e.complexity.Query.PrimitiveStringObject(childComplexity), true
+		return e.ComplexityRoot.Query.PrimitiveStringObject(childComplexity), true
 	case "Query.ptrToAnyContainer":
-		if e.complexity.Query.PtrToAnyContainer == nil {
+		if e.ComplexityRoot.Query.PtrToAnyContainer == nil {
 			break
 		}
 
-		return e.complexity.Query.PtrToAnyContainer(childComplexity), true
+		return e.ComplexityRoot.Query.PtrToAnyContainer(childComplexity), true
 	case "Query.ptrToSliceContainer":
-		if e.complexity.Query.PtrToSliceContainer == nil {
+		if e.ComplexityRoot.Query.PtrToSliceContainer == nil {
 			break
 		}
 
-		return e.complexity.Query.PtrToSliceContainer(childComplexity), true
+		return e.ComplexityRoot.Query.PtrToSliceContainer(childComplexity), true
 	case "Query.recursive":
-		if e.complexity.Query.Recursive == nil {
+		if e.ComplexityRoot.Query.Recursive == nil {
 			break
 		}
 
@@ -1850,15 +1840,15 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Recursive(childComplexity, args["input"].(*RecursiveInputSlice)), true
+		return e.ComplexityRoot.Query.Recursive(childComplexity, args["input"].(*RecursiveInputSlice)), true
 	case "Query.scalarSlice":
-		if e.complexity.Query.ScalarSlice == nil {
+		if e.ComplexityRoot.Query.ScalarSlice == nil {
 			break
 		}
 
-		return e.complexity.Query.ScalarSlice(childComplexity), true
+		return e.ComplexityRoot.Query.ScalarSlice(childComplexity), true
 	case "Query.searchMixed":
-		if e.complexity.Query.SearchMixed == nil {
+		if e.ComplexityRoot.Query.SearchMixed == nil {
 			break
 		}
 
@@ -1867,9 +1857,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.SearchMixed(childComplexity, args["query"].(*string), args["category"].(*string), args["minPrice"].(*int), args["limit"].(*int), args["offset"].(*int), args["sortBy"].(*string)), true
+		return e.ComplexityRoot.Query.SearchMixed(childComplexity, args["query"].(*string), args["category"].(*string), args["minPrice"].(*int), args["limit"].(*int), args["offset"].(*int), args["sortBy"].(*string)), true
 	case "Query.searchProducts":
-		if e.complexity.Query.SearchProducts == nil {
+		if e.ComplexityRoot.Query.SearchProducts == nil {
 			break
 		}
 
@@ -1878,9 +1868,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.SearchProducts(childComplexity, args["query"].(*string), args["category"].(*string), args["minPrice"].(*int)), true
+		return e.ComplexityRoot.Query.SearchProducts(childComplexity, args["query"].(*string), args["category"].(*string), args["minPrice"].(*int)), true
 	case "Query.searchProductsNormal":
-		if e.complexity.Query.SearchProductsNormal == nil {
+		if e.ComplexityRoot.Query.SearchProductsNormal == nil {
 			break
 		}
 
@@ -1889,9 +1879,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.SearchProductsNormal(childComplexity, args["filters"].(map[string]any)), true
+		return e.ComplexityRoot.Query.SearchProductsNormal(childComplexity, args["filters"].(map[string]any)), true
 	case "Query.searchRequired":
-		if e.complexity.Query.SearchRequired == nil {
+		if e.ComplexityRoot.Query.SearchRequired == nil {
 			break
 		}
 
@@ -1900,9 +1890,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.SearchRequired(childComplexity, args["name"].(string), args["age"].(int)), true
+		return e.ComplexityRoot.Query.SearchRequired(childComplexity, args["name"].(string), args["age"].(int)), true
 	case "Query.searchWithDefaults":
-		if e.complexity.Query.SearchWithDefaults == nil {
+		if e.ComplexityRoot.Query.SearchWithDefaults == nil {
 			break
 		}
 
@@ -1911,9 +1901,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.SearchWithDefaults(childComplexity, args["query"].(*string), args["limit"].(*int), args["includeArchived"].(*bool)), true
+		return e.ComplexityRoot.Query.SearchWithDefaults(childComplexity, args["query"].(*string), args["limit"].(*int), args["includeArchived"].(*bool)), true
 	case "Query.searchWithDirectives":
-		if e.complexity.Query.SearchWithDirectives == nil {
+		if e.ComplexityRoot.Query.SearchWithDirectives == nil {
 			break
 		}
 
@@ -1922,45 +1912,45 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.SearchWithDirectives(childComplexity, args["oldField"].(*string), args["newField"].(*string)), true
+		return e.ComplexityRoot.Query.SearchWithDirectives(childComplexity, args["oldField"].(*string), args["newField"].(*string)), true
 	case "Query.shapeUnion":
-		if e.complexity.Query.ShapeUnion == nil {
+		if e.ComplexityRoot.Query.ShapeUnion == nil {
 			break
 		}
 
-		return e.complexity.Query.ShapeUnion(childComplexity), true
+		return e.ComplexityRoot.Query.ShapeUnion(childComplexity), true
 	case "Query.shapes":
-		if e.complexity.Query.Shapes == nil {
+		if e.ComplexityRoot.Query.Shapes == nil {
 			break
 		}
 
-		return e.complexity.Query.Shapes(childComplexity), true
+		return e.ComplexityRoot.Query.Shapes(childComplexity), true
 	case "Query.skipInclude":
-		if e.complexity.Query.SkipInclude == nil {
+		if e.ComplexityRoot.Query.SkipInclude == nil {
 			break
 		}
 
-		return e.complexity.Query.SkipInclude(childComplexity), true
+		return e.ComplexityRoot.Query.SkipInclude(childComplexity), true
 	case "Query.slices":
-		if e.complexity.Query.Slices == nil {
+		if e.ComplexityRoot.Query.Slices == nil {
 			break
 		}
 
-		return e.complexity.Query.Slices(childComplexity), true
+		return e.ComplexityRoot.Query.Slices(childComplexity), true
 	case "Query.stringFromContextFunction":
-		if e.complexity.Query.StringFromContextFunction == nil {
+		if e.ComplexityRoot.Query.StringFromContextFunction == nil {
 			break
 		}
 
-		return e.complexity.Query.StringFromContextFunction(childComplexity), true
+		return e.ComplexityRoot.Query.StringFromContextFunction(childComplexity), true
 	case "Query.stringFromContextInterface":
-		if e.complexity.Query.StringFromContextInterface == nil {
+		if e.ComplexityRoot.Query.StringFromContextInterface == nil {
 			break
 		}
 
-		return e.complexity.Query.StringFromContextInterface(childComplexity), true
+		return e.ComplexityRoot.Query.StringFromContextInterface(childComplexity), true
 	case "Query.user":
-		if e.complexity.Query.User == nil {
+		if e.ComplexityRoot.Query.User == nil {
 			break
 		}
 
@@ -1969,140 +1959,140 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.User(childComplexity, args["id"].(int)), true
+		return e.ComplexityRoot.Query.User(childComplexity, args["id"].(int)), true
 	case "Query.vOkCaseNil":
-		if e.complexity.Query.VOkCaseNil == nil {
+		if e.ComplexityRoot.Query.VOkCaseNil == nil {
 			break
 		}
 
-		return e.complexity.Query.VOkCaseNil(childComplexity), true
+		return e.ComplexityRoot.Query.VOkCaseNil(childComplexity), true
 	case "Query.vOkCaseValue":
-		if e.complexity.Query.VOkCaseValue == nil {
+		if e.ComplexityRoot.Query.VOkCaseValue == nil {
 			break
 		}
 
-		return e.complexity.Query.VOkCaseValue(childComplexity), true
+		return e.ComplexityRoot.Query.VOkCaseValue(childComplexity), true
 	case "Query.valid":
-		if e.complexity.Query.Valid == nil {
+		if e.ComplexityRoot.Query.Valid == nil {
 			break
 		}
 
-		return e.complexity.Query.Valid(childComplexity), true
+		return e.ComplexityRoot.Query.Valid(childComplexity), true
 	case "Query.validType":
-		if e.complexity.Query.ValidType == nil {
+		if e.ComplexityRoot.Query.ValidType == nil {
 			break
 		}
 
-		return e.complexity.Query.ValidType(childComplexity), true
+		return e.ComplexityRoot.Query.ValidType(childComplexity), true
 	case "Query.variadicModel":
-		if e.complexity.Query.VariadicModel == nil {
+		if e.ComplexityRoot.Query.VariadicModel == nil {
 			break
 		}
 
-		return e.complexity.Query.VariadicModel(childComplexity), true
+		return e.ComplexityRoot.Query.VariadicModel(childComplexity), true
 	case "Query.wrappedMap":
-		if e.complexity.Query.WrappedMap == nil {
+		if e.ComplexityRoot.Query.WrappedMap == nil {
 			break
 		}
 
-		return e.complexity.Query.WrappedMap(childComplexity), true
+		return e.ComplexityRoot.Query.WrappedMap(childComplexity), true
 	case "Query.wrappedScalar":
-		if e.complexity.Query.WrappedScalar == nil {
+		if e.ComplexityRoot.Query.WrappedScalar == nil {
 			break
 		}
 
-		return e.complexity.Query.WrappedScalar(childComplexity), true
+		return e.ComplexityRoot.Query.WrappedScalar(childComplexity), true
 	case "Query.wrappedSlice":
-		if e.complexity.Query.WrappedSlice == nil {
+		if e.ComplexityRoot.Query.WrappedSlice == nil {
 			break
 		}
 
-		return e.complexity.Query.WrappedSlice(childComplexity), true
+		return e.ComplexityRoot.Query.WrappedSlice(childComplexity), true
 	case "Query.wrappedStruct":
-		if e.complexity.Query.WrappedStruct == nil {
+		if e.ComplexityRoot.Query.WrappedStruct == nil {
 			break
 		}
 
-		return e.complexity.Query.WrappedStruct(childComplexity), true
+		return e.ComplexityRoot.Query.WrappedStruct(childComplexity), true
 
 	case "Rectangle.area":
-		if e.complexity.Rectangle.Area == nil {
+		if e.ComplexityRoot.Rectangle.Area == nil {
 			break
 		}
 
-		return e.complexity.Rectangle.Area(childComplexity), true
+		return e.ComplexityRoot.Rectangle.Area(childComplexity), true
 	case "Rectangle.coordinates":
-		if e.complexity.Rectangle.Coordinates == nil {
+		if e.ComplexityRoot.Rectangle.Coordinates == nil {
 			break
 		}
 
-		return e.complexity.Rectangle.Coordinates(childComplexity), true
+		return e.ComplexityRoot.Rectangle.Coordinates(childComplexity), true
 	case "Rectangle.length":
-		if e.complexity.Rectangle.Length == nil {
+		if e.ComplexityRoot.Rectangle.Length == nil {
 			break
 		}
 
-		return e.complexity.Rectangle.Length(childComplexity), true
+		return e.ComplexityRoot.Rectangle.Length(childComplexity), true
 	case "Rectangle.width":
-		if e.complexity.Rectangle.Width == nil {
+		if e.ComplexityRoot.Rectangle.Width == nil {
 			break
 		}
 
-		return e.complexity.Rectangle.Width(childComplexity), true
+		return e.ComplexityRoot.Rectangle.Width(childComplexity), true
 
 	case "Size.height":
-		if e.complexity.Size.Height == nil {
+		if e.ComplexityRoot.Size.Height == nil {
 			break
 		}
 
-		return e.complexity.Size.Height(childComplexity), true
+		return e.ComplexityRoot.Size.Height(childComplexity), true
 	case "Size.weight":
-		if e.complexity.Size.Weight == nil {
+		if e.ComplexityRoot.Size.Weight == nil {
 			break
 		}
 
-		return e.complexity.Size.Weight(childComplexity), true
+		return e.ComplexityRoot.Size.Weight(childComplexity), true
 
 	case "SkipIncludeTestType.a":
-		if e.complexity.SkipIncludeTestType.A == nil {
+		if e.ComplexityRoot.SkipIncludeTestType.A == nil {
 			break
 		}
 
-		return e.complexity.SkipIncludeTestType.A(childComplexity), true
+		return e.ComplexityRoot.SkipIncludeTestType.A(childComplexity), true
 	case "SkipIncludeTestType.b":
-		if e.complexity.SkipIncludeTestType.B == nil {
+		if e.ComplexityRoot.SkipIncludeTestType.B == nil {
 			break
 		}
 
-		return e.complexity.SkipIncludeTestType.B(childComplexity), true
+		return e.ComplexityRoot.SkipIncludeTestType.B(childComplexity), true
 
 	case "Slices.test1":
-		if e.complexity.Slices.Test1 == nil {
+		if e.ComplexityRoot.Slices.Test1 == nil {
 			break
 		}
 
-		return e.complexity.Slices.Test1(childComplexity), true
+		return e.ComplexityRoot.Slices.Test1(childComplexity), true
 	case "Slices.test2":
-		if e.complexity.Slices.Test2 == nil {
+		if e.ComplexityRoot.Slices.Test2 == nil {
 			break
 		}
 
-		return e.complexity.Slices.Test2(childComplexity), true
+		return e.ComplexityRoot.Slices.Test2(childComplexity), true
 	case "Slices.test3":
-		if e.complexity.Slices.Test3 == nil {
+		if e.ComplexityRoot.Slices.Test3 == nil {
 			break
 		}
 
-		return e.complexity.Slices.Test3(childComplexity), true
+		return e.ComplexityRoot.Slices.Test3(childComplexity), true
 	case "Slices.test4":
-		if e.complexity.Slices.Test4 == nil {
+		if e.ComplexityRoot.Slices.Test4 == nil {
 			break
 		}
 
-		return e.complexity.Slices.Test4(childComplexity), true
+		return e.ComplexityRoot.Slices.Test4(childComplexity), true
 
 	case "Subscription.directiveArg":
-		if e.complexity.Subscription.DirectiveArg == nil {
+		if e.ComplexityRoot.Subscription.DirectiveArg == nil {
 			break
 		}
 
@@ -2111,15 +2101,15 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Subscription.DirectiveArg(childComplexity, args["arg"].(string)), true
+		return e.ComplexityRoot.Subscription.DirectiveArg(childComplexity, args["arg"].(string)), true
 	case "Subscription.directiveDouble":
-		if e.complexity.Subscription.DirectiveDouble == nil {
+		if e.ComplexityRoot.Subscription.DirectiveDouble == nil {
 			break
 		}
 
-		return e.complexity.Subscription.DirectiveDouble(childComplexity), true
+		return e.ComplexityRoot.Subscription.DirectiveDouble(childComplexity), true
 	case "Subscription.directiveNullableArg":
-		if e.complexity.Subscription.DirectiveNullableArg == nil {
+		if e.ComplexityRoot.Subscription.DirectiveNullableArg == nil {
 			break
 		}
 
@@ -2128,58 +2118,58 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Subscription.DirectiveNullableArg(childComplexity, args["arg"].(*int), args["arg2"].(*int), args["arg3"].(*string)), true
+		return e.ComplexityRoot.Subscription.DirectiveNullableArg(childComplexity, args["arg"].(*int), args["arg2"].(*int), args["arg3"].(*string)), true
 	case "Subscription.directiveUnimplemented":
-		if e.complexity.Subscription.DirectiveUnimplemented == nil {
+		if e.ComplexityRoot.Subscription.DirectiveUnimplemented == nil {
 			break
 		}
 
-		return e.complexity.Subscription.DirectiveUnimplemented(childComplexity), true
+		return e.ComplexityRoot.Subscription.DirectiveUnimplemented(childComplexity), true
 	case "Subscription.errorRequired":
-		if e.complexity.Subscription.ErrorRequired == nil {
+		if e.ComplexityRoot.Subscription.ErrorRequired == nil {
 			break
 		}
 
-		return e.complexity.Subscription.ErrorRequired(childComplexity), true
+		return e.ComplexityRoot.Subscription.ErrorRequired(childComplexity), true
 	case "Subscription.initPayload":
-		if e.complexity.Subscription.InitPayload == nil {
+		if e.ComplexityRoot.Subscription.InitPayload == nil {
 			break
 		}
 
-		return e.complexity.Subscription.InitPayload(childComplexity), true
+		return e.ComplexityRoot.Subscription.InitPayload(childComplexity), true
 	case "Subscription.issue896b":
-		if e.complexity.Subscription.Issue896b == nil {
+		if e.ComplexityRoot.Subscription.Issue896b == nil {
 			break
 		}
 
-		return e.complexity.Subscription.Issue896b(childComplexity), true
+		return e.ComplexityRoot.Subscription.Issue896b(childComplexity), true
 	case "Subscription.updated":
-		if e.complexity.Subscription.Updated == nil {
+		if e.ComplexityRoot.Subscription.Updated == nil {
 			break
 		}
 
-		return e.complexity.Subscription.Updated(childComplexity), true
+		return e.ComplexityRoot.Subscription.Updated(childComplexity), true
 
 	case "User.created":
-		if e.complexity.User.Created == nil {
+		if e.ComplexityRoot.User.Created == nil {
 			break
 		}
 
-		return e.complexity.User.Created(childComplexity), true
+		return e.ComplexityRoot.User.Created(childComplexity), true
 	case "User.friends":
-		if e.complexity.User.Friends == nil {
+		if e.ComplexityRoot.User.Friends == nil {
 			break
 		}
 
-		return e.complexity.User.Friends(childComplexity), true
+		return e.ComplexityRoot.User.Friends(childComplexity), true
 	case "User.id":
-		if e.complexity.User.ID == nil {
+		if e.ComplexityRoot.User.ID == nil {
 			break
 		}
 
-		return e.complexity.User.ID(childComplexity), true
+		return e.ComplexityRoot.User.ID(childComplexity), true
 	case "User.pets":
-		if e.complexity.User.Pets == nil {
+		if e.ComplexityRoot.User.Pets == nil {
 			break
 		}
 
@@ -2188,42 +2178,42 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.User.Pets(childComplexity, args["limit"].(*int)), true
+		return e.ComplexityRoot.User.Pets(childComplexity, args["limit"].(*int)), true
 	case "User.updated":
-		if e.complexity.User.Updated == nil {
+		if e.ComplexityRoot.User.Updated == nil {
 			break
 		}
 
-		return e.complexity.User.Updated(childComplexity), true
+		return e.ComplexityRoot.User.Updated(childComplexity), true
 
 	case "VOkCaseNil.value":
-		if e.complexity.VOkCaseNil.Value == nil {
+		if e.ComplexityRoot.VOkCaseNil.Value == nil {
 			break
 		}
 
-		return e.complexity.VOkCaseNil.Value(childComplexity), true
+		return e.ComplexityRoot.VOkCaseNil.Value(childComplexity), true
 
 	case "VOkCaseValue.value":
-		if e.complexity.VOkCaseValue.Value == nil {
+		if e.ComplexityRoot.VOkCaseValue.Value == nil {
 			break
 		}
 
-		return e.complexity.VOkCaseValue.Value(childComplexity), true
+		return e.ComplexityRoot.VOkCaseValue.Value(childComplexity), true
 
 	case "ValidType.differentCase":
-		if e.complexity.ValidType.DifferentCase == nil {
+		if e.ComplexityRoot.ValidType.DifferentCase == nil {
 			break
 		}
 
-		return e.complexity.ValidType.DifferentCase(childComplexity), true
+		return e.ComplexityRoot.ValidType.DifferentCase(childComplexity), true
 	case "ValidType.different_case":
-		if e.complexity.ValidType.DifferentCaseOld == nil {
+		if e.ComplexityRoot.ValidType.DifferentCaseOld == nil {
 			break
 		}
 
-		return e.complexity.ValidType.DifferentCaseOld(childComplexity), true
+		return e.ComplexityRoot.ValidType.DifferentCaseOld(childComplexity), true
 	case "ValidType.validArgs":
-		if e.complexity.ValidType.ValidArgs == nil {
+		if e.ComplexityRoot.ValidType.ValidArgs == nil {
 			break
 		}
 
@@ -2232,9 +2222,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.ValidType.ValidArgs(childComplexity, args["break"].(string), args["default"].(string), args["func"].(string), args["interface"].(string), args["select"].(string), args["case"].(string), args["defer"].(string), args["go"].(string), args["map"].(string), args["struct"].(string), args["chan"].(string), args["else"].(string), args["goto"].(string), args["package"].(string), args["switch"].(string), args["const"].(string), args["fallthrough"].(string), args["if"].(string), args["range"].(string), args["type"].(string), args["continue"].(string), args["for"].(string), args["import"].(string), args["return"].(string), args["var"].(string), args["_"].(string)), true
+		return e.ComplexityRoot.ValidType.ValidArgs(childComplexity, args["break"].(string), args["default"].(string), args["func"].(string), args["interface"].(string), args["select"].(string), args["case"].(string), args["defer"].(string), args["go"].(string), args["map"].(string), args["struct"].(string), args["chan"].(string), args["else"].(string), args["goto"].(string), args["package"].(string), args["switch"].(string), args["const"].(string), args["fallthrough"].(string), args["if"].(string), args["range"].(string), args["type"].(string), args["continue"].(string), args["for"].(string), args["import"].(string), args["return"].(string), args["var"].(string), args["_"].(string)), true
 	case "ValidType.validInputKeywords":
-		if e.complexity.ValidType.ValidInputKeywords == nil {
+		if e.ComplexityRoot.ValidType.ValidInputKeywords == nil {
 			break
 		}
 
@@ -2243,10 +2233,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.ValidType.ValidInputKeywords(childComplexity, args["input"].(*ValidInput)), true
+		return e.ComplexityRoot.ValidType.ValidInputKeywords(childComplexity, args["input"].(*ValidInput)), true
 
 	case "VariadicModel.value":
-		if e.complexity.VariadicModel.Value == nil {
+		if e.ComplexityRoot.VariadicModel.Value == nil {
 			break
 		}
 
@@ -2255,10 +2245,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.VariadicModel.Value(childComplexity, args["rank"].(int)), true
+		return e.ComplexityRoot.VariadicModel.Value(childComplexity, args["rank"].(int)), true
 
 	case "WrappedMap.get":
-		if e.complexity.WrappedMap.Get == nil {
+		if e.ComplexityRoot.WrappedMap.Get == nil {
 			break
 		}
 
@@ -2267,10 +2257,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.WrappedMap.Get(childComplexity, args["key"].(string)), true
+		return e.ComplexityRoot.WrappedMap.Get(childComplexity, args["key"].(string)), true
 
 	case "WrappedSlice.get":
-		if e.complexity.WrappedSlice.Get == nil {
+		if e.ComplexityRoot.WrappedSlice.Get == nil {
 			break
 		}
 
@@ -2279,48 +2269,48 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.WrappedSlice.Get(childComplexity, args["idx"].(int)), true
+		return e.ComplexityRoot.WrappedSlice.Get(childComplexity, args["idx"].(int)), true
 
 	case "WrappedStruct.desc":
-		if e.complexity.WrappedStruct.Desc == nil {
+		if e.ComplexityRoot.WrappedStruct.Desc == nil {
 			break
 		}
 
-		return e.complexity.WrappedStruct.Desc(childComplexity), true
+		return e.ComplexityRoot.WrappedStruct.Desc(childComplexity), true
 	case "WrappedStruct.name":
-		if e.complexity.WrappedStruct.Name == nil {
+		if e.ComplexityRoot.WrappedStruct.Name == nil {
 			break
 		}
 
-		return e.complexity.WrappedStruct.Name(childComplexity), true
+		return e.ComplexityRoot.WrappedStruct.Name(childComplexity), true
 
 	case "XXIt.id":
-		if e.complexity.XXIt.ID == nil {
+		if e.ComplexityRoot.XXIt.ID == nil {
 			break
 		}
 
-		return e.complexity.XXIt.ID(childComplexity), true
+		return e.ComplexityRoot.XXIt.ID(childComplexity), true
 
 	case "XxIt.id":
-		if e.complexity.XxIt.ID == nil {
+		if e.ComplexityRoot.XxIt.ID == nil {
 			break
 		}
 
-		return e.complexity.XxIt.ID(childComplexity), true
+		return e.ComplexityRoot.XxIt.ID(childComplexity), true
 
 	case "asdfIt.id":
-		if e.complexity.AsdfIt.ID == nil {
+		if e.ComplexityRoot.AsdfIt.ID == nil {
 			break
 		}
 
-		return e.complexity.AsdfIt.ID(childComplexity), true
+		return e.ComplexityRoot.AsdfIt.ID(childComplexity), true
 
 	case "iIt.id":
-		if e.complexity.IIt.ID == nil {
+		if e.ComplexityRoot.IIt.ID == nil {
 			break
 		}
 
-		return e.complexity.IIt.ID(childComplexity), true
+		return e.ComplexityRoot.IIt.ID(childComplexity), true
 
 	}
 	return 0, false
@@ -3318,11 +3308,11 @@ func (ec *executionContext) field_Query_directiveArg_argsArg(
 			var zeroVal string
 			return zeroVal, err
 		}
-		if ec.directives.Length == nil {
+		if ec.Directives.Length == nil {
 			var zeroVal string
 			return zeroVal, errors.New("directive length is not implemented")
 		}
-		return ec.directives.Length(ctx, rawArgs, directive0, min, max, message)
+		return ec.Directives.Length(ctx, rawArgs, directive0, min, max, message)
 	}
 
 	tmp, err := directive1(ctx)
@@ -3392,11 +3382,11 @@ func (ec *executionContext) field_Query_directiveInputType_argsArg(
 	}
 
 	directive1 := func(ctx context.Context) (any, error) {
-		if ec.directives.Custom == nil {
+		if ec.Directives.Custom == nil {
 			var zeroVal InnerInput
 			return zeroVal, errors.New("directive custom is not implemented")
 		}
-		return ec.directives.Custom(ctx, rawArgs, directive0)
+		return ec.Directives.Custom(ctx, rawArgs, directive0)
 	}
 
 	tmp, err := directive1(ctx)
@@ -3472,11 +3462,11 @@ func (ec *executionContext) field_Query_directiveNullableArg_argsArg(
 			var zeroVal *int
 			return zeroVal, err
 		}
-		if ec.directives.Range == nil {
+		if ec.Directives.Range == nil {
 			var zeroVal *int
 			return zeroVal, errors.New("directive range is not implemented")
 		}
-		return ec.directives.Range(ctx, rawArgs, directive0, min, nil)
+		return ec.Directives.Range(ctx, rawArgs, directive0, min, nil)
 	}
 
 	tmp, err := directive1(ctx)
@@ -3520,11 +3510,11 @@ func (ec *executionContext) field_Query_directiveNullableArg_argsArg2(
 			var zeroVal *int
 			return zeroVal, err
 		}
-		if ec.directives.Range == nil {
+		if ec.Directives.Range == nil {
 			var zeroVal *int
 			return zeroVal, errors.New("directive range is not implemented")
 		}
-		return ec.directives.Range(ctx, rawArgs, directive0, min, nil)
+		return ec.Directives.Range(ctx, rawArgs, directive0, min, nil)
 	}
 
 	tmp, err := directive1(ctx)
@@ -3563,11 +3553,11 @@ func (ec *executionContext) field_Query_directiveNullableArg_argsArg3(
 	}
 
 	directive1 := func(ctx context.Context) (any, error) {
-		if ec.directives.ToNull == nil {
+		if ec.Directives.ToNull == nil {
 			var zeroVal *string
 			return zeroVal, errors.New("directive toNull is not implemented")
 		}
-		return ec.directives.ToNull(ctx, rawArgs, directive0)
+		return ec.Directives.ToNull(ctx, rawArgs, directive0)
 	}
 
 	tmp, err := directive1(ctx)
@@ -3623,18 +3613,18 @@ func (ec *executionContext) field_Query_directiveSingleNullableArg_argsArg1(
 			var zeroVal *string
 			return zeroVal, err
 		}
-		if ec.directives.Populate == nil {
+		if ec.Directives.Populate == nil {
 			var zeroVal *string
 			return zeroVal, errors.New("directive populate is not implemented")
 		}
-		return ec.directives.Populate(ctx, rawArgs, directive0, value)
+		return ec.Directives.Populate(ctx, rawArgs, directive0, value)
 	}
 	directive2 := func(ctx context.Context) (any, error) {
-		if ec.directives.Noop == nil {
+		if ec.Directives.Noop == nil {
 			var zeroVal *string
 			return zeroVal, errors.New("directive noop is not implemented")
 		}
-		return ec.directives.Noop(ctx, rawArgs, directive1)
+		return ec.Directives.Noop(ctx, rawArgs, directive1)
 	}
 
 	tmp, err := directive2(ctx)
@@ -4022,11 +4012,11 @@ func (ec *executionContext) field_Subscription_directiveArg_argsArg(
 			var zeroVal string
 			return zeroVal, err
 		}
-		if ec.directives.Length == nil {
+		if ec.Directives.Length == nil {
 			var zeroVal string
 			return zeroVal, errors.New("directive length is not implemented")
 		}
-		return ec.directives.Length(ctx, rawArgs, directive0, min, max, message)
+		return ec.Directives.Length(ctx, rawArgs, directive0, min, max, message)
 	}
 
 	tmp, err := directive1(ctx)
@@ -4091,11 +4081,11 @@ func (ec *executionContext) field_Subscription_directiveNullableArg_argsArg(
 			var zeroVal *int
 			return zeroVal, err
 		}
-		if ec.directives.Range == nil {
+		if ec.Directives.Range == nil {
 			var zeroVal *int
 			return zeroVal, errors.New("directive range is not implemented")
 		}
-		return ec.directives.Range(ctx, rawArgs, directive0, min, nil)
+		return ec.Directives.Range(ctx, rawArgs, directive0, min, nil)
 	}
 
 	tmp, err := directive1(ctx)
@@ -4139,11 +4129,11 @@ func (ec *executionContext) field_Subscription_directiveNullableArg_argsArg2(
 			var zeroVal *int
 			return zeroVal, err
 		}
-		if ec.directives.Range == nil {
+		if ec.Directives.Range == nil {
 			var zeroVal *int
 			return zeroVal, errors.New("directive range is not implemented")
 		}
-		return ec.directives.Range(ctx, rawArgs, directive0, min, nil)
+		return ec.Directives.Range(ctx, rawArgs, directive0, min, nil)
 	}
 
 	tmp, err := directive1(ctx)
@@ -4182,11 +4172,11 @@ func (ec *executionContext) field_Subscription_directiveNullableArg_argsArg3(
 	}
 
 	directive1 := func(ctx context.Context) (any, error) {
-		if ec.directives.ToNull == nil {
+		if ec.Directives.ToNull == nil {
 			var zeroVal *string
 			return zeroVal, errors.New("directive toNull is not implemented")
 		}
-		return ec.directives.ToNull(ctx, rawArgs, directive0)
+		return ec.Directives.ToNull(ctx, rawArgs, directive0)
 	}
 
 	tmp, err := directive1(ctx)
@@ -4457,10 +4447,10 @@ func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj any, next 
 			}
 			n := next
 			next = func(ctx context.Context) (any, error) {
-				if ec.directives.Logged == nil {
+				if ec.Directives.Logged == nil {
 					return nil, errors.New("directive logged is not implemented")
 				}
-				return ec.directives.Logged(ctx, obj, n, args["id"].(string))
+				return ec.Directives.Logged(ctx, obj, n, args["id"].(string))
 			}
 		}
 	}
@@ -4757,7 +4747,7 @@ func (ec *executionContext) _BackedByInterface_id(ctx context.Context, field gra
 		field,
 		ec.fieldContext_BackedByInterface_id,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.BackedByInterface().ID(ctx, obj)
+			return ec.Resolvers.BackedByInterface().ID(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -5482,7 +5472,7 @@ func (ec *executionContext) _DeferModel_values(ctx context.Context, field graphq
 		field,
 		ec.fieldContext_DeferModel_values,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.DeferModel().Values(ctx, obj)
+			return ec.Resolvers.DeferModel().Values(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -5922,7 +5912,7 @@ func (ec *executionContext) _Errors_a(ctx context.Context, field graphql.Collect
 		field,
 		ec.fieldContext_Errors_a,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Errors().A(ctx, obj)
+			return ec.Resolvers.Errors().A(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -5963,7 +5953,7 @@ func (ec *executionContext) _Errors_b(ctx context.Context, field graphql.Collect
 		field,
 		ec.fieldContext_Errors_b,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Errors().B(ctx, obj)
+			return ec.Resolvers.Errors().B(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -6004,7 +5994,7 @@ func (ec *executionContext) _Errors_c(ctx context.Context, field graphql.Collect
 		field,
 		ec.fieldContext_Errors_c,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Errors().C(ctx, obj)
+			return ec.Resolvers.Errors().C(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -6045,7 +6035,7 @@ func (ec *executionContext) _Errors_d(ctx context.Context, field graphql.Collect
 		field,
 		ec.fieldContext_Errors_d,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Errors().D(ctx, obj)
+			return ec.Resolvers.Errors().D(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -6086,7 +6076,7 @@ func (ec *executionContext) _Errors_e(ctx context.Context, field graphql.Collect
 		field,
 		ec.fieldContext_Errors_e,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Errors().E(ctx, obj)
+			return ec.Resolvers.Errors().E(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -6158,7 +6148,7 @@ func (ec *executionContext) _ForcedResolver_field(ctx context.Context, field gra
 		field,
 		ec.fieldContext_ForcedResolver_field,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.ForcedResolver().Field(ctx, obj)
+			return ec.Resolvers.ForcedResolver().Field(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -6685,7 +6675,7 @@ func (ec *executionContext) _ModelMethods_resolverField(ctx context.Context, fie
 		field,
 		ec.fieldContext_ModelMethods_resolverField,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.ModelMethods().ResolverField(ctx, obj)
+			return ec.Resolvers.ModelMethods().ResolverField(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -6779,7 +6769,7 @@ func (ec *executionContext) _Mutation_defaultInput(ctx context.Context, field gr
 		ec.fieldContext_Mutation_defaultInput,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().DefaultInput(ctx, fc.Args["input"].(DefaultInput))
+			return ec.Resolvers.Mutation().DefaultInput(ctx, fc.Args["input"].(DefaultInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -6828,7 +6818,7 @@ func (ec *executionContext) _Mutation_overrideValueViaInput(ctx context.Context,
 		ec.fieldContext_Mutation_overrideValueViaInput,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().OverrideValueViaInput(ctx, fc.Args["input"].(FieldsOrderInput))
+			return ec.Resolvers.Mutation().OverrideValueViaInput(ctx, fc.Args["input"].(FieldsOrderInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -6875,7 +6865,7 @@ func (ec *executionContext) _Mutation_updateProduct(ctx context.Context, field g
 		ec.fieldContext_Mutation_updateProduct,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().UpdateProduct(ctx, map[string]interface{}{
+			return ec.Resolvers.Mutation().UpdateProduct(ctx, map[string]interface{}{
 				"id":    fc.Args["id"].(string),
 				"name":  fc.Args["name"].(*string),
 				"price": fc.Args["price"].(*float64),
@@ -6922,7 +6912,7 @@ func (ec *executionContext) _Mutation_updateSomething(ctx context.Context, field
 		ec.fieldContext_Mutation_updateSomething,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().UpdateSomething(ctx, fc.Args["input"].(SpecialInput))
+			return ec.Resolvers.Mutation().UpdateSomething(ctx, fc.Args["input"].(SpecialInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -6965,7 +6955,7 @@ func (ec *executionContext) _Mutation_updatePtrToPtr(ctx context.Context, field 
 		ec.fieldContext_Mutation_updatePtrToPtr,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().UpdatePtrToPtr(ctx, fc.Args["input"].(UpdatePtrToPtrOuter))
+			return ec.Resolvers.Mutation().UpdatePtrToPtr(ctx, fc.Args["input"].(UpdatePtrToPtrOuter))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -7036,11 +7026,11 @@ func (ec *executionContext) _ObjectDirectives_text(ctx context.Context, field gr
 					var zeroVal string
 					return zeroVal, err
 				}
-				if ec.directives.Length == nil {
+				if ec.Directives.Length == nil {
 					var zeroVal string
 					return zeroVal, errors.New("directive length is not implemented")
 				}
-				return ec.directives.Length(ctx, obj, directive0, min, max, message)
+				return ec.Directives.Length(ctx, obj, directive0, min, max, message)
 			}
 
 			next = directive1
@@ -7078,11 +7068,11 @@ func (ec *executionContext) _ObjectDirectives_nullableText(ctx context.Context, 
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.ToNull == nil {
+				if ec.Directives.ToNull == nil {
 					var zeroVal *string
 					return zeroVal, errors.New("directive toNull is not implemented")
 				}
-				return ec.directives.ToNull(ctx, obj, directive0)
+				return ec.Directives.ToNull(ctx, obj, directive0)
 			}
 
 			next = directive1
@@ -7151,11 +7141,11 @@ func (ec *executionContext) _ObjectDirectivesWithCustomGoModel_nullableText(ctx 
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.ToNull == nil {
+				if ec.Directives.ToNull == nil {
 					var zeroVal string
 					return zeroVal, errors.New("directive toNull is not implemented")
 				}
-				return ec.directives.ToNull(ctx, obj, directive0)
+				return ec.Directives.ToNull(ctx, obj, directive0)
 			}
 
 			next = directive1
@@ -7284,7 +7274,7 @@ func (ec *executionContext) _OverlappingFields_oldFoo(ctx context.Context, field
 		field,
 		ec.fieldContext_OverlappingFields_oldFoo,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.OverlappingFields().OldFoo(ctx, obj)
+			return ec.Resolvers.OverlappingFields().OldFoo(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -7377,7 +7367,7 @@ func (ec *executionContext) _Panics_fieldScalarMarshal(ctx context.Context, fiel
 		field,
 		ec.fieldContext_Panics_fieldScalarMarshal,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Panics().FieldScalarMarshal(ctx, obj)
+			return ec.Resolvers.Panics().FieldScalarMarshal(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -7452,7 +7442,7 @@ func (ec *executionContext) _Panics_argUnmarshal(ctx context.Context, field grap
 		ec.fieldContext_Panics_argUnmarshal,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Panics().ArgUnmarshal(ctx, obj, fc.Args["u"].([]MarshalPanic))
+			return ec.Resolvers.Panics().ArgUnmarshal(ctx, obj, fc.Args["u"].([]MarshalPanic))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -7526,7 +7516,7 @@ func (ec *executionContext) _Pet_friends(ctx context.Context, field graphql.Coll
 		ec.fieldContext_Pet_friends,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Pet().Friends(ctx, obj, fc.Args["limit"].(*int))
+			return ec.Resolvers.Pet().Friends(ctx, obj, fc.Args["limit"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -7574,7 +7564,7 @@ func (ec *executionContext) _Primitive_value(ctx context.Context, field graphql.
 		field,
 		ec.fieldContext_Primitive_value,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Primitive().Value(ctx, obj)
+			return ec.Resolvers.Primitive().Value(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -7636,7 +7626,7 @@ func (ec *executionContext) _PrimitiveString_value(ctx context.Context, field gr
 		field,
 		ec.fieldContext_PrimitiveString_value,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.PrimitiveString().Value(ctx, obj)
+			return ec.Resolvers.PrimitiveString().Value(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -7698,7 +7688,7 @@ func (ec *executionContext) _PrimitiveString_len(ctx context.Context, field grap
 		field,
 		ec.fieldContext_PrimitiveString_len,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.PrimitiveString().Len(ctx, obj)
+			return ec.Resolvers.PrimitiveString().Len(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -7989,7 +7979,7 @@ func (ec *executionContext) _Query_invalidIdentifier(ctx context.Context, field 
 		field,
 		ec.fieldContext_Query_invalidIdentifier,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().InvalidIdentifier(ctx)
+			return ec.Resolvers.Query().InvalidIdentifier(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8024,7 +8014,7 @@ func (ec *executionContext) _Query_collision(ctx context.Context, field graphql.
 		field,
 		ec.fieldContext_Query_collision,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Collision(ctx)
+			return ec.Resolvers.Query().Collision(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8060,7 +8050,7 @@ func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.C
 		ec.fieldContext_Query_mapInput,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().MapInput(ctx, fc.Args["input"].(map[string]any))
+			return ec.Resolvers.Query().MapInput(ctx, fc.Args["input"].(map[string]any))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8103,7 +8093,7 @@ func (ec *executionContext) _Query_recursive(ctx context.Context, field graphql.
 		ec.fieldContext_Query_recursive,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Recursive(ctx, fc.Args["input"].(*RecursiveInputSlice))
+			return ec.Resolvers.Query().Recursive(ctx, fc.Args["input"].(*RecursiveInputSlice))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8146,7 +8136,7 @@ func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graph
 		ec.fieldContext_Query_nestedInputs,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().NestedInputs(ctx, fc.Args["input"].([][]*OuterInput))
+			return ec.Resolvers.Query().NestedInputs(ctx, fc.Args["input"].([][]*OuterInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8188,7 +8178,7 @@ func (ec *executionContext) _Query_nestedOutputs(ctx context.Context, field grap
 		field,
 		ec.fieldContext_Query_nestedOutputs,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().NestedOutputs(ctx)
+			return ec.Resolvers.Query().NestedOutputs(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8223,7 +8213,7 @@ func (ec *executionContext) _Query_modelMethods(ctx context.Context, field graph
 		field,
 		ec.fieldContext_Query_modelMethods,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().ModelMethods(ctx)
+			return ec.Resolvers.Query().ModelMethods(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8263,7 +8253,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 		ec.fieldContext_Query_user,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().User(ctx, fc.Args["id"].(int))
+			return ec.Resolvers.Query().User(ctx, fc.Args["id"].(int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8318,7 +8308,7 @@ func (ec *executionContext) _Query_nullableArg(ctx context.Context, field graphq
 		ec.fieldContext_Query_nullableArg,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().NullableArg(ctx, fc.Args["arg"].(*int))
+			return ec.Resolvers.Query().NullableArg(ctx, fc.Args["arg"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8361,7 +8351,7 @@ func (ec *executionContext) _Query_inputSlice(ctx context.Context, field graphql
 		ec.fieldContext_Query_inputSlice,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().InputSlice(ctx, fc.Args["arg"].([]string))
+			return ec.Resolvers.Query().InputSlice(ctx, fc.Args["arg"].([]string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8404,7 +8394,7 @@ func (ec *executionContext) _Query_inputNullableSlice(ctx context.Context, field
 		ec.fieldContext_Query_inputNullableSlice,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().InputNullableSlice(ctx, fc.Args["arg"].([]string))
+			return ec.Resolvers.Query().InputNullableSlice(ctx, fc.Args["arg"].([]string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8447,7 +8437,7 @@ func (ec *executionContext) _Query_inputOmittable(ctx context.Context, field gra
 		ec.fieldContext_Query_inputOmittable,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().InputOmittable(ctx, fc.Args["arg"].(OmittableInput))
+			return ec.Resolvers.Query().InputOmittable(ctx, fc.Args["arg"].(OmittableInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8489,7 +8479,7 @@ func (ec *executionContext) _Query_shapeUnion(ctx context.Context, field graphql
 		field,
 		ec.fieldContext_Query_shapeUnion,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().ShapeUnion(ctx)
+			return ec.Resolvers.Query().ShapeUnion(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8520,7 +8510,7 @@ func (ec *executionContext) _Query_autobind(ctx context.Context, field graphql.C
 		field,
 		ec.fieldContext_Query_autobind,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Autobind(ctx)
+			return ec.Resolvers.Query().Autobind(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8563,7 +8553,7 @@ func (ec *executionContext) _Query_deprecatedField(ctx context.Context, field gr
 		field,
 		ec.fieldContext_Query_deprecatedField,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().DeprecatedField(ctx)
+			return ec.Resolvers.Query().DeprecatedField(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8595,7 +8585,7 @@ func (ec *executionContext) _Query_fieldWithDeprecatedArg(ctx context.Context, f
 		ec.fieldContext_Query_fieldWithDeprecatedArg,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().FieldWithDeprecatedArg(ctx, fc.Args["oldArg"].(*int), fc.Args["newArg"].(*int))
+			return ec.Resolvers.Query().FieldWithDeprecatedArg(ctx, fc.Args["oldArg"].(*int), fc.Args["newArg"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8637,7 +8627,7 @@ func (ec *executionContext) _Query_overlapping(ctx context.Context, field graphq
 		field,
 		ec.fieldContext_Query_overlapping,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Overlapping(ctx)
+			return ec.Resolvers.Query().Overlapping(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8681,7 +8671,7 @@ func (ec *executionContext) _Query_defaultParameters(ctx context.Context, field 
 		ec.fieldContext_Query_defaultParameters,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().DefaultParameters(ctx, fc.Args["falsyBoolean"].(*bool), fc.Args["truthyBoolean"].(*bool))
+			return ec.Resolvers.Query().DefaultParameters(ctx, fc.Args["falsyBoolean"].(*bool), fc.Args["truthyBoolean"].(*bool))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8729,7 +8719,7 @@ func (ec *executionContext) _Query_deferSingle(ctx context.Context, field graphq
 		field,
 		ec.fieldContext_Query_deferSingle,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().DeferSingle(ctx)
+			return ec.Resolvers.Query().DeferSingle(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8768,7 +8758,7 @@ func (ec *executionContext) _Query_deferMultiple(ctx context.Context, field grap
 		field,
 		ec.fieldContext_Query_deferMultiple,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().DeferMultiple(ctx)
+			return ec.Resolvers.Query().DeferMultiple(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8808,7 +8798,7 @@ func (ec *executionContext) _Query_directiveArg(ctx context.Context, field graph
 		ec.fieldContext_Query_directiveArg,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().DirectiveArg(ctx, fc.Args["arg"].(string))
+			return ec.Resolvers.Query().DirectiveArg(ctx, fc.Args["arg"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8851,7 +8841,7 @@ func (ec *executionContext) _Query_directiveNullableArg(ctx context.Context, fie
 		ec.fieldContext_Query_directiveNullableArg,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().DirectiveNullableArg(ctx, fc.Args["arg"].(*int), fc.Args["arg2"].(*int), fc.Args["arg3"].(*string))
+			return ec.Resolvers.Query().DirectiveNullableArg(ctx, fc.Args["arg"].(*int), fc.Args["arg2"].(*int), fc.Args["arg3"].(*string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8894,7 +8884,7 @@ func (ec *executionContext) _Query_directiveSingleNullableArg(ctx context.Contex
 		ec.fieldContext_Query_directiveSingleNullableArg,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().DirectiveSingleNullableArg(ctx, fc.Args["arg1"].(*string))
+			return ec.Resolvers.Query().DirectiveSingleNullableArg(ctx, fc.Args["arg1"].(*string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8937,7 +8927,7 @@ func (ec *executionContext) _Query_directiveInputNullable(ctx context.Context, f
 		ec.fieldContext_Query_directiveInputNullable,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().DirectiveInputNullable(ctx, fc.Args["arg"].(*InputDirectives))
+			return ec.Resolvers.Query().DirectiveInputNullable(ctx, fc.Args["arg"].(*InputDirectives))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -8980,7 +8970,7 @@ func (ec *executionContext) _Query_directiveInput(ctx context.Context, field gra
 		ec.fieldContext_Query_directiveInput,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().DirectiveInput(ctx, fc.Args["arg"].(InputDirectives))
+			return ec.Resolvers.Query().DirectiveInput(ctx, fc.Args["arg"].(InputDirectives))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -9023,7 +9013,7 @@ func (ec *executionContext) _Query_directiveInputType(ctx context.Context, field
 		ec.fieldContext_Query_directiveInputType,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().DirectiveInputType(ctx, fc.Args["arg"].(InnerInput))
+			return ec.Resolvers.Query().DirectiveInputType(ctx, fc.Args["arg"].(InnerInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -9065,7 +9055,7 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 		field,
 		ec.fieldContext_Query_directiveObject,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().DirectiveObject(ctx)
+			return ec.Resolvers.Query().DirectiveObject(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -9076,11 +9066,11 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 					var zeroVal *ObjectDirectives
 					return zeroVal, err
 				}
-				if ec.directives.Order1 == nil {
+				if ec.Directives.Order1 == nil {
 					var zeroVal *ObjectDirectives
 					return zeroVal, errors.New("directive order1 is not implemented")
 				}
-				return ec.directives.Order1(ctx, nil, directive0, location)
+				return ec.Directives.Order1(ctx, nil, directive0, location)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
 				location, err := ec.unmarshalNString2string(ctx, "order1_2")
@@ -9088,11 +9078,11 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 					var zeroVal *ObjectDirectives
 					return zeroVal, err
 				}
-				if ec.directives.Order1 == nil {
+				if ec.Directives.Order1 == nil {
 					var zeroVal *ObjectDirectives
 					return zeroVal, errors.New("directive order1 is not implemented")
 				}
-				return ec.directives.Order1(ctx, nil, directive1, location)
+				return ec.Directives.Order1(ctx, nil, directive1, location)
 			}
 			directive3 := func(ctx context.Context) (any, error) {
 				location, err := ec.unmarshalNString2string(ctx, "order2_1")
@@ -9100,11 +9090,11 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 					var zeroVal *ObjectDirectives
 					return zeroVal, err
 				}
-				if ec.directives.Order2 == nil {
+				if ec.Directives.Order2 == nil {
 					var zeroVal *ObjectDirectives
 					return zeroVal, errors.New("directive order2 is not implemented")
 				}
-				return ec.directives.Order2(ctx, nil, directive2, location)
+				return ec.Directives.Order2(ctx, nil, directive2, location)
 			}
 			directive4 := func(ctx context.Context) (any, error) {
 				location, err := ec.unmarshalNString2string(ctx, "Query_field")
@@ -9112,11 +9102,11 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 					var zeroVal *ObjectDirectives
 					return zeroVal, err
 				}
-				if ec.directives.Order1 == nil {
+				if ec.Directives.Order1 == nil {
 					var zeroVal *ObjectDirectives
 					return zeroVal, errors.New("directive order1 is not implemented")
 				}
-				return ec.directives.Order1(ctx, nil, directive3, location)
+				return ec.Directives.Order1(ctx, nil, directive3, location)
 			}
 
 			next = directive4
@@ -9156,7 +9146,7 @@ func (ec *executionContext) _Query_directiveObjectWithCustomGoModel(ctx context.
 		field,
 		ec.fieldContext_Query_directiveObjectWithCustomGoModel,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().DirectiveObjectWithCustomGoModel(ctx)
+			return ec.Resolvers.Query().DirectiveObjectWithCustomGoModel(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -9192,7 +9182,7 @@ func (ec *executionContext) _Query_directiveFieldDef(ctx context.Context, field 
 		ec.fieldContext_Query_directiveFieldDef,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().DirectiveFieldDef(ctx, fc.Args["ret"].(string))
+			return ec.Resolvers.Query().DirectiveFieldDef(ctx, fc.Args["ret"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -9208,11 +9198,11 @@ func (ec *executionContext) _Query_directiveFieldDef(ctx context.Context, field 
 					var zeroVal string
 					return zeroVal, err
 				}
-				if ec.directives.Length == nil {
+				if ec.Directives.Length == nil {
 					var zeroVal string
 					return zeroVal, errors.New("directive length is not implemented")
 				}
-				return ec.directives.Length(ctx, nil, directive0, min, nil, message)
+				return ec.Directives.Length(ctx, nil, directive0, min, nil, message)
 			}
 
 			next = directive1
@@ -9255,7 +9245,7 @@ func (ec *executionContext) _Query_directiveField(ctx context.Context, field gra
 		field,
 		ec.fieldContext_Query_directiveField,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().DirectiveField(ctx)
+			return ec.Resolvers.Query().DirectiveField(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -9286,24 +9276,24 @@ func (ec *executionContext) _Query_directiveDouble(ctx context.Context, field gr
 		field,
 		ec.fieldContext_Query_directiveDouble,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().DirectiveDouble(ctx)
+			return ec.Resolvers.Query().DirectiveDouble(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Directive1 == nil {
+				if ec.Directives.Directive1 == nil {
 					var zeroVal *string
 					return zeroVal, errors.New("directive directive1 is not implemented")
 				}
-				return ec.directives.Directive1(ctx, nil, directive0)
+				return ec.Directives.Directive1(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
-				if ec.directives.Directive2 == nil {
+				if ec.Directives.Directive2 == nil {
 					var zeroVal *string
 					return zeroVal, errors.New("directive directive2 is not implemented")
 				}
-				return ec.directives.Directive2(ctx, nil, directive1)
+				return ec.Directives.Directive2(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -9335,17 +9325,17 @@ func (ec *executionContext) _Query_directiveUnimplemented(ctx context.Context, f
 		field,
 		ec.fieldContext_Query_directiveUnimplemented,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().DirectiveUnimplemented(ctx)
+			return ec.Resolvers.Query().DirectiveUnimplemented(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Unimplemented == nil {
+				if ec.Directives.Unimplemented == nil {
 					var zeroVal *string
 					return zeroVal, errors.New("directive unimplemented is not implemented")
 				}
-				return ec.directives.Unimplemented(ctx, nil, directive0)
+				return ec.Directives.Unimplemented(ctx, nil, directive0)
 			}
 
 			next = directive1
@@ -9377,7 +9367,7 @@ func (ec *executionContext) _Query_embeddedCase1(ctx context.Context, field grap
 		field,
 		ec.fieldContext_Query_embeddedCase1,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().EmbeddedCase1(ctx)
+			return ec.Resolvers.Query().EmbeddedCase1(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -9412,7 +9402,7 @@ func (ec *executionContext) _Query_embeddedCase2(ctx context.Context, field grap
 		field,
 		ec.fieldContext_Query_embeddedCase2,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().EmbeddedCase2(ctx)
+			return ec.Resolvers.Query().EmbeddedCase2(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -9447,7 +9437,7 @@ func (ec *executionContext) _Query_embeddedCase3(ctx context.Context, field grap
 		field,
 		ec.fieldContext_Query_embeddedCase3,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().EmbeddedCase3(ctx)
+			return ec.Resolvers.Query().EmbeddedCase3(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -9483,7 +9473,7 @@ func (ec *executionContext) _Query_enumInInput(ctx context.Context, field graphq
 		ec.fieldContext_Query_enumInInput,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().EnumInInput(ctx, fc.Args["input"].(*InputWithEnumValue))
+			return ec.Resolvers.Query().EnumInInput(ctx, fc.Args["input"].(*InputWithEnumValue))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -9526,7 +9516,7 @@ func (ec *executionContext) _Query_searchProducts(ctx context.Context, field gra
 		ec.fieldContext_Query_searchProducts,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().SearchProducts(ctx, map[string]interface{}{
+			return ec.Resolvers.Query().SearchProducts(ctx, map[string]interface{}{
 				"query":    fc.Args["query"].(*string),
 				"category": fc.Args["category"].(*string),
 				"minPrice": fc.Args["minPrice"].(*int),
@@ -9573,7 +9563,7 @@ func (ec *executionContext) _Query_searchRequired(ctx context.Context, field gra
 		ec.fieldContext_Query_searchRequired,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().SearchRequired(ctx, map[string]interface{}{
+			return ec.Resolvers.Query().SearchRequired(ctx, map[string]interface{}{
 				"name": fc.Args["name"].(string),
 				"age":  fc.Args["age"].(int),
 			})
@@ -9619,7 +9609,7 @@ func (ec *executionContext) _Query_searchProductsNormal(ctx context.Context, fie
 		ec.fieldContext_Query_searchProductsNormal,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().SearchProductsNormal(ctx, fc.Args["filters"].(map[string]any))
+			return ec.Resolvers.Query().SearchProductsNormal(ctx, fc.Args["filters"].(map[string]any))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -9662,7 +9652,7 @@ func (ec *executionContext) _Query_searchWithDefaults(ctx context.Context, field
 		ec.fieldContext_Query_searchWithDefaults,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().SearchWithDefaults(ctx, map[string]interface{}{
+			return ec.Resolvers.Query().SearchWithDefaults(ctx, map[string]interface{}{
 				"query":           fc.Args["query"].(*string),
 				"limit":           fc.Args["limit"].(*int),
 				"includeArchived": fc.Args["includeArchived"].(*bool),
@@ -9709,7 +9699,7 @@ func (ec *executionContext) _Query_searchMixed(ctx context.Context, field graphq
 		ec.fieldContext_Query_searchMixed,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().SearchMixed(ctx, map[string]interface{}{
+			return ec.Resolvers.Query().SearchMixed(ctx, map[string]interface{}{
 				"query":    fc.Args["query"].(*string),
 				"category": fc.Args["category"].(*string),
 				"minPrice": fc.Args["minPrice"].(*int),
@@ -9756,7 +9746,7 @@ func (ec *executionContext) _Query_filterProducts(ctx context.Context, field gra
 		ec.fieldContext_Query_filterProducts,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().FilterProducts(ctx, map[string]interface{}{
+			return ec.Resolvers.Query().FilterProducts(ctx, map[string]interface{}{
 				"query":    fc.Args["query"].(*string),
 				"category": fc.Args["category"].(*string),
 				"minPrice": fc.Args["minPrice"].(*int),
@@ -9803,7 +9793,7 @@ func (ec *executionContext) _Query_findProducts(ctx context.Context, field graph
 		ec.fieldContext_Query_findProducts,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().FindProducts(ctx, map[string]interface{}{
+			return ec.Resolvers.Query().FindProducts(ctx, map[string]interface{}{
 				"query":    fc.Args["query"].(*string),
 				"category": fc.Args["category"].(*string),
 				"minPrice": fc.Args["minPrice"].(*int),
@@ -9850,7 +9840,7 @@ func (ec *executionContext) _Query_searchWithDirectives(ctx context.Context, fie
 		ec.fieldContext_Query_searchWithDirectives,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().SearchWithDirectives(ctx, map[string]interface{}{
+			return ec.Resolvers.Query().SearchWithDirectives(ctx, map[string]interface{}{
 				"oldField": fc.Args["oldField"].(*string),
 				"newField": fc.Args["newField"].(*string),
 			})
@@ -9895,7 +9885,7 @@ func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.Col
 		field,
 		ec.fieldContext_Query_shapes,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Shapes(ctx)
+			return ec.Resolvers.Query().Shapes(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -9926,17 +9916,17 @@ func (ec *executionContext) _Query_noShape(ctx context.Context, field graphql.Co
 		field,
 		ec.fieldContext_Query_noShape,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().NoShape(ctx)
+			return ec.Resolvers.Query().NoShape(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.MakeNil == nil {
+				if ec.Directives.MakeNil == nil {
 					var zeroVal Shape
 					return zeroVal, errors.New("directive makeNil is not implemented")
 				}
-				return ec.directives.MakeNil(ctx, nil, directive0)
+				return ec.Directives.MakeNil(ctx, nil, directive0)
 			}
 
 			next = directive1
@@ -9968,7 +9958,7 @@ func (ec *executionContext) _Query_node(ctx context.Context, field graphql.Colle
 		field,
 		ec.fieldContext_Query_node,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Node(ctx)
+			return ec.Resolvers.Query().Node(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -9999,17 +9989,17 @@ func (ec *executionContext) _Query_noShapeTypedNil(ctx context.Context, field gr
 		field,
 		ec.fieldContext_Query_noShapeTypedNil,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().NoShapeTypedNil(ctx)
+			return ec.Resolvers.Query().NoShapeTypedNil(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.MakeTypedNil == nil {
+				if ec.Directives.MakeTypedNil == nil {
 					var zeroVal Shape
 					return zeroVal, errors.New("directive makeTypedNil is not implemented")
 				}
-				return ec.directives.MakeTypedNil(ctx, nil, directive0)
+				return ec.Directives.MakeTypedNil(ctx, nil, directive0)
 			}
 
 			next = directive1
@@ -10041,17 +10031,17 @@ func (ec *executionContext) _Query_animal(ctx context.Context, field graphql.Col
 		field,
 		ec.fieldContext_Query_animal,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Animal(ctx)
+			return ec.Resolvers.Query().Animal(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.MakeTypedNil == nil {
+				if ec.Directives.MakeTypedNil == nil {
 					var zeroVal Animal
 					return zeroVal, errors.New("directive makeTypedNil is not implemented")
 				}
-				return ec.directives.MakeTypedNil(ctx, nil, directive0)
+				return ec.Directives.MakeTypedNil(ctx, nil, directive0)
 			}
 
 			next = directive1
@@ -10083,7 +10073,7 @@ func (ec *executionContext) _Query_notAnInterface(ctx context.Context, field gra
 		field,
 		ec.fieldContext_Query_notAnInterface,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().NotAnInterface(ctx)
+			return ec.Resolvers.Query().NotAnInterface(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -10122,7 +10112,7 @@ func (ec *executionContext) _Query_dog(ctx context.Context, field graphql.Collec
 		field,
 		ec.fieldContext_Query_dog,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Dog(ctx)
+			return ec.Resolvers.Query().Dog(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -10161,7 +10151,7 @@ func (ec *executionContext) _Query_issue896a(ctx context.Context, field graphql.
 		field,
 		ec.fieldContext_Query_issue896a,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Issue896a(ctx)
+			return ec.Resolvers.Query().Issue896a(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -10197,7 +10187,7 @@ func (ec *executionContext) _Query_mapStringInterface(ctx context.Context, field
 		ec.fieldContext_Query_mapStringInterface,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().MapStringInterface(ctx, fc.Args["in"].(map[string]any))
+			return ec.Resolvers.Query().MapStringInterface(ctx, fc.Args["in"].(map[string]any))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -10250,7 +10240,7 @@ func (ec *executionContext) _Query_mapNestedStringInterface(ctx context.Context,
 		ec.fieldContext_Query_mapNestedStringInterface,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().MapNestedStringInterface(ctx, fc.Args["in"].(*NestedMapInput))
+			return ec.Resolvers.Query().MapNestedStringInterface(ctx, fc.Args["in"].(*NestedMapInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -10303,7 +10293,7 @@ func (ec *executionContext) _Query_mapNestedMapSlice(ctx context.Context, field 
 		ec.fieldContext_Query_mapNestedMapSlice,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().MapNestedMapSlice(ctx, fc.Args["input"].(map[string]any))
+			return ec.Resolvers.Query().MapNestedMapSlice(ctx, fc.Args["input"].(map[string]any))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -10345,7 +10335,7 @@ func (ec *executionContext) _Query_errorBubble(ctx context.Context, field graphq
 		field,
 		ec.fieldContext_Query_errorBubble,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().ErrorBubble(ctx)
+			return ec.Resolvers.Query().ErrorBubble(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -10386,7 +10376,7 @@ func (ec *executionContext) _Query_errorBubbleList(ctx context.Context, field gr
 		field,
 		ec.fieldContext_Query_errorBubbleList,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().ErrorBubbleList(ctx)
+			return ec.Resolvers.Query().ErrorBubbleList(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -10427,7 +10417,7 @@ func (ec *executionContext) _Query_errorList(ctx context.Context, field graphql.
 		field,
 		ec.fieldContext_Query_errorList,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().ErrorList(ctx)
+			return ec.Resolvers.Query().ErrorList(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -10468,7 +10458,7 @@ func (ec *executionContext) _Query_errors(ctx context.Context, field graphql.Col
 		field,
 		ec.fieldContext_Query_errors,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Errors(ctx)
+			return ec.Resolvers.Query().Errors(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -10511,7 +10501,7 @@ func (ec *executionContext) _Query_valid(ctx context.Context, field graphql.Coll
 		field,
 		ec.fieldContext_Query_valid,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Valid(ctx)
+			return ec.Resolvers.Query().Valid(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -10542,7 +10532,7 @@ func (ec *executionContext) _Query_invalid(ctx context.Context, field graphql.Co
 		field,
 		ec.fieldContext_Query_invalid,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Invalid(ctx)
+			return ec.Resolvers.Query().Invalid(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -10573,7 +10563,7 @@ func (ec *executionContext) _Query_panics(ctx context.Context, field graphql.Col
 		field,
 		ec.fieldContext_Query_panics,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Panics(ctx)
+			return ec.Resolvers.Query().Panics(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -10612,7 +10602,7 @@ func (ec *executionContext) _Query_primitiveObject(ctx context.Context, field gr
 		field,
 		ec.fieldContext_Query_primitiveObject,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().PrimitiveObject(ctx)
+			return ec.Resolvers.Query().PrimitiveObject(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -10649,7 +10639,7 @@ func (ec *executionContext) _Query_primitiveStringObject(ctx context.Context, fi
 		field,
 		ec.fieldContext_Query_primitiveStringObject,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().PrimitiveStringObject(ctx)
+			return ec.Resolvers.Query().PrimitiveStringObject(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -10688,7 +10678,7 @@ func (ec *executionContext) _Query_ptrToAnyContainer(ctx context.Context, field 
 		field,
 		ec.fieldContext_Query_ptrToAnyContainer,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().PtrToAnyContainer(ctx)
+			return ec.Resolvers.Query().PtrToAnyContainer(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -10725,7 +10715,7 @@ func (ec *executionContext) _Query_ptrToSliceContainer(ctx context.Context, fiel
 		field,
 		ec.fieldContext_Query_ptrToSliceContainer,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().PtrToSliceContainer(ctx)
+			return ec.Resolvers.Query().PtrToSliceContainer(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -10760,7 +10750,7 @@ func (ec *executionContext) _Query_infinity(ctx context.Context, field graphql.C
 		field,
 		ec.fieldContext_Query_infinity,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Infinity(ctx)
+			return ec.Resolvers.Query().Infinity(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -10791,7 +10781,7 @@ func (ec *executionContext) _Query_stringFromContextInterface(ctx context.Contex
 		field,
 		ec.fieldContext_Query_stringFromContextInterface,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().StringFromContextInterface(ctx)
+			return ec.Resolvers.Query().StringFromContextInterface(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -10822,7 +10812,7 @@ func (ec *executionContext) _Query_stringFromContextFunction(ctx context.Context
 		field,
 		ec.fieldContext_Query_stringFromContextFunction,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().StringFromContextFunction(ctx)
+			return ec.Resolvers.Query().StringFromContextFunction(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -10854,7 +10844,7 @@ func (ec *executionContext) _Query_defaultScalar(ctx context.Context, field grap
 		ec.fieldContext_Query_defaultScalar,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().DefaultScalar(ctx, fc.Args["arg"].(string))
+			return ec.Resolvers.Query().DefaultScalar(ctx, fc.Args["arg"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -10896,7 +10886,7 @@ func (ec *executionContext) _Query_skipInclude(ctx context.Context, field graphq
 		field,
 		ec.fieldContext_Query_skipInclude,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().SkipInclude(ctx)
+			return ec.Resolvers.Query().SkipInclude(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -10933,7 +10923,7 @@ func (ec *executionContext) _Query_slices(ctx context.Context, field graphql.Col
 		field,
 		ec.fieldContext_Query_slices,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Slices(ctx)
+			return ec.Resolvers.Query().Slices(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -10974,7 +10964,7 @@ func (ec *executionContext) _Query_scalarSlice(ctx context.Context, field graphq
 		field,
 		ec.fieldContext_Query_scalarSlice,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().ScalarSlice(ctx)
+			return ec.Resolvers.Query().ScalarSlice(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -11006,7 +10996,7 @@ func (ec *executionContext) _Query_fallback(ctx context.Context, field graphql.C
 		ec.fieldContext_Query_fallback,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Fallback(ctx, fc.Args["arg"].(FallbackToStringEncoding))
+			return ec.Resolvers.Query().Fallback(ctx, fc.Args["arg"].(FallbackToStringEncoding))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -11048,7 +11038,7 @@ func (ec *executionContext) _Query_optionalUnion(ctx context.Context, field grap
 		field,
 		ec.fieldContext_Query_optionalUnion,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().OptionalUnion(ctx)
+			return ec.Resolvers.Query().OptionalUnion(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -11079,7 +11069,7 @@ func (ec *executionContext) _Query_vOkCaseValue(ctx context.Context, field graph
 		field,
 		ec.fieldContext_Query_vOkCaseValue,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().VOkCaseValue(ctx)
+			return ec.Resolvers.Query().VOkCaseValue(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -11114,7 +11104,7 @@ func (ec *executionContext) _Query_vOkCaseNil(ctx context.Context, field graphql
 		field,
 		ec.fieldContext_Query_vOkCaseNil,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().VOkCaseNil(ctx)
+			return ec.Resolvers.Query().VOkCaseNil(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -11149,7 +11139,7 @@ func (ec *executionContext) _Query_validType(ctx context.Context, field graphql.
 		field,
 		ec.fieldContext_Query_validType,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().ValidType(ctx)
+			return ec.Resolvers.Query().ValidType(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -11190,7 +11180,7 @@ func (ec *executionContext) _Query_variadicModel(ctx context.Context, field grap
 		field,
 		ec.fieldContext_Query_variadicModel,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().VariadicModel(ctx)
+			return ec.Resolvers.Query().VariadicModel(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -11225,7 +11215,7 @@ func (ec *executionContext) _Query_wrappedStruct(ctx context.Context, field grap
 		field,
 		ec.fieldContext_Query_wrappedStruct,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().WrappedStruct(ctx)
+			return ec.Resolvers.Query().WrappedStruct(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -11262,7 +11252,7 @@ func (ec *executionContext) _Query_wrappedScalar(ctx context.Context, field grap
 		field,
 		ec.fieldContext_Query_wrappedScalar,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().WrappedScalar(ctx)
+			return ec.Resolvers.Query().WrappedScalar(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -11293,7 +11283,7 @@ func (ec *executionContext) _Query_wrappedMap(ctx context.Context, field graphql
 		field,
 		ec.fieldContext_Query_wrappedMap,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().WrappedMap(ctx)
+			return ec.Resolvers.Query().WrappedMap(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -11328,7 +11318,7 @@ func (ec *executionContext) _Query_wrappedSlice(ctx context.Context, field graph
 		field,
 		ec.fieldContext_Query_wrappedSlice,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().WrappedSlice(ctx)
+			return ec.Resolvers.Query().WrappedSlice(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -11853,7 +11843,7 @@ func (ec *executionContext) _Subscription_updated(ctx context.Context, field gra
 		field,
 		ec.fieldContext_Subscription_updated,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Subscription().Updated(ctx)
+			return ec.Resolvers.Subscription().Updated(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -11884,7 +11874,7 @@ func (ec *executionContext) _Subscription_initPayload(ctx context.Context, field
 		field,
 		ec.fieldContext_Subscription_initPayload,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Subscription().InitPayload(ctx)
+			return ec.Resolvers.Subscription().InitPayload(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -11916,7 +11906,7 @@ func (ec *executionContext) _Subscription_directiveArg(ctx context.Context, fiel
 		ec.fieldContext_Subscription_directiveArg,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Subscription().DirectiveArg(ctx, fc.Args["arg"].(string))
+			return ec.Resolvers.Subscription().DirectiveArg(ctx, fc.Args["arg"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -11959,7 +11949,7 @@ func (ec *executionContext) _Subscription_directiveNullableArg(ctx context.Conte
 		ec.fieldContext_Subscription_directiveNullableArg,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Subscription().DirectiveNullableArg(ctx, fc.Args["arg"].(*int), fc.Args["arg2"].(*int), fc.Args["arg3"].(*string))
+			return ec.Resolvers.Subscription().DirectiveNullableArg(ctx, fc.Args["arg"].(*int), fc.Args["arg2"].(*int), fc.Args["arg3"].(*string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -12001,24 +11991,24 @@ func (ec *executionContext) _Subscription_directiveDouble(ctx context.Context, f
 		field,
 		ec.fieldContext_Subscription_directiveDouble,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Subscription().DirectiveDouble(ctx)
+			return ec.Resolvers.Subscription().DirectiveDouble(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Directive1 == nil {
+				if ec.Directives.Directive1 == nil {
 					var zeroVal *string
 					return zeroVal, errors.New("directive directive1 is not implemented")
 				}
-				return ec.directives.Directive1(ctx, nil, directive0)
+				return ec.Directives.Directive1(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
-				if ec.directives.Directive2 == nil {
+				if ec.Directives.Directive2 == nil {
 					var zeroVal *string
 					return zeroVal, errors.New("directive directive2 is not implemented")
 				}
-				return ec.directives.Directive2(ctx, nil, directive1)
+				return ec.Directives.Directive2(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -12050,17 +12040,17 @@ func (ec *executionContext) _Subscription_directiveUnimplemented(ctx context.Con
 		field,
 		ec.fieldContext_Subscription_directiveUnimplemented,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Subscription().DirectiveUnimplemented(ctx)
+			return ec.Resolvers.Subscription().DirectiveUnimplemented(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Unimplemented == nil {
+				if ec.Directives.Unimplemented == nil {
 					var zeroVal *string
 					return zeroVal, errors.New("directive unimplemented is not implemented")
 				}
-				return ec.directives.Unimplemented(ctx, nil, directive0)
+				return ec.Directives.Unimplemented(ctx, nil, directive0)
 			}
 
 			next = directive1
@@ -12092,7 +12082,7 @@ func (ec *executionContext) _Subscription_issue896b(ctx context.Context, field g
 		field,
 		ec.fieldContext_Subscription_issue896b,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Subscription().Issue896b(ctx)
+			return ec.Resolvers.Subscription().Issue896b(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -12127,7 +12117,7 @@ func (ec *executionContext) _Subscription_errorRequired(ctx context.Context, fie
 		field,
 		ec.fieldContext_Subscription_errorRequired,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Subscription().ErrorRequired(ctx)
+			return ec.Resolvers.Subscription().ErrorRequired(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -12199,7 +12189,7 @@ func (ec *executionContext) _User_friends(ctx context.Context, field graphql.Col
 		field,
 		ec.fieldContext_User_friends,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.User().Friends(ctx, obj)
+			return ec.Resolvers.User().Friends(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -12305,7 +12295,7 @@ func (ec *executionContext) _User_pets(ctx context.Context, field graphql.Collec
 		ec.fieldContext_User_pets,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.User().Pets(ctx, obj, fc.Args["limit"].(*int))
+			return ec.Resolvers.User().Pets(ctx, obj, fc.Args["limit"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -12613,7 +12603,7 @@ func (ec *executionContext) _WrappedMap_get(ctx context.Context, field graphql.C
 		ec.fieldContext_WrappedMap_get,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.WrappedMap().Get(ctx, obj, fc.Args["key"].(string))
+			return ec.Resolvers.WrappedMap().Get(ctx, obj, fc.Args["key"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -12656,7 +12646,7 @@ func (ec *executionContext) _WrappedSlice_get(ctx context.Context, field graphql
 		ec.fieldContext_WrappedSlice_get,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.WrappedSlice().Get(ctx, obj, fc.Args["idx"].(int))
+			return ec.Resolvers.WrappedSlice().Get(ctx, obj, fc.Args["idx"].(int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -14535,7 +14525,7 @@ func (ec *executionContext) unmarshalInputFieldsOrderInput(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
-			if err = ec.resolvers.FieldsOrderInput().OverrideFirstField(ctx, &it, data); err != nil {
+			if err = ec.Resolvers.FieldsOrderInput().OverrideFirstField(ctx, &it, data); err != nil {
 				return it, err
 			}
 		}
@@ -14573,11 +14563,11 @@ func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, o
 					var zeroVal string
 					return zeroVal, err
 				}
-				if ec.directives.Length == nil {
+				if ec.Directives.Length == nil {
 					var zeroVal string
 					return zeroVal, errors.New("directive length is not implemented")
 				}
-				return ec.directives.Length(ctx, obj, directive0, min, nil, message)
+				return ec.Directives.Length(ctx, obj, directive0, min, nil, message)
 			}
 
 			tmp, err := directive1(ctx)
@@ -14642,11 +14632,11 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalNString2string(ctx, v) }
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Directive3 == nil {
+				if ec.Directives.Directive3 == nil {
 					var zeroVal string
 					return zeroVal, errors.New("directive directive3 is not implemented")
 				}
-				return ec.directives.Directive3(ctx, obj, directive0)
+				return ec.Directives.Directive3(ctx, obj, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
 				min, err := ec.unmarshalNInt2int(ctx, 0)
@@ -14664,11 +14654,11 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 					var zeroVal string
 					return zeroVal, err
 				}
-				if ec.directives.Length == nil {
+				if ec.Directives.Length == nil {
 					var zeroVal string
 					return zeroVal, errors.New("directive length is not implemented")
 				}
-				return ec.directives.Length(ctx, obj, directive1, min, max, message)
+				return ec.Directives.Length(ctx, obj, directive1, min, max, message)
 			}
 
 			tmp, err := directive2(ctx)
@@ -14686,18 +14676,18 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalOString2ᚖstring(ctx, v) }
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Directive3 == nil {
+				if ec.Directives.Directive3 == nil {
 					var zeroVal *string
 					return zeroVal, errors.New("directive directive3 is not implemented")
 				}
-				return ec.directives.Directive3(ctx, obj, directive0)
+				return ec.Directives.Directive3(ctx, obj, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
-				if ec.directives.ToNull == nil {
+				if ec.Directives.ToNull == nil {
 					var zeroVal *string
 					return zeroVal, errors.New("directive toNull is not implemented")
 				}
-				return ec.directives.ToNull(ctx, obj, directive1)
+				return ec.Directives.ToNull(ctx, obj, directive1)
 			}
 
 			tmp, err := directive2(ctx)
@@ -14719,11 +14709,11 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			}
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Directive3 == nil {
+				if ec.Directives.Directive3 == nil {
 					var zeroVal *InnerDirectives
 					return zeroVal, errors.New("directive directive3 is not implemented")
 				}
-				return ec.directives.Directive3(ctx, obj, directive0)
+				return ec.Directives.Directive3(ctx, obj, directive0)
 			}
 
 			tmp, err := directive1(ctx)
@@ -14745,11 +14735,11 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			}
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Directive3 == nil {
+				if ec.Directives.Directive3 == nil {
 					var zeroVal *InnerDirectives
 					return zeroVal, errors.New("directive directive3 is not implemented")
 				}
-				return ec.directives.Directive3(ctx, obj, directive0)
+				return ec.Directives.Directive3(ctx, obj, directive0)
 			}
 
 			tmp, err := directive1(ctx)
@@ -14771,11 +14761,11 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			}
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Directive3 == nil {
+				if ec.Directives.Directive3 == nil {
 					var zeroVal *ThirdParty
 					return zeroVal, errors.New("directive directive3 is not implemented")
 				}
-				return ec.directives.Directive3(ctx, obj, directive0)
+				return ec.Directives.Directive3(ctx, obj, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
 				min, err := ec.unmarshalNInt2int(ctx, 0)
@@ -14788,11 +14778,11 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 					var zeroVal *ThirdParty
 					return zeroVal, err
 				}
-				if ec.directives.Length == nil {
+				if ec.Directives.Length == nil {
 					var zeroVal *ThirdParty
 					return zeroVal, errors.New("directive length is not implemented")
 				}
-				return ec.directives.Length(ctx, obj, directive1, min, max, nil)
+				return ec.Directives.Length(ctx, obj, directive1, min, max, nil)
 			}
 
 			tmp, err := directive2(ctx)

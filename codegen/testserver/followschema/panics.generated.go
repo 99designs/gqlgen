@@ -61,7 +61,7 @@ func (ec *executionContext) _Panics_fieldScalarMarshal(ctx context.Context, fiel
 		field,
 		ec.fieldContext_Panics_fieldScalarMarshal,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Panics().FieldScalarMarshal(ctx, obj)
+			return ec.Resolvers.Panics().FieldScalarMarshal(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -136,7 +136,7 @@ func (ec *executionContext) _Panics_argUnmarshal(ctx context.Context, field grap
 		ec.fieldContext_Panics_argUnmarshal,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Panics().ArgUnmarshal(ctx, obj, fc.Args["u"].([]MarshalPanic))
+			return ec.Resolvers.Panics().ArgUnmarshal(ctx, obj, fc.Args["u"].([]MarshalPanic))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)

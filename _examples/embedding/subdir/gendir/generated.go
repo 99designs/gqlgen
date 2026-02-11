@@ -22,12 +22,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -58,16 +53,11 @@ type QueryResolver interface {
 	Subdir(ctx context.Context) (string, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -78,36 +68,36 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "Query.inSchemadir":
-		if e.complexity.Query.InSchemadir == nil {
+		if e.ComplexityRoot.Query.InSchemadir == nil {
 			break
 		}
 
-		return e.complexity.Query.InSchemadir(childComplexity), true
+		return e.ComplexityRoot.Query.InSchemadir(childComplexity), true
 	case "Query.parentdir":
-		if e.complexity.Query.Parentdir == nil {
+		if e.ComplexityRoot.Query.Parentdir == nil {
 			break
 		}
 
-		return e.complexity.Query.Parentdir(childComplexity), true
+		return e.ComplexityRoot.Query.Parentdir(childComplexity), true
 	case "Query.subdir":
-		if e.complexity.Query.Subdir == nil {
+		if e.ComplexityRoot.Query.Subdir == nil {
 			break
 		}
 
-		return e.complexity.Query.Subdir(childComplexity), true
+		return e.ComplexityRoot.Query.Subdir(childComplexity), true
 	case "Query._service":
-		if e.complexity.Query.__resolve__service == nil {
+		if e.ComplexityRoot.Query.__resolve__service == nil {
 			break
 		}
 
-		return e.complexity.Query.__resolve__service(childComplexity), true
+		return e.ComplexityRoot.Query.__resolve__service(childComplexity), true
 
 	case "_Service.sdl":
-		if e.complexity._Service.SDL == nil {
+		if e.ComplexityRoot._Service.SDL == nil {
 			break
 		}
 
-		return e.complexity._Service.SDL(childComplexity), true
+		return e.ComplexityRoot._Service.SDL(childComplexity), true
 
 	}
 	return 0, false
@@ -305,7 +295,7 @@ func (ec *executionContext) _Query_inSchemadir(ctx context.Context, field graphq
 		field,
 		ec.fieldContext_Query_inSchemadir,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().InSchemadir(ctx)
+			return ec.Resolvers.Query().InSchemadir(ctx)
 		},
 		nil,
 		ec.marshalNString2string,
@@ -334,7 +324,7 @@ func (ec *executionContext) _Query_parentdir(ctx context.Context, field graphql.
 		field,
 		ec.fieldContext_Query_parentdir,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Parentdir(ctx)
+			return ec.Resolvers.Query().Parentdir(ctx)
 		},
 		nil,
 		ec.marshalNString2string,
@@ -363,7 +353,7 @@ func (ec *executionContext) _Query_subdir(ctx context.Context, field graphql.Col
 		field,
 		ec.fieldContext_Query_subdir,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Subdir(ctx)
+			return ec.Resolvers.Query().Subdir(ctx)
 		},
 		nil,
 		ec.marshalNString2string,

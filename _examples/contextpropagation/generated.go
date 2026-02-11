@@ -22,12 +22,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -63,16 +58,11 @@ type TodoContextResolver interface {
 	Value(ctx context.Context, obj *TodoContext) (*string, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -83,31 +73,31 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "Query.testTodo":
-		if e.complexity.Query.TestTodo == nil {
+		if e.ComplexityRoot.Query.TestTodo == nil {
 			break
 		}
 
-		return e.complexity.Query.TestTodo(childComplexity), true
+		return e.ComplexityRoot.Query.TestTodo(childComplexity), true
 
 	case "Todo.context":
-		if e.complexity.Todo.Context == nil {
+		if e.ComplexityRoot.Todo.Context == nil {
 			break
 		}
 
-		return e.complexity.Todo.Context(childComplexity), true
+		return e.ComplexityRoot.Todo.Context(childComplexity), true
 	case "Todo.text":
-		if e.complexity.Todo.Text == nil {
+		if e.ComplexityRoot.Todo.Text == nil {
 			break
 		}
 
-		return e.complexity.Todo.Text(childComplexity), true
+		return e.ComplexityRoot.Todo.Text(childComplexity), true
 
 	case "TodoContext.value":
-		if e.complexity.TodoContext.Value == nil {
+		if e.ComplexityRoot.TodoContext.Value == nil {
 			break
 		}
 
-		return e.complexity.TodoContext.Value(childComplexity), true
+		return e.ComplexityRoot.TodoContext.Value(childComplexity), true
 
 	}
 	return 0, false
@@ -298,7 +288,7 @@ func (ec *executionContext) _Query_testTodo(ctx context.Context, field graphql.C
 		field,
 		ec.fieldContext_Query_testTodo,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().TestTodo(ctx)
+			return ec.Resolvers.Query().TestTodo(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -309,11 +299,11 @@ func (ec *executionContext) _Query_testTodo(ctx context.Context, field graphql.C
 					var zeroVal *Todo
 					return zeroVal, err
 				}
-				if ec.directives.WithContext == nil {
+				if ec.Directives.WithContext == nil {
 					var zeroVal *Todo
 					return zeroVal, errors.New("directive withContext is not implemented")
 				}
-				return ec.directives.WithContext(ctx, nil, directive0, value)
+				return ec.Directives.WithContext(ctx, nil, directive0, value)
 			}
 
 			next = directive1
@@ -521,7 +511,7 @@ func (ec *executionContext) _TodoContext_value(ctx context.Context, field graphq
 		field,
 		ec.fieldContext_TodoContext_value,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.TodoContext().Value(ctx, obj)
+			return ec.Resolvers.TodoContext().Value(ctx, obj)
 		},
 		nil,
 		ec.marshalOString2ᚖstring,

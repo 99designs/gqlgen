@@ -39,7 +39,7 @@ func (ec *executionContext) _BackedByInterface_id(ctx context.Context, field gra
 		field,
 		ec.fieldContext_BackedByInterface_id,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.BackedByInterface().ID(ctx, obj)
+			return ec.Resolvers.BackedByInterface().ID(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)

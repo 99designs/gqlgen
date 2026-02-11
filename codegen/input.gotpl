@@ -55,7 +55,7 @@
 					}
 					if data, ok := tmp.({{ $field.TypeReference.GO | ref }}) ; ok {
 						{{- if $field.IsResolver }}
-							if err = ec.resolvers.{{ $field.ShortInvocation }}; err != nil {
+							if err = ec.Resolvers.{{ $field.ShortInvocation }}; err != nil {
 								return {{$it}}, err
 							}
 						{{- else }}
@@ -89,7 +89,7 @@
 						if err != nil {
 							return {{$it}}, err
 						}
-						if err = ec.resolvers.{{ $field.ShortInvocation }}; err != nil {
+						if err = ec.Resolvers.{{ $field.ShortInvocation }}; err != nil {
 							return {{$it}}, err
 						}
 					{{- else }}

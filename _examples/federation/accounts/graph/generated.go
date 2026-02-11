@@ -24,12 +24,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -83,16 +78,11 @@ type UserResolver interface {
 	Host(ctx context.Context, obj *model.User) (*model.EmailHost, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -103,20 +93,20 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "EmailHost.id":
-		if e.complexity.EmailHost.ID == nil {
+		if e.ComplexityRoot.EmailHost.ID == nil {
 			break
 		}
 
-		return e.complexity.EmailHost.ID(childComplexity), true
+		return e.ComplexityRoot.EmailHost.ID(childComplexity), true
 	case "EmailHost.name":
-		if e.complexity.EmailHost.Name == nil {
+		if e.ComplexityRoot.EmailHost.Name == nil {
 			break
 		}
 
-		return e.complexity.EmailHost.Name(childComplexity), true
+		return e.ComplexityRoot.EmailHost.Name(childComplexity), true
 
 	case "Entity.findEmailHostByID":
-		if e.complexity.Entity.FindEmailHostByID == nil {
+		if e.ComplexityRoot.Entity.FindEmailHostByID == nil {
 			break
 		}
 
@@ -125,9 +115,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindEmailHostByID(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Entity.FindEmailHostByID(childComplexity, args["id"].(string)), true
 	case "Entity.findUserByID":
-		if e.complexity.Entity.FindUserByID == nil {
+		if e.ComplexityRoot.Entity.FindUserByID == nil {
 			break
 		}
 
@@ -136,22 +126,22 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Entity.FindUserByID(childComplexity, args["id"].(string)), true
+		return e.ComplexityRoot.Entity.FindUserByID(childComplexity, args["id"].(string)), true
 
 	case "Query.me":
-		if e.complexity.Query.Me == nil {
+		if e.ComplexityRoot.Query.Me == nil {
 			break
 		}
 
-		return e.complexity.Query.Me(childComplexity), true
+		return e.ComplexityRoot.Query.Me(childComplexity), true
 	case "Query._service":
-		if e.complexity.Query.__resolve__service == nil {
+		if e.ComplexityRoot.Query.__resolve__service == nil {
 			break
 		}
 
-		return e.complexity.Query.__resolve__service(childComplexity), true
+		return e.ComplexityRoot.Query.__resolve__service(childComplexity), true
 	case "Query._entities":
-		if e.complexity.Query.__resolve_entities == nil {
+		if e.ComplexityRoot.Query.__resolve_entities == nil {
 			break
 		}
 
@@ -160,39 +150,39 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.__resolve_entities(childComplexity, args["representations"].([]map[string]any)), true
+		return e.ComplexityRoot.Query.__resolve_entities(childComplexity, args["representations"].([]map[string]any)), true
 
 	case "User.email":
-		if e.complexity.User.Email == nil {
+		if e.ComplexityRoot.User.Email == nil {
 			break
 		}
 
-		return e.complexity.User.Email(childComplexity), true
+		return e.ComplexityRoot.User.Email(childComplexity), true
 	case "User.host":
-		if e.complexity.User.Host == nil {
+		if e.ComplexityRoot.User.Host == nil {
 			break
 		}
 
-		return e.complexity.User.Host(childComplexity), true
+		return e.ComplexityRoot.User.Host(childComplexity), true
 	case "User.id":
-		if e.complexity.User.ID == nil {
+		if e.ComplexityRoot.User.ID == nil {
 			break
 		}
 
-		return e.complexity.User.ID(childComplexity), true
+		return e.ComplexityRoot.User.ID(childComplexity), true
 	case "User.username":
-		if e.complexity.User.Username == nil {
+		if e.ComplexityRoot.User.Username == nil {
 			break
 		}
 
-		return e.complexity.User.Username(childComplexity), true
+		return e.ComplexityRoot.User.Username(childComplexity), true
 
 	case "_Service.sdl":
-		if e.complexity._Service.SDL == nil {
+		if e.ComplexityRoot._Service.SDL == nil {
 			break
 		}
 
-		return e.complexity._Service.SDL(childComplexity), true
+		return e.ComplexityRoot._Service.SDL(childComplexity), true
 
 	}
 	return 0, false
@@ -534,7 +524,7 @@ func (ec *executionContext) _Entity_findEmailHostByID(ctx context.Context, field
 		ec.fieldContext_Entity_findEmailHostByID,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindEmailHostByID(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Entity().FindEmailHostByID(ctx, fc.Args["id"].(string))
 		},
 		nil,
 		ec.marshalNEmailHost2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋaccountsᚋgraphᚋmodelᚐEmailHost,
@@ -581,7 +571,7 @@ func (ec *executionContext) _Entity_findUserByID(ctx context.Context, field grap
 		ec.fieldContext_Entity_findUserByID,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindUserByID(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Entity().FindUserByID(ctx, fc.Args["id"].(string))
 		},
 		nil,
 		ec.marshalNUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋaccountsᚋgraphᚋmodelᚐUser,
@@ -631,7 +621,7 @@ func (ec *executionContext) _Query_me(ctx context.Context, field graphql.Collect
 		field,
 		ec.fieldContext_Query_me,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Me(ctx)
+			return ec.Resolvers.Query().Me(ctx)
 		},
 		nil,
 		ec.marshalOUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋaccountsᚋgraphᚋmodelᚐUser,
@@ -881,7 +871,7 @@ func (ec *executionContext) _User_host(ctx context.Context, field graphql.Collec
 		field,
 		ec.fieldContext_User_host,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.User().Host(ctx, obj)
+			return ec.Resolvers.User().Host(ctx, obj)
 		},
 		nil,
 		ec.marshalNEmailHost2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋaccountsᚋgraphᚋmodelᚐEmailHost,

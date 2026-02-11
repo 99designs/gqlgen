@@ -23,12 +23,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -87,16 +82,11 @@ type QueryResolver interface {
 	Torture2d(ctx context.Context, customerIds [][]int) ([][]*Customer, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -107,89 +97,89 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "Address.country":
-		if e.complexity.Address.Country == nil {
+		if e.ComplexityRoot.Address.Country == nil {
 			break
 		}
 
-		return e.complexity.Address.Country(childComplexity), true
+		return e.ComplexityRoot.Address.Country(childComplexity), true
 	case "Address.id":
-		if e.complexity.Address.ID == nil {
+		if e.ComplexityRoot.Address.ID == nil {
 			break
 		}
 
-		return e.complexity.Address.ID(childComplexity), true
+		return e.ComplexityRoot.Address.ID(childComplexity), true
 	case "Address.street":
-		if e.complexity.Address.Street == nil {
+		if e.ComplexityRoot.Address.Street == nil {
 			break
 		}
 
-		return e.complexity.Address.Street(childComplexity), true
+		return e.ComplexityRoot.Address.Street(childComplexity), true
 
 	case "Customer.address":
-		if e.complexity.Customer.Address == nil {
+		if e.ComplexityRoot.Customer.Address == nil {
 			break
 		}
 
-		return e.complexity.Customer.Address(childComplexity), true
+		return e.ComplexityRoot.Customer.Address(childComplexity), true
 	case "Customer.id":
-		if e.complexity.Customer.ID == nil {
+		if e.ComplexityRoot.Customer.ID == nil {
 			break
 		}
 
-		return e.complexity.Customer.ID(childComplexity), true
+		return e.ComplexityRoot.Customer.ID(childComplexity), true
 	case "Customer.name":
-		if e.complexity.Customer.Name == nil {
+		if e.ComplexityRoot.Customer.Name == nil {
 			break
 		}
 
-		return e.complexity.Customer.Name(childComplexity), true
+		return e.ComplexityRoot.Customer.Name(childComplexity), true
 	case "Customer.orders":
-		if e.complexity.Customer.Orders == nil {
+		if e.ComplexityRoot.Customer.Orders == nil {
 			break
 		}
 
-		return e.complexity.Customer.Orders(childComplexity), true
+		return e.ComplexityRoot.Customer.Orders(childComplexity), true
 
 	case "Item.name":
-		if e.complexity.Item.Name == nil {
+		if e.ComplexityRoot.Item.Name == nil {
 			break
 		}
 
-		return e.complexity.Item.Name(childComplexity), true
+		return e.ComplexityRoot.Item.Name(childComplexity), true
 
 	case "Order.amount":
-		if e.complexity.Order.Amount == nil {
+		if e.ComplexityRoot.Order.Amount == nil {
 			break
 		}
 
-		return e.complexity.Order.Amount(childComplexity), true
+		return e.ComplexityRoot.Order.Amount(childComplexity), true
 	case "Order.date":
-		if e.complexity.Order.Date == nil {
+		if e.ComplexityRoot.Order.Date == nil {
 			break
 		}
 
-		return e.complexity.Order.Date(childComplexity), true
+		return e.ComplexityRoot.Order.Date(childComplexity), true
 	case "Order.id":
-		if e.complexity.Order.ID == nil {
+		if e.ComplexityRoot.Order.ID == nil {
 			break
 		}
 
-		return e.complexity.Order.ID(childComplexity), true
+		return e.ComplexityRoot.Order.ID(childComplexity), true
 	case "Order.items":
-		if e.complexity.Order.Items == nil {
+		if e.ComplexityRoot.Order.Items == nil {
 			break
 		}
 
-		return e.complexity.Order.Items(childComplexity), true
+		return e.ComplexityRoot.Order.Items(childComplexity), true
 
 	case "Query.customers":
-		if e.complexity.Query.Customers == nil {
+		if e.ComplexityRoot.Query.Customers == nil {
 			break
 		}
 
-		return e.complexity.Query.Customers(childComplexity), true
+		return e.ComplexityRoot.Query.Customers(childComplexity), true
 	case "Query.torture1d":
-		if e.complexity.Query.Torture1d == nil {
+		if e.ComplexityRoot.Query.Torture1d == nil {
 			break
 		}
 
@@ -198,9 +188,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Torture1d(childComplexity, args["customerIds"].([]int)), true
+		return e.ComplexityRoot.Query.Torture1d(childComplexity, args["customerIds"].([]int)), true
 	case "Query.torture2d":
-		if e.complexity.Query.Torture2d == nil {
+		if e.ComplexityRoot.Query.Torture2d == nil {
 			break
 		}
 
@@ -209,7 +199,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Torture2d(childComplexity, args["customerIds"].([][]int)), true
+		return e.ComplexityRoot.Query.Torture2d(childComplexity, args["customerIds"].([][]int)), true
 
 	}
 	return 0, false
@@ -556,7 +546,7 @@ func (ec *executionContext) _Customer_address(ctx context.Context, field graphql
 		field,
 		ec.fieldContext_Customer_address,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Customer().Address(ctx, obj)
+			return ec.Resolvers.Customer().Address(ctx, obj)
 		},
 		nil,
 		ec.marshalOAddress2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋdataloaderᚐAddress,
@@ -593,7 +583,7 @@ func (ec *executionContext) _Customer_orders(ctx context.Context, field graphql.
 		field,
 		ec.fieldContext_Customer_orders,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Customer().Orders(ctx, obj)
+			return ec.Resolvers.Customer().Orders(ctx, obj)
 		},
 		nil,
 		ec.marshalOOrder2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋdataloaderᚐOrderᚄ,
@@ -748,7 +738,7 @@ func (ec *executionContext) _Order_items(ctx context.Context, field graphql.Coll
 		field,
 		ec.fieldContext_Order_items,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Order().Items(ctx, obj)
+			return ec.Resolvers.Order().Items(ctx, obj)
 		},
 		nil,
 		ec.marshalOItem2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋdataloaderᚐItemᚄ,
@@ -781,7 +771,7 @@ func (ec *executionContext) _Query_customers(ctx context.Context, field graphql.
 		field,
 		ec.fieldContext_Query_customers,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Customers(ctx)
+			return ec.Resolvers.Query().Customers(ctx)
 		},
 		nil,
 		ec.marshalOCustomer2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋdataloaderᚐCustomerᚄ,
@@ -821,7 +811,7 @@ func (ec *executionContext) _Query_torture1d(ctx context.Context, field graphql.
 		ec.fieldContext_Query_torture1d,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Torture1d(ctx, fc.Args["customerIds"].([]int))
+			return ec.Resolvers.Query().Torture1d(ctx, fc.Args["customerIds"].([]int))
 		},
 		nil,
 		ec.marshalOCustomer2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋdataloaderᚐCustomerᚄ,
@@ -872,7 +862,7 @@ func (ec *executionContext) _Query_torture2d(ctx context.Context, field graphql.
 		ec.fieldContext_Query_torture2d,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Torture2d(ctx, fc.Args["customerIds"].([][]int))
+			return ec.Resolvers.Query().Torture2d(ctx, fc.Args["customerIds"].([][]int))
 		},
 		nil,
 		ec.marshalOCustomer2ᚕᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋdataloaderᚐCustomer,

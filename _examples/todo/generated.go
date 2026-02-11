@@ -22,12 +22,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -71,16 +66,11 @@ type MyQueryResolver interface {
 	Todos(ctx context.Context) ([]*Todo, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -91,7 +81,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "MyMutation.createTodo":
-		if e.complexity.MyMutation.CreateTodo == nil {
+		if e.ComplexityRoot.MyMutation.CreateTodo == nil {
 			break
 		}
 
@@ -100,9 +90,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.MyMutation.CreateTodo(childComplexity, args["todo"].(TodoInput)), true
+		return e.ComplexityRoot.MyMutation.CreateTodo(childComplexity, args["todo"].(TodoInput)), true
 	case "MyMutation.updateTodo":
-		if e.complexity.MyMutation.UpdateTodo == nil {
+		if e.ComplexityRoot.MyMutation.UpdateTodo == nil {
 			break
 		}
 
@@ -111,16 +101,16 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.MyMutation.UpdateTodo(childComplexity, args["id"].(int), args["changes"].(map[string]any)), true
+		return e.ComplexityRoot.MyMutation.UpdateTodo(childComplexity, args["id"].(int), args["changes"].(map[string]any)), true
 
 	case "MyQuery.lastTodo":
-		if e.complexity.MyQuery.LastTodo == nil {
+		if e.ComplexityRoot.MyQuery.LastTodo == nil {
 			break
 		}
 
-		return e.complexity.MyQuery.LastTodo(childComplexity), true
+		return e.ComplexityRoot.MyQuery.LastTodo(childComplexity), true
 	case "MyQuery.todo":
-		if e.complexity.MyQuery.Todo == nil {
+		if e.ComplexityRoot.MyQuery.Todo == nil {
 			break
 		}
 
@@ -129,32 +119,32 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.MyQuery.Todo(childComplexity, args["id"].(int)), true
+		return e.ComplexityRoot.MyQuery.Todo(childComplexity, args["id"].(int)), true
 	case "MyQuery.todos":
-		if e.complexity.MyQuery.Todos == nil {
+		if e.ComplexityRoot.MyQuery.Todos == nil {
 			break
 		}
 
-		return e.complexity.MyQuery.Todos(childComplexity), true
+		return e.ComplexityRoot.MyQuery.Todos(childComplexity), true
 
 	case "Todo.done":
-		if e.complexity.Todo.Done == nil {
+		if e.ComplexityRoot.Todo.Done == nil {
 			break
 		}
 
-		return e.complexity.Todo.Done(childComplexity), true
+		return e.ComplexityRoot.Todo.Done(childComplexity), true
 	case "Todo.id":
-		if e.complexity.Todo.ID == nil {
+		if e.ComplexityRoot.Todo.ID == nil {
 			break
 		}
 
-		return e.complexity.Todo.ID(childComplexity), true
+		return e.ComplexityRoot.Todo.ID(childComplexity), true
 	case "Todo.text":
-		if e.complexity.Todo.Text == nil {
+		if e.ComplexityRoot.Todo.Text == nil {
 			break
 		}
 
-		return e.complexity.Todo.Text(childComplexity), true
+		return e.ComplexityRoot.Todo.Text(childComplexity), true
 
 	}
 	return 0, false
@@ -417,10 +407,10 @@ func (ec *executionContext) _queryMiddleware(ctx context.Context, obj *ast.Opera
 			}
 			n := next
 			next = func(ctx context.Context) (any, error) {
-				if ec.directives.User == nil {
+				if ec.Directives.User == nil {
 					return nil, errors.New("directive user is not implemented")
 				}
-				return ec.directives.User(ctx, obj, n, args["id"].(int))
+				return ec.Directives.User(ctx, obj, n, args["id"].(int))
 			}
 		}
 	}
@@ -450,10 +440,10 @@ func (ec *executionContext) _mutationMiddleware(ctx context.Context, obj *ast.Op
 			}
 			n := next
 			next = func(ctx context.Context) (any, error) {
-				if ec.directives.User == nil {
+				if ec.Directives.User == nil {
 					return nil, errors.New("directive user is not implemented")
 				}
-				return ec.directives.User(ctx, obj, n, args["id"].(int))
+				return ec.Directives.User(ctx, obj, n, args["id"].(int))
 			}
 		}
 	}
@@ -483,10 +473,10 @@ func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj any, next 
 			}
 			n := next
 			next = func(ctx context.Context) (any, error) {
-				if ec.directives.User == nil {
+				if ec.Directives.User == nil {
 					return nil, errors.New("directive user is not implemented")
 				}
-				return ec.directives.User(ctx, obj, n, args["id"].(int))
+				return ec.Directives.User(ctx, obj, n, args["id"].(int))
 			}
 		}
 	}
@@ -505,7 +495,7 @@ func (ec *executionContext) _MyMutation_createTodo(ctx context.Context, field gr
 		ec.fieldContext_MyMutation_createTodo,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.MyMutation().CreateTodo(ctx, fc.Args["todo"].(TodoInput))
+			return ec.Resolvers.MyMutation().CreateTodo(ctx, fc.Args["todo"].(TodoInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -556,7 +546,7 @@ func (ec *executionContext) _MyMutation_updateTodo(ctx context.Context, field gr
 		ec.fieldContext_MyMutation_updateTodo,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.MyMutation().UpdateTodo(ctx, fc.Args["id"].(int), fc.Args["changes"].(map[string]any))
+			return ec.Resolvers.MyMutation().UpdateTodo(ctx, fc.Args["id"].(int), fc.Args["changes"].(map[string]any))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -607,7 +597,7 @@ func (ec *executionContext) _MyQuery_todo(ctx context.Context, field graphql.Col
 		ec.fieldContext_MyQuery_todo,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.MyQuery().Todo(ctx, fc.Args["id"].(int))
+			return ec.Resolvers.MyQuery().Todo(ctx, fc.Args["id"].(int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -657,7 +647,7 @@ func (ec *executionContext) _MyQuery_lastTodo(ctx context.Context, field graphql
 		field,
 		ec.fieldContext_MyQuery_lastTodo,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.MyQuery().LastTodo(ctx)
+			return ec.Resolvers.MyQuery().LastTodo(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -696,7 +686,7 @@ func (ec *executionContext) _MyQuery_todos(ctx context.Context, field graphql.Co
 		field,
 		ec.fieldContext_MyQuery_todos,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.MyQuery().Todos(ctx)
+			return ec.Resolvers.MyQuery().Todos(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -920,11 +910,11 @@ func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.Collec
 					var zeroVal bool
 					return zeroVal, err
 				}
-				if ec.directives.HasRole == nil {
+				if ec.Directives.HasRole == nil {
 					var zeroVal bool
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.directives.HasRole(ctx, obj, directive0, role)
+				return ec.Directives.HasRole(ctx, obj, directive0, role)
 			}
 
 			next = directive1

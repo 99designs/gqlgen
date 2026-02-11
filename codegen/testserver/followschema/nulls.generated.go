@@ -167,7 +167,7 @@ func (ec *executionContext) _Errors_a(ctx context.Context, field graphql.Collect
 		field,
 		ec.fieldContext_Errors_a,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Errors().A(ctx, obj)
+			return ec.Resolvers.Errors().A(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -208,7 +208,7 @@ func (ec *executionContext) _Errors_b(ctx context.Context, field graphql.Collect
 		field,
 		ec.fieldContext_Errors_b,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Errors().B(ctx, obj)
+			return ec.Resolvers.Errors().B(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -249,7 +249,7 @@ func (ec *executionContext) _Errors_c(ctx context.Context, field graphql.Collect
 		field,
 		ec.fieldContext_Errors_c,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Errors().C(ctx, obj)
+			return ec.Resolvers.Errors().C(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -290,7 +290,7 @@ func (ec *executionContext) _Errors_d(ctx context.Context, field graphql.Collect
 		field,
 		ec.fieldContext_Errors_d,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Errors().D(ctx, obj)
+			return ec.Resolvers.Errors().D(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -331,7 +331,7 @@ func (ec *executionContext) _Errors_e(ctx context.Context, field graphql.Collect
 		field,
 		ec.fieldContext_Errors_e,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Errors().E(ctx, obj)
+			return ec.Resolvers.Errors().E(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)

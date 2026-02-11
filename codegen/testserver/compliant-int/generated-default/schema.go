@@ -21,12 +21,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -62,16 +57,11 @@ type QueryResolver interface {
 	EchoInt64InputToInt64Object(ctx context.Context, input Input64) (*Result64, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -82,7 +72,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "Query.echoInt64InputToInt64Object":
-		if e.complexity.Query.EchoInt64InputToInt64Object == nil {
+		if e.ComplexityRoot.Query.EchoInt64InputToInt64Object == nil {
 			break
 		}
 
@@ -91,9 +81,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.EchoInt64InputToInt64Object(childComplexity, args["input"].(Input64)), true
+		return e.ComplexityRoot.Query.EchoInt64InputToInt64Object(childComplexity, args["input"].(Input64)), true
 	case "Query.echoInt64ToInt64":
-		if e.complexity.Query.EchoInt64ToInt64 == nil {
+		if e.ComplexityRoot.Query.EchoInt64ToInt64 == nil {
 			break
 		}
 
@@ -102,9 +92,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.EchoInt64ToInt64(childComplexity, args["n"].(*int)), true
+		return e.ComplexityRoot.Query.EchoInt64ToInt64(childComplexity, args["n"].(*int)), true
 	case "Query.echoIntInputToIntObject":
-		if e.complexity.Query.EchoIntInputToIntObject == nil {
+		if e.ComplexityRoot.Query.EchoIntInputToIntObject == nil {
 			break
 		}
 
@@ -113,9 +103,9 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.EchoIntInputToIntObject(childComplexity, args["input"].(Input)), true
+		return e.ComplexityRoot.Query.EchoIntInputToIntObject(childComplexity, args["input"].(Input)), true
 	case "Query.echoIntToInt":
-		if e.complexity.Query.EchoIntToInt == nil {
+		if e.ComplexityRoot.Query.EchoIntToInt == nil {
 			break
 		}
 
@@ -124,21 +114,21 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.EchoIntToInt(childComplexity, args["n"].(*int)), true
+		return e.ComplexityRoot.Query.EchoIntToInt(childComplexity, args["n"].(*int)), true
 
 	case "Result.n":
-		if e.complexity.Result.N == nil {
+		if e.ComplexityRoot.Result.N == nil {
 			break
 		}
 
-		return e.complexity.Result.N(childComplexity), true
+		return e.ComplexityRoot.Result.N(childComplexity), true
 
 	case "Result64.n":
-		if e.complexity.Result64.N == nil {
+		if e.ComplexityRoot.Result64.N == nil {
 			break
 		}
 
-		return e.complexity.Result64.N(childComplexity), true
+		return e.ComplexityRoot.Result64.N(childComplexity), true
 
 	}
 	return 0, false
@@ -379,7 +369,7 @@ func (ec *executionContext) _Query_echoIntToInt(ctx context.Context, field graph
 		ec.fieldContext_Query_echoIntToInt,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().EchoIntToInt(ctx, fc.Args["n"].(*int))
+			return ec.Resolvers.Query().EchoIntToInt(ctx, fc.Args["n"].(*int))
 		},
 		nil,
 		ec.marshalNInt2int,
@@ -420,7 +410,7 @@ func (ec *executionContext) _Query_echoInt64ToInt64(ctx context.Context, field g
 		ec.fieldContext_Query_echoInt64ToInt64,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().EchoInt64ToInt64(ctx, fc.Args["n"].(*int))
+			return ec.Resolvers.Query().EchoInt64ToInt64(ctx, fc.Args["n"].(*int))
 		},
 		nil,
 		ec.marshalNInt642int,
@@ -461,7 +451,7 @@ func (ec *executionContext) _Query_echoIntInputToIntObject(ctx context.Context, 
 		ec.fieldContext_Query_echoIntInputToIntObject,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().EchoIntInputToIntObject(ctx, fc.Args["input"].(Input))
+			return ec.Resolvers.Query().EchoIntInputToIntObject(ctx, fc.Args["input"].(Input))
 		},
 		nil,
 		ec.marshalOResult2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgeneratedᚑdefaultᚐResult,
@@ -506,7 +496,7 @@ func (ec *executionContext) _Query_echoInt64InputToInt64Object(ctx context.Conte
 		ec.fieldContext_Query_echoInt64InputToInt64Object,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().EchoInt64InputToInt64Object(ctx, fc.Args["input"].(Input64))
+			return ec.Resolvers.Query().EchoInt64InputToInt64Object(ctx, fc.Args["input"].(Input64))
 		},
 		nil,
 		ec.marshalOResult642ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋcompliantᚑintᚋgeneratedᚑdefaultᚐResult64,

@@ -92,7 +92,7 @@ func (ec *executionContext) unmarshalInputFieldsOrderInput(ctx context.Context, 
 			if err != nil {
 				return it, err
 			}
-			if err = ec.resolvers.FieldsOrderInput().OverrideFirstField(ctx, &it, data); err != nil {
+			if err = ec.Resolvers.FieldsOrderInput().OverrideFirstField(ctx, &it, data); err != nil {
 				return it, err
 			}
 		}

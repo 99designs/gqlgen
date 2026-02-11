@@ -23,12 +23,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -81,16 +76,11 @@ type SubscriptionResolver interface {
 	MessageAdded(ctx context.Context, roomName string) (<-chan *Message, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -101,57 +91,57 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	switch typeName + "." + field {
 
 	case "Chatroom.messages":
-		if e.complexity.Chatroom.Messages == nil {
+		if e.ComplexityRoot.Chatroom.Messages == nil {
 			break
 		}
 
-		return e.complexity.Chatroom.Messages(childComplexity), true
+		return e.ComplexityRoot.Chatroom.Messages(childComplexity), true
 	case "Chatroom.name":
-		if e.complexity.Chatroom.Name == nil {
+		if e.ComplexityRoot.Chatroom.Name == nil {
 			break
 		}
 
-		return e.complexity.Chatroom.Name(childComplexity), true
+		return e.ComplexityRoot.Chatroom.Name(childComplexity), true
 	case "Chatroom.subscription":
-		if e.complexity.Chatroom.Subscription == nil {
+		if e.ComplexityRoot.Chatroom.Subscription == nil {
 			break
 		}
 
-		return e.complexity.Chatroom.Subscription(childComplexity), true
+		return e.ComplexityRoot.Chatroom.Subscription(childComplexity), true
 
 	case "Message.createdAt":
-		if e.complexity.Message.CreatedAt == nil {
+		if e.ComplexityRoot.Message.CreatedAt == nil {
 			break
 		}
 
-		return e.complexity.Message.CreatedAt(childComplexity), true
+		return e.ComplexityRoot.Message.CreatedAt(childComplexity), true
 	case "Message.createdBy":
-		if e.complexity.Message.CreatedBy == nil {
+		if e.ComplexityRoot.Message.CreatedBy == nil {
 			break
 		}
 
-		return e.complexity.Message.CreatedBy(childComplexity), true
+		return e.ComplexityRoot.Message.CreatedBy(childComplexity), true
 	case "Message.id":
-		if e.complexity.Message.ID == nil {
+		if e.ComplexityRoot.Message.ID == nil {
 			break
 		}
 
-		return e.complexity.Message.ID(childComplexity), true
+		return e.ComplexityRoot.Message.ID(childComplexity), true
 	case "Message.subscription":
-		if e.complexity.Message.Subscription == nil {
+		if e.ComplexityRoot.Message.Subscription == nil {
 			break
 		}
 
-		return e.complexity.Message.Subscription(childComplexity), true
+		return e.ComplexityRoot.Message.Subscription(childComplexity), true
 	case "Message.text":
-		if e.complexity.Message.Text == nil {
+		if e.ComplexityRoot.Message.Text == nil {
 			break
 		}
 
-		return e.complexity.Message.Text(childComplexity), true
+		return e.ComplexityRoot.Message.Text(childComplexity), true
 
 	case "Mutation.post":
-		if e.complexity.Mutation.Post == nil {
+		if e.ComplexityRoot.Mutation.Post == nil {
 			break
 		}
 
@@ -160,10 +150,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.Post(childComplexity, args["text"].(string), args["username"].(string), args["roomName"].(string)), true
+		return e.ComplexityRoot.Mutation.Post(childComplexity, args["text"].(string), args["username"].(string), args["roomName"].(string)), true
 
 	case "Query.room":
-		if e.complexity.Query.Room == nil {
+		if e.ComplexityRoot.Query.Room == nil {
 			break
 		}
 
@@ -172,10 +162,10 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.Room(childComplexity, args["name"].(string)), true
+		return e.ComplexityRoot.Query.Room(childComplexity, args["name"].(string)), true
 
 	case "Subscription.messageAdded":
-		if e.complexity.Subscription.MessageAdded == nil {
+		if e.ComplexityRoot.Subscription.MessageAdded == nil {
 			break
 		}
 
@@ -184,7 +174,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Subscription.MessageAdded(childComplexity, args["roomName"].(string)), true
+		return e.ComplexityRoot.Subscription.MessageAdded(childComplexity, args["roomName"].(string)), true
 
 	}
 	return 0, false
@@ -455,10 +445,10 @@ func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *as
 			}
 			n := next
 			next = func(ctx context.Context) (any, error) {
-				if ec.directives.User == nil {
+				if ec.Directives.User == nil {
 					return nil, errors.New("directive user is not implemented")
 				}
-				return ec.directives.User(ctx, obj, n, args["username"].(string))
+				return ec.Directives.User(ctx, obj, n, args["username"].(string))
 			}
 		}
 	}
@@ -744,7 +734,7 @@ func (ec *executionContext) _Mutation_post(ctx context.Context, field graphql.Co
 		ec.fieldContext_Mutation_post,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().Post(ctx, fc.Args["text"].(string), fc.Args["username"].(string), fc.Args["roomName"].(string))
+			return ec.Resolvers.Mutation().Post(ctx, fc.Args["text"].(string), fc.Args["username"].(string), fc.Args["roomName"].(string))
 		},
 		nil,
 		ec.marshalNMessage2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋchatᚐMessage,
@@ -797,7 +787,7 @@ func (ec *executionContext) _Query_room(ctx context.Context, field graphql.Colle
 		ec.fieldContext_Query_room,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Room(ctx, fc.Args["name"].(string))
+			return ec.Resolvers.Query().Room(ctx, fc.Args["name"].(string))
 		},
 		nil,
 		ec.marshalOChatroom2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋchatᚐChatroom,
@@ -954,7 +944,7 @@ func (ec *executionContext) _Subscription_messageAdded(ctx context.Context, fiel
 		ec.fieldContext_Subscription_messageAdded,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Subscription().MessageAdded(ctx, fc.Args["roomName"].(string))
+			return ec.Resolvers.Subscription().MessageAdded(ctx, fc.Args["roomName"].(string))
 		},
 		nil,
 		ec.marshalNMessage2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋchatᚐMessage,

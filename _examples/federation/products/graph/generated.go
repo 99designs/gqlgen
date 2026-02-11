@@ -24,12 +24,7 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{
-		schema:     cfg.Schema,
-		resolvers:  cfg.Resolvers,
-		directives: cfg.Directives,
-		complexity: cfg.Complexity,
-	}
+	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -54,16 +49,11 @@ type QueryResolver interface {
 	TopProducts(ctx context.Context, first *int) ([]*model.Product, error)
 }
 
-type executableSchema struct {
-	schema     *ast.Schema
-	resolvers  ResolverRoot
-	directives DirectiveRoot
-	complexity ComplexityRoot
-}
+type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
-	if e.schema != nil {
-		return e.schema
+	if e.SchemaData != nil {
+		return e.SchemaData
 	}
 	return parsedSchema
 }
@@ -381,7 +371,7 @@ func (ec *executionContext) _Entity_findManufacturerByID(ctx context.Context, fi
 		ec.fieldContext_Entity_findManufacturerByID,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindManufacturerByID(ctx, fc.Args["id"].(string))
+			return ec.Resolvers.Entity().FindManufacturerByID(ctx, fc.Args["id"].(string))
 		},
 		nil,
 		ec.marshalNManufacturer2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋproductsᚋgraphᚋmodelᚐManufacturer,
@@ -428,7 +418,7 @@ func (ec *executionContext) _Entity_findProductByManufacturerIDAndID(ctx context
 		ec.fieldContext_Entity_findProductByManufacturerIDAndID,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindProductByManufacturerIDAndID(ctx, fc.Args["manufacturerID"].(string), fc.Args["id"].(string))
+			return ec.Resolvers.Entity().FindProductByManufacturerIDAndID(ctx, fc.Args["manufacturerID"].(string), fc.Args["id"].(string))
 		},
 		nil,
 		ec.marshalNProduct2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋproductsᚋgraphᚋmodelᚐProduct,
@@ -481,7 +471,7 @@ func (ec *executionContext) _Entity_findProductByUpc(ctx context.Context, field 
 		ec.fieldContext_Entity_findProductByUpc,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Entity().FindProductByUpc(ctx, fc.Args["upc"].(string))
+			return ec.Resolvers.Entity().FindProductByUpc(ctx, fc.Args["upc"].(string))
 		},
 		nil,
 		ec.marshalNProduct2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋproductsᚋgraphᚋmodelᚐProduct,
@@ -743,7 +733,7 @@ func (ec *executionContext) _Query_topProducts(ctx context.Context, field graphq
 		ec.fieldContext_Query_topProducts,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().TopProducts(ctx, fc.Args["first"].(*int))
+			return ec.Resolvers.Query().TopProducts(ctx, fc.Args["first"].(*int))
 		},
 		nil,
 		ec.marshalOProduct2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋproductsᚋgraphᚋmodelᚐProduct,

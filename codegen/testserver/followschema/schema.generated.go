@@ -246,11 +246,11 @@ func (ec *executionContext) field_Query_directiveArg_argsArg(
 			var zeroVal string
 			return zeroVal, err
 		}
-		if ec.directives.Length == nil {
+		if ec.Directives.Length == nil {
 			var zeroVal string
 			return zeroVal, errors.New("directive length is not implemented")
 		}
-		return ec.directives.Length(ctx, rawArgs, directive0, min, max, message)
+		return ec.Directives.Length(ctx, rawArgs, directive0, min, max, message)
 	}
 
 	tmp, err := directive1(ctx)
@@ -320,11 +320,11 @@ func (ec *executionContext) field_Query_directiveInputType_argsArg(
 	}
 
 	directive1 := func(ctx context.Context) (any, error) {
-		if ec.directives.Custom == nil {
+		if ec.Directives.Custom == nil {
 			var zeroVal InnerInput
 			return zeroVal, errors.New("directive custom is not implemented")
 		}
-		return ec.directives.Custom(ctx, rawArgs, directive0)
+		return ec.Directives.Custom(ctx, rawArgs, directive0)
 	}
 
 	tmp, err := directive1(ctx)
@@ -400,11 +400,11 @@ func (ec *executionContext) field_Query_directiveNullableArg_argsArg(
 			var zeroVal *int
 			return zeroVal, err
 		}
-		if ec.directives.Range == nil {
+		if ec.Directives.Range == nil {
 			var zeroVal *int
 			return zeroVal, errors.New("directive range is not implemented")
 		}
-		return ec.directives.Range(ctx, rawArgs, directive0, min, nil)
+		return ec.Directives.Range(ctx, rawArgs, directive0, min, nil)
 	}
 
 	tmp, err := directive1(ctx)
@@ -448,11 +448,11 @@ func (ec *executionContext) field_Query_directiveNullableArg_argsArg2(
 			var zeroVal *int
 			return zeroVal, err
 		}
-		if ec.directives.Range == nil {
+		if ec.Directives.Range == nil {
 			var zeroVal *int
 			return zeroVal, errors.New("directive range is not implemented")
 		}
-		return ec.directives.Range(ctx, rawArgs, directive0, min, nil)
+		return ec.Directives.Range(ctx, rawArgs, directive0, min, nil)
 	}
 
 	tmp, err := directive1(ctx)
@@ -491,11 +491,11 @@ func (ec *executionContext) field_Query_directiveNullableArg_argsArg3(
 	}
 
 	directive1 := func(ctx context.Context) (any, error) {
-		if ec.directives.ToNull == nil {
+		if ec.Directives.ToNull == nil {
 			var zeroVal *string
 			return zeroVal, errors.New("directive toNull is not implemented")
 		}
-		return ec.directives.ToNull(ctx, rawArgs, directive0)
+		return ec.Directives.ToNull(ctx, rawArgs, directive0)
 	}
 
 	tmp, err := directive1(ctx)
@@ -551,18 +551,18 @@ func (ec *executionContext) field_Query_directiveSingleNullableArg_argsArg1(
 			var zeroVal *string
 			return zeroVal, err
 		}
-		if ec.directives.Populate == nil {
+		if ec.Directives.Populate == nil {
 			var zeroVal *string
 			return zeroVal, errors.New("directive populate is not implemented")
 		}
-		return ec.directives.Populate(ctx, rawArgs, directive0, value)
+		return ec.Directives.Populate(ctx, rawArgs, directive0, value)
 	}
 	directive2 := func(ctx context.Context) (any, error) {
-		if ec.directives.Noop == nil {
+		if ec.Directives.Noop == nil {
 			var zeroVal *string
 			return zeroVal, errors.New("directive noop is not implemented")
 		}
-		return ec.directives.Noop(ctx, rawArgs, directive1)
+		return ec.Directives.Noop(ctx, rawArgs, directive1)
 	}
 
 	tmp, err := directive2(ctx)
@@ -950,11 +950,11 @@ func (ec *executionContext) field_Subscription_directiveArg_argsArg(
 			var zeroVal string
 			return zeroVal, err
 		}
-		if ec.directives.Length == nil {
+		if ec.Directives.Length == nil {
 			var zeroVal string
 			return zeroVal, errors.New("directive length is not implemented")
 		}
-		return ec.directives.Length(ctx, rawArgs, directive0, min, max, message)
+		return ec.Directives.Length(ctx, rawArgs, directive0, min, max, message)
 	}
 
 	tmp, err := directive1(ctx)
@@ -1019,11 +1019,11 @@ func (ec *executionContext) field_Subscription_directiveNullableArg_argsArg(
 			var zeroVal *int
 			return zeroVal, err
 		}
-		if ec.directives.Range == nil {
+		if ec.Directives.Range == nil {
 			var zeroVal *int
 			return zeroVal, errors.New("directive range is not implemented")
 		}
-		return ec.directives.Range(ctx, rawArgs, directive0, min, nil)
+		return ec.Directives.Range(ctx, rawArgs, directive0, min, nil)
 	}
 
 	tmp, err := directive1(ctx)
@@ -1067,11 +1067,11 @@ func (ec *executionContext) field_Subscription_directiveNullableArg_argsArg2(
 			var zeroVal *int
 			return zeroVal, err
 		}
-		if ec.directives.Range == nil {
+		if ec.Directives.Range == nil {
 			var zeroVal *int
 			return zeroVal, errors.New("directive range is not implemented")
 		}
-		return ec.directives.Range(ctx, rawArgs, directive0, min, nil)
+		return ec.Directives.Range(ctx, rawArgs, directive0, min, nil)
 	}
 
 	tmp, err := directive1(ctx)
@@ -1110,11 +1110,11 @@ func (ec *executionContext) field_Subscription_directiveNullableArg_argsArg3(
 	}
 
 	directive1 := func(ctx context.Context) (any, error) {
-		if ec.directives.ToNull == nil {
+		if ec.Directives.ToNull == nil {
 			var zeroVal *string
 			return zeroVal, errors.New("directive toNull is not implemented")
 		}
-		return ec.directives.ToNull(ctx, rawArgs, directive0)
+		return ec.Directives.ToNull(ctx, rawArgs, directive0)
 	}
 
 	tmp, err := directive1(ctx)
@@ -1376,7 +1376,7 @@ func (ec *executionContext) _ForcedResolver_field(ctx context.Context, field gra
 		field,
 		ec.fieldContext_ForcedResolver_field,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.ForcedResolver().Field(ctx, obj)
+			return ec.Resolvers.ForcedResolver().Field(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -1508,7 +1508,7 @@ func (ec *executionContext) _ModelMethods_resolverField(ctx context.Context, fie
 		field,
 		ec.fieldContext_ModelMethods_resolverField,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.ModelMethods().ResolverField(ctx, obj)
+			return ec.Resolvers.ModelMethods().ResolverField(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -1668,7 +1668,7 @@ func (ec *executionContext) _Pet_friends(ctx context.Context, field graphql.Coll
 		ec.fieldContext_Pet_friends,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Pet().Friends(ctx, obj, fc.Args["limit"].(*int))
+			return ec.Resolvers.Pet().Friends(ctx, obj, fc.Args["limit"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -1716,7 +1716,7 @@ func (ec *executionContext) _Query_invalidIdentifier(ctx context.Context, field 
 		field,
 		ec.fieldContext_Query_invalidIdentifier,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().InvalidIdentifier(ctx)
+			return ec.Resolvers.Query().InvalidIdentifier(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -1751,7 +1751,7 @@ func (ec *executionContext) _Query_collision(ctx context.Context, field graphql.
 		field,
 		ec.fieldContext_Query_collision,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Collision(ctx)
+			return ec.Resolvers.Query().Collision(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -1787,7 +1787,7 @@ func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.C
 		ec.fieldContext_Query_mapInput,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().MapInput(ctx, fc.Args["input"].(map[string]any))
+			return ec.Resolvers.Query().MapInput(ctx, fc.Args["input"].(map[string]any))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -1830,7 +1830,7 @@ func (ec *executionContext) _Query_recursive(ctx context.Context, field graphql.
 		ec.fieldContext_Query_recursive,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Recursive(ctx, fc.Args["input"].(*RecursiveInputSlice))
+			return ec.Resolvers.Query().Recursive(ctx, fc.Args["input"].(*RecursiveInputSlice))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -1873,7 +1873,7 @@ func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graph
 		ec.fieldContext_Query_nestedInputs,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().NestedInputs(ctx, fc.Args["input"].([][]*OuterInput))
+			return ec.Resolvers.Query().NestedInputs(ctx, fc.Args["input"].([][]*OuterInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -1915,7 +1915,7 @@ func (ec *executionContext) _Query_nestedOutputs(ctx context.Context, field grap
 		field,
 		ec.fieldContext_Query_nestedOutputs,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().NestedOutputs(ctx)
+			return ec.Resolvers.Query().NestedOutputs(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -1950,7 +1950,7 @@ func (ec *executionContext) _Query_modelMethods(ctx context.Context, field graph
 		field,
 		ec.fieldContext_Query_modelMethods,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().ModelMethods(ctx)
+			return ec.Resolvers.Query().ModelMethods(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -1990,7 +1990,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 		ec.fieldContext_Query_user,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().User(ctx, fc.Args["id"].(int))
+			return ec.Resolvers.Query().User(ctx, fc.Args["id"].(int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -2045,7 +2045,7 @@ func (ec *executionContext) _Query_nullableArg(ctx context.Context, field graphq
 		ec.fieldContext_Query_nullableArg,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().NullableArg(ctx, fc.Args["arg"].(*int))
+			return ec.Resolvers.Query().NullableArg(ctx, fc.Args["arg"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -2088,7 +2088,7 @@ func (ec *executionContext) _Query_inputSlice(ctx context.Context, field graphql
 		ec.fieldContext_Query_inputSlice,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().InputSlice(ctx, fc.Args["arg"].([]string))
+			return ec.Resolvers.Query().InputSlice(ctx, fc.Args["arg"].([]string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -2131,7 +2131,7 @@ func (ec *executionContext) _Query_inputNullableSlice(ctx context.Context, field
 		ec.fieldContext_Query_inputNullableSlice,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().InputNullableSlice(ctx, fc.Args["arg"].([]string))
+			return ec.Resolvers.Query().InputNullableSlice(ctx, fc.Args["arg"].([]string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -2174,7 +2174,7 @@ func (ec *executionContext) _Query_inputOmittable(ctx context.Context, field gra
 		ec.fieldContext_Query_inputOmittable,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().InputOmittable(ctx, fc.Args["arg"].(OmittableInput))
+			return ec.Resolvers.Query().InputOmittable(ctx, fc.Args["arg"].(OmittableInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -2216,7 +2216,7 @@ func (ec *executionContext) _Query_shapeUnion(ctx context.Context, field graphql
 		field,
 		ec.fieldContext_Query_shapeUnion,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().ShapeUnion(ctx)
+			return ec.Resolvers.Query().ShapeUnion(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -2247,7 +2247,7 @@ func (ec *executionContext) _Query_autobind(ctx context.Context, field graphql.C
 		field,
 		ec.fieldContext_Query_autobind,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Autobind(ctx)
+			return ec.Resolvers.Query().Autobind(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -2290,7 +2290,7 @@ func (ec *executionContext) _Query_deprecatedField(ctx context.Context, field gr
 		field,
 		ec.fieldContext_Query_deprecatedField,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().DeprecatedField(ctx)
+			return ec.Resolvers.Query().DeprecatedField(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -2322,7 +2322,7 @@ func (ec *executionContext) _Query_fieldWithDeprecatedArg(ctx context.Context, f
 		ec.fieldContext_Query_fieldWithDeprecatedArg,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().FieldWithDeprecatedArg(ctx, fc.Args["oldArg"].(*int), fc.Args["newArg"].(*int))
+			return ec.Resolvers.Query().FieldWithDeprecatedArg(ctx, fc.Args["oldArg"].(*int), fc.Args["newArg"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -2364,7 +2364,7 @@ func (ec *executionContext) _Query_overlapping(ctx context.Context, field graphq
 		field,
 		ec.fieldContext_Query_overlapping,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Overlapping(ctx)
+			return ec.Resolvers.Query().Overlapping(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -2408,7 +2408,7 @@ func (ec *executionContext) _Query_defaultParameters(ctx context.Context, field 
 		ec.fieldContext_Query_defaultParameters,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().DefaultParameters(ctx, fc.Args["falsyBoolean"].(*bool), fc.Args["truthyBoolean"].(*bool))
+			return ec.Resolvers.Query().DefaultParameters(ctx, fc.Args["falsyBoolean"].(*bool), fc.Args["truthyBoolean"].(*bool))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -2456,7 +2456,7 @@ func (ec *executionContext) _Query_deferSingle(ctx context.Context, field graphq
 		field,
 		ec.fieldContext_Query_deferSingle,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().DeferSingle(ctx)
+			return ec.Resolvers.Query().DeferSingle(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -2495,7 +2495,7 @@ func (ec *executionContext) _Query_deferMultiple(ctx context.Context, field grap
 		field,
 		ec.fieldContext_Query_deferMultiple,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().DeferMultiple(ctx)
+			return ec.Resolvers.Query().DeferMultiple(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -2535,7 +2535,7 @@ func (ec *executionContext) _Query_directiveArg(ctx context.Context, field graph
 		ec.fieldContext_Query_directiveArg,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().DirectiveArg(ctx, fc.Args["arg"].(string))
+			return ec.Resolvers.Query().DirectiveArg(ctx, fc.Args["arg"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -2578,7 +2578,7 @@ func (ec *executionContext) _Query_directiveNullableArg(ctx context.Context, fie
 		ec.fieldContext_Query_directiveNullableArg,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().DirectiveNullableArg(ctx, fc.Args["arg"].(*int), fc.Args["arg2"].(*int), fc.Args["arg3"].(*string))
+			return ec.Resolvers.Query().DirectiveNullableArg(ctx, fc.Args["arg"].(*int), fc.Args["arg2"].(*int), fc.Args["arg3"].(*string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -2621,7 +2621,7 @@ func (ec *executionContext) _Query_directiveSingleNullableArg(ctx context.Contex
 		ec.fieldContext_Query_directiveSingleNullableArg,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().DirectiveSingleNullableArg(ctx, fc.Args["arg1"].(*string))
+			return ec.Resolvers.Query().DirectiveSingleNullableArg(ctx, fc.Args["arg1"].(*string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -2664,7 +2664,7 @@ func (ec *executionContext) _Query_directiveInputNullable(ctx context.Context, f
 		ec.fieldContext_Query_directiveInputNullable,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().DirectiveInputNullable(ctx, fc.Args["arg"].(*InputDirectives))
+			return ec.Resolvers.Query().DirectiveInputNullable(ctx, fc.Args["arg"].(*InputDirectives))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -2707,7 +2707,7 @@ func (ec *executionContext) _Query_directiveInput(ctx context.Context, field gra
 		ec.fieldContext_Query_directiveInput,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().DirectiveInput(ctx, fc.Args["arg"].(InputDirectives))
+			return ec.Resolvers.Query().DirectiveInput(ctx, fc.Args["arg"].(InputDirectives))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -2750,7 +2750,7 @@ func (ec *executionContext) _Query_directiveInputType(ctx context.Context, field
 		ec.fieldContext_Query_directiveInputType,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().DirectiveInputType(ctx, fc.Args["arg"].(InnerInput))
+			return ec.Resolvers.Query().DirectiveInputType(ctx, fc.Args["arg"].(InnerInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -2792,7 +2792,7 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 		field,
 		ec.fieldContext_Query_directiveObject,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().DirectiveObject(ctx)
+			return ec.Resolvers.Query().DirectiveObject(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -2803,11 +2803,11 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 					var zeroVal *ObjectDirectives
 					return zeroVal, err
 				}
-				if ec.directives.Order1 == nil {
+				if ec.Directives.Order1 == nil {
 					var zeroVal *ObjectDirectives
 					return zeroVal, errors.New("directive order1 is not implemented")
 				}
-				return ec.directives.Order1(ctx, nil, directive0, location)
+				return ec.Directives.Order1(ctx, nil, directive0, location)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
 				location, err := ec.unmarshalNString2string(ctx, "order1_2")
@@ -2815,11 +2815,11 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 					var zeroVal *ObjectDirectives
 					return zeroVal, err
 				}
-				if ec.directives.Order1 == nil {
+				if ec.Directives.Order1 == nil {
 					var zeroVal *ObjectDirectives
 					return zeroVal, errors.New("directive order1 is not implemented")
 				}
-				return ec.directives.Order1(ctx, nil, directive1, location)
+				return ec.Directives.Order1(ctx, nil, directive1, location)
 			}
 			directive3 := func(ctx context.Context) (any, error) {
 				location, err := ec.unmarshalNString2string(ctx, "order2_1")
@@ -2827,11 +2827,11 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 					var zeroVal *ObjectDirectives
 					return zeroVal, err
 				}
-				if ec.directives.Order2 == nil {
+				if ec.Directives.Order2 == nil {
 					var zeroVal *ObjectDirectives
 					return zeroVal, errors.New("directive order2 is not implemented")
 				}
-				return ec.directives.Order2(ctx, nil, directive2, location)
+				return ec.Directives.Order2(ctx, nil, directive2, location)
 			}
 			directive4 := func(ctx context.Context) (any, error) {
 				location, err := ec.unmarshalNString2string(ctx, "Query_field")
@@ -2839,11 +2839,11 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 					var zeroVal *ObjectDirectives
 					return zeroVal, err
 				}
-				if ec.directives.Order1 == nil {
+				if ec.Directives.Order1 == nil {
 					var zeroVal *ObjectDirectives
 					return zeroVal, errors.New("directive order1 is not implemented")
 				}
-				return ec.directives.Order1(ctx, nil, directive3, location)
+				return ec.Directives.Order1(ctx, nil, directive3, location)
 			}
 
 			next = directive4
@@ -2883,7 +2883,7 @@ func (ec *executionContext) _Query_directiveObjectWithCustomGoModel(ctx context.
 		field,
 		ec.fieldContext_Query_directiveObjectWithCustomGoModel,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().DirectiveObjectWithCustomGoModel(ctx)
+			return ec.Resolvers.Query().DirectiveObjectWithCustomGoModel(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -2919,7 +2919,7 @@ func (ec *executionContext) _Query_directiveFieldDef(ctx context.Context, field 
 		ec.fieldContext_Query_directiveFieldDef,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().DirectiveFieldDef(ctx, fc.Args["ret"].(string))
+			return ec.Resolvers.Query().DirectiveFieldDef(ctx, fc.Args["ret"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
@@ -2935,11 +2935,11 @@ func (ec *executionContext) _Query_directiveFieldDef(ctx context.Context, field 
 					var zeroVal string
 					return zeroVal, err
 				}
-				if ec.directives.Length == nil {
+				if ec.Directives.Length == nil {
 					var zeroVal string
 					return zeroVal, errors.New("directive length is not implemented")
 				}
-				return ec.directives.Length(ctx, nil, directive0, min, nil, message)
+				return ec.Directives.Length(ctx, nil, directive0, min, nil, message)
 			}
 
 			next = directive1
@@ -2982,7 +2982,7 @@ func (ec *executionContext) _Query_directiveField(ctx context.Context, field gra
 		field,
 		ec.fieldContext_Query_directiveField,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().DirectiveField(ctx)
+			return ec.Resolvers.Query().DirectiveField(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -3013,24 +3013,24 @@ func (ec *executionContext) _Query_directiveDouble(ctx context.Context, field gr
 		field,
 		ec.fieldContext_Query_directiveDouble,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().DirectiveDouble(ctx)
+			return ec.Resolvers.Query().DirectiveDouble(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Directive1 == nil {
+				if ec.Directives.Directive1 == nil {
 					var zeroVal *string
 					return zeroVal, errors.New("directive directive1 is not implemented")
 				}
-				return ec.directives.Directive1(ctx, nil, directive0)
+				return ec.Directives.Directive1(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
-				if ec.directives.Directive2 == nil {
+				if ec.Directives.Directive2 == nil {
 					var zeroVal *string
 					return zeroVal, errors.New("directive directive2 is not implemented")
 				}
-				return ec.directives.Directive2(ctx, nil, directive1)
+				return ec.Directives.Directive2(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -3062,17 +3062,17 @@ func (ec *executionContext) _Query_directiveUnimplemented(ctx context.Context, f
 		field,
 		ec.fieldContext_Query_directiveUnimplemented,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().DirectiveUnimplemented(ctx)
+			return ec.Resolvers.Query().DirectiveUnimplemented(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Unimplemented == nil {
+				if ec.Directives.Unimplemented == nil {
 					var zeroVal *string
 					return zeroVal, errors.New("directive unimplemented is not implemented")
 				}
-				return ec.directives.Unimplemented(ctx, nil, directive0)
+				return ec.Directives.Unimplemented(ctx, nil, directive0)
 			}
 
 			next = directive1
@@ -3104,7 +3104,7 @@ func (ec *executionContext) _Query_embeddedCase1(ctx context.Context, field grap
 		field,
 		ec.fieldContext_Query_embeddedCase1,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().EmbeddedCase1(ctx)
+			return ec.Resolvers.Query().EmbeddedCase1(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -3139,7 +3139,7 @@ func (ec *executionContext) _Query_embeddedCase2(ctx context.Context, field grap
 		field,
 		ec.fieldContext_Query_embeddedCase2,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().EmbeddedCase2(ctx)
+			return ec.Resolvers.Query().EmbeddedCase2(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -3174,7 +3174,7 @@ func (ec *executionContext) _Query_embeddedCase3(ctx context.Context, field grap
 		field,
 		ec.fieldContext_Query_embeddedCase3,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().EmbeddedCase3(ctx)
+			return ec.Resolvers.Query().EmbeddedCase3(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -3210,7 +3210,7 @@ func (ec *executionContext) _Query_enumInInput(ctx context.Context, field graphq
 		ec.fieldContext_Query_enumInInput,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().EnumInInput(ctx, fc.Args["input"].(*InputWithEnumValue))
+			return ec.Resolvers.Query().EnumInInput(ctx, fc.Args["input"].(*InputWithEnumValue))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -3253,7 +3253,7 @@ func (ec *executionContext) _Query_searchProducts(ctx context.Context, field gra
 		ec.fieldContext_Query_searchProducts,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().SearchProducts(ctx, map[string]interface{}{
+			return ec.Resolvers.Query().SearchProducts(ctx, map[string]interface{}{
 				"query":    fc.Args["query"].(*string),
 				"category": fc.Args["category"].(*string),
 				"minPrice": fc.Args["minPrice"].(*int),
@@ -3300,7 +3300,7 @@ func (ec *executionContext) _Query_searchRequired(ctx context.Context, field gra
 		ec.fieldContext_Query_searchRequired,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().SearchRequired(ctx, map[string]interface{}{
+			return ec.Resolvers.Query().SearchRequired(ctx, map[string]interface{}{
 				"name": fc.Args["name"].(string),
 				"age":  fc.Args["age"].(int),
 			})
@@ -3346,7 +3346,7 @@ func (ec *executionContext) _Query_searchProductsNormal(ctx context.Context, fie
 		ec.fieldContext_Query_searchProductsNormal,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().SearchProductsNormal(ctx, fc.Args["filters"].(map[string]any))
+			return ec.Resolvers.Query().SearchProductsNormal(ctx, fc.Args["filters"].(map[string]any))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -3389,7 +3389,7 @@ func (ec *executionContext) _Query_searchWithDefaults(ctx context.Context, field
 		ec.fieldContext_Query_searchWithDefaults,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().SearchWithDefaults(ctx, map[string]interface{}{
+			return ec.Resolvers.Query().SearchWithDefaults(ctx, map[string]interface{}{
 				"query":           fc.Args["query"].(*string),
 				"limit":           fc.Args["limit"].(*int),
 				"includeArchived": fc.Args["includeArchived"].(*bool),
@@ -3436,7 +3436,7 @@ func (ec *executionContext) _Query_searchMixed(ctx context.Context, field graphq
 		ec.fieldContext_Query_searchMixed,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().SearchMixed(ctx, map[string]interface{}{
+			return ec.Resolvers.Query().SearchMixed(ctx, map[string]interface{}{
 				"query":    fc.Args["query"].(*string),
 				"category": fc.Args["category"].(*string),
 				"minPrice": fc.Args["minPrice"].(*int),
@@ -3483,7 +3483,7 @@ func (ec *executionContext) _Query_filterProducts(ctx context.Context, field gra
 		ec.fieldContext_Query_filterProducts,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().FilterProducts(ctx, map[string]interface{}{
+			return ec.Resolvers.Query().FilterProducts(ctx, map[string]interface{}{
 				"query":    fc.Args["query"].(*string),
 				"category": fc.Args["category"].(*string),
 				"minPrice": fc.Args["minPrice"].(*int),
@@ -3530,7 +3530,7 @@ func (ec *executionContext) _Query_findProducts(ctx context.Context, field graph
 		ec.fieldContext_Query_findProducts,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().FindProducts(ctx, map[string]interface{}{
+			return ec.Resolvers.Query().FindProducts(ctx, map[string]interface{}{
 				"query":    fc.Args["query"].(*string),
 				"category": fc.Args["category"].(*string),
 				"minPrice": fc.Args["minPrice"].(*int),
@@ -3577,7 +3577,7 @@ func (ec *executionContext) _Query_searchWithDirectives(ctx context.Context, fie
 		ec.fieldContext_Query_searchWithDirectives,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().SearchWithDirectives(ctx, map[string]interface{}{
+			return ec.Resolvers.Query().SearchWithDirectives(ctx, map[string]interface{}{
 				"oldField": fc.Args["oldField"].(*string),
 				"newField": fc.Args["newField"].(*string),
 			})
@@ -3622,7 +3622,7 @@ func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.Col
 		field,
 		ec.fieldContext_Query_shapes,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Shapes(ctx)
+			return ec.Resolvers.Query().Shapes(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -3653,17 +3653,17 @@ func (ec *executionContext) _Query_noShape(ctx context.Context, field graphql.Co
 		field,
 		ec.fieldContext_Query_noShape,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().NoShape(ctx)
+			return ec.Resolvers.Query().NoShape(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.MakeNil == nil {
+				if ec.Directives.MakeNil == nil {
 					var zeroVal Shape
 					return zeroVal, errors.New("directive makeNil is not implemented")
 				}
-				return ec.directives.MakeNil(ctx, nil, directive0)
+				return ec.Directives.MakeNil(ctx, nil, directive0)
 			}
 
 			next = directive1
@@ -3695,7 +3695,7 @@ func (ec *executionContext) _Query_node(ctx context.Context, field graphql.Colle
 		field,
 		ec.fieldContext_Query_node,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Node(ctx)
+			return ec.Resolvers.Query().Node(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -3726,17 +3726,17 @@ func (ec *executionContext) _Query_noShapeTypedNil(ctx context.Context, field gr
 		field,
 		ec.fieldContext_Query_noShapeTypedNil,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().NoShapeTypedNil(ctx)
+			return ec.Resolvers.Query().NoShapeTypedNil(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.MakeTypedNil == nil {
+				if ec.Directives.MakeTypedNil == nil {
 					var zeroVal Shape
 					return zeroVal, errors.New("directive makeTypedNil is not implemented")
 				}
-				return ec.directives.MakeTypedNil(ctx, nil, directive0)
+				return ec.Directives.MakeTypedNil(ctx, nil, directive0)
 			}
 
 			next = directive1
@@ -3768,17 +3768,17 @@ func (ec *executionContext) _Query_animal(ctx context.Context, field graphql.Col
 		field,
 		ec.fieldContext_Query_animal,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Animal(ctx)
+			return ec.Resolvers.Query().Animal(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.MakeTypedNil == nil {
+				if ec.Directives.MakeTypedNil == nil {
 					var zeroVal Animal
 					return zeroVal, errors.New("directive makeTypedNil is not implemented")
 				}
-				return ec.directives.MakeTypedNil(ctx, nil, directive0)
+				return ec.Directives.MakeTypedNil(ctx, nil, directive0)
 			}
 
 			next = directive1
@@ -3810,7 +3810,7 @@ func (ec *executionContext) _Query_notAnInterface(ctx context.Context, field gra
 		field,
 		ec.fieldContext_Query_notAnInterface,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().NotAnInterface(ctx)
+			return ec.Resolvers.Query().NotAnInterface(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -3849,7 +3849,7 @@ func (ec *executionContext) _Query_dog(ctx context.Context, field graphql.Collec
 		field,
 		ec.fieldContext_Query_dog,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Dog(ctx)
+			return ec.Resolvers.Query().Dog(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -3888,7 +3888,7 @@ func (ec *executionContext) _Query_issue896a(ctx context.Context, field graphql.
 		field,
 		ec.fieldContext_Query_issue896a,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Issue896a(ctx)
+			return ec.Resolvers.Query().Issue896a(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -3924,7 +3924,7 @@ func (ec *executionContext) _Query_mapStringInterface(ctx context.Context, field
 		ec.fieldContext_Query_mapStringInterface,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().MapStringInterface(ctx, fc.Args["in"].(map[string]any))
+			return ec.Resolvers.Query().MapStringInterface(ctx, fc.Args["in"].(map[string]any))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -3977,7 +3977,7 @@ func (ec *executionContext) _Query_mapNestedStringInterface(ctx context.Context,
 		ec.fieldContext_Query_mapNestedStringInterface,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().MapNestedStringInterface(ctx, fc.Args["in"].(*NestedMapInput))
+			return ec.Resolvers.Query().MapNestedStringInterface(ctx, fc.Args["in"].(*NestedMapInput))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4030,7 +4030,7 @@ func (ec *executionContext) _Query_mapNestedMapSlice(ctx context.Context, field 
 		ec.fieldContext_Query_mapNestedMapSlice,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().MapNestedMapSlice(ctx, fc.Args["input"].(map[string]any))
+			return ec.Resolvers.Query().MapNestedMapSlice(ctx, fc.Args["input"].(map[string]any))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4072,7 +4072,7 @@ func (ec *executionContext) _Query_errorBubble(ctx context.Context, field graphq
 		field,
 		ec.fieldContext_Query_errorBubble,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().ErrorBubble(ctx)
+			return ec.Resolvers.Query().ErrorBubble(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4113,7 +4113,7 @@ func (ec *executionContext) _Query_errorBubbleList(ctx context.Context, field gr
 		field,
 		ec.fieldContext_Query_errorBubbleList,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().ErrorBubbleList(ctx)
+			return ec.Resolvers.Query().ErrorBubbleList(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4154,7 +4154,7 @@ func (ec *executionContext) _Query_errorList(ctx context.Context, field graphql.
 		field,
 		ec.fieldContext_Query_errorList,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().ErrorList(ctx)
+			return ec.Resolvers.Query().ErrorList(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4195,7 +4195,7 @@ func (ec *executionContext) _Query_errors(ctx context.Context, field graphql.Col
 		field,
 		ec.fieldContext_Query_errors,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Errors(ctx)
+			return ec.Resolvers.Query().Errors(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4238,7 +4238,7 @@ func (ec *executionContext) _Query_valid(ctx context.Context, field graphql.Coll
 		field,
 		ec.fieldContext_Query_valid,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Valid(ctx)
+			return ec.Resolvers.Query().Valid(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4269,7 +4269,7 @@ func (ec *executionContext) _Query_invalid(ctx context.Context, field graphql.Co
 		field,
 		ec.fieldContext_Query_invalid,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Invalid(ctx)
+			return ec.Resolvers.Query().Invalid(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4300,7 +4300,7 @@ func (ec *executionContext) _Query_panics(ctx context.Context, field graphql.Col
 		field,
 		ec.fieldContext_Query_panics,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Panics(ctx)
+			return ec.Resolvers.Query().Panics(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4339,7 +4339,7 @@ func (ec *executionContext) _Query_primitiveObject(ctx context.Context, field gr
 		field,
 		ec.fieldContext_Query_primitiveObject,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().PrimitiveObject(ctx)
+			return ec.Resolvers.Query().PrimitiveObject(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4376,7 +4376,7 @@ func (ec *executionContext) _Query_primitiveStringObject(ctx context.Context, fi
 		field,
 		ec.fieldContext_Query_primitiveStringObject,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().PrimitiveStringObject(ctx)
+			return ec.Resolvers.Query().PrimitiveStringObject(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4415,7 +4415,7 @@ func (ec *executionContext) _Query_ptrToAnyContainer(ctx context.Context, field 
 		field,
 		ec.fieldContext_Query_ptrToAnyContainer,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().PtrToAnyContainer(ctx)
+			return ec.Resolvers.Query().PtrToAnyContainer(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4452,7 +4452,7 @@ func (ec *executionContext) _Query_ptrToSliceContainer(ctx context.Context, fiel
 		field,
 		ec.fieldContext_Query_ptrToSliceContainer,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().PtrToSliceContainer(ctx)
+			return ec.Resolvers.Query().PtrToSliceContainer(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4487,7 +4487,7 @@ func (ec *executionContext) _Query_infinity(ctx context.Context, field graphql.C
 		field,
 		ec.fieldContext_Query_infinity,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Infinity(ctx)
+			return ec.Resolvers.Query().Infinity(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4518,7 +4518,7 @@ func (ec *executionContext) _Query_stringFromContextInterface(ctx context.Contex
 		field,
 		ec.fieldContext_Query_stringFromContextInterface,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().StringFromContextInterface(ctx)
+			return ec.Resolvers.Query().StringFromContextInterface(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4549,7 +4549,7 @@ func (ec *executionContext) _Query_stringFromContextFunction(ctx context.Context
 		field,
 		ec.fieldContext_Query_stringFromContextFunction,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().StringFromContextFunction(ctx)
+			return ec.Resolvers.Query().StringFromContextFunction(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4581,7 +4581,7 @@ func (ec *executionContext) _Query_defaultScalar(ctx context.Context, field grap
 		ec.fieldContext_Query_defaultScalar,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().DefaultScalar(ctx, fc.Args["arg"].(string))
+			return ec.Resolvers.Query().DefaultScalar(ctx, fc.Args["arg"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4623,7 +4623,7 @@ func (ec *executionContext) _Query_skipInclude(ctx context.Context, field graphq
 		field,
 		ec.fieldContext_Query_skipInclude,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().SkipInclude(ctx)
+			return ec.Resolvers.Query().SkipInclude(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4660,7 +4660,7 @@ func (ec *executionContext) _Query_slices(ctx context.Context, field graphql.Col
 		field,
 		ec.fieldContext_Query_slices,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().Slices(ctx)
+			return ec.Resolvers.Query().Slices(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4701,7 +4701,7 @@ func (ec *executionContext) _Query_scalarSlice(ctx context.Context, field graphq
 		field,
 		ec.fieldContext_Query_scalarSlice,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().ScalarSlice(ctx)
+			return ec.Resolvers.Query().ScalarSlice(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4733,7 +4733,7 @@ func (ec *executionContext) _Query_fallback(ctx context.Context, field graphql.C
 		ec.fieldContext_Query_fallback,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().Fallback(ctx, fc.Args["arg"].(FallbackToStringEncoding))
+			return ec.Resolvers.Query().Fallback(ctx, fc.Args["arg"].(FallbackToStringEncoding))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4775,7 +4775,7 @@ func (ec *executionContext) _Query_optionalUnion(ctx context.Context, field grap
 		field,
 		ec.fieldContext_Query_optionalUnion,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().OptionalUnion(ctx)
+			return ec.Resolvers.Query().OptionalUnion(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4806,7 +4806,7 @@ func (ec *executionContext) _Query_vOkCaseValue(ctx context.Context, field graph
 		field,
 		ec.fieldContext_Query_vOkCaseValue,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().VOkCaseValue(ctx)
+			return ec.Resolvers.Query().VOkCaseValue(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4841,7 +4841,7 @@ func (ec *executionContext) _Query_vOkCaseNil(ctx context.Context, field graphql
 		field,
 		ec.fieldContext_Query_vOkCaseNil,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().VOkCaseNil(ctx)
+			return ec.Resolvers.Query().VOkCaseNil(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4876,7 +4876,7 @@ func (ec *executionContext) _Query_validType(ctx context.Context, field graphql.
 		field,
 		ec.fieldContext_Query_validType,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().ValidType(ctx)
+			return ec.Resolvers.Query().ValidType(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4917,7 +4917,7 @@ func (ec *executionContext) _Query_variadicModel(ctx context.Context, field grap
 		field,
 		ec.fieldContext_Query_variadicModel,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().VariadicModel(ctx)
+			return ec.Resolvers.Query().VariadicModel(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4952,7 +4952,7 @@ func (ec *executionContext) _Query_wrappedStruct(ctx context.Context, field grap
 		field,
 		ec.fieldContext_Query_wrappedStruct,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().WrappedStruct(ctx)
+			return ec.Resolvers.Query().WrappedStruct(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -4989,7 +4989,7 @@ func (ec *executionContext) _Query_wrappedScalar(ctx context.Context, field grap
 		field,
 		ec.fieldContext_Query_wrappedScalar,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().WrappedScalar(ctx)
+			return ec.Resolvers.Query().WrappedScalar(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -5020,7 +5020,7 @@ func (ec *executionContext) _Query_wrappedMap(ctx context.Context, field graphql
 		field,
 		ec.fieldContext_Query_wrappedMap,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().WrappedMap(ctx)
+			return ec.Resolvers.Query().WrappedMap(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -5055,7 +5055,7 @@ func (ec *executionContext) _Query_wrappedSlice(ctx context.Context, field graph
 		field,
 		ec.fieldContext_Query_wrappedSlice,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().WrappedSlice(ctx)
+			return ec.Resolvers.Query().WrappedSlice(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -5202,7 +5202,7 @@ func (ec *executionContext) _Subscription_updated(ctx context.Context, field gra
 		field,
 		ec.fieldContext_Subscription_updated,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Subscription().Updated(ctx)
+			return ec.Resolvers.Subscription().Updated(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -5233,7 +5233,7 @@ func (ec *executionContext) _Subscription_initPayload(ctx context.Context, field
 		field,
 		ec.fieldContext_Subscription_initPayload,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Subscription().InitPayload(ctx)
+			return ec.Resolvers.Subscription().InitPayload(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -5265,7 +5265,7 @@ func (ec *executionContext) _Subscription_directiveArg(ctx context.Context, fiel
 		ec.fieldContext_Subscription_directiveArg,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Subscription().DirectiveArg(ctx, fc.Args["arg"].(string))
+			return ec.Resolvers.Subscription().DirectiveArg(ctx, fc.Args["arg"].(string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -5308,7 +5308,7 @@ func (ec *executionContext) _Subscription_directiveNullableArg(ctx context.Conte
 		ec.fieldContext_Subscription_directiveNullableArg,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Subscription().DirectiveNullableArg(ctx, fc.Args["arg"].(*int), fc.Args["arg2"].(*int), fc.Args["arg3"].(*string))
+			return ec.Resolvers.Subscription().DirectiveNullableArg(ctx, fc.Args["arg"].(*int), fc.Args["arg2"].(*int), fc.Args["arg3"].(*string))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -5350,24 +5350,24 @@ func (ec *executionContext) _Subscription_directiveDouble(ctx context.Context, f
 		field,
 		ec.fieldContext_Subscription_directiveDouble,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Subscription().DirectiveDouble(ctx)
+			return ec.Resolvers.Subscription().DirectiveDouble(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Directive1 == nil {
+				if ec.Directives.Directive1 == nil {
 					var zeroVal *string
 					return zeroVal, errors.New("directive directive1 is not implemented")
 				}
-				return ec.directives.Directive1(ctx, nil, directive0)
+				return ec.Directives.Directive1(ctx, nil, directive0)
 			}
 			directive2 := func(ctx context.Context) (any, error) {
-				if ec.directives.Directive2 == nil {
+				if ec.Directives.Directive2 == nil {
 					var zeroVal *string
 					return zeroVal, errors.New("directive directive2 is not implemented")
 				}
-				return ec.directives.Directive2(ctx, nil, directive1)
+				return ec.Directives.Directive2(ctx, nil, directive1)
 			}
 
 			next = directive2
@@ -5399,17 +5399,17 @@ func (ec *executionContext) _Subscription_directiveUnimplemented(ctx context.Con
 		field,
 		ec.fieldContext_Subscription_directiveUnimplemented,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Subscription().DirectiveUnimplemented(ctx)
+			return ec.Resolvers.Subscription().DirectiveUnimplemented(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.directives.Unimplemented == nil {
+				if ec.Directives.Unimplemented == nil {
 					var zeroVal *string
 					return zeroVal, errors.New("directive unimplemented is not implemented")
 				}
-				return ec.directives.Unimplemented(ctx, nil, directive0)
+				return ec.Directives.Unimplemented(ctx, nil, directive0)
 			}
 
 			next = directive1
@@ -5441,7 +5441,7 @@ func (ec *executionContext) _Subscription_issue896b(ctx context.Context, field g
 		field,
 		ec.fieldContext_Subscription_issue896b,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Subscription().Issue896b(ctx)
+			return ec.Resolvers.Subscription().Issue896b(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -5476,7 +5476,7 @@ func (ec *executionContext) _Subscription_errorRequired(ctx context.Context, fie
 		field,
 		ec.fieldContext_Subscription_errorRequired,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Subscription().ErrorRequired(ctx)
+			return ec.Resolvers.Subscription().ErrorRequired(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
@@ -5548,7 +5548,7 @@ func (ec *executionContext) _User_friends(ctx context.Context, field graphql.Col
 		field,
 		ec.fieldContext_User_friends,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.User().Friends(ctx, obj)
+			return ec.Resolvers.User().Friends(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
@@ -5654,7 +5654,7 @@ func (ec *executionContext) _User_pets(ctx context.Context, field graphql.Collec
 		ec.fieldContext_User_pets,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.User().Pets(ctx, obj, fc.Args["limit"].(*int))
+			return ec.Resolvers.User().Pets(ctx, obj, fc.Args["limit"].(*int))
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)

@@ -1,5 +1,7 @@
 package federation
 
+//go:generate go run ../../testdata/gqlgen.go -config testdata/entityinterfaces/interface.yml
+
 import (
 	"testing"
 

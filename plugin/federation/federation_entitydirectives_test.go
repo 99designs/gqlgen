@@ -1,5 +1,7 @@
 package federation
 
+//go:generate go run ../../testdata/gqlgen.go -config testdata/entitydirectives/gqlgen.yml
+
 import (
 	"testing"
 

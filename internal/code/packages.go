@@ -44,6 +44,13 @@ func WithBuildTags(tags ...string) func(p *Packages) {
 	}
 }
 
+// WithBuildFlags option for NewPackages adds raw build flags to the packages.Load call.
+func WithBuildFlags(flags ...string) func(p *Packages) {
+	return func(p *Packages) {
+		p.buildFlags = append(p.buildFlags, flags...)
+	}
+}
+
 func WithPreloadNames(importPaths ...string) func(p *Packages) {
 	return func(p *Packages) {
 		p.LoadAllNames(importPaths...)

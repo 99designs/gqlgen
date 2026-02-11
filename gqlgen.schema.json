@@ -211,6 +211,11 @@
       "type": "array",
       "items": { "type": "string" }
     },
+    "go_build_flags": {
+      "description": "Set additional build flags passed to go/packages while loading packages",
+      "type": "array",
+      "items": { "type": "string" }
+    },
     "go_initialisms": {
       "description": "Set to modify the initialisms regarded for Go names",
       "type": "object",

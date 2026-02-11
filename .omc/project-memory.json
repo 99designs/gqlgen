@@ -1,0 +1,247 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1770775073340,
+  "projectRoot": "/var/home/smoothbrain/dev/codelite7/gqlgen",
+  "techStack": {
+    "languages": [
+      {
+        "name": "Go",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "go.mod"
+        ]
+      }
+    ],
+    "frameworks": [],
+    "packageManager": "go",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": null,
+    "testCommand": null,
+    "lintCommand": null,
+    "devCommand": null,
+    "scripts": {}
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": null
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "bin",
+      "docs"
+    ],
+    "gitBranches": {
+      "defaultBranch": "master",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "_examples": {
+      "path": "_examples",
+      "purpose": null,
+      "fileCount": 4,
+      "lastAccessed": 1770775073336,
+      "keyFiles": [
+        "go.mod",
+        "go.sum",
+        "readme.md",
+        "tools.go"
+      ]
+    },
+    "api": {
+      "path": "api",
+      "purpose": "API routes",
+      "fileCount": 8,
+      "lastAccessed": 1770775073336,
+      "keyFiles": [
+        "generate.go",
+        "generate_test.go",
+        "migration_docs_test.go",
+        "option.go",
+        "option_test.go"
+      ]
+    },
+    "bin": {
+      "path": "bin",
+      "purpose": "Executable scripts",
+      "fileCount": 3,
+      "lastAccessed": 1770775073336,
+      "keyFiles": [
+        "fmt.sh",
+        "release",
+        "update_gqlparser.sh"
+      ]
+    },
+    "client": {
+      "path": "client",
+      "purpose": null,
+      "fileCount": 10,
+      "lastAccessed": 1770775073336,
+      "keyFiles": [
+        "client.go",
+        "client_test.go",
+        "errors.go",
+        "incremental_http.go",
+        "options.go"
+      ]
+    },
+    "codegen": {
+      "path": "codegen",
+      "purpose": null,
+      "fileCount": 39,
+      "lastAccessed": 1770775073337,
+      "keyFiles": [
+        "args.go",
+        "args.gotpl",
+        "autobind_test.go",
+        "complexity.go",
+        "data.go"
+      ]
+    },
+    "complexity": {
+      "path": "complexity",
+      "purpose": null,
+      "fileCount": 3,
+      "lastAccessed": 1770775073337,
+      "keyFiles": [
+        "complexity.go",
+        "complexity_test.go",
+        "option.go"
+      ]
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 3,
+      "lastAccessed": 1770775073337,
+      "keyFiles": [
+        "build.sh",
+        "config.yml",
+        "readme.md"
+      ]
+    },
+    "graphql": {
+      "path": "graphql",
+      "purpose": null,
+      "fileCount": 62,
+      "lastAccessed": 1770775073338,
+      "keyFiles": [
+        "any.go",
+        "args.go",
+        "args_test.go",
+        "bool.go",
+        "bool_test.go"
+      ]
+    },
+    "handler": {
+      "path": "handler",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1770775073338,
+      "keyFiles": [
+        "handler.go"
+      ]
+    },
+    "init-templates": {
+      "path": "init-templates",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1770775073338,
+      "keyFiles": [
+        "gqlgen.yml.gotmpl",
+        "schema.graphqls"
+      ]
+    },
+    "integration": {
+      "path": "integration",
+      "purpose": null,
+      "fileCount": 7,
+      "lastAccessed": 1770775073338,
+      "keyFiles": [
+        "README.md",
+        "codegen.ts",
+        "graphql.config.yml",
+        "package-lock.json",
+        "package.json"
+      ]
+    },
+    "internal": {
+      "path": "internal",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1770775073338,
+      "keyFiles": [
+        "tools.go"
+      ]
+    },
+    "plugin": {
+      "path": "plugin",
+      "purpose": null,
+      "fileCount": 1,
+      "lastAccessed": 1770775073339,
+      "keyFiles": [
+        "plugin.go"
+      ]
+    },
+    "testdata": {
+      "path": "testdata",
+      "purpose": null,
+      "fileCount": 2,
+      "lastAccessed": 1770775073339,
+      "keyFiles": [
+        "gomod-with-leading-comments.mod",
+        "gqlgen.go"
+      ]
+    },
+    "_examples/config": {
+      "path": "_examples/config",
+      "purpose": "Configuration files",
+      "fileCount": 11,
+      "lastAccessed": 1770775073339,
+      "keyFiles": [
+        "generated.go",
+        "model.go",
+        "models_gen.go"
+      ]
+    },
+    "codegen/config": {
+      "path": "codegen/config",
+      "purpose": "Configuration files",
+      "fileCount": 12,
+      "lastAccessed": 1770775073339,
+      "keyFiles": [
+        "binder.go",
+        "binder_test.go",
+        "config.go"
+      ]
+    },
+    "docs/static": {
+      "path": "docs/static",
+      "purpose": "Static files",
+      "fileCount": 7,
+      "lastAccessed": 1770775073340,
+      "keyFiles": [
+        "external-link-alt.svg",
+        "favicon.ico",
+        "main.css"
+      ]
+    },
+    "integration/src": {
+      "path": "integration/src",
+      "purpose": "Source code",
+      "fileCount": 0,
+      "lastAccessed": 1770775073340,
+      "keyFiles": []
+    }
+  },
+  "hotPaths": [],
+  "userDirectives": []
+}

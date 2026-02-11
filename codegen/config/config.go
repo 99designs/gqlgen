@@ -36,6 +36,7 @@ type Config struct {
 	Directives                           map[string]DirectiveConfig `yaml:"directives,omitempty"`
 	LocalPrefix                          string                     `yaml:"local_prefix,omitempty"`
 	GoBuildTags                          StringList                 `yaml:"go_build_tags,omitempty"`
+	GoBuildFlags                         StringList                 `yaml:"go_build_flags,omitempty"`
 	GoInitialisms                        GoInitialismsConfig        `yaml:"go_initialisms,omitempty"`
 	OmitSliceElementPointers             bool                       `yaml:"omit_slice_element_pointers,omitempty"`
 	OmitGetters                          bool                       `yaml:"omit_getters,omitempty"`
@@ -278,6 +279,7 @@ func (c *Config) Init() error {
 	if c.Packages == nil {
 		c.Packages = code.NewPackages(
 			code.WithBuildTags(c.GoBuildTags...),
+			code.WithBuildFlags(c.GoBuildFlags...),
 			code.PackagePrefixToCache("github.com/99designs/gqlgen/graphql"),
 			code.WithPreloadNames(templatePackageNames...),
 		)
@@ -961,6 +963,7 @@ func (c *Config) LoadSchema() error {
 	if c.Packages != nil {
 		c.Packages = code.NewPackages(
 			code.WithBuildTags(c.GoBuildTags...),
+			code.WithBuildFlags(c.GoBuildFlags...),
 			code.PackagePrefixToCache("github.com/99designs/gqlgen/graphql"),
 			code.WithPreloadNames(templatePackageNames...),
 		)

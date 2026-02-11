@@ -10,8 +10,10 @@ type Query struct {
 }
 
 type User struct {
-	NullableBatch       *Profile `json:"nullableBatch,omitempty"`
-	NullableNonBatch    *Profile `json:"nullableNonBatch,omitempty"`
-	NonNullableBatch    *Profile `json:"nonNullableBatch"`
-	NonNullableNonBatch *Profile `json:"nonNullableNonBatch"`
+	NullableBatch           *Profile `json:"nullableBatch,omitempty"`
+	NullableNonBatch        *Profile `json:"nullableNonBatch,omitempty"`
+	NullableBatchWithArg    *Profile `json:"nullableBatchWithArg,omitempty"`
+	NullableNonBatchWithArg *Profile `json:"nullableNonBatchWithArg,omitempty"`
+	NonNullableBatch        *Profile `json:"nonNullableBatch"`
+	NonNullableNonBatch     *Profile `json:"nonNullableNonBatch"`
 }

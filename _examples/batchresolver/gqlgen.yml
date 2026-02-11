@@ -22,6 +22,11 @@ models:
         batch: true
       nullableNonBatch:
         resolver: true
+      nullableBatchWithArg:
+        resolver: true
+        batch: true
+      nullableNonBatchWithArg:
+        resolver: true
       nonNullableBatch:
         resolver: true
         batch: true

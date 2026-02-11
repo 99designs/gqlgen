@@ -138,25 +138,59 @@ func (ec *executionContext) {{ $field.FieldContextFunc }}({{ if not $field.Args 
 	return fc, nil
 }
 
+{{- if and $field.IsBatch (not $object.Root) }}
+func (ec *executionContext) resolveBatch_{{$object.Name}}_{{$field.Name}}(ctx context.Context, field graphql.CollectedField, obj {{$object.Reference | ref}}) (any, error) {
+	resolver := ec.resolvers.{{ ucFirst $object.Name }}()
+	{{- if $field.Args }}
+	fc := graphql.GetFieldContext(ctx)
+	{{- end }}
+	group := graphql.GetBatchParentGroup(ctx, {{ $object.Name | quote }})
+	if group != nil {
+		parents, ok := group.Parents.([]{{$object.Reference | ref}})
+		if ok {
+			idx, ok := graphql.BatchParentIndex(ctx)
+			if ok {
+				key := field.Alias
+				if key == "" {
+					key = field.Name
+				}
+				{{/* TODO: resolveBatch_* runs per parent even when grouped; consider a single
+				dispatch per field if the execution flow can support it. */ -}}
+				result := group.GetFieldResult(key, func() (any, error) {
+					return resolver.{{ $field.GoFieldName }}({{ $field.BatchCallArgs "parents" }})
+				})
+				return graphql.ResolveBatchGroupResult[{{ $field.TypeReference.GO | ref }}](
+					ctx,
+					idx,
+					len(parents),
+					result,
+					{{ printf "%s.%s" $object.Name $field.Name | quote }},
+				)
+			}
+		}
+	}
+
+	results, err := resolver.{{ $field.GoFieldName }}({{ $field.BatchCallArgs (printf "[]%s{obj}" ($object.Reference | ref)) }})
+	return graphql.ResolveBatchSingleResult[{{ $field.TypeReference.GO | ref }}](
+		ctx,
+		results,
+		err,
+		{{ printf "%s.%s" $object.Name $field.Name | quote }},
+	)
+}
+{{- end }}
+
 {{- end }}{{- end}}
 
 {{ define "fieldDefinition" }}
 	{{- if and .IsBatch (not .Object.Root) }}
-		resolver := ec.resolvers.{{ ucFirst .Object.Name }}()
-		results, errs := resolver.{{ .GoFieldName }}(ctx, []{{ .Object.Reference | ref }}{obj})
-		if errs == nil {
-			errs = make([]error, len(results))
-		}
-		if len(results) != 1 || len(errs) != 1 {
-			return nil, fmt.Errorf(
-				"batch resolver {{ .Object.Name }}.{{ .Name }} returned %d results and %d errors for %d parents",
-				len(results),
-				len(errs),
-				1,
-			)
-		}
-		return results[0], errs[0]
+		return ec.resolveBatch_{{ .Object.Name }}_{{ .Name }}(ctx, field, obj)
 	{{- else }}
+		{{- template "singleFieldDefinition" . }}
+	{{- end }}
+{{- end }}
+
+{{ define "singleFieldDefinition" }}
 	{{- if or .IsResolver .IsMethod -}}
 	{{- if gt (len .Args) 0 -}}
 	fc := graphql.GetFieldContext(ctx)
@@ -201,4 +235,3 @@ func (ec *executionContext) {{ $field.FieldContextFunc }}({{ if not $field.Args 
 		return {{.GoReceiverName}}.{{.GoFieldName}}, nil
 	{{- end }}
 	{{- end }}
-{{- end }}

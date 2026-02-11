@@ -5,6 +5,8 @@ type Query {
 type User {
     nullableBatch: Profile
     nullableNonBatch: Profile
+    nullableBatchWithArg(offset: Int!): Profile
+    nullableNonBatchWithArg(offset: Int!): Profile
     nonNullableBatch: Profile!
     nonNullableNonBatch: Profile!
 }

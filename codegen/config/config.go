@@ -589,8 +589,9 @@ type TypeMapField struct {
 
 	// Batch enables batch resolver generation for this field.
 	// When true, a batch resolver method (e.g., PostsBatch) will be generated
-	// that accepts multiple parent objects and returns results for all of them
-	// in a single call, reducing N+1 query problems.
+	// that accepts multiple parent objects and returns ([]T, error) for all of them
+	// in a single call, reducing N+1 query problems. For partial failures, return
+	// a graphql.BatchErrors implementation as the error.
 	Batch bool `yaml:"batch,omitempty"`
 	// ForceGenerate forces the field to be generated in the model struct
 	// even when OmitResolverFields is enabled and the field has forceResolver: true.

@@ -130,6 +130,9 @@
 					}
 				{{- end }}
 				ret := make(graphql.Array, len(v))
+				{{- if and $.HasBatchResolverFields (not $type.IsScalar) (eq $type.Elem.Definition.Kind "OBJECT") }}
+				ctx = graphql.WithBatchParents(ctx, {{ $type.Elem.Definition.Name | quote }}, v)
+				{{- end }}
 				{{- if not $type.IsScalar }}
 					var wg sync.WaitGroup
 					{{- if gt $.Config.Exec.WorkerLimit 0 }}

@@ -285,15 +285,16 @@
 		}
 	}
 
-	type executionContext struct {
-		*graphql.OperationContext
-		*executableSchema
-		deferred        int32
-		pendingDeferred int32
-		deferredResults chan graphql.DeferredResult
-	}
+type executionContext struct {
+	*graphql.OperationContext
+	*executableSchema
+	deferred        int32
+	pendingDeferred int32
+	deferredResults chan graphql.DeferredResult
+}
 
-	func (ec *executionContext) processDeferredGroup(dg graphql.DeferredGroup) {
+
+func (ec *executionContext) processDeferredGroup(dg graphql.DeferredGroup) {
 		atomic.AddInt32(&ec.pendingDeferred, 1)
 		go func () {
 			ctx := graphql.WithFreshResponseContext(dg.Context)

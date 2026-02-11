@@ -85,6 +85,29 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 		if fieldEntry, ok := fieldCfg.Fields[field.Name]; ok {
 			f.Batch = fieldEntry.Batch
 			if f.Batch {
+				if f.Object.Root {
+					return nil, fmt.Errorf(
+						"batch resolver is not supported for root field %s.%s",
+						obj.Name,
+						field.Name,
+					)
+				}
+				// batch resolvers are always user-provided
+				f.IsResolver = true
+			}
+		}
+	}
+
+	if f.IsResolver && b.Config.ResolversAlwaysReturnPointers && !f.TypeReference.IsPtr() &&
+		f.TypeReference.IsStruct() {
+		f.TypeReference = b.Binder.PointerTo(f.TypeReference)
+	}
+
+	// Set Batch flag from config (independent of resolver setting)
+	if fieldCfg, ok := b.Config.Models[obj.Name]; ok {
+		if fieldEntry, ok := fieldCfg.Fields[field.Name]; ok {
+			f.Batch = fieldEntry.Batch
+			if f.Batch {
 				// batch resolvers are always user-provided
 				f.IsResolver = true
 			}
@@ -609,7 +632,7 @@ func (f *Field) IsBatch() bool {
 //
 // The batch resolver would be:
 //
-//	Posts(ctx context.Context, objs []*User) ([][]*Post, []error)
+//	Posts(ctx context.Context, objs []*User) ([][]*Post, error)
 func (f *Field) ShortBatchResolverDeclaration() string {
 	if f.Object.Root {
 		// Root fields don't have a parent object, so batch doesn't make sense
@@ -617,9 +640,46 @@ func (f *Field) ShortBatchResolverDeclaration() string {
 	}
 
 	parentType := templates.CurrentImports.LookupType(f.Object.Reference())
-	resultType := templates.CurrentImports.LookupType(f.TypeReference.GO)
+	res := fmt.Sprintf("(ctx context.Context, objs []%s", parentType)
 
-	return fmt.Sprintf("(ctx context.Context, objs []%s) ([]%s, []error)", parentType, resultType)
+	var resSb strings.Builder
+	var inlineInfo *InlineArgsInfo
+	if f.Object != nil && f.Object.Definition != nil {
+		inlineInfo = GetInlineArgsMetadata(f.Object.Name, f.Name)
+	}
+	if inlineInfo != nil {
+		goType := formatGoType(inlineInfo.GoType)
+		resSb.WriteString(fmt.Sprintf(", %s %s", inlineInfo.OriginalArgName, goType))
+
+		for _, arg := range f.Args {
+			if !slices.Contains(inlineInfo.ExpandedArgs, arg.Name) {
+				resSb.WriteString(
+					fmt.Sprintf(
+						", %s %s",
+						arg.VarName,
+						templates.CurrentImports.LookupType(arg.TypeReference.GO),
+					),
+				)
+			}
+		}
+	} else {
+		for _, arg := range f.Args {
+			resSb.WriteString(
+				fmt.Sprintf(
+					", %s %s",
+					arg.VarName,
+					templates.CurrentImports.LookupType(arg.TypeReference.GO),
+				),
+			)
+		}
+	}
+	res += resSb.String()
+
+	return fmt.Sprintf(
+		"%s) ([]%s, error)",
+		res,
+		templates.CurrentImports.LookupType(f.TypeReference.GO),
+	)
 }
 
 func (f *Field) GoNameUnexported() string {
@@ -812,6 +872,12 @@ func (f *Field) CallArgs() string {
 		args = append(args, "ctx")
 	}
 
+	args = append(args, f.callArgExpressions()...)
+	return strings.Join(args, ", ")
+}
+
+func (f *Field) callArgExpressions() []string {
+	args := make([]string, 0, len(f.Args))
 	var inlineInfo *InlineArgsInfo
 	if f.Object != nil && f.Object.Definition != nil {
 		inlineInfo = GetInlineArgsMetadata(f.Object.Name, f.Name)
@@ -890,6 +956,18 @@ func (f *Field) CallArgs() string {
 		}
 	}
 
+	return args
+}
+
+// BatchCallArgs returns a comma-separated list of resolver call arguments for batch resolvers.
+func (f *Field) BatchCallArgs(parentVar string) string {
+	args := make([]string, 0, len(f.Args)+2)
+	args = append(args, "ctx")
+	if parentVar != "" {
+		args = append(args, parentVar)
+	}
+
+	args = append(args, f.callArgExpressions()...)
 	return strings.Join(args, ", ")
 }
 

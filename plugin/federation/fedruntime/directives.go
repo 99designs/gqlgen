@@ -1,6 +1,9 @@
 package fedruntime
 
-import "context"
+import (
+	"context"
+	"fmt"
+)
 
 // ResolverFunc is a function that resolves a value in the context of federation entity resolution.
 // It matches the signature used throughout the GraphQL execution pipeline.
@@ -11,26 +14,7 @@ type ResolverFunc func(context.Context) (any, error)
 type DirectiveFunc func(context.Context, ResolverFunc) (any, error)
 
 // ChainDirectives applies a chain of directives to a base resolver function.
-// Directives are applied in order, with each directive wrapping the next one.
-// This is the core directive chaining logic, extracted from code generation templates
-// to improve testability and maintainability.
-//
-// Example:
-//
-//	base := func(ctx context.Context) (any, error) {
-//	    return resolveEntity(ctx, id)
-//	}
-//	directives := []DirectiveFunc{
-//	    func(ctx context.Context, next ResolverFunc) (any, error) {
-//	        // auth directive logic
-//	        return authMiddleware(ctx, next)
-//	    },
-//	    func(ctx context.Context, next ResolverFunc) (any, error) {
-//	        // logging directive logic
-//	        return loggingMiddleware(ctx, next)
-//	    },
-//	}
-//	result, err := ChainDirectives(ctx, base, directives)
+// Directives are applied in reverse order, with each directive wrapping the next one.
 func ChainDirectives(
 	ctx context.Context, base ResolverFunc, directives []DirectiveFunc,
 ) (any, error) {
@@ -51,4 +35,39 @@ func ChainDirectives(
 	}
 
 	return resolver(ctx)
+}
+
+// WrapEntityResolver wraps an entity resolver with directive middleware.
+// If no directives are provided, the resolver is called directly.
+// Otherwise, directives are applied and the result is type-checked.
+func WrapEntityResolver[T any](
+	ctx context.Context,
+	typedResolver func(context.Context) (T, error),
+	directives []DirectiveFunc,
+) (T, error) {
+	var zero T
+
+	// Fast path: no directives, call resolver directly
+	if len(directives) == 0 {
+		return typedResolver(ctx)
+	}
+
+	// Slow path: wrap with directives
+	// Convert typed resolver to untyped for directive chain
+	base := func(ctx context.Context) (any, error) {
+		return typedResolver(ctx)
+	}
+
+	result, err := ChainDirectives(ctx, base, directives)
+	if err != nil {
+		return zero, err
+	}
+
+	// Type assert the result back to the expected type
+	typedResult, ok := result.(T)
+	if !ok {
+		return zero, fmt.Errorf("unexpected type %T from directive chain, expected %T", result, zero)
+	}
+
+	return typedResult, nil
 }

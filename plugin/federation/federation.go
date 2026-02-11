@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
+	"go/types"
 	"sort"
 	"strings"
 
@@ -353,6 +354,21 @@ func (f *Federation) GenerateCode(data *codegen.Data) error {
 			}
 
 			resolver.InputType = obj.Type
+		}
+	}
+
+	// fill in return types for all entity resolvers
+	// Entity resolvers always return pointers in Federation
+	for _, entity := range f.Entities {
+		for _, resolver := range entity.Resolvers {
+			// Ensure the return type is a pointer
+			if ptr, ok := entity.Type.(*types.Pointer); ok {
+				// Already a pointer
+				resolver.ReturnType = ptr
+			} else {
+				// Make it a pointer
+				resolver.ReturnType = types.NewPointer(entity.Type)
+			}
 		}
 	}
 

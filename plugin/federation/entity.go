@@ -40,6 +40,19 @@ func (e *EntityResolver) LookupInputType() string {
 	return templates.CurrentImports.LookupType(e.InputType)
 }
 
+func (e *EntityResolver) LookupReturnType() string {
+	return templates.CurrentImports.LookupType(e.ReturnType)
+}
+
+// IsPointerReturnType returns true if the resolver's return type is a pointer
+func (e *EntityResolver) IsPointerReturnType() bool {
+	if e.ReturnType == nil {
+		return false
+	}
+	lookupType := templates.CurrentImports.LookupType(e.ReturnType)
+	return len(lookupType) > 0 && lookupType[0] == '*'
+}
+
 type KeyField struct {
 	Definition *ast.FieldDefinition
 	Field      fieldset.Field        // len > 1 for nested fields

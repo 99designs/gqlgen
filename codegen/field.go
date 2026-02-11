@@ -80,16 +80,20 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 		log.Println(err.Error())
 	}
 
-	if f.IsResolver && b.Config.ResolversAlwaysReturnPointers && !f.TypeReference.IsPtr() &&
-		f.TypeReference.IsStruct() {
-		f.TypeReference = b.Binder.PointerTo(f.TypeReference)
-	}
-
 	// Set Batch flag from config (independent of resolver setting)
 	if fieldCfg, ok := b.Config.Models[obj.Name]; ok {
 		if fieldEntry, ok := fieldCfg.Fields[field.Name]; ok {
 			f.Batch = fieldEntry.Batch
+			if f.Batch {
+				// batch resolvers are always user-provided
+				f.IsResolver = true
+			}
 		}
+	}
+
+	if f.IsResolver && b.Config.ResolversAlwaysReturnPointers && !f.TypeReference.IsPtr() &&
+		f.TypeReference.IsStruct() {
+		f.TypeReference = b.Binder.PointerTo(f.TypeReference)
 	}
 
 	return &f, nil
@@ -590,6 +594,32 @@ func (f *Field) IsConcurrent() bool {
 		return false
 	}
 	return f.MethodHasContext || f.IsResolver
+}
+
+// IsBatch returns true if this field has batch resolver enabled.
+func (f *Field) IsBatch() bool {
+	return f.Batch
+}
+
+// ShortBatchResolverDeclaration returns the method signature for a batch resolver.
+// Batch resolvers accept multiple parent objects and return results for all of them.
+// For example, if the normal resolver is:
+//
+//	Posts(ctx context.Context, obj *User) ([]*Post, error)
+//
+// The batch resolver would be:
+//
+//	Posts(ctx context.Context, objs []*User) ([][]*Post, []error)
+func (f *Field) ShortBatchResolverDeclaration() string {
+	if f.Object.Root {
+		// Root fields don't have a parent object, so batch doesn't make sense
+		return ""
+	}
+
+	parentType := templates.CurrentImports.LookupType(f.Object.Reference())
+	resultType := templates.CurrentImports.LookupType(f.TypeReference.GO)
+
+	return fmt.Sprintf("(ctx context.Context, objs []%s) ([]%s, []error)", parentType, resultType)
 }
 
 func (f *Field) GoNameUnexported() string {

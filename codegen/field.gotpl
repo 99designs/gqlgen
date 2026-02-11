@@ -141,6 +141,22 @@ func (ec *executionContext) {{ $field.FieldContextFunc }}({{ if not $field.Args 
 {{- end }}{{- end}}
 
 {{ define "fieldDefinition" }}
+	{{- if and .IsBatch (not .Object.Root) }}
+		resolver := ec.resolvers.{{ ucFirst .Object.Name }}()
+		results, errs := resolver.{{ .GoFieldName }}(ctx, []{{ .Object.Reference | ref }}{obj})
+		if errs == nil {
+			errs = make([]error, len(results))
+		}
+		if len(results) != 1 || len(errs) != 1 {
+			return nil, fmt.Errorf(
+				"batch resolver {{ .Object.Name }}.{{ .Name }} returned %d results and %d errors for %d parents",
+				len(results),
+				len(errs),
+				1,
+			)
+		}
+		return results[0], errs[0]
+	{{- else }}
 	{{- if or .IsResolver .IsMethod -}}
 	{{- if gt (len .Args) 0 -}}
 	fc := graphql.GetFieldContext(ctx)
@@ -183,5 +199,6 @@ func (ec *executionContext) {{ $field.FieldContextFunc }}({{ if not $field.Args 
 		}
 		{{- end -}}
 		return {{.GoReceiverName}}.{{.GoFieldName}}, nil
+	{{- end }}
 	{{- end }}
 {{- end }}

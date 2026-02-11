@@ -72,7 +72,9 @@
 	{{ if $object.HasResolvers }}
 		type {{ucFirst $object.Name}}Resolver interface {
 		{{ range $field := $object.Fields -}}
-			{{- if $field.IsResolver }}
+			{{- if $field.IsBatch }}
+				{{- $field.GoFieldName}}{{ $field.ShortBatchResolverDeclaration }}
+			{{- else if $field.IsResolver }}
 				{{- $field.GoFieldName}}{{ $field.ShortResolverDeclaration }}
 			{{- end }}
 		{{ end }}

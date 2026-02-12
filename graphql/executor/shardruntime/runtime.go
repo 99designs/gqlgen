@@ -13,6 +13,36 @@ import (
 // ObjectExecutionContext defines the runtime surface required by generated object shards.
 type ObjectExecutionContext interface {
 	GetOperationContext() *graphql.OperationContext
+	ResolveExecutableField(
+		ctx context.Context,
+		objectName string,
+		fieldName string,
+		field graphql.CollectedField,
+		obj any,
+	) graphql.Marshaler
+	ResolveExecutableStreamField(
+		ctx context.Context,
+		objectName string,
+		fieldName string,
+		field graphql.CollectedField,
+		obj any,
+	) func(context.Context) graphql.Marshaler
+	MarshalCodec(
+		ctx context.Context,
+		funcName string,
+		sel ast.SelectionSet,
+		value any,
+	) graphql.Marshaler
+	UnmarshalCodec(
+		ctx context.Context,
+		funcName string,
+		value any,
+	) (any, error)
+	ParseFieldArgs(
+		ctx context.Context,
+		argsKey string,
+		rawArgs map[string]any,
+	) (map[string]any, error)
 	ResolveField(
 		ctx context.Context,
 		objectName string,

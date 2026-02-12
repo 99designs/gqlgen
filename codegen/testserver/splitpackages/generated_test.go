@@ -29,7 +29,7 @@ func TestSplitPackagesLayout(t *testing.T) {
 		Hello string
 	}
 	c.MustPost(`query { hello(name:"Ada") }`, &resp)
-	require.Equal(t, "", resp.Hello)
+	require.Equal(t, "Hello Ada", resp.Hello)
 }
 
 func TestSplitPackagesCodecCompile(t *testing.T) {

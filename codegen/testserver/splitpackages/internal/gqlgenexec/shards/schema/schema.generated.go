@@ -95,39 +95,27 @@ func _Query(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast
 
 // split_fields_.gotpl
 func __splitField_Query___schema(ctx context.Context, ec shardruntime.ObjectExecutionContext, field graphql.CollectedField, obj any) graphql.Marshaler {
-	_ = ctx
-	_ = ec
-	_ = field
-	_ = obj
-	return graphql.Null
+	return ec.ResolveExecutableField(ctx, "Query", "__schema", field, obj)
 }
 
 // split_fields_.gotpl
 func __splitField_Query___type(ctx context.Context, ec shardruntime.ObjectExecutionContext, field graphql.CollectedField, obj any) graphql.Marshaler {
-	_ = ctx
-	_ = ec
-	_ = field
-	_ = obj
-	return graphql.Null
+	return ec.ResolveExecutableField(ctx, "Query", "__type", field, obj)
 }
 
 // split_fields_.gotpl
 func __splitField_Query_hello(ctx context.Context, ec shardruntime.ObjectExecutionContext, field graphql.CollectedField, obj any) graphql.Marshaler {
-	_ = ctx
-	_ = ec
-	_ = field
-	_ = obj
-	return graphql.Null
+	return ec.ResolveExecutableField(ctx, "Query", "hello", field, obj)
 }
 
 // split_args_.gotpl
-func __splitArgs_field_Query___type_args(_ context.Context, _ shardruntime.ObjectExecutionContext, rawArgs map[string]any) (map[string]any, error) {
-	return rawArgs, nil
+func __splitArgs_field_Query___type_args(ctx context.Context, ec shardruntime.ObjectExecutionContext, rawArgs map[string]any) (map[string]any, error) {
+	return ec.ParseFieldArgs(ctx, "field_Query___type_args", rawArgs)
 }
 
 // split_args_.gotpl
-func __splitArgs_field_Query_hello_args(_ context.Context, _ shardruntime.ObjectExecutionContext, rawArgs map[string]any) (map[string]any, error) {
-	return rawArgs, nil
+func __splitArgs_field_Query_hello_args(ctx context.Context, ec shardruntime.ObjectExecutionContext, rawArgs map[string]any) (map[string]any, error) {
+	return ec.ParseFieldArgs(ctx, "field_Query_hello_args", rawArgs)
 }
 
 // split_complexity_.gotpl
@@ -158,6 +146,6 @@ func __splitComplexity_Query_hello(ctx context.Context, ec shardruntime.ObjectEx
 }
 
 // split_codecs_.gotpl
-func marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(_ context.Context, _ shardruntime.ObjectExecutionContext, _ ast.SelectionSet, _ *introspection.Schema) graphql.Marshaler {
-	return graphql.Null
+func marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value *introspection.Schema) graphql.Marshaler {
+	return ec.MarshalCodec(ctx, "marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema", sel, value)
 }

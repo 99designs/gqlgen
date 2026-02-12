@@ -3,8 +3,8 @@
 {{- if eq (index $.Ownership.ArgsOwner $key) $.ShardName }}
 
 // split_args_.gotpl
-func __splitArgs_{{ $key }}(_ context.Context, _ shardruntime.ObjectExecutionContext, rawArgs map[string]any) (map[string]any, error) {
-	return rawArgs, nil
+func __splitArgs_{{ $key }}(ctx context.Context, ec shardruntime.ObjectExecutionContext, rawArgs map[string]any) (map[string]any, error) {
+	return ec.ParseFieldArgs(ctx, "{{ $key }}", rawArgs)
 }
 {{- end }}
 {{- end }}

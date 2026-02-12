@@ -7,21 +7,13 @@
 
 // split_fields_.gotpl
 func __splitStreamField_{{ $field.Object.Name }}_{{ $field.Name }}(ctx context.Context, ec shardruntime.ObjectExecutionContext, field graphql.CollectedField, obj any) func(context.Context) graphql.Marshaler {
-	_ = ctx
-	_ = ec
-	_ = field
-	_ = obj
-	return nil
+	return ec.ResolveExecutableStreamField(ctx, "{{ $field.Object.Name }}", "{{ $field.Name }}", field, obj)
 }
 {{- else }}
 
 // split_fields_.gotpl
 func __splitField_{{ $field.Object.Name }}_{{ $field.Name }}(ctx context.Context, ec shardruntime.ObjectExecutionContext, field graphql.CollectedField, obj any) graphql.Marshaler {
-	_ = ctx
-	_ = ec
-	_ = field
-	_ = obj
-	return graphql.Null
+	return ec.ResolveExecutableField(ctx, "{{ $field.Object.Name }}", "{{ $field.Name }}", field, obj)
 }
 {{- end }}
 {{- end }}

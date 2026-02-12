@@ -15,6 +15,7 @@
 {{ reserveImport "github.com/99designs/gqlgen/graphql" }}
 {{ reserveImport "github.com/99designs/gqlgen/graphql/introspection" }}
 {{ reserveImport "github.com/99designs/gqlgen/graphql/executor/shardruntime" }}
+{{ reserveImport "golang.org/x/sync/semaphore" }}
 
 {{ $useFunctionSyntaxForExecutionContext := .Config.UseFunctionSyntaxForExecutionContext }}
 
@@ -318,6 +319,165 @@ func (ec *executionContext) ResolveStreamField(ctx context.Context, objectName, 
 	}
 
 	return handler(ctx, ec, field, nil)
+}
+
+func (ec *executionContext) ResolveExecutableField(ctx context.Context, objectName, fieldName string, field graphql.CollectedField, obj any) graphql.Marshaler {
+	handler, ok := splitExecutableFieldResolvers[objectName+"."+fieldName]
+	if !ok {
+		panic(fmt.Sprintf("unknown executable field %s.%s", objectName, fieldName))
+	}
+
+	return handler(ctx, ec, field, obj)
+}
+
+func (ec *executionContext) ResolveExecutableStreamField(ctx context.Context, objectName, fieldName string, field graphql.CollectedField, obj any) func(context.Context) graphql.Marshaler {
+	handler, ok := splitExecutableStreamFieldResolvers[objectName+"."+fieldName]
+	if !ok {
+		panic(fmt.Sprintf("unknown executable stream field %s.%s", objectName, fieldName))
+	}
+
+	return handler(ctx, ec, field, obj)
+}
+
+func (ec *executionContext) MarshalCodec(ctx context.Context, funcName string, sel ast.SelectionSet, value any) graphql.Marshaler {
+	handler, ok := splitCodecMarshalResolvers[funcName]
+	if !ok {
+		panic(fmt.Errorf("unknown codec marshal function %s", funcName))
+	}
+
+	return handler(ctx, ec, sel, value)
+}
+
+func (ec *executionContext) UnmarshalCodec(ctx context.Context, funcName string, value any) (any, error) {
+	handler, ok := splitCodecUnmarshalResolvers[funcName]
+	if !ok {
+		return nil, fmt.Errorf("unknown codec unmarshal function %s", funcName)
+	}
+
+	return handler(ctx, ec, value)
+}
+
+func (ec *executionContext) ParseFieldArgs(ctx context.Context, argsKey string, rawArgs map[string]any) (map[string]any, error) {
+	handler, ok := splitArgsParsers[argsKey]
+	if !ok {
+		return rawArgs, nil
+	}
+
+	return handler(ctx, ec, rawArgs)
+}
+
+type splitFieldResolver func(context.Context, *executionContext, graphql.CollectedField, any) graphql.Marshaler
+
+var splitExecutableFieldResolvers = map[string]splitFieldResolver{
+{{- range $object := .Objects }}
+{{- range $field := $object.Fields }}
+	{{ printf "%s.%s" $object.Name $field.Name | quote }}: func(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj any) graphql.Marshaler {
+		{{- if $object.Root }}
+		{{- if $useFunctionSyntaxForExecutionContext }}
+		return _{{ $object.Name }}_{{ $field.Name }}(ctx, ec, field)
+		{{- else }}
+		return ec._{{ $object.Name }}_{{ $field.Name }}(ctx, field)
+		{{- end }}
+		{{- else }}
+		typedObj, ok := obj.({{ $object.Reference | ref }})
+		if !ok {
+			panic(fmt.Errorf("unexpected type %T for object {{ $object.Name }}", obj))
+		}
+		{{- if $useFunctionSyntaxForExecutionContext }}
+		return _{{ $object.Name }}_{{ $field.Name }}(ctx, ec, field, typedObj)
+		{{- else }}
+		return ec._{{ $object.Name }}_{{ $field.Name }}(ctx, field, typedObj)
+		{{- end }}
+		{{- end }}
+	},
+{{- end }}
+{{- end }}
+}
+
+type splitStreamFieldResolver func(context.Context, *executionContext, graphql.CollectedField, any) func(context.Context) graphql.Marshaler
+
+var splitExecutableStreamFieldResolvers = map[string]splitStreamFieldResolver{
+{{- range $object := .Objects }}
+{{- if $object.Stream }}
+{{- range $field := $object.Fields }}
+	{{ printf "%s.%s" $object.Name $field.Name | quote }}: func(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj any) func(context.Context) graphql.Marshaler {
+		{{- if $object.Root }}
+		{{- if $useFunctionSyntaxForExecutionContext }}
+		return _{{ $object.Name }}_{{ $field.Name }}(ctx, ec, field)
+		{{- else }}
+		return ec._{{ $object.Name }}_{{ $field.Name }}(ctx, field)
+		{{- end }}
+		{{- else }}
+		typedObj, ok := obj.({{ $object.Reference | ref }})
+		if !ok {
+			panic(fmt.Errorf("unexpected type %T for object {{ $object.Name }}", obj))
+		}
+		{{- if $useFunctionSyntaxForExecutionContext }}
+		return _{{ $object.Name }}_{{ $field.Name }}(ctx, ec, field, typedObj)
+		{{- else }}
+		return ec._{{ $object.Name }}_{{ $field.Name }}(ctx, field, typedObj)
+		{{- end }}
+		{{- end }}
+	},
+{{- end }}
+{{- end }}
+{{- end }}
+}
+
+type splitCodecMarshalResolver func(context.Context, *executionContext, ast.SelectionSet, any) graphql.Marshaler
+
+var splitCodecMarshalResolvers = map[string]splitCodecMarshalResolver{
+{{- range $ref := .ReferencedTypes }}
+{{- $marshalFunc := $ref.MarshalFunc }}
+{{- if $marshalFunc }}
+	{{ $marshalFunc | quote }}: func(ctx context.Context, ec *executionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
+		typedValue, ok := value.({{ $ref.GO | ref }})
+		if !ok {
+			panic(fmt.Errorf("unexpected codec input %T for {{ $marshalFunc }}", value))
+		}
+		{{- if $useFunctionSyntaxForExecutionContext }}
+		return {{ $marshalFunc }}(ctx, ec, sel, typedValue)
+		{{- else }}
+		return ec.{{ $marshalFunc }}(ctx, sel, typedValue)
+		{{- end }}
+	},
+{{- end }}
+{{- end }}
+}
+
+type splitCodecUnmarshalResolver func(context.Context, *executionContext, any) (any, error)
+
+var splitCodecUnmarshalResolvers = map[string]splitCodecUnmarshalResolver{
+{{- range $ref := .ReferencedTypes }}
+{{- $unmarshalFunc := $ref.UnmarshalFunc }}
+{{- if $unmarshalFunc }}
+	{{ $unmarshalFunc | quote }}: func(ctx context.Context, ec *executionContext, value any) (any, error) {
+		{{- if $useFunctionSyntaxForExecutionContext }}
+		return {{ $unmarshalFunc }}(ctx, ec, value)
+		{{- else }}
+		return ec.{{ $unmarshalFunc }}(ctx, value)
+		{{- end }}
+	},
+{{- end }}
+{{- end }}
+}
+
+type splitArgsParser func(context.Context, *executionContext, map[string]any) (map[string]any, error)
+
+var splitArgsParsers = map[string]splitArgsParser{
+{{- range $object := .Objects }}
+{{- range $field := $object.Fields }}
+{{- if $field.Args }}
+	{{ printf "%s.%s" $object.Name $field.Name | quote }}: func(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
+		{{- if $useFunctionSyntaxForExecutionContext }}
+		return {{ $field.ArgsFunc }}(ctx, ec, rawArgs)
+		{{- else }}
+		return ec.{{ $field.ArgsFunc }}(ctx, rawArgs)
+		{{- end }}
+	},
+{{- end }}
+{{- end }}
+{{- end }}
 }
 
 {{- range $object := .Objects }}

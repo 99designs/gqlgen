@@ -48,6 +48,24 @@ var splitImportsTemplate string
 //go:embed split_runtime_.gotpl
 var splitRuntimeTemplate string
 
+//go:embed args.gotpl
+var argsTemplate string
+
+//go:embed directives.gotpl
+var directivesTemplate string
+
+//go:embed field.gotpl
+var fieldTemplate string
+
+//go:embed input.gotpl
+var inputTemplate string
+
+//go:embed interface.gotpl
+var interfaceTemplate string
+
+//go:embed type.gotpl
+var typeTemplate string
+
 type splitRootTemplateData struct {
 	*Data
 	Scope string
@@ -218,7 +236,7 @@ func pruneEmptyDirs(root string) error {
 func generateSplitRootGateway(data *Data, scope string) error {
 	return templates.Render(templates.Options{
 		PackageName:     data.Config.Exec.Package,
-		Template:        splitRootTemplate,
+		Template:        splitRootTemplate + "\n" + argsTemplate + "\n" + directivesTemplate + "\n" + fieldTemplate + "\n" + inputTemplate + "\n" + interfaceTemplate + "\n" + typeTemplate,
 		Filename:        data.Config.Exec.Filename,
 		Data:            splitRootTemplateData{Data: data, Scope: scope},
 		RegionTags:      false,

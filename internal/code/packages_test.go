@@ -49,6 +49,24 @@ func TestPackages(t *testing.T) {
 		require.Equal(t, 3, p.numLoadCalls)
 	})
 
+	t.Run("custom build flags preserve embedded spaces", func(t *testing.T) {
+		p := NewPackages(WithBuildFlags("-gcflags=github.com/MatthewsREIS/gemini/...=-N -l"))
+		require.Equal(t, []string{"-gcflags=github.com/MatthewsREIS/gemini/...=-N -l"}, p.buildFlags)
+	})
+
+	t.Run("build tags and custom flags coexist", func(t *testing.T) {
+		p := NewPackages(
+			WithBuildTags("private", "enterprise"),
+			WithBuildFlags("-gcflags=all=-N -l"),
+		)
+
+		require.Equal(
+			t,
+			[]string{"-tags", "private,enterprise", "-gcflags=all=-N -l"},
+			p.buildFlags,
+		)
+	})
+
 	t.Run("able to load packages by relative path", func(t *testing.T) {
 		p := initialState(t)
 		require.Equal(t, "a", p.Load("./testdata/a").Name)

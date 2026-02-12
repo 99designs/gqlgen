@@ -73,6 +73,29 @@ func TestReadConfig(t *testing.T) {
 		}
 	})
 
+	t.Run("go build flags list preserves embedded spaces", func(t *testing.T) {
+		cfg, err := ReadConfig(strings.NewReader(`
+schema: testdata/cfg/outer
+go_build_flags:
+  - "-gcflags=github.com/MatthewsREIS/gemini/...=-N -l"
+`))
+		require.NoError(t, err)
+		require.Equal(
+			t,
+			StringList{"-gcflags=github.com/MatthewsREIS/gemini/...=-N -l"},
+			cfg.GoBuildFlags,
+		)
+	})
+
+	t.Run("go build flags single string form", func(t *testing.T) {
+		cfg, err := ReadConfig(strings.NewReader(`
+schema: testdata/cfg/outer
+go_build_flags: "-gcflags=all=-N -l"
+`))
+		require.NoError(t, err)
+		require.Equal(t, StringList{"-gcflags=all=-N -l"}, cfg.GoBuildFlags)
+	})
+
 	t.Run("unwalkable path", func(t *testing.T) {
 		cfgFile, err := os.Open("testdata/cfg/unwalkable.yml")
 		require.NoError(t, err)
@@ -247,6 +270,57 @@ func TestConfigCheck(t *testing.T) {
 	}
 }
 
+func TestConfigCheckSplitPackages(t *testing.T) {
+	t.Run("split-packages requires filename", func(t *testing.T) {
+		cfg := Config{
+			Exec: ExecConfig{
+				Layout: ExecLayoutSplitPackages,
+			},
+		}
+
+		require.EqualError(
+			t,
+			cfg.check(),
+			"config.exec: filename must be specified when using split-packages layout",
+		)
+	})
+
+	t.Run("split-packages sets shard defaults", func(t *testing.T) {
+		cfg := Config{
+			Exec: ExecConfig{
+				Layout:   ExecLayoutSplitPackages,
+				Filename: "generated/exec.go",
+			},
+		}
+
+		require.NoError(t, cfg.check())
+		require.Equal(
+			t,
+			filepath.ToSlash(filepath.Join(cfg.Exec.Dir(), "internal/gqlgenexec/shards")),
+			filepath.ToSlash(cfg.Exec.ShardDir),
+		)
+		require.Equal(t, "{name}.generated.go", cfg.Exec.ShardFilenameTemplate)
+	})
+
+	t.Run("federation unsupported in split-packages", func(t *testing.T) {
+		cfg := Config{
+			Exec: ExecConfig{
+				Layout:   ExecLayoutSplitPackages,
+				Filename: "generated/exec.go",
+			},
+			Federation: PackageConfig{
+				Filename: "generated/federation.go",
+			},
+		}
+
+		require.EqualError(
+			t,
+			cfg.check(),
+			"federation is not supported with exec.layout=split-packages yet",
+		)
+	})
+}
+
 func TestAutobinding(t *testing.T) {
 	t.Run("valid paths", func(t *testing.T) {
 		cfg := Config{
@@ -416,6 +490,40 @@ func TestLoadSchema(t *testing.T) {
 		require.Error(t, err)
 		require.Nil(t, cfg.Schema)
 	})
+}
+
+func TestInitWithGoBuildFlags(t *testing.T) {
+	t.Parallel()
+
+	cfg, err := ReadConfig(strings.NewReader(`
+schema: testdata/cfg/outer
+go_build_flags:
+  - -tags=private
+`))
+	require.NoError(t, err)
+	require.NoError(t, cfg.Init())
+
+	pkg := cfg.Packages.Load("github.com/99designs/gqlgen/internal/code/testdata/p")
+	require.NotNil(t, pkg)
+	require.Equal(t, "p", pkg.Name)
+}
+
+func TestLoadSchemaWithGoBuildFlagsWhenPackagesSet(t *testing.T) {
+	t.Parallel()
+
+	cfg, err := ReadConfig(strings.NewReader(`
+schema: testdata/cfg/outer
+go_build_flags:
+  - -tags=private
+`))
+	require.NoError(t, err)
+
+	cfg.Packages = code.NewPackages()
+	require.NoError(t, cfg.LoadSchema())
+
+	pkg := cfg.Packages.Load("github.com/99designs/gqlgen/internal/code/testdata/p")
+	require.NotNil(t, pkg)
+	require.Equal(t, "p", pkg.Name)
 }
 
 func FuzzReadConfig(f *testing.F) {

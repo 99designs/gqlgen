@@ -1,0 +1,33 @@
+{{ define "split_codecs_.gotpl" }}
+{{- range $key := .Ownership.CodecOwnerKeys }}
+{{- if eq (index $.Ownership.CodecOwner $key) $.ShardName }}
+{{- with $type := index $.CodecByFunc $key }}
+{{- if eq $key ($type.MarshalFunc) }}
+
+// split_codecs_.gotpl
+func {{ $key }}(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value {{ $type.GO | ref }}) graphql.Marshaler {
+	return ec.MarshalCodec(ctx, "{{ $key }}", sel, value)
+}
+{{- else if eq $key ($type.UnmarshalFunc) }}
+
+// split_codecs_.gotpl
+func {{ $key }}(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) ({{ $type.GO | ref }}, error) {
+	raw, err := ec.UnmarshalCodec(ctx, "{{ $key }}", value)
+	if err != nil {
+		var zero {{ $type.GO | ref }}
+		return zero, err
+	}
+
+	typed, ok := raw.({{ $type.GO | ref }})
+	if !ok {
+		var zero {{ $type.GO | ref }}
+		return zero, fmt.Errorf("unexpected codec result type %T for {{ $key }}", raw)
+	}
+
+	return typed, nil
+}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{ end }}

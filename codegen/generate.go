@@ -26,6 +26,8 @@ func GenerateCode(data *Data) error {
 		return generateSingleFile(data)
 	case config.ExecLayoutFollowSchema:
 		return generatePerSchema(data)
+	case config.ExecLayoutSplitPackages:
+		return generateSplitPackages(data)
 	}
 
 	return fmt.Errorf("unrecognized exec layout %s", data.Config.Exec.Layout)

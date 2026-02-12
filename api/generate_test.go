@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"testing"
@@ -15,10 +16,18 @@ import (
 func cleanup(workDir string) {
 	_ = os.Remove(filepath.Join(workDir, "server.go"))
 	_ = os.Remove(filepath.Join(workDir, "graph", "generated.go"))
+	_ = os.Remove(filepath.Join(workDir, "graph", "split_runtime.generated.go"))
+	for i := 0; i < 64; i++ {
+		_ = os.Remove(filepath.Join(workDir, "graph", fmt.Sprintf("split_shard_import_%d.generated.go", i)))
+	}
+	_ = os.RemoveAll(filepath.Join(workDir, "graph", "internal", "gqlgenexec"))
 	_ = os.Remove(filepath.Join(workDir, "graph", "resolver.go"))
 	_ = os.Remove(filepath.Join(workDir, "graph", "federation.go"))
 	_ = os.Remove(filepath.Join(workDir, "graph", "schema.resolvers.go"))
 	_ = os.Remove(filepath.Join(workDir, "graph", "model", "models_gen.go"))
+	_ = os.Remove(filepath.Join(workDir, "graph", "model", "resolver.go"))
+	_ = os.Remove(filepath.Join(workDir, "graph", "model", "schema.resolvers.go"))
+	_ = os.Remove(filepath.Join(workDir, "graph", "model", "generated.go"))
 }
 
 func TestGenerate(t *testing.T) {
@@ -39,6 +48,10 @@ func TestGenerate(t *testing.T) {
 		{
 			name:    "worker_limit",
 			workDir: filepath.Join(wd, "testdata", "workerlimit"),
+		},
+		{
+			name:    "split_packages",
+			workDir: filepath.Join(wd, "testdata", "splitpackages"),
 		},
 	}
 	for _, tt := range tests {

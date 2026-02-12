@@ -1,0 +1,22 @@
+{{ define "split_fields_.gotpl" }}
+{{- range $key := .Ownership.FieldOwnerKeys }}
+{{- if eq (index $.Ownership.FieldOwner $key) $.ShardName }}
+{{- with $field := index $.FieldByLookupKey $key }}
+
+{{- if $field.Object.Stream }}
+
+// split_fields_.gotpl
+func __splitStreamField_{{ $field.Object.Name }}_{{ $field.Name }}(ctx context.Context, ec shardruntime.ObjectExecutionContext, field graphql.CollectedField, obj any) func(context.Context) graphql.Marshaler {
+	return ec.ResolveExecutableStreamField(ctx, "{{ $field.Object.Name }}", "{{ $field.Name }}", field, obj)
+}
+{{- else }}
+
+// split_fields_.gotpl
+func __splitField_{{ $field.Object.Name }}_{{ $field.Name }}(ctx context.Context, ec shardruntime.ObjectExecutionContext, field graphql.CollectedField, obj any) graphql.Marshaler {
+	return ec.ResolveExecutableField(ctx, "{{ $field.Object.Name }}", "{{ $field.Name }}", field, obj)
+}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{ end }}

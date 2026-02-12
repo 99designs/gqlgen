@@ -111,6 +111,10 @@ call_argument_directives_with_null: true
 #  - private
 #  - enterprise
 
+# Optional: set additional build flags that will be passed to go/packages
+# go_build_flags:
+#  - "-gcflags=github.com/MatthewsREIS/gemini/...=-N -l"
+
 # Optional: set to modify the initialisms regarded for Go names
 # go_initialisms:
 #   replace_defaults: false # if true, the default initialisms will get dropped in favor of the new ones instead of being added

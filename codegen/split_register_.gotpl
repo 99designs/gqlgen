@@ -1,0 +1,40 @@
+{{ reserveImport "context" }}
+
+{{ reserveImport "github.com/99designs/gqlgen/graphql" }}
+{{ reserveImport "github.com/99designs/gqlgen/graphql/executor/shardruntime" }}
+
+func init() {
+{{- range $key := .Ownership.FieldOwnerKeys }}
+{{- if eq (index $.Ownership.FieldOwner $key) $.ShardName }}
+{{- with $field := index $.FieldByLookupKey $key }}
+{{- if $field.Object.Stream }}
+	shardruntime.RegisterStreamField(splitScope, {{ $field.Object.Name | quote }}, {{ $field.Name | quote }}, func(ctx context.Context, ec shardruntime.ObjectExecutionContext, field graphql.CollectedField, obj any) func(context.Context) graphql.Marshaler {
+		return __splitStreamField_{{ $field.Object.Name }}_{{ $field.Name }}(ctx, ec, field, obj)
+	})
+{{- else }}
+	shardruntime.RegisterField(splitScope, {{ $field.Object.Name | quote }}, {{ $field.Name | quote }}, func(ctx context.Context, ec shardruntime.ObjectExecutionContext, field graphql.CollectedField, obj any) graphql.Marshaler {
+		return __splitField_{{ $field.Object.Name }}_{{ $field.Name }}(ctx, ec, field, obj)
+	})
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- range $inputName := .Ownership.InputOwnerKeys }}
+{{- if eq (index $.Ownership.InputOwner $inputName) $.ShardName }}
+{{- with $input := index $.InputByName $inputName }}
+	{{- if not $input.HasUnmarshal }}
+	shardruntime.RegisterInputUnmarshaler(splitScope, {{ $input.Name | quote }}, __splitInput_{{ $input.Name }})
+	{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- range $key := .Ownership.ComplexityOwnerKeys }}
+{{- if eq (index $.Ownership.ComplexityOwner $key) $.ShardName }}
+{{- with $field := index $.FieldByLookupKey $key }}
+	shardruntime.RegisterComplexity(splitScope, {{ $field.Object.Name | quote }}, {{ $field.Name | quote }}, func(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return __splitComplexity_{{ $field.Object.Name }}_{{ $field.Name }}(ctx, ec, childComplexity, rawArgs)
+	})
+{{- end }}
+{{- end }}
+{{- end }}
+}

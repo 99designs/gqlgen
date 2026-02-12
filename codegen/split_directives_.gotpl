@@ -1,0 +1,22 @@
+{{ define "split_directives_.gotpl" }}
+{{- range $key := .Ownership.FieldOwnerKeys }}
+{{- if eq (index $.Ownership.FieldOwner $key) $.ShardName }}
+{{- with $field := index $.FieldByLookupKey $key }}
+{{- if gt (len $field.ImplDirectives) 0 }}
+
+// split_directives_.gotpl
+func __splitDirectives_{{ $field.Object.Name }}_{{ $field.Name }}(next graphql.Resolver) graphql.Resolver {
+	directive0 := next
+	{{- range $i, $directive := $field.ImplDirectives }}
+	directive{{ add $i 1 }} := func(ctx context.Context) (any, error) {
+		// directive {{ $directive.Name }}
+		return directive{{ $i }}(ctx)
+	}
+	{{- end }}
+	return directive{{ len $field.ImplDirectives }}
+}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{ end }}

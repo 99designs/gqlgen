@@ -1,0 +1,639 @@
+package shardruntime
+
+import (
+	"context"
+	"fmt"
+	"sync"
+	"sync/atomic"
+	"testing"
+
+	"github.com/99designs/gqlgen/graphql"
+	"github.com/vektah/gqlparser/v2/ast"
+)
+
+func TestFieldRegistry(t *testing.T) {
+	resetFieldRegistryForTest()
+
+	h := func(context.Context, ObjectExecutionContext, graphql.CollectedField, any) graphql.Marshaler {
+		return graphql.Null
+	}
+
+	if got, ok := LookupField("scope", "Query", "name"); ok || got != nil {
+		t.Fatalf("unexpected field handler before registration: handler=%v ok=%v", got, ok)
+	}
+
+	RegisterField("scope", "Query", "name", h)
+
+	got, ok := LookupField("scope", "Query", "name")
+	if !ok {
+		t.Fatal("expected registered field handler")
+	}
+	if got == nil {
+		t.Fatal("expected non-nil field handler")
+	}
+
+	if got, ok := LookupField("scope", "Query", "missing"); ok || got != nil {
+		t.Fatalf("unexpected field handler for missing field: handler=%v ok=%v", got, ok)
+	}
+	if got, ok := LookupField("scope", "Mutation", "name"); ok || got != nil {
+		t.Fatalf("unexpected field handler for missing object: handler=%v ok=%v", got, ok)
+	}
+	if got, ok := LookupField("other-scope", "Query", "name"); ok || got != nil {
+		t.Fatalf("unexpected field handler for missing scope: handler=%v ok=%v", got, ok)
+	}
+
+	defer func() {
+		recovered := recover()
+		if recovered == nil {
+			t.Fatal("expected duplicate registration panic")
+		}
+		msg, ok := recovered.(string)
+		if !ok {
+			t.Fatalf("expected panic string, got %T", recovered)
+		}
+		expected := "duplicate field shard handler registration: scope:Query:name"
+		if msg != expected {
+			t.Fatalf("unexpected panic message: got %q want %q", msg, expected)
+		}
+	}()
+
+	RegisterField("scope", "Query", "name", h)
+}
+
+func TestStreamFieldRegistry(t *testing.T) {
+	resetStreamFieldRegistryForTest()
+
+	h := func(context.Context, ObjectExecutionContext, graphql.CollectedField, any) func(context.Context) graphql.Marshaler {
+		return func(context.Context) graphql.Marshaler {
+			return graphql.Null
+		}
+	}
+
+	if got, ok := LookupStreamField("scope", "Query", "name"); ok || got != nil {
+		t.Fatalf("unexpected stream field handler before registration: handler=%v ok=%v", got, ok)
+	}
+
+	RegisterStreamField("scope", "Query", "name", h)
+
+	got, ok := LookupStreamField("scope", "Query", "name")
+	if !ok {
+		t.Fatal("expected registered stream field handler")
+	}
+	if got == nil {
+		t.Fatal("expected non-nil stream field handler")
+	}
+
+	if got, ok := LookupStreamField("scope", "Query", "missing"); ok || got != nil {
+		t.Fatalf("unexpected stream field handler for missing field: handler=%v ok=%v", got, ok)
+	}
+	if got, ok := LookupStreamField("scope", "Mutation", "name"); ok || got != nil {
+		t.Fatalf("unexpected stream field handler for missing object: handler=%v ok=%v", got, ok)
+	}
+	if got, ok := LookupStreamField("other-scope", "Query", "name"); ok || got != nil {
+		t.Fatalf("unexpected stream field handler for missing scope: handler=%v ok=%v", got, ok)
+	}
+
+	defer func() {
+		recovered := recover()
+		if recovered == nil {
+			t.Fatal("expected duplicate registration panic")
+		}
+		msg, ok := recovered.(string)
+		if !ok {
+			t.Fatalf("expected panic string, got %T", recovered)
+		}
+		expected := "duplicate stream field shard handler registration: scope:Query:name"
+		if msg != expected {
+			t.Fatalf("unexpected panic message: got %q want %q", msg, expected)
+		}
+	}()
+
+	RegisterStreamField("scope", "Query", "name", h)
+}
+
+func TestComplexityRegistry(t *testing.T) {
+	resetComplexityRegistryForTest()
+
+	h := func(context.Context, ObjectExecutionContext, int, map[string]any) (int, bool) {
+		return 42, true
+	}
+
+	if got, ok := LookupComplexity("scope", "Query", "name"); ok || got != nil {
+		t.Fatalf("unexpected complexity handler before registration: handler=%v ok=%v", got, ok)
+	}
+
+	RegisterComplexity("scope", "Query", "name", h)
+
+	got, ok := LookupComplexity("scope", "Query", "name")
+	if !ok {
+		t.Fatal("expected registered complexity handler")
+	}
+	if got == nil {
+		t.Fatal("expected non-nil complexity handler")
+	}
+
+	if got, ok := LookupComplexity("scope", "Query", "missing"); ok || got != nil {
+		t.Fatalf("unexpected complexity handler for missing field: handler=%v ok=%v", got, ok)
+	}
+	if got, ok := LookupComplexity("scope", "Mutation", "name"); ok || got != nil {
+		t.Fatalf("unexpected complexity handler for missing object: handler=%v ok=%v", got, ok)
+	}
+	if got, ok := LookupComplexity("other-scope", "Query", "name"); ok || got != nil {
+		t.Fatalf("unexpected complexity handler for missing scope: handler=%v ok=%v", got, ok)
+	}
+
+	defer func() {
+		recovered := recover()
+		if recovered == nil {
+			t.Fatal("expected duplicate registration panic")
+		}
+		msg, ok := recovered.(string)
+		if !ok {
+			t.Fatalf("expected panic string, got %T", recovered)
+		}
+		expected := "duplicate complexity shard handler registration: scope:Query:name"
+		if msg != expected {
+			t.Fatalf("unexpected panic message: got %q want %q", msg, expected)
+		}
+	}()
+
+	RegisterComplexity("scope", "Query", "name", h)
+}
+
+func TestInputUnmarshalRegistryDeterministicOrder(t *testing.T) {
+	resetInputUnmarshalRegistryForTest()
+
+	type marker struct{ id string }
+	inputB := &marker{id: "B"}
+	inputA := &marker{id: "A"}
+	inputC := &marker{id: "C"}
+
+	if got := ListInputUnmarshalers("scope", nil); got != nil {
+		t.Fatalf("unexpected input unmarshalers before registration: %v", got)
+	}
+
+	RegisterInputUnmarshaler("scope", "InputB", inputB)
+	RegisterInputUnmarshaler("scope", "InputA", inputA)
+	RegisterInputUnmarshaler("scope", "InputC", inputC)
+	RegisterInputUnmarshaler("other-scope", "InputA", &marker{id: "other"})
+
+	got := ListInputUnmarshalers("scope", nil)
+	if len(got) != 3 {
+		t.Fatalf("unexpected number of input unmarshalers: got %d want %d", len(got), 3)
+	}
+
+	if got[0] != inputA {
+		t.Fatalf("unexpected first input unmarshaler: got %v want %v", got[0], inputA)
+	}
+	if got[1] != inputB {
+		t.Fatalf("unexpected second input unmarshaler: got %v want %v", got[1], inputB)
+	}
+	if got[2] != inputC {
+		t.Fatalf("unexpected third input unmarshaler: got %v want %v", got[2], inputC)
+	}
+
+	if got := ListInputUnmarshalers("missing-scope", nil); got != nil {
+		t.Fatalf("unexpected input unmarshalers for missing scope: %v", got)
+	}
+
+	defer func() {
+		recovered := recover()
+		if recovered == nil {
+			t.Fatal("expected duplicate registration panic")
+		}
+		msg, ok := recovered.(string)
+		if !ok {
+			t.Fatalf("expected panic string, got %T", recovered)
+		}
+		expected := "duplicate input unmarshaler registration: scope:InputA"
+		if msg != expected {
+			t.Fatalf("unexpected panic message: got %q want %q", msg, expected)
+		}
+	}()
+
+	RegisterInputUnmarshaler("scope", "InputA", &marker{id: "dup"})
+}
+
+func TestRegistryDuplicatePanics(t *testing.T) {
+	t.Run("object", func(t *testing.T) {
+		resetObjectRegistryForTest()
+
+		h := func(context.Context, ObjectExecutionContext, ast.SelectionSet, any) graphql.Marshaler {
+			return graphql.Null
+		}
+
+		RegisterObject("scope", "Query", func(ctx context.Context, ec ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
+			return h(ctx, ec, sel, obj)
+		})
+		assertDuplicateRegistrationPanic(t, "duplicate object shard handler registration: scope:Query", func() {
+			RegisterObject("scope", "Query", func(ctx context.Context, ec ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
+				return h(ctx, ec, sel, obj)
+			})
+		})
+	})
+
+	t.Run("stream object", func(t *testing.T) {
+		resetStreamObjectRegistryForTest()
+
+		h := func(context.Context, ObjectExecutionContext, ast.SelectionSet) func(context.Context) graphql.Marshaler {
+			return func(context.Context) graphql.Marshaler {
+				return graphql.Null
+			}
+		}
+
+		RegisterStreamObject("scope", "Query", func(ctx context.Context, ec ObjectExecutionContext, sel ast.SelectionSet) func(context.Context) graphql.Marshaler {
+			return h(ctx, ec, sel)
+		})
+		assertDuplicateRegistrationPanic(t, "duplicate stream object shard handler registration: scope:Query", func() {
+			RegisterStreamObject("scope", "Query", func(ctx context.Context, ec ObjectExecutionContext, sel ast.SelectionSet) func(context.Context) graphql.Marshaler {
+				return h(ctx, ec, sel)
+			})
+		})
+	})
+
+	t.Run("field", func(t *testing.T) {
+		resetFieldRegistryForTest()
+
+		h := func(context.Context, ObjectExecutionContext, graphql.CollectedField, any) graphql.Marshaler {
+			return graphql.Null
+		}
+
+		RegisterField("scope", "Query", "name", h)
+		assertDuplicateRegistrationPanic(t, "duplicate field shard handler registration: scope:Query:name", func() {
+			RegisterField("scope", "Query", "name", h)
+		})
+	})
+
+	t.Run("stream field", func(t *testing.T) {
+		resetStreamFieldRegistryForTest()
+
+		h := func(context.Context, ObjectExecutionContext, graphql.CollectedField, any) func(context.Context) graphql.Marshaler {
+			return func(context.Context) graphql.Marshaler {
+				return graphql.Null
+			}
+		}
+
+		RegisterStreamField("scope", "Query", "name", h)
+		assertDuplicateRegistrationPanic(t, "duplicate stream field shard handler registration: scope:Query:name", func() {
+			RegisterStreamField("scope", "Query", "name", h)
+		})
+	})
+
+	t.Run("complexity", func(t *testing.T) {
+		resetComplexityRegistryForTest()
+
+		h := func(context.Context, ObjectExecutionContext, int, map[string]any) (int, bool) {
+			return 42, true
+		}
+
+		RegisterComplexity("scope", "Query", "name", h)
+		assertDuplicateRegistrationPanic(t, "duplicate complexity shard handler registration: scope:Query:name", func() {
+			RegisterComplexity("scope", "Query", "name", h)
+		})
+	})
+
+	t.Run("input unmarshaler", func(t *testing.T) {
+		resetInputUnmarshalRegistryForTest()
+
+		type marker struct{ id string }
+
+		RegisterInputUnmarshaler("scope", "InputA", &marker{id: "A"})
+		assertDuplicateRegistrationPanic(t, "duplicate input unmarshaler registration: scope:InputA", func() {
+			RegisterInputUnmarshaler("scope", "InputA", &marker{id: "dup"})
+		})
+	})
+}
+
+func TestRegistryConcurrentAccess(t *testing.T) {
+	t.Run("field", func(t *testing.T) {
+		resetFieldRegistryForTest()
+
+		h := func(context.Context, ObjectExecutionContext, graphql.CollectedField, any) graphql.Marshaler {
+			return graphql.Null
+		}
+
+		const total = 128
+		const readers = 8
+
+		errCh := make(chan error, total+readers)
+		reportErr := func(err error) {
+			select {
+			case errCh <- err:
+			default:
+			}
+		}
+
+		start := make(chan struct{})
+		var writersWG sync.WaitGroup
+		var readersWG sync.WaitGroup
+		var writesDone atomic.Bool
+
+		for i := 0; i < total; i++ {
+			writersWG.Add(1)
+			go func(i int) {
+				defer writersWG.Done()
+				<-start
+				RegisterField("scope", "Query", fmt.Sprintf("field_%03d", i), h)
+			}(i)
+		}
+
+		for i := 0; i < readers; i++ {
+			readersWG.Add(1)
+			go func() {
+				defer readersWG.Done()
+				<-start
+				for !writesDone.Load() {
+					for i := 0; i < total; i++ {
+						handler, ok := LookupField("scope", "Query", fmt.Sprintf("field_%03d", i))
+						if ok && handler == nil {
+							reportErr(fmt.Errorf("nil field handler for registered key %d", i))
+						}
+					}
+				}
+			}()
+		}
+
+		close(start)
+		writersWG.Wait()
+		writesDone.Store(true)
+		readersWG.Wait()
+
+		close(errCh)
+		for err := range errCh {
+			t.Fatal(err)
+		}
+
+		for i := 0; i < total; i++ {
+			handler, ok := LookupField("scope", "Query", fmt.Sprintf("field_%03d", i))
+			if !ok || handler == nil {
+				t.Fatalf("missing registered field handler for key %d", i)
+			}
+		}
+	})
+
+	t.Run("stream field", func(t *testing.T) {
+		resetStreamFieldRegistryForTest()
+
+		h := func(context.Context, ObjectExecutionContext, graphql.CollectedField, any) func(context.Context) graphql.Marshaler {
+			return func(context.Context) graphql.Marshaler {
+				return graphql.Null
+			}
+		}
+
+		const total = 128
+		const readers = 8
+
+		errCh := make(chan error, total+readers)
+		reportErr := func(err error) {
+			select {
+			case errCh <- err:
+			default:
+			}
+		}
+
+		start := make(chan struct{})
+		var writersWG sync.WaitGroup
+		var readersWG sync.WaitGroup
+		var writesDone atomic.Bool
+
+		for i := 0; i < total; i++ {
+			writersWG.Add(1)
+			go func(i int) {
+				defer writersWG.Done()
+				<-start
+				RegisterStreamField("scope", "Query", fmt.Sprintf("stream_field_%03d", i), h)
+			}(i)
+		}
+
+		for i := 0; i < readers; i++ {
+			readersWG.Add(1)
+			go func() {
+				defer readersWG.Done()
+				<-start
+				for !writesDone.Load() {
+					for i := 0; i < total; i++ {
+						handler, ok := LookupStreamField("scope", "Query", fmt.Sprintf("stream_field_%03d", i))
+						if ok && handler == nil {
+							reportErr(fmt.Errorf("nil stream field handler for registered key %d", i))
+						}
+					}
+				}
+			}()
+		}
+
+		close(start)
+		writersWG.Wait()
+		writesDone.Store(true)
+		readersWG.Wait()
+
+		close(errCh)
+		for err := range errCh {
+			t.Fatal(err)
+		}
+
+		for i := 0; i < total; i++ {
+			handler, ok := LookupStreamField("scope", "Query", fmt.Sprintf("stream_field_%03d", i))
+			if !ok || handler == nil {
+				t.Fatalf("missing registered stream field handler for key %d", i)
+			}
+		}
+	})
+
+	t.Run("complexity", func(t *testing.T) {
+		resetComplexityRegistryForTest()
+
+		h := func(context.Context, ObjectExecutionContext, int, map[string]any) (int, bool) {
+			return 42, true
+		}
+
+		const total = 128
+		const readers = 8
+
+		errCh := make(chan error, total+readers)
+		reportErr := func(err error) {
+			select {
+			case errCh <- err:
+			default:
+			}
+		}
+
+		start := make(chan struct{})
+		var writersWG sync.WaitGroup
+		var readersWG sync.WaitGroup
+		var writesDone atomic.Bool
+
+		for i := 0; i < total; i++ {
+			writersWG.Add(1)
+			go func(i int) {
+				defer writersWG.Done()
+				<-start
+				RegisterComplexity("scope", "Query", fmt.Sprintf("complexity_%03d", i), h)
+			}(i)
+		}
+
+		for i := 0; i < readers; i++ {
+			readersWG.Add(1)
+			go func() {
+				defer readersWG.Done()
+				<-start
+				for !writesDone.Load() {
+					for i := 0; i < total; i++ {
+						handler, ok := LookupComplexity("scope", "Query", fmt.Sprintf("complexity_%03d", i))
+						if ok && handler == nil {
+							reportErr(fmt.Errorf("nil complexity handler for registered key %d", i))
+						}
+					}
+				}
+			}()
+		}
+
+		close(start)
+		writersWG.Wait()
+		writesDone.Store(true)
+		readersWG.Wait()
+
+		close(errCh)
+		for err := range errCh {
+			t.Fatal(err)
+		}
+
+		for i := 0; i < total; i++ {
+			handler, ok := LookupComplexity("scope", "Query", fmt.Sprintf("complexity_%03d", i))
+			if !ok || handler == nil {
+				t.Fatalf("missing registered complexity handler for key %d", i)
+			}
+		}
+	})
+
+	t.Run("input unmarshaler", func(t *testing.T) {
+		resetInputUnmarshalRegistryForTest()
+
+		type marker struct{ id string }
+
+		const total = 128
+		const readers = 8
+
+		errCh := make(chan error, total+readers)
+		reportErr := func(err error) {
+			select {
+			case errCh <- err:
+			default:
+			}
+		}
+
+		start := make(chan struct{})
+		var writersWG sync.WaitGroup
+		var readersWG sync.WaitGroup
+		var writesDone atomic.Bool
+
+		for i := 0; i < total; i++ {
+			writersWG.Add(1)
+			go func(i int) {
+				defer writersWG.Done()
+				<-start
+				RegisterInputUnmarshaler("scope", fmt.Sprintf("Input_%03d", i), &marker{id: fmt.Sprintf("%03d", i)})
+			}(i)
+		}
+
+		for i := 0; i < readers; i++ {
+			readersWG.Add(1)
+			go func() {
+				defer readersWG.Done()
+				<-start
+				for !writesDone.Load() {
+					unmarshalers := ListInputUnmarshalers("scope", nil)
+					if len(unmarshalers) > total {
+						reportErr(fmt.Errorf("unexpected input unmarshaler count: got %d want <= %d", len(unmarshalers), total))
+					}
+					for i, unmarshaler := range unmarshalers {
+						if unmarshaler == nil {
+							reportErr(fmt.Errorf("nil input unmarshaler at index %d", i))
+						}
+					}
+				}
+			}()
+		}
+
+		close(start)
+		writersWG.Wait()
+		writesDone.Store(true)
+		readersWG.Wait()
+
+		close(errCh)
+		for err := range errCh {
+			t.Fatal(err)
+		}
+
+		unmarshalers := ListInputUnmarshalers("scope", nil)
+		if len(unmarshalers) != total {
+			t.Fatalf("unexpected number of registered input unmarshalers: got %d want %d", len(unmarshalers), total)
+		}
+		for i, unmarshaler := range unmarshalers {
+			if unmarshaler == nil {
+				t.Fatalf("nil input unmarshaler at index %d after registration", i)
+			}
+		}
+	})
+}
+
+func assertDuplicateRegistrationPanic(t *testing.T, expected string, register func()) {
+	t.Helper()
+
+	defer func() {
+		recovered := recover()
+		if recovered == nil {
+			t.Fatal("expected duplicate registration panic")
+		}
+		msg, ok := recovered.(string)
+		if !ok {
+			t.Fatalf("expected panic string, got %T", recovered)
+		}
+		if msg != expected {
+			t.Fatalf("unexpected panic message: got %q want %q", msg, expected)
+		}
+	}()
+
+	register()
+}
+
+func resetObjectRegistryForTest() {
+	mu.Lock()
+	defer mu.Unlock()
+
+	objectByScope = map[string]map[string]ObjectHandler{}
+}
+
+func resetStreamObjectRegistryForTest() {
+	mu.Lock()
+	defer mu.Unlock()
+
+	streamByScope = map[string]map[string]StreamObjectHandler{}
+}
+
+func resetFieldRegistryForTest() {
+	mu.Lock()
+	defer mu.Unlock()
+
+	fieldByScope = map[string]map[string]map[string]FieldHandler{}
+}
+
+func resetStreamFieldRegistryForTest() {
+	mu.Lock()
+	defer mu.Unlock()
+
+	streamFieldByScope = map[string]map[string]map[string]StreamFieldHandler{}
+}
+
+func resetComplexityRegistryForTest() {
+	mu.Lock()
+	defer mu.Unlock()
+
+	complexityByScope = map[string]map[string]map[string]ComplexityHandler{}
+}
+
+func resetInputUnmarshalRegistryForTest() {
+	mu.Lock()
+	defer mu.Unlock()
+
+	inputUnmarshalByScope = map[string]map[string]any{}
+}

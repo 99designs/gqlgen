@@ -21,6 +21,10 @@ type ExecConfig struct {
 	FilenameTemplate string `yaml:"filename_template,omitempty"` // String template with {name} as placeholder for base name.
 	DirName          string `yaml:"dir"`
 
+	// Only for split-packages layout:
+	ShardDir              string `yaml:"shard_dir,omitempty"`
+	ShardFilenameTemplate string `yaml:"shard_filename_template,omitempty"` // String template with {name} as placeholder for base name.
+
 	// Maximum number of goroutines in concurrency to use when running multiple child resolvers
 	// Suppressing the number of goroutines generated can reduce memory consumption per request,
 	// but processing time may increase due to the reduced number of concurrences
@@ -36,6 +40,8 @@ var (
 	// Write generated code to a directory, generating one Go source file for each GraphQL schema
 	// file.
 	ExecLayoutFollowSchema ExecLayout = "follow-schema"
+	// Write generated code to multiple internal shard packages and a small public gateway package.
+	ExecLayoutSplitPackages ExecLayout = "split-packages"
 )
 
 func (r *ExecConfig) Check() error {
@@ -59,6 +65,28 @@ func (r *ExecConfig) Check() error {
 			return errors.New("dir must be specified when using follow-schema layout")
 		}
 		r.DirName = abs(r.DirName)
+	case ExecLayoutSplitPackages:
+		if r.Filename == "" {
+			return errors.New("filename must be specified when using split-packages layout")
+		}
+		if !strings.HasSuffix(r.Filename, ".go") {
+			return errors.New(
+				"filename should be path to a go source file when using split-packages layout",
+			)
+		}
+		r.Filename = abs(r.Filename)
+
+		if r.ShardDir == "" {
+			r.ShardDir = "internal/gqlgenexec/shards"
+		}
+		if !filepath.IsAbs(r.ShardDir) {
+			r.ShardDir = filepath.Join(filepath.Dir(r.Filename), r.ShardDir)
+		}
+		r.ShardDir = abs(r.ShardDir)
+
+		if r.ShardFilenameTemplate == "" {
+			r.ShardFilenameTemplate = "{name}.generated.go"
+		}
 	default:
 		return fmt.Errorf("invalid layout %s", r.Layout)
 	}
@@ -92,6 +120,11 @@ func (r *ExecConfig) Dir() string {
 		return filepath.Dir(r.Filename)
 	case ExecLayoutFollowSchema:
 		return abs(r.DirName)
+	case ExecLayoutSplitPackages:
+		if r.Filename == "" {
+			return ""
+		}
+		return filepath.Dir(r.Filename)
 	default:
 		panic("invalid layout " + r.Layout)
 	}

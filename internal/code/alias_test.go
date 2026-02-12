@@ -22,6 +22,11 @@ func TestIsAliasInternal(t *testing.T) {
 			lhs:  "graph/model",
 			rhs:  "internal/store/example",
 		},
+		{
+			name: "parent package aliasing child internal type",
+			lhs:  "github.com/org/repo/ent/gen.Contact",
+			rhs:  "github.com/org/repo/ent/gen/internal.Contact",
+		},
 	}
 
 	for _, tc := range isInternal {
@@ -54,6 +59,11 @@ func TestIsAliasInternal(t *testing.T) {
 			name: "diff root internal alias",
 			lhs:  "github.com/org/repo/graph/model",
 			rhs:  "github.com/org/repoB/internal/store/example",
+		},
+		{
+			name: "different parent package not aliasing internal",
+			lhs:  "github.com/org/repo/other.Contact",
+			rhs:  "github.com/org/repo/ent/gen/internal.Contact",
 		},
 	}
 

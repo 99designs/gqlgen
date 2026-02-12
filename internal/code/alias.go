@@ -12,7 +12,16 @@ func Unalias(t types.Type) types.Type {
 		// type is in an internal package. Only the last type in the alias
 		// chain is provided as the RHS.
 		if isAliasInternal(t.String(), unalias(t).String()) {
-			return types.NewNamed(alias.Obj(), alias.Underlying(), nil)
+			// Collect methods from the unaliased type so the synthetic
+			// named type still satisfies interfaces (e.g. Noder).
+			var methods []*types.Func
+			if orig, ok := unalias(t).(*types.Named); ok {
+				methods = make([]*types.Func, orig.NumMethods())
+				for i := range methods {
+					methods[i] = orig.Method(i)
+				}
+			}
+			return types.NewNamed(alias.Obj(), alias.Underlying(), methods)
 		}
 	}
 	return unalias(t)
@@ -45,10 +54,21 @@ func isAliasInternal(lhs, rhs string) bool {
 		return false
 	}
 	root := rhs[:idx]
+	// Extract package path from lhs (strip ".TypeName" suffix)
+	lhsPkg := lhs
+	if dotIdx := strings.LastIndex(lhs, "."); dotIdx != -1 {
+		lhsPkg = lhs[:dotIdx]
+	}
 	switch {
 	// The alias type path is checked against the root of the non-alias type to
 	// ensure the types being aliased share the same root.
 	case strings.HasPrefix(lhs, root):
+		return true
+	// Parent-package case: alias declared in gen, target in gen/internal.
+	// The lhs type string uses "." before the type name (gen.Contact) while
+	// root uses "/" as directory separator (gen/), so HasPrefix(lhs, root)
+	// fails. Check if root starts with the alias package path instead.
+	case strings.HasPrefix(root, lhsPkg+"/"):
 		return true
 	default:
 		return false

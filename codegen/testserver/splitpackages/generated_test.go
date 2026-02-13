@@ -43,7 +43,7 @@ func TestSplitPackagesCompiles(t *testing.T) {
 }
 
 func TestSplitComplexityParity(t *testing.T) {
-	t.Run("returns false because generated split complexity handlers are stubs", func(t *testing.T) {
+	t.Run("uses configured complexity handler", func(t *testing.T) {
 		schema := NewExecutableSchema(Config{
 			Resolvers: &Stub{},
 			Complexity: ComplexityRoot{
@@ -56,8 +56,8 @@ func TestSplitComplexityParity(t *testing.T) {
 		})
 
 		value, ok := schema.Complexity(context.Background(), "Query", "hello", 4, map[string]any{"name": "Ada"})
-		require.False(t, ok)
-		require.Equal(t, 0, value)
+		require.True(t, ok)
+		require.Equal(t, 7, value)
 	})
 
 	t.Run("returns false when complexity function is unset", func(t *testing.T) {

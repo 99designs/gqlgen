@@ -4,12 +4,10 @@ package prelude
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/executor/shardruntime"
-	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
@@ -17,52 +15,28 @@ const splitScope = "github.com/99designs/gqlgen/codegen/testserver/splitpackages
 
 func init() {
 	shardruntime.RegisterObject(splitScope, "__Directive", func(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
-		typedObj, ok := obj.(*introspection.Directive)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Directive", obj))
-		}
-		return ___Directive(ctx, ec, sel, typedObj)
+		return ___Directive(ctx, ec, sel, obj)
 	})
 	shardruntime.RegisterObject(splitScope, "__EnumValue", func(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
-		typedObj, ok := obj.(*introspection.EnumValue)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __EnumValue", obj))
-		}
-		return ___EnumValue(ctx, ec, sel, typedObj)
+		return ___EnumValue(ctx, ec, sel, obj)
 	})
 	shardruntime.RegisterObject(splitScope, "__Field", func(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
-		typedObj, ok := obj.(*introspection.Field)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Field", obj))
-		}
-		return ___Field(ctx, ec, sel, typedObj)
+		return ___Field(ctx, ec, sel, obj)
 	})
 	shardruntime.RegisterObject(splitScope, "__InputValue", func(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
-		typedObj, ok := obj.(*introspection.InputValue)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __InputValue", obj))
-		}
-		return ___InputValue(ctx, ec, sel, typedObj)
+		return ___InputValue(ctx, ec, sel, obj)
 	})
 	shardruntime.RegisterObject(splitScope, "__Schema", func(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
-		typedObj, ok := obj.(*introspection.Schema)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Schema", obj))
-		}
-		return ___Schema(ctx, ec, sel, typedObj)
+		return ___Schema(ctx, ec, sel, obj)
 	})
 	shardruntime.RegisterObject(splitScope, "__Type", func(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
-		typedObj, ok := obj.(*introspection.Type)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Type", obj))
-		}
-		return ___Type(ctx, ec, sel, typedObj)
+		return ___Type(ctx, ec, sel, obj)
 	})
 }
 
 var __DirectiveImplementors = []string{"__Directive"}
 
-func ___Directive(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj *introspection.Directive) graphql.Marshaler {
+func ___Directive(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.GetOperationContext(), sel, __DirectiveImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -118,7 +92,7 @@ func ___Directive(ctx context.Context, ec shardruntime.ObjectExecutionContext, s
 
 var __EnumValueImplementors = []string{"__EnumValue"}
 
-func ___EnumValue(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj *introspection.EnumValue) graphql.Marshaler {
+func ___EnumValue(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.GetOperationContext(), sel, __EnumValueImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -166,7 +140,7 @@ func ___EnumValue(ctx context.Context, ec shardruntime.ObjectExecutionContext, s
 
 var __FieldImplementors = []string{"__Field"}
 
-func ___Field(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj *introspection.Field) graphql.Marshaler {
+func ___Field(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.GetOperationContext(), sel, __FieldImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -224,7 +198,7 @@ func ___Field(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel a
 
 var __InputValueImplementors = []string{"__InputValue"}
 
-func ___InputValue(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj *introspection.InputValue) graphql.Marshaler {
+func ___InputValue(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.GetOperationContext(), sel, __InputValueImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -279,7 +253,7 @@ func ___InputValue(ctx context.Context, ec shardruntime.ObjectExecutionContext, 
 
 var __SchemaImplementors = []string{"__Schema"}
 
-func ___Schema(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj *introspection.Schema) graphql.Marshaler {
+func ___Schema(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.GetOperationContext(), sel, __SchemaImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -334,7 +308,7 @@ func ___Schema(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel 
 
 var __TypeImplementors = []string{"__Type"}
 
-func ___Type(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj *introspection.Type) graphql.Marshaler {
+func ___Type(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.GetOperationContext(), sel, __TypeImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -603,541 +577,305 @@ func __splitArgs_field___Type_fields_args(ctx context.Context, ec shardruntime.O
 
 // split_complexity_.gotpl
 func __splitComplexity___Directive_args(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Directive", "args", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Directive_description(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Directive", "description", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Directive_isRepeatable(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Directive", "isRepeatable", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Directive_locations(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Directive", "locations", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Directive_name(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Directive", "name", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___EnumValue_deprecationReason(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__EnumValue", "deprecationReason", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___EnumValue_description(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__EnumValue", "description", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___EnumValue_isDeprecated(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__EnumValue", "isDeprecated", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___EnumValue_name(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__EnumValue", "name", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Field_args(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Field", "args", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Field_deprecationReason(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Field", "deprecationReason", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Field_description(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Field", "description", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Field_isDeprecated(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Field", "isDeprecated", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Field_name(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Field", "name", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Field_type(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Field", "type", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___InputValue_defaultValue(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__InputValue", "defaultValue", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___InputValue_deprecationReason(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__InputValue", "deprecationReason", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___InputValue_description(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__InputValue", "description", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___InputValue_isDeprecated(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__InputValue", "isDeprecated", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___InputValue_name(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__InputValue", "name", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___InputValue_type(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__InputValue", "type", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Schema_description(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Schema", "description", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Schema_directives(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Schema", "directives", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Schema_mutationType(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Schema", "mutationType", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Schema_queryType(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Schema", "queryType", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Schema_subscriptionType(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Schema", "subscriptionType", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Schema_types(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Schema", "types", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Type_description(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Type", "description", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Type_enumValues(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Type", "enumValues", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Type_fields(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Type", "fields", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Type_inputFields(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Type", "inputFields", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Type_interfaces(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Type", "interfaces", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Type_isOneOf(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Type", "isOneOf", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Type_kind(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Type", "kind", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Type_name(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Type", "name", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Type_ofType(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Type", "ofType", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Type_possibleTypes(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Type", "possibleTypes", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Type_specifiedByURL(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Type", "specifiedByURL", childComplexity, rawArgs)
 }
 
 // split_codecs_.gotpl
-func marshalNBoolean2bool(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value bool) graphql.Marshaler {
+func marshalNBoolean2bool(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalNBoolean2bool", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalNString2string(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value string) graphql.Marshaler {
+func marshalNString2string(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalNString2string", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value []introspection.Directive) graphql.Marshaler {
+func marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value []string) graphql.Marshaler {
+func marshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalN__DirectiveLocation2ᚕstringᚄ", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value []introspection.InputValue) graphql.Marshaler {
+func marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value []introspection.Type) graphql.Marshaler {
+func marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value *introspection.Type) graphql.Marshaler {
+func marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalN__TypeKind2string(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value string) graphql.Marshaler {
+func marshalN__TypeKind2string(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalN__TypeKind2string", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalOBoolean2bool(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value bool) graphql.Marshaler {
+func marshalOBoolean2bool(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalOBoolean2bool", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalOBoolean2ᚖbool(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value *bool) graphql.Marshaler {
+func marshalOBoolean2ᚖbool(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalOBoolean2ᚖbool", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalOString2ᚖstring(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value *string) graphql.Marshaler {
+func marshalOString2ᚖstring(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalOString2ᚖstring", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value []introspection.EnumValue) graphql.Marshaler {
+func marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐFieldᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value []introspection.Field) graphql.Marshaler {
+func marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐFieldᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐFieldᚄ", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value []introspection.InputValue) graphql.Marshaler {
+func marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value []introspection.Type) graphql.Marshaler {
+func marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value *introspection.Type) graphql.Marshaler {
+func marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType", sel, value)
 }
 
 // split_codecs_.gotpl
-func unmarshalNBoolean2bool(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (bool, error) {
-	raw, err := ec.UnmarshalCodec(ctx, "unmarshalNBoolean2bool", value)
-	if err != nil {
-		var zero bool
-		return zero, err
-	}
-
-	typed, ok := raw.(bool)
-	if !ok {
-		var zero bool
-		return zero, fmt.Errorf("unexpected codec result type %T for unmarshalNBoolean2bool", raw)
-	}
-
-	return typed, nil
+func unmarshalNBoolean2bool(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (any, error) {
+	return ec.UnmarshalCodec(ctx, "unmarshalNBoolean2bool", value)
 }
 
 // split_codecs_.gotpl
-func unmarshalNString2string(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (string, error) {
-	raw, err := ec.UnmarshalCodec(ctx, "unmarshalNString2string", value)
-	if err != nil {
-		var zero string
-		return zero, err
-	}
-
-	typed, ok := raw.(string)
-	if !ok {
-		var zero string
-		return zero, fmt.Errorf("unexpected codec result type %T for unmarshalNString2string", raw)
-	}
-
-	return typed, nil
+func unmarshalNString2string(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (any, error) {
+	return ec.UnmarshalCodec(ctx, "unmarshalNString2string", value)
 }
 
 // split_codecs_.gotpl
-func unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) ([]string, error) {
-	raw, err := ec.UnmarshalCodec(ctx, "unmarshalN__DirectiveLocation2ᚕstringᚄ", value)
-	if err != nil {
-		var zero []string
-		return zero, err
-	}
-
-	typed, ok := raw.([]string)
-	if !ok {
-		var zero []string
-		return zero, fmt.Errorf("unexpected codec result type %T for unmarshalN__DirectiveLocation2ᚕstringᚄ", raw)
-	}
-
-	return typed, nil
+func unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (any, error) {
+	return ec.UnmarshalCodec(ctx, "unmarshalN__DirectiveLocation2ᚕstringᚄ", value)
 }
 
 // split_codecs_.gotpl
-func unmarshalN__TypeKind2string(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (string, error) {
-	raw, err := ec.UnmarshalCodec(ctx, "unmarshalN__TypeKind2string", value)
-	if err != nil {
-		var zero string
-		return zero, err
-	}
-
-	typed, ok := raw.(string)
-	if !ok {
-		var zero string
-		return zero, fmt.Errorf("unexpected codec result type %T for unmarshalN__TypeKind2string", raw)
-	}
-
-	return typed, nil
+func unmarshalN__TypeKind2string(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (any, error) {
+	return ec.UnmarshalCodec(ctx, "unmarshalN__TypeKind2string", value)
 }
 
 // split_codecs_.gotpl
-func unmarshalOBoolean2bool(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (bool, error) {
-	raw, err := ec.UnmarshalCodec(ctx, "unmarshalOBoolean2bool", value)
-	if err != nil {
-		var zero bool
-		return zero, err
-	}
-
-	typed, ok := raw.(bool)
-	if !ok {
-		var zero bool
-		return zero, fmt.Errorf("unexpected codec result type %T for unmarshalOBoolean2bool", raw)
-	}
-
-	return typed, nil
+func unmarshalOBoolean2bool(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (any, error) {
+	return ec.UnmarshalCodec(ctx, "unmarshalOBoolean2bool", value)
 }
 
 // split_codecs_.gotpl
-func unmarshalOBoolean2ᚖbool(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (*bool, error) {
-	raw, err := ec.UnmarshalCodec(ctx, "unmarshalOBoolean2ᚖbool", value)
-	if err != nil {
-		var zero *bool
-		return zero, err
-	}
-
-	typed, ok := raw.(*bool)
-	if !ok {
-		var zero *bool
-		return zero, fmt.Errorf("unexpected codec result type %T for unmarshalOBoolean2ᚖbool", raw)
-	}
-
-	return typed, nil
+func unmarshalOBoolean2ᚖbool(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (any, error) {
+	return ec.UnmarshalCodec(ctx, "unmarshalOBoolean2ᚖbool", value)
 }
 
 // split_codecs_.gotpl
-func unmarshalOString2ᚖstring(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (*string, error) {
-	raw, err := ec.UnmarshalCodec(ctx, "unmarshalOString2ᚖstring", value)
-	if err != nil {
-		var zero *string
-		return zero, err
-	}
-
-	typed, ok := raw.(*string)
-	if !ok {
-		var zero *string
-		return zero, fmt.Errorf("unexpected codec result type %T for unmarshalOString2ᚖstring", raw)
-	}
-
-	return typed, nil
+func unmarshalOString2ᚖstring(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (any, error) {
+	return ec.UnmarshalCodec(ctx, "unmarshalOString2ᚖstring", value)
 }

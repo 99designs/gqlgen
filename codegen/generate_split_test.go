@@ -1,6 +1,7 @@
 package codegen
 
 import (
+	"bytes"
 	"fmt"
 	goast "go/ast"
 	"go/parser"
@@ -99,6 +100,24 @@ func TestSplitPackagesDeterminism(t *testing.T) {
 	require.Equal(t, firstRun, secondRun)
 }
 
+func TestSplitOmitComplexityDoesNotReferenceComplexityRoot(t *testing.T) {
+	workDir := chdirToLocalSplitFixtureWorkspace(t)
+	configPath := filepath.Join(workDir, "gqlgen.yml")
+
+	contents, err := os.ReadFile(configPath)
+	require.NoError(t, err)
+
+	contents = append(bytes.TrimRight(contents, "\n"), []byte("\nomit_complexity: true\n")...)
+	require.NoError(t, os.WriteFile(configPath, contents, 0o644))
+
+	cleanupSplitGeneratedFiles(workDir)
+	snapshot := generateSplitSnapshot(t)
+
+	generated, ok := snapshot[filepath.Join("graph", "generated.go")]
+	require.True(t, ok)
+	require.NotContains(t, string(generated), "ec.complexity.")
+}
+
 func guardrailExecGeneratedFiles(t *testing.T, dir string) []string {
 	t.Helper()
 
@@ -180,16 +199,18 @@ func TestSplitStaleFileCleanupDeterministic(t *testing.T) {
 	baseline := generateSplitSnapshot(t)
 
 	staleRootImport := filepath.Join(workDir, "graph", "split_shard_import_999.generated.go")
-	staleShardGenerated := filepath.Join(workDir, "graph", "internal", "gqlgenexec", "shards", "stale", "legacy.generated.go")
+	staleSplitOwnedShardGenerated := filepath.Join(workDir, "graph", "internal", "gqlgenexec", "shards", "stale", "legacy.generated.go")
+	staleUnownedShardGenerated := filepath.Join(workDir, "graph", "internal", "gqlgenexec", "shards", "stale", "foreign.generated.go")
 	staleRegister := filepath.Join(workDir, "graph", "internal", "gqlgenexec", "shards", "obsolete", "register.generated.go")
 	keptInsideShardScope := filepath.Join(workDir, "graph", "internal", "gqlgenexec", "shards", "stale", "keep.txt")
 	unrelatedOutsideScope := filepath.Join(workDir, "graph", "unrelated.generated.go")
 
 	require.NoError(t, os.MkdirAll(filepath.Dir(staleRootImport), 0o755))
-	require.NoError(t, os.MkdirAll(filepath.Dir(staleShardGenerated), 0o755))
+	require.NoError(t, os.MkdirAll(filepath.Dir(staleSplitOwnedShardGenerated), 0o755))
 	require.NoError(t, os.MkdirAll(filepath.Dir(staleRegister), 0o755))
 	require.NoError(t, os.WriteFile(staleRootImport, []byte("package graph\n"), 0o644))
-	require.NoError(t, os.WriteFile(staleShardGenerated, []byte("package stale\n"), 0o644))
+	require.NoError(t, os.WriteFile(staleSplitOwnedShardGenerated, []byte("package stale\nconst splitScope = \"scope\"\n"), 0o644))
+	require.NoError(t, os.WriteFile(staleUnownedShardGenerated, []byte("package stale\n"), 0o644))
 	require.NoError(t, os.WriteFile(staleRegister, []byte("package obsolete\n"), 0o644))
 	require.NoError(t, os.WriteFile(keptInsideShardScope, []byte("keep me\n"), 0o644))
 	require.NoError(t, os.WriteFile(unrelatedOutsideScope, []byte("package graph\n"), 0o644))
@@ -203,8 +224,12 @@ func TestSplitStaleFileCleanupDeterministic(t *testing.T) {
 	_, err := os.Stat(staleRootImport)
 	require.True(t, os.IsNotExist(err), "expected stale split import to be removed")
 
-	_, err = os.Stat(staleShardGenerated)
+	_, err = os.Stat(staleSplitOwnedShardGenerated)
 	require.True(t, os.IsNotExist(err), "expected stale split shard file to be removed")
+
+	staleUnownedContents, err := os.ReadFile(staleUnownedShardGenerated)
+	require.NoError(t, err)
+	require.Equal(t, "package stale\n", string(staleUnownedContents))
 
 	_, err = os.Stat(staleRegister)
 	require.True(t, os.IsNotExist(err), "expected stale split register file to be removed")
@@ -229,6 +254,54 @@ func TestSplitStaleCleanupDeterministicAndScoped(t *testing.T) {
 	TestSplitStaleFileCleanupDeterministic(t)
 }
 
+func TestListSplitShardGeneratedFilesSupportsCustomTemplate(t *testing.T) {
+	root := t.TempDir()
+
+	ownedCustom := filepath.Join(root, "custom", "legacy.go")
+	ownedRegister := filepath.Join(root, "legacy", "register.generated.go")
+	unownedCustom := filepath.Join(root, "custom", "foreign.go")
+	nonMatching := filepath.Join(root, "custom", "legacy.txt")
+
+	require.NoError(t, os.MkdirAll(filepath.Dir(ownedCustom), 0o755))
+	require.NoError(t, os.MkdirAll(filepath.Dir(ownedRegister), 0o755))
+
+	require.NoError(t, os.WriteFile(ownedCustom, []byte("package custom\nconst splitScope = \"scope\"\n"), 0o644))
+	require.NoError(t, os.WriteFile(ownedRegister, []byte("package legacy\n"), 0o644))
+	require.NoError(t, os.WriteFile(unownedCustom, []byte("package custom\n"), 0o644))
+	require.NoError(t, os.WriteFile(nonMatching, []byte("package custom\nconst splitScope = \"scope\"\n"), 0o644))
+
+	files, err := listSplitShardGeneratedFiles(root, "{name}.go")
+	require.NoError(t, err)
+	require.Equal(t, []string{ownedCustom, ownedRegister}, files)
+}
+
+func TestListSplitShardGeneratedFilesIncludesLegacyTemplateMatches(t *testing.T) {
+	root := t.TempDir()
+
+	legacyNamedOwned := filepath.Join(root, "legacy", "alpha.generated.go")
+	currentNamedOwned := filepath.Join(root, "legacy", "beta.gql.go")
+	registerFile := filepath.Join(root, "legacy", "register.generated.go")
+	unownedLegacyNamed := filepath.Join(root, "legacy", "foreign.generated.go")
+
+	require.NoError(t, os.MkdirAll(filepath.Dir(legacyNamedOwned), 0o755))
+	require.NoError(t, os.WriteFile(legacyNamedOwned, []byte("package legacy\nconst splitScope = \"scope\"\n"), 0o644))
+	require.NoError(t, os.WriteFile(currentNamedOwned, []byte("package legacy\nconst splitScope = \"scope\"\n"), 0o644))
+	require.NoError(t, os.WriteFile(registerFile, []byte("package legacy\n"), 0o644))
+	require.NoError(t, os.WriteFile(unownedLegacyNamed, []byte("package legacy\n"), 0o644))
+
+	files, err := listSplitShardGeneratedFiles(root, "{name}.gql.go")
+	require.NoError(t, err)
+	require.Equal(t, []string{legacyNamedOwned, currentNamedOwned, registerFile}, files)
+}
+
+func TestSplitShortHashZeroPadsToFixedWidth(t *testing.T) {
+	require.NotPanics(t, func() {
+		_ = splitShortHash("x3130")
+	})
+	require.Equal(t, "0fae14", splitShortHash("x3130"))
+	require.Len(t, splitShortHash("x3130"), 6)
+}
+
 func TestSplitPackagesShardNameCollision(t *testing.T) {
 	newBuild := func(source string) *Data {
 		return &Data{Config: &config.Config{Sources: []*ast.Source{{Name: source}}}}
@@ -248,6 +321,18 @@ func TestSplitPackagesShardNameCollision(t *testing.T) {
 
 	require.Equal(t, first, second)
 	require.Equal(t, []string{"a_b", "a_b_" + splitShortHash("a_b.generated.go")}, first)
+}
+
+func TestSplitPackagesShardNameKeywordSanitization(t *testing.T) {
+	newBuild := func(source string) *Data {
+		return &Data{Config: &config.Config{Sources: []*ast.Source{{Name: source}}}}
+	}
+
+	used := map[string]string{}
+	shardName := splitShardName("type.generated.go", newBuild("graph/type.graphqls"), used)
+
+	require.Equal(t, "s_type", shardName)
+	require.False(t, token.Lookup(shardName).IsKeyword())
 }
 
 func TestSplitOwnershipPlannerDeterministic(t *testing.T) {
@@ -324,6 +409,145 @@ func TestSplitCodecOwnerDeterministic(t *testing.T) {
 	require.Equal(t, "common", first.CodecOwner[orphanRef.UnmarshalFunc()])
 }
 
+func TestSplitCodecWrappersAvoidRootPackageReferences(t *testing.T) {
+	const rootImportPath = "example.com/project/graph"
+	rootType := types.NewNamed(
+		types.NewTypeName(0, types.NewPackage(rootImportPath, "graph"), "RootScalar", nil),
+		types.Typ[types.String],
+		nil,
+	)
+	ref := &config.TypeReference{
+		Definition: &ast.Definition{Name: "RootScalar", Kind: ast.Scalar},
+		GQL:        ast.NamedType("RootScalar", nil),
+		GO:         rootType,
+	}
+
+	marshalKey := ref.MarshalFunc()
+	unmarshalKey := ref.UnmarshalFunc()
+	ownership := &splitOwnershipPlanner{
+		CodecOwner: map[string]string{
+			marshalKey:   "alpha",
+			unmarshalKey: "alpha",
+		},
+		CodecOwnerKeys: []string{marshalKey, unmarshalKey},
+	}
+
+	outPath := filepath.Join(t.TempDir(), "alpha.generated.go")
+	err := templates.Render(templates.Options{
+		PackageName: "alpha",
+		Template:    splitShardTemplate + "\n" + splitFieldsTemplate + "\n" + splitArgsTemplate + "\n" + splitDirectivesTemplate + "\n" + splitComplexityTemplate + "\n" + splitInputsTemplate + "\n" + splitCodecsTemplate,
+		Filename:    outPath,
+		Data: splitShardTemplateData{
+			Data:             &Data{Config: &config.Config{}},
+			Scope:            "scope",
+			ShardName:        "alpha",
+			Ownership:        ownership,
+			FieldByLookupKey: map[string]*Field{},
+			InputByName:      map[string]*Object{},
+			CodecByFunc: map[string]*config.TypeReference{
+				marshalKey:   ref,
+				unmarshalKey: ref,
+			},
+		},
+		Packages: internalcode.NewPackages(),
+	})
+	require.NoError(t, err)
+
+	contents, err := os.ReadFile(outPath)
+	require.NoError(t, err)
+
+	text := string(contents)
+	require.NotContains(t, text, rootImportPath)
+	require.Contains(t, text, fmt.Sprintf("func %s(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler", marshalKey))
+	require.Contains(t, text, fmt.Sprintf("func %s(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (any, error)", unmarshalKey))
+}
+
+func TestSplitShardObjectHandlersAvoidRootPackageReferences(t *testing.T) {
+	const rootImportPath = "example.com/project/graph"
+	rootObjectType := types.NewNamed(
+		types.NewTypeName(0, types.NewPackage(rootImportPath, "graph"), "User", nil),
+		types.NewStruct(nil, nil),
+		nil,
+	)
+	object := &Object{
+		Definition: &ast.Definition{Name: "User", Kind: ast.Object},
+		Type:       rootObjectType,
+	}
+
+	outPath := filepath.Join(t.TempDir(), "schema.generated.go")
+	err := templates.Render(templates.Options{
+		PackageName: "alpha",
+		Template:    splitShardTemplate + "\n" + splitFieldsTemplate + "\n" + splitArgsTemplate + "\n" + splitDirectivesTemplate + "\n" + splitComplexityTemplate + "\n" + splitInputsTemplate + "\n" + splitCodecsTemplate,
+		Filename:    outPath,
+		Data: splitShardTemplateData{
+			Data: &Data{
+				Config:  &config.Config{},
+				Objects: Objects{object},
+			},
+			Scope:            "scope",
+			ShardName:        "alpha",
+			Ownership:        &splitOwnershipPlanner{},
+			FieldByLookupKey: map[string]*Field{},
+			InputByName:      map[string]*Object{},
+			CodecByFunc:      map[string]*config.TypeReference{},
+		},
+		Packages: internalcode.NewPackages(),
+	})
+	require.NoError(t, err)
+
+	contents, err := os.ReadFile(outPath)
+	require.NoError(t, err)
+
+	text := string(contents)
+	require.NotContains(t, text, rootImportPath)
+	require.Contains(t, text, "return _User(ctx, ec, sel, obj)")
+	require.Contains(t, text, "func _User(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler")
+	require.NotContains(t, text, "typedObj, ok := obj.(")
+}
+
+func TestSplitInputWrappersAvoidRootPackageReferences(t *testing.T) {
+	const rootImportPath = "example.com/project/graph"
+	rootInputType := types.NewNamed(
+		types.NewTypeName(0, types.NewPackage(rootImportPath, "graph"), "UserInput", nil),
+		types.NewStruct(nil, nil),
+		nil,
+	)
+	input := &Object{
+		Definition: &ast.Definition{Name: "UserInput", Kind: ast.InputObject},
+		Type:       rootInputType,
+	}
+	ownership := &splitOwnershipPlanner{
+		InputOwner: map[string]string{
+			input.Name: "alpha",
+		},
+		InputOwnerKeys: []string{input.Name},
+	}
+
+	outPath := filepath.Join(t.TempDir(), "inputs.generated.go")
+	err := templates.Render(templates.Options{
+		PackageName: "alpha",
+		Template:    splitInputsTemplate + "\n{{ template \"split_inputs_.gotpl\" . }}",
+		Filename:    outPath,
+		Data: splitShardTemplateData{
+			Data:      &Data{Config: &config.Config{}},
+			ShardName: "alpha",
+			Ownership: ownership,
+			InputByName: map[string]*Object{
+				input.Name: input,
+			},
+		},
+		Packages: internalcode.NewPackages(),
+	})
+	require.NoError(t, err)
+
+	contents, err := os.ReadFile(outPath)
+	require.NoError(t, err)
+
+	text := string(contents)
+	require.NotContains(t, text, rootImportPath)
+	require.Contains(t, text, "func __splitInput_UserInput(_ context.Context, obj any) (any, error)")
+}
+
 func TestSplitRootUsesLookupField(t *testing.T) {
 	workDir := chdirToLocalSplitFixtureWorkspace(t)
 
@@ -372,6 +596,39 @@ func TestSplitRootUsesLookupStreamField(t *testing.T) {
 	require.Contains(t, resolveStreamFieldBody, "panic(fmt.Sprintf(\"unknown stream field %s.%s\", objectName, fieldName))")
 }
 
+func TestSplitRootSeparatesStreamResolversFromRegularResolvers(t *testing.T) {
+	workDir := chdirToLocalSplitFixtureWorkspace(t)
+
+	schemaPath := filepath.Join(workDir, "graph", "subscription.graphqls")
+	require.NoError(t, os.WriteFile(schemaPath, []byte("type Subscription { tick: String! }\n"), 0o644))
+	t.Cleanup(func() {
+		_ = os.Remove(schemaPath)
+	})
+
+	cleanupSplitGeneratedFiles(workDir)
+	snapshot := generateSplitSnapshot(t)
+
+	generated, ok := snapshot[filepath.Join("graph", "generated.go")]
+	require.True(t, ok)
+
+	contents := string(generated)
+
+	fieldResolversStart := strings.Index(contents, "var splitExecutableFieldResolvers = map[string]splitFieldResolver{")
+	require.NotEqual(t, -1, fieldResolversStart)
+
+	streamResolversStart := strings.Index(contents, "var splitExecutableStreamFieldResolvers = map[string]splitStreamFieldResolver{")
+	require.NotEqual(t, -1, streamResolversStart)
+	require.Greater(t, streamResolversStart, fieldResolversStart)
+
+	fieldResolversBody := contents[fieldResolversStart:streamResolversStart]
+	require.NotContains(t, fieldResolversBody, "\"Subscription.tick\":")
+
+	streamResolversEnd := strings.Index(contents[streamResolversStart:], "type splitCodecMarshalResolver")
+	require.NotEqual(t, -1, streamResolversEnd)
+	streamResolversBody := contents[streamResolversStart : streamResolversStart+streamResolversEnd]
+	require.Contains(t, streamResolversBody, "\"Subscription.tick\":")
+}
+
 func TestSplitComplexityLookupParity(t *testing.T) {
 	workDir := chdirToLocalSplitFixtureWorkspace(t)
 
@@ -413,7 +670,7 @@ func TestSplitComplexityLookupParity(t *testing.T) {
 	require.True(t, foundRegisterComplexity, "expected shard register output to include complexity registrations")
 }
 
-func TestSplitRootInputMapFromRegistry(t *testing.T) {
+func TestSplitRootInputMapFromGeneratedUnmarshalers(t *testing.T) {
 	workDir := chdirToLocalSplitFixtureWorkspace(t)
 
 	cleanupSplitGeneratedFiles(workDir)
@@ -431,8 +688,8 @@ func TestSplitRootInputMapFromRegistry(t *testing.T) {
 	require.Greater(t, executionContextStart, execStart)
 
 	execBody := contents[execStart:executionContextStart]
-	require.Contains(t, execBody, "inputUnmarshalMap := graphql.BuildUnmarshalerMap(shardruntime.ListInputUnmarshalers(")
-	require.NotRegexp(t, regexp.MustCompile(`(?s)inputUnmarshalMap\s*:=\s*graphql\.BuildUnmarshalerMap\(\s*(?:ec\.)?unmarshalInput`), execBody)
+	require.Contains(t, execBody, "inputUnmarshalMap := graphql.BuildUnmarshalerMap(")
+	require.NotContains(t, execBody, "shardruntime.InputUnmarshalMap(")
 }
 
 func TestSplitRuntimeIsThin(t *testing.T) {
@@ -679,6 +936,7 @@ func TestSplitComplexityEmissionByOwner(t *testing.T) {
 	alphaText := string(alphaContents)
 	require.Contains(t, alphaText, "split_complexity_.gotpl")
 	require.Contains(t, alphaText, "func __splitComplexity_AlphaQuery_alphaField")
+	require.Contains(t, alphaText, "return ec.ResolveExecutableComplexity(ctx, \"AlphaQuery\", \"alphaField\", childComplexity, rawArgs)")
 	require.NotContains(t, alphaText, "func __splitComplexity_ZetaQuery_zetaField")
 
 	zetaContents, err := os.ReadFile(zetaPath)
@@ -686,6 +944,7 @@ func TestSplitComplexityEmissionByOwner(t *testing.T) {
 	zetaText := string(zetaContents)
 	require.Contains(t, zetaText, "split_complexity_.gotpl")
 	require.Contains(t, zetaText, "func __splitComplexity_ZetaQuery_zetaField")
+	require.Contains(t, zetaText, "return ec.ResolveExecutableComplexity(ctx, \"ZetaQuery\", \"zetaField\", childComplexity, rawArgs)")
 	require.NotContains(t, zetaText, "func __splitComplexity_AlphaQuery_alphaField")
 }
 
@@ -794,12 +1053,28 @@ func TestSplitInputRegistrationEmission(t *testing.T) {
 	ownership, err := planSplitOwnership(data)
 	require.NoError(t, err)
 
+	builds := map[string]*Data{}
+	require.NoError(t, addObjects(data, &builds))
+
+	var alphaBuild *Data
+	for filename, build := range builds {
+		if filename == "" || build == nil || len(build.Objects) == 0 {
+			continue
+		}
+		alphaBuild = build
+		break
+	}
+	require.NotNil(t, alphaBuild)
+	require.Empty(t, alphaBuild.Inputs)
+	require.Empty(t, buildInputLookupMap(alphaBuild), "object-only shard builds do not include input definitions")
+
 	templateData := splitShardTemplateData{
-		Data:        data,
-		Scope:       "scope",
-		ShardName:   "alpha",
-		Ownership:   ownership,
-		InputByName: buildInputLookupMap(data),
+		Data:             alphaBuild,
+		Scope:            "scope",
+		ShardName:        "alpha",
+		Ownership:        ownership,
+		FieldByLookupKey: buildFieldLookupMap(alphaBuild),
+		InputByName:      buildInputLookupMap(data),
 	}
 
 	outDir := t.TempDir()
@@ -1040,6 +1315,8 @@ func splitCodecOwnerTestData() *Data {
 func collectSplitGeneratedFiles(t *testing.T, workDir string) []string {
 	t.Helper()
 
+	generatedHeader := []byte("// Code generated by github.com/99designs/gqlgen, DO NOT EDIT.")
+
 	files := []string{
 		filepath.Join("graph", "generated.go"),
 		filepath.Join("graph", "split_runtime.generated.go"),
@@ -1059,6 +1336,14 @@ func collectSplitGeneratedFiles(t *testing.T, workDir string) []string {
 			return walkErr
 		}
 		if d.IsDir() || filepath.Ext(path) != ".go" {
+			return nil
+		}
+
+		contents, readErr := os.ReadFile(path)
+		if readErr != nil {
+			return readErr
+		}
+		if !bytes.HasPrefix(contents, generatedHeader) {
 			return nil
 		}
 

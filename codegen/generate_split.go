@@ -3,6 +3,7 @@ package codegen
 import (
 	_ "embed"
 	"fmt"
+	"go/token"
 	"hash/fnv"
 	"os"
 	"path/filepath"
@@ -118,7 +119,7 @@ func cleanupSplitGeneratedOutputs(data *Data) error {
 		return fmt.Errorf("remove stale split runtime file %q: %w", runtimePath, err)
 	}
 
-	generatedShardFiles, err := listSplitShardGeneratedFiles(data.Config.Exec.ShardDir)
+	generatedShardFiles, err := listSplitShardGeneratedFiles(data.Config.Exec.ShardDir, data.Config.Exec.ShardFilenameTemplate)
 	if err != nil {
 		return err
 	}
@@ -150,7 +151,7 @@ func removeSplitGeneratedByGlob(pattern string, kind string) error {
 	return nil
 }
 
-func listSplitShardGeneratedFiles(root string) ([]string, error) {
+func listSplitShardGeneratedFiles(root string, _ string) ([]string, error) {
 	info, err := os.Stat(root)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -167,10 +168,17 @@ func listSplitShardGeneratedFiles(root string) ([]string, error) {
 		if walkErr != nil {
 			return walkErr
 		}
-		if d.IsDir() || !strings.HasSuffix(path, ".generated.go") {
+		if d.IsDir() {
 			return nil
 		}
-		generated = append(generated, path)
+
+		owned, ownerErr := isSplitOwnedGeneratedFile(path, d.Name())
+		if ownerErr != nil {
+			return ownerErr
+		}
+		if owned {
+			generated = append(generated, path)
+		}
 		return nil
 	})
 	if err != nil {
@@ -179,6 +187,27 @@ func listSplitShardGeneratedFiles(root string) ([]string, error) {
 
 	sort.Strings(generated)
 	return generated, nil
+}
+
+func isSplitOwnedGeneratedFile(path string, name string) (bool, error) {
+	if name == "register.generated.go" {
+		return true, nil
+	}
+
+	if filepath.Ext(name) != ".go" {
+		return false, nil
+	}
+
+	contents, err := os.ReadFile(path)
+	if err != nil {
+		return false, fmt.Errorf("read split shard candidate %q: %w", path, err)
+	}
+
+	if strings.Contains(string(contents), "const splitScope =") {
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func pruneEmptyDirs(root string) error {
@@ -313,7 +342,7 @@ func generateSplitShardPackages(data *Data, scope string) ([]string, error) {
 				ShardName:        shardName,
 				Ownership:        ownership,
 				FieldByLookupKey: buildFieldLookupMap(build),
-				InputByName:      buildInputLookupMap(build),
+				InputByName:      buildInputLookupMap(data),
 				CodecByFunc:      buildCodecLookupMap(data),
 			},
 			RegionTags:      false,
@@ -334,7 +363,7 @@ func generateSplitShardPackages(data *Data, scope string) ([]string, error) {
 				ShardName:        shardName,
 				Ownership:        ownership,
 				FieldByLookupKey: buildFieldLookupMap(build),
-				InputByName:      buildInputLookupMap(build),
+				InputByName:      buildInputLookupMap(data),
 			},
 			RegionTags:      false,
 			GeneratedHeader: true,
@@ -426,7 +455,13 @@ func splitScope(data *Data) string {
 	if path := data.Config.Exec.ImportPath(); path != "" {
 		return path
 	}
-	return data.Config.Exec.Package + ":" + filepath.Base(data.Config.Exec.Filename)
+
+	fallback := data.Config.Exec.Package + ":" + filepath.Base(data.Config.Exec.Filename)
+	if data.Config.Exec.Filename == "" {
+		return fallback
+	}
+
+	return fallback + ":" + splitShortHash(data.Config.Exec.Filename)
 }
 
 var splitNameSanitizer = regexp.MustCompile(`[^a-zA-Z0-9_]+`)
@@ -468,11 +503,18 @@ func splitSanitizeName(name string) string {
 	if name[0] >= '0' && name[0] <= '9' {
 		name = "s_" + name
 	}
+	if token.Lookup(name).IsKeyword() {
+		name = "s_" + name
+	}
 	return name
 }
 
 func splitShortHash(s string) string {
 	h := fnv.New32a()
 	_, _ = h.Write([]byte(s))
-	return fmt.Sprintf("%x", h.Sum32())[:6]
+	sum := fmt.Sprintf("%x", h.Sum32())
+	if len(sum) >= 6 {
+		return sum[:6]
+	}
+	return strings.Repeat("0", 6-len(sum)) + sum
 }

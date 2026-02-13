@@ -17,6 +17,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"text/template"
 	"unicode"
 
@@ -67,7 +68,12 @@ var (
 	modelNamesMu sync.Mutex
 	modelNames   = make(map[string]string, 0)
 	goNameRe     = regexp.MustCompile("[^a-zA-Z0-9_]")
+	initialisms  atomic.Value
 )
+
+func init() {
+	initialisms.Store(CommonInitialisms)
+}
 
 // Render renders a gql plugin template from the given Options. Render is an
 // abstraction of the text/template package that makes it easier to write gqlgen
@@ -815,5 +821,13 @@ var CommonInitialisms = map[string]bool{
 // GetInitialisms returns the initialisms to capitalize in Go names. If unchanged, default
 // initialisms will be returned
 var GetInitialisms = func() map[string]bool {
-	return CommonInitialisms
+	return initialisms.Load().(map[string]bool)
+}
+
+// SetInitialisms updates the Go-name initialism snapshot used by templates.
+func SetInitialisms(value map[string]bool) {
+	if value == nil {
+		value = CommonInitialisms
+	}
+	initialisms.Store(value)
 }

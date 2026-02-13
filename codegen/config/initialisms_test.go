@@ -1,6 +1,9 @@
 package config
 
 import (
+	"fmt"
+	"sync"
+	"sync/atomic"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -38,4 +41,49 @@ func TestGoInitialismsConfig(t *testing.T) {
 		result := tt.determineGoInitialisms()
 		assert.True(t, result["ASDF"])
 	})
+}
+
+func TestGoInitialismsConcurrentSetAndRead(t *testing.T) {
+	t.Cleanup(func() {
+		templates.SetInitialisms(templates.CommonInitialisms)
+	})
+
+	const workers = 8
+	const iterations = 128
+
+	start := make(chan struct{})
+	var wg sync.WaitGroup
+	var emptyReads atomic.Int32
+
+	for i := 0; i < workers; i++ {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+			<-start
+			for j := 0; j < iterations; j++ {
+				GoInitialismsConfig{
+					ReplaceDefaults: true,
+					Initialisms:     []string{fmt.Sprintf("worker_%d_%d", i, j)},
+				}.setInitialisms()
+			}
+		}(i)
+	}
+
+	for i := 0; i < workers; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			<-start
+			for j := 0; j < iterations; j++ {
+				if len(templates.GetInitialisms()) == 0 {
+					emptyReads.Add(1)
+				}
+			}
+		}()
+	}
+
+	close(start)
+	wg.Wait()
+
+	assert.Zero(t, emptyReads.Load())
 }

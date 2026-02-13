@@ -55,7 +55,7 @@ func RunSplitPackagesBenchHarness(workDir string) ([]byte, error) {
 		return nil, fmt.Errorf("generate: %w", err)
 	}
 
-	fileCount, totalBytes, err := splitPackagesGeneratedStats(filepath.Join(workDir, "graph"))
+	fileCount, totalBytes, err := splitPackagesGeneratedStats(cfg.Exec.Dir())
 	if err != nil {
 		return nil, err
 	}
@@ -122,11 +122,11 @@ func ValidateSplitPackagesBenchSummary(summary SplitPackagesBenchSummary) error 
 	return nil
 }
 
-func splitPackagesGeneratedStats(graphDir string) (int, int64, error) {
+func splitPackagesGeneratedStats(generatedDir string) (int, int64, error) {
 	fileCount := 0
 	totalBytes := int64(0)
 
-	err := filepath.WalkDir(graphDir, func(path string, d fs.DirEntry, walkErr error) error {
+	err := filepath.WalkDir(generatedDir, func(path string, d fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return walkErr
 		}

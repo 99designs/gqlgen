@@ -3,6 +3,7 @@ package shardruntime
 import (
 	"context"
 	"fmt"
+	"reflect"
 	"sync"
 	"sync/atomic"
 	"testing"
@@ -58,6 +59,32 @@ func TestFieldRegistry(t *testing.T) {
 	}()
 
 	RegisterField("scope", "Query", "name", h)
+}
+
+func TestFieldLookupSnapshotIsBuiltLazily(t *testing.T) {
+	resetFieldRegistryForTest()
+
+	h := func(context.Context, ObjectExecutionContext, graphql.CollectedField, any) graphql.Marshaler {
+		return graphql.Null
+	}
+
+	const total = 16
+	for i := 0; i < total; i++ {
+		RegisterField("scope", "Query", fmt.Sprintf("field_%03d", i), h)
+	}
+
+	if got := len(loadFieldLookupSnapshot()); got != 0 {
+		t.Fatalf("unexpected eager field snapshot size: got %d want 0", got)
+	}
+
+	got, ok := LookupField("scope", "Query", "field_000")
+	if !ok || got == nil {
+		t.Fatal("expected lookup to resolve registered field after lazy snapshot build")
+	}
+
+	if got := len(loadFieldLookupSnapshot()); got != total {
+		t.Fatalf("unexpected rebuilt field snapshot size: got %d want %d", got, total)
+	}
 }
 
 func TestStreamFieldRegistry(t *testing.T) {
@@ -212,6 +239,36 @@ func TestInputUnmarshalRegistryDeterministicOrder(t *testing.T) {
 	}()
 
 	RegisterInputUnmarshaler("scope", "InputA", &marker{id: "dup"})
+}
+
+func TestInputUnmarshalMap(t *testing.T) {
+	resetInputUnmarshalRegistryForTest()
+
+	type inputA struct{ Value string }
+	type inputB struct{ Value string }
+
+	fnA := func(context.Context, any) (inputA, error) { return inputA{}, nil }
+	fnB := func(context.Context, any) (inputB, error) { return inputB{}, nil }
+
+	RegisterInputUnmarshaler("scope", "InputA", fnA)
+	RegisterInputUnmarshaler("scope", "InputB", fnB)
+
+	inputMap := InputUnmarshalMap("scope", nil)
+	if len(inputMap) != 2 {
+		t.Fatalf("unexpected number of input unmarshalers in map: got %d want %d", len(inputMap), 2)
+	}
+
+	if _, ok := inputMap[reflect.TypeFor[inputA]()]; !ok {
+		t.Fatal("missing inputA unmarshaler in map")
+	}
+	if _, ok := inputMap[reflect.TypeFor[inputB]()]; !ok {
+		t.Fatal("missing inputB unmarshaler in map")
+	}
+
+	missingScope := InputUnmarshalMap("missing-scope", nil)
+	if len(missingScope) != 0 {
+		t.Fatalf("expected empty input unmarshaler map for missing scope, got %d entries", len(missingScope))
+	}
 }
 
 func TestRegistryDuplicatePanics(t *testing.T) {
@@ -601,6 +658,7 @@ func resetObjectRegistryForTest() {
 	defer mu.Unlock()
 
 	objectByScope = map[string]map[string]ObjectHandler{}
+	resetObjectLookupSnapshotForTest()
 }
 
 func resetStreamObjectRegistryForTest() {
@@ -608,6 +666,7 @@ func resetStreamObjectRegistryForTest() {
 	defer mu.Unlock()
 
 	streamByScope = map[string]map[string]StreamObjectHandler{}
+	resetStreamObjectLookupSnapshotForTest()
 }
 
 func resetFieldRegistryForTest() {
@@ -615,6 +674,7 @@ func resetFieldRegistryForTest() {
 	defer mu.Unlock()
 
 	fieldByScope = map[string]map[string]map[string]FieldHandler{}
+	resetFieldLookupSnapshotForTest()
 }
 
 func resetStreamFieldRegistryForTest() {
@@ -622,6 +682,7 @@ func resetStreamFieldRegistryForTest() {
 	defer mu.Unlock()
 
 	streamFieldByScope = map[string]map[string]map[string]StreamFieldHandler{}
+	resetStreamFieldLookupSnapshotForTest()
 }
 
 func resetComplexityRegistryForTest() {
@@ -629,6 +690,7 @@ func resetComplexityRegistryForTest() {
 	defer mu.Unlock()
 
 	complexityByScope = map[string]map[string]map[string]ComplexityHandler{}
+	resetComplexityLookupSnapshotForTest()
 }
 
 func resetInputUnmarshalRegistryForTest() {
@@ -636,4 +698,5 @@ func resetInputUnmarshalRegistryForTest() {
 	defer mu.Unlock()
 
 	inputUnmarshalByScope = map[string]map[string]any{}
+	resetInputUnmarshalLookupSnapshotForTest()
 }

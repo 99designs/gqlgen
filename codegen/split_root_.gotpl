@@ -131,7 +131,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap(shardruntime.ListInputUnmarshalers({{ $.Scope | quote }}, &ec)...)
+	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		{{- range $input := .Inputs }}
+			{{- if not $input.HasUnmarshal }}
+				{{- if $useFunctionSyntaxForExecutionContext }}
+		func(ctx context.Context, obj any) ({{ if $input.PointersInUnmarshalInput }}*{{ end }}{{ $input.Type | ref }}, error) {
+			return unmarshalInput{{ $input.Name }}(ctx, &ec, obj)
+		},
+				{{- else }}
+		ec.unmarshalInput{{ $input.Name }},
+				{{- end }}
+			{{- end }}
+		{{- end }}
+	)
 	first := true
 
 	switch opCtx.Operation.Operation {
@@ -366,10 +378,20 @@ func (ec *executionContext) ParseFieldArgs(ctx context.Context, argsKey string, 
 	return handler(ctx, ec, rawArgs)
 }
 
+func (ec *executionContext) ResolveExecutableComplexity(ctx context.Context, objectName, fieldName string, childComplexity int, rawArgs map[string]any) (int, bool) {
+	handler, ok := splitExecutableComplexityResolvers[objectName+"."+fieldName]
+	if !ok {
+		panic(fmt.Sprintf("unknown executable complexity %s.%s", objectName, fieldName))
+	}
+
+	return handler(ctx, ec, childComplexity, rawArgs)
+}
+
 type splitFieldResolver func(context.Context, *executionContext, graphql.CollectedField, any) graphql.Marshaler
 
 var splitExecutableFieldResolvers = map[string]splitFieldResolver{
 {{- range $object := .Objects }}
+{{- if not $object.Stream }}
 {{- range $field := $object.Fields }}
 	{{ printf "%s.%s" $object.Name $field.Name | quote }}: func(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj any) graphql.Marshaler {
 		{{- if $object.Root }}
@@ -390,6 +412,7 @@ var splitExecutableFieldResolvers = map[string]splitFieldResolver{
 		{{- end }}
 		{{- end }}
 	},
+{{- end }}
 {{- end }}
 {{- end }}
 }
@@ -473,6 +496,37 @@ var splitArgsParsers = map[string]splitArgsParser{
 		return {{ $field.ArgsFunc }}(ctx, ec, rawArgs)
 		{{- else }}
 		return ec.{{ $field.ArgsFunc }}(ctx, rawArgs)
+		{{- end }}
+	},
+{{- end }}
+{{- end }}
+{{- end }}
+}
+
+type splitComplexityResolver func(context.Context, *executionContext, int, map[string]any) (int, bool)
+
+var splitExecutableComplexityResolvers = map[string]splitComplexityResolver{
+{{- if not .Config.OmitComplexity }}
+{{- range $object := .Objects }}
+{{- range $field := $object.Fields }}
+	{{ printf "%s.%s" $object.Name $field.Name | quote }}: func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		{{- if and (not $object.IsReserved) (not $field.IsReserved) }}
+		if ec.complexity.{{ucFirst $object.Name }}.{{$field.GoFieldName}} == nil {
+			return 0, false
+		}
+		{{ if $field.Args }}
+			{{ if $useFunctionSyntaxForExecutionContext }}
+		args, err := {{ $field.ArgsFunc }}(ctx, ec, rawArgs)
+			{{ else }}
+		args, err := ec.{{ $field.ArgsFunc }}(ctx, rawArgs)
+			{{ end }}
+		if err != nil {
+			return 0, false
+		}
+		{{ end }}
+		return ec.complexity.{{ucFirst $object.Name}}.{{$field.GoFieldName}}(childComplexity{{if $field.Args}}, {{$field.ComplexityArgs}} {{ end }}), true
+		{{- else }}
+		return 0, false
 		{{- end }}
 	},
 {{- end }}

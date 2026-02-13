@@ -119,6 +119,7 @@ var (
 	objectLookupSnapshot           atomic.Value
 	streamObjectLookupSnapshot     atomic.Value
 	fieldLookupSnapshot            atomic.Value
+	fieldLookupSnapshotDirty       atomic.Bool
 	streamFieldLookupSnapshot      atomic.Value
 	complexityLookupSnapshot       atomic.Value
 	inputUnmarshalMapByScopeLookup atomic.Value
@@ -148,10 +149,6 @@ func cloneObjectHandlers(src map[string]ObjectHandler) map[string]ObjectHandler 
 }
 
 func cloneStreamObjectHandlers(src map[string]StreamObjectHandler) map[string]StreamObjectHandler {
-	return maps.Clone(src)
-}
-
-func cloneFieldHandlers(src map[string]FieldHandler) map[string]FieldHandler {
 	return maps.Clone(src)
 }
 
@@ -227,6 +224,7 @@ func resetStreamObjectLookupSnapshotForTest() {
 
 func resetFieldLookupSnapshotForTest() {
 	fieldLookupSnapshot.Store(map[string]FieldHandler{})
+	fieldLookupSnapshotDirty.Store(false)
 }
 
 func resetStreamFieldLookupSnapshotForTest() {
@@ -312,14 +310,42 @@ func RegisterField(scope, objectName, fieldName string, handler FieldHandler) {
 	}
 	objectHandlers[fieldName] = handler
 
-	lookup := cloneFieldHandlers(loadFieldLookupSnapshot())
-	lookup[fieldKey(scope, objectName, fieldName)] = handler
-	fieldLookupSnapshot.Store(lookup)
+	fieldLookupSnapshotDirty.Store(true)
 }
 
 func LookupField(scope, objectName, fieldName string) (FieldHandler, bool) {
-	handler, ok := loadFieldLookupSnapshot()[fieldKey(scope, objectName, fieldName)]
+	key := fieldKey(scope, objectName, fieldName)
+	if fieldLookupSnapshotDirty.Load() {
+		mu.Lock()
+		if fieldLookupSnapshotDirty.Load() {
+			rebuildFieldLookupSnapshotLocked()
+		}
+		mu.Unlock()
+	}
+
+	handler, ok := loadFieldLookupSnapshot()[key]
 	return handler, ok
+}
+
+func rebuildFieldLookupSnapshotLocked() {
+	totalFields := 0
+	for _, scopeHandlers := range fieldByScope {
+		for _, objectHandlers := range scopeHandlers {
+			totalFields += len(objectHandlers)
+		}
+	}
+
+	lookup := make(map[string]FieldHandler, totalFields)
+	for scope, scopeHandlers := range fieldByScope {
+		for objectName, objectHandlers := range scopeHandlers {
+			for fieldName, handler := range objectHandlers {
+				lookup[fieldKey(scope, objectName, fieldName)] = handler
+			}
+		}
+	}
+
+	fieldLookupSnapshot.Store(lookup)
+	fieldLookupSnapshotDirty.Store(false)
 }
 
 func RegisterStreamField(scope, objectName, fieldName string, handler StreamFieldHandler) {

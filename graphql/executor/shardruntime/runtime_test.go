@@ -61,6 +61,32 @@ func TestFieldRegistry(t *testing.T) {
 	RegisterField("scope", "Query", "name", h)
 }
 
+func TestFieldLookupSnapshotIsBuiltLazily(t *testing.T) {
+	resetFieldRegistryForTest()
+
+	h := func(context.Context, ObjectExecutionContext, graphql.CollectedField, any) graphql.Marshaler {
+		return graphql.Null
+	}
+
+	const total = 16
+	for i := 0; i < total; i++ {
+		RegisterField("scope", "Query", fmt.Sprintf("field_%03d", i), h)
+	}
+
+	if got := len(loadFieldLookupSnapshot()); got != 0 {
+		t.Fatalf("unexpected eager field snapshot size: got %d want 0", got)
+	}
+
+	got, ok := LookupField("scope", "Query", "field_000")
+	if !ok || got == nil {
+		t.Fatal("expected lookup to resolve registered field after lazy snapshot build")
+	}
+
+	if got := len(loadFieldLookupSnapshot()); got != total {
+		t.Fatalf("unexpected rebuilt field snapshot size: got %d want %d", got, total)
+	}
+}
+
 func TestStreamFieldRegistry(t *testing.T) {
 	resetStreamFieldRegistryForTest()
 

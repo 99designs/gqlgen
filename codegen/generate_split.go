@@ -3,6 +3,7 @@ package codegen
 import (
 	_ "embed"
 	"fmt"
+	"go/token"
 	"hash/fnv"
 	"os"
 	"path/filepath"
@@ -520,6 +521,9 @@ func splitSanitizeName(name string) string {
 		name = "shard"
 	}
 	if name[0] >= '0' && name[0] <= '9' {
+		name = "s_" + name
+	}
+	if token.Lookup(name).IsKeyword() {
 		name = "s_" + name
 	}
 	return name

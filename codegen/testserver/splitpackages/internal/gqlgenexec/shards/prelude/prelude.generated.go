@@ -792,200 +792,116 @@ func __splitComplexity___Type_specifiedByURL(ctx context.Context, ec shardruntim
 }
 
 // split_codecs_.gotpl
-func marshalNBoolean2bool(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value bool) graphql.Marshaler {
+func marshalNBoolean2bool(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalNBoolean2bool", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalNString2string(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value string) graphql.Marshaler {
+func marshalNString2string(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalNString2string", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value []introspection.Directive) graphql.Marshaler {
+func marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value []string) graphql.Marshaler {
+func marshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalN__DirectiveLocation2ᚕstringᚄ", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value []introspection.InputValue) graphql.Marshaler {
+func marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value []introspection.Type) graphql.Marshaler {
+func marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value *introspection.Type) graphql.Marshaler {
+func marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalN__TypeKind2string(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value string) graphql.Marshaler {
+func marshalN__TypeKind2string(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalN__TypeKind2string", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalOBoolean2bool(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value bool) graphql.Marshaler {
+func marshalOBoolean2bool(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalOBoolean2bool", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalOBoolean2ᚖbool(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value *bool) graphql.Marshaler {
+func marshalOBoolean2ᚖbool(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalOBoolean2ᚖbool", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalOString2ᚖstring(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value *string) graphql.Marshaler {
+func marshalOString2ᚖstring(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalOString2ᚖstring", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value []introspection.EnumValue) graphql.Marshaler {
+func marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐFieldᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value []introspection.Field) graphql.Marshaler {
+func marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐFieldᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐFieldᚄ", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value []introspection.InputValue) graphql.Marshaler {
+func marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value []introspection.Type) graphql.Marshaler {
+func marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ", sel, value)
 }
 
 // split_codecs_.gotpl
-func marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value *introspection.Type) graphql.Marshaler {
+func marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
 	return ec.MarshalCodec(ctx, "marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType", sel, value)
 }
 
 // split_codecs_.gotpl
-func unmarshalNBoolean2bool(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (bool, error) {
-	raw, err := ec.UnmarshalCodec(ctx, "unmarshalNBoolean2bool", value)
-	if err != nil {
-		var zero bool
-		return zero, err
-	}
-
-	typed, ok := raw.(bool)
-	if !ok {
-		var zero bool
-		return zero, fmt.Errorf("unexpected codec result type %T for unmarshalNBoolean2bool", raw)
-	}
-
-	return typed, nil
+func unmarshalNBoolean2bool(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (any, error) {
+	return ec.UnmarshalCodec(ctx, "unmarshalNBoolean2bool", value)
 }
 
 // split_codecs_.gotpl
-func unmarshalNString2string(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (string, error) {
-	raw, err := ec.UnmarshalCodec(ctx, "unmarshalNString2string", value)
-	if err != nil {
-		var zero string
-		return zero, err
-	}
-
-	typed, ok := raw.(string)
-	if !ok {
-		var zero string
-		return zero, fmt.Errorf("unexpected codec result type %T for unmarshalNString2string", raw)
-	}
-
-	return typed, nil
+func unmarshalNString2string(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (any, error) {
+	return ec.UnmarshalCodec(ctx, "unmarshalNString2string", value)
 }
 
 // split_codecs_.gotpl
-func unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) ([]string, error) {
-	raw, err := ec.UnmarshalCodec(ctx, "unmarshalN__DirectiveLocation2ᚕstringᚄ", value)
-	if err != nil {
-		var zero []string
-		return zero, err
-	}
-
-	typed, ok := raw.([]string)
-	if !ok {
-		var zero []string
-		return zero, fmt.Errorf("unexpected codec result type %T for unmarshalN__DirectiveLocation2ᚕstringᚄ", raw)
-	}
-
-	return typed, nil
+func unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (any, error) {
+	return ec.UnmarshalCodec(ctx, "unmarshalN__DirectiveLocation2ᚕstringᚄ", value)
 }
 
 // split_codecs_.gotpl
-func unmarshalN__TypeKind2string(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (string, error) {
-	raw, err := ec.UnmarshalCodec(ctx, "unmarshalN__TypeKind2string", value)
-	if err != nil {
-		var zero string
-		return zero, err
-	}
-
-	typed, ok := raw.(string)
-	if !ok {
-		var zero string
-		return zero, fmt.Errorf("unexpected codec result type %T for unmarshalN__TypeKind2string", raw)
-	}
-
-	return typed, nil
+func unmarshalN__TypeKind2string(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (any, error) {
+	return ec.UnmarshalCodec(ctx, "unmarshalN__TypeKind2string", value)
 }
 
 // split_codecs_.gotpl
-func unmarshalOBoolean2bool(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (bool, error) {
-	raw, err := ec.UnmarshalCodec(ctx, "unmarshalOBoolean2bool", value)
-	if err != nil {
-		var zero bool
-		return zero, err
-	}
-
-	typed, ok := raw.(bool)
-	if !ok {
-		var zero bool
-		return zero, fmt.Errorf("unexpected codec result type %T for unmarshalOBoolean2bool", raw)
-	}
-
-	return typed, nil
+func unmarshalOBoolean2bool(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (any, error) {
+	return ec.UnmarshalCodec(ctx, "unmarshalOBoolean2bool", value)
 }
 
 // split_codecs_.gotpl
-func unmarshalOBoolean2ᚖbool(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (*bool, error) {
-	raw, err := ec.UnmarshalCodec(ctx, "unmarshalOBoolean2ᚖbool", value)
-	if err != nil {
-		var zero *bool
-		return zero, err
-	}
-
-	typed, ok := raw.(*bool)
-	if !ok {
-		var zero *bool
-		return zero, fmt.Errorf("unexpected codec result type %T for unmarshalOBoolean2ᚖbool", raw)
-	}
-
-	return typed, nil
+func unmarshalOBoolean2ᚖbool(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (any, error) {
+	return ec.UnmarshalCodec(ctx, "unmarshalOBoolean2ᚖbool", value)
 }
 
 // split_codecs_.gotpl
-func unmarshalOString2ᚖstring(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (*string, error) {
-	raw, err := ec.UnmarshalCodec(ctx, "unmarshalOString2ᚖstring", value)
-	if err != nil {
-		var zero *string
-		return zero, err
-	}
-
-	typed, ok := raw.(*string)
-	if !ok {
-		var zero *string
-		return zero, fmt.Errorf("unexpected codec result type %T for unmarshalOString2ᚖstring", raw)
-	}
-
-	return typed, nil
+func unmarshalOString2ᚖstring(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (any, error) {
+	return ec.UnmarshalCodec(ctx, "unmarshalOString2ᚖstring", value)
 }

@@ -504,6 +504,7 @@ var splitArgsParsers = map[string]splitArgsParser{
 type splitComplexityResolver func(context.Context, *executionContext, int, map[string]any) (int, bool)
 
 var splitExecutableComplexityResolvers = map[string]splitComplexityResolver{
+{{- if not .Config.OmitComplexity }}
 {{- range $object := .Objects }}
 {{- range $field := $object.Fields }}
 	{{ printf "%s.%s" $object.Name $field.Name | quote }}: func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
@@ -526,6 +527,7 @@ var splitExecutableComplexityResolvers = map[string]splitComplexityResolver{
 		return 0, false
 		{{- end }}
 	},
+{{- end }}
 {{- end }}
 {{- end }}
 }

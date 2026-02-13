@@ -462,6 +462,92 @@ func TestSplitCodecWrappersAvoidRootPackageReferences(t *testing.T) {
 	require.Contains(t, text, fmt.Sprintf("func %s(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (any, error)", unmarshalKey))
 }
 
+func TestSplitShardObjectHandlersAvoidRootPackageReferences(t *testing.T) {
+	const rootImportPath = "example.com/project/graph"
+	rootObjectType := types.NewNamed(
+		types.NewTypeName(0, types.NewPackage(rootImportPath, "graph"), "User", nil),
+		types.NewStruct(nil, nil),
+		nil,
+	)
+	object := &Object{
+		Definition: &ast.Definition{Name: "User", Kind: ast.Object},
+		Type:       rootObjectType,
+	}
+
+	outPath := filepath.Join(t.TempDir(), "schema.generated.go")
+	err := templates.Render(templates.Options{
+		PackageName: "alpha",
+		Template:    splitShardTemplate + "\n" + splitFieldsTemplate + "\n" + splitArgsTemplate + "\n" + splitDirectivesTemplate + "\n" + splitComplexityTemplate + "\n" + splitInputsTemplate + "\n" + splitCodecsTemplate,
+		Filename:    outPath,
+		Data: splitShardTemplateData{
+			Data: &Data{
+				Config:  &config.Config{},
+				Objects: Objects{object},
+			},
+			Scope:            "scope",
+			ShardName:        "alpha",
+			Ownership:        &splitOwnershipPlanner{},
+			FieldByLookupKey: map[string]*Field{},
+			InputByName:      map[string]*Object{},
+			CodecByFunc:      map[string]*config.TypeReference{},
+		},
+		Packages: internalcode.NewPackages(),
+	})
+	require.NoError(t, err)
+
+	contents, err := os.ReadFile(outPath)
+	require.NoError(t, err)
+
+	text := string(contents)
+	require.NotContains(t, text, rootImportPath)
+	require.Contains(t, text, "return _User(ctx, ec, sel, obj)")
+	require.Contains(t, text, "func _User(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler")
+	require.NotContains(t, text, "typedObj, ok := obj.(")
+}
+
+func TestSplitInputWrappersAvoidRootPackageReferences(t *testing.T) {
+	const rootImportPath = "example.com/project/graph"
+	rootInputType := types.NewNamed(
+		types.NewTypeName(0, types.NewPackage(rootImportPath, "graph"), "UserInput", nil),
+		types.NewStruct(nil, nil),
+		nil,
+	)
+	input := &Object{
+		Definition: &ast.Definition{Name: "UserInput", Kind: ast.InputObject},
+		Type:       rootInputType,
+	}
+	ownership := &splitOwnershipPlanner{
+		InputOwner: map[string]string{
+			input.Name: "alpha",
+		},
+		InputOwnerKeys: []string{input.Name},
+	}
+
+	outPath := filepath.Join(t.TempDir(), "inputs.generated.go")
+	err := templates.Render(templates.Options{
+		PackageName: "alpha",
+		Template:    splitInputsTemplate + "\n{{ template \"split_inputs_.gotpl\" . }}",
+		Filename:    outPath,
+		Data: splitShardTemplateData{
+			Data:      &Data{Config: &config.Config{}},
+			ShardName: "alpha",
+			Ownership: ownership,
+			InputByName: map[string]*Object{
+				input.Name: input,
+			},
+		},
+		Packages: internalcode.NewPackages(),
+	})
+	require.NoError(t, err)
+
+	contents, err := os.ReadFile(outPath)
+	require.NoError(t, err)
+
+	text := string(contents)
+	require.NotContains(t, text, rootImportPath)
+	require.Contains(t, text, "func __splitInput_UserInput(_ context.Context, obj any) (any, error)")
+}
+
 func TestSplitRootUsesLookupField(t *testing.T) {
 	workDir := chdirToLocalSplitFixtureWorkspace(t)
 

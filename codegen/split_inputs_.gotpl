@@ -5,16 +5,8 @@
 {{- if not $input.HasUnmarshal }}
 
 // split_inputs_.gotpl
-func __splitInput_{{ $input.Name }}(_ context.Context, obj any) ({{ if $input.PointersInUnmarshalInput }}*{{ end }}{{ $input.Type | ref }}, error) {
-	{{- if $input.PointersInUnmarshalInput }}
-	var it {{ $input.Type | ref }}
-	_ = obj
-	return &it, nil
-	{{- else }}
-	var it {{ $input.Type | ref }}
-	_ = obj
-	return it, nil
-	{{- end }}
+func __splitInput_{{ $input.Name }}(_ context.Context, obj any) (any, error) {
+	return obj, nil
 }
 {{- end }}
 {{- end }}

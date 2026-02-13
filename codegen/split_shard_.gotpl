@@ -1,5 +1,4 @@
 {{ reserveImport "context"  }}
-{{ reserveImport "fmt"  }}
 {{ reserveImport "strconv"  }}
 {{ reserveImport "sync/atomic" }}
 
@@ -20,11 +19,7 @@ func init() {
 		{{- if $object.Root }}
 		return _{{ $object.Name }}(ctx, ec, sel)
 		{{- else }}
-		typedObj, ok := obj.({{ $object.Reference | ref }})
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object {{ $object.Name }}", obj))
-		}
-		return _{{ $object.Name }}(ctx, ec, sel, typedObj)
+		return _{{ $object.Name }}(ctx, ec, sel, obj)
 		{{- end }}
 	})
 	{{- end }}
@@ -57,7 +52,7 @@ func _{{$object.Name}}(ctx context.Context, ec shardruntime.ObjectExecutionConte
 }
 {{- else }}
 
-func _{{$object.Name}}(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet{{ if not $object.Root }},obj {{$object.Reference | ref }}{{ end }}) graphql.Marshaler {
+func _{{$object.Name}}(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet{{ if not $object.Root }}, obj any{{ end }}) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.GetOperationContext(), sel, {{$object.Name|lcFirst}}Implementors)
 	{{- if $object.Root }}
 		ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{

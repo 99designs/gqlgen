@@ -4,12 +4,10 @@ package prelude
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/executor/shardruntime"
-	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
@@ -17,52 +15,28 @@ const splitScope = "github.com/99designs/gqlgen/codegen/testserver/splitpackages
 
 func init() {
 	shardruntime.RegisterObject(splitScope, "__Directive", func(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
-		typedObj, ok := obj.(*introspection.Directive)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Directive", obj))
-		}
-		return ___Directive(ctx, ec, sel, typedObj)
+		return ___Directive(ctx, ec, sel, obj)
 	})
 	shardruntime.RegisterObject(splitScope, "__EnumValue", func(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
-		typedObj, ok := obj.(*introspection.EnumValue)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __EnumValue", obj))
-		}
-		return ___EnumValue(ctx, ec, sel, typedObj)
+		return ___EnumValue(ctx, ec, sel, obj)
 	})
 	shardruntime.RegisterObject(splitScope, "__Field", func(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
-		typedObj, ok := obj.(*introspection.Field)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Field", obj))
-		}
-		return ___Field(ctx, ec, sel, typedObj)
+		return ___Field(ctx, ec, sel, obj)
 	})
 	shardruntime.RegisterObject(splitScope, "__InputValue", func(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
-		typedObj, ok := obj.(*introspection.InputValue)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __InputValue", obj))
-		}
-		return ___InputValue(ctx, ec, sel, typedObj)
+		return ___InputValue(ctx, ec, sel, obj)
 	})
 	shardruntime.RegisterObject(splitScope, "__Schema", func(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
-		typedObj, ok := obj.(*introspection.Schema)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Schema", obj))
-		}
-		return ___Schema(ctx, ec, sel, typedObj)
+		return ___Schema(ctx, ec, sel, obj)
 	})
 	shardruntime.RegisterObject(splitScope, "__Type", func(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
-		typedObj, ok := obj.(*introspection.Type)
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object __Type", obj))
-		}
-		return ___Type(ctx, ec, sel, typedObj)
+		return ___Type(ctx, ec, sel, obj)
 	})
 }
 
 var __DirectiveImplementors = []string{"__Directive"}
 
-func ___Directive(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj *introspection.Directive) graphql.Marshaler {
+func ___Directive(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.GetOperationContext(), sel, __DirectiveImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -118,7 +92,7 @@ func ___Directive(ctx context.Context, ec shardruntime.ObjectExecutionContext, s
 
 var __EnumValueImplementors = []string{"__EnumValue"}
 
-func ___EnumValue(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj *introspection.EnumValue) graphql.Marshaler {
+func ___EnumValue(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.GetOperationContext(), sel, __EnumValueImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -166,7 +140,7 @@ func ___EnumValue(ctx context.Context, ec shardruntime.ObjectExecutionContext, s
 
 var __FieldImplementors = []string{"__Field"}
 
-func ___Field(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj *introspection.Field) graphql.Marshaler {
+func ___Field(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.GetOperationContext(), sel, __FieldImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -224,7 +198,7 @@ func ___Field(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel a
 
 var __InputValueImplementors = []string{"__InputValue"}
 
-func ___InputValue(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj *introspection.InputValue) graphql.Marshaler {
+func ___InputValue(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.GetOperationContext(), sel, __InputValueImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -279,7 +253,7 @@ func ___InputValue(ctx context.Context, ec shardruntime.ObjectExecutionContext, 
 
 var __SchemaImplementors = []string{"__Schema"}
 
-func ___Schema(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj *introspection.Schema) graphql.Marshaler {
+func ___Schema(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.GetOperationContext(), sel, __SchemaImplementors)
 
 	out := graphql.NewFieldSet(fields)
@@ -334,7 +308,7 @@ func ___Schema(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel 
 
 var __TypeImplementors = []string{"__Type"}
 
-func ___Type(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj *introspection.Type) graphql.Marshaler {
+func ___Type(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, obj any) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.GetOperationContext(), sel, __TypeImplementors)
 
 	out := graphql.NewFieldSet(fields)

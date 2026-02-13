@@ -180,16 +180,18 @@ func TestSplitStaleFileCleanupDeterministic(t *testing.T) {
 	baseline := generateSplitSnapshot(t)
 
 	staleRootImport := filepath.Join(workDir, "graph", "split_shard_import_999.generated.go")
-	staleShardGenerated := filepath.Join(workDir, "graph", "internal", "gqlgenexec", "shards", "stale", "legacy.generated.go")
+	staleSplitOwnedShardGenerated := filepath.Join(workDir, "graph", "internal", "gqlgenexec", "shards", "stale", "legacy.generated.go")
+	staleUnownedShardGenerated := filepath.Join(workDir, "graph", "internal", "gqlgenexec", "shards", "stale", "foreign.generated.go")
 	staleRegister := filepath.Join(workDir, "graph", "internal", "gqlgenexec", "shards", "obsolete", "register.generated.go")
 	keptInsideShardScope := filepath.Join(workDir, "graph", "internal", "gqlgenexec", "shards", "stale", "keep.txt")
 	unrelatedOutsideScope := filepath.Join(workDir, "graph", "unrelated.generated.go")
 
 	require.NoError(t, os.MkdirAll(filepath.Dir(staleRootImport), 0o755))
-	require.NoError(t, os.MkdirAll(filepath.Dir(staleShardGenerated), 0o755))
+	require.NoError(t, os.MkdirAll(filepath.Dir(staleSplitOwnedShardGenerated), 0o755))
 	require.NoError(t, os.MkdirAll(filepath.Dir(staleRegister), 0o755))
 	require.NoError(t, os.WriteFile(staleRootImport, []byte("package graph\n"), 0o644))
-	require.NoError(t, os.WriteFile(staleShardGenerated, []byte("package stale\n"), 0o644))
+	require.NoError(t, os.WriteFile(staleSplitOwnedShardGenerated, []byte("package stale\nconst splitScope = \"scope\"\n"), 0o644))
+	require.NoError(t, os.WriteFile(staleUnownedShardGenerated, []byte("package stale\n"), 0o644))
 	require.NoError(t, os.WriteFile(staleRegister, []byte("package obsolete\n"), 0o644))
 	require.NoError(t, os.WriteFile(keptInsideShardScope, []byte("keep me\n"), 0o644))
 	require.NoError(t, os.WriteFile(unrelatedOutsideScope, []byte("package graph\n"), 0o644))
@@ -203,8 +205,12 @@ func TestSplitStaleFileCleanupDeterministic(t *testing.T) {
 	_, err := os.Stat(staleRootImport)
 	require.True(t, os.IsNotExist(err), "expected stale split import to be removed")
 
-	_, err = os.Stat(staleShardGenerated)
+	_, err = os.Stat(staleSplitOwnedShardGenerated)
 	require.True(t, os.IsNotExist(err), "expected stale split shard file to be removed")
+
+	staleUnownedContents, err := os.ReadFile(staleUnownedShardGenerated)
+	require.NoError(t, err)
+	require.Equal(t, "package stale\n", string(staleUnownedContents))
 
 	_, err = os.Stat(staleRegister)
 	require.True(t, os.IsNotExist(err), "expected stale split register file to be removed")
@@ -431,8 +437,9 @@ func TestSplitRootInputMapFromRegistry(t *testing.T) {
 	require.Greater(t, executionContextStart, execStart)
 
 	execBody := contents[execStart:executionContextStart]
-	require.Contains(t, execBody, "inputUnmarshalMap := graphql.BuildUnmarshalerMap(shardruntime.ListInputUnmarshalers(")
-	require.NotRegexp(t, regexp.MustCompile(`(?s)inputUnmarshalMap\s*:=\s*graphql\.BuildUnmarshalerMap\(\s*(?:ec\.)?unmarshalInput`), execBody)
+	require.Contains(t, execBody, "inputUnmarshalMap := shardruntime.InputUnmarshalMap(")
+	require.NotContains(t, execBody, "graphql.BuildUnmarshalerMap(")
+	require.NotContains(t, execBody, "shardruntime.ListInputUnmarshalers(")
 }
 
 func TestSplitRuntimeIsThin(t *testing.T) {

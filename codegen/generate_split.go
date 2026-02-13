@@ -118,7 +118,7 @@ func cleanupSplitGeneratedOutputs(data *Data) error {
 		return fmt.Errorf("remove stale split runtime file %q: %w", runtimePath, err)
 	}
 
-	generatedShardFiles, err := listSplitShardGeneratedFiles(data.Config.Exec.ShardDir)
+	generatedShardFiles, err := listSplitShardGeneratedFiles(data.Config.Exec.ShardDir, data.Config.Exec.ShardFilenameTemplate)
 	if err != nil {
 		return err
 	}
@@ -150,7 +150,7 @@ func removeSplitGeneratedByGlob(pattern string, kind string) error {
 	return nil
 }
 
-func listSplitShardGeneratedFiles(root string) ([]string, error) {
+func listSplitShardGeneratedFiles(root string, shardFilenameTemplate string) ([]string, error) {
 	info, err := os.Stat(root)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -162,15 +162,27 @@ func listSplitShardGeneratedFiles(root string) ([]string, error) {
 		return nil, fmt.Errorf("split shard root %q is not a directory", root)
 	}
 
+	shardFilePattern, err := compileSplitShardFilenamePattern(shardFilenameTemplate)
+	if err != nil {
+		return nil, err
+	}
+
 	var generated []string
 	err = filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return walkErr
 		}
-		if d.IsDir() || !strings.HasSuffix(path, ".generated.go") {
+		if d.IsDir() {
 			return nil
 		}
-		generated = append(generated, path)
+
+		owned, ownerErr := isSplitOwnedGeneratedFile(path, d.Name(), shardFilePattern)
+		if ownerErr != nil {
+			return ownerErr
+		}
+		if owned {
+			generated = append(generated, path)
+		}
 		return nil
 	})
 	if err != nil {
@@ -179,6 +191,46 @@ func listSplitShardGeneratedFiles(root string) ([]string, error) {
 
 	sort.Strings(generated)
 	return generated, nil
+}
+
+func compileSplitShardFilenamePattern(shardFilenameTemplate string) (*regexp.Regexp, error) {
+	if shardFilenameTemplate == "" {
+		shardFilenameTemplate = "{name}.generated.go"
+	}
+
+	escaped := regexp.QuoteMeta(shardFilenameTemplate)
+	escaped = strings.ReplaceAll(escaped, regexp.QuoteMeta("{name}"), "[^/]+")
+	pattern, err := regexp.Compile("^" + escaped + "$")
+	if err != nil {
+		return nil, fmt.Errorf("compile split shard filename pattern for %q: %w", shardFilenameTemplate, err)
+	}
+
+	return pattern, nil
+}
+
+func isSplitOwnedGeneratedFile(path string, name string, shardFilePattern *regexp.Regexp) (bool, error) {
+	if !strings.HasSuffix(name, ".generated.go") {
+		return false, nil
+	}
+
+	if name == "register.generated.go" {
+		return true, nil
+	}
+
+	if !shardFilePattern.MatchString(name) {
+		return false, nil
+	}
+
+	contents, err := os.ReadFile(path)
+	if err != nil {
+		return false, fmt.Errorf("read split shard candidate %q: %w", path, err)
+	}
+
+	if strings.Contains(string(contents), "const splitScope =") {
+		return true, nil
+	}
+
+	return false, nil
 }
 
 func pruneEmptyDirs(root string) error {
@@ -426,7 +478,13 @@ func splitScope(data *Data) string {
 	if path := data.Config.Exec.ImportPath(); path != "" {
 		return path
 	}
-	return data.Config.Exec.Package + ":" + filepath.Base(data.Config.Exec.Filename)
+
+	fallback := data.Config.Exec.Package + ":" + filepath.Base(data.Config.Exec.Filename)
+	if data.Config.Exec.Filename == "" {
+		return fallback
+	}
+
+	return fallback + ":" + splitShortHash(data.Config.Exec.Filename)
 }
 
 var splitNameSanitizer = regexp.MustCompile(`[^a-zA-Z0-9_]+`)

@@ -2,8 +2,11 @@ package shardruntime
 
 import (
 	"context"
+	"maps"
+	"reflect"
 	"sort"
 	"sync"
+	"sync/atomic"
 
 	"github.com/vektah/gqlparser/v2/ast"
 
@@ -105,7 +108,131 @@ var (
 	streamFieldByScope    = map[string]map[string]map[string]StreamFieldHandler{}
 	complexityByScope     = map[string]map[string]map[string]ComplexityHandler{}
 	inputUnmarshalByScope = map[string]map[string]any{}
+
+	objectLookupSnapshot           atomic.Value
+	streamObjectLookupSnapshot     atomic.Value
+	fieldLookupSnapshot            atomic.Value
+	streamFieldLookupSnapshot      atomic.Value
+	complexityLookupSnapshot       atomic.Value
+	inputUnmarshalMapByScopeLookup atomic.Value
 )
+
+var emptyInputUnmarshalMap = map[reflect.Type]reflect.Value{}
+
+func init() {
+	resetObjectLookupSnapshotForTest()
+	resetStreamObjectLookupSnapshotForTest()
+	resetFieldLookupSnapshotForTest()
+	resetStreamFieldLookupSnapshotForTest()
+	resetComplexityLookupSnapshotForTest()
+	resetInputUnmarshalLookupSnapshotForTest()
+}
+
+func objectKey(scope, objectName string) string {
+	return scope + "\x00" + objectName
+}
+
+func fieldKey(scope, objectName, fieldName string) string {
+	return scope + "\x00" + objectName + "\x00" + fieldName
+}
+
+func cloneObjectHandlers(src map[string]ObjectHandler) map[string]ObjectHandler {
+	return maps.Clone(src)
+}
+
+func cloneStreamObjectHandlers(src map[string]StreamObjectHandler) map[string]StreamObjectHandler {
+	return maps.Clone(src)
+}
+
+func cloneFieldHandlers(src map[string]FieldHandler) map[string]FieldHandler {
+	return maps.Clone(src)
+}
+
+func cloneStreamFieldHandlers(src map[string]StreamFieldHandler) map[string]StreamFieldHandler {
+	return maps.Clone(src)
+}
+
+func cloneComplexityHandlers(src map[string]ComplexityHandler) map[string]ComplexityHandler {
+	return maps.Clone(src)
+}
+
+func cloneInputUnmarshalMapByScope(src map[string]map[reflect.Type]reflect.Value) map[string]map[reflect.Type]reflect.Value {
+	clone := make(map[string]map[reflect.Type]reflect.Value, len(src))
+	for scope, handlers := range src {
+		clone[scope] = handlers
+	}
+	return clone
+}
+
+func cloneInputUnmarshalHandlers(src map[reflect.Type]reflect.Value) map[reflect.Type]reflect.Value {
+	return maps.Clone(src)
+}
+
+func loadObjectLookupSnapshot() map[string]ObjectHandler {
+	if snapshot := objectLookupSnapshot.Load(); snapshot != nil {
+		return snapshot.(map[string]ObjectHandler)
+	}
+	return nil
+}
+
+func loadStreamObjectLookupSnapshot() map[string]StreamObjectHandler {
+	if snapshot := streamObjectLookupSnapshot.Load(); snapshot != nil {
+		return snapshot.(map[string]StreamObjectHandler)
+	}
+	return nil
+}
+
+func loadFieldLookupSnapshot() map[string]FieldHandler {
+	if snapshot := fieldLookupSnapshot.Load(); snapshot != nil {
+		return snapshot.(map[string]FieldHandler)
+	}
+	return nil
+}
+
+func loadStreamFieldLookupSnapshot() map[string]StreamFieldHandler {
+	if snapshot := streamFieldLookupSnapshot.Load(); snapshot != nil {
+		return snapshot.(map[string]StreamFieldHandler)
+	}
+	return nil
+}
+
+func loadComplexityLookupSnapshot() map[string]ComplexityHandler {
+	if snapshot := complexityLookupSnapshot.Load(); snapshot != nil {
+		return snapshot.(map[string]ComplexityHandler)
+	}
+	return nil
+}
+
+func loadInputUnmarshalLookupSnapshot() map[string]map[reflect.Type]reflect.Value {
+	if snapshot := inputUnmarshalMapByScopeLookup.Load(); snapshot != nil {
+		return snapshot.(map[string]map[reflect.Type]reflect.Value)
+	}
+	return nil
+}
+
+func resetObjectLookupSnapshotForTest() {
+	objectLookupSnapshot.Store(map[string]ObjectHandler{})
+}
+
+func resetStreamObjectLookupSnapshotForTest() {
+	streamObjectLookupSnapshot.Store(map[string]StreamObjectHandler{})
+}
+
+func resetFieldLookupSnapshotForTest() {
+	fieldLookupSnapshot.Store(map[string]FieldHandler{})
+}
+
+func resetStreamFieldLookupSnapshotForTest() {
+	streamFieldLookupSnapshot.Store(map[string]StreamFieldHandler{})
+}
+
+func resetComplexityLookupSnapshotForTest() {
+	complexityLookupSnapshot.Store(map[string]ComplexityHandler{})
+}
+
+func resetInputUnmarshalLookupSnapshotForTest() {
+	inputUnmarshalMapByScopeLookup.Store(map[string]map[reflect.Type]reflect.Value{})
+}
 
 func RegisterObject(scope, objectName string, handler ObjectHandler) {
 	mu.Lock()
@@ -121,17 +248,14 @@ func RegisterObject(scope, objectName string, handler ObjectHandler) {
 		panic("duplicate object shard handler registration: " + scope + ":" + objectName)
 	}
 	scopeHandlers[objectName] = handler
+
+	lookup := cloneObjectHandlers(loadObjectLookupSnapshot())
+	lookup[objectKey(scope, objectName)] = handler
+	objectLookupSnapshot.Store(lookup)
 }
 
 func LookupObject(scope, objectName string) (ObjectHandler, bool) {
-	mu.RLock()
-	defer mu.RUnlock()
-
-	scopeHandlers := objectByScope[scope]
-	if scopeHandlers == nil {
-		return nil, false
-	}
-	handler, ok := scopeHandlers[objectName]
+	handler, ok := loadObjectLookupSnapshot()[objectKey(scope, objectName)]
 	return handler, ok
 }
 
@@ -149,17 +273,14 @@ func RegisterStreamObject(scope, objectName string, handler StreamObjectHandler)
 		panic("duplicate stream object shard handler registration: " + scope + ":" + objectName)
 	}
 	scopeHandlers[objectName] = handler
+
+	lookup := cloneStreamObjectHandlers(loadStreamObjectLookupSnapshot())
+	lookup[objectKey(scope, objectName)] = handler
+	streamObjectLookupSnapshot.Store(lookup)
 }
 
 func LookupStreamObject(scope, objectName string) (StreamObjectHandler, bool) {
-	mu.RLock()
-	defer mu.RUnlock()
-
-	scopeHandlers := streamByScope[scope]
-	if scopeHandlers == nil {
-		return nil, false
-	}
-	handler, ok := scopeHandlers[objectName]
+	handler, ok := loadStreamObjectLookupSnapshot()[objectKey(scope, objectName)]
 	return handler, ok
 }
 
@@ -183,23 +304,14 @@ func RegisterField(scope, objectName, fieldName string, handler FieldHandler) {
 		panic("duplicate field shard handler registration: " + scope + ":" + objectName + ":" + fieldName)
 	}
 	objectHandlers[fieldName] = handler
+
+	lookup := cloneFieldHandlers(loadFieldLookupSnapshot())
+	lookup[fieldKey(scope, objectName, fieldName)] = handler
+	fieldLookupSnapshot.Store(lookup)
 }
 
 func LookupField(scope, objectName, fieldName string) (FieldHandler, bool) {
-	mu.RLock()
-	defer mu.RUnlock()
-
-	scopeHandlers := fieldByScope[scope]
-	if scopeHandlers == nil {
-		return nil, false
-	}
-
-	objectHandlers := scopeHandlers[objectName]
-	if objectHandlers == nil {
-		return nil, false
-	}
-
-	handler, ok := objectHandlers[fieldName]
+	handler, ok := loadFieldLookupSnapshot()[fieldKey(scope, objectName, fieldName)]
 	return handler, ok
 }
 
@@ -223,23 +335,14 @@ func RegisterStreamField(scope, objectName, fieldName string, handler StreamFiel
 		panic("duplicate stream field shard handler registration: " + scope + ":" + objectName + ":" + fieldName)
 	}
 	objectHandlers[fieldName] = handler
+
+	lookup := cloneStreamFieldHandlers(loadStreamFieldLookupSnapshot())
+	lookup[fieldKey(scope, objectName, fieldName)] = handler
+	streamFieldLookupSnapshot.Store(lookup)
 }
 
 func LookupStreamField(scope, objectName, fieldName string) (StreamFieldHandler, bool) {
-	mu.RLock()
-	defer mu.RUnlock()
-
-	scopeHandlers := streamFieldByScope[scope]
-	if scopeHandlers == nil {
-		return nil, false
-	}
-
-	objectHandlers := scopeHandlers[objectName]
-	if objectHandlers == nil {
-		return nil, false
-	}
-
-	handler, ok := objectHandlers[fieldName]
+	handler, ok := loadStreamFieldLookupSnapshot()[fieldKey(scope, objectName, fieldName)]
 	return handler, ok
 }
 
@@ -263,23 +366,14 @@ func RegisterComplexity(scope, objectName, fieldName string, handler ComplexityH
 		panic("duplicate complexity shard handler registration: " + scope + ":" + objectName + ":" + fieldName)
 	}
 	objectHandlers[fieldName] = handler
+
+	lookup := cloneComplexityHandlers(loadComplexityLookupSnapshot())
+	lookup[fieldKey(scope, objectName, fieldName)] = handler
+	complexityLookupSnapshot.Store(lookup)
 }
 
 func LookupComplexity(scope, objectName, fieldName string) (ComplexityHandler, bool) {
-	mu.RLock()
-	defer mu.RUnlock()
-
-	scopeHandlers := complexityByScope[scope]
-	if scopeHandlers == nil {
-		return nil, false
-	}
-
-	objectHandlers := scopeHandlers[objectName]
-	if objectHandlers == nil {
-		return nil, false
-	}
-
-	handler, ok := objectHandlers[fieldName]
+	handler, ok := loadComplexityLookupSnapshot()[fieldKey(scope, objectName, fieldName)]
 	return handler, ok
 }
 
@@ -297,6 +391,26 @@ func RegisterInputUnmarshaler(scope, inputName string, fn any) {
 		panic("duplicate input unmarshaler registration: " + scope + ":" + inputName)
 	}
 	scopeHandlers[inputName] = fn
+
+	ft := reflect.TypeOf(fn)
+	if ft == nil || ft.Kind() != reflect.Func || ft.NumOut() == 0 {
+		return
+	}
+
+	lookup := cloneInputUnmarshalMapByScope(loadInputUnmarshalLookupSnapshot())
+	inputLookupByType := cloneInputUnmarshalHandlers(lookup[scope])
+	inputLookupByType[ft.Out(0)] = reflect.ValueOf(fn)
+	lookup[scope] = inputLookupByType
+	inputUnmarshalMapByScopeLookup.Store(lookup)
+}
+
+func InputUnmarshalMap(scope string, _ ObjectExecutionContext) map[reflect.Type]reflect.Value {
+	scopeHandlers := loadInputUnmarshalLookupSnapshot()[scope]
+	if scopeHandlers == nil {
+		return emptyInputUnmarshalMap
+	}
+
+	return scopeHandlers
 }
 
 func ListInputUnmarshalers(scope string, _ ObjectExecutionContext) []any {

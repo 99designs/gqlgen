@@ -209,10 +209,6 @@ func compileSplitShardFilenamePattern(shardFilenameTemplate string) (*regexp.Reg
 }
 
 func isSplitOwnedGeneratedFile(path string, name string, shardFilePattern *regexp.Regexp) (bool, error) {
-	if !strings.HasSuffix(name, ".generated.go") {
-		return false, nil
-	}
-
 	if name == "register.generated.go" {
 		return true, nil
 	}

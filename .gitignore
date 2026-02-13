@@ -10,6 +10,7 @@
 /codegen/gen
 /gen
 /.sisyphus
+**/.omc
 
 /.vscode
 .idea/

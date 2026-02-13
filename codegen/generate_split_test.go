@@ -236,6 +236,27 @@ func TestSplitStaleCleanupDeterministicAndScoped(t *testing.T) {
 	TestSplitStaleFileCleanupDeterministic(t)
 }
 
+func TestListSplitShardGeneratedFilesSupportsCustomTemplate(t *testing.T) {
+	root := t.TempDir()
+
+	ownedCustom := filepath.Join(root, "custom", "legacy.go")
+	ownedRegister := filepath.Join(root, "legacy", "register.generated.go")
+	unownedCustom := filepath.Join(root, "custom", "foreign.go")
+	nonMatching := filepath.Join(root, "custom", "legacy.txt")
+
+	require.NoError(t, os.MkdirAll(filepath.Dir(ownedCustom), 0o755))
+	require.NoError(t, os.MkdirAll(filepath.Dir(ownedRegister), 0o755))
+
+	require.NoError(t, os.WriteFile(ownedCustom, []byte("package custom\nconst splitScope = \"scope\"\n"), 0o644))
+	require.NoError(t, os.WriteFile(ownedRegister, []byte("package legacy\n"), 0o644))
+	require.NoError(t, os.WriteFile(unownedCustom, []byte("package custom\n"), 0o644))
+	require.NoError(t, os.WriteFile(nonMatching, []byte("package custom\nconst splitScope = \"scope\"\n"), 0o644))
+
+	files, err := listSplitShardGeneratedFiles(root, "{name}.go")
+	require.NoError(t, err)
+	require.Equal(t, []string{ownedCustom, ownedRegister}, files)
+}
+
 func TestSplitPackagesShardNameCollision(t *testing.T) {
 	newBuild := func(source string) *Data {
 		return &Data{Config: &config.Config{Sources: []*ast.Source{{Name: source}}}}
@@ -420,7 +441,7 @@ func TestSplitComplexityLookupParity(t *testing.T) {
 	require.True(t, foundRegisterComplexity, "expected shard register output to include complexity registrations")
 }
 
-func TestSplitRootInputMapFromRegistry(t *testing.T) {
+func TestSplitRootInputMapFromGeneratedUnmarshalers(t *testing.T) {
 	workDir := chdirToLocalSplitFixtureWorkspace(t)
 
 	cleanupSplitGeneratedFiles(workDir)
@@ -438,9 +459,8 @@ func TestSplitRootInputMapFromRegistry(t *testing.T) {
 	require.Greater(t, executionContextStart, execStart)
 
 	execBody := contents[execStart:executionContextStart]
-	require.Contains(t, execBody, "inputUnmarshalMap := shardruntime.InputUnmarshalMap(")
-	require.NotContains(t, execBody, "graphql.BuildUnmarshalerMap(")
-	require.NotContains(t, execBody, "shardruntime.ListInputUnmarshalers(")
+	require.Contains(t, execBody, "inputUnmarshalMap := graphql.BuildUnmarshalerMap(")
+	require.NotContains(t, execBody, "shardruntime.InputUnmarshalMap(")
 }
 
 func TestSplitRuntimeIsThin(t *testing.T) {

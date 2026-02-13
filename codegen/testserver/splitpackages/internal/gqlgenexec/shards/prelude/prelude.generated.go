@@ -603,344 +603,192 @@ func __splitArgs_field___Type_fields_args(ctx context.Context, ec shardruntime.O
 
 // split_complexity_.gotpl
 func __splitComplexity___Directive_args(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Directive", "args", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Directive_description(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Directive", "description", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Directive_isRepeatable(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Directive", "isRepeatable", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Directive_locations(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Directive", "locations", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Directive_name(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Directive", "name", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___EnumValue_deprecationReason(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__EnumValue", "deprecationReason", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___EnumValue_description(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__EnumValue", "description", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___EnumValue_isDeprecated(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__EnumValue", "isDeprecated", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___EnumValue_name(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__EnumValue", "name", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Field_args(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Field", "args", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Field_deprecationReason(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Field", "deprecationReason", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Field_description(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Field", "description", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Field_isDeprecated(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Field", "isDeprecated", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Field_name(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Field", "name", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Field_type(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Field", "type", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___InputValue_defaultValue(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__InputValue", "defaultValue", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___InputValue_deprecationReason(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__InputValue", "deprecationReason", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___InputValue_description(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__InputValue", "description", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___InputValue_isDeprecated(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__InputValue", "isDeprecated", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___InputValue_name(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__InputValue", "name", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___InputValue_type(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__InputValue", "type", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Schema_description(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Schema", "description", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Schema_directives(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Schema", "directives", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Schema_mutationType(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Schema", "mutationType", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Schema_queryType(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Schema", "queryType", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Schema_subscriptionType(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Schema", "subscriptionType", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Schema_types(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Schema", "types", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Type_description(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Type", "description", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Type_enumValues(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Type", "enumValues", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Type_fields(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Type", "fields", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Type_inputFields(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Type", "inputFields", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Type_interfaces(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Type", "interfaces", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Type_isOneOf(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Type", "isOneOf", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Type_kind(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Type", "kind", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Type_name(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Type", "name", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Type_ofType(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Type", "ofType", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Type_possibleTypes(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Type", "possibleTypes", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity___Type_specifiedByURL(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "__Type", "specifiedByURL", childComplexity, rawArgs)
 }
 
 // split_codecs_.gotpl

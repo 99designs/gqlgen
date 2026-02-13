@@ -46,6 +46,13 @@ type ObjectExecutionContext interface {
 		argsKey string,
 		rawArgs map[string]any,
 	) (map[string]any, error)
+	ResolveExecutableComplexity(
+		ctx context.Context,
+		objectName string,
+		fieldName string,
+		childComplexity int,
+		rawArgs map[string]any,
+	) (int, bool)
 	ResolveField(
 		ctx context.Context,
 		objectName string,
@@ -399,6 +406,9 @@ func RegisterInputUnmarshaler(scope, inputName string, fn any) {
 
 	lookup := cloneInputUnmarshalMapByScope(loadInputUnmarshalLookupSnapshot())
 	inputLookupByType := cloneInputUnmarshalHandlers(lookup[scope])
+	if inputLookupByType == nil {
+		inputLookupByType = map[reflect.Type]reflect.Value{}
+	}
 	inputLookupByType[ft.Out(0)] = reflect.ValueOf(fn)
 	lookup[scope] = inputLookupByType
 	inputUnmarshalMapByScopeLookup.Store(lookup)

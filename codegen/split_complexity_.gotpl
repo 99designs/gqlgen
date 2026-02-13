@@ -5,11 +5,7 @@
 
 // split_complexity_.gotpl
 func __splitComplexity_{{ $field.Object.Name }}_{{ $field.Name }}(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, {{ $field.Object.Name | quote }}, {{ $field.Name | quote }}, childComplexity, rawArgs)
 }
 {{- end }}
 {{- end }}

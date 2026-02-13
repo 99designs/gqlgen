@@ -79,7 +79,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap(shardruntime.ListInputUnmarshalers("github.com/99designs/gqlgen/codegen/testserver/splitpackages", &ec)...)
+	inputUnmarshalMap := shardruntime.InputUnmarshalMap("github.com/99designs/gqlgen/codegen/testserver/splitpackages", &ec)
 	first := true
 
 	switch opCtx.Operation.Operation {
@@ -233,6 +233,15 @@ func (ec *executionContext) ParseFieldArgs(ctx context.Context, argsKey string, 
 	}
 
 	return handler(ctx, ec, rawArgs)
+}
+
+func (ec *executionContext) ResolveExecutableComplexity(ctx context.Context, objectName, fieldName string, childComplexity int, rawArgs map[string]any) (int, bool) {
+	handler, ok := splitExecutableComplexityResolvers[objectName+"."+fieldName]
+	if !ok {
+		panic(fmt.Sprintf("unknown executable complexity %s.%s", objectName, fieldName))
+	}
+
+	return handler(ctx, ec, childComplexity, rawArgs)
 }
 
 type splitFieldResolver func(context.Context, *executionContext, graphql.CollectedField, any) graphql.Marshaler
@@ -734,6 +743,144 @@ var splitArgsParsers = map[string]splitArgsParser{
 	},
 	"__Type.enumValues": func(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 		return ec.field___Type_enumValues_args(ctx, rawArgs)
+	},
+}
+
+type splitComplexityResolver func(context.Context, *executionContext, int, map[string]any) (int, bool)
+
+var splitExecutableComplexityResolvers = map[string]splitComplexityResolver{
+	"Query.hello": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		if ec.complexity.Query.Hello == nil {
+			return 0, false
+		}
+
+		args, err := ec.field_Query_hello_args(ctx, rawArgs)
+
+		if err != nil {
+			return 0, false
+		}
+
+		return ec.complexity.Query.Hello(childComplexity, args["name"].(string)), true
+	},
+	"Query.__type": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"Query.__schema": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Directive.name": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Directive.description": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Directive.isRepeatable": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Directive.locations": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Directive.args": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__EnumValue.name": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__EnumValue.description": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__EnumValue.isDeprecated": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__EnumValue.deprecationReason": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Field.name": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Field.description": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Field.args": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Field.type": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Field.isDeprecated": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Field.deprecationReason": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__InputValue.name": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__InputValue.description": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__InputValue.type": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__InputValue.defaultValue": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__InputValue.isDeprecated": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__InputValue.deprecationReason": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Schema.description": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Schema.types": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Schema.queryType": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Schema.mutationType": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Schema.subscriptionType": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Schema.directives": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Type.kind": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Type.name": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Type.description": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Type.specifiedByURL": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Type.fields": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Type.interfaces": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Type.possibleTypes": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Type.enumValues": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Type.inputFields": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Type.ofType": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
+	},
+	"__Type.isOneOf": func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
+		return 0, false
 	},
 }
 

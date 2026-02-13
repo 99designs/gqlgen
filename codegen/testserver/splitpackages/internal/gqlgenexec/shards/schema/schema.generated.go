@@ -120,29 +120,17 @@ func __splitArgs_field_Query_hello_args(ctx context.Context, ec shardruntime.Obj
 
 // split_complexity_.gotpl
 func __splitComplexity_Query___schema(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "Query", "__schema", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity_Query___type(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "Query", "__type", childComplexity, rawArgs)
 }
 
 // split_complexity_.gotpl
 func __splitComplexity_Query_hello(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-	_ = ctx
-	_ = ec
-	_ = childComplexity
-	_ = rawArgs
-	return 0, false
+	return ec.ResolveExecutableComplexity(ctx, "Query", "hello", childComplexity, rawArgs)
 }
 
 // split_codecs_.gotpl

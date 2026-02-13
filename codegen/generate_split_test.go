@@ -275,6 +275,33 @@ func TestListSplitShardGeneratedFilesSupportsCustomTemplate(t *testing.T) {
 	require.Equal(t, []string{ownedCustom, ownedRegister}, files)
 }
 
+func TestListSplitShardGeneratedFilesIncludesLegacyTemplateMatches(t *testing.T) {
+	root := t.TempDir()
+
+	legacyNamedOwned := filepath.Join(root, "legacy", "alpha.generated.go")
+	currentNamedOwned := filepath.Join(root, "legacy", "beta.gql.go")
+	registerFile := filepath.Join(root, "legacy", "register.generated.go")
+	unownedLegacyNamed := filepath.Join(root, "legacy", "foreign.generated.go")
+
+	require.NoError(t, os.MkdirAll(filepath.Dir(legacyNamedOwned), 0o755))
+	require.NoError(t, os.WriteFile(legacyNamedOwned, []byte("package legacy\nconst splitScope = \"scope\"\n"), 0o644))
+	require.NoError(t, os.WriteFile(currentNamedOwned, []byte("package legacy\nconst splitScope = \"scope\"\n"), 0o644))
+	require.NoError(t, os.WriteFile(registerFile, []byte("package legacy\n"), 0o644))
+	require.NoError(t, os.WriteFile(unownedLegacyNamed, []byte("package legacy\n"), 0o644))
+
+	files, err := listSplitShardGeneratedFiles(root, "{name}.gql.go")
+	require.NoError(t, err)
+	require.Equal(t, []string{legacyNamedOwned, currentNamedOwned, registerFile}, files)
+}
+
+func TestSplitShortHashZeroPadsToFixedWidth(t *testing.T) {
+	require.NotPanics(t, func() {
+		_ = splitShortHash("x3130")
+	})
+	require.Equal(t, "0fae14", splitShortHash("x3130"))
+	require.Len(t, splitShortHash("x3130"), 6)
+}
+
 func TestSplitPackagesShardNameCollision(t *testing.T) {
 	newBuild := func(source string) *Data {
 		return &Data{Config: &config.Config{Sources: []*ast.Source{{Name: source}}}}
@@ -408,8 +435,8 @@ func TestSplitCodecWrappersAvoidRootPackageReferences(t *testing.T) {
 	outPath := filepath.Join(t.TempDir(), "alpha.generated.go")
 	err := templates.Render(templates.Options{
 		PackageName: "alpha",
-		Template: splitShardTemplate + "\n" + splitFieldsTemplate + "\n" + splitArgsTemplate + "\n" + splitDirectivesTemplate + "\n" + splitComplexityTemplate + "\n" + splitInputsTemplate + "\n" + splitCodecsTemplate,
-		Filename: outPath,
+		Template:    splitShardTemplate + "\n" + splitFieldsTemplate + "\n" + splitArgsTemplate + "\n" + splitDirectivesTemplate + "\n" + splitComplexityTemplate + "\n" + splitInputsTemplate + "\n" + splitCodecsTemplate,
+		Filename:    outPath,
 		Data: splitShardTemplateData{
 			Data:             &Data{Config: &config.Config{}},
 			Scope:            "scope",

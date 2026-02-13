@@ -151,7 +151,7 @@ func removeSplitGeneratedByGlob(pattern string, kind string) error {
 	return nil
 }
 
-func listSplitShardGeneratedFiles(root string, shardFilenameTemplate string) ([]string, error) {
+func listSplitShardGeneratedFiles(root string, _ string) ([]string, error) {
 	info, err := os.Stat(root)
 	if err != nil {
 		if os.IsNotExist(err) {
@@ -163,11 +163,6 @@ func listSplitShardGeneratedFiles(root string, shardFilenameTemplate string) ([]
 		return nil, fmt.Errorf("split shard root %q is not a directory", root)
 	}
 
-	shardFilePattern, err := compileSplitShardFilenamePattern(shardFilenameTemplate)
-	if err != nil {
-		return nil, err
-	}
-
 	var generated []string
 	err = filepath.WalkDir(root, func(path string, d os.DirEntry, walkErr error) error {
 		if walkErr != nil {
@@ -177,7 +172,7 @@ func listSplitShardGeneratedFiles(root string, shardFilenameTemplate string) ([]
 			return nil
 		}
 
-		owned, ownerErr := isSplitOwnedGeneratedFile(path, d.Name(), shardFilePattern)
+		owned, ownerErr := isSplitOwnedGeneratedFile(path, d.Name())
 		if ownerErr != nil {
 			return ownerErr
 		}
@@ -194,27 +189,12 @@ func listSplitShardGeneratedFiles(root string, shardFilenameTemplate string) ([]
 	return generated, nil
 }
 
-func compileSplitShardFilenamePattern(shardFilenameTemplate string) (*regexp.Regexp, error) {
-	if shardFilenameTemplate == "" {
-		shardFilenameTemplate = "{name}.generated.go"
-	}
-
-	escaped := regexp.QuoteMeta(shardFilenameTemplate)
-	escaped = strings.ReplaceAll(escaped, regexp.QuoteMeta("{name}"), "[^/]+")
-	pattern, err := regexp.Compile("^" + escaped + "$")
-	if err != nil {
-		return nil, fmt.Errorf("compile split shard filename pattern for %q: %w", shardFilenameTemplate, err)
-	}
-
-	return pattern, nil
-}
-
-func isSplitOwnedGeneratedFile(path string, name string, shardFilePattern *regexp.Regexp) (bool, error) {
+func isSplitOwnedGeneratedFile(path string, name string) (bool, error) {
 	if name == "register.generated.go" {
 		return true, nil
 	}
 
-	if !shardFilePattern.MatchString(name) {
+	if filepath.Ext(name) != ".go" {
 		return false, nil
 	}
 
@@ -532,5 +512,9 @@ func splitSanitizeName(name string) string {
 func splitShortHash(s string) string {
 	h := fnv.New32a()
 	_, _ = h.Write([]byte(s))
-	return fmt.Sprintf("%x", h.Sum32())[:6]
+	sum := fmt.Sprintf("%x", h.Sum32())
+	if len(sum) >= 6 {
+		return sum[:6]
+	}
+	return strings.Repeat("0", 6-len(sum)) + sum
 }

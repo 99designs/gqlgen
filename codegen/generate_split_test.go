@@ -510,6 +510,39 @@ func TestSplitRootUsesLookupStreamField(t *testing.T) {
 	require.Contains(t, resolveStreamFieldBody, "panic(fmt.Sprintf(\"unknown stream field %s.%s\", objectName, fieldName))")
 }
 
+func TestSplitRootSeparatesStreamResolversFromRegularResolvers(t *testing.T) {
+	workDir := chdirToLocalSplitFixtureWorkspace(t)
+
+	schemaPath := filepath.Join(workDir, "graph", "subscription.graphqls")
+	require.NoError(t, os.WriteFile(schemaPath, []byte("type Subscription { tick: String! }\n"), 0o644))
+	t.Cleanup(func() {
+		_ = os.Remove(schemaPath)
+	})
+
+	cleanupSplitGeneratedFiles(workDir)
+	snapshot := generateSplitSnapshot(t)
+
+	generated, ok := snapshot[filepath.Join("graph", "generated.go")]
+	require.True(t, ok)
+
+	contents := string(generated)
+
+	fieldResolversStart := strings.Index(contents, "var splitExecutableFieldResolvers = map[string]splitFieldResolver{")
+	require.NotEqual(t, -1, fieldResolversStart)
+
+	streamResolversStart := strings.Index(contents, "var splitExecutableStreamFieldResolvers = map[string]splitStreamFieldResolver{")
+	require.NotEqual(t, -1, streamResolversStart)
+	require.Greater(t, streamResolversStart, fieldResolversStart)
+
+	fieldResolversBody := contents[fieldResolversStart:streamResolversStart]
+	require.NotContains(t, fieldResolversBody, "\"Subscription.tick\":")
+
+	streamResolversEnd := strings.Index(contents[streamResolversStart:], "type splitCodecMarshalResolver")
+	require.NotEqual(t, -1, streamResolversEnd)
+	streamResolversBody := contents[streamResolversStart : streamResolversStart+streamResolversEnd]
+	require.Contains(t, streamResolversBody, "\"Subscription.tick\":")
+}
+
 func TestSplitComplexityLookupParity(t *testing.T) {
 	workDir := chdirToLocalSplitFixtureWorkspace(t)
 

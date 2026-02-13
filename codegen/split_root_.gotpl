@@ -391,6 +391,7 @@ type splitFieldResolver func(context.Context, *executionContext, graphql.Collect
 
 var splitExecutableFieldResolvers = map[string]splitFieldResolver{
 {{- range $object := .Objects }}
+{{- if not $object.Stream }}
 {{- range $field := $object.Fields }}
 	{{ printf "%s.%s" $object.Name $field.Name | quote }}: func(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj any) graphql.Marshaler {
 		{{- if $object.Root }}
@@ -411,6 +412,7 @@ var splitExecutableFieldResolvers = map[string]splitFieldResolver{
 		{{- end }}
 		{{- end }}
 	},
+{{- end }}
 {{- end }}
 {{- end }}
 }

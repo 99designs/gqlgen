@@ -4,8 +4,9 @@ import (
 	"errors"
 	"sync/atomic"
 
-	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/vektah/gqlparser/v2/ast"
+
+	"github.com/99designs/gqlgen/graphql/introspection"
 )
 
 // ExecutionContextState stores generated execution context dependencies and state.

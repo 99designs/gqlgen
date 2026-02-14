@@ -151,12 +151,12 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 	case f.Name == "__schema":
 		f.GoFieldType = GoFieldMethod
 		f.GoReceiverName = "ec"
-		f.GoFieldName = "introspectSchema"
+		f.GoFieldName = "IntrospectSchema"
 		return nil
 	case f.Name == "__type":
 		f.GoFieldType = GoFieldMethod
 		f.GoReceiverName = "ec"
-		f.GoFieldName = "introspectType"
+		f.GoFieldName = "IntrospectType"
 		return nil
 	case f.Name == "_entities":
 		f.GoFieldType = GoFieldMethod

@@ -22,7 +22,7 @@ require (
 	google.golang.org/protobuf v1.36.11
 )
 
-require golang.org/x/sync v0.19.0 // indirect
+require golang.org/x/sync v0.19.0
 
 require (
 	github.com/agnivade/levenshtein v1.2.1 // indirect

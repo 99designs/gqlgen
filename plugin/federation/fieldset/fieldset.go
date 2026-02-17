@@ -143,7 +143,7 @@ func parseUnnestedKeyFieldSet(raw string, prefix []string) Set {
 	ret := Set{}
 	unionField := false
 
-	for _, s := range strings.Fields(raw) {
+	for s := range strings.FieldsSeq(raw) {
 		if s == "..." {
 			continue
 		}

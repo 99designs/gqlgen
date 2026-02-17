@@ -16,7 +16,7 @@ import (
 
 func TestInterfaces(t *testing.T) {
 	t.Run("slices of interfaces are not pointers", func(t *testing.T) {
-		field, ok := reflect.TypeOf((*QueryResolver)(nil)).Elem().MethodByName("Shapes")
+		field, ok := reflect.TypeFor[QueryResolver]().MethodByName("Shapes")
 		require.True(t, ok)
 		require.Equal(t, "[]followschema.Shape", field.Type.Out(0).String())
 	})

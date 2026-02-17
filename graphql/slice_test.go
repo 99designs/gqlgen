@@ -79,7 +79,7 @@ func TestMarshalSliceConcurrently(t *testing.T) {
 		)
 		assert.Equal(t, int32(n), callCount.Load())
 		require.Len(t, ret, n)
-		for i := 0; i < n; i++ {
+		for i := range n {
 			var buf bytes.Buffer
 			ret[i].MarshalGQL(&buf)
 			assert.Equal(t, fmt.Sprintf(`"item-%d"`, i), buf.String())

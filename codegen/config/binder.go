@@ -581,8 +581,8 @@ func hasMethod(it types.Type, name string) bool {
 		return false
 	}
 
-	for i := 0; i < namedType.NumMethods(); i++ {
-		if namedType.Method(i).Name() == name {
+	for method := range namedType.Methods() {
+		if method.Name() == name {
 			return true
 		}
 	}

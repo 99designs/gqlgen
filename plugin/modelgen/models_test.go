@@ -876,16 +876,16 @@ func TestCustomTemplate(t *testing.T) {
 }
 
 func getStringInBetween(str, start, end string) string {
-	startIndex := strings.Index(str, start)
-	if startIndex == -1 {
+	_, after, ok := strings.Cut(str, start)
+	if !ok {
 		return ""
 	}
 
-	newStr := str[startIndex+len(start):]
-	e := strings.Index(newStr, end)
-	if e == -1 {
+	newStr := after
+	before, _, ok := strings.Cut(newStr, end)
+	if !ok {
 		return ""
 	}
 
-	return newStr[:e]
+	return before
 }

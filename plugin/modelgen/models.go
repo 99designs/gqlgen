@@ -645,8 +645,8 @@ func containsInvalidSpace(valuesString string) bool {
 	valuesString = strings.ReplaceAll(valuesString, "\"", "")
 	if strings.Contains(valuesString, ",") {
 		// split by comma,
-		values := strings.Split(valuesString, ",")
-		for _, value := range values {
+		values := strings.SplitSeq(valuesString, ",")
+		for value := range values {
 			if strings.TrimSpace(value) != value {
 				return true
 			}
@@ -655,8 +655,8 @@ func containsInvalidSpace(valuesString string) bool {
 	}
 	if strings.Contains(valuesString, ";") {
 		// split by semicolon, which is common in gorm
-		values := strings.Split(valuesString, ";")
-		for _, value := range values {
+		values := strings.SplitSeq(valuesString, ";")
+		for value := range values {
 			if strings.TrimSpace(value) != value {
 				return true
 			}

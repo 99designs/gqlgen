@@ -124,11 +124,9 @@ func TestSSE(t *testing.T) {
 		defer srv.Close()
 
 		var wg sync.WaitGroup
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			handler.SendNextSubscriptionMessage()
-		}()
+		})
 
 		client := &http.Client{}
 		req := createHTTPRequest(srv.URL, `{"query":"subscription { name }"}`)
@@ -150,21 +148,17 @@ func TestSSE(t *testing.T) {
 		assert.Equal(t, "data: {\"data\":{\"name\":\"test\"}}\n", readLine(br))
 		assert.Equal(t, "\n", readLine(br))
 
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			handler.SendNextSubscriptionMessage()
-		}()
+		})
 
 		assert.Equal(t, "event: next\n", readLine(br))
 		assert.Equal(t, "data: {\"data\":{\"name\":\"test\"}}\n", readLine(br))
 		assert.Equal(t, "\n", readLine(br))
 
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			handler.SendCompleteSubscriptionMessage()
-		}()
+		})
 
 		assert.Equal(t, "event: complete\n", readLine(br))
 		assert.Equal(t, "\n", readLine(br))
@@ -180,12 +174,10 @@ func TestSSE(t *testing.T) {
 		defer srv.Close()
 
 		var wg sync.WaitGroup
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			// Wait for ping interval to trigger
 			time.Sleep(pingInterval + time.Millisecond*100)
-		}()
+		})
 
 		client := &http.Client{}
 		req := createHTTPRequest(srv.URL, `{"query":"subscription { name }"}`)
@@ -206,11 +198,9 @@ func TestSSE(t *testing.T) {
 		assert.Equal(t, ": ping\n", readLine(br))
 		assert.Equal(t, "\n", readLine(br))
 
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
+		wg.Go(func() {
 			handler.SendCompleteSubscriptionMessage()
-		}()
+		})
 
 		assert.Equal(t, "event: complete\n", readLine(br))
 		assert.Equal(t, "\n", readLine(br))

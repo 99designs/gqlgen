@@ -55,7 +55,7 @@ func (a Tracer) InterceptResponse(
 	opCtx := graphql.GetOperationContext(ctx)
 
 	_, _ = fmt.Fprintln(a.out, "GraphQL Request {")
-	for _, line := range strings.Split(opCtx.RawQuery, "\n") {
+	for line := range strings.SplitSeq(opCtx.RawQuery, "\n") {
 		_, _ = fmt.Fprintln(a.out, " ", aurora.Cyan(line))
 	}
 	for name, value := range opCtx.Variables {

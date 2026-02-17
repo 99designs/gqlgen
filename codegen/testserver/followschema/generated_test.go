@@ -16,7 +16,7 @@ import (
 )
 
 func TestForcedResolverFieldIsPointer(t *testing.T) {
-	field, ok := reflect.TypeOf((*ForcedResolverResolver)(nil)).Elem().MethodByName("Field")
+	field, ok := reflect.TypeFor[ForcedResolverResolver]().MethodByName("Field")
 	require.True(t, ok)
 	require.Equal(t, "*followschema.Circle", field.Type.Out(0).String())
 }

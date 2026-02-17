@@ -129,75 +129,29 @@
 						return graphql.Null
 					}
 				{{- end }}
-				ret := make(graphql.Array, len(v))
 				{{- if and $.HasBatchResolverFields (not $type.IsScalar) (eq $type.Elem.Definition.Kind "OBJECT") }}
 				ctx = graphql.WithBatchParents(ctx, {{ $type.Elem.Definition.Name | quote }}, v)
 				{{- end }}
 				{{- if not $type.IsScalar }}
-					var wg sync.WaitGroup
-					{{- if gt $.Config.Exec.WorkerLimit 0 }}
-						sm := semaphore.NewWeighted({{ $.Config.Exec.WorkerLimit }})
-					{{- end }}
-					isLen1 := len(v) == 1
-					if !isLen1 {
-						wg.Add(len(v))
-					}
-				{{- end }}
-				for i := range v {
-					{{- if not $type.IsScalar }}
-						i := i
-						fc := &graphql.FieldContext{
-							Index: &i,
-							Result: &v[i],
-						}
-						ctx := graphql.WithFieldContext(ctx, fc)
-						f := func(i int) {
-							{{- if not $.Config.OmitPanicHandler }}
-							defer func() {
-								if r := recover(); r != nil {
-									ec.Error(ctx, ec.Recover(ctx, r))
-									ret = nil
-								}
-							}()
-							{{- end }}
-							if !isLen1 {
-								{{- if gt $.Config.Exec.WorkerLimit 0 }}
-									defer func(){
-										sm.Release(1)
-										wg.Done()
-									}()
-								{{- else }}
-									defer wg.Done()
-								{{- end }}
-							}
-							{{ if $useFunctionSyntaxForExecutionContext -}}
-							ret[i] = {{ $type.Elem.MarshalFunc }}(ctx, ec, sel, v[i])
-							{{- else -}}
-							ret[i] = ec.{{ $type.Elem.MarshalFunc }}(ctx, sel, v[i])
-							{{- end }}
-						}
-						if isLen1 {
-							f(i)
-						} else {
-							{{- if gt $.Config.Exec.WorkerLimit 0 }}
-								if err := sm.Acquire(ctx, 1); err != nil {
-									ec.Error(ctx, ctx.Err())
-								} else {
-									go f(i)
-								}
-							{{- else }}
-								go f(i)
-							{{- end }}
-						}
-					{{ else }}
+					ret := graphql.MarshalSliceConcurrently(ctx, len(v), {{ $.Config.Exec.WorkerLimit }}, {{ $.Config.OmitPanicHandler }}, func(ctx context.Context, i int) graphql.Marshaler {
+						fc := graphql.GetFieldContext(ctx)
+						fc.Result = &v[i]
+						{{ if $useFunctionSyntaxForExecutionContext -}}
+						return {{ $type.Elem.MarshalFunc }}(ctx, ec, sel, v[i])
+						{{- else -}}
+						return ec.{{ $type.Elem.MarshalFunc }}(ctx, sel, v[i])
+						{{- end }}
+					})
+				{{- else }}
+					ret := make(graphql.Array, len(v))
+					for i := range v {
 						{{ if $useFunctionSyntaxForExecutionContext -}}
 						ret[i] = {{ $type.Elem.MarshalFunc }}(ctx, ec, sel, v[i])
 						{{- else -}}
 						ret[i] = ec.{{ $type.Elem.MarshalFunc }}(ctx, sel, v[i])
 						{{- end }}
-					{{- end }}
-				}
-				{{ if not $type.IsScalar }} wg.Wait() {{ end }}
+					}
+				{{- end }}
 				{{ if $type.Elem.GQL.NonNull }}
 					for _, e := range ret {
 						if e == graphql.Null {

@@ -106,7 +106,7 @@
 	}
 
 	func (e *executableSchema) Complexity(ctx context.Context, typeName, field string, childComplexity int, rawArgs map[string]any) (int, bool) {
-		ec := executionContext{nil, e, 0, 0, nil}
+		ec := newExecutionContext(nil, e, nil)
 		_ = ec
 		{{ if not .Config.OmitComplexity -}}
 		switch typeName + "." + field {
@@ -145,7 +145,7 @@
 
 	func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		opCtx := graphql.GetOperationContext(ctx)
-		ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
+		ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
 		inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 			{{- range $input := .Inputs -}}
 				{{ if not $input.HasUnmarshal }}
@@ -184,9 +184,9 @@
 						{{- end }}
 					{{- end }}
 				} else {
-					if atomic.LoadInt32(&ec.pendingDeferred) > 0 {
-						result := <-ec.deferredResults
-						atomic.AddInt32(&ec.pendingDeferred, -1)
+					if atomic.LoadInt32(&ec.PendingDeferred) > 0 {
+						result := <-ec.DeferredResults
+						atomic.AddInt32(&ec.PendingDeferred, -1)
 						data = result.Result
 						response.Path = result.Path
 						response.Label = result.Label
@@ -198,8 +198,8 @@
 				var buf bytes.Buffer
 				data.MarshalGQL(&buf)
 				response.Data = buf.Bytes()
-				if atomic.LoadInt32(&ec.deferred) > 0 {
-					hasNext := atomic.LoadInt32(&ec.pendingDeferred) > 0
+				if atomic.LoadInt32(&ec.Deferred) > 0 {
+					hasNext := atomic.LoadInt32(&ec.PendingDeferred) > 0
 					response.HasNext = &hasNext
 				}
 
@@ -276,46 +276,23 @@
 	}
 
 type executionContext struct {
-	*graphql.OperationContext
-	*executableSchema
-	deferred        int32
-	pendingDeferred int32
-	deferredResults chan graphql.DeferredResult
+	*graphql.ExecutionContextState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 }
 
-
-func (ec *executionContext) processDeferredGroup(dg graphql.DeferredGroup) {
-		atomic.AddInt32(&ec.pendingDeferred, 1)
-		go func () {
-			ctx := graphql.WithFreshResponseContext(dg.Context)
-			dg.FieldSet.Dispatch(ctx)
-			ds := graphql.DeferredResult{
-				Path:   dg.Path,
-				Label:  dg.Label,
-				Result: dg.FieldSet,
-				Errors: graphql.GetErrors(ctx),
-			}
-			// null fields should bubble up
-			if dg.FieldSet.Invalids > 0 {
-				ds.Result = graphql.Null
-			}
-			ec.deferredResults <- ds
-		}()
+func newExecutionContext(
+	opCtx *graphql.OperationContext,
+	execSchema *executableSchema,
+	deferredResults chan graphql.DeferredResult,
+) executionContext {
+	return executionContext{
+		ExecutionContextState: graphql.NewExecutionContextState[ResolverRoot, DirectiveRoot, ComplexityRoot](
+			opCtx,
+			(*graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot])(execSchema),
+			parsedSchema,
+			deferredResults,
+		),
 	}
-
-	func (ec *executionContext) introspectSchema() (*introspection.Schema, error) {
-		if ec.DisableIntrospection {
-			return nil, errors.New("introspection disabled")
-		}
-		return introspection.WrapSchema(ec.Schema()), nil
-	}
-
-	func (ec *executionContext) introspectType(name string) (*introspection.Type, error) {
-		if ec.DisableIntrospection {
-			return nil, errors.New("introspection disabled")
-		}
-		return introspection.WrapTypeFromDef(ec.Schema(), ec.Schema().Types[name]), nil
-	}
+}
 
 	{{if .HasEmbeddableSources }}
 	//go:embed{{- range $source := .AugmentedSources }}{{if $source.Embeddable}} {{$source.RelativePath|quote}}{{end}}{{- end }}

@@ -81,6 +81,7 @@ func TestReadConfig(t *testing.T) {
 
 		if runtime.GOOS == "windows" {
 			require.ErrorContains(t, err, "failed to walk schema at root not_walkable/: ")
+			// TODO(steve): Now that Go 1.25 is min supported, this could be improved.
 			// Go 1.24 and below report "CreateFile" but 1.25 and above report "GetFileAttributesEx"
 			// in error
 			// See https://go.dev/doc/go1.25#ospkgos

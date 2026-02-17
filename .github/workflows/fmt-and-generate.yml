@@ -21,7 +21,7 @@ jobs:
       pull-requests: write
     strategy:
       matrix:
-        go: ["1.24", "1.25"]
+        go: ["1.26", "1.25"]
     steps:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v5
       with:

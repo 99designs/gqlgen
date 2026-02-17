@@ -633,6 +633,7 @@ func mutateHook(b *ModelBuild) *ModelBuild {
 func parseAst(path string) (*ast.Package, error) {
 	// test setup to parse the types
 	fset := token.NewFileSet()
+	//nolint:staticcheck // SA1019 help wanted to golang.org/x/tools/go/packages
 	pkgs, err := parser.ParseDir(fset, path, nil, parser.AllErrors)
 	if err != nil {
 		return nil, err

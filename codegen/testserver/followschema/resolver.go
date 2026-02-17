@@ -68,7 +68,7 @@ func (r *mutationResolver) OverrideValueViaInput(ctx context.Context, input Fiel
 }
 
 // UpdateProduct is the resolver for the updateProduct field.
-func (r *mutationResolver) UpdateProduct(ctx context.Context, input map[string]any) (string, error) {
+func (r *mutationResolver) UpdateProduct(ctx context.Context, input map[string]interface{}) (string, error) {
 	panic("not implemented")
 }
 
@@ -298,12 +298,12 @@ func (r *queryResolver) EnumInInput(ctx context.Context, input *InputWithEnumVal
 }
 
 // SearchProducts is the resolver for the searchProducts field.
-func (r *queryResolver) SearchProducts(ctx context.Context, filters map[string]any) ([]string, error) {
+func (r *queryResolver) SearchProducts(ctx context.Context, filters map[string]interface{}) ([]string, error) {
 	panic("not implemented")
 }
 
 // SearchRequired is the resolver for the searchRequired field.
-func (r *queryResolver) SearchRequired(ctx context.Context, filters map[string]any) ([]string, error) {
+func (r *queryResolver) SearchRequired(ctx context.Context, filters map[string]interface{}) ([]string, error) {
 	panic("not implemented")
 }
 
@@ -313,27 +313,27 @@ func (r *queryResolver) SearchProductsNormal(ctx context.Context, filters map[st
 }
 
 // SearchWithDefaults is the resolver for the searchWithDefaults field.
-func (r *queryResolver) SearchWithDefaults(ctx context.Context, filters map[string]any) ([]string, error) {
+func (r *queryResolver) SearchWithDefaults(ctx context.Context, filters map[string]interface{}) ([]string, error) {
 	panic("not implemented")
 }
 
 // SearchMixed is the resolver for the searchMixed field.
-func (r *queryResolver) SearchMixed(ctx context.Context, filters map[string]any, limit *int, offset *int, sortBy *string) ([]string, error) {
+func (r *queryResolver) SearchMixed(ctx context.Context, filters map[string]interface{}, limit *int, offset *int, sortBy *string) ([]string, error) {
 	panic("not implemented")
 }
 
 // FilterProducts is the resolver for the filterProducts field.
-func (r *queryResolver) FilterProducts(ctx context.Context, filters map[string]any) ([]string, error) {
+func (r *queryResolver) FilterProducts(ctx context.Context, filters map[string]interface{}) ([]string, error) {
 	panic("not implemented")
 }
 
 // FindProducts is the resolver for the findProducts field.
-func (r *queryResolver) FindProducts(ctx context.Context, filters map[string]any) ([]string, error) {
+func (r *queryResolver) FindProducts(ctx context.Context, filters map[string]interface{}) ([]string, error) {
 	panic("not implemented")
 }
 
 // SearchWithDirectives is the resolver for the searchWithDirectives field.
-func (r *queryResolver) SearchWithDirectives(ctx context.Context, input map[string]any) ([]string, error) {
+func (r *queryResolver) SearchWithDirectives(ctx context.Context, input map[string]interface{}) ([]string, error) {
 	panic("not implemented")
 }
 

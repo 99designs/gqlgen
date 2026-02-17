@@ -426,7 +426,6 @@ func (b *builder) findBindFieldTarget(in types.Type, name string) (types.Object,
 	case *types.Struct:
 		var found types.Object
 		for field := range t.Fields() {
-			field := field
 			if !field.Exported() || !equalFieldName(field.Name(), name) {
 				continue
 			}
@@ -468,7 +467,6 @@ func (b *builder) findBindStructEmbedsTarget(
 ) (types.Object, error) {
 	var found types.Object
 	for field := range strukt.Fields() {
-		field := field
 		if !field.Embedded() {
 			continue
 		}
@@ -502,8 +500,6 @@ func (b *builder) findBindInterfaceEmbedsTarget(
 ) (types.Object, error) {
 	var found types.Object
 	for embeddedType := range iface.EmbeddedTypes() {
-		embeddedType := embeddedType
-
 		f, err := b.findBindTarget(embeddedType, name, autoBindGetterHaser)
 		if err != nil {
 			return nil, err

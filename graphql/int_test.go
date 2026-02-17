@@ -397,7 +397,7 @@ func beforeUnmarshalInt(v any) (int, error) {
 func BenchmarkUnmarshalIntInitial(b *testing.B) {
 	numbers := makeRandomNumberSlice(true)
 
-	for range b.N {
+	for b.Loop() {
 		for i := range numbers {
 			_, _ = beforeUnmarshalInt(numbers[i])
 		}
@@ -407,7 +407,7 @@ func BenchmarkUnmarshalIntInitial(b *testing.B) {
 func BenchmarkUnmarshalIntNew(b *testing.B) {
 	numbers := makeRandomNumberSlice(true)
 
-	for range b.N {
+	for b.Loop() {
 		for i := range numbers {
 			_, _ = UnmarshalInt(numbers[i])
 		}

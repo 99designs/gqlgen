@@ -772,8 +772,11 @@ func buildResolverSDL(
 	resolverArgs := ""
 	var resolverArgsSb705 strings.Builder
 	for _, keyField := range resolver.KeyFields {
-		resolverArgsSb705.WriteString(
-			fmt.Sprintf("%s: %s,", keyField.Field.ToGoPrivate(), keyField.Definition.Type.String()),
+		fmt.Fprintf(
+			&resolverArgsSb705,
+			"%s: %s,",
+			keyField.Field.ToGoPrivate(),
+			keyField.Definition.Type.String(),
 		)
 	}
 	resolverArgs += resolverArgsSb705.String()
@@ -790,11 +793,11 @@ func buildEntityResolverInputDefinitionSDL(resolver *EntityResolver) string {
 	entityResolverInputDefinition := "input " + resolver.InputTypeName + " {\n"
 	var entityResolverInputDefinitionSb714 strings.Builder
 	for _, keyField := range resolver.KeyFields {
-		entityResolverInputDefinitionSb714.WriteString(fmt.Sprintf(
+		fmt.Fprintf(&entityResolverInputDefinitionSb714,
 			"\t%s: %s\n",
 			keyField.Field.ToGo(),
 			keyField.Definition.Type.String(),
-		))
+		)
 	}
 	entityResolverInputDefinition += entityResolverInputDefinitionSb714.String()
 	return entityResolverInputDefinition + "}"

@@ -4,6 +4,7 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
+	"go/types"
 	"sort"
 	"strings"
 
@@ -356,6 +357,21 @@ func (f *Federation) GenerateCode(data *codegen.Data) error {
 		}
 	}
 
+	// fill in return types for all entity resolvers
+	// Entity resolvers always return pointers in Federation
+	for _, entity := range f.Entities {
+		for _, resolver := range entity.Resolvers {
+			// Ensure the return type is a pointer
+			if ptr, ok := entity.Type.(*types.Pointer); ok {
+				// Already a pointer
+				resolver.ReturnType = ptr
+			} else {
+				// Make it a pointer
+				resolver.ReturnType = types.NewPointer(entity.Type)
+			}
+		}
+	}
+
 	if f.PackageOptions.ExplicitRequires && len(requiresEntities) > 0 {
 		err := f.generateExplicitRequires(
 			data,
@@ -368,6 +384,28 @@ func (f *Federation) GenerateCode(data *codegen.Data) error {
 	}
 
 	f.RequiresEntities = requiresEntities
+
+	// Populate ImplDirectives on each entity by extracting the resolved
+	// OBJECT-level directives from the corresponding codegen.Object.
+	// These are the user-defined directives (e.g. @guard, @auth) that
+	// should wrap entity resolver calls — federation-internal directives
+	// are excluded.
+	for _, e := range f.Entities {
+		obj := data.Objects.ByName(e.Def.Name)
+		if obj == nil || len(obj.Fields) == 0 {
+			continue
+		}
+		// OBJECT-level directives are propagated to every field during
+		// codegen.  Pick them from the first field's directive list.
+		for _, d := range obj.Fields[0].Directives {
+			if d.SkipRuntime {
+				continue
+			}
+			if d.IsLocation(ast.LocationObject) && !federationDirectiveNames[d.Name] {
+				e.ImplDirectives = append(e.ImplDirectives, d)
+			}
+		}
+	}
 
 	return templates.Render(templates.Options{
 		PackageName: data.Config.Federation.Package,

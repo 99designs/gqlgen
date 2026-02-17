@@ -153,40 +153,59 @@ func (ec *executionContext) resolveEntity(
 	}()
 
 	switch typeName {
-	case "Hello":
-		resolverName, err := entityResolverNameForHello(ctx, rep)
+	case "Basic":
+		resolverName, err := entityResolverNameForBasic(ctx, rep)
 		if err != nil {
-			return nil, fmt.Errorf(`finding resolver for Entity "Hello": %w`, err)
+			return nil, fmt.Errorf(`finding resolver for Entity "Basic": %w`, err)
 		}
 		switch resolverName {
 
-		case "findHelloByID":
+		case "findBasicByID":
 			id0, err := ec.unmarshalNString2string(ctx, rep["id"])
 			if err != nil {
-				return nil, fmt.Errorf(`unmarshalling param 0 for findHelloByID(): %w`, err)
+				return nil, fmt.Errorf(`unmarshalling param 0 for findBasicByID(): %w`, err)
 			}
-			entity, err := ec.Resolvers.Entity().FindHelloByID(ctx, id0)
+			entity, err := ec.Resolvers.Entity().FindBasicByID(ctx, id0)
 			if err != nil {
-				return nil, fmt.Errorf(`resolving Entity "Hello": %w`, err)
+				return nil, fmt.Errorf(`resolving Entity "Basic": %w`, err)
 			}
 
 			return entity, nil
 		}
-	case "World":
-		resolverName, err := entityResolverNameForWorld(ctx, rep)
+	case "Person":
+		resolverName, err := entityResolverNameForPerson(ctx, rep)
 		if err != nil {
-			return nil, fmt.Errorf(`finding resolver for Entity "World": %w`, err)
+			return nil, fmt.Errorf(`finding resolver for Entity "Person": %w`, err)
 		}
 		switch resolverName {
 
-		case "findWorldByID":
+		case "findPersonByID":
 			id0, err := ec.unmarshalNString2string(ctx, rep["id"])
 			if err != nil {
-				return nil, fmt.Errorf(`unmarshalling param 0 for findWorldByID(): %w`, err)
+				return nil, fmt.Errorf(`unmarshalling param 0 for findPersonByID(): %w`, err)
 			}
-			entity, err := ec.Resolvers.Entity().FindWorldByID(ctx, id0)
+			entity, err := ec.Resolvers.Entity().FindPersonByID(ctx, id0)
 			if err != nil {
-				return nil, fmt.Errorf(`resolving Entity "World": %w`, err)
+				return nil, fmt.Errorf(`resolving Entity "Person": %w`, err)
+			}
+
+			return entity, nil
+		}
+	case "Product":
+		resolverName, err := entityResolverNameForProduct(ctx, rep)
+		if err != nil {
+			return nil, fmt.Errorf(`finding resolver for Entity "Product": %w`, err)
+		}
+		switch resolverName {
+
+		case "findProductBySku":
+			id0, err := ec.unmarshalNString2string(ctx, rep["sku"])
+			if err != nil {
+				return nil, fmt.Errorf(`unmarshalling param 0 for findProductBySku(): %w`, err)
+			}
+			entity, err := ec.Resolvers.Entity().FindProductBySku(ctx, id0)
+			if err != nil {
+				return nil, fmt.Errorf(`resolving Entity "Product": %w`, err)
 			}
 
 			return entity, nil
@@ -217,7 +236,7 @@ func (ec *executionContext) resolveManyEntities(
 	}
 }
 
-func entityResolverNameForHello(ctx context.Context, rep EntityRepresentation) (string, error) {
+func entityResolverNameForBasic(ctx context.Context, rep EntityRepresentation) (string, error) {
 	// we collect errors because a later entity resolver may work fine
 	// when an entity has multiple keys
 	entityResolverErrs := []error{}
@@ -235,7 +254,7 @@ func entityResolverNameForHello(ctx context.Context, rep EntityRepresentation) (
 		val, ok = m["id"]
 		if !ok {
 			entityResolverErrs = append(entityResolverErrs,
-				fmt.Errorf("%w due to missing Key Field \"id\" for Hello", ErrTypeNotFound))
+				fmt.Errorf("%w due to missing Key Field \"id\" for Basic", ErrTypeNotFound))
 			break
 		}
 		if allNull {
@@ -243,16 +262,16 @@ func entityResolverNameForHello(ctx context.Context, rep EntityRepresentation) (
 		}
 		if allNull {
 			entityResolverErrs = append(entityResolverErrs,
-				fmt.Errorf("%w due to all null value KeyFields for Hello", ErrTypeNotFound))
+				fmt.Errorf("%w due to all null value KeyFields for Basic", ErrTypeNotFound))
 			break
 		}
-		return "findHelloByID", nil
+		return "findBasicByID", nil
 	}
-	return "", fmt.Errorf("%w for Hello due to %v", ErrTypeNotFound,
+	return "", fmt.Errorf("%w for Basic due to %v", ErrTypeNotFound,
 		errors.Join(entityResolverErrs...).Error())
 }
 
-func entityResolverNameForWorld(ctx context.Context, rep EntityRepresentation) (string, error) {
+func entityResolverNameForPerson(ctx context.Context, rep EntityRepresentation) (string, error) {
 	// we collect errors because a later entity resolver may work fine
 	// when an entity has multiple keys
 	entityResolverErrs := []error{}
@@ -270,7 +289,7 @@ func entityResolverNameForWorld(ctx context.Context, rep EntityRepresentation) (
 		val, ok = m["id"]
 		if !ok {
 			entityResolverErrs = append(entityResolverErrs,
-				fmt.Errorf("%w due to missing Key Field \"id\" for World", ErrTypeNotFound))
+				fmt.Errorf("%w due to missing Key Field \"id\" for Person", ErrTypeNotFound))
 			break
 		}
 		if allNull {
@@ -278,11 +297,46 @@ func entityResolverNameForWorld(ctx context.Context, rep EntityRepresentation) (
 		}
 		if allNull {
 			entityResolverErrs = append(entityResolverErrs,
-				fmt.Errorf("%w due to all null value KeyFields for World", ErrTypeNotFound))
+				fmt.Errorf("%w due to all null value KeyFields for Person", ErrTypeNotFound))
 			break
 		}
-		return "findWorldByID", nil
+		return "findPersonByID", nil
 	}
-	return "", fmt.Errorf("%w for World due to %v", ErrTypeNotFound,
+	return "", fmt.Errorf("%w for Person due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
+}
+
+func entityResolverNameForProduct(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
+	for {
+		var (
+			m   EntityRepresentation
+			val any
+			ok  bool
+		)
+		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
+		m = rep
+		val, ok = m["sku"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"sku\" for Product", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for Product", ErrTypeNotFound))
+			break
+		}
+		return "findProductBySku", nil
+	}
+	return "", fmt.Errorf("%w for Product due to %v", ErrTypeNotFound,
 		errors.Join(entityResolverErrs...).Error())
 }

@@ -633,6 +633,7 @@ func mutateHook(b *ModelBuild) *ModelBuild {
 func parseAst(path string) (*ast.Package, error) {
 	// test setup to parse the types
 	fset := token.NewFileSet()
+	// help wanted to golang.org/x/tools/go/packages
 	pkgs, err := parser.ParseDir(fset, path, nil, parser.AllErrors)
 	if err != nil {
 		return nil, err
@@ -876,16 +877,16 @@ func TestCustomTemplate(t *testing.T) {
 }
 
 func getStringInBetween(str, start, end string) string {
-	startIndex := strings.Index(str, start)
-	if startIndex == -1 {
+	_, after, ok := strings.Cut(str, start)
+	if !ok {
 		return ""
 	}
 
-	newStr := str[startIndex+len(start):]
-	e := strings.Index(newStr, end)
-	if e == -1 {
+	newStr := after
+	before, _, ok := strings.Cut(newStr, end)
+	if !ok {
 		return ""
 	}
 
-	return newStr[:e]
+	return before
 }

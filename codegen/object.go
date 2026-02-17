@@ -118,8 +118,8 @@ func (o *Object) HasUnmarshal() bool {
 	if o.IsMap() {
 		return false
 	}
-	for i := 0; i < o.Type.(*types.Named).NumMethods(); i++ {
-		if o.Type.(*types.Named).Method(i).Name() == "UnmarshalGQL" {
+	for method := range o.Type.(*types.Named).Methods() {
+		if method.Name() == "UnmarshalGQL" {
 			return true
 		}
 	}

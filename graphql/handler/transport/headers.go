@@ -31,7 +31,7 @@ func determineResponseContentType(
 		return acceptApplicationJson
 	}
 
-	for _, acceptPart := range strings.Split(accept, ",") {
+	for acceptPart := range strings.SplitSeq(accept, ",") {
 		mediaType, _, err := mime.ParseMediaType(strings.TrimSpace(acceptPart))
 		if err != nil {
 			continue

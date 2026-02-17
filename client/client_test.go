@@ -214,7 +214,7 @@ func TestSetCustomDecodeConfig(t *testing.T) {
 		ErrorUnused: true,
 		ZeroFields:  true,
 		DecodeHook: func(f reflect.Type, t reflect.Type, data any) (any, error) {
-			if t != reflect.TypeOf(time.Time{}) {
+			if t != reflect.TypeFor[time.Time]() {
 				return data, nil
 			}
 

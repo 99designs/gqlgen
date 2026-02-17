@@ -54,7 +54,7 @@ To launch the project, follow these steps:
    ```
 
 3. **Using the API**
-   
+
    After launching, open your browser and go to:
    ```
    http://localhost:8080
@@ -80,11 +80,11 @@ Interactive GraphQL playground console is available at:
 
 <details>
     <summary><b>Getting a list of all posts</b></summary>
-    
+
     query{
         posts{
             id
-            title 
+            title
             text
             authorID
             commentsEnabled
@@ -96,7 +96,7 @@ Interactive GraphQL playground console is available at:
 
 <details>
     <summary><b>Getting a specific post with comments</b></summary>
-    
+
     query {
         post(postID: 1) {
             id
@@ -124,7 +124,7 @@ Interactive GraphQL playground console is available at:
 
 <details>
     <summary><b>Creating a new post</b></summary>
-    
+
     mutation {
         addPost(postInput: {
             authorID: "a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
@@ -142,7 +142,7 @@ Interactive GraphQL playground console is available at:
 
 <details>
     <summary><b>Creating a new comment</b></summary>
-    
+
     mutation {
         addComment(commentInput: {
             authorID: "123e4567-e89b-12d3-a456-426614174000",
@@ -153,7 +153,7 @@ Interactive GraphQL playground console is available at:
             id
             text
             parentID
-        }   
+        }
     }
 
 </details>
@@ -161,7 +161,7 @@ Interactive GraphQL playground console is available at:
 
 <details>
     <summary><b>Subscribing to new comments</b></summary>
-    
+
     subscription {
         commentAdded(postID: 1) {
             id
@@ -240,7 +240,7 @@ For testing the API, you can use any GraphQL clients, such as Insomnia, Postman,
 
 
 ## 🔧 Stack:
-  * Go 1.24
+  * Go 1.25
   * GraphQL (gqlgen)
   * PostgreSQL 17
   * Redis 9

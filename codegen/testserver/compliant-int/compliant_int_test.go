@@ -67,6 +67,7 @@ func TestCodegen(t *testing.T) {
 			path, err := filepath.Abs(tc.pkgPath)
 			require.NoError(t, err)
 
+			//nolint:staticcheck // SA1019 help wanted to golang.org/x/tools/go/packages
 			pkgs, err := parser.ParseDir(token.NewFileSet(), path, nil, parser.AllErrors)
 			require.NoError(t, err)
 

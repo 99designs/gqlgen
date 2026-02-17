@@ -28,7 +28,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        go: ["1.24", "1.25"]
+        go: ["1.26", "1.25"]
     runs-on: ${{ matrix.os }}
     continue-on-error: true
     steps:

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"sync"
 	"testing"
 	"time"
 
@@ -28,6 +29,49 @@ func isNil(input any) bool {
 }
 
 type ckey string
+
+type callStore struct {
+	mu    sync.Mutex
+	calls map[string][]directiveCall
+}
+
+func (s *callStore) getCalls(directiveName string) []directiveCall {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.calls == nil {
+		s.calls = make(map[string][]directiveCall)
+	}
+
+	return s.calls[directiveName]
+}
+
+func (s *callStore) addCall(directiveName string, call directiveCall) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.calls == nil {
+		s.calls = make(map[string][]directiveCall)
+	}
+
+	s.calls[directiveName] = append(s.calls[directiveName], call)
+}
+
+func (s *callStore) reset(directiveName string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	if s.calls == nil {
+		s.calls = make(map[string][]directiveCall)
+	}
+
+	s.calls[directiveName] = nil
+}
+
+type directiveCall struct {
+	TypeName string
+	Value    any
+}
 
 func TestDirectives(t *testing.T) {
 	resolvers := &Stub{}
@@ -111,6 +155,9 @@ func TestDirectives(t *testing.T) {
 	resolvers.SubscriptionResolver.DirectiveUnimplemented = func(ctx context.Context) (<-chan *string, error) {
 		return okchan()
 	}
+
+	callStore := callStore{}
+
 	srv := handler.New(NewExecutableSchema(Config{
 		Resolvers: resolvers,
 		Directives: DirectiveRoot{
@@ -204,7 +251,14 @@ func TestDirectives(t *testing.T) {
 				return next(ctx)
 			},
 			Directive3: func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
-				return next(ctx)
+				call := directiveCall{}
+				typedObj, err := next(ctx)
+				if typedObj != nil {
+					call.TypeName = (reflect.TypeOf(typedObj).String())
+					call.Value = typedObj
+				}
+				callStore.addCall("Directive3", call)
+				return typedObj, err
 			},
 			Order1: func(ctx context.Context, obj any, next graphql.Resolver, location string) (res any, err error) {
 				order := []string{location}
@@ -466,6 +520,25 @@ func TestDirectives(t *testing.T) {
 
 			require.NoError(t, err)
 			require.Equal(t, "Ok", *resp.DirectiveInputType)
+		})
+		t.Run("directives run as expected for X times ", func(t *testing.T) {
+			callStore.reset("Directive3")
+
+			var resp struct {
+				DirectiveInput *string
+			}
+
+			err := c.Post(`query { directiveInput(arg: {text:"test", inner:{message:"msg"}}) }`, &resp)
+			require.NoError(t, err)
+
+			calls := callStore.getCalls("Directive3")
+			t.Logf("directive3 was called %d time(s)", len(calls))
+
+			require.Equal(t, 1, len(calls),
+				"@directive3 should be called exactly once for InputDirectives, but was called %d times", len(calls))
+			require.Equal(t, "followschema.InputDirectives", calls[0].TypeName,
+				"@directive3 should receive an object of type InputDirectives, but received %s", calls[0].TypeName)
+			require.Equal(t, "test", calls[0].Value.(InputDirectives).Text)
 		})
 	})
 	t.Run("object field directives", func(t *testing.T) {

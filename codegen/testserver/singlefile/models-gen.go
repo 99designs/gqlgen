@@ -204,6 +204,10 @@ type OuterObject struct {
 	Inner *InnerObject `json:"inner"`
 }
 
+type OuterWrapperInput struct {
+	Inner *InputDirectives `json:"inner"`
+}
+
 type Pet struct {
 	ID      int    `json:"id"`
 	Friends []*Pet `json:"friends,omitempty"`

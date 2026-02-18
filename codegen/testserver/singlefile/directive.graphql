@@ -21,6 +21,7 @@ extend type Query {
     directiveInputNullable(arg: InputDirectives): String
     directiveInput(arg: InputDirectives!): String
     directiveInputType(arg: InnerInput! @custom): String
+    directiveInputOuter(arg: OuterWrapperInput!): String
     directiveObject: ObjectDirectives @order1(location: "Query_field")
     directiveObjectWithCustomGoModel: ObjectDirectivesWithCustomGoModel
     directiveFieldDef(ret: String!): String! @length(min: 1, message: "not valid")
@@ -34,6 +35,10 @@ extend type Subscription {
     directiveNullableArg(arg: Int @range(min:0), arg2: Int @range, arg3: String @toNull): String
     directiveDouble: String @directive1 @directive2
     directiveUnimplemented: String @unimplemented
+}
+
+input OuterWrapperInput {
+    inner: InputDirectives!
 }
 
 input InputDirectives @directive3 {

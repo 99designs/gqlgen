@@ -247,6 +247,11 @@ func (r *queryResolver) DirectiveInputType(ctx context.Context, arg InnerInput) 
 	panic("not implemented")
 }
 
+// DirectiveInputOuter is the resolver for the directiveInputOuter field.
+func (r *queryResolver) DirectiveInputOuter(ctx context.Context, arg OuterWrapperInput) (*string, error) {
+	panic("not implemented")
+}
+
 // DirectiveObject is the resolver for the directiveObject field.
 func (r *queryResolver) DirectiveObject(ctx context.Context) (*ObjectDirectives, error) {
 	panic("not implemented")

@@ -249,7 +249,6 @@ func (ec *executionContext) unmarshalInputMapNestedInput(ctx context.Context, ob
 			it.Value = data
 		}
 	}
-
 	return it, nil
 }
 
@@ -283,7 +282,6 @@ func (ec *executionContext) unmarshalInputMapNestedMapSliceInput(ctx context.Con
 			it["recurse"] = data
 		}
 	}
-
 	return it, nil
 }
 
@@ -331,7 +329,6 @@ func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Co
 			it["nested"] = data
 		}
 	}
-
 	return it, nil
 }
 
@@ -358,7 +355,6 @@ func (ec *executionContext) unmarshalInputNestedMapInput(ctx context.Context, ob
 			it.Map = data
 		}
 	}
-
 	return it, nil
 }
 

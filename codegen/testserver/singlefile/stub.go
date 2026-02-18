@@ -81,6 +81,7 @@ type Stub struct {
 		DirectiveInputNullable           func(ctx context.Context, arg *InputDirectives) (*string, error)
 		DirectiveInput                   func(ctx context.Context, arg InputDirectives) (*string, error)
 		DirectiveInputType               func(ctx context.Context, arg InnerInput) (*string, error)
+		DirectiveInputOuter              func(ctx context.Context, arg OuterWrapperInput) (*string, error)
 		DirectiveObject                  func(ctx context.Context) (*ObjectDirectives, error)
 		DirectiveObjectWithCustomGoModel func(ctx context.Context) (*ObjectDirectivesWithCustomGoModel, error)
 		DirectiveFieldDef                func(ctx context.Context, ret string) (string, error)
@@ -393,6 +394,9 @@ func (r *stubQuery) DirectiveInput(ctx context.Context, arg InputDirectives) (*s
 }
 func (r *stubQuery) DirectiveInputType(ctx context.Context, arg InnerInput) (*string, error) {
 	return r.QueryResolver.DirectiveInputType(ctx, arg)
+}
+func (r *stubQuery) DirectiveInputOuter(ctx context.Context, arg OuterWrapperInput) (*string, error) {
+	return r.QueryResolver.DirectiveInputOuter(ctx, arg)
 }
 func (r *stubQuery) DirectiveObject(ctx context.Context) (*ObjectDirectives, error) {
 	return r.QueryResolver.DirectiveObject(ctx)

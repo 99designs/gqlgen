@@ -3077,7 +3077,6 @@ func unmarshalInputCreateUserInput(ctx context.Context, ec *executionContext, ob
 			it.Role = data
 		}
 	}
-
 	return it, nil
 }
 
@@ -3136,7 +3135,6 @@ func unmarshalInputUserFilter(ctx context.Context, ec *executionContext, obj any
 			it.IsActive = data
 		}
 	}
-
 	return it, nil
 }
 

@@ -56,7 +56,6 @@ func (ec *executionContext) unmarshalInputDirectiveInput(ctx context.Context, ob
 			it["newField"] = data
 		}
 	}
-
 	return it, nil
 }
 
@@ -90,7 +89,6 @@ func (ec *executionContext) unmarshalInputRequiredFilters(ctx context.Context, o
 			it["age"] = data
 		}
 	}
-
 	return it, nil
 }
 
@@ -131,7 +129,6 @@ func (ec *executionContext) unmarshalInputSearchFilters(ctx context.Context, obj
 			it["minPrice"] = data
 		}
 	}
-
 	return it, nil
 }
 
@@ -182,7 +179,6 @@ func (ec *executionContext) unmarshalInputSearchWithDefaults(ctx context.Context
 			it["includeArchived"] = data
 		}
 	}
-
 	return it, nil
 }
 
@@ -223,7 +219,6 @@ func (ec *executionContext) unmarshalInputUpdateProductInput(ctx context.Context
 			it["price"] = data
 		}
 	}
-
 	return it, nil
 }
 

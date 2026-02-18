@@ -112,7 +112,57 @@
 			}
 		}
 
+		{{- if $input.InputObjectDirectives }}
+		// Execute INPUT_OBJECT level directives (e.g., @oneOf, @directive3)
+		// These run after all fields have been unmarshaled
+		{{ if $useFunctionSyntaxForExecutionContext -}}
+		directive0 := func(ctx context.Context) (any, error) { return {{$it}}, nil }
+		{{- else -}}
+		directive0 := func(ctx context.Context) (any, error) { return {{$it}}, nil }
+		{{- end }}
+		{{- range $i, $directive := $input.InputObjectDirectives }}
+		directive{{add $i 1}} := func(ctx context.Context) (any, error) {
+			{{- range $arg := $directive.Args }}
+				{{- if notNil "Value" $arg }}
+					{{ if $useFunctionSyntaxForExecutionContext -}}
+					{{ $arg.VarName }}, err := {{ $arg.TypeReference.UnmarshalFunc }}(ctx, ec, {{ $arg.Value | dump }})
+					{{- else -}}
+					{{ $arg.VarName }}, err := ec.{{ $arg.TypeReference.UnmarshalFunc }}(ctx, {{ $arg.Value | dump }})
+					{{- end }}
+					if err != nil {
+						return {{$it}}, graphql.ErrorOnPath(ctx, err)
+					}
+				{{- else if notNil "Default" $arg }}
+					{{ if $useFunctionSyntaxForExecutionContext -}}
+					{{ $arg.VarName }}, err := {{ $arg.TypeReference.UnmarshalFunc }}(ctx, ec, {{ $arg.Default | dump }})
+					{{- else -}}
+					{{ $arg.VarName }}, err := ec.{{ $arg.TypeReference.UnmarshalFunc }}(ctx, {{ $arg.Default | dump }})
+					{{- end }}
+					if err != nil {
+						return {{$it}}, graphql.ErrorOnPath(ctx, err)
+					}
+				{{- end }}
+			{{- end }}
+			{{- if not $directive.IsBuiltIn}}
+				if {{$directive.CallPath}} == nil {
+					return {{$it}}, errors.New("directive {{$directive.Name}} is not implemented")
+				}
+			{{- end}}
+			return {{$directive.CallPath}}(ctx, asMap, directive{{$i}})
+		}
+		{{- end }}
+		tmp, err := directive{{$input.InputObjectDirectives|len}}(ctx)
+		if err != nil {
+			return {{$it}}, graphql.ErrorOnPath(ctx, err)
+		}
+		if data, ok := tmp.({{ if $input.PointersInUnmarshalInput }}*{{ end }}{{$input.Type | ref}}) ; ok {
+			return data, nil
+		}
+		return {{$it}}, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from INPUT_OBJECT directive, should be {{ if $input.PointersInUnmarshalInput }}*{{ end }}{{$input.Type | ref}}`, tmp))
+		{{- else }}
 		return {{$it}}, nil
+		{{- end }}
 	}
 	{{- end }}
 {{ end }}
+

@@ -139,6 +139,23 @@ func (o *Object) HasDirectives() bool {
 	return false
 }
 
+// InputObjectDirectives returns directives that should be executed at the INPUT_OBJECT level.
+// This is used for input types to execute @directives placed on the input object itself,
+// after all fields have been unmarshaled.
+// See: https://github.com/99designs/gqlgen/issues/2281
+func (o *Object) InputObjectDirectives() []*Directive {
+	if o.Kind != ast.InputObject {
+		return nil
+	}
+	var d []*Directive
+	for _, dir := range o.Directives {
+		if !dir.SkipRuntime && dir.IsLocation(ast.LocationInputObject) {
+			d = append(d, dir)
+		}
+	}
+	return d
+}
+
 func (o *Object) IsConcurrent() bool {
 	for _, f := range o.Fields {
 		if f.IsConcurrent() {

@@ -2145,7 +2145,6 @@ func (ec *executionContext) unmarshalInputInput(ctx context.Context, obj any) (I
 			it.N = data
 		}
 	}
-
 	return it, nil
 }
 
@@ -2172,7 +2171,6 @@ func (ec *executionContext) unmarshalInputInput64(ctx context.Context, obj any) 
 			it.N = data
 		}
 	}
-
 	return it, nil
 }
 

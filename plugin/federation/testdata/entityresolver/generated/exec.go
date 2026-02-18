@@ -4466,7 +4466,6 @@ func (ec *executionContext) unmarshalInputMultiHelloByNamesInput(ctx context.Con
 			it.Name = data
 		}
 	}
-
 	return it, nil
 }
 
@@ -4493,7 +4492,6 @@ func (ec *executionContext) unmarshalInputMultiHelloMultipleRequiresByNamesInput
 			it.Name = data
 		}
 	}
-
 	return it, nil
 }
 
@@ -4520,7 +4518,6 @@ func (ec *executionContext) unmarshalInputMultiHelloRequiresByNamesInput(ctx con
 			it.Name = data
 		}
 	}
-
 	return it, nil
 }
 
@@ -4547,7 +4544,6 @@ func (ec *executionContext) unmarshalInputMultiHelloWithErrorByNamesInput(ctx co
 			it.Name = data
 		}
 	}
-
 	return it, nil
 }
 
@@ -4574,7 +4570,6 @@ func (ec *executionContext) unmarshalInputMultiPlanetRequiresNestedByNamesInput(
 			it.Name = data
 		}
 	}
-
 	return it, nil
 }
 

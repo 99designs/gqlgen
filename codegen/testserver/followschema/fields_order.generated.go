@@ -97,7 +97,6 @@ func (ec *executionContext) unmarshalInputFieldsOrderInput(ctx context.Context, 
 			}
 		}
 	}
-
 	return it, nil
 }
 

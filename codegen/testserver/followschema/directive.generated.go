@@ -355,7 +355,6 @@ func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, o
 			}
 		}
 	}
-
 	return it, nil
 }
 
@@ -378,13 +377,6 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalNString2string(ctx, v) }
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Directive3 == nil {
-					var zeroVal string
-					return zeroVal, errors.New("directive directive3 is not implemented")
-				}
-				return ec.Directives.Directive3(ctx, obj, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				min, err := ec.unmarshalNInt2int(ctx, 0)
 				if err != nil {
 					var zeroVal string
@@ -404,10 +396,10 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 					var zeroVal string
 					return zeroVal, errors.New("directive length is not implemented")
 				}
-				return ec.Directives.Length(ctx, obj, directive1, min, max, message)
+				return ec.Directives.Length(ctx, obj, directive0, min, max, message)
 			}
 
-			tmp, err := directive2(ctx)
+			tmp, err := directive1(ctx)
 			if err != nil {
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
@@ -422,21 +414,14 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalOString2ᚖstring(ctx, v) }
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Directive3 == nil {
-					var zeroVal *string
-					return zeroVal, errors.New("directive directive3 is not implemented")
-				}
-				return ec.Directives.Directive3(ctx, obj, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				if ec.Directives.ToNull == nil {
 					var zeroVal *string
 					return zeroVal, errors.New("directive toNull is not implemented")
 				}
-				return ec.Directives.ToNull(ctx, obj, directive1)
+				return ec.Directives.ToNull(ctx, obj, directive0)
 			}
 
-			tmp, err := directive2(ctx)
+			tmp, err := directive1(ctx)
 			if err != nil {
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
@@ -450,56 +435,18 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			}
 		case "inner":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("inner"))
-			directive0 := func(ctx context.Context) (any, error) {
-				return ec.unmarshalNInnerDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInnerDirectives(ctx, v)
-			}
-
-			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Directive3 == nil {
-					var zeroVal *InnerDirectives
-					return zeroVal, errors.New("directive directive3 is not implemented")
-				}
-				return ec.Directives.Directive3(ctx, obj, directive0)
-			}
-
-			tmp, err := directive1(ctx)
+			data, err := ec.unmarshalNInnerDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInnerDirectives(ctx, v)
 			if err != nil {
-				return it, graphql.ErrorOnPath(ctx, err)
+				return it, err
 			}
-			if data, ok := tmp.(*InnerDirectives); ok {
-				it.Inner = data
-			} else if tmp == nil {
-				it.Inner = nil
-			} else {
-				err := fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/codegen/testserver/followschema.InnerDirectives`, tmp)
-				return it, graphql.ErrorOnPath(ctx, err)
-			}
+			it.Inner = data
 		case "innerNullable":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("innerNullable"))
-			directive0 := func(ctx context.Context) (any, error) {
-				return ec.unmarshalOInnerDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInnerDirectives(ctx, v)
-			}
-
-			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Directive3 == nil {
-					var zeroVal *InnerDirectives
-					return zeroVal, errors.New("directive directive3 is not implemented")
-				}
-				return ec.Directives.Directive3(ctx, obj, directive0)
-			}
-
-			tmp, err := directive1(ctx)
+			data, err := ec.unmarshalOInnerDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInnerDirectives(ctx, v)
 			if err != nil {
-				return it, graphql.ErrorOnPath(ctx, err)
+				return it, err
 			}
-			if data, ok := tmp.(*InnerDirectives); ok {
-				it.InnerNullable = data
-			} else if tmp == nil {
-				it.InnerNullable = nil
-			} else {
-				err := fmt.Errorf(`unexpected type %T from directive, should be *github.com/99designs/gqlgen/codegen/testserver/followschema.InnerDirectives`, tmp)
-				return it, graphql.ErrorOnPath(ctx, err)
-			}
+			it.InnerNullable = data
 		case "thirdParty":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("thirdParty"))
 			directive0 := func(ctx context.Context) (any, error) {
@@ -507,13 +454,6 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			}
 
 			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.Directive3 == nil {
-					var zeroVal *ThirdParty
-					return zeroVal, errors.New("directive directive3 is not implemented")
-				}
-				return ec.Directives.Directive3(ctx, obj, directive0)
-			}
-			directive2 := func(ctx context.Context) (any, error) {
 				min, err := ec.unmarshalNInt2int(ctx, 0)
 				if err != nil {
 					var zeroVal *ThirdParty
@@ -528,10 +468,10 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 					var zeroVal *ThirdParty
 					return zeroVal, errors.New("directive length is not implemented")
 				}
-				return ec.Directives.Length(ctx, obj, directive1, min, max, nil)
+				return ec.Directives.Length(ctx, obj, directive0, min, max, nil)
 			}
 
-			tmp, err := directive2(ctx)
+			tmp, err := directive1(ctx)
 			if err != nil {
 				return it, graphql.ErrorOnPath(ctx, err)
 			}
@@ -545,7 +485,48 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			}
 		}
 	}
+	// Execute INPUT_OBJECT level directives (e.g., @oneOf, @directive3)
+	// These run after all fields have been unmarshaled
+	directive0 := func(ctx context.Context) (any, error) { return it, nil }
+	directive1 := func(ctx context.Context) (any, error) {
+		if ec.Directives.Directive3 == nil {
+			return it, errors.New("directive directive3 is not implemented")
+		}
+		return ec.Directives.Directive3(ctx, asMap, directive0)
+	}
+	tmp, err := directive1(ctx)
+	if err != nil {
+		return it, graphql.ErrorOnPath(ctx, err)
+	}
+	if data, ok := tmp.(InputDirectives); ok {
+		return data, nil
+	}
+	return it, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from INPUT_OBJECT directive, should be InputDirectives`, tmp))
+}
 
+func (ec *executionContext) unmarshalInputOuterWrapperInput(ctx context.Context, obj any) (OuterWrapperInput, error) {
+	var it OuterWrapperInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"inner"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "inner":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("inner"))
+			data, err := ec.unmarshalNInputDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInputDirectives(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Inner = data
+		}
+	}
 	return it, nil
 }
 
@@ -650,6 +631,16 @@ func (ec *executionContext) unmarshalNInnerDirectives2ᚖgithubᚗcomᚋ99design
 
 func (ec *executionContext) unmarshalNInputDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInputDirectives(ctx context.Context, v any) (InputDirectives, error) {
 	res, err := ec.unmarshalInputInputDirectives(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNInputDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInputDirectives(ctx context.Context, v any) (*InputDirectives, error) {
+	res, err := ec.unmarshalInputInputDirectives(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNOuterWrapperInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐOuterWrapperInput(ctx context.Context, v any) (OuterWrapperInput, error) {
+	res, err := ec.unmarshalInputOuterWrapperInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

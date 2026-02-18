@@ -532,18 +532,18 @@ func TestDirectives(t *testing.T) {
 				DirectiveInputOuter *string
 			}
 
-			err := c.Post(`query { directiveInputOuter(arg: {inner: {text:"test", inner:{message:"msg"}}}) }`,
-				&resp,
-			)
+			query := `query { directiveInputOuter(arg: {inner: {text:"test", inner:{message:"msg"}}}) }`
+			err := c.Post(query, &resp)
 			require.NoError(t, err)
 
 			calls := callStore.getCalls("Directive3")
 			t.Logf("directive3 was called %d time(s)", len(calls))
 
-			require.Equal(t, 1, len(calls),
-				"@directive3 should be called exactly once for InputDirectives, but was called %d times", len(calls))
+			require.Len(t, calls, 1,
+				"@directive3 should be called exactly once, but was called %d times", len(calls))
 			require.Equal(t, "followschema.InputDirectives", calls[0].TypeName,
-				"@directive3 should receive an object of type InputDirectives, but received %s", calls[0].TypeName)
+				"@directive3 should receive type InputDirectives, but received %s",
+				calls[0].TypeName)
 			require.Equal(t, "test", calls[0].Value.(InputDirectives).Text)
 		})
 	})

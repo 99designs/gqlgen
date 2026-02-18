@@ -2596,7 +2596,6 @@ func (ec *executionContext) unmarshalInputDateFilter(ctx context.Context, obj an
 			it.Op = data
 		}
 	}
-
 	return it, nil
 }
 
@@ -2644,7 +2643,6 @@ func (ec *executionContext) unmarshalInputListCoercion(ctx context.Context, obj 
 			it.ScalarVal = data
 		}
 	}
-
 	return it, nil
 }
 

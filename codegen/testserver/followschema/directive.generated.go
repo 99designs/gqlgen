@@ -496,12 +496,12 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 	}
 	tmp, err := directive1(ctx)
 	if err != nil {
-		return it, err
+		return it, graphql.ErrorOnPath(ctx, err)
 	}
 	if data, ok := tmp.(InputDirectives); ok {
 		return data, nil
 	}
-	return it, fmt.Errorf(`unexpected type %T from INPUT_OBJECT directive, should be InputDirectives`, tmp)
+	return it, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from INPUT_OBJECT directive, should be InputDirectives`, tmp))
 }
 
 // endregion **************************** input.gotpl *****************************

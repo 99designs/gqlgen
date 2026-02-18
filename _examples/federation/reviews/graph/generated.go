@@ -2740,7 +2740,6 @@ func (ec *executionContext) unmarshalInputProductByManufacturerIDAndIDsInput(ctx
 			it.ID = data
 		}
 	}
-
 	return it, nil
 }
 

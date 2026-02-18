@@ -2211,30 +2211,30 @@ func (ec *executionContext) unmarshalInputTodoInput(ctx context.Context, obj any
 		switch k {
 		case "text":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("text"))
-			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalNString2string(ctx, v) }
-
-			directive1 := func(ctx context.Context) (any, error) {
-				if ec.Directives.InputLogging == nil {
-					var zeroVal string
-					return zeroVal, errors.New("directive inputLogging is not implemented")
-				}
-				return ec.Directives.InputLogging(ctx, obj, directive0)
-			}
-
-			tmp, err := directive1(ctx)
+			data, err := ec.unmarshalNString2string(ctx, v)
 			if err != nil {
-				return it, graphql.ErrorOnPath(ctx, err)
+				return it, err
 			}
-			if data, ok := tmp.(string); ok {
-				it.Text = data
-			} else {
-				err := fmt.Errorf(`unexpected type %T from directive, should be string`, tmp)
-				return it, graphql.ErrorOnPath(ctx, err)
-			}
+			it.Text = data
 		}
 	}
-
-	return it, nil
+	// Execute INPUT_OBJECT level directives (e.g., @oneOf, @directive3)
+	// These run after all fields have been unmarshaled
+	directive0 := func(ctx context.Context) (any, error) { return it, nil }
+	directive1 := func(ctx context.Context) (any, error) {
+		if ec.Directives.InputLogging == nil {
+			return it, errors.New("directive inputLogging is not implemented")
+		}
+		return ec.Directives.InputLogging(ctx, asMap, directive0)
+	}
+	tmp, err := directive1(ctx)
+	if err != nil {
+		return it, graphql.ErrorOnPath(ctx, err)
+	}
+	if data, ok := tmp.(TodoInput); ok {
+		return data, nil
+	}
+	return it, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from INPUT_OBJECT directive, should be TodoInput`, tmp))
 }
 
 // endregion **************************** input.gotpl *****************************

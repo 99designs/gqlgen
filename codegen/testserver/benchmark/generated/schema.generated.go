@@ -642,7 +642,6 @@ func (ec *executionContext) unmarshalInputUserOrderBy(ctx context.Context, obj a
 			it.OrderByDirection = data
 		}
 	}
-
 	return it, nil
 }
 

@@ -2475,7 +2475,6 @@ func (ec *executionContext) unmarshalInputTodoInput(ctx context.Context, obj any
 			it.Number = data
 		}
 	}
-
 	return it, nil
 }
 

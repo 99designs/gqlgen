@@ -2560,7 +2560,6 @@ func (ec *executionContext) unmarshalInputSearchArgs(ctx context.Context, obj an
 			it.IsBanned = data
 		}
 	}
-
 	return it, nil
 }
 

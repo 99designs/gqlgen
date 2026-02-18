@@ -2299,7 +2299,6 @@ func (ec *executionContext) unmarshalInputUploadFile(ctx context.Context, obj an
 			it.File = data
 		}
 	}
-
 	return it, nil
 }
 

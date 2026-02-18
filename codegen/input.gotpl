@@ -130,7 +130,7 @@
 					{{ $arg.VarName }}, err := ec.{{ $arg.TypeReference.UnmarshalFunc }}(ctx, {{ $arg.Value | dump }})
 					{{- end }}
 					if err != nil {
-						return {{$it}}, err
+						return {{$it}}, graphql.ErrorOnPath(ctx, err)
 					}
 				{{- else if notNil "Default" $arg }}
 					{{ if $useFunctionSyntaxForExecutionContext -}}
@@ -139,7 +139,7 @@
 					{{ $arg.VarName }}, err := ec.{{ $arg.TypeReference.UnmarshalFunc }}(ctx, {{ $arg.Default | dump }})
 					{{- end }}
 					if err != nil {
-						return {{$it}}, err
+						return {{$it}}, graphql.ErrorOnPath(ctx, err)
 					}
 				{{- end }}
 			{{- end }}
@@ -153,12 +153,12 @@
 		{{- end }}
 		tmp, err := directive{{$input.InputObjectDirectives|len}}(ctx)
 		if err != nil {
-			return {{$it}}, err
+			return {{$it}}, graphql.ErrorOnPath(ctx, err)
 		}
 		if data, ok := tmp.({{ if $input.PointersInUnmarshalInput }}*{{ end }}{{$input.Type | ref}}) ; ok {
 			return data, nil
 		}
-		return {{$it}}, fmt.Errorf(`unexpected type %T from INPUT_OBJECT directive, should be {{ if $input.PointersInUnmarshalInput }}*{{ end }}{{$input.Type | ref}}`, tmp)
+		return {{$it}}, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from INPUT_OBJECT directive, should be {{ if $input.PointersInUnmarshalInput }}*{{ end }}{{$input.Type | ref}}`, tmp))
 		{{- else }}
 		return {{$it}}, nil
 		{{- end }}

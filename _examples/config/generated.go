@@ -2391,7 +2391,6 @@ func (ec *executionContext) unmarshalInputNewTodo(ctx context.Context, obj any) 
 			it.UserID = data
 		}
 	}
-
 	return it, nil
 }
 

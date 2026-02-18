@@ -104,6 +104,10 @@ func TestDirectives(t *testing.T) {
 		return &ok, nil
 	}
 
+	resolvers.QueryResolver.DirectiveInputOuter = func(ctx context.Context, arg OuterWrapperInput) (i *string, e error) {
+		return &ok, nil
+	}
+
 	resolvers.QueryResolver.DirectiveObject = func(ctx context.Context) (*ObjectDirectives, error) {
 		return &ObjectDirectives{
 			Text:         ok,
@@ -521,14 +525,16 @@ func TestDirectives(t *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, "Ok", *resp.DirectiveInputType)
 		})
-		t.Run("directives run as expected for X times ", func(t *testing.T) {
+		t.Run("directives run as expected for X times", func(t *testing.T) {
 			callStore.reset("Directive3")
 
 			var resp struct {
-				DirectiveInput *string
+				DirectiveInputOuter *string
 			}
 
-			err := c.Post(`query { directiveInput(arg: {text:"test", inner:{message:"msg"}}) }`, &resp)
+			err := c.Post(`query { directiveInputOuter(arg: {inner: {text:"test", inner:{message:"msg"}}}) }`,
+				&resp,
+			)
 			require.NoError(t, err)
 
 			calls := callStore.getCalls("Directive3")

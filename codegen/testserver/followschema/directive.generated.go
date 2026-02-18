@@ -504,6 +504,32 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 	return it, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from INPUT_OBJECT directive, should be InputDirectives`, tmp))
 }
 
+func (ec *executionContext) unmarshalInputOuterWrapperInput(ctx context.Context, obj any) (OuterWrapperInput, error) {
+	var it OuterWrapperInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"inner"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "inner":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("inner"))
+			data, err := ec.unmarshalNInputDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInputDirectives(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Inner = data
+		}
+	}
+	return it, nil
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -605,6 +631,16 @@ func (ec *executionContext) unmarshalNInnerDirectives2ᚖgithubᚗcomᚋ99design
 
 func (ec *executionContext) unmarshalNInputDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInputDirectives(ctx context.Context, v any) (InputDirectives, error) {
 	res, err := ec.unmarshalInputInputDirectives(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNInputDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInputDirectives(ctx context.Context, v any) (*InputDirectives, error) {
+	res, err := ec.unmarshalInputInputDirectives(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalNOuterWrapperInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐOuterWrapperInput(ctx context.Context, v any) (OuterWrapperInput, error) {
+	res, err := ec.unmarshalInputOuterWrapperInput(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

@@ -322,6 +322,7 @@ type ComplexityRoot struct {
 		DirectiveFieldDef                func(childComplexity int, ret string) int
 		DirectiveInput                   func(childComplexity int, arg InputDirectives) int
 		DirectiveInputNullable           func(childComplexity int, arg *InputDirectives) int
+		DirectiveInputOuter              func(childComplexity int, arg OuterWrapperInput) int
 		DirectiveInputType               func(childComplexity int, arg InnerInput) int
 		DirectiveNullableArg             func(childComplexity int, arg *int, arg2 *int, arg3 *string) int
 		DirectiveObject                  func(childComplexity int) int
@@ -1374,6 +1375,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Query.DirectiveInputNullable(childComplexity, args["arg"].(*InputDirectives)), true
 
+	case "Query.directiveInputOuter":
+		if e.ComplexityRoot.Query.DirectiveInputOuter == nil {
+			break
+		}
+
+		args, err := ec.field_Query_directiveInputOuter_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.DirectiveInputOuter(childComplexity, args["arg"].(OuterWrapperInput)), true
+
 	case "Query.directiveInputType":
 		if e.ComplexityRoot.Query.DirectiveInputType == nil {
 			break
@@ -2325,6 +2338,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputNestedMapInput,
 		ec.unmarshalInputOmittableInput,
 		ec.unmarshalInputOuterInput,
+		ec.unmarshalInputOuterWrapperInput,
 		ec.unmarshalInputRecursiveInputSlice,
 		ec.unmarshalInputRequiredFilters,
 		ec.unmarshalInputSearchFilters,
@@ -2707,6 +2721,9 @@ input OuterInput {
 type OuterObject {
 	inner: InnerObject!
 }
+input OuterWrapperInput {
+	inner: InputDirectives!
+}
 type OverlappingFields {
 	oneFoo: Int! @goField(name: "foo")
 	twoFoo: Int! @goField(name: "foo")
@@ -2775,6 +2792,7 @@ type Query {
 	directiveInputNullable(arg: InputDirectives): String
 	directiveInput(arg: InputDirectives!): String
 	directiveInputType(arg: InnerInput! @custom): String
+	directiveInputOuter(arg: OuterWrapperInput!): String
 	directiveObject: ObjectDirectives @order1(location: "Query_field")
 	directiveObjectWithCustomGoModel: ObjectDirectivesWithCustomGoModel
 	directiveFieldDef(ret: String!): String! @length(min: 1, message: "not valid")

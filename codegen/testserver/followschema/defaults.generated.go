@@ -440,7 +440,6 @@ func (ec *executionContext) unmarshalInputDefaultInput(ctx context.Context, obj 
 			it.TruthyBoolean = data
 		}
 	}
-
 	return it, nil
 }
 

@@ -228,7 +228,6 @@ func (ec *executionContext) unmarshalInputUpdatePtrToPtrInner(ctx context.Contex
 			it.Value = data
 		}
 	}
-
 	return it, nil
 }
 
@@ -269,7 +268,6 @@ func (ec *executionContext) unmarshalInputUpdatePtrToPtrOuter(ctx context.Contex
 			it.StupidInner = data
 		}
 	}
-
 	return it, nil
 }
 

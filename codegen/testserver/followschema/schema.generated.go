@@ -5728,7 +5728,6 @@ func (ec *executionContext) unmarshalInputChanges(ctx context.Context, obj any) 
 			it["b"] = data
 		}
 	}
-
 	return it, nil
 }
 
@@ -5755,7 +5754,6 @@ func (ec *executionContext) unmarshalInputInnerInput(ctx context.Context, obj an
 			it.ID = data
 		}
 	}
-
 	return it, nil
 }
 
@@ -5831,7 +5829,6 @@ func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, ob
 			it.Object = graphql.OmittableOf(data)
 		}
 	}
-
 	return it, nil
 }
 
@@ -5858,7 +5855,6 @@ func (ec *executionContext) unmarshalInputOuterInput(ctx context.Context, obj an
 			it.Inner = data
 		}
 	}
-
 	return it, nil
 }
 
@@ -5885,7 +5881,6 @@ func (ec *executionContext) unmarshalInputRecursiveInputSlice(ctx context.Contex
 			it.Self = data
 		}
 	}
-
 	return it, nil
 }
 

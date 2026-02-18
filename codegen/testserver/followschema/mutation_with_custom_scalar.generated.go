@@ -50,7 +50,6 @@ func (ec *executionContext) unmarshalInputNestedInput(ctx context.Context, obj a
 			it.Field = data
 		}
 	}
-
 	return it, nil
 }
 
@@ -77,7 +76,6 @@ func (ec *executionContext) unmarshalInputSpecialInput(ctx context.Context, obj 
 			it.Nesting = data
 		}
 	}
-
 	return it, nil
 }
 

@@ -50,7 +50,6 @@ func (ec *executionContext) unmarshalInputInputWithEnumValue(ctx context.Context
 			it.Enum = data
 		}
 	}
-
 	return it, nil
 }
 

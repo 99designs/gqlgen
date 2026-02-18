@@ -584,7 +584,6 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj an
 			it.Underscore = data
 		}
 	}
-
 	return it, nil
 }
 

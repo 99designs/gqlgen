@@ -1,6 +1,7 @@
 {{ define "split_codecs_.gotpl" }}
 {{ reserveImport "reflect" }}
 {{ reserveImport "sync" }}
+{{ reserveImport "fmt" }}
 {{- range $key := .Ownership.CodecOwnerKeys }}
 {{- if eq (index $.Ownership.CodecOwner $key) $.ShardName }}
 {{- with $type := index $.CodecByFunc $key }}
@@ -119,30 +120,29 @@ func {{ $key }}(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel
 	{{- if and (not $type.GQL.NonNull) (not $type.IsContext) }}
 	_ = ctx
 	{{- end }}
+	v := value.({{ $type.GO | ref }})
 	{{- if $type.HasEnumValues }}
 	{{- /* Enum with external marshaler: convert via reflect */}}
-	enumStr := fmt.Sprint(value)
+	enumStr := fmt.Sprint(v)
 	res := {{ $type.Marshaler | call }}(enumStr)
 	{{- else if $type.CastType }}
-	{{- /* Cast type: reflect-convert to target type then call marshaler */}}
-	rv{{ if not $type.IsNilable }} := reflect.ValueOf(value){{ end }}
+	{{- /* Cast type: convert to target type then call marshaler */}}
 	{{- if and $type.IsTargetNilable (not $type.IsNilable) }}
-	castVal := rv.Addr().Interface()
+	castVal := &v
 	{{- else if and (not $type.IsTargetNilable) $type.IsNilable }}
-	castVal := rv.Elem().Interface()
+	castVal := *v
 	{{- else }}
-	castVal := value
+	castVal := v
 	{{- end }}
 	res := {{ $type.Marshaler | call }}(castVal)
 	{{- else }}
 	{{- /* Direct external marshaler call */}}
 	{{- if and $type.IsTargetNilable (not $type.IsNilable) }}
-	res := {{ $type.Marshaler | call }}(&value)
+	res := {{ $type.Marshaler | call }}(&v)
 	{{- else if and (not $type.IsTargetNilable) $type.IsNilable }}
-	rv{{ if not $type.IsNilable }} := reflect.ValueOf(value){{ end }}
-	res := {{ $type.Marshaler | call }}(rv.Elem().Interface())
+	res := {{ $type.Marshaler | call }}(*v)
 	{{- else }}
-	res := {{ $type.Marshaler | call }}(value)
+	res := {{ $type.Marshaler | call }}(v)
 	{{- end }}
 	{{- end }}
 	{{- if $type.GQL.NonNull }}

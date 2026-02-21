@@ -1,18 +1,279 @@
 {{ define "split_codecs_.gotpl" }}
+{{ reserveImport "reflect" }}
+{{ reserveImport "sync" }}
 {{- range $key := .Ownership.CodecOwnerKeys }}
 {{- if eq (index $.Ownership.CodecOwner $key) $.ShardName }}
 {{- with $type := index $.CodecByFunc $key }}
 {{- if eq $key ($type.MarshalFunc) }}
 
-// split_codecs_.gotpl
+// split_codecs_.gotpl — marshal
 func {{ $key }}(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
-	return ec.MarshalCodec(ctx, "{{ $key }}", sel, value)
+	{{- if or $type.IsPtrToSlice $type.IsPtrToIntf }}
+	{{- /* Pointer-to-slice / pointer-to-interface: dereference and delegate to elem codec */}}
+	rv := reflect.ValueOf(value)
+	if rv.Kind() == reflect.Ptr {
+		value = rv.Elem().Interface()
+	}
+	return ec.MarshalCodec(ctx, {{ $type.Elem.MarshalFunc | quote }}, sel, value)
+
+	{{- else if $type.IsSlice }}
+	{{- /* Slice: iterate elements, dispatch each via ec.MarshalCodec */}}
+	{{- if not $type.GQL.NonNull }}
+	if value == nil {
+		return graphql.Null
+	}
+	{{- end }}
+	rv := reflect.ValueOf(value)
+	ret := make(graphql.Array, rv.Len())
+	{{- if not $type.IsScalar }}
+	var wg sync.WaitGroup
+	isLen1 := rv.Len() == 1
+	if !isLen1 {
+		wg.Add(rv.Len())
+	}
+	{{- end }}
+	for i := 0; i < rv.Len(); i++ {
+		{{- if not $type.IsScalar }}
+		i := i
+		fc := &graphql.FieldContext{
+			Index: &i,
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			{{- if not $.Config.OmitPanicHandler }}
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			{{- end }}
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.MarshalCodec(ctx, {{ $type.Elem.MarshalFunc | quote }}, sel, rv.Index(i).Interface())
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+		{{- else }}
+		ret[i] = ec.MarshalCodec(ctx, {{ $type.Elem.MarshalFunc | quote }}, sel, rv.Index(i).Interface())
+		{{- end }}
+	}
+	{{- if not $type.IsScalar }}
+	wg.Wait()
+	{{- end }}
+	{{- if $type.Elem.GQL.NonNull }}
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+	{{- end }}
+	return ret
+
+	{{- else if and $type.IsPtrToPtr (not $type.Unmarshaler) (not $type.IsMarshaler) }}
+	{{- /* Pointer-to-pointer: nil check, dereference, delegate to elem codec */}}
+	if value == nil {
+		return graphql.Null
+	}
+	rv := reflect.ValueOf(value)
+	if rv.IsNil() {
+		return graphql.Null
+	}
+	return ec.MarshalCodec(ctx, {{ $type.Elem.MarshalFunc | quote }}, sel, rv.Elem().Interface())
+
+	{{- else }}
+	{{- /* Terminal / object types */}}
+	{{- if $type.IsNilable }}
+	if value == nil {
+		{{- if $type.GQL.NonNull }}
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		{{- end }}
+		return graphql.Null
+	}
+	rv := reflect.ValueOf(value)
+	if rv.Kind() == reflect.Ptr && rv.IsNil() {
+		{{- if $type.GQL.NonNull }}
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		{{- end }}
+		return graphql.Null
+	}
+	{{- end }}
+	{{- if $type.IsMarshaler }}
+	{{- /* Type implements graphql.Marshaler interface */}}
+	{{- if $type.IsContext }}
+	return graphql.WrapContextMarshaler(ctx, value.(graphql.ContextMarshaler))
+	{{- else }}
+	return value.(graphql.Marshaler)
+	{{- end }}
+	{{- else if $type.Marshaler }}
+	{{- /* External marshaler function (e.g. graphql.MarshalString) */}}
+	_ = sel
+	{{- if and (not $type.GQL.NonNull) (not $type.IsContext) }}
+	_ = ctx
+	{{- end }}
+	{{- if $type.HasEnumValues }}
+	{{- /* Enum with external marshaler: convert via reflect */}}
+	enumStr := fmt.Sprint(value)
+	res := {{ $type.Marshaler | call }}(enumStr)
+	{{- else if $type.CastType }}
+	{{- /* Cast type: reflect-convert to target type then call marshaler */}}
+	rv{{ if not $type.IsNilable }} := reflect.ValueOf(value){{ end }}
+	{{- if and $type.IsTargetNilable (not $type.IsNilable) }}
+	castVal := rv.Addr().Interface()
+	{{- else if and (not $type.IsTargetNilable) $type.IsNilable }}
+	castVal := rv.Elem().Interface()
+	{{- else }}
+	castVal := value
+	{{- end }}
+	res := {{ $type.Marshaler | call }}(castVal)
+	{{- else }}
+	{{- /* Direct external marshaler call */}}
+	{{- if and $type.IsTargetNilable (not $type.IsNilable) }}
+	res := {{ $type.Marshaler | call }}(&value)
+	{{- else if and (not $type.IsTargetNilable) $type.IsNilable }}
+	rv{{ if not $type.IsNilable }} := reflect.ValueOf(value){{ end }}
+	res := {{ $type.Marshaler | call }}(rv.Elem().Interface())
+	{{- else }}
+	res := {{ $type.Marshaler | call }}(value)
+	{{- end }}
+	{{- end }}
+	{{- if $type.GQL.NonNull }}
+	if res == graphql.Null {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+	}
+	{{- end }}
+	{{- if $type.IsContext }}
+	return graphql.WrapContextMarshaler(ctx, res)
+	{{- else }}
+	return res
+	{{- end }}
+	{{- else if $type.IsRoot }}
+	{{- /* Root object (Query/Mutation/Subscription) */}}
+	handler, ok := shardruntime.LookupObject(splitScope, {{ $type.Definition.Name | quote }})
+	if !ok {
+		panic("missing object shard handler for {{ $type.Definition.Name }}")
+	}
+	{{- if eq $type.Definition.Name "Subscription" }}
+	stream := handler(ctx, ec, sel, nil)
+	return stream
+	{{- else }}
+	return handler(ctx, ec, sel, nil)
+	{{- end }}
+	{{- else }}
+	{{- /* Named object type: dispatch via LookupObject */}}
+	handler, ok := shardruntime.LookupObject(splitScope, {{ $type.Definition.Name | quote }})
+	if !ok {
+		panic("missing object shard handler for {{ $type.Definition.Name }}")
+	}
+	return handler(ctx, ec, sel, value)
+	{{- end }}
+	{{- end }}
 }
 {{- else if eq $key ($type.UnmarshalFunc) }}
 
-// split_codecs_.gotpl
+// split_codecs_.gotpl — unmarshal
 func {{ $key }}(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (any, error) {
-	return ec.UnmarshalCodec(ctx, "{{ $key }}", value)
+	{{- if and $type.IsNilable (not $type.GQL.NonNull) (not $type.IsPtrToPtr) }}
+	if value == nil { return nil, nil }
+	{{- end }}
+	{{- if or $type.IsPtrToSlice $type.IsPtrToIntf }}
+	{{- /* Pointer-to-slice / pointer-to-interface: delegate to elem, take address */}}
+	res, err := ec.UnmarshalCodec(ctx, {{ $type.Elem.UnmarshalFunc | quote }}, value)
+	if err != nil {
+		return nil, graphql.ErrorOnPath(ctx, err)
+	}
+	rv := reflect.ValueOf(res)
+	ptr := reflect.New(rv.Type())
+	ptr.Elem().Set(rv)
+	return ptr.Interface(), nil
+
+	{{- else if $type.IsSlice }}
+	{{- /* Slice: coerce to list, unmarshal each element */}}
+	vSlice := graphql.CoerceList(value)
+	res := make([]any, len(vSlice))
+	for i := range vSlice {
+		elemCtx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		elem, err := ec.UnmarshalCodec(elemCtx, {{ $type.Elem.UnmarshalFunc | quote }}, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+		res[i] = elem
+	}
+	{{- /* Convert []any to the correct typed slice using reflect */}}
+	if len(vSlice) > 0 && res[0] != nil {
+		sliceType := reflect.SliceOf(reflect.TypeOf(res[0]))
+		typedSlice := reflect.MakeSlice(sliceType, len(res), len(res))
+		for i, elem := range res {
+			typedSlice.Index(i).Set(reflect.ValueOf(elem))
+		}
+		return typedSlice.Interface(), nil
+	}
+	return res, nil
+
+	{{- else if and $type.IsPtrToPtr (not $type.Unmarshaler) (not $type.IsMarshaler) }}
+	{{- /* Pointer-to-pointer: delegate to elem, wrap in pointer */}}
+	if value == nil {
+		return nil, nil
+	}
+	res, err := ec.UnmarshalCodec(ctx, {{ $type.Elem.UnmarshalFunc | quote }}, value)
+	if err != nil {
+		return nil, graphql.ErrorOnPath(ctx, err)
+	}
+	rv := reflect.ValueOf(res)
+	ptr := reflect.New(rv.Type())
+	ptr.Elem().Set(rv)
+	return ptr.Interface(), nil
+
+	{{- else }}
+	{{- /* Terminal types */}}
+	{{- if $type.Unmarshaler }}
+	{{- /* External unmarshaler function */}}
+	{{- if $type.HasEnumValues }}
+	tmp, err := {{ $type.Unmarshaler | call }}(value)
+	if err != nil {
+		return nil, graphql.ErrorOnPath(ctx, err)
+	}
+	return tmp, nil
+	{{- else if $type.CastType }}
+	{{- if $type.IsContext }}
+	tmp, err := {{ $type.Unmarshaler | call }}(ctx, value)
+	{{- else }}
+	tmp, err := {{ $type.Unmarshaler | call }}(value)
+	{{- end }}
+	if err != nil {
+		return nil, graphql.ErrorOnPath(ctx, err)
+	}
+	return tmp, nil
+	{{- else }}
+	{{- if $type.IsContext }}
+	res, err := {{ $type.Unmarshaler | call }}(ctx, value)
+	{{- else }}
+	res, err := {{ $type.Unmarshaler | call }}(value)
+	{{- end }}
+	return res, graphql.ErrorOnPath(ctx, err)
+	{{- end }}
+	{{- else if $type.IsMarshaler }}
+	{{- /* Type implements graphql.Unmarshaler interface — need reflect to create instance */}}
+	{{- if $type.IsContext }}
+	return nil, fmt.Errorf("context unmarshaler not supported in shard codecs without type reference")
+	{{- else }}
+	return nil, fmt.Errorf("interface unmarshaler not supported in shard codecs without type reference")
+	{{- end }}
+	{{- else }}
+	{{- /* Input object: delegate to input unmarshaler via ec.UnmarshalCodec */}}
+	return value, nil
+	{{- end }}
+	{{- end }}
 }
 {{- end }}
 {{- end }}

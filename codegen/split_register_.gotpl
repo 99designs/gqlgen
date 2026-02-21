@@ -1,5 +1,6 @@
 {{ reserveImport "context" }}
 
+{{ reserveImport "github.com/vektah/gqlparser/v2/ast" }}
 {{ reserveImport "github.com/99designs/gqlgen/graphql" }}
 {{ reserveImport "github.com/99designs/gqlgen/graphql/executor/shardruntime" }}
 
@@ -34,6 +35,21 @@ func init() {
 	shardruntime.RegisterComplexity(splitScope, {{ $field.Object.Name | quote }}, {{ $field.Name | quote }}, func(ctx context.Context, ec shardruntime.ObjectExecutionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
 		return __splitComplexity_{{ $field.Object.Name }}_{{ $field.Name }}(ctx, ec, childComplexity, rawArgs)
 	})
+{{- end }}
+{{- end }}
+{{- end }}
+{{- range $key := .Ownership.CodecOwnerKeys }}
+{{- if eq (index $.Ownership.CodecOwner $key) $.ShardName }}
+{{- with $type := index $.CodecByFunc $key }}
+{{- if eq $key ($type.MarshalFunc) }}
+	shardruntime.RegisterCodecMarshal(splitScope, {{ $key | quote }}, func(ctx context.Context, ec shardruntime.ObjectExecutionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
+		return {{ $key }}(ctx, ec, sel, value)
+	})
+{{- else if eq $key ($type.UnmarshalFunc) }}
+	shardruntime.RegisterCodecUnmarshal(splitScope, {{ $key | quote }}, func(ctx context.Context, ec shardruntime.ObjectExecutionContext, value any) (any, error) {
+		return {{ $key }}(ctx, ec, value)
+	})
+{{- end }}
 {{- end }}
 {{- end }}
 {{- end }}

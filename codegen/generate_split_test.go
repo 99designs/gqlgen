@@ -608,25 +608,35 @@ func TestSplitRootSeparatesStreamResolversFromRegularResolvers(t *testing.T) {
 	cleanupSplitGeneratedFiles(workDir)
 	snapshot := generateSplitSnapshot(t)
 
+	// Root generated.go should no longer contain inline executable field/stream resolver maps.
 	generated, ok := snapshot[filepath.Join("graph", "generated.go")]
 	require.True(t, ok)
-
 	contents := string(generated)
+	require.NotContains(t, contents, "var splitExecutableFieldResolvers")
+	require.NotContains(t, contents, "var splitExecutableStreamFieldResolvers")
 
-	fieldResolversStart := strings.Index(contents, "var splitExecutableFieldResolvers = map[string]splitFieldResolver{")
-	require.NotEqual(t, -1, fieldResolversStart)
+	// Stream fields should be registered via RegisterStreamField in shard code,
+	// while regular fields use RegisterField.
+	var foundRegisterField bool
+	var foundRegisterStreamField bool
+	for relPath, shardContents := range snapshot {
+		if !strings.HasPrefix(relPath, filepath.Join("graph", "internal", "gqlgenexec", "shards")) {
+			continue
+		}
+		text := string(shardContents)
+		if strings.Contains(text, "RegisterField(splitScope,") {
+			foundRegisterField = true
+			// Regular field registrations should not include subscription fields
+			require.NotContains(t, text, `RegisterField(splitScope, "Subscription"`)
+		}
+		if strings.Contains(text, "RegisterStreamField(splitScope,") {
+			foundRegisterStreamField = true
+			require.Contains(t, text, `RegisterStreamField(splitScope, "Subscription", "tick"`)
+		}
+	}
 
-	streamResolversStart := strings.Index(contents, "var splitExecutableStreamFieldResolvers = map[string]splitStreamFieldResolver{")
-	require.NotEqual(t, -1, streamResolversStart)
-	require.Greater(t, streamResolversStart, fieldResolversStart)
-
-	fieldResolversBody := contents[fieldResolversStart:streamResolversStart]
-	require.NotContains(t, fieldResolversBody, "\"Subscription.tick\":")
-
-	streamResolversEnd := strings.Index(contents[streamResolversStart:], "type splitCodecMarshalResolver")
-	require.NotEqual(t, -1, streamResolversEnd)
-	streamResolversBody := contents[streamResolversStart : streamResolversStart+streamResolversEnd]
-	require.Contains(t, streamResolversBody, "\"Subscription.tick\":")
+	require.True(t, foundRegisterField, "expected shard to register regular fields via RegisterField")
+	require.True(t, foundRegisterStreamField, "expected shard to register stream fields via RegisterStreamField")
 }
 
 func TestSplitComplexityLookupParity(t *testing.T) {

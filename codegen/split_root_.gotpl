@@ -132,17 +132,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		{{- range $input := .Inputs }}
-			{{- if not $input.HasUnmarshal }}
-				{{- if $useFunctionSyntaxForExecutionContext }}
-		func(ctx context.Context, obj any) ({{ if $input.PointersInUnmarshalInput }}*{{ end }}{{ $input.Type | ref }}, error) {
-			return unmarshalInput{{ $input.Name }}(ctx, &ec, obj)
-		},
-				{{- else }}
-		ec.unmarshalInput{{ $input.Name }},
-				{{- end }}
-			{{- end }}
-		{{- end }}
+		shardruntime.ListInputUnmarshalers({{ $.Scope | quote }}, &ec)...
 	)
 	first := true
 
@@ -334,25 +324,15 @@ func (ec *executionContext) ResolveStreamField(ctx context.Context, objectName, 
 }
 
 func (ec *executionContext) ResolveExecutableField(ctx context.Context, objectName, fieldName string, field graphql.CollectedField, obj any) graphql.Marshaler {
-	handler, ok := splitExecutableFieldResolvers[objectName+"."+fieldName]
-	if !ok {
-		panic(fmt.Sprintf("unknown executable field %s.%s", objectName, fieldName))
-	}
-
-	return handler(ctx, ec, field, obj)
+	return ec.ResolveField(ctx, objectName, fieldName, field, obj)
 }
 
 func (ec *executionContext) ResolveExecutableStreamField(ctx context.Context, objectName, fieldName string, field graphql.CollectedField, obj any) func(context.Context) graphql.Marshaler {
-	handler, ok := splitExecutableStreamFieldResolvers[objectName+"."+fieldName]
-	if !ok {
-		panic(fmt.Sprintf("unknown executable stream field %s.%s", objectName, fieldName))
-	}
-
-	return handler(ctx, ec, field, obj)
+	return ec.ResolveStreamField(ctx, objectName, fieldName, field, obj)
 }
 
 func (ec *executionContext) MarshalCodec(ctx context.Context, funcName string, sel ast.SelectionSet, value any) graphql.Marshaler {
-	handler, ok := splitCodecMarshalResolvers[funcName]
+	handler, ok := shardruntime.LookupCodecMarshal({{ $.Scope | quote }}, funcName)
 	if !ok {
 		panic(fmt.Errorf("unknown codec marshal function %s", funcName))
 	}
@@ -361,7 +341,7 @@ func (ec *executionContext) MarshalCodec(ctx context.Context, funcName string, s
 }
 
 func (ec *executionContext) UnmarshalCodec(ctx context.Context, funcName string, value any) (any, error) {
-	handler, ok := splitCodecUnmarshalResolvers[funcName]
+	handler, ok := shardruntime.LookupCodecUnmarshal({{ $.Scope | quote }}, funcName)
 	if !ok {
 		return nil, fmt.Errorf("unknown codec unmarshal function %s", funcName)
 	}
@@ -370,171 +350,20 @@ func (ec *executionContext) UnmarshalCodec(ctx context.Context, funcName string,
 }
 
 func (ec *executionContext) ParseFieldArgs(ctx context.Context, argsKey string, rawArgs map[string]any) (map[string]any, error) {
-	handler, ok := splitArgsParsers[argsKey]
-	if !ok {
-		return rawArgs, nil
-	}
-
-	return handler(ctx, ec, rawArgs)
+	return rawArgs, nil
 }
 
 func (ec *executionContext) ResolveExecutableComplexity(ctx context.Context, objectName, fieldName string, childComplexity int, rawArgs map[string]any) (int, bool) {
-	handler, ok := splitExecutableComplexityResolvers[objectName+"."+fieldName]
+	handler, ok := shardruntime.LookupComplexity({{ $.Scope | quote }}, objectName, fieldName)
 	if !ok {
-		panic(fmt.Sprintf("unknown executable complexity %s.%s", objectName, fieldName))
+		return 0, false
 	}
 
 	return handler(ctx, ec, childComplexity, rawArgs)
 }
 
-type splitFieldResolver func(context.Context, *executionContext, graphql.CollectedField, any) graphql.Marshaler
-
-var splitExecutableFieldResolvers = map[string]splitFieldResolver{
 {{- range $object := .Objects }}
-{{- if not $object.Stream }}
-{{- range $field := $object.Fields }}
-	{{ printf "%s.%s" $object.Name $field.Name | quote }}: func(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj any) graphql.Marshaler {
-		{{- if $object.Root }}
-		{{- if $useFunctionSyntaxForExecutionContext }}
-		return _{{ $object.Name }}_{{ $field.Name }}(ctx, ec, field)
-		{{- else }}
-		return ec._{{ $object.Name }}_{{ $field.Name }}(ctx, field)
-		{{- end }}
-		{{- else }}
-		typedObj, ok := obj.({{ $object.Reference | ref }})
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object {{ $object.Name }}", obj))
-		}
-		{{- if $useFunctionSyntaxForExecutionContext }}
-		return _{{ $object.Name }}_{{ $field.Name }}(ctx, ec, field, typedObj)
-		{{- else }}
-		return ec._{{ $object.Name }}_{{ $field.Name }}(ctx, field, typedObj)
-		{{- end }}
-		{{- end }}
-	},
-{{- end }}
-{{- end }}
-{{- end }}
-}
-
-type splitStreamFieldResolver func(context.Context, *executionContext, graphql.CollectedField, any) func(context.Context) graphql.Marshaler
-
-var splitExecutableStreamFieldResolvers = map[string]splitStreamFieldResolver{
-{{- range $object := .Objects }}
-{{- if $object.Stream }}
-{{- range $field := $object.Fields }}
-	{{ printf "%s.%s" $object.Name $field.Name | quote }}: func(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj any) func(context.Context) graphql.Marshaler {
-		{{- if $object.Root }}
-		{{- if $useFunctionSyntaxForExecutionContext }}
-		return _{{ $object.Name }}_{{ $field.Name }}(ctx, ec, field)
-		{{- else }}
-		return ec._{{ $object.Name }}_{{ $field.Name }}(ctx, field)
-		{{- end }}
-		{{- else }}
-		typedObj, ok := obj.({{ $object.Reference | ref }})
-		if !ok {
-			panic(fmt.Errorf("unexpected type %T for object {{ $object.Name }}", obj))
-		}
-		{{- if $useFunctionSyntaxForExecutionContext }}
-		return _{{ $object.Name }}_{{ $field.Name }}(ctx, ec, field, typedObj)
-		{{- else }}
-		return ec._{{ $object.Name }}_{{ $field.Name }}(ctx, field, typedObj)
-		{{- end }}
-		{{- end }}
-	},
-{{- end }}
-{{- end }}
-{{- end }}
-}
-
-type splitCodecMarshalResolver func(context.Context, *executionContext, ast.SelectionSet, any) graphql.Marshaler
-
-var splitCodecMarshalResolvers = map[string]splitCodecMarshalResolver{
-{{- range $ref := .ReferencedTypes }}
-{{- $marshalFunc := $ref.MarshalFunc }}
-{{- if $marshalFunc }}
-	{{ $marshalFunc | quote }}: func(ctx context.Context, ec *executionContext, sel ast.SelectionSet, value any) graphql.Marshaler {
-		typedValue, ok := value.({{ $ref.GO | ref }})
-		if !ok {
-			panic(fmt.Errorf("unexpected codec input %T for {{ $marshalFunc }}", value))
-		}
-		{{- if $useFunctionSyntaxForExecutionContext }}
-		return {{ $marshalFunc }}(ctx, ec, sel, typedValue)
-		{{- else }}
-		return ec.{{ $marshalFunc }}(ctx, sel, typedValue)
-		{{- end }}
-	},
-{{- end }}
-{{- end }}
-}
-
-type splitCodecUnmarshalResolver func(context.Context, *executionContext, any) (any, error)
-
-var splitCodecUnmarshalResolvers = map[string]splitCodecUnmarshalResolver{
-{{- range $ref := .ReferencedTypes }}
-{{- $unmarshalFunc := $ref.UnmarshalFunc }}
-{{- if $unmarshalFunc }}
-	{{ $unmarshalFunc | quote }}: func(ctx context.Context, ec *executionContext, value any) (any, error) {
-		{{- if $useFunctionSyntaxForExecutionContext }}
-		return {{ $unmarshalFunc }}(ctx, ec, value)
-		{{- else }}
-		return ec.{{ $unmarshalFunc }}(ctx, value)
-		{{- end }}
-	},
-{{- end }}
-{{- end }}
-}
-
-type splitArgsParser func(context.Context, *executionContext, map[string]any) (map[string]any, error)
-
-var splitArgsParsers = map[string]splitArgsParser{
-{{- range $object := .Objects }}
-{{- range $field := $object.Fields }}
-{{- if $field.Args }}
-	{{ printf "%s.%s" $object.Name $field.Name | quote }}: func(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
-		{{- if $useFunctionSyntaxForExecutionContext }}
-		return {{ $field.ArgsFunc }}(ctx, ec, rawArgs)
-		{{- else }}
-		return ec.{{ $field.ArgsFunc }}(ctx, rawArgs)
-		{{- end }}
-	},
-{{- end }}
-{{- end }}
-{{- end }}
-}
-
-type splitComplexityResolver func(context.Context, *executionContext, int, map[string]any) (int, bool)
-
-var splitExecutableComplexityResolvers = map[string]splitComplexityResolver{
-{{- if not .Config.OmitComplexity }}
-{{- range $object := .Objects }}
-{{- range $field := $object.Fields }}
-	{{ printf "%s.%s" $object.Name $field.Name | quote }}: func(ctx context.Context, ec *executionContext, childComplexity int, rawArgs map[string]any) (int, bool) {
-		{{- if and (not $object.IsReserved) (not $field.IsReserved) }}
-		if ec.complexity.{{ucFirst $object.Name }}.{{$field.GoFieldName}} == nil {
-			return 0, false
-		}
-		{{ if $field.Args }}
-			{{ if $useFunctionSyntaxForExecutionContext }}
-		args, err := {{ $field.ArgsFunc }}(ctx, ec, rawArgs)
-			{{ else }}
-		args, err := ec.{{ $field.ArgsFunc }}(ctx, rawArgs)
-			{{ end }}
-		if err != nil {
-			return 0, false
-		}
-		{{ end }}
-		return ec.complexity.{{ucFirst $object.Name}}.{{$field.GoFieldName}}(childComplexity{{if $field.Args}}, {{$field.ComplexityArgs}} {{ end }}), true
-		{{- else }}
-		return 0, false
-		{{- end }}
-	},
-{{- end }}
-{{- end }}
-{{- end }}
-}
-
-{{- range $object := .Objects }}
+	{{- if $object.Root }}
 	{{- if $object.Stream }}
 		{{ if $useFunctionSyntaxForExecutionContext -}}
 func _{{$object.Name}}(ctx context.Context, ec *executionContext, sel ast.SelectionSet) func(ctx context.Context) graphql.Marshaler {
@@ -553,28 +382,21 @@ func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.Selec
 }
 	{{- else }}
 		{{ if $useFunctionSyntaxForExecutionContext -}}
-func _{{$object.Name}}(ctx context.Context, ec *executionContext, sel ast.SelectionSet{{ if not $object.Root }},obj {{$object.Reference | ref }}{{ end }}) graphql.Marshaler {
+func _{{$object.Name}}(ctx context.Context, ec *executionContext, sel ast.SelectionSet) graphql.Marshaler {
 		{{- else -}}
-func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.SelectionSet{{ if not $object.Root }},obj {{$object.Reference | ref }}{{ end }}) graphql.Marshaler {
+func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.SelectionSet) graphql.Marshaler {
 		{{- end }}
 	handler, ok := shardruntime.LookupObject({{ $.Scope | quote }}, {{$object.Name | quote}})
 	if !ok {
 		panic(fmt.Sprintf("missing object shard handler for %s", {{$object.Name | quote}}))
 	}
-		{{- if $object.Root }}
 		{{ if $useFunctionSyntaxForExecutionContext -}}
 	return handler(ctx, ec, sel, nil)
 		{{- else -}}
 	return handler(ctx, ec, sel, nil)
-		{{- end }}
-		{{- else }}
-		{{ if $useFunctionSyntaxForExecutionContext -}}
-	return handler(ctx, ec, sel, obj)
-		{{- else -}}
-	return handler(ctx, ec, sel, obj)
-		{{- end }}
 		{{- end }}
 }
+	{{- end }}
 	{{- end }}
 {{- end }}
 

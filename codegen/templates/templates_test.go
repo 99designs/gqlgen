@@ -23,7 +23,7 @@ func TestToGo(t *testing.T) {
 	require.Equal(t, "ToCamel", ToGo("ToCamel"))
 	require.Equal(t, "ToCamel", ToGo("to-camel"))
 	require.Equal(t, "ToCamel", ToGo("-to-camel"))
-	require.Equal(t, "ToCamel", ToGo("_to-camel"))
+	require.Equal(t, "_ToCamel", ToGo("_to-camel"))
 	require.Equal(t, "_", ToGo("_"))
 
 	require.Equal(t, "RelatedURLs", ToGo("RelatedURLs"))

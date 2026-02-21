@@ -271,6 +271,98 @@ func TestInputUnmarshalMap(t *testing.T) {
 	}
 }
 
+func TestCodecMarshalRegistry(t *testing.T) {
+	resetCodecMarshalRegistryForTest()
+
+	h := func(context.Context, ObjectExecutionContext, ast.SelectionSet, any) graphql.Marshaler {
+		return graphql.Null
+	}
+
+	if got, ok := LookupCodecMarshal("scope", "marshalFoo"); ok || got != nil {
+		t.Fatalf("unexpected codec marshal handler before registration: handler=%v ok=%v", got, ok)
+	}
+
+	RegisterCodecMarshal("scope", "marshalFoo", h)
+
+	got, ok := LookupCodecMarshal("scope", "marshalFoo")
+	if !ok {
+		t.Fatal("expected registered codec marshal handler")
+	}
+	if got == nil {
+		t.Fatal("expected non-nil codec marshal handler")
+	}
+
+	if got, ok := LookupCodecMarshal("scope", "marshalMissing"); ok || got != nil {
+		t.Fatalf("unexpected codec marshal handler for missing func: handler=%v ok=%v", got, ok)
+	}
+	if got, ok := LookupCodecMarshal("other-scope", "marshalFoo"); ok || got != nil {
+		t.Fatalf("unexpected codec marshal handler for missing scope: handler=%v ok=%v", got, ok)
+	}
+
+	defer func() {
+		recovered := recover()
+		if recovered == nil {
+			t.Fatal("expected duplicate registration panic")
+		}
+		msg, ok := recovered.(string)
+		if !ok {
+			t.Fatalf("expected panic string, got %T", recovered)
+		}
+		expected := "duplicate codec marshal handler registration: scope:marshalFoo"
+		if msg != expected {
+			t.Fatalf("unexpected panic message: got %q want %q", msg, expected)
+		}
+	}()
+
+	RegisterCodecMarshal("scope", "marshalFoo", h)
+}
+
+func TestCodecUnmarshalRegistry(t *testing.T) {
+	resetCodecUnmarshalRegistryForTest()
+
+	h := func(context.Context, ObjectExecutionContext, any) (any, error) {
+		return nil, nil
+	}
+
+	if got, ok := LookupCodecUnmarshal("scope", "unmarshalBar"); ok || got != nil {
+		t.Fatalf("unexpected codec unmarshal handler before registration: handler=%v ok=%v", got, ok)
+	}
+
+	RegisterCodecUnmarshal("scope", "unmarshalBar", h)
+
+	got, ok := LookupCodecUnmarshal("scope", "unmarshalBar")
+	if !ok {
+		t.Fatal("expected registered codec unmarshal handler")
+	}
+	if got == nil {
+		t.Fatal("expected non-nil codec unmarshal handler")
+	}
+
+	if got, ok := LookupCodecUnmarshal("scope", "unmarshalMissing"); ok || got != nil {
+		t.Fatalf("unexpected codec unmarshal handler for missing func: handler=%v ok=%v", got, ok)
+	}
+	if got, ok := LookupCodecUnmarshal("other-scope", "unmarshalBar"); ok || got != nil {
+		t.Fatalf("unexpected codec unmarshal handler for missing scope: handler=%v ok=%v", got, ok)
+	}
+
+	defer func() {
+		recovered := recover()
+		if recovered == nil {
+			t.Fatal("expected duplicate registration panic")
+		}
+		msg, ok := recovered.(string)
+		if !ok {
+			t.Fatalf("expected panic string, got %T", recovered)
+		}
+		expected := "duplicate codec unmarshal handler registration: scope:unmarshalBar"
+		if msg != expected {
+			t.Fatalf("unexpected panic message: got %q want %q", msg, expected)
+		}
+	}()
+
+	RegisterCodecUnmarshal("scope", "unmarshalBar", h)
+}
+
 func TestRegistryDuplicatePanics(t *testing.T) {
 	t.Run("object", func(t *testing.T) {
 		resetObjectRegistryForTest()
@@ -357,6 +449,32 @@ func TestRegistryDuplicatePanics(t *testing.T) {
 		RegisterInputUnmarshaler("scope", "InputA", &marker{id: "A"})
 		assertDuplicateRegistrationPanic(t, "duplicate input unmarshaler registration: scope:InputA", func() {
 			RegisterInputUnmarshaler("scope", "InputA", &marker{id: "dup"})
+		})
+	})
+
+	t.Run("codec marshal", func(t *testing.T) {
+		resetCodecMarshalRegistryForTest()
+
+		h := func(context.Context, ObjectExecutionContext, ast.SelectionSet, any) graphql.Marshaler {
+			return graphql.Null
+		}
+
+		RegisterCodecMarshal("scope", "marshalFoo", h)
+		assertDuplicateRegistrationPanic(t, "duplicate codec marshal handler registration: scope:marshalFoo", func() {
+			RegisterCodecMarshal("scope", "marshalFoo", h)
+		})
+	})
+
+	t.Run("codec unmarshal", func(t *testing.T) {
+		resetCodecUnmarshalRegistryForTest()
+
+		h := func(context.Context, ObjectExecutionContext, any) (any, error) {
+			return nil, nil
+		}
+
+		RegisterCodecUnmarshal("scope", "unmarshalBar", h)
+		assertDuplicateRegistrationPanic(t, "duplicate codec unmarshal handler registration: scope:unmarshalBar", func() {
+			RegisterCodecUnmarshal("scope", "unmarshalBar", h)
 		})
 	})
 }
@@ -631,6 +749,138 @@ func TestRegistryConcurrentAccess(t *testing.T) {
 			}
 		}
 	})
+
+	t.Run("codec marshal", func(t *testing.T) {
+		resetCodecMarshalRegistryForTest()
+
+		h := func(context.Context, ObjectExecutionContext, ast.SelectionSet, any) graphql.Marshaler {
+			return graphql.Null
+		}
+
+		const total = 128
+		const readers = 8
+
+		errCh := make(chan error, total+readers)
+		reportErr := func(err error) {
+			select {
+			case errCh <- err:
+			default:
+			}
+		}
+
+		start := make(chan struct{})
+		var writersWG sync.WaitGroup
+		var readersWG sync.WaitGroup
+		var writesDone atomic.Bool
+
+		for i := 0; i < total; i++ {
+			writersWG.Add(1)
+			go func(i int) {
+				defer writersWG.Done()
+				<-start
+				RegisterCodecMarshal("scope", fmt.Sprintf("marshal_%03d", i), h)
+			}(i)
+		}
+
+		for i := 0; i < readers; i++ {
+			readersWG.Add(1)
+			go func() {
+				defer readersWG.Done()
+				<-start
+				for !writesDone.Load() {
+					for i := 0; i < total; i++ {
+						handler, ok := LookupCodecMarshal("scope", fmt.Sprintf("marshal_%03d", i))
+						if ok && handler == nil {
+							reportErr(fmt.Errorf("nil codec marshal handler for registered key %d", i))
+						}
+					}
+				}
+			}()
+		}
+
+		close(start)
+		writersWG.Wait()
+		writesDone.Store(true)
+		readersWG.Wait()
+
+		close(errCh)
+		for err := range errCh {
+			t.Fatal(err)
+		}
+
+		for i := 0; i < total; i++ {
+			handler, ok := LookupCodecMarshal("scope", fmt.Sprintf("marshal_%03d", i))
+			if !ok || handler == nil {
+				t.Fatalf("missing registered codec marshal handler for key %d", i)
+			}
+		}
+	})
+
+	t.Run("codec unmarshal", func(t *testing.T) {
+		resetCodecUnmarshalRegistryForTest()
+
+		h := func(context.Context, ObjectExecutionContext, any) (any, error) {
+			return nil, nil
+		}
+
+		const total = 128
+		const readers = 8
+
+		errCh := make(chan error, total+readers)
+		reportErr := func(err error) {
+			select {
+			case errCh <- err:
+			default:
+			}
+		}
+
+		start := make(chan struct{})
+		var writersWG sync.WaitGroup
+		var readersWG sync.WaitGroup
+		var writesDone atomic.Bool
+
+		for i := 0; i < total; i++ {
+			writersWG.Add(1)
+			go func(i int) {
+				defer writersWG.Done()
+				<-start
+				RegisterCodecUnmarshal("scope", fmt.Sprintf("unmarshal_%03d", i), h)
+			}(i)
+		}
+
+		for i := 0; i < readers; i++ {
+			readersWG.Add(1)
+			go func() {
+				defer readersWG.Done()
+				<-start
+				for !writesDone.Load() {
+					for i := 0; i < total; i++ {
+						handler, ok := LookupCodecUnmarshal("scope", fmt.Sprintf("unmarshal_%03d", i))
+						if ok && handler == nil {
+							reportErr(fmt.Errorf("nil codec unmarshal handler for registered key %d", i))
+						}
+					}
+				}
+			}()
+		}
+
+		close(start)
+		writersWG.Wait()
+		writesDone.Store(true)
+		readersWG.Wait()
+
+		close(errCh)
+		for err := range errCh {
+			t.Fatal(err)
+		}
+
+		for i := 0; i < total; i++ {
+			handler, ok := LookupCodecUnmarshal("scope", fmt.Sprintf("unmarshal_%03d", i))
+			if !ok || handler == nil {
+				t.Fatalf("missing registered codec unmarshal handler for key %d", i)
+			}
+		}
+	})
 }
 
 func assertDuplicateRegistrationPanic(t *testing.T, expected string, register func()) {
@@ -699,4 +949,20 @@ func resetInputUnmarshalRegistryForTest() {
 
 	inputUnmarshalByScope = map[string]map[string]any{}
 	resetInputUnmarshalLookupSnapshotForTest()
+}
+
+func resetCodecMarshalRegistryForTest() {
+	mu.Lock()
+	defer mu.Unlock()
+
+	codecMarshalByScope = map[string]map[string]CodecMarshalHandler{}
+	resetCodecMarshalLookupSnapshotForTest()
+}
+
+func resetCodecUnmarshalRegistryForTest() {
+	mu.Lock()
+	defer mu.Unlock()
+
+	codecUnmarshalByScope = map[string]map[string]CodecUnmarshalHandler{}
+	resetCodecUnmarshalLookupSnapshotForTest()
 }

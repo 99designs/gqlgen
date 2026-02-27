@@ -20,6 +20,21 @@ func TestPackages(t *testing.T) {
 		require.Equal(t, 1, p.numLoadCalls)
 	})
 
+	t.Run("types are not loaded by default", func(t *testing.T) {
+		p := initialState(t)
+		require.Nil(t, p.Load("github.com/99designs/gqlgen/internal/code/testdata/b").TypesInfo)
+		require.Equal(t, 1, p.numLoadCalls)
+		require.NotNil(t, p.LoadWithTypes("github.com/99designs/gqlgen/internal/code/testdata/b").TypesInfo)
+		require.Equal(t, 2, p.numLoadCalls)
+	})
+
+	t.Run("packages loaded with types are not loaded again", func(t *testing.T) {
+		p := initialState(t)
+		require.NotNil(t, p.LoadWithTypes("github.com/99designs/gqlgen/internal/code/testdata/p").TypesInfo)
+		p.Load("github.com/99designs/gqlgen/internal/code/testdata/p")
+		require.Equal(t, 2, p.numLoadCalls)
+	})
+
 	t.Run("name for unknown package makes name only load", func(t *testing.T) {
 		p := initialState(t)
 		require.Equal(

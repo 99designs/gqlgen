@@ -12,11 +12,9 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-var mode = packages.NeedName |
+const mode = packages.NeedName |
 	packages.NeedFiles |
-	packages.NeedTypes |
 	packages.NeedSyntax |
-	packages.NeedTypesInfo |
 	packages.NeedModule
 
 type (
@@ -116,10 +114,6 @@ func (p *Packages) ReloadAll(importPaths ...string) []*packages.Package {
 // LoadAll will call packages.Load and return the package data for the given packages,
 // but if the package already have been loaded it will return cached values instead.
 func (p *Packages) LoadAll(importPaths ...string) []*packages.Package {
-	if p.packages == nil {
-		p.packages = map[string]*packages.Package{}
-	}
-
 	missing := make([]string, 0, len(importPaths))
 	for _, path := range importPaths {
 		if _, ok := p.packages[path]; ok {
@@ -155,6 +149,9 @@ func (p *Packages) LoadAll(importPaths ...string) []*packages.Package {
 
 func (p *Packages) addToCache(pkg *packages.Package) {
 	imp := NormalizeVendor(pkg.PkgPath)
+	if p.packages == nil {
+		p.packages = map[string]*packages.Package{}
+	}
 	p.packages[imp] = pkg
 	p.packages[pkg.Dir] = pkg // also cache by dir for relative path bindings
 }
@@ -203,11 +200,11 @@ func (p *Packages) Load(importPath string) *packages.Package {
 // available if the imported package is a second order dependency. Fortunately this doesnt happen
 // very often, so we can just issue a load when we detect it.
 func (p *Packages) LoadWithTypes(importPath string) *packages.Package {
-	pkg := p.Load(importPath)
+	pkg := p.packages[importPath]
 	if pkg == nil || pkg.TypesInfo == nil {
 		p.numLoadCalls++
 		pkgs, err := packages.Load(&packages.Config{
-			Mode:       mode,
+			Mode:       mode | packages.NeedTypesInfo | packages.NeedTypes,
 			BuildFlags: p.buildFlags,
 		}, importPath)
 		if err != nil {

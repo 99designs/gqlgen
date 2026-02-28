@@ -127,6 +127,7 @@ directive @goField(
 	type: String
 	autoBindGetterHaser: Boolean
 	forceGenerate: Boolean
+	batch: Boolean
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 type User @goModel(model: "github.com/you/pkg/model.User") {

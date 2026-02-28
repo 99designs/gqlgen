@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
+	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
@@ -414,6 +415,32 @@ func TestBatchResolver_BatchErrors_ResultLenMismatch_AddsErrorPerParent(t *testi
 		`{"users":[{"nullableBatch":null},{"nullableBatch":null}]}`,
 		marshalJSON(t, resp),
 	)
+}
+
+func TestBatchDirectiveConfig(t *testing.T) {
+	cfg, err := config.LoadConfig("gqlgen.yml")
+	require.NoError(t, err)
+	require.NoError(t, cfg.Init())
+
+	userFields := cfg.Models["User"].Fields
+
+	// YAML-configured fields
+	require.True(t, userFields["nullableBatch"].Batch)
+	require.True(t, userFields["nullableBatchWithArg"].Batch)
+	require.True(t, userFields["nonNullableBatch"].Batch)
+
+	require.False(t, userFields["nullableNonBatch"].Batch)
+	require.False(t, userFields["nullableNonBatchWithArg"].Batch)
+	require.False(t, userFields["nonNullableNonBatch"].Batch)
+
+	// Directive-configured fields
+	require.True(t, userFields["directiveNullableBatch"].Batch)
+	require.True(t, userFields["directiveNullableBatchWithArg"].Batch)
+	require.True(t, userFields["directiveNonNullableBatch"].Batch)
+
+	require.False(t, userFields["directiveNullableNonBatch"].Batch)
+	require.False(t, userFields["directiveNullableNonBatchWithArg"].Batch)
+	require.False(t, userFields["directiveNonNullableNonBatch"].Batch)
 }
 
 func TestBatchResolver_BatchErrors_ListPerIndex_AddsMultipleErrors(t *testing.T) {

@@ -153,6 +153,36 @@ func (r *userResolver) NonNullableNonBatch(ctx context.Context, obj *User) (*Pro
 	return resolveProfile(r.Resolver, idx)
 }
 
+// DirectiveNullableBatch is the batch resolver for the directiveNullableBatch field.
+func (r *userResolver) DirectiveNullableBatch(ctx context.Context, objs []*User) ([]*Profile, error) {
+	return r.NullableBatch(ctx, objs)
+}
+
+// DirectiveNullableNonBatch is the resolver for the directiveNullableNonBatch field.
+func (r *userResolver) DirectiveNullableNonBatch(ctx context.Context, obj *User) (*Profile, error) {
+	return r.NullableNonBatch(ctx, obj)
+}
+
+// DirectiveNullableBatchWithArg is the batch resolver for the directiveNullableBatchWithArg field.
+func (r *userResolver) DirectiveNullableBatchWithArg(ctx context.Context, objs []*User, offset int) ([]*Profile, error) {
+	return r.NullableBatchWithArg(ctx, objs, offset)
+}
+
+// DirectiveNullableNonBatchWithArg is the resolver for the directiveNullableNonBatchWithArg field.
+func (r *userResolver) DirectiveNullableNonBatchWithArg(ctx context.Context, obj *User, offset int) (*Profile, error) {
+	return r.NullableNonBatchWithArg(ctx, obj, offset)
+}
+
+// DirectiveNonNullableBatch is the batch resolver for the directiveNonNullableBatch field.
+func (r *userResolver) DirectiveNonNullableBatch(ctx context.Context, objs []*User) ([]*Profile, error) {
+	return r.NonNullableBatch(ctx, objs)
+}
+
+// DirectiveNonNullableNonBatch is the resolver for the directiveNonNullableNonBatch field.
+func (r *userResolver) DirectiveNonNullableNonBatch(ctx context.Context, obj *User) (*Profile, error) {
+	return r.NonNullableNonBatch(ctx, obj)
+}
+
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 

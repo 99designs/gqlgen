@@ -89,6 +89,7 @@ const (
 	DirArgDescription         = "description"
 	DirArgOmittable           = "omittable"
 	DirArgAutoBindGetterHaser = "autoBindGetterHaser"
+	DirArgBatch               = "batch"
 )
 
 var cfgFilenames = []string{".gqlgen.yml", "gqlgen.yml", "gqlgen.yaml"}
@@ -433,6 +434,12 @@ func (c *Config) injectTypesFromSchema() error {
 						if k, err := arg.Value.Value(nil); err == nil {
 							val := k.(bool)
 							typeMapFieldEntry.AutoBindGetterHaser = &val
+						}
+					}
+
+					if arg := fd.Arguments.ForName(DirArgBatch); arg != nil {
+						if k, err := arg.Value.Value(nil); err == nil {
+							typeMapFieldEntry.Batch = k.(bool)
 						}
 					}
 

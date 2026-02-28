@@ -204,6 +204,7 @@ directive @goField(
 	name: String
 	omittable: Boolean
 	type: String
+	batch: Boolean
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 directive @goTag(

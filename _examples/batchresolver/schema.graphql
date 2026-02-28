@@ -1,3 +1,10 @@
+directive @goField(
+	forceResolver: Boolean
+	name: String
+	omittable: Boolean
+	batch: Boolean
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
 type Query {
     users: [User!]!
 }
@@ -9,6 +16,13 @@ type User {
     nullableNonBatchWithArg(offset: Int!): Profile
     nonNullableBatch: Profile!
     nonNullableNonBatch: Profile!
+
+    directiveNullableBatch: Profile @goField(batch: true)
+    directiveNullableNonBatch: Profile @goField(forceResolver: true)
+    directiveNullableBatchWithArg(offset: Int!): Profile @goField(batch: true)
+    directiveNullableNonBatchWithArg(offset: Int!): Profile @goField(forceResolver: true)
+    directiveNonNullableBatch: Profile! @goField(batch: true)
+    directiveNonNullableNonBatch: Profile! @goField(forceResolver: true)
 }
 
 type Profile {

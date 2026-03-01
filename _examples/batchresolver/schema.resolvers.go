@@ -8,10 +8,29 @@ package batchresolver
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
+
+// CoverBatch is the batch resolver for the coverBatch field.
+func (r *profileResolver) CoverBatch(ctx context.Context, objs []*Profile) ([]*Image, error) {
+	r.coverBatchCalls++
+	results := make([]*Image, len(objs))
+	for i, obj := range objs {
+		idx := r.profileIndex(obj)
+		results[i], _ = resolveImage(r.Resolver, idx)
+	}
+	return results, nil
+}
+
+// CoverNonBatch is the resolver for the coverNonBatch field.
+func (r *profileResolver) CoverNonBatch(ctx context.Context, obj *Profile) (*Image, error) {
+	r.coverNonBatchCalls++
+	idx := r.profileIndex(obj)
+	return resolveImage(r.Resolver, idx)
+}
 
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*User, error) {
@@ -153,11 +172,38 @@ func (r *userResolver) NonNullableNonBatch(ctx context.Context, obj *User) (*Pro
 	return resolveProfile(r.Resolver, idx)
 }
 
+// ProfileBatch is the batch resolver for the profileBatch field.
+func (r *userResolver) ProfileBatch(ctx context.Context, objs []*User) ([]*Profile, error) {
+	r.profileBatchCalls++
+	results := make([]*Profile, len(objs))
+	for i, obj := range objs {
+		idx := r.userIndex(obj)
+		if idx >= 0 && idx < len(r.profiles) {
+			results[i] = r.profiles[idx]
+		}
+	}
+	return results, nil
+}
+
+// ProfileNonBatch is the resolver for the profileNonBatch field.
+func (r *userResolver) ProfileNonBatch(ctx context.Context, obj *User) (*Profile, error) {
+	r.profileNonBatchCalls++
+	idx := r.userIndex(obj)
+	if idx < 0 || idx >= len(r.profiles) {
+		return nil, fmt.Errorf("profile not set at index %d", idx)
+	}
+	return r.profiles[idx], nil
+}
+
+// Profile returns ProfileResolver implementation.
+func (r *Resolver) Profile() ProfileResolver { return &profileResolver{r} }
+
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
 // User returns UserResolver implementation.
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
+type profileResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }

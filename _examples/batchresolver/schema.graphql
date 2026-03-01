@@ -9,8 +9,18 @@ type User {
     nullableNonBatchWithArg(offset: Int!): Profile
     nonNullableBatch: Profile!
     nonNullableNonBatch: Profile!
+
+    profileBatch: Profile
+    profileNonBatch: Profile
 }
 
 type Profile {
     id: ID!
+    coverBatch: Image
+    coverNonBatch: Image
+}
+
+
+type Image {
+    url: String!
 }

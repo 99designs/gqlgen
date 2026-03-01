@@ -2,8 +2,14 @@
 
 package batchresolver
 
+type Image struct {
+	URL string `json:"url"`
+}
+
 type Profile struct {
-	ID string `json:"id"`
+	ID            string `json:"id"`
+	CoverBatch    *Image `json:"coverBatch,omitempty"`
+	CoverNonBatch *Image `json:"coverNonBatch,omitempty"`
 }
 
 type Query struct {
@@ -16,4 +22,6 @@ type User struct {
 	NullableNonBatchWithArg *Profile `json:"nullableNonBatchWithArg,omitempty"`
 	NonNullableBatch        *Profile `json:"nonNullableBatch"`
 	NonNullableNonBatch     *Profile `json:"nonNullableNonBatch"`
+	ProfileBatch            *Profile `json:"profileBatch,omitempty"`
+	ProfileNonBatch         *Profile `json:"profileNonBatch,omitempty"`
 }

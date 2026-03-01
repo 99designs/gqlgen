@@ -55,6 +55,19 @@ return results, graphql.BatchErrorList(errs)
 
 Each entry in the error slice corresponds to the parent at the same index. Individual errors can also be `gqlerror.List` to report multiple errors for a single item.
 
+## Nested Batching
+
+The schema also demonstrates **nested batch resolvers** through the path `User → Profile → Image`:
+
+| Parent    | Field             | Batch | Target  |
+|-----------|-------------------|-------|---------|
+| `User`    | `profileBatch`    | yes   | Profile |
+| `User`    | `profileNonBatch` | no    | Profile |
+| `Profile` | `coverBatch`      | yes   | Image   |
+| `Profile` | `coverNonBatch`   | no    | Image   |
+
+With 10 users, the batch path resolves all profiles in **1 call** (vs 10 for non-batch). However, `coverBatch` is still called **once per profile** (10 calls) rather than once for all profiles. This happens because profiles returned by a batch resolver are marshalled as individual values, not as a list — the batch parent context for `Profile` is only set when marshalling a `[Profile]` list field. Ideally, nested batching should propagate the batch parent context from batch resolver results so that `coverBatch` is called only once for all 10 profiles. The `TestBatchResolver_Nested_CallCount` test documents these current call counts and confirms both paths return identical data.
+
 ## Tests
 
 The tests verify **parity** between batch and non-batch resolvers — both must produce identical data and errors for the same inputs. Covered scenarios include:
@@ -66,3 +79,8 @@ The tests verify **parity** between batch and non-batch resolvers — both must 
 - `gqlerror.Error` with and without a custom path
 - Non-null field error propagation (parent nulled out)
 - Wrong result/error slice lengths (produces per-parent error messages)
+- Nested batch call count verification (`User → Profile → Image`)
+
+## Benchmarks
+
+`BenchmarkBatchResolver_SingleLevel` and `BenchmarkBatchResolver_Nested` compare batch vs non-batch execution time. Note that these benchmarks use in-memory resolvers with no I/O, so they only measure the framework overhead of batching. In a real-world scenario the main benefit of batching is reducing the number of round-trips to external services (databases, APIs, etc.), which these benchmarks do not capture.

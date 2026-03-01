@@ -32,3 +32,15 @@ models:
         batch: true
       nonNullableNonBatch:
         resolver: true
+      profileBatch:
+          resolver: true
+          batch: true
+      profileNonBatch:
+          resolver: true
+  Profile:
+    fields:
+      coverBatch:
+          resolver: true
+          batch: true
+      coverNonBatch:
+          resolver: true

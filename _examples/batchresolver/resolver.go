@@ -8,6 +8,7 @@ package batchresolver
 type Resolver struct {
 	users                   []*User
 	profiles                []*Profile
+	images                  []*Image
 	profileErrIdx           int
 	profileErrWithValueIdxs map[int]struct{}
 	profileErrListIdxs      map[int]struct{}
@@ -19,6 +20,12 @@ type Resolver struct {
 	batchResultsWrongLen    bool
 	batchResultsLen         int
 	batchErrListIdxs        map[int]struct{}
+
+	// Call counters for the nested batch performance test
+	profileBatchCalls    int
+	profileNonBatchCalls int
+	coverBatchCalls      int
+	coverNonBatchCalls   int
 }
 
 func (r *Resolver) userIndex(obj *User) int {
@@ -27,6 +34,18 @@ func (r *Resolver) userIndex(obj *User) int {
 	}
 	for i := range r.users {
 		if r.users[i] == obj {
+			return i
+		}
+	}
+	return -1
+}
+
+func (r *Resolver) profileIndex(obj *Profile) int {
+	if obj == nil {
+		return -1
+	}
+	for i := range r.profiles {
+		if r.profiles[i] == obj {
 			return i
 		}
 	}

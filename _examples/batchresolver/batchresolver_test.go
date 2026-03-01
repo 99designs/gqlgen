@@ -444,3 +444,202 @@ func TestBatchResolver_BatchErrors_ListPerIndex_AddsMultipleErrors(t *testing.T)
 		marshalJSON(t, resp),
 	)
 }
+
+func TestBatchResolver_Nested_CallCount(t *testing.T) {
+	const n = 10
+	users := make([]*User, n)
+	profiles := make([]*Profile, n)
+	images := make([]*Image, n)
+	for i := 0; i < n; i++ {
+		users[i] = &User{}
+		profiles[i] = &Profile{ID: fmt.Sprintf("p%d", i)}
+		images[i] = &Image{URL: fmt.Sprintf("https://img/%d", i)}
+	}
+	resolver := &Resolver{
+		users:         users,
+		profiles:      profiles,
+		images:        images,
+		profileErrIdx: -1,
+	}
+	client := newTestClient(resolver)
+
+	type graphqlResp struct {
+		Users []struct {
+			Profile *struct {
+				ID    string `json:"id"`
+				Cover *struct {
+					URL string `json:"url"`
+				} `json:"cover"`
+			} `json:"profile"`
+		} `json:"users"`
+	}
+
+	assertData := func(t *testing.T, resp graphqlResp, label string) {
+		t.Helper()
+		require.Len(t, resp.Users, n)
+		for i, u := range resp.Users {
+			require.NotNil(t, u.Profile, "%s user %d profile nil", label, i)
+			require.Equal(t, fmt.Sprintf("p%d", i), u.Profile.ID)
+			require.NotNil(t, u.Profile.Cover, "%s user %d cover nil", label, i)
+			require.Equal(t, fmt.Sprintf("https://img/%d", i), u.Profile.Cover.URL)
+		}
+	}
+
+	// --- Batch path ---
+
+	var batchResp graphqlResp
+	err := client.Post(`query {
+		users {
+			profile: profileBatch {
+				id
+				cover: coverBatch {
+					url
+				}
+			}
+		}
+	}`, &batchResp)
+	require.NoError(t, err)
+	assertData(t, batchResp, "batch")
+	require.Equal(
+		t,
+		1,
+		resolver.profileBatchCalls,
+		"profileBatch should be called once for all users",
+	)
+	// TODO: coverBatch is called once per profile (not batched) because profiles
+	// are resolved as individual values, not as a list. The batch parent context
+	// for "Profile" is only set when marshalling a [Profile] list field.
+	// Nested batching should propagate the batch parent context from batch
+	// resolver results so coverBatchCalls == 1 here.
+	require.Equal(
+		t,
+		n,
+		resolver.coverBatchCalls,
+		"coverBatch called once per profile (no list parent context)",
+	)
+
+	// --- Non-batch path ---
+	var nonBatchResp graphqlResp
+	err = client.Post(`query {
+		users {
+			profile: profileNonBatch {
+				id
+				cover: coverNonBatch {
+					url
+				}
+			}
+		}
+	}`, &nonBatchResp)
+	require.NoError(t, err)
+	assertData(t, nonBatchResp, "non-batch")
+	require.Equal(
+		t,
+		n,
+		resolver.profileNonBatchCalls,
+		"profileNonBatch should be called once per user",
+	)
+	require.Equal(
+		t,
+		n,
+		resolver.coverNonBatchCalls,
+		"coverNonBatch should be called once per profile",
+	)
+
+	// --- Verify both paths produce identical data ---
+	require.Equal(
+		t,
+		marshalJSON(t, batchResp),
+		marshalJSON(t, nonBatchResp),
+		"batch and non-batch should return identical data",
+	)
+}
+
+func BenchmarkBatchResolver_SingleLevel(b *testing.B) {
+	const n = 100
+	users := make([]*User, n)
+	profiles := make([]*Profile, n)
+	for i := 0; i < n; i++ {
+		users[i] = &User{}
+		profiles[i] = &Profile{ID: fmt.Sprintf("p%d", i)}
+	}
+
+	b.Run("batch", func(b *testing.B) {
+		resolver := &Resolver{
+			users:         users,
+			profiles:      profiles,
+			profileErrIdx: -1,
+		}
+		c := newTestClient(resolver)
+		var resp json.RawMessage
+		for b.Loop() {
+			_ = c.Post(`query { users { nullableBatch { id } } }`, &resp)
+		}
+	})
+
+	b.Run("non-batch", func(b *testing.B) {
+		resolver := &Resolver{
+			users:         users,
+			profiles:      profiles,
+			profileErrIdx: -1,
+		}
+		c := newTestClient(resolver)
+		var resp json.RawMessage
+		for b.Loop() {
+			_ = c.Post(`query { users { nullableNonBatch { id } } }`, &resp)
+		}
+	})
+}
+
+func BenchmarkBatchResolver_Nested(b *testing.B) {
+	const n = 100
+	users := make([]*User, n)
+	profiles := make([]*Profile, n)
+	images := make([]*Image, n)
+	for i := 0; i < n; i++ {
+		users[i] = &User{}
+		profiles[i] = &Profile{ID: fmt.Sprintf("p%d", i)}
+		images[i] = &Image{URL: fmt.Sprintf("https://img/%d", i)}
+	}
+
+	b.Run("batch", func(b *testing.B) {
+		resolver := &Resolver{
+			users:         users,
+			profiles:      profiles,
+			images:        images,
+			profileErrIdx: -1,
+		}
+		c := newTestClient(resolver)
+		var resp json.RawMessage
+		for b.Loop() {
+			_ = c.Post(`query {
+				users {
+					profile: profileBatch {
+						id
+						cover: coverBatch { url }
+					}
+				}
+			}`, &resp)
+		}
+	})
+
+	b.Run("non-batch", func(b *testing.B) {
+		resolver := &Resolver{
+			users:         users,
+			profiles:      profiles,
+			images:        images,
+			profileErrIdx: -1,
+		}
+		c := newTestClient(resolver)
+		var resp json.RawMessage
+		for b.Loop() {
+			_ = c.Post(`query {
+				users {
+					profile: profileNonBatch {
+						id
+						cover: coverNonBatch { url }
+					}
+				}
+			}`, &resp)
+		}
+	})
+}

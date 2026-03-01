@@ -24,7 +24,25 @@ var (
 	) // regex to grab the version number from a url
 )
 
+// Generate generates GraphQL code based on the provided config.
 func Generate(cfg *config.Config, option ...Option) error {
+	return generate(cfg, nil, option...)
+}
+
+// GenerateIncremental generates code only for schemas affected by changes.
+// changedSchemas should contain paths to schema files that have changed
+// (e.g., from git diff). If empty, performs full generation.
+// Use verbose to enable detailed logging of what's being regenerated.
+func GenerateIncremental(cfg *config.Config, changedSchemas []string, verbose bool, option ...Option) error {
+	return generate(cfg, &codegen.IncrementalOptions{
+		ChangedSchemas: changedSchemas,
+		Verbose:        verbose,
+	}, option...)
+}
+
+// generate is the shared implementation for both Generate and GenerateIncremental.
+// If incrementalOpts is nil, performs full generation. Otherwise, uses incremental generation.
+func generate(cfg *config.Config, incrementalOpts *codegen.IncrementalOptions, option ...Option) error {
 	_ = syscall.Unlink(cfg.Exec.Filename)
 	if cfg.Model.IsDefined() {
 		_ = syscall.Unlink(cfg.Model.Filename)
@@ -153,8 +171,15 @@ func Generate(cfg *config.Config, option ...Option) error {
 		}
 	}
 
-	if err = codegen.GenerateCode(data); err != nil {
-		return fmt.Errorf("generating core failed: %w", err)
+	// Use incremental generation if options provided, otherwise full generation
+	if incrementalOpts != nil {
+		if err = codegen.GenerateCodeIncremental(data, *incrementalOpts); err != nil {
+			return fmt.Errorf("generating core failed: %w", err)
+		}
+	} else {
+		if err = codegen.GenerateCode(data); err != nil {
+			return fmt.Errorf("generating core failed: %w", err)
+		}
 	}
 
 	if !cfg.SkipModTidy {

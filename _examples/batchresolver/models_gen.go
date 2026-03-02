@@ -12,16 +12,28 @@ type Profile struct {
 	CoverNonBatch *Image `json:"coverNonBatch,omitempty"`
 }
 
+type ProfileEdge struct {
+	Node   *Profile `json:"node"`
+	Cursor string   `json:"cursor"`
+}
+
+type ProfilesConnection struct {
+	Edges      []*ProfileEdge `json:"edges"`
+	TotalCount int            `json:"totalCount"`
+}
+
 type Query struct {
 }
 
 type User struct {
-	NullableBatch           *Profile `json:"nullableBatch,omitempty"`
-	NullableNonBatch        *Profile `json:"nullableNonBatch,omitempty"`
-	NullableBatchWithArg    *Profile `json:"nullableBatchWithArg,omitempty"`
-	NullableNonBatchWithArg *Profile `json:"nullableNonBatchWithArg,omitempty"`
-	NonNullableBatch        *Profile `json:"nonNullableBatch"`
-	NonNullableNonBatch     *Profile `json:"nonNullableNonBatch"`
-	ProfileBatch            *Profile `json:"profileBatch,omitempty"`
-	ProfileNonBatch         *Profile `json:"profileNonBatch,omitempty"`
+	NullableBatch             *Profile            `json:"nullableBatch,omitempty"`
+	NullableNonBatch          *Profile            `json:"nullableNonBatch,omitempty"`
+	NullableBatchWithArg      *Profile            `json:"nullableBatchWithArg,omitempty"`
+	NullableNonBatchWithArg   *Profile            `json:"nullableNonBatchWithArg,omitempty"`
+	NonNullableBatch          *Profile            `json:"nonNullableBatch"`
+	NonNullableNonBatch       *Profile            `json:"nonNullableNonBatch"`
+	ProfileBatch              *Profile            `json:"profileBatch,omitempty"`
+	ProfileNonBatch           *Profile            `json:"profileNonBatch,omitempty"`
+	ProfileConnectionBatch    *ProfilesConnection `json:"profileConnectionBatch,omitempty"`
+	ProfileConnectionNonBatch *ProfilesConnection `json:"profileConnectionNonBatch,omitempty"`
 }

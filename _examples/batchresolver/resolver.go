@@ -24,10 +24,12 @@ type Resolver struct {
 	batchErrListIdxs        map[int]struct{}
 
 	// Call counters for the nested batch performance test (atomic for -race safety)
-	profileBatchCalls    atomic.Int32
-	profileNonBatchCalls atomic.Int32
-	coverBatchCalls      atomic.Int32
-	coverNonBatchCalls   atomic.Int32
+	profileBatchCalls              atomic.Int32
+	profileNonBatchCalls           atomic.Int32
+	coverBatchCalls                atomic.Int32
+	coverNonBatchCalls             atomic.Int32
+	profileConnectionBatchCalls    atomic.Int32
+	profileConnectionNonBatchCalls atomic.Int32
 }
 
 func (r *Resolver) userIndex(obj *User) int {

@@ -554,6 +554,125 @@ func TestBatchResolver_Nested_CallCount(t *testing.T) {
 	)
 }
 
+func TestBatchResolver_Nested_Connection_CallCount(t *testing.T) {
+	const n = 10
+	users := make([]*User, n)
+	profiles := make([]*Profile, n)
+	images := make([]*Image, n)
+	for i := 0; i < n; i++ {
+		users[i] = &User{}
+		profiles[i] = &Profile{ID: fmt.Sprintf("p%d", i)}
+		images[i] = &Image{URL: fmt.Sprintf("https://img/%d", i)}
+	}
+	resolver := &Resolver{
+		users:         users,
+		profiles:      profiles,
+		images:        images,
+		profileErrIdx: -1,
+	}
+	client := newTestClient(resolver)
+
+	type graphqlResp struct {
+		Users []struct {
+			Conn *struct {
+				Edges []struct {
+					Node *struct {
+						ID    string `json:"id"`
+						Cover *struct {
+							URL string `json:"url"`
+						} `json:"cover"`
+					} `json:"node"`
+				} `json:"edges"`
+			} `json:"conn"`
+		} `json:"users"`
+	}
+
+	assertData := func(t *testing.T, resp graphqlResp, label string) {
+		t.Helper()
+		require.Len(t, resp.Users, n)
+		for i, u := range resp.Users {
+			require.NotNil(t, u.Conn, "%s user %d connection nil", label, i)
+			require.Len(t, u.Conn.Edges, 1, "%s user %d edges", label, i)
+			node := u.Conn.Edges[0].Node
+			require.NotNil(t, node, "%s user %d node nil", label, i)
+			require.Equal(t, fmt.Sprintf("p%d", i), node.ID)
+			require.NotNil(t, node.Cover, "%s user %d cover nil", label, i)
+			require.Equal(t, fmt.Sprintf("https://img/%d", i), node.Cover.URL)
+		}
+	}
+
+	// --- Batch path ---
+
+	var batchResp graphqlResp
+	err := client.Post(`query {
+		users {
+			conn: profileConnectionBatch {
+				edges {
+					node {
+						id
+						cover: coverBatch { url }
+					}
+				}
+			}
+		}
+	}`, &batchResp)
+	require.NoError(t, err)
+	assertData(t, batchResp, "batch")
+	require.Equal(
+		t,
+		int32(1),
+		resolver.profileConnectionBatchCalls.Load(),
+		"profileConnectionBatch should be called once for all users",
+	)
+	// TODO: coverBatch is not batched because the immediate parent (Profile)
+	// and its edge are not batched — only the connection is. This should be 1
+	// once nested batching propagates through non-batched intermediate types.
+	require.Equal(
+		t,
+		int32(n),
+		resolver.coverBatchCalls.Load(),
+		"coverBatch called once per profile (immediate parent not batched)",
+	)
+
+	// --- Non-batch path ---
+
+	var nonBatchResp graphqlResp
+	err = client.Post(`query {
+		users {
+			conn: profileConnectionNonBatch {
+				edges {
+					node {
+						id
+						cover: coverNonBatch { url }
+					}
+				}
+			}
+		}
+	}`, &nonBatchResp)
+	require.NoError(t, err)
+	assertData(t, nonBatchResp, "non-batch")
+	require.Equal(
+		t,
+		int32(n),
+		resolver.profileConnectionNonBatchCalls.Load(),
+		"profileConnectionNonBatch should be called once per user",
+	)
+	require.Equal(
+		t,
+		int32(n),
+		resolver.coverNonBatchCalls.Load(),
+		"coverNonBatch should be called once per profile",
+	)
+
+	// --- Verify both paths produce identical data ---
+	require.Equal(
+		t,
+		marshalJSON(t, batchResp),
+		marshalJSON(t, nonBatchResp),
+		"batch and non-batch should return identical data",
+	)
+}
+
 func BenchmarkBatchResolver_SingleLevel(b *testing.B) {
 	const n = 100
 	users := make([]*User, n)

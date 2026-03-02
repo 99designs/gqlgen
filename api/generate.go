@@ -33,7 +33,12 @@ func Generate(cfg *config.Config, option ...Option) error {
 // changedSchemas should contain paths to schema files that have changed
 // (e.g., from git diff). If empty, performs full generation.
 // Use verbose to enable detailed logging of what's being regenerated.
-func GenerateIncremental(cfg *config.Config, changedSchemas []string, verbose bool, option ...Option) error {
+func GenerateIncremental(
+	cfg *config.Config,
+	changedSchemas []string,
+	verbose bool,
+	option ...Option,
+) error {
 	return generate(cfg, &codegen.IncrementalOptions{
 		ChangedSchemas: changedSchemas,
 		Verbose:        verbose,

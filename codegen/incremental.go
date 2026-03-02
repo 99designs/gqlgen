@@ -1,7 +1,7 @@
 package codegen
 
 import (
-	"fmt"
+	"errors"
 	"log"
 )
 
@@ -24,7 +24,7 @@ type IncrementalOptions struct {
 // content-based file writing in templates.write().
 func GenerateCodeIncremental(data *Data, opts IncrementalOptions) error {
 	if !data.Config.Exec.IsDefined() {
-		return fmt.Errorf("missing exec config")
+		return errors.New("missing exec config")
 	}
 
 	if opts.Verbose && len(opts.ChangedSchemas) > 0 {

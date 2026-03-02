@@ -1,7 +1,6 @@
 package codegen
 
 import (
-	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -15,9 +14,7 @@ import (
 // only regenerates files for affected schemas (the core optimization).
 func TestGenerateCodeIncremental_SelectiveGeneration(t *testing.T) {
 	// Create temp directory for generated files
-	tmpDir, err := os.MkdirTemp("", "gqlgen-incremental-test")
-	require.NoError(t, err)
-	t.Cleanup(func() { os.RemoveAll(tmpDir) })
+	_ = t.TempDir()
 
 	// Create schema with multiple files that have dependencies:
 	// user.graphqls: User type
@@ -63,15 +60,17 @@ func TestGenerateCodeIncremental_SelectiveGeneration(t *testing.T) {
 	// Test 1: Changing user.graphqls should affect post.graphqls (Post references User)
 	affected := depGraph.GetAffectedSchemas([]string{"user.graphqls"})
 	require.Contains(t, affected, "user.graphqls", "changed schema should be affected")
-	require.Contains(t, affected, "post.graphqls", "post depends on user, should be affected")
-	require.NotContains(t, affected, "comment.graphqls", "comment is independent, should NOT be affected")
+	require.Contains(t, affected, "post.graphqls", "post depends on user")
+	require.NotContains(
+		t, affected, "comment.graphqls", "comment is independent",
+	)
 
-	// Test 2: Changing comment.graphqls affects itself and schema.graphqls (Query references Comment)
+	// Test 2: Changing comment.graphqls affects itself and schema.graphqls
 	affected = depGraph.GetAffectedSchemas([]string{"comment.graphqls"})
 	require.Contains(t, affected, "comment.graphqls", "changed schema should be affected")
-	require.Contains(t, affected, "schema.graphqls", "Query references Comment, so schema is affected")
-	require.NotContains(t, affected, "user.graphqls", "user is independent of comment")
-	require.NotContains(t, affected, "post.graphqls", "post is independent of comment")
+	require.Contains(t, affected, "schema.graphqls", "Query references Comment")
+	require.NotContains(t, affected, "user.graphqls", "user is independent")
+	require.NotContains(t, affected, "post.graphqls", "post is independent")
 
 	// Test 3: Verify the type filtering works correctly
 	affectedTypes := depGraph.GetTypesForSchemas([]string{"user.graphqls"})

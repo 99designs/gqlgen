@@ -34,6 +34,7 @@ type Stub struct {
 		DefaultInput          func(ctx context.Context, input DefaultInput) (*DefaultParametersMirror, error)
 		OverrideValueViaInput func(ctx context.Context, input FieldsOrderInput) (*FieldsOrderPayload, error)
 		UpdateProduct         func(ctx context.Context, input map[string]interface{}) (string, error)
+		Issue4053             func(ctx context.Context, input *Issue4053Input1) (bool, error)
 		UpdateSomething       func(ctx context.Context, input SpecialInput) (string, error)
 		UpdatePtrToPtr        func(ctx context.Context, input UpdatePtrToPtrOuter) (*PtrToPtrOuter, error)
 	}
@@ -271,6 +272,9 @@ func (r *stubMutation) OverrideValueViaInput(ctx context.Context, input FieldsOr
 }
 func (r *stubMutation) UpdateProduct(ctx context.Context, input map[string]interface{}) (string, error) {
 	return r.MutationResolver.UpdateProduct(ctx, input)
+}
+func (r *stubMutation) Issue4053(ctx context.Context, input *Issue4053Input1) (bool, error) {
+	return r.MutationResolver.Issue4053(ctx, input)
 }
 func (r *stubMutation) UpdateSomething(ctx context.Context, input SpecialInput) (string, error) {
 	return r.MutationResolver.UpdateSomething(ctx, input)

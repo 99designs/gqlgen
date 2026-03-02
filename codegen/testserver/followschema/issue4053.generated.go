@@ -28,6 +28,10 @@ import (
 
 func (ec *executionContext) unmarshalInputIssue4053Input1(ctx context.Context, obj any) (Issue4053Input1, error) {
 	var it Issue4053Input1
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -54,6 +58,10 @@ func (ec *executionContext) unmarshalInputIssue4053Input1(ctx context.Context, o
 
 func (ec *executionContext) unmarshalInputIssue4053Input2(ctx context.Context, obj any) (Issue4053Input2, error) {
 	var it Issue4053Input2
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v

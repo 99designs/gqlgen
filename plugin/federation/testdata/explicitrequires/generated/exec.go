@@ -4298,6 +4298,10 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 func (ec *executionContext) unmarshalInputMultiHelloByNamesInput(ctx context.Context, obj any) (MultiHelloByNamesInput, error) {
 	var it MultiHelloByNamesInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -4324,6 +4328,10 @@ func (ec *executionContext) unmarshalInputMultiHelloByNamesInput(ctx context.Con
 
 func (ec *executionContext) unmarshalInputMultiHelloMultipleRequiresByNamesInput(ctx context.Context, obj any) (MultiHelloMultipleRequiresByNamesInput, error) {
 	var it MultiHelloMultipleRequiresByNamesInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -4350,6 +4358,10 @@ func (ec *executionContext) unmarshalInputMultiHelloMultipleRequiresByNamesInput
 
 func (ec *executionContext) unmarshalInputMultiHelloRequiresByNamesInput(ctx context.Context, obj any) (MultiHelloRequiresByNamesInput, error) {
 	var it MultiHelloRequiresByNamesInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -4376,6 +4388,10 @@ func (ec *executionContext) unmarshalInputMultiHelloRequiresByNamesInput(ctx con
 
 func (ec *executionContext) unmarshalInputMultiHelloWithErrorByNamesInput(ctx context.Context, obj any) (MultiHelloWithErrorByNamesInput, error) {
 	var it MultiHelloWithErrorByNamesInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -4402,6 +4418,10 @@ func (ec *executionContext) unmarshalInputMultiHelloWithErrorByNamesInput(ctx co
 
 func (ec *executionContext) unmarshalInputMultiPlanetRequiresNestedByNamesInput(ctx context.Context, obj any) (MultiPlanetRequiresNestedByNamesInput, error) {
 	var it MultiPlanetRequiresNestedByNamesInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v

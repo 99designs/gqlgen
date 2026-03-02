@@ -9,8 +9,30 @@ type User {
     nullableNonBatchWithArg(offset: Int!): Profile
     nonNullableBatch: Profile!
     nonNullableNonBatch: Profile!
+
+    profileBatch: Profile
+    profileNonBatch: Profile
+    profileConnectionBatch: ProfilesConnection
+    profileConnectionNonBatch: ProfilesConnection
 }
 
 type Profile {
     id: ID!
+    coverBatch: Image
+    coverNonBatch: Image
+}
+
+
+type Image {
+    url: String!
+}
+
+type ProfilesConnection {
+    edges: [ProfileEdge!]!
+    totalCount: Int!
+}
+
+type ProfileEdge {
+    node: Profile!
+    cursor: ID!
 }

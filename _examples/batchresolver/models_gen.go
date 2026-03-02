@@ -2,18 +2,38 @@
 
 package batchresolver
 
+type Image struct {
+	URL string `json:"url"`
+}
+
 type Profile struct {
-	ID string `json:"id"`
+	ID            string `json:"id"`
+	CoverBatch    *Image `json:"coverBatch,omitempty"`
+	CoverNonBatch *Image `json:"coverNonBatch,omitempty"`
+}
+
+type ProfileEdge struct {
+	Node   *Profile `json:"node"`
+	Cursor string   `json:"cursor"`
+}
+
+type ProfilesConnection struct {
+	Edges      []*ProfileEdge `json:"edges"`
+	TotalCount int            `json:"totalCount"`
 }
 
 type Query struct {
 }
 
 type User struct {
-	NullableBatch           *Profile `json:"nullableBatch,omitempty"`
-	NullableNonBatch        *Profile `json:"nullableNonBatch,omitempty"`
-	NullableBatchWithArg    *Profile `json:"nullableBatchWithArg,omitempty"`
-	NullableNonBatchWithArg *Profile `json:"nullableNonBatchWithArg,omitempty"`
-	NonNullableBatch        *Profile `json:"nonNullableBatch"`
-	NonNullableNonBatch     *Profile `json:"nonNullableNonBatch"`
+	NullableBatch             *Profile            `json:"nullableBatch,omitempty"`
+	NullableNonBatch          *Profile            `json:"nullableNonBatch,omitempty"`
+	NullableBatchWithArg      *Profile            `json:"nullableBatchWithArg,omitempty"`
+	NullableNonBatchWithArg   *Profile            `json:"nullableNonBatchWithArg,omitempty"`
+	NonNullableBatch          *Profile            `json:"nonNullableBatch"`
+	NonNullableNonBatch       *Profile            `json:"nonNullableNonBatch"`
+	ProfileBatch              *Profile            `json:"profileBatch,omitempty"`
+	ProfileNonBatch           *Profile            `json:"profileNonBatch,omitempty"`
+	ProfileConnectionBatch    *ProfilesConnection `json:"profileConnectionBatch,omitempty"`
+	ProfileConnectionNonBatch *ProfilesConnection `json:"profileConnectionNonBatch,omitempty"`
 }

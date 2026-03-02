@@ -27,6 +27,7 @@ func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 type ResolverRoot interface {
+	Profile() ProfileResolver
 	Query() QueryResolver
 	User() UserResolver
 }
@@ -35,8 +36,24 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	Image struct {
+		URL func(childComplexity int) int
+	}
+
 	Profile struct {
-		ID func(childComplexity int) int
+		CoverBatch    func(childComplexity int) int
+		CoverNonBatch func(childComplexity int) int
+		ID            func(childComplexity int) int
+	}
+
+	ProfileEdge struct {
+		Cursor func(childComplexity int) int
+		Node   func(childComplexity int) int
+	}
+
+	ProfilesConnection struct {
+		Edges      func(childComplexity int) int
+		TotalCount func(childComplexity int) int
 	}
 
 	Query struct {
@@ -44,15 +61,23 @@ type ComplexityRoot struct {
 	}
 
 	User struct {
-		NonNullableBatch        func(childComplexity int) int
-		NonNullableNonBatch     func(childComplexity int) int
-		NullableBatch           func(childComplexity int) int
-		NullableBatchWithArg    func(childComplexity int, offset int) int
-		NullableNonBatch        func(childComplexity int) int
-		NullableNonBatchWithArg func(childComplexity int, offset int) int
+		NonNullableBatch          func(childComplexity int) int
+		NonNullableNonBatch       func(childComplexity int) int
+		NullableBatch             func(childComplexity int) int
+		NullableBatchWithArg      func(childComplexity int, offset int) int
+		NullableNonBatch          func(childComplexity int) int
+		NullableNonBatchWithArg   func(childComplexity int, offset int) int
+		ProfileBatch              func(childComplexity int) int
+		ProfileConnectionBatch    func(childComplexity int) int
+		ProfileConnectionNonBatch func(childComplexity int) int
+		ProfileNonBatch           func(childComplexity int) int
 	}
 }
 
+type ProfileResolver interface {
+	CoverBatch(ctx context.Context, objs []*Profile) ([]*Image, error)
+	CoverNonBatch(ctx context.Context, obj *Profile) (*Image, error)
+}
 type QueryResolver interface {
 	Users(ctx context.Context) ([]*User, error)
 }
@@ -63,6 +88,10 @@ type UserResolver interface {
 	NullableNonBatchWithArg(ctx context.Context, obj *User, offset int) (*Profile, error)
 	NonNullableBatch(ctx context.Context, objs []*User) ([]*Profile, error)
 	NonNullableNonBatch(ctx context.Context, obj *User) (*Profile, error)
+	ProfileBatch(ctx context.Context, objs []*User) ([]*Profile, error)
+	ProfileNonBatch(ctx context.Context, obj *User) (*Profile, error)
+	ProfileConnectionBatch(ctx context.Context, objs []*User) ([]*ProfilesConnection, error)
+	ProfileConnectionNonBatch(ctx context.Context, obj *User) (*ProfilesConnection, error)
 }
 
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -79,12 +108,57 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	_ = ec
 	switch typeName + "." + field {
 
+	case "Image.url":
+		if e.ComplexityRoot.Image.URL == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Image.URL(childComplexity), true
+
+	case "Profile.coverBatch":
+		if e.ComplexityRoot.Profile.CoverBatch == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Profile.CoverBatch(childComplexity), true
+	case "Profile.coverNonBatch":
+		if e.ComplexityRoot.Profile.CoverNonBatch == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Profile.CoverNonBatch(childComplexity), true
 	case "Profile.id":
 		if e.ComplexityRoot.Profile.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Profile.ID(childComplexity), true
+
+	case "ProfileEdge.cursor":
+		if e.ComplexityRoot.ProfileEdge.Cursor == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ProfileEdge.Cursor(childComplexity), true
+	case "ProfileEdge.node":
+		if e.ComplexityRoot.ProfileEdge.Node == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ProfileEdge.Node(childComplexity), true
+
+	case "ProfilesConnection.edges":
+		if e.ComplexityRoot.ProfilesConnection.Edges == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ProfilesConnection.Edges(childComplexity), true
+	case "ProfilesConnection.totalCount":
+		if e.ComplexityRoot.ProfilesConnection.TotalCount == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ProfilesConnection.TotalCount(childComplexity), true
 
 	case "Query.users":
 		if e.ComplexityRoot.Query.Users == nil {
@@ -139,6 +213,30 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.NullableNonBatchWithArg(childComplexity, args["offset"].(int)), true
+	case "User.profileBatch":
+		if e.ComplexityRoot.User.ProfileBatch == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.ProfileBatch(childComplexity), true
+	case "User.profileConnectionBatch":
+		if e.ComplexityRoot.User.ProfileConnectionBatch == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.ProfileConnectionBatch(childComplexity), true
+	case "User.profileConnectionNonBatch":
+		if e.ComplexityRoot.User.ProfileConnectionNonBatch == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.ProfileConnectionNonBatch(childComplexity), true
+	case "User.profileNonBatch":
+		if e.ComplexityRoot.User.ProfileNonBatch == nil {
+			break
+		}
+
+		return e.ComplexityRoot.User.ProfileNonBatch(childComplexity), true
 
 	}
 	return 0, false
@@ -311,6 +409,35 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _Image_url(ctx context.Context, field graphql.CollectedField, obj *Image) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Image_url,
+		func(ctx context.Context) (any, error) {
+			return obj.URL, nil
+		},
+		nil,
+		ec.marshalNString2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Image_url(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Image",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Profile_id(ctx context.Context, field graphql.CollectedField, obj *Profile) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -335,6 +462,236 @@ func (ec *executionContext) fieldContext_Profile_id(_ context.Context, field gra
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Profile_coverBatch(ctx context.Context, field graphql.CollectedField, obj *Profile) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Profile_coverBatch,
+		func(ctx context.Context) (any, error) {
+			return ec.resolveBatch_Profile_coverBatch(ctx, field, obj)
+		},
+		nil,
+		ec.marshalOImage2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐImage,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Profile_coverBatch(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Profile",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "url":
+				return ec.fieldContext_Image_url(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Image", field.Name)
+		},
+	}
+	return fc, nil
+}
+func (ec *executionContext) resolveBatch_Profile_coverBatch(ctx context.Context, field graphql.CollectedField, obj *Profile) (any, error) {
+	resolver := ec.Resolvers.Profile()
+	group := graphql.GetBatchParentGroup(ctx, "Profile")
+	if group != nil {
+		parents, ok := group.Parents.([]*Profile)
+		if ok {
+			idx, ok := graphql.BatchParentIndex(ctx)
+			if ok {
+				key := field.Alias
+				if key == "" {
+					key = field.Name
+				}
+				result := group.GetFieldResult(key, func() (any, error) {
+					return resolver.CoverBatch(ctx, parents)
+				})
+				return graphql.ResolveBatchGroupResult[*Image](
+					ctx,
+					idx,
+					len(parents),
+					result,
+					"Profile.coverBatch",
+				)
+			}
+		}
+	}
+
+	results, err := resolver.CoverBatch(ctx, []*Profile{obj})
+	return graphql.ResolveBatchSingleResult[*Image](
+		ctx,
+		results,
+		err,
+		"Profile.coverBatch",
+	)
+}
+
+func (ec *executionContext) _Profile_coverNonBatch(ctx context.Context, field graphql.CollectedField, obj *Profile) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Profile_coverNonBatch,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Profile().CoverNonBatch(ctx, obj)
+		},
+		nil,
+		ec.marshalOImage2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐImage,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Profile_coverNonBatch(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Profile",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "url":
+				return ec.fieldContext_Image_url(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Image", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProfileEdge_node(ctx context.Context, field graphql.CollectedField, obj *ProfileEdge) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ProfileEdge_node,
+		func(ctx context.Context) (any, error) {
+			return obj.Node, nil
+		},
+		nil,
+		ec.marshalNProfile2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfile,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ProfileEdge_node(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProfileEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Profile_id(ctx, field)
+			case "coverBatch":
+				return ec.fieldContext_Profile_coverBatch(ctx, field)
+			case "coverNonBatch":
+				return ec.fieldContext_Profile_coverNonBatch(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProfileEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *ProfileEdge) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ProfileEdge_cursor,
+		func(ctx context.Context) (any, error) {
+			return obj.Cursor, nil
+		},
+		nil,
+		ec.marshalNID2string,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ProfileEdge_cursor(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProfileEdge",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type ID does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProfilesConnection_edges(ctx context.Context, field graphql.CollectedField, obj *ProfilesConnection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ProfilesConnection_edges,
+		func(ctx context.Context) (any, error) {
+			return obj.Edges, nil
+		},
+		nil,
+		ec.marshalNProfileEdge2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfileEdgeᚄ,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ProfilesConnection_edges(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProfilesConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "node":
+				return ec.fieldContext_ProfileEdge_node(ctx, field)
+			case "cursor":
+				return ec.fieldContext_ProfileEdge_cursor(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ProfileEdge", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _ProfilesConnection_totalCount(ctx context.Context, field graphql.CollectedField, obj *ProfilesConnection) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_ProfilesConnection_totalCount,
+		func(ctx context.Context) (any, error) {
+			return obj.TotalCount, nil
+		},
+		nil,
+		ec.marshalNInt2int,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_ProfilesConnection_totalCount(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "ProfilesConnection",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -376,6 +733,14 @@ func (ec *executionContext) fieldContext_Query_users(_ context.Context, field gr
 				return ec.fieldContext_User_nonNullableBatch(ctx, field)
 			case "nonNullableNonBatch":
 				return ec.fieldContext_User_nonNullableNonBatch(ctx, field)
+			case "profileBatch":
+				return ec.fieldContext_User_profileBatch(ctx, field)
+			case "profileNonBatch":
+				return ec.fieldContext_User_profileNonBatch(ctx, field)
+			case "profileConnectionBatch":
+				return ec.fieldContext_User_profileConnectionBatch(ctx, field)
+			case "profileConnectionNonBatch":
+				return ec.fieldContext_User_profileConnectionNonBatch(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 		},
@@ -517,6 +882,10 @@ func (ec *executionContext) fieldContext_User_nullableBatch(_ context.Context, f
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Profile_id(ctx, field)
+			case "coverBatch":
+				return ec.fieldContext_Profile_coverBatch(ctx, field)
+			case "coverNonBatch":
+				return ec.fieldContext_Profile_coverNonBatch(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
 		},
@@ -584,6 +953,10 @@ func (ec *executionContext) fieldContext_User_nullableNonBatch(_ context.Context
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Profile_id(ctx, field)
+			case "coverBatch":
+				return ec.fieldContext_Profile_coverBatch(ctx, field)
+			case "coverNonBatch":
+				return ec.fieldContext_Profile_coverNonBatch(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
 		},
@@ -617,6 +990,10 @@ func (ec *executionContext) fieldContext_User_nullableBatchWithArg(ctx context.C
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Profile_id(ctx, field)
+			case "coverBatch":
+				return ec.fieldContext_Profile_coverBatch(ctx, field)
+			case "coverNonBatch":
+				return ec.fieldContext_Profile_coverNonBatch(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
 		},
@@ -697,6 +1074,10 @@ func (ec *executionContext) fieldContext_User_nullableNonBatchWithArg(ctx contex
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Profile_id(ctx, field)
+			case "coverBatch":
+				return ec.fieldContext_Profile_coverBatch(ctx, field)
+			case "coverNonBatch":
+				return ec.fieldContext_Profile_coverNonBatch(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
 		},
@@ -741,6 +1122,10 @@ func (ec *executionContext) fieldContext_User_nonNullableBatch(_ context.Context
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Profile_id(ctx, field)
+			case "coverBatch":
+				return ec.fieldContext_Profile_coverBatch(ctx, field)
+			case "coverNonBatch":
+				return ec.fieldContext_Profile_coverNonBatch(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
 		},
@@ -808,8 +1193,224 @@ func (ec *executionContext) fieldContext_User_nonNullableNonBatch(_ context.Cont
 			switch field.Name {
 			case "id":
 				return ec.fieldContext_Profile_id(ctx, field)
+			case "coverBatch":
+				return ec.fieldContext_Profile_coverBatch(ctx, field)
+			case "coverNonBatch":
+				return ec.fieldContext_Profile_coverNonBatch(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_profileBatch(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_profileBatch,
+		func(ctx context.Context) (any, error) {
+			return ec.resolveBatch_User_profileBatch(ctx, field, obj)
+		},
+		nil,
+		ec.marshalOProfile2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfile,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_profileBatch(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Profile_id(ctx, field)
+			case "coverBatch":
+				return ec.fieldContext_Profile_coverBatch(ctx, field)
+			case "coverNonBatch":
+				return ec.fieldContext_Profile_coverNonBatch(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
+		},
+	}
+	return fc, nil
+}
+func (ec *executionContext) resolveBatch_User_profileBatch(ctx context.Context, field graphql.CollectedField, obj *User) (any, error) {
+	resolver := ec.Resolvers.User()
+	group := graphql.GetBatchParentGroup(ctx, "User")
+	if group != nil {
+		parents, ok := group.Parents.([]*User)
+		if ok {
+			idx, ok := graphql.BatchParentIndex(ctx)
+			if ok {
+				key := field.Alias
+				if key == "" {
+					key = field.Name
+				}
+				result := group.GetFieldResult(key, func() (any, error) {
+					return resolver.ProfileBatch(ctx, parents)
+				})
+				return graphql.ResolveBatchGroupResult[*Profile](
+					ctx,
+					idx,
+					len(parents),
+					result,
+					"User.profileBatch",
+				)
+			}
+		}
+	}
+
+	results, err := resolver.ProfileBatch(ctx, []*User{obj})
+	return graphql.ResolveBatchSingleResult[*Profile](
+		ctx,
+		results,
+		err,
+		"User.profileBatch",
+	)
+}
+
+func (ec *executionContext) _User_profileNonBatch(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_profileNonBatch,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.User().ProfileNonBatch(ctx, obj)
+		},
+		nil,
+		ec.marshalOProfile2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfile,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_profileNonBatch(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Profile_id(ctx, field)
+			case "coverBatch":
+				return ec.fieldContext_Profile_coverBatch(ctx, field)
+			case "coverNonBatch":
+				return ec.fieldContext_Profile_coverNonBatch(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Profile", field.Name)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _User_profileConnectionBatch(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_profileConnectionBatch,
+		func(ctx context.Context) (any, error) {
+			return ec.resolveBatch_User_profileConnectionBatch(ctx, field, obj)
+		},
+		nil,
+		ec.marshalOProfilesConnection2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfilesConnection,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_profileConnectionBatch(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "edges":
+				return ec.fieldContext_ProfilesConnection_edges(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_ProfilesConnection_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ProfilesConnection", field.Name)
+		},
+	}
+	return fc, nil
+}
+func (ec *executionContext) resolveBatch_User_profileConnectionBatch(ctx context.Context, field graphql.CollectedField, obj *User) (any, error) {
+	resolver := ec.Resolvers.User()
+	group := graphql.GetBatchParentGroup(ctx, "User")
+	if group != nil {
+		parents, ok := group.Parents.([]*User)
+		if ok {
+			idx, ok := graphql.BatchParentIndex(ctx)
+			if ok {
+				key := field.Alias
+				if key == "" {
+					key = field.Name
+				}
+				result := group.GetFieldResult(key, func() (any, error) {
+					return resolver.ProfileConnectionBatch(ctx, parents)
+				})
+				return graphql.ResolveBatchGroupResult[*ProfilesConnection](
+					ctx,
+					idx,
+					len(parents),
+					result,
+					"User.profileConnectionBatch",
+				)
+			}
+		}
+	}
+
+	results, err := resolver.ProfileConnectionBatch(ctx, []*User{obj})
+	return graphql.ResolveBatchSingleResult[*ProfilesConnection](
+		ctx,
+		results,
+		err,
+		"User.profileConnectionBatch",
+	)
+}
+
+func (ec *executionContext) _User_profileConnectionNonBatch(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_User_profileConnectionNonBatch,
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.User().ProfileConnectionNonBatch(ctx, obj)
+		},
+		nil,
+		ec.marshalOProfilesConnection2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfilesConnection,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_User_profileConnectionNonBatch(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "User",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "edges":
+				return ec.fieldContext_ProfilesConnection_edges(ctx, field)
+			case "totalCount":
+				return ec.fieldContext_ProfilesConnection_totalCount(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type ProfilesConnection", field.Name)
 		},
 	}
 	return fc, nil
@@ -2269,6 +2870,45 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** object.gotpl ****************************
 
+var imageImplementors = []string{"Image"}
+
+func (ec *executionContext) _Image(ctx context.Context, sel ast.SelectionSet, obj *Image) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, imageImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Image")
+		case "url":
+			out.Values[i] = ec._Image_url(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
 var profileImplementors = []string{"Profile"}
 
 func (ec *executionContext) _Profile(ctx context.Context, sel ast.SelectionSet, obj *Profile) graphql.Marshaler {
@@ -2282,6 +2922,160 @@ func (ec *executionContext) _Profile(ctx context.Context, sel ast.SelectionSet, 
 			out.Values[i] = graphql.MarshalString("Profile")
 		case "id":
 			out.Values[i] = ec._Profile_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "coverBatch":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Profile_coverBatch(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "coverNonBatch":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Profile_coverNonBatch(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var profileEdgeImplementors = []string{"ProfileEdge"}
+
+func (ec *executionContext) _ProfileEdge(ctx context.Context, sel ast.SelectionSet, obj *ProfileEdge) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, profileEdgeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ProfileEdge")
+		case "node":
+			out.Values[i] = ec._ProfileEdge_node(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "cursor":
+			out.Values[i] = ec._ProfileEdge_cursor(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.Deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.ProcessDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
+
+var profilesConnectionImplementors = []string{"ProfilesConnection"}
+
+func (ec *executionContext) _ProfilesConnection(ctx context.Context, sel ast.SelectionSet, obj *ProfilesConnection) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, profilesConnectionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ProfilesConnection")
+		case "edges":
+			out.Values[i] = ec._ProfilesConnection_edges(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "totalCount":
+			out.Values[i] = ec._ProfilesConnection_totalCount(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -2572,6 +3366,138 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "profileBatch":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_profileBatch(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "profileNonBatch":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_profileNonBatch(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "profileConnectionBatch":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_profileConnectionBatch(ctx, field, obj)
+				return res
+			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+		case "profileConnectionNonBatch":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._User_profileConnectionNonBatch(ctx, field, obj)
 				return res
 			}
 
@@ -3015,6 +3941,33 @@ func (ec *executionContext) marshalNProfile2ᚖgithubᚗcomᚋ99designsᚋgqlgen
 	return ec._Profile(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNProfileEdge2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfileEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*ProfileEdge) graphql.Marshaler {
+	ctx = graphql.WithBatchParents(ctx, "ProfileEdge", v)
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNProfileEdge2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfileEdge(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNProfileEdge2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfileEdge(ctx context.Context, sel ast.SelectionSet, v *ProfileEdge) graphql.Marshaler {
+	if v == nil {
+		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
+			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
+		}
+		return graphql.Null
+	}
+	return ec._ProfileEdge(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3232,11 +4185,25 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
+func (ec *executionContext) marshalOImage2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐImage(ctx context.Context, sel ast.SelectionSet, v *Image) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Image(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalOProfile2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfile(ctx context.Context, sel ast.SelectionSet, v *Profile) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}
 	return ec._Profile(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOProfilesConnection2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfilesConnection(ctx context.Context, sel ast.SelectionSet, v *ProfilesConnection) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ProfilesConnection(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v any) (*string, error) {

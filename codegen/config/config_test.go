@@ -264,23 +264,6 @@ func TestConfigCheck(t *testing.T) {
 					"exec and federation define the same import path (github.com/99designs/gqlgen/codegen/config/generated) with different package names (generated vs federation)",
 				)
 			})
-
-			t.Run("deprecated federated flag raises an error", func(t *testing.T) {
-				config := Config{
-					Exec: ExecConfig{
-						Layout:   execLayout,
-						Filename: "generated/exec.go",
-						DirName:  "generated",
-					},
-					Federated: true,
-				}
-
-				require.EqualError(
-					t,
-					config.check(),
-					"federated has been removed, instead use\nfederation:\n    filename: path/to/federated.go",
-				)
-			})
 		})
 	}
 }

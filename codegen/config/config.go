@@ -65,9 +65,6 @@ type Config struct {
 	Sources                        []*ast.Source  `yaml:"-"`
 	Packages                       *code.Packages `yaml:"-"`
 	Schema                         *ast.Schema    `yaml:"-"`
-
-	// Deprecated: use Federation instead. Will be removed next release
-	Federated bool `yaml:"federated,omitempty"`
 }
 
 const (
@@ -715,11 +712,6 @@ func (c *Config) check() error {
 		if c.Federation.ImportPath() != c.Exec.ImportPath() {
 			return errors.New("federation and exec must be in the same package")
 		}
-	}
-	if c.Federated {
-		return errors.New(
-			"federated has been removed, instead use\nfederation:\n    filename: path/to/federated.go",
-		)
 	}
 
 	for importPath, pkg := range fileList {

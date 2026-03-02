@@ -5,6 +5,8 @@ package batchresolver
 // It serves as dependency injection for your app, add any dependencies you require
 // here.
 
+import "sync/atomic"
+
 type Resolver struct {
 	users                   []*User
 	profiles                []*Profile
@@ -21,11 +23,11 @@ type Resolver struct {
 	batchResultsLen         int
 	batchErrListIdxs        map[int]struct{}
 
-	// Call counters for the nested batch performance test
-	profileBatchCalls    int
-	profileNonBatchCalls int
-	coverBatchCalls      int
-	coverNonBatchCalls   int
+	// Call counters for the nested batch performance test (atomic for -race safety)
+	profileBatchCalls    atomic.Int32
+	profileNonBatchCalls atomic.Int32
+	coverBatchCalls      atomic.Int32
+	coverNonBatchCalls   atomic.Int32
 }
 
 func (r *Resolver) userIndex(obj *User) int {

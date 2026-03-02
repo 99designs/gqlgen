@@ -502,8 +502,8 @@ func TestBatchResolver_Nested_CallCount(t *testing.T) {
 	assertData(t, batchResp, "batch")
 	require.Equal(
 		t,
-		1,
-		resolver.profileBatchCalls,
+		int32(1),
+		resolver.profileBatchCalls.Load(),
 		"profileBatch should be called once for all users",
 	)
 	// TODO: coverBatch is called once per profile (not batched) because profiles
@@ -513,8 +513,8 @@ func TestBatchResolver_Nested_CallCount(t *testing.T) {
 	// resolver results so coverBatchCalls == 1 here.
 	require.Equal(
 		t,
-		n,
-		resolver.coverBatchCalls,
+		int32(n),
+		resolver.coverBatchCalls.Load(),
 		"coverBatch called once per profile (no list parent context)",
 	)
 
@@ -534,14 +534,14 @@ func TestBatchResolver_Nested_CallCount(t *testing.T) {
 	assertData(t, nonBatchResp, "non-batch")
 	require.Equal(
 		t,
-		n,
-		resolver.profileNonBatchCalls,
+		int32(n),
+		resolver.profileNonBatchCalls.Load(),
 		"profileNonBatch should be called once per user",
 	)
 	require.Equal(
 		t,
-		n,
-		resolver.coverNonBatchCalls,
+		int32(n),
+		resolver.coverNonBatchCalls.Load(),
 		"coverNonBatch should be called once per profile",
 	)
 

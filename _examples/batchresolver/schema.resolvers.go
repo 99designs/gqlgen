@@ -16,7 +16,7 @@ import (
 
 // CoverBatch is the batch resolver for the coverBatch field.
 func (r *profileResolver) CoverBatch(ctx context.Context, objs []*Profile) ([]*Image, error) {
-	r.coverBatchCalls++
+	r.coverBatchCalls.Add(1)
 	results := make([]*Image, len(objs))
 	for i, obj := range objs {
 		idx := r.profileIndex(obj)
@@ -27,7 +27,7 @@ func (r *profileResolver) CoverBatch(ctx context.Context, objs []*Profile) ([]*I
 
 // CoverNonBatch is the resolver for the coverNonBatch field.
 func (r *profileResolver) CoverNonBatch(ctx context.Context, obj *Profile) (*Image, error) {
-	r.coverNonBatchCalls++
+	r.coverNonBatchCalls.Add(1)
 	idx := r.profileIndex(obj)
 	return resolveImage(r.Resolver, idx)
 }
@@ -174,7 +174,7 @@ func (r *userResolver) NonNullableNonBatch(ctx context.Context, obj *User) (*Pro
 
 // ProfileBatch is the batch resolver for the profileBatch field.
 func (r *userResolver) ProfileBatch(ctx context.Context, objs []*User) ([]*Profile, error) {
-	r.profileBatchCalls++
+	r.profileBatchCalls.Add(1)
 	results := make([]*Profile, len(objs))
 	for i, obj := range objs {
 		idx := r.userIndex(obj)
@@ -187,7 +187,7 @@ func (r *userResolver) ProfileBatch(ctx context.Context, objs []*User) ([]*Profi
 
 // ProfileNonBatch is the resolver for the profileNonBatch field.
 func (r *userResolver) ProfileNonBatch(ctx context.Context, obj *User) (*Profile, error) {
-	r.profileNonBatchCalls++
+	r.profileNonBatchCalls.Add(1)
 	idx := r.userIndex(obj)
 	if idx < 0 || idx >= len(r.profiles) {
 		return nil, fmt.Errorf("profile not set at index %d", idx)

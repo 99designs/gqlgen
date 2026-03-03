@@ -23,7 +23,7 @@ type Imports struct {
 }
 
 func (i *Import) String() string {
-	if strings.HasSuffix(i.Path, i.Alias) {
+	if strings.HasSuffix(i.Path, i.Alias) && i.Alias == i.Name {
 		return strconv.Quote(i.Path)
 	}
 

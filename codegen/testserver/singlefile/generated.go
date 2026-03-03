@@ -249,6 +249,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		DefaultInput          func(childComplexity int, input DefaultInput) int
+		Issue4053             func(childComplexity int, input *Issue4053Input1) int
 		OverrideValueViaInput func(childComplexity int, input FieldsOrderInput) int
 		UpdateProduct         func(childComplexity int, id string, name *string, price *float64) int
 		UpdatePtrToPtr        func(childComplexity int, input UpdatePtrToPtrOuter) int
@@ -519,6 +520,7 @@ type MutationResolver interface {
 	DefaultInput(ctx context.Context, input DefaultInput) (*DefaultParametersMirror, error)
 	OverrideValueViaInput(ctx context.Context, input FieldsOrderInput) (*FieldsOrderPayload, error)
 	UpdateProduct(ctx context.Context, input map[string]interface{}) (string, error)
+	Issue4053(ctx context.Context, input *Issue4053Input1) (bool, error)
 	UpdateSomething(ctx context.Context, input SpecialInput) (string, error)
 	UpdatePtrToPtr(ctx context.Context, input UpdatePtrToPtrOuter) (*PtrToPtrOuter, error)
 }
@@ -1134,6 +1136,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.DefaultInput(childComplexity, args["input"].(DefaultInput)), true
+	case "Mutation.issue4053":
+		if e.ComplexityRoot.Mutation.Issue4053 == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_issue4053_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.Issue4053(childComplexity, args["input"].(*Issue4053Input1)), true
 	case "Mutation.overrideValueViaInput":
 		if e.ComplexityRoot.Mutation.OverrideValueViaInput == nil {
 			break
@@ -2341,6 +2354,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputInnerInput,
 		ec.unmarshalInputInputDirectives,
 		ec.unmarshalInputInputWithEnumValue,
+		ec.unmarshalInputIssue4053Input1,
+		ec.unmarshalInputIssue4053Input2,
 		ec.unmarshalInputMapNestedInput,
 		ec.unmarshalInputMapNestedMapSliceInput,
 		ec.unmarshalInputMapStringInterfaceInput,
@@ -2642,6 +2657,13 @@ input InputWithEnumValue {
 type InvalidIdentifier {
 	id: Int!
 }
+input Issue4053Input1 {
+	input2: Issue4053Input2
+}
+input Issue4053Input2 {
+	hello: String
+	helloWithDefault: String = "world"
+}
 type It {
 	id: ID!
 }
@@ -2694,6 +2716,7 @@ type Mutation {
 	defaultInput(input: DefaultInput!): DefaultParametersMirror!
 	overrideValueViaInput(input: FieldsOrderInput!): FieldsOrderPayload!
 	updateProduct(id: ID!, name: String, price: Float): String!
+	issue4053(input: Issue4053Input1): Boolean!
 	updateSomething(input: SpecialInput!): String!
 	updatePtrToPtr(input: UpdatePtrToPtrOuter!): PtrToPtrOuter!
 }
@@ -3125,6 +3148,17 @@ func (ec *executionContext) field_Mutation_defaultInput_args(ctx context.Context
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalNDefaultInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐDefaultInput)
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_issue4053_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalOIssue4053Input12ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐIssue4053Input1)
 	if err != nil {
 		return nil, err
 	}
@@ -6905,6 +6939,49 @@ func (ec *executionContext) fieldContext_Mutation_updateProduct(ctx context.Cont
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Mutation_updateProduct_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Mutation_issue4053(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Mutation_issue4053,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().Issue4053(ctx, fc.Args["input"].(*Issue4053Input1))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, nil, next)
+		},
+		ec.marshalNBoolean2bool,
+		true,
+		true,
+	)
+}
+
+func (ec *executionContext) fieldContext_Mutation_issue4053(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_issue4053_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -14440,13 +14517,18 @@ func (ec *executionContext) fieldContext_iIt_id(_ context.Context, field graphql
 // region    **************************** input.gotpl *****************************
 
 func (ec *executionContext) unmarshalInputChanges(ctx context.Context, obj any) (map[string]any, error) {
-	it := make(map[string]any, len(obj.(map[string]any)))
+	var it map[string]any
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
 	fieldsInOrder := [...]string{"a", "b"}
+	it = make(map[string]any, len(asMap))
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -14474,6 +14556,10 @@ func (ec *executionContext) unmarshalInputChanges(ctx context.Context, obj any) 
 
 func (ec *executionContext) unmarshalInputDefaultInput(ctx context.Context, obj any) (DefaultInput, error) {
 	var it DefaultInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -14513,13 +14599,18 @@ func (ec *executionContext) unmarshalInputDefaultInput(ctx context.Context, obj 
 }
 
 func (ec *executionContext) unmarshalInputDirectiveInput(ctx context.Context, obj any) (map[string]any, error) {
-	it := make(map[string]any, len(obj.(map[string]any)))
+	var it map[string]any
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
 	fieldsInOrder := [...]string{"oldField", "newField"}
+	it = make(map[string]any, len(asMap))
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -14547,6 +14638,10 @@ func (ec *executionContext) unmarshalInputDirectiveInput(ctx context.Context, ob
 
 func (ec *executionContext) unmarshalInputFieldsOrderInput(ctx context.Context, obj any) (FieldsOrderInput, error) {
 	var it FieldsOrderInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -14582,6 +14677,10 @@ func (ec *executionContext) unmarshalInputFieldsOrderInput(ctx context.Context, 
 
 func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, obj any) (InnerDirectives, error) {
 	var it InnerDirectives
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -14633,6 +14732,10 @@ func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, o
 
 func (ec *executionContext) unmarshalInputInnerInput(ctx context.Context, obj any) (InnerInput, error) {
 	var it InnerInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -14659,6 +14762,10 @@ func (ec *executionContext) unmarshalInputInnerInput(ctx context.Context, obj an
 
 func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, obj any) (InputDirectives, error) {
 	var it InputDirectives
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -14805,6 +14912,10 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 
 func (ec *executionContext) unmarshalInputInputWithEnumValue(ctx context.Context, obj any) (InputWithEnumValue, error) {
 	var it InputWithEnumValue
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -14829,8 +14940,83 @@ func (ec *executionContext) unmarshalInputInputWithEnumValue(ctx context.Context
 	return it, nil
 }
 
+func (ec *executionContext) unmarshalInputIssue4053Input1(ctx context.Context, obj any) (Issue4053Input1, error) {
+	var it Issue4053Input1
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"input2"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "input2":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input2"))
+			data, err := ec.unmarshalOIssue4053Input22githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐIssue4053Input2(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Input2 = data
+		}
+	}
+	return it, nil
+}
+
+func (ec *executionContext) unmarshalInputIssue4053Input2(ctx context.Context, obj any) (Issue4053Input2, error) {
+	var it Issue4053Input2
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	if _, present := asMap["helloWithDefault"]; !present {
+		asMap["helloWithDefault"] = "world"
+	}
+
+	fieldsInOrder := [...]string{"hello", "helloWithDefault"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "hello":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hello"))
+			data, err := ec.unmarshalOString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Hello = data
+		case "helloWithDefault":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("helloWithDefault"))
+			data, err := ec.unmarshalOString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.HelloWithDefault = data
+		}
+	}
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputMapNestedInput(ctx context.Context, obj any) (MapNested, error) {
 	var it MapNested
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -14856,13 +15042,18 @@ func (ec *executionContext) unmarshalInputMapNestedInput(ctx context.Context, ob
 }
 
 func (ec *executionContext) unmarshalInputMapNestedMapSliceInput(ctx context.Context, obj any) (map[string]any, error) {
-	it := make(map[string]any, len(obj.(map[string]any)))
+	var it map[string]any
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
 	fieldsInOrder := [...]string{"name", "recurse"}
+	it = make(map[string]any, len(asMap))
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -14889,13 +15080,18 @@ func (ec *executionContext) unmarshalInputMapNestedMapSliceInput(ctx context.Con
 }
 
 func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Context, obj any) (map[string]any, error) {
-	it := make(map[string]any, len(obj.(map[string]any)))
+	var it map[string]any
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
 	fieldsInOrder := [...]string{"a", "b", "c", "nested"}
+	it = make(map[string]any, len(asMap))
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -14937,6 +15133,10 @@ func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Co
 
 func (ec *executionContext) unmarshalInputNestedInput(ctx context.Context, obj any) (NestedInput, error) {
 	var it NestedInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -14963,6 +15163,10 @@ func (ec *executionContext) unmarshalInputNestedInput(ctx context.Context, obj a
 
 func (ec *executionContext) unmarshalInputNestedMapInput(ctx context.Context, obj any) (NestedMapInput, error) {
 	var it NestedMapInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -14989,6 +15193,10 @@ func (ec *executionContext) unmarshalInputNestedMapInput(ctx context.Context, ob
 
 func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, obj any) (OmittableInput, error) {
 	var it OmittableInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -15064,6 +15272,10 @@ func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, ob
 
 func (ec *executionContext) unmarshalInputOuterInput(ctx context.Context, obj any) (OuterInput, error) {
 	var it OuterInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -15090,6 +15302,10 @@ func (ec *executionContext) unmarshalInputOuterInput(ctx context.Context, obj an
 
 func (ec *executionContext) unmarshalInputOuterWrapperInput(ctx context.Context, obj any) (OuterWrapperInput, error) {
 	var it OuterWrapperInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -15116,6 +15332,10 @@ func (ec *executionContext) unmarshalInputOuterWrapperInput(ctx context.Context,
 
 func (ec *executionContext) unmarshalInputRecursiveInputSlice(ctx context.Context, obj any) (RecursiveInputSlice, error) {
 	var it RecursiveInputSlice
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -15141,13 +15361,18 @@ func (ec *executionContext) unmarshalInputRecursiveInputSlice(ctx context.Contex
 }
 
 func (ec *executionContext) unmarshalInputRequiredFilters(ctx context.Context, obj any) (map[string]any, error) {
-	it := make(map[string]any, len(obj.(map[string]any)))
+	var it map[string]any
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
 	fieldsInOrder := [...]string{"name", "age"}
+	it = make(map[string]any, len(asMap))
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -15174,13 +15399,18 @@ func (ec *executionContext) unmarshalInputRequiredFilters(ctx context.Context, o
 }
 
 func (ec *executionContext) unmarshalInputSearchFilters(ctx context.Context, obj any) (map[string]any, error) {
-	it := make(map[string]any, len(obj.(map[string]any)))
+	var it map[string]any
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
 	fieldsInOrder := [...]string{"query", "category", "minPrice"}
+	it = make(map[string]any, len(asMap))
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -15214,7 +15444,11 @@ func (ec *executionContext) unmarshalInputSearchFilters(ctx context.Context, obj
 }
 
 func (ec *executionContext) unmarshalInputSearchWithDefaults(ctx context.Context, obj any) (map[string]any, error) {
-	it := make(map[string]any, len(obj.(map[string]any)))
+	var it map[string]any
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -15231,6 +15465,7 @@ func (ec *executionContext) unmarshalInputSearchWithDefaults(ctx context.Context
 	}
 
 	fieldsInOrder := [...]string{"query", "limit", "includeArchived"}
+	it = make(map[string]any, len(asMap))
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -15265,6 +15500,10 @@ func (ec *executionContext) unmarshalInputSearchWithDefaults(ctx context.Context
 
 func (ec *executionContext) unmarshalInputSpecialInput(ctx context.Context, obj any) (SpecialInput, error) {
 	var it SpecialInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -15290,13 +15529,18 @@ func (ec *executionContext) unmarshalInputSpecialInput(ctx context.Context, obj 
 }
 
 func (ec *executionContext) unmarshalInputUpdateProductInput(ctx context.Context, obj any) (map[string]any, error) {
-	it := make(map[string]any, len(obj.(map[string]any)))
+	var it map[string]any
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
 	fieldsInOrder := [...]string{"id", "name", "price"}
+	it = make(map[string]any, len(asMap))
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -15331,6 +15575,10 @@ func (ec *executionContext) unmarshalInputUpdateProductInput(ctx context.Context
 
 func (ec *executionContext) unmarshalInputUpdatePtrToPtrInner(ctx context.Context, obj any) (UpdatePtrToPtrInner, error) {
 	var it UpdatePtrToPtrInner
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -15364,6 +15612,10 @@ func (ec *executionContext) unmarshalInputUpdatePtrToPtrInner(ctx context.Contex
 
 func (ec *executionContext) unmarshalInputUpdatePtrToPtrOuter(ctx context.Context, obj any) (UpdatePtrToPtrOuter, error) {
 	var it UpdatePtrToPtrOuter
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -15404,6 +15656,10 @@ func (ec *executionContext) unmarshalInputUpdatePtrToPtrOuter(ctx context.Contex
 
 func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj any) (ValidInput, error) {
 	var it ValidInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -17659,6 +17915,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		case "updateProduct":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Mutation_updateProduct(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "issue4053":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_issue4053(ctx, field)
 			})
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
@@ -22681,6 +22944,19 @@ func (ec *executionContext) marshalOInvalidIdentifier2ᚖgithubᚗcomᚋ99design
 		return graphql.Null
 	}
 	return ec._InvalidIdentifier(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOIssue4053Input12ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐIssue4053Input1(ctx context.Context, v any) (*Issue4053Input1, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputIssue4053Input1(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOIssue4053Input22githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚐIssue4053Input2(ctx context.Context, v any) (Issue4053Input2, error) {
+	res, err := ec.unmarshalInputIssue4053Input2(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOIt2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋsinglefileᚋintrospectionᚐIt(ctx context.Context, sel ast.SelectionSet, v *introspection1.It) graphql.Marshaler {

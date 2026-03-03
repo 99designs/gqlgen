@@ -3031,6 +3031,10 @@ func fieldContext___Type_isOneOf(_ context.Context, ec *executionContext, field 
 
 func unmarshalInputCreateUserInput(ctx context.Context, ec *executionContext, obj any) (CreateUserInput, error) {
 	var it CreateUserInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -3082,6 +3086,10 @@ func unmarshalInputCreateUserInput(ctx context.Context, ec *executionContext, ob
 
 func unmarshalInputUserFilter(ctx context.Context, ec *executionContext, obj any) (UserFilter, error) {
 	var it UserFilter
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v

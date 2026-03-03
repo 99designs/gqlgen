@@ -6,7 +6,6 @@ import (
 	"context"
 
 	"github.com/99designs/gqlgen/graphql"
-	"github.com/vektah/gqlparser/v2/ast"
 )
 
 // region    ************************** generated!.gotpl **************************
@@ -27,8 +26,8 @@ import (
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputNestedInput(ctx context.Context, obj any) (NestedInput, error) {
-	var it NestedInput
+func (ec *executionContext) unmarshalInputIssue4053Input1(ctx context.Context, obj any) (Issue4053Input1, error) {
+	var it Issue4053Input1
 	if obj == nil {
 		return it, nil
 	}
@@ -38,27 +37,27 @@ func (ec *executionContext) unmarshalInputNestedInput(ctx context.Context, obj a
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"field"}
+	fieldsInOrder := [...]string{"input2"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "field":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("field"))
-			data, err := ec.unmarshalNEmail2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐEmail(ctx, v)
+		case "input2":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("input2"))
+			data, err := ec.unmarshalOIssue4053Input22githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐIssue4053Input2(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Field = data
+			it.Input2 = data
 		}
 	}
 	return it, nil
 }
 
-func (ec *executionContext) unmarshalInputSpecialInput(ctx context.Context, obj any) (SpecialInput, error) {
-	var it SpecialInput
+func (ec *executionContext) unmarshalInputIssue4053Input2(ctx context.Context, obj any) (Issue4053Input2, error) {
+	var it Issue4053Input2
 	if obj == nil {
 		return it, nil
 	}
@@ -68,20 +67,31 @@ func (ec *executionContext) unmarshalInputSpecialInput(ctx context.Context, obj 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"nesting"}
+	if _, present := asMap["helloWithDefault"]; !present {
+		asMap["helloWithDefault"] = "world"
+	}
+
+	fieldsInOrder := [...]string{"hello", "helloWithDefault"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
 			continue
 		}
 		switch k {
-		case "nesting":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("nesting"))
-			data, err := ec.unmarshalNNestedInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐNestedInput(ctx, v)
+		case "hello":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("hello"))
+			data, err := ec.unmarshalOString2string(ctx, v)
 			if err != nil {
 				return it, err
 			}
-			it.Nesting = data
+			it.Hello = data
+		case "helloWithDefault":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("helloWithDefault"))
+			data, err := ec.unmarshalOString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.HelloWithDefault = data
 		}
 	}
 	return it, nil
@@ -99,23 +109,16 @@ func (ec *executionContext) unmarshalInputSpecialInput(ctx context.Context, obj 
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) unmarshalNEmail2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐEmail(ctx context.Context, v any) (Email, error) {
-	var res Email
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNEmail2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐEmail(ctx context.Context, sel ast.SelectionSet, v Email) graphql.Marshaler {
-	return v
-}
-
-func (ec *executionContext) unmarshalNNestedInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐNestedInput(ctx context.Context, v any) (*NestedInput, error) {
-	res, err := ec.unmarshalInputNestedInput(ctx, v)
+func (ec *executionContext) unmarshalOIssue4053Input12ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐIssue4053Input1(ctx context.Context, v any) (*Issue4053Input1, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputIssue4053Input1(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) unmarshalNSpecialInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐSpecialInput(ctx context.Context, v any) (SpecialInput, error) {
-	res, err := ec.unmarshalInputSpecialInput(ctx, v)
+func (ec *executionContext) unmarshalOIssue4053Input22githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐIssue4053Input2(ctx context.Context, v any) (Issue4053Input2, error) {
+	res, err := ec.unmarshalInputIssue4053Input2(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 

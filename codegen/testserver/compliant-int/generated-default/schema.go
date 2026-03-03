@@ -2124,6 +2124,10 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 func (ec *executionContext) unmarshalInputInput(ctx context.Context, obj any) (Input, error) {
 	var it Input
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -2150,6 +2154,10 @@ func (ec *executionContext) unmarshalInputInput(ctx context.Context, obj any) (I
 
 func (ec *executionContext) unmarshalInputInput64(ctx context.Context, obj any) (Input64, error) {
 	var it Input64
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v

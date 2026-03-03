@@ -11,11 +11,11 @@
 	{{- else -}}
 	func (ec *executionContext) unmarshalInput{{ .Name }}(ctx context.Context, obj any) ({{ if .PointersInUnmarshalInput }}*{{ end }}{{.Type | ref}}, error) {
 	{{- end }}
-		{{- if $input.IsMap }}
-			it := make(map[string]any, len(obj.(map[string]any)))
-		{{- else }}
-			var it {{.Type | ref}}
-		{{- end }}
+		var it {{.Type | ref}}
+		if obj == nil {
+			return it, nil
+		}
+
 		asMap := map[string]any{}
 		for k, v := range obj.(map[string]any) {
 			asMap[k] = v
@@ -29,6 +29,9 @@
 		{{- end }}
 
 		fieldsInOrder := [...]string{ {{ range .Fields }}{{ quote .Name }},{{ end }} }
+		{{- if $input.IsMap }}
+			it = make(map[string]any, len(asMap))
+		{{- end }}
 		for _, k := range fieldsInOrder {
 			v, ok := asMap[k]
 			if !ok {

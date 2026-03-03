@@ -72,6 +72,11 @@ func (r *mutationResolver) UpdateProduct(ctx context.Context, input map[string]i
 	panic("not implemented")
 }
 
+// Issue4053 is the resolver for the issue4053 field.
+func (r *mutationResolver) Issue4053(ctx context.Context, input *Issue4053Input1) (bool, error) {
+	panic("not implemented")
+}
+
 // UpdateSomething is the resolver for the updateSomething field.
 func (r *mutationResolver) UpdateSomething(ctx context.Context, input SpecialInput) (string, error) {
 	panic("not implemented")

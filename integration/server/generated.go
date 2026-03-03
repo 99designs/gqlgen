@@ -2554,6 +2554,10 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 func (ec *executionContext) unmarshalInputDateFilter(ctx context.Context, obj any) (models.DateFilter, error) {
 	var it models.DateFilter
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -2601,6 +2605,10 @@ func (ec *executionContext) unmarshalInputDateFilter(ctx context.Context, obj an
 
 func (ec *executionContext) unmarshalInputListCoercion(ctx context.Context, obj any) (models.ListCoercion, error) {
 	var it models.ListCoercion
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v

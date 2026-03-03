@@ -54,9 +54,24 @@
         "options": {
           "type": "object",
           "properties": {
-            "computed_requires": { "type": "boolean" }
+            "explicit_requires": {
+              "type": "boolean",
+              "description": "Generate a function in the execution context to populate fields using the @requires directive into the entity. Cannot be used together with computed_requires.",
+              "default": false
+            },
+            "computed_requires": {
+              "type": "boolean",
+              "description": "Generate resolver functions to compute values for fields using the @requires directive. Requires federation version 2 and call_argument_directives_with_null to be true. Cannot be used together with explicit_requires.",
+              "default": false
+            },
+            "entity_resolver_multi": {
+              "type": "boolean",
+              "description": "Default engine for entityResolver generation. Can be overridden per entity with @entityResolver(multi: Boolean) directive.",
+              "default": false
+            }
           }
-        }
+        },
+        "model_template": { "type": "string" }
       }
     },
     "model": {
@@ -65,7 +80,12 @@
       "properties": {
         "filename": { "type": "string" },
         "package": { "type": "string" },
-        "model_template": { "type": "string" }
+        "model_template": { "type": "string" },
+        "version": { "type": "integer" },
+        "options": {
+          "type": "object",
+          "additionalProperties": { "type": "boolean" }
+        }
       }
     },
     "resolver": {
@@ -86,13 +106,23 @@
         },
         "omit_template_comment": { "type": "boolean" },
         "resolver_template": { "type": "string" },
-        "preserve_resolver": { "type": "boolean" }
+        "preserve_resolver": { "type": "boolean" },
+        "type": {
+          "type": "string",
+          "description": "The name of the resolver struct type",
+          "default": "Resolver"
+        }
       }
     },
     "autobind": {
       "description": "gqlgen will search for any type names in the schema in these go packages",
       "type": "array",
       "items": { "type": "string" }
+    },
+    "autobind_getter_haser": {
+      "description": "Enable getter/haser methods for autobind",
+      "type": "boolean",
+      "default": false
     },
     "models": {
       "description": "Type mapping between the GraphQL and go type systems",
@@ -104,17 +134,68 @@
             "type": "array",
             "items": { "type": "string" }
           },
+          "forceGenerate": {
+            "type": "boolean",
+            "description": "Force generation of this type even if it is mapped to a model"
+          },
           "fields": {
             "type": "object",
             "additionalProperties": {
               "type": "object",
               "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "Go type for this field"
+                },
                 "resolver": { "type": "boolean" },
                 "fieldName": { "type": "string" },
+                "omittable": {
+                  "type": "boolean",
+                  "description": "Wrap this field with Omittable"
+                },
+                "autoBindGetterHaser": {
+                  "type": "boolean",
+                  "description": "Enable getter/haser auto-binding for this field"
+                },
                 "batch": {
                   "type": "boolean",
                   "description": "Enable batch resolver generation for this field to reduce N+1 queries"
+                },
+                "forceGenerate": {
+                  "type": "boolean",
+                  "description": "Force generate this field in the model even when OmitResolverFields is enabled"
                 }
+              }
+            }
+          },
+          "enum_values": {
+            "type": "object",
+            "description": "Custom enum value mappings",
+            "additionalProperties": {
+              "type": "object"
+            }
+          },
+          "extraFields": {
+            "type": "object",
+            "description": "Additional named fields to add to the generated model",
+            "additionalProperties": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string", "description": "Go type of the extra field" },
+                "overrideTags": { "type": "string", "description": "Override the Go struct tag" },
+                "description": { "type": "string", "description": "Go doc-comment for the field" }
+              }
+            }
+          },
+          "embedExtraFields": {
+            "type": "array",
+            "description": "Embeddable extra fields to add to the generated model",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": { "type": "string", "description": "Go type of the extra field" },
+                "overrideTags": { "type": "string", "description": "Override the Go struct tag" },
+                "description": { "type": "string", "description": "Go doc-comment for the field" }
               }
             }
           }
@@ -126,8 +207,39 @@
       "type": "string",
       "default": "json"
     },
+    "embedded_structs_prefix": {
+      "description": "Prefix for embedded structs",
+      "type": "string",
+      "default": "Base"
+    },
+    "directives": {
+      "description": "Custom directive configuration",
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "skip_runtime": {
+            "type": "boolean",
+            "description": "Skip runtime directive hook generation"
+          },
+          "implementation": {
+            "type": "string",
+            "description": "Static implementation function for the directive"
+          }
+        }
+      }
+    },
+    "local_prefix": {
+      "description": "Local package prefix for import sorting",
+      "type": "string"
+    },
     "omit_slice_element_pointers": {
       "description": "Turn on to use []Thing instead of []*Thing",
+      "type": "boolean",
+      "default": false
+    },
+    "omit_getters": {
+      "description": "Turn on to omit getter methods on models",
       "type": "boolean",
       "default": false
     },
@@ -161,6 +273,16 @@
       "type": "boolean",
       "default": false
     },
+    "omit_panic_handler": {
+      "description": "Turn on to omit panic handler in the generated server",
+      "type": "boolean",
+      "default": false
+    },
+    "omit_enum_json_marshalers": {
+      "description": "Turn on to omit JSON marshaler/unmarshaler generation for enums",
+      "type": "boolean",
+      "default": false
+    },
     "struct_fields_always_pointers": {
       "description": "Turn off to make struct-type struct fields not use pointers",
       "type": "boolean",
@@ -180,6 +302,16 @@
       "description": "Wrap nullable input fields with Omittable",
       "type": "boolean",
       "default": true
+    },
+    "enable_model_json_omitempty_tag": {
+      "description": "Enable adding omitempty to the json tag of generated model fields",
+      "type": "boolean",
+      "default": false
+    },
+    "enable_model_json_omitzero_tag": {
+      "description": "Enable adding omitzero to the json tag of generated model fields",
+      "type": "boolean",
+      "default": false
     },
     "skip_validation": {
       "description": "Set to speed up generation time by not performing a final validation pass",

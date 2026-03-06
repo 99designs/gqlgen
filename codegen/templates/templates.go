@@ -713,6 +713,12 @@ func write(filename string, b []byte, packages *code.Packages) error {
 		formatted = b
 	}
 
+	// Skip write if content is unchanged - preserves mtime for Go build cache
+	existing, readErr := os.ReadFile(filename)
+	if readErr == nil && bytes.Equal(existing, formatted) {
+		return nil
+	}
+
 	err = os.WriteFile(filename, formatted, 0o644)
 	if err != nil {
 		return fmt.Errorf("failed to write %s: %w", filename, err)

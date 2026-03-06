@@ -26,14 +26,20 @@ type Query struct {
 }
 
 type User struct {
-	NullableBatch             *Profile            `json:"nullableBatch,omitempty"`
-	NullableNonBatch          *Profile            `json:"nullableNonBatch,omitempty"`
-	NullableBatchWithArg      *Profile            `json:"nullableBatchWithArg,omitempty"`
-	NullableNonBatchWithArg   *Profile            `json:"nullableNonBatchWithArg,omitempty"`
-	NonNullableBatch          *Profile            `json:"nonNullableBatch"`
-	NonNullableNonBatch       *Profile            `json:"nonNullableNonBatch"`
-	ProfileBatch              *Profile            `json:"profileBatch,omitempty"`
-	ProfileNonBatch           *Profile            `json:"profileNonBatch,omitempty"`
-	ProfileConnectionBatch    *ProfilesConnection `json:"profileConnectionBatch,omitempty"`
-	ProfileConnectionNonBatch *ProfilesConnection `json:"profileConnectionNonBatch,omitempty"`
+	NullableBatch                    *Profile            `json:"nullableBatch,omitempty"`
+	NullableNonBatch                 *Profile            `json:"nullableNonBatch,omitempty"`
+	NullableBatchWithArg             *Profile            `json:"nullableBatchWithArg,omitempty"`
+	NullableNonBatchWithArg          *Profile            `json:"nullableNonBatchWithArg,omitempty"`
+	NonNullableBatch                 *Profile            `json:"nonNullableBatch"`
+	NonNullableNonBatch              *Profile            `json:"nonNullableNonBatch"`
+	DirectiveNullableBatch           *Profile            `json:"directiveNullableBatch,omitempty"`
+	DirectiveNullableNonBatch        *Profile            `json:"directiveNullableNonBatch,omitempty"`
+	DirectiveNullableBatchWithArg    *Profile            `json:"directiveNullableBatchWithArg,omitempty"`
+	DirectiveNullableNonBatchWithArg *Profile            `json:"directiveNullableNonBatchWithArg,omitempty"`
+	DirectiveNonNullableBatch        *Profile            `json:"directiveNonNullableBatch"`
+	DirectiveNonNullableNonBatch     *Profile            `json:"directiveNonNullableNonBatch"`
+	ProfileBatch                     *Profile            `json:"profileBatch,omitempty"`
+	ProfileNonBatch                  *Profile            `json:"profileNonBatch,omitempty"`
+	ProfileConnectionBatch           *ProfilesConnection `json:"profileConnectionBatch,omitempty"`
+	ProfileConnectionNonBatch        *ProfilesConnection `json:"profileConnectionNonBatch,omitempty"`
 }

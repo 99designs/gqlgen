@@ -37,8 +37,22 @@ func TestRewriter(t *testing.T) {
 		}, imps)
 	})
 
-	t.Run("out of scope dir", func(t *testing.T) {
-		_, err := New("../../../out-of-gomod/package")
-		require.Error(t, err)
+	t.Run("out of scope dir returns no-op rewriter", func(t *testing.T) {
+		r, err := New("../../../out-of-gomod/package")
+		require.NoError(t, err)
+		require.NotNil(t, r)
+		// No-op rewriter should return empty results without panicking
+		assert.Nil(t, r.GetPrevDecl("Foo", "Bar"))
+		assert.Equal(t, "", r.GetMethodBody("Foo", "Bar"))
+		assert.Equal(t, "", r.GetMethodComment("Foo", "Bar"))
+		assert.Equal(t, "", r.RemainingSource("nonexistent.go"))
+		assert.Nil(t, r.ExistingImports("nonexistent.go"))
+	})
+
+	t.Run("nonexistent dir returns no-op rewriter", func(t *testing.T) {
+		r, err := New("/tmp/definitely-does-not-exist-gqlgen-test")
+		require.NoError(t, err)
+		require.NotNil(t, r)
+		assert.Nil(t, r.GetPrevDecl("X", "Y"))
 	})
 }

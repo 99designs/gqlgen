@@ -24,6 +24,8 @@ type (
 	// that can be invalidated as writes are made and packages are known to change.
 	Packages struct {
 		packages              map[string]*packages.Package
+		injected              map[string]bool // packages added via Inject, protected from eviction
+		noExternalLoad        bool            // when true, never call packages.Load (sandbox mode)
 		importToName          map[string]string
 		loadErrors            []error
 		buildFlags            []string
@@ -83,16 +85,23 @@ func dedupPackages(packages []string) []string {
 
 func (p *Packages) CleanupUserPackages() {
 	if p.packagesToCachePrefix == "" {
-		// Cleanup all packages if we don't know which ones to keep
-		p.packages = nil
+		if len(p.injected) > 0 {
+			var toRemove []string
+			for k := range p.packages {
+				if !p.injected[k] {
+					toRemove = append(toRemove, k)
+				}
+			}
+			for _, k := range toRemove {
+				delete(p.packages, k)
+			}
+		} else {
+			p.packages = nil
+		}
 	} else {
-		// Don't clean up github.com/99designs/gqlgen prefixed packages,
-		// they haven't changed and do not need to be reloaded
-		// if you are using a fork, then you need to have customized
-		// the prefix using PackagePrefixToCache
 		var toRemove []string
 		for k := range p.packages {
-			if !strings.HasPrefix(k, p.packagesToCachePrefix) {
+			if !strings.HasPrefix(k, p.packagesToCachePrefix) && !p.injected[k] {
 				toRemove = append(toRemove, k)
 			}
 		}
@@ -126,7 +135,7 @@ func (p *Packages) LoadAll(importPaths ...string) []*packages.Package {
 		missing = append(missing, path)
 	}
 
-	if len(missing) > 0 {
+	if len(missing) > 0 && !p.noExternalLoad {
 		p.numLoadCalls++
 		pkgs, err := packages.Load(&packages.Config{
 			Mode:       mode,
@@ -173,7 +182,7 @@ func (p *Packages) Load(importPath string) *packages.Package {
 // second order dependency. Fortunately this doesnt happen very often, so we can just issue a load when we detect it.
 func (p *Packages) LoadWithTypes(importPath string) *packages.Package {
 	pkg := p.Load(importPath)
-	if pkg == nil || pkg.TypesInfo == nil {
+	if (pkg == nil || pkg.TypesInfo == nil) && !p.noExternalLoad {
 		p.numLoadCalls++
 		pkgs, err := packages.Load(&packages.Config{
 			Mode:       mode,
@@ -224,21 +233,27 @@ func (p *Packages) LoadAllNames(importPaths ...string) {
 	}
 
 	if len(missing) > 0 {
-		pkgs, err := packages.Load(&packages.Config{
-			Mode:       packages.NeedName,
-			BuildFlags: p.buildFlags,
-		}, missing...)
+		if p.noExternalLoad {
+			for _, importPath := range missing {
+				p.importToName[importPath] = SanitizePackageName(filepath.Base(importPath))
+			}
+		} else {
+			pkgs, err := packages.Load(&packages.Config{
+				Mode:       packages.NeedName,
+				BuildFlags: p.buildFlags,
+			}, missing...)
 
-		if err != nil {
-			p.loadErrors = append(p.loadErrors, err)
-		}
-
-		for _, pkg := range pkgs {
-			if pkg.Name == "" {
-				pkg.Name = SanitizePackageName(filepath.Base(pkg.PkgPath))
+			if err != nil {
+				p.loadErrors = append(p.loadErrors, err)
 			}
 
-			p.importToName[pkg.PkgPath] = pkg.Name
+			for _, pkg := range pkgs {
+				if pkg.Name == "" {
+					pkg.Name = SanitizePackageName(filepath.Base(pkg.PkgPath))
+				}
+
+				p.importToName[pkg.PkgPath] = pkg.Name
+			}
 		}
 	}
 }
@@ -250,6 +265,30 @@ func (p *Packages) NameForPackage(importPath string) string {
 
 	importPath = NormalizeVendor(importPath)
 	return p.importToName[importPath]
+}
+
+// Inject adds a pre-built package to the cache under the given import path.
+// Injected packages are protected from eviction by CleanupUserPackages.
+// After the first Inject call, external packages.Load calls are disabled,
+// allowing gqlgen to run without a Go module environment (e.g. inside a
+// Bazel sandbox) when all referenced packages are injected upfront.
+func (p *Packages) Inject(importPath string, pkg *packages.Package) {
+	if p.packages == nil {
+		p.packages = map[string]*packages.Package{}
+	}
+	if p.injected == nil {
+		p.injected = map[string]bool{}
+	}
+	p.noExternalLoad = true
+	importPath = NormalizeVendor(importPath)
+	p.packages[importPath] = pkg
+	p.injected[importPath] = true
+	if p.importToName == nil {
+		p.importToName = map[string]string{}
+	}
+	if pkg.Name != "" {
+		p.importToName[importPath] = pkg.Name
+	}
 }
 
 // Evict removes a given package import path from the cache. Further calls to Load will fetch it from disk.
@@ -281,6 +320,11 @@ func (p *Packages) Errors() PkgErrors {
 
 func (p *Packages) Count() int {
 	return len(p.packages)
+}
+
+// HasInjected reports whether any packages were injected via Inject.
+func (p *Packages) HasInjected() bool {
+	return len(p.injected) > 0
 }
 
 type PkgErrors []error

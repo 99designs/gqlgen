@@ -887,7 +887,7 @@ func (c *Config) injectBuiltins() {
 }
 
 func (c *Config) LoadSchema() error {
-	if c.Packages != nil {
+	if c.Packages != nil && !c.Packages.HasInjected() {
 		c.Packages = code.NewPackages(
 			code.WithBuildTags(c.GoBuildTags...),
 			code.PackagePrefixToCache("github.com/99designs/gqlgen/graphql"),

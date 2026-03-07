@@ -24,16 +24,28 @@ type Rewriter struct {
 func New(dir string) (*Rewriter, error) {
 	importPath := code.ImportPathForDir(dir)
 	if importPath == "" {
-		return nil, fmt.Errorf("import path not found for directory: %q", dir)
+		// No Go module environment (e.g. Bazel sandbox). Return an
+		// empty rewriter that preserves nothing — this is safe when
+		// generating fresh files.
+		return &Rewriter{
+			files:  map[string]string{},
+			copied: map[ast.Decl]bool{},
+		}, nil
 	}
 	pkgs, err := packages.Load(&packages.Config{
 		Mode: packages.NeedSyntax | packages.NeedTypes,
 	}, importPath)
 	if err != nil {
-		return nil, err
+		return &Rewriter{
+			files:  map[string]string{},
+			copied: map[ast.Decl]bool{},
+		}, nil
 	}
 	if len(pkgs) == 0 {
-		return nil, fmt.Errorf("package not found for importPath: %s", importPath)
+		return &Rewriter{
+			files:  map[string]string{},
+			copied: map[ast.Decl]bool{},
+		}, nil
 	}
 
 	return &Rewriter{
@@ -69,6 +81,9 @@ func (r *Rewriter) getFile(filename string) string {
 }
 
 func (r *Rewriter) GetPrevDecl(structname, methodname string) *ast.FuncDecl {
+	if r.pkg == nil {
+		return nil
+	}
 	for _, f := range r.pkg.Syntax {
 		for _, d := range f.Decls {
 			d, isFunc := d.(*ast.FuncDecl)
@@ -116,6 +131,9 @@ func (r *Rewriter) GetMethodBody(structname, methodname string) string {
 }
 
 func (r *Rewriter) MarkStructCopied(name string) {
+	if r.pkg == nil {
+		return
+	}
 	for _, f := range r.pkg.Syntax {
 		for _, d := range f.Decls {
 			d, isGen := d.(*ast.GenDecl)
@@ -141,6 +159,9 @@ func (r *Rewriter) MarkStructCopied(name string) {
 }
 
 func (r *Rewriter) ExistingImports(filename string) []Import {
+	if r.pkg == nil {
+		return nil
+	}
 	filename, err := filepath.Abs(filename)
 	if err != nil {
 		panic(err)
@@ -170,6 +191,9 @@ func (r *Rewriter) ExistingImports(filename string) []Import {
 }
 
 func (r *Rewriter) RemainingSource(filename string) string {
+	if r.pkg == nil {
+		return ""
+	}
 	filename, err := filepath.Abs(filename)
 	if err != nil {
 		panic(err)

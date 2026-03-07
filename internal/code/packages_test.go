@@ -80,6 +80,122 @@ func TestLoadAllNames(t *testing.T) {
 	assert.Equal(t, "github_com", p.importToName["github.com"])
 }
 
+func TestInject(t *testing.T) {
+	t.Run("inject sets sandbox mode and caches package", func(t *testing.T) {
+		p := NewPackages()
+		require.False(t, p.HasInjected())
+
+		pkg := &packages.Package{
+			ID:      "example.com/foo",
+			Name:    "foo",
+			PkgPath: "example.com/foo",
+		}
+		p.Inject("example.com/foo", pkg)
+
+		require.True(t, p.HasInjected())
+		require.True(t, p.noExternalLoad)
+		loaded := p.Load("example.com/foo")
+		require.NotNil(t, loaded)
+		assert.Equal(t, "foo", loaded.Name)
+	})
+
+	t.Run("inject populates name cache", func(t *testing.T) {
+		p := NewPackages()
+		pkg := &packages.Package{
+			ID:      "example.com/bar",
+			Name:    "bar",
+			PkgPath: "example.com/bar",
+		}
+		p.Inject("example.com/bar", pkg)
+		assert.Equal(t, "bar", p.NameForPackage("example.com/bar"))
+	})
+
+	t.Run("sandbox mode skips packages.Load", func(t *testing.T) {
+		p := NewPackages()
+		pkg := &packages.Package{
+			ID:      "example.com/foo",
+			Name:    "foo",
+			PkgPath: "example.com/foo",
+		}
+		p.Inject("example.com/foo", pkg)
+
+		// LoadAll for a missing package should not call packages.Load
+		pkgs := p.LoadAll("example.com/foo", "example.com/missing")
+		assert.Equal(t, 0, p.numLoadCalls)
+		assert.Equal(t, "foo", pkgs[0].Name)
+		assert.Nil(t, pkgs[1])
+	})
+
+	t.Run("sandbox mode derives name from import path", func(t *testing.T) {
+		p := NewPackages()
+		pkg := &packages.Package{
+			ID:      "example.com/foo",
+			Name:    "foo",
+			PkgPath: "example.com/foo",
+		}
+		p.Inject("example.com/foo", pkg)
+
+		// Name for an unknown package in sandbox mode should be derived from path
+		assert.Equal(t, "somepkg", p.NameForPackage("example.com/somepkg"))
+		assert.Equal(t, 0, p.numLoadCalls)
+	})
+}
+
+func TestCleanupUserPackagesWithInjected(t *testing.T) {
+	t.Run("injected packages survive cleanup without prefix", func(t *testing.T) {
+		p := NewPackages()
+		injected := &packages.Package{ID: "example.com/injected", Name: "injected", PkgPath: "example.com/injected"}
+		p.Inject("example.com/injected", injected)
+
+		// Manually add a non-injected package
+		p.packages["example.com/regular"] = &packages.Package{ID: "example.com/regular", Name: "regular", PkgPath: "example.com/regular"}
+
+		p.CleanupUserPackages()
+
+		assert.NotNil(t, p.packages["example.com/injected"])
+		assert.Nil(t, p.packages["example.com/regular"])
+	})
+
+	t.Run("injected packages survive cleanup with prefix", func(t *testing.T) {
+		p := NewPackages(PackagePrefixToCache("github.com/99designs/gqlgen/graphql"))
+		injected := &packages.Package{ID: "example.com/injected", Name: "injected", PkgPath: "example.com/injected"}
+		p.Inject("example.com/injected", injected)
+
+		// Add a package matching the prefix (should survive) and one that doesn't (should be removed)
+		p.packages["github.com/99designs/gqlgen/graphql/foo"] = &packages.Package{
+			ID: "github.com/99designs/gqlgen/graphql/foo", Name: "foo",
+			PkgPath: "github.com/99designs/gqlgen/graphql/foo",
+		}
+		p.packages["example.com/other"] = &packages.Package{ID: "example.com/other", Name: "other", PkgPath: "example.com/other"}
+
+		p.CleanupUserPackages()
+
+		assert.NotNil(t, p.packages["example.com/injected"], "injected should survive")
+		assert.NotNil(t, p.packages["github.com/99designs/gqlgen/graphql/foo"], "prefix match should survive")
+		assert.Nil(t, p.packages["example.com/other"], "non-matching, non-injected should be removed")
+	})
+}
+
+func TestLoadWithTypesInSandboxMode(t *testing.T) {
+	p := NewPackages()
+	pkg := &packages.Package{
+		ID:      "example.com/typed",
+		Name:    "typed",
+		PkgPath: "example.com/typed",
+	}
+	p.Inject("example.com/typed", pkg)
+
+	// LoadWithTypes should return the cached package without calling packages.Load
+	result := p.LoadWithTypes("example.com/typed")
+	assert.Equal(t, "typed", result.Name)
+	assert.Equal(t, 0, p.numLoadCalls)
+
+	// For a missing package, should not panic or call packages.Load
+	result = p.LoadWithTypes("example.com/missing")
+	assert.Nil(t, result)
+	assert.Equal(t, 0, p.numLoadCalls)
+}
+
 func initialState(t *testing.T, opts ...Option) *Packages {
 	p := NewPackages(opts...)
 	pkgs := p.LoadAll(

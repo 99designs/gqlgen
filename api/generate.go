@@ -47,7 +47,11 @@ func GenerateIncremental(
 
 // generate is the shared implementation for both Generate and GenerateIncremental.
 // If incrementalOpts is nil, performs full generation. Otherwise, uses incremental generation.
-func generate(cfg *config.Config, incrementalOpts *codegen.IncrementalOptions, option ...Option) error {
+func generate(
+	cfg *config.Config,
+	incrementalOpts *codegen.IncrementalOptions,
+	option ...Option,
+) error {
 	_ = syscall.Unlink(cfg.Exec.Filename)
 	if cfg.Model.IsDefined() {
 		_ = syscall.Unlink(cfg.Model.Filename)

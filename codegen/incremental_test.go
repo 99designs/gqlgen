@@ -75,7 +75,11 @@ func TestGenerateCodeIncremental_SelectiveGeneration(t *testing.T) {
 	// Test 3: Verify the type filtering works correctly
 	affectedTypes := depGraph.GetTypesForSchemas([]string{"user.graphqls"})
 	require.True(t, affectedTypes["User"], "User should be in affected types")
-	require.False(t, affectedTypes["Post"], "Post should NOT be in affected types for user schema only")
+	require.False(
+		t,
+		affectedTypes["Post"],
+		"Post should NOT be in affected types for user schema only",
+	)
 	require.False(t, affectedTypes["Comment"], "Comment should NOT be in affected types")
 }
 

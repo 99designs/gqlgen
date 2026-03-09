@@ -114,6 +114,16 @@ resolver:
 # Optional: set to skip running `go mod tidy` when generating server code
 # skip_mod_tidy: true
 
+# Optional: set to use -gcflags="-N -l" during validation to disable compiler
+# optimizations. This makes cold cache validation ~2x faster since we only need
+# to check for errors, not produce optimized code. Default: true
+# fast_validation: true
+
+# Optional: set to use go/format.Source instead of imports.Process for formatting.
+# This is significantly faster (~10x) but doesn't group imports by stdlib/external/internal.
+# Imports will be sorted alphabetically instead. Default: false
+# skip_import_grouping: false
+
 # Optional: set to skip generation of JSON Marshalers and Unmarshalers for enums
 # omit_enum_json_marshalers: false
 

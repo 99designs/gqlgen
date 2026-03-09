@@ -62,9 +62,8 @@ type Options struct {
 	// Packages cache, you can find me on config.Config
 	Packages *code.Packages
 
-	// SkipImportGrouping uses go/format.Source instead of imports.Process for
-	// formatting. This is faster but doesn't group imports by stdlib/external/internal.
-	SkipImportGrouping bool
+	// PruneOptions configures import pruning and formatting behavior.
+	PruneOptions imports.PruneOptions
 }
 
 var (
@@ -158,8 +157,7 @@ func Render(cfg Options) error {
 	}
 	CurrentImports = nil
 
-	err = write(cfg.Filename, result.Bytes(), cfg.Packages, cfg.SkipImportGrouping)
-	if err != nil {
+	if err = write(cfg.Filename, result.Bytes(), cfg.Packages, cfg.PruneOptions); err != nil {
 		return err
 	}
 
@@ -705,13 +703,13 @@ func render(filename string, tpldata any) (*bytes.Buffer, error) {
 	return buf, t.Execute(buf, tpldata)
 }
 
-func write(filename string, b []byte, packages *code.Packages, skipImportGrouping bool) error {
+func write(filename string, b []byte, packages *code.Packages, opts imports.PruneOptions) error {
 	err := os.MkdirAll(filepath.Dir(filename), 0o755)
 	if err != nil {
 		return fmt.Errorf("failed to create directory: %w", err)
 	}
 
-	formatted, err := imports.Prune(filename, b, packages, skipImportGrouping)
+	formatted, err := imports.Prune(filename, b, packages, opts)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "gofmt failed on %s: %s\n", filepath.Base(filename), err.Error())
 		formatted = b
@@ -723,12 +721,7 @@ func write(filename string, b []byte, packages *code.Packages, skipImportGroupin
 		return nil
 	}
 
-	err = os.WriteFile(filename, formatted, 0o644)
-	if err != nil {
-		return fmt.Errorf("failed to write %s: %w", filename, err)
-	}
-
-	return nil
+	return os.WriteFile(filename, formatted, 0o644)
 }
 
 var pkgReplacer = strings.NewReplacer(

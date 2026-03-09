@@ -129,13 +129,13 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 	}
 
 	return templates.Render(templates.Options{
-		PackageName:        data.Config.Resolver.Package,
-		FileNotice:         fileNotice,
-		Filename:           data.Config.Resolver.Filename,
-		Data:               resolverBuild,
-		Packages:           data.Config.Packages,
-		Template:           newResolverTemplate,
-		SkipImportGrouping: data.Config.SkipImportGrouping,
+		PackageName:  data.Config.Resolver.Package,
+		FileNotice:   fileNotice,
+		Filename:     data.Config.Resolver.Filename,
+		Data:         resolverBuild,
+		Packages:     data.Config.Packages,
+		Template:     newResolverTemplate,
+		PruneOptions: data.Config.GetPruneOptions(),
 	})
 }
 
@@ -263,13 +263,13 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 		}
 
 		err := templates.Render(templates.Options{
-			PackageName:        data.Config.Resolver.Package,
-			FileNotice:         fileNotice.String(),
-			Filename:           file.name,
-			Data:               resolverBuild,
-			Packages:           data.Config.Packages,
-			Template:           newResolverTemplate,
-			SkipImportGrouping: data.Config.SkipImportGrouping,
+			PackageName:  data.Config.Resolver.Package,
+			FileNotice:   fileNotice.String(),
+			Filename:     file.name,
+			Data:         resolverBuild,
+			Packages:     data.Config.Packages,
+			Template:     newResolverTemplate,
+			PruneOptions: data.Config.GetPruneOptions(),
 		})
 		if err != nil {
 			return err
@@ -284,11 +284,11 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 				//
 				// It serves as dependency injection for your app, add any dependencies you require
 				// here.`,
-			Template:           `type {{.}} struct {}`,
-			Filename:           data.Config.Resolver.Filename,
-			Data:               data.Config.Resolver.Type,
-			Packages:           data.Config.Packages,
-			SkipImportGrouping: data.Config.SkipImportGrouping,
+			Template:     `type {{.}} struct {}`,
+			Filename:     data.Config.Resolver.Filename,
+			Data:         data.Config.Resolver.Type,
+			Packages:     data.Config.Packages,
+			PruneOptions: data.Config.GetPruneOptions(),
 		})
 		if err != nil {
 			return err

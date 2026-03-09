@@ -207,13 +207,12 @@ func generate(
 }
 
 func validate(cfg *config.Config) error {
-	roots := []string{cfg.Exec.ImportPath() + "/..."}
+	roots := []string{withSubpackages(cfg.Exec.ImportPath())}
 	if cfg.Model.IsDefined() {
-		roots = append(roots, cfg.Model.ImportPath()+"/...")
+		roots = append(roots, withSubpackages(cfg.Model.ImportPath()))
 	}
-
 	if cfg.Resolver.IsDefined() {
-		roots = append(roots, cfg.Resolver.ImportPath()+"/...")
+		roots = append(roots, withSubpackages(cfg.Resolver.ImportPath()))
 	}
 
 	// Use go build for validation instead of packages.Load with NeedTypes.
@@ -221,8 +220,16 @@ func validate(cfg *config.Config) error {
 	// are recompiled. Since we use content-based file writing, unchanged
 	// generated files keep their mtime, so go build skips them.
 	//
-	// FastValidation (default: true) uses -gcflags="-N -l" to disable compiler
+	// FastValidation uses -gcflags="-N -l" to disable compiler
 	// optimizations, making cold cache validation ~2x faster.
-	fastValidation := cfg.FastValidation == nil || *cfg.FastValidation
-	return code.ValidateWithBuild(fastValidation, roots...)
+	return code.ValidateWithBuild(cfg.GetFastValidation(), roots...)
+}
+
+// subpackagesWildcard is the Go tooling pattern for "this package and all subpackages".
+// Used by go build, go test, etc. (e.g., "go build ./...")
+const subpackagesWildcard = "/..."
+
+// withSubpackages appends the Go wildcard pattern to include all subpackages.
+func withSubpackages(importPath string) string {
+	return importPath + subpackagesWildcard
 }

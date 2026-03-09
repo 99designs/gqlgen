@@ -18,12 +18,27 @@ import (
 	"github.com/99designs/gqlgen/internal/code"
 )
 
-// bufPool reuses buffers across Prune calls to reduce allocations
+// bufPool reuses buffers across Prune calls to reduce allocations.
 var bufPool = sync.Pool{
-	New: func() interface{} {
+	New: func() any {
 		return new(bytes.Buffer)
 	},
 }
+
+// getBuffer returns a buffer and a release function.
+// If usePool is true, the buffer is obtained from the pool and release returns it.
+// If usePool is false, a new buffer is allocated and release is a no-op.
+func getBuffer(usePool bool) (*bytes.Buffer, func()) {
+	if usePool {
+		buf := bufPool.Get().(*bytes.Buffer)
+		buf.Reset()
+		return buf, func() { bufPool.Put(buf) }
+	}
+	return new(bytes.Buffer), func() {}
+}
+
+// defaultTabWidth is the standard Go tab width used by gofmt.
+const defaultTabWidth = 8
 
 type visitFn func(node ast.Node)
 
@@ -32,10 +47,22 @@ func (fn visitFn) Visit(node ast.Node) ast.Visitor {
 	return fn
 }
 
-// Prune removes any unused imports.
-// If skipImportGrouping is true, uses format.Source (faster, no import grouping).
-// If false, uses imports.Process (slower, groups imports by stdlib/external/internal).
-func Prune(filename string, src []byte, packages *code.Packages, skipImportGrouping bool) ([]byte, error) {
+// PruneOptions configures the behavior of the Prune function.
+type PruneOptions struct {
+	// SkipImportGrouping uses format.Source instead of imports.Process.
+	// Faster but doesn't group imports by stdlib/external/internal.
+	SkipImportGrouping bool
+	// UseBufferPooling reuses buffers via sync.Pool to reduce GC pressure.
+	UseBufferPooling bool
+}
+
+// Prune removes any unused imports from Go source code.
+func Prune(
+	filename string,
+	src []byte,
+	packages *code.Packages,
+	opts PruneOptions,
+) ([]byte, error) {
 	fset := token.NewFileSet()
 
 	file, err := parser.ParseFile(fset, filename, src, parser.ParseComments|parser.AllErrors)
@@ -47,28 +74,37 @@ func Prune(filename string, src []byte, packages *code.Packages, skipImportGroup
 	for ipath, name := range unused {
 		astutil.DeleteNamedImport(fset, file, name, ipath)
 	}
-	printConfig := &printer.Config{Mode: printer.TabIndent, Tabwidth: 8}
 
-	// Reuse buffer from pool to reduce allocations
-	buf := bufPool.Get().(*bytes.Buffer)
-	buf.Reset()
-	defer bufPool.Put(buf)
+	buf, release := getBuffer(opts.UseBufferPooling)
+	defer release()
 
+	printConfig := &printer.Config{Mode: printer.TabIndent, Tabwidth: defaultTabWidth}
 	if err := printConfig.Fprint(buf, fset, file); err != nil {
 		return nil, err
 	}
 
-	if skipImportGrouping {
-		// format.Source is faster - we already removed unused imports above
-		return format.Source(buf.Bytes())
+	if opts.SkipImportGrouping {
+		return formatSourceFast(buf.Bytes())
 	}
+	return formatSourceWithGrouping(filename, buf.Bytes())
+}
 
-	// imports.Process groups imports by stdlib/external/internal but is slower
-	return imports.Process(
-		filename,
-		buf.Bytes(),
-		&imports.Options{FormatOnly: true, Comments: true, TabIndent: true, TabWidth: 8},
-	)
+// formatSourceFast formats source code using go/format.Source.
+// This is fast but doesn't group imports by category.
+func formatSourceFast(src []byte) ([]byte, error) {
+	return format.Source(src)
+}
+
+// formatSourceWithGrouping formats source code using imports.Process.
+// This groups imports by stdlib/external/internal but is slower.
+func formatSourceWithGrouping(filename string, src []byte) ([]byte, error) {
+	opts := &imports.Options{
+		FormatOnly: true,
+		Comments:   true,
+		TabIndent:  true,
+		TabWidth:   defaultTabWidth,
+	}
+	return imports.Process(filename, src, opts)
 }
 
 func getUnusedImports(file ast.Node, packages *code.Packages) map[string]string {

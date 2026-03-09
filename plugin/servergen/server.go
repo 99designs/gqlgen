@@ -37,12 +37,12 @@ func (m *Plugin) GenerateCode(data *codegen.Data) error {
 
 	if _, err := os.Stat(m.filename); errors.Is(err, fs.ErrNotExist) {
 		return templates.Render(templates.Options{
-			PackageName:        "main",
-			Filename:           m.filename,
-			Data:               serverBuild,
-			Packages:           data.Config.Packages,
-			Template:           serverTemplate,
-			SkipImportGrouping: data.Config.SkipImportGrouping,
+			PackageName:  "main",
+			Filename:     m.filename,
+			Data:         serverBuild,
+			Packages:     data.Config.Packages,
+			Template:     serverTemplate,
+			PruneOptions: data.Config.GetPruneOptions(),
 		})
 	}
 

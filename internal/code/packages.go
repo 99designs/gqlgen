@@ -38,6 +38,7 @@ type (
 		loadErrors            []error
 		buildFlags            []string
 		packagesToCachePrefix string
+		useLightModePrefetch  bool // Use lightMode instead of fullMode for LoadAll
 
 		numLoadCalls int // stupid test steam. ignore.
 		numNameCalls int // stupid test steam. ignore.
@@ -67,11 +68,21 @@ func PackagePrefixToCache(prefixPath string) func(p *Packages) {
 	}
 }
 
+// WithLightModePrefetch option for NewPackages uses lightMode (NeedName|NeedFiles|NeedModule)
+// instead of fullMode for LoadAll, avoiding compilation until types are needed.
+func WithLightModePrefetch(enabled bool) func(p *Packages) {
+	return func(p *Packages) {
+		p.useLightModePrefetch = enabled
+	}
+}
+
 // NewPackages creates a new packages cache
 // It will load all packages in the current module, and any packages that are passed to Load or
 // LoadAll
 func NewPackages(opts ...Option) *Packages {
-	p := &Packages{}
+	p := &Packages{
+		useLightModePrefetch: false, // Default to full mode for backwards compatibility
+	}
 	for _, opt := range opts {
 		opt(p)
 	}
@@ -124,8 +135,12 @@ func (p *Packages) ReloadAll(importPaths ...string) []*packages.Package {
 
 // LoadAll will call packages.Load and return the package data for the given packages,
 // but if the package already have been loaded it will return cached values instead.
-// This uses fullMode which includes type information (slower but complete).
+// If useLightModePrefetch is true, uses lightMode (faster, no type info).
+// Otherwise uses fullMode (slower but includes type information).
 func (p *Packages) LoadAll(importPaths ...string) []*packages.Package {
+	if p.useLightModePrefetch {
+		return p.loadAllWithMode(lightMode, importPaths...)
+	}
 	return p.loadAllWithMode(fullMode, importPaths...)
 }
 
@@ -338,23 +353,24 @@ func (p *Packages) ModTidy() error {
 	return nil
 }
 
+// disableOptimizationsFlag is passed to go build to skip compiler optimizations.
+// This makes cold cache builds ~2x faster since we only need error checking.
+const disableOptimizationsFlag = "-gcflags=-N -l"
+
 // ValidateWithBuild validates packages by running `go build` instead of loading
 // with NeedTypes. This is more efficient because:
 // 1. It reuses the existing build cache
 // 2. The user will likely run `go build` anyway after generation
 // 3. It avoids double-loading type information
 //
-// ValidateWithBuild validates packages by running go build.
-// If fastValidation is true, uses -gcflags="-N -l" to disable optimizations,
-// which is ~2x faster for cold cache (we just need to check for errors, not
-// produce optimized code).
+// If fastValidation is true, disables compiler optimizations for faster builds.
 func ValidateWithBuild(fastValidation bool, importPaths ...string) error {
-	var args []string
+	args := []string{"build"}
 	if fastValidation {
-		args = append([]string{"build", "-gcflags=-N -l"}, importPaths...)
-	} else {
-		args = append([]string{"build"}, importPaths...)
+		args = append(args, disableOptimizationsFlag)
 	}
+	args = append(args, importPaths...)
+
 	cmd := exec.Command("go", args...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {

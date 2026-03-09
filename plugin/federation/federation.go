@@ -415,10 +415,10 @@ func (f *Federation) GenerateCode(data *codegen.Data) error {
 			UsePointers                          bool
 			UseFunctionSyntaxForExecutionContext bool
 		}{*f, data.Config.ResolversAlwaysReturnPointers, data.Config.UseFunctionSyntaxForExecutionContext},
-		GeneratedHeader:    true,
-		Packages:           data.Config.Packages,
-		Template:           federationTemplate,
-		SkipImportGrouping: data.Config.SkipImportGrouping,
+		GeneratedHeader: true,
+		Packages:        data.Config.Packages,
+		Template:        federationTemplate,
+		PruneOptions:    data.Config.GetPruneOptions(),
 	})
 }
 
@@ -749,10 +749,10 @@ func (f *Federation) generateExplicitRequires(
 			Populators      []Populator
 			OriginalSource  string
 		}{*f, existingImports, populators, ""},
-		GeneratedHeader:    false,
-		Packages:           data.Config.Packages,
-		Template:           explicitRequiresTemplate,
-		SkipImportGrouping: data.Config.SkipImportGrouping,
+		GeneratedHeader: false,
+		Packages:        data.Config.Packages,
+		Template:        explicitRequiresTemplate,
+		PruneOptions:    data.Config.GetPruneOptions(),
 	})
 }
 

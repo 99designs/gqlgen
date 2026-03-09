@@ -52,10 +52,10 @@ func (m *Plugin) GenerateCode(data *codegen.Data) error {
 			Data:     data,
 			TypeName: m.typeName,
 		},
-		GeneratedHeader:    true,
-		Packages:           data.Config.Packages,
-		Template:           stubsTemplate,
-		SkipImportGrouping: data.Config.SkipImportGrouping,
+		GeneratedHeader: true,
+		Packages:        data.Config.Packages,
+		Template:        stubsTemplate,
+		PruneOptions:    data.Config.GetPruneOptions(),
 	})
 }
 

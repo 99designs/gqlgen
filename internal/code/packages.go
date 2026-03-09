@@ -343,8 +343,11 @@ func (p *Packages) ModTidy() error {
 // 1. It reuses the existing build cache
 // 2. The user will likely run `go build` anyway after generation
 // 3. It avoids double-loading type information
+//
+// Uses -gcflags="-N -l" to disable optimizations, which is ~2x faster for
+// validation purposes (we just need to check for errors, not produce optimized code).
 func ValidateWithBuild(importPaths ...string) error {
-	args := append([]string{"build"}, importPaths...)
+	args := append([]string{"build", "-gcflags=-N -l"}, importPaths...)
 	cmd := exec.Command("go", args...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {

@@ -1,6 +1,6 @@
 module github.com/99designs/gqlgen/_examples
 
-go 1.25
+go 1.25.0
 
 replace github.com/99designs/gqlgen => ../
 
@@ -14,7 +14,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/vektah/dataloaden v0.3.0
 	github.com/vektah/gqlparser/v2 v2.5.32
-	golang.org/x/sync v0.19.0
+	golang.org/x/sync v0.20.0
 )
 
 require (

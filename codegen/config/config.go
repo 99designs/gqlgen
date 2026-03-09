@@ -62,6 +62,14 @@ type Config struct {
 	EnableModelJsonOmitzeroTag     *bool          `yaml:"enable_model_json_omitzero_tag,omitempty"`
 	SkipValidation                 bool           `yaml:"skip_validation,omitempty"`
 	SkipModTidy                    bool           `yaml:"skip_mod_tidy,omitempty"`
+	// FastValidation uses -gcflags="-N -l" to disable compiler optimizations
+	// during validation, making cold cache validation ~2x faster. The generated
+	// code is only used for error checking, not execution. Default: true
+	FastValidation                 *bool          `yaml:"fast_validation,omitempty"`
+	// SkipImportGrouping uses go/format.Source instead of imports.Process for
+	// formatting generated code. This is faster but doesn't group imports
+	// (stdlib/external/internal). Default: false
+	SkipImportGrouping             bool           `yaml:"skip_import_grouping,omitempty"`
 	Sources                        []*ast.Source  `yaml:"-"`
 	Packages                       *code.Packages `yaml:"-"`
 	Schema                         *ast.Schema    `yaml:"-"`

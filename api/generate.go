@@ -220,5 +220,9 @@ func validate(cfg *config.Config) error {
 	// go build benefits from incremental compilation - only changed files
 	// are recompiled. Since we use content-based file writing, unchanged
 	// generated files keep their mtime, so go build skips them.
-	return code.ValidateWithBuild(roots...)
+	//
+	// FastValidation (default: true) uses -gcflags="-N -l" to disable compiler
+	// optimizations, making cold cache validation ~2x faster.
+	fastValidation := cfg.FastValidation == nil || *cfg.FastValidation
+	return code.ValidateWithBuild(fastValidation, roots...)
 }

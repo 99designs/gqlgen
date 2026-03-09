@@ -344,10 +344,17 @@ func (p *Packages) ModTidy() error {
 // 2. The user will likely run `go build` anyway after generation
 // 3. It avoids double-loading type information
 //
-// Uses -gcflags="-N -l" to disable optimizations, which is ~2x faster for
-// validation purposes (we just need to check for errors, not produce optimized code).
-func ValidateWithBuild(importPaths ...string) error {
-	args := append([]string{"build", "-gcflags=-N -l"}, importPaths...)
+// ValidateWithBuild validates packages by running go build.
+// If fastValidation is true, uses -gcflags="-N -l" to disable optimizations,
+// which is ~2x faster for cold cache (we just need to check for errors, not
+// produce optimized code).
+func ValidateWithBuild(fastValidation bool, importPaths ...string) error {
+	var args []string
+	if fastValidation {
+		args = append([]string{"build", "-gcflags=-N -l"}, importPaths...)
+	} else {
+		args = append([]string{"build"}, importPaths...)
+	}
 	cmd := exec.Command("go", args...)
 	output, err := cmd.CombinedOutput()
 	if err != nil {

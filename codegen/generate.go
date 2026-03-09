@@ -33,13 +33,14 @@ func GenerateCode(data *Data) error {
 
 func generateSingleFile(data *Data) error {
 	return templates.Render(templates.Options{
-		PackageName:     data.Config.Exec.Package,
-		Filename:        data.Config.Exec.Filename,
-		Data:            data,
-		RegionTags:      true,
-		GeneratedHeader: true,
-		Packages:        data.Config.Packages,
-		TemplateFS:      codegenTemplates,
+		PackageName:        data.Config.Exec.Package,
+		Filename:           data.Config.Exec.Filename,
+		Data:               data,
+		RegionTags:         true,
+		GeneratedHeader:    true,
+		Packages:           data.Config.Packages,
+		TemplateFS:         codegenTemplates,
+		SkipImportGrouping: data.Config.SkipImportGrouping,
 	})
 }
 
@@ -80,13 +81,14 @@ func generatePerSchema(data *Data) error {
 		path := filepath.Join(dir, filename)
 
 		err = templates.Render(templates.Options{
-			PackageName:     data.Config.Exec.Package,
-			Filename:        path,
-			Data:            build,
-			RegionTags:      true,
-			GeneratedHeader: true,
-			Packages:        data.Config.Packages,
-			TemplateFS:      codegenTemplates,
+			PackageName:        data.Config.Exec.Package,
+			Filename:           path,
+			Data:               build,
+			RegionTags:         true,
+			GeneratedHeader:    true,
+			Packages:           data.Config.Packages,
+			TemplateFS:         codegenTemplates,
+			SkipImportGrouping: data.Config.SkipImportGrouping,
 		})
 		if err != nil {
 			return err
@@ -137,14 +139,15 @@ func generateRootFile(data *Data) error {
 	path := filepath.Join(dir, "root_.generated.go")
 
 	return templates.Render(templates.Options{
-		PackageName:     data.Config.Exec.Package,
-		Template:        rootTemplate,
-		Filename:        path,
-		Data:            data,
-		RegionTags:      false,
-		GeneratedHeader: true,
-		Packages:        data.Config.Packages,
-		TemplateFS:      codegenTemplates,
+		PackageName:        data.Config.Exec.Package,
+		Template:           rootTemplate,
+		Filename:           path,
+		Data:               data,
+		RegionTags:         false,
+		GeneratedHeader:    true,
+		Packages:           data.Config.Packages,
+		TemplateFS:         codegenTemplates,
+		SkipImportGrouping: data.Config.SkipImportGrouping,
 	})
 }
 

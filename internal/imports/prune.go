@@ -10,11 +10,20 @@ import (
 	"go/printer"
 	"go/token"
 	"strings"
+	"sync"
 
 	"golang.org/x/tools/go/ast/astutil"
+	"golang.org/x/tools/imports"
 
 	"github.com/99designs/gqlgen/internal/code"
 )
+
+// bufPool reuses buffers across Prune calls to reduce allocations
+var bufPool = sync.Pool{
+	New: func() interface{} {
+		return new(bytes.Buffer)
+	},
+}
 
 type visitFn func(node ast.Node)
 
@@ -23,8 +32,10 @@ func (fn visitFn) Visit(node ast.Node) ast.Visitor {
 	return fn
 }
 
-// Prune removes any unused imports
-func Prune(filename string, src []byte, packages *code.Packages) ([]byte, error) {
+// Prune removes any unused imports.
+// If skipImportGrouping is true, uses format.Source (faster, no import grouping).
+// If false, uses imports.Process (slower, groups imports by stdlib/external/internal).
+func Prune(filename string, src []byte, packages *code.Packages, skipImportGrouping bool) ([]byte, error) {
 	fset := token.NewFileSet()
 
 	file, err := parser.ParseFile(fset, filename, src, parser.ParseComments|parser.AllErrors)
@@ -38,15 +49,26 @@ func Prune(filename string, src []byte, packages *code.Packages) ([]byte, error)
 	}
 	printConfig := &printer.Config{Mode: printer.TabIndent, Tabwidth: 8}
 
-	var buf bytes.Buffer
-	if err := printConfig.Fprint(&buf, fset, file); err != nil {
+	// Reuse buffer from pool to reduce allocations
+	buf := bufPool.Get().(*bytes.Buffer)
+	buf.Reset()
+	defer bufPool.Put(buf)
+
+	if err := printConfig.Fprint(buf, fset, file); err != nil {
 		return nil, err
 	}
 
-	// Use format.Source instead of imports.Process - much faster since we already
-	// removed unused imports above. imports.Process would re-parse and re-process
-	// imports which is redundant work.
-	return format.Source(buf.Bytes())
+	if skipImportGrouping {
+		// format.Source is faster - we already removed unused imports above
+		return format.Source(buf.Bytes())
+	}
+
+	// imports.Process groups imports by stdlib/external/internal but is slower
+	return imports.Process(
+		filename,
+		buf.Bytes(),
+		&imports.Options{FormatOnly: true, Comments: true, TabIndent: true, TabWidth: 8},
+	)
 }
 
 func getUnusedImports(file ast.Node, packages *code.Packages) map[string]string {

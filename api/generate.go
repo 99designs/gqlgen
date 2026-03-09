@@ -9,6 +9,7 @@ import (
 
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
+	"github.com/99designs/gqlgen/internal/code"
 	"github.com/99designs/gqlgen/plugin"
 	"github.com/99designs/gqlgen/plugin/federation"
 	"github.com/99designs/gqlgen/plugin/modelgen"
@@ -206,19 +207,18 @@ func generate(
 }
 
 func validate(cfg *config.Config) error {
-	roots := []string{cfg.Exec.ImportPath()}
+	roots := []string{cfg.Exec.ImportPath() + "/..."}
 	if cfg.Model.IsDefined() {
-		roots = append(roots, cfg.Model.ImportPath())
+		roots = append(roots, cfg.Model.ImportPath()+"/...")
 	}
 
 	if cfg.Resolver.IsDefined() {
-		roots = append(roots, cfg.Resolver.ImportPath())
+		roots = append(roots, cfg.Resolver.ImportPath()+"/...")
 	}
 
-	cfg.Packages.LoadAll(roots...)
-	errs := cfg.Packages.Errors()
-	if len(errs) > 0 {
-		return errs
-	}
-	return nil
+	// Use go build for validation instead of packages.Load with NeedTypes.
+	// go build benefits from incremental compilation - only changed files
+	// are recompiled. Since we use content-based file writing, unchanged
+	// generated files keep their mtime, so go build skips them.
+	return code.ValidateWithBuild(roots...)
 }

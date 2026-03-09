@@ -313,8 +313,9 @@ func (c *Config) Init() error {
 		return err
 	}
 
-	// prefetch all packages in one big packages.Load call
-	c.Packages.LoadAll(c.packageList()...)
+	// prefetch all packages with light mode (no type checking, fast)
+	// Type info will be loaded on-demand only for packages that need it (e.g., autobind)
+	c.Packages.LoadAllLight(c.packageList()...)
 
 	err = c.autobind()
 	if err != nil {

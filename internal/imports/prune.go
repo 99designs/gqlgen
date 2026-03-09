@@ -5,13 +5,13 @@ package imports
 import (
 	"bytes"
 	"go/ast"
+	"go/format"
 	"go/parser"
 	"go/printer"
 	"go/token"
 	"strings"
 
 	"golang.org/x/tools/go/ast/astutil"
-	"golang.org/x/tools/imports"
 
 	"github.com/99designs/gqlgen/internal/code"
 )
@@ -43,11 +43,10 @@ func Prune(filename string, src []byte, packages *code.Packages) ([]byte, error)
 		return nil, err
 	}
 
-	return imports.Process(
-		filename,
-		buf.Bytes(),
-		&imports.Options{FormatOnly: true, Comments: true, TabIndent: true, TabWidth: 8},
-	)
+	// Use format.Source instead of imports.Process - much faster since we already
+	// removed unused imports above. imports.Process would re-parse and re-process
+	// imports which is redundant work.
+	return format.Source(buf.Bytes())
 }
 
 func getUnusedImports(file ast.Node, packages *code.Packages) map[string]string {

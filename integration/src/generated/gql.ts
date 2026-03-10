@@ -11,8 +11,18 @@ import { TypedDocumentNode as DocumentNode } from '@graphql-typed-document-node/
  * 3. It does not support dead code elimination, so it will add unused operations.
  *
  * Therefore it is highly recommended to use the babel or swc plugin for production.
+ * Learn more about it here: https://the-guild.dev/graphql/codegen/plugins/presets/preset-client#reducing-bundle-size
  */
-const documents = {
+type Documents = {
+    "query coercion($value: [ListCoercion!]) {\n  coercion(value: $value)\n}": typeof types.CoercionDocument,
+    "query complexity($value: Int!) {\n  complexity(value: $value)\n}": typeof types.ComplexityDocument,
+    "query date($filter: DateFilter!) {\n  date(filter: $filter)\n}": typeof types.DateDocument,
+    "query error($type: ErrorType) {\n  error(type: $type)\n}": typeof types.ErrorDocument,
+    "query jsonEncoding {\n  jsonEncoding\n}": typeof types.JsonEncodingDocument,
+    "query path {\n  path {\n    cc: child {\n      error\n    }\n  }\n}": typeof types.PathDocument,
+    "query viewer {\n  viewer {\n    user {\n      name\n      phoneNumber\n      query {\n        jsonEncoding\n      }\n      ...userFragment @defer\n    }\n  }\n}\n\nfragment userFragment on User {\n  likes\n}": typeof types.ViewerDocument,
+};
+const documents: Documents = {
     "query coercion($value: [ListCoercion!]) {\n  coercion(value: $value)\n}": types.CoercionDocument,
     "query complexity($value: Int!) {\n  complexity(value: $value)\n}": types.ComplexityDocument,
     "query date($filter: DateFilter!) {\n  date(filter: $filter)\n}": types.DateDocument,

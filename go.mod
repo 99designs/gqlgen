@@ -1,6 +1,6 @@
 module github.com/99designs/gqlgen
 
-go 1.25
+go 1.25.0
 
 require (
 	github.com/PuerkitoBio/goquery v1.11.0
@@ -22,7 +22,7 @@ require (
 	google.golang.org/protobuf v1.36.11
 )
 
-require golang.org/x/sync v0.19.0
+require golang.org/x/sync v0.20.0
 
 require (
 	github.com/agnivade/levenshtein v1.2.1 // indirect
@@ -30,7 +30,7 @@ require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	golang.org/x/mod v0.33.0 // indirect
-	golang.org/x/net v0.50.0 // indirect
-	golang.org/x/sys v0.41.0 // indirect
+	golang.org/x/net v0.51.0 // indirect
+	golang.org/x/sys v0.42.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

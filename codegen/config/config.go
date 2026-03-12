@@ -418,192 +418,229 @@ func (c *Config) injectTypesFromSchema() error {
 			continue
 		}
 
-		if bd := schemaType.Directives.ForName(DirGoModel); bd != nil {
-			if ma := bd.Arguments.ForName(DirArgModel); ma != nil {
-				if mv, err := ma.Value.Value(nil); err == nil {
-					c.Models.Add(schemaType.Name, mv.(string))
-				}
-			}
-
-			if ma := bd.Arguments.ForName(DirArgModels); ma != nil {
-				if mvs, err := ma.Value.Value(nil); err == nil {
-					for _, mv := range mvs.([]any) {
-						c.Models.Add(schemaType.Name, mv.(string))
-					}
-				}
-			}
-
-			if fg := bd.Arguments.ForName(DirArgForceGenerate); fg != nil {
-				if mv, err := fg.Value.Value(nil); err == nil {
-					c.Models.ForceGenerate(schemaType.Name, mv.(bool))
-				}
-			}
-		}
+		c.injectGoModelDirective(schemaType)
 
 		if schemaType.Kind == ast.Object ||
 			schemaType.Kind == ast.InputObject ||
 			schemaType.Kind == ast.Interface {
-			for _, field := range schemaType.Fields {
-				if fd := field.Directives.ForName(DirGoField); fd != nil {
-					// First, copy map entry for type and field to do modifications
-					typeMapEntry := c.Models[schemaType.Name]
-					typeMapFieldEntry := typeMapEntry.Fields[field.Name]
-
-					if ta := fd.Arguments.ForName(DirArgType); ta != nil {
-						if c.Models.UserDefined(schemaType.Name) {
-							return newNotApplicableError(DirGoField, DirArgType, *fd.Position)
-						}
-
-						if ft, err := ta.Value.Value(nil); err == nil {
-							typeMapFieldEntry.Type = ft.(string)
-						}
-					}
-
-					if ra := fd.Arguments.ForName(DirArgForceResolver); ra != nil {
-						if fr, err := ra.Value.Value(nil); err == nil {
-							typeMapFieldEntry.Resolver = fr.(bool)
-						}
-					}
-
-					if na := fd.Arguments.ForName(DirArgName); na != nil {
-						if fr, err := na.Value.Value(nil); err == nil {
-							typeMapFieldEntry.FieldName = fr.(string)
-						}
-					}
-
-					if arg := fd.Arguments.ForName(DirArgOmittable); arg != nil {
-						if k, err := arg.Value.Value(nil); err == nil {
-							val := k.(bool)
-							typeMapFieldEntry.Omittable = &val
-						}
-					}
-
-					if arg := fd.Arguments.ForName(DirArgAutoBindGetterHaser); arg != nil {
-						if k, err := arg.Value.Value(nil); err == nil {
-							val := k.(bool)
-							typeMapFieldEntry.AutoBindGetterHaser = &val
-						}
-					}
-
-					if arg := fd.Arguments.ForName(DirArgBatch); arg != nil {
-						if k, err := arg.Value.Value(nil); err == nil {
-							typeMapFieldEntry.Batch = k.(bool)
-						}
-					}
-
-					if arg := fd.Arguments.ForName(DirArgForceGenerate); arg != nil {
-						if c.Models.UserDefined(schemaType.Name) {
-							return newNotApplicableError(
-								DirGoField,
-								DirArgForceGenerate,
-								*fd.Position,
-							)
-						}
-
-						if k, err := arg.Value.Value(nil); err == nil {
-							val := k.(bool)
-							typeMapFieldEntry.ForceGenerate = val
-						}
-					}
-
-					// May be uninitialized, so do it now.
-					if typeMapEntry.Fields == nil {
-						typeMapEntry.Fields = make(map[string]TypeMapField)
-					}
-
-					// First, copy back probably modificated field settings
-					typeMapEntry.Fields[field.Name] = typeMapFieldEntry
-
-					// And final copy back probably modificated all type map
-					c.Models[schemaType.Name] = typeMapEntry
-				}
+			if err := c.injectGoFieldDirectives(schemaType); err != nil {
+				return err
 			}
 
-			if efds := schemaType.Directives.ForNames(DirGoExtraField); len(efds) != 0 {
-				for _, efd := range efds {
-					argumentName := "type"
-					if t := efd.Arguments.ForName(argumentName); t != nil {
-						extraField := ModelExtraField{}
-
-						if tv, err := t.Value.Value(nil); err == nil {
-							extraField.Type = tv.(string)
-						}
-
-						if extraField.Type == "" {
-							return newCannotBeEmptyError(
-								DirGoExtraField,
-								argumentName,
-								*efd.Position,
-							)
-						}
-
-						if ot := efd.Arguments.ForName(DirArgOverrideTags); ot != nil {
-							if otv, err := ot.Value.Value(nil); err == nil {
-								extraField.OverrideTags = otv.(string)
-							}
-						}
-
-						if d := efd.Arguments.ForName(DirArgDescription); d != nil {
-							if dv, err := d.Value.Value(nil); err == nil {
-								extraField.Description = dv.(string)
-							}
-						}
-
-						extraFieldName := ""
-						if fn := efd.Arguments.ForName(DirArgName); fn != nil {
-							if fnv, err := fn.Value.Value(nil); err == nil {
-								extraFieldName = fnv.(string)
-							}
-						}
-
-						// First copy, then modify map entry.
-						typeMapEntry := c.Models[schemaType.Name]
-
-						if extraFieldName == "" {
-							// Embeddable fields
-							typeMapEntry.EmbedExtraFields = append(
-								typeMapEntry.EmbedExtraFields,
-								extraField,
-							)
-						} else {
-							// Regular fields
-							if typeMapEntry.ExtraFields == nil {
-								typeMapEntry.ExtraFields = make(map[string]ModelExtraField)
-							}
-							typeMapEntry.ExtraFields[extraFieldName] = extraField
-						}
-
-						// Copy back modified map entry
-						c.Models[schemaType.Name] = typeMapEntry
-					}
-				}
+			if err := c.injectGoExtraFieldDirectives(schemaType); err != nil {
+				return err
 			}
 		}
 
-		if schemaType.Kind == ast.Enum && !strings.HasPrefix(schemaType.Name, "__") {
-			values := make(map[string]EnumValue)
+		c.injectGoEnumDirectives(schemaType)
+	}
 
-			for _, value := range schemaType.EnumValues {
-				if directive := value.Directives.ForName(DirGoEnum); directive != nil {
-					if arg := directive.Arguments.ForName(DirArgValue); arg != nil {
-						if v, err := arg.Value.Value(nil); err == nil {
-							values[value.Name] = EnumValue{
-								Value: v.(string),
-							}
-						}
-					}
-				}
-			}
+	return nil
+}
 
-			if len(values) > 0 {
-				model := c.Models[schemaType.Name]
-				model.EnumValues = values
-				c.Models[schemaType.Name] = model
+func (c *Config) injectGoModelDirective(schemaType *ast.Definition) {
+	bd := schemaType.Directives.ForName(DirGoModel)
+	if bd == nil {
+		return
+	}
+
+	if ma := bd.Arguments.ForName(DirArgModel); ma != nil {
+		if mv, err := ma.Value.Value(nil); err == nil {
+			c.Models.Add(schemaType.Name, mv.(string))
+		}
+	}
+
+	if ma := bd.Arguments.ForName(DirArgModels); ma != nil {
+		if mvs, err := ma.Value.Value(nil); err == nil {
+			for _, mv := range mvs.([]any) {
+				c.Models.Add(schemaType.Name, mv.(string))
 			}
 		}
 	}
 
+	if fg := bd.Arguments.ForName(DirArgForceGenerate); fg != nil {
+		if mv, err := fg.Value.Value(nil); err == nil {
+			c.Models.ForceGenerate(schemaType.Name, mv.(bool))
+		}
+	}
+}
+
+func (c *Config) injectGoFieldDirectives(schemaType *ast.Definition) error {
+	for _, field := range schemaType.Fields {
+		fd := field.Directives.ForName(DirGoField)
+		if fd == nil {
+			continue
+		}
+
+		// First, copy map entry for type and field to do modifications
+		typeMapEntry := c.Models[schemaType.Name]
+		typeMapFieldEntry := typeMapEntry.Fields[field.Name]
+
+		if ta := fd.Arguments.ForName(DirArgType); ta != nil {
+			if c.Models.UserDefined(schemaType.Name) {
+				return newNotApplicableError(DirGoField, DirArgType, *fd.Position)
+			}
+
+			if ft, err := ta.Value.Value(nil); err == nil {
+				typeMapFieldEntry.Type = ft.(string)
+			}
+		}
+
+		if ra := fd.Arguments.ForName(DirArgForceResolver); ra != nil {
+			if fr, err := ra.Value.Value(nil); err == nil {
+				typeMapFieldEntry.Resolver = fr.(bool)
+			}
+		}
+
+		if na := fd.Arguments.ForName(DirArgName); na != nil {
+			if fr, err := na.Value.Value(nil); err == nil {
+				typeMapFieldEntry.FieldName = fr.(string)
+			}
+		}
+
+		if arg := fd.Arguments.ForName(DirArgOmittable); arg != nil {
+			if k, err := arg.Value.Value(nil); err == nil {
+				val := k.(bool)
+				typeMapFieldEntry.Omittable = &val
+			}
+		}
+
+		if arg := fd.Arguments.ForName(DirArgAutoBindGetterHaser); arg != nil {
+			if k, err := arg.Value.Value(nil); err == nil {
+				val := k.(bool)
+				typeMapFieldEntry.AutoBindGetterHaser = &val
+			}
+		}
+
+		if arg := fd.Arguments.ForName(DirArgBatch); arg != nil {
+			if k, err := arg.Value.Value(nil); err == nil {
+				typeMapFieldEntry.Batch = k.(bool)
+			}
+		}
+
+		if arg := fd.Arguments.ForName(DirArgForceGenerate); arg != nil {
+			if c.Models.UserDefined(schemaType.Name) {
+				return newNotApplicableError(
+					DirGoField,
+					DirArgForceGenerate,
+					*fd.Position,
+				)
+			}
+
+			if k, err := arg.Value.Value(nil); err == nil {
+				val := k.(bool)
+				typeMapFieldEntry.ForceGenerate = val
+			}
+		}
+
+		// May be uninitialized, so do it now.
+		if typeMapEntry.Fields == nil {
+			typeMapEntry.Fields = make(map[string]TypeMapField)
+		}
+
+		// First, copy back probably modificated field settings
+		typeMapEntry.Fields[field.Name] = typeMapFieldEntry
+
+		// And final copy back probably modificated all type map
+		c.Models[schemaType.Name] = typeMapEntry
+	}
+
 	return nil
+}
+
+func (c *Config) injectGoExtraFieldDirectives(schemaType *ast.Definition) error {
+	efds := schemaType.Directives.ForNames(DirGoExtraField)
+	if len(efds) == 0 {
+		return nil
+	}
+
+	for _, efd := range efds {
+		t := efd.Arguments.ForName(DirArgType)
+		if t == nil {
+			continue
+		}
+
+		extraField := ModelExtraField{}
+
+		if tv, err := t.Value.Value(nil); err == nil {
+			extraField.Type = tv.(string)
+		}
+
+		if extraField.Type == "" {
+			return newCannotBeEmptyError(
+				DirGoExtraField,
+				DirArgType,
+				*efd.Position,
+			)
+		}
+
+		if ot := efd.Arguments.ForName(DirArgOverrideTags); ot != nil {
+			if otv, err := ot.Value.Value(nil); err == nil {
+				extraField.OverrideTags = otv.(string)
+			}
+		}
+
+		if d := efd.Arguments.ForName(DirArgDescription); d != nil {
+			if dv, err := d.Value.Value(nil); err == nil {
+				extraField.Description = dv.(string)
+			}
+		}
+
+		extraFieldName := ""
+		if fn := efd.Arguments.ForName(DirArgName); fn != nil {
+			if fnv, err := fn.Value.Value(nil); err == nil {
+				extraFieldName = fnv.(string)
+			}
+		}
+
+		// First copy, then modify map entry.
+		typeMapEntry := c.Models[schemaType.Name]
+
+		if extraFieldName == "" {
+			// Embeddable fields
+			typeMapEntry.EmbedExtraFields = append(
+				typeMapEntry.EmbedExtraFields,
+				extraField,
+			)
+		} else {
+			// Regular fields
+			if typeMapEntry.ExtraFields == nil {
+				typeMapEntry.ExtraFields = make(map[string]ModelExtraField)
+			}
+			typeMapEntry.ExtraFields[extraFieldName] = extraField
+		}
+
+		// Copy back modified map entry
+		c.Models[schemaType.Name] = typeMapEntry
+	}
+
+	return nil
+}
+
+func (c *Config) injectGoEnumDirectives(schemaType *ast.Definition) {
+	if schemaType.Kind != ast.Enum || strings.HasPrefix(schemaType.Name, "__") {
+		return
+	}
+
+	values := make(map[string]EnumValue)
+
+	for _, value := range schemaType.EnumValues {
+		if directive := value.Directives.ForName(DirGoEnum); directive != nil {
+			if arg := directive.Arguments.ForName(DirArgValue); arg != nil {
+				if v, err := arg.Value.Value(nil); err == nil {
+					values[value.Name] = EnumValue{
+						Value: v.(string),
+					}
+				}
+			}
+		}
+	}
+
+	if len(values) > 0 {
+		model := c.Models[schemaType.Name]
+		model.EnumValues = values
+		c.Models[schemaType.Name] = model
+	}
 }
 
 type TypeMapEntry struct {

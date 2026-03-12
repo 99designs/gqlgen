@@ -223,6 +223,8 @@ directive @goField(
 	name: String
 	omittable: Boolean
 	type: String
+  autoBindGetterHaser: Boolean
+  forceGenerate: Boolean
 	batch: Boolean
 ) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 

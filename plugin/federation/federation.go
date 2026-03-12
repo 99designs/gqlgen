@@ -418,6 +418,7 @@ func (f *Federation) GenerateCode(data *codegen.Data) error {
 		GeneratedHeader: true,
 		Packages:        data.Config.Packages,
 		Template:        federationTemplate,
+		PruneOptions:    data.Config.GetPruneOptions(),
 	})
 }
 
@@ -751,6 +752,7 @@ func (f *Federation) generateExplicitRequires(
 		GeneratedHeader: false,
 		Packages:        data.Config.Packages,
 		Template:        explicitRequiresTemplate,
+		PruneOptions:    data.Config.GetPruneOptions(),
 	})
 }
 

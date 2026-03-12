@@ -323,6 +323,26 @@
       "type": "boolean",
       "default": false
     },
+    "fast_validation": {
+      "description": "Use -gcflags=\"-N -l\" during validation to disable compiler optimizations for faster cold cache builds",
+      "type": "boolean",
+      "default": false
+    },
+    "skip_import_grouping": {
+      "description": "Use go/format.Source instead of imports.Process for formatting (faster but no import grouping)",
+      "type": "boolean",
+      "default": false
+    },
+    "use_light_mode_prefetch": {
+      "description": "Use light mode (NeedName|NeedFiles|NeedModule) for initial package loading instead of full NeedTypes",
+      "type": "boolean",
+      "default": false
+    },
+    "use_buffer_pooling": {
+      "description": "Reuse byte buffers via sync.Pool during code formatting to reduce GC pressure",
+      "type": "boolean",
+      "default": false
+    },
     "call_argument_directives_with_null": {
       "description": "Argument directives decorating a field with a null value will still be called",
       "type": "boolean",

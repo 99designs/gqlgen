@@ -161,7 +161,8 @@ func (b *Binder) FindObject(pkgName, typeName string) (types.Object, error) {
 }
 
 func indexDefs(pkg *packages.Package) map[string]types.Object {
-	res := make(map[string]types.Object)
+	// Pre-allocate with capacity to avoid map rehashing
+	res := make(map[string]types.Object, len(pkg.TypesInfo.Defs))
 
 	scope := pkg.Types.Scope()
 	for astNode, def := range pkg.TypesInfo.Defs {

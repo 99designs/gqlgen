@@ -468,3 +468,58 @@ unknown: foo`))
 		}
 	})
 }
+
+func TestPerformanceOptions(t *testing.T) {
+	t.Run("GetFastValidation defaults to false", func(t *testing.T) {
+		cfg := &Config{}
+		require.False(t, cfg.GetFastValidation())
+	})
+
+	t.Run("GetFastValidation returns true when set", func(t *testing.T) {
+		val := true
+		cfg := &Config{FastValidation: &val}
+		require.True(t, cfg.GetFastValidation())
+	})
+
+	t.Run("GetSkipImportGrouping defaults to false", func(t *testing.T) {
+		cfg := &Config{}
+		require.False(t, cfg.GetSkipImportGrouping())
+	})
+
+	t.Run("GetSkipImportGrouping returns true when set", func(t *testing.T) {
+		val := true
+		cfg := &Config{SkipImportGrouping: &val}
+		require.True(t, cfg.GetSkipImportGrouping())
+	})
+
+	t.Run("GetUseLightModePrefetch defaults to false", func(t *testing.T) {
+		cfg := &Config{}
+		require.False(t, cfg.GetUseLightModePrefetch())
+	})
+
+	t.Run("GetUseLightModePrefetch returns true when set", func(t *testing.T) {
+		val := true
+		cfg := &Config{UseLightModePrefetch: &val}
+		require.True(t, cfg.GetUseLightModePrefetch())
+	})
+
+	t.Run("GetUseBufferPooling defaults to false", func(t *testing.T) {
+		cfg := &Config{}
+		require.False(t, cfg.GetUseBufferPooling())
+	})
+
+	t.Run("GetUseBufferPooling returns true when set", func(t *testing.T) {
+		val := true
+		cfg := &Config{UseBufferPooling: &val}
+		require.True(t, cfg.GetUseBufferPooling())
+	})
+
+	t.Run("GetPruneOptions returns correct values", func(t *testing.T) {
+		skipImport := true
+		useBuffer := true
+		cfg := &Config{SkipImportGrouping: &skipImport, UseBufferPooling: &useBuffer}
+		opts := cfg.GetPruneOptions()
+		require.True(t, opts.SkipImportGrouping)
+		require.True(t, opts.UseBufferPooling)
+	})
+}

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go/token"
 	"go/types"
+	"os"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/ast"
@@ -205,7 +206,8 @@ type TypeReference struct {
 	Marshaler                *types.Func // When using external marshalling functions this will point to the Marshal function
 	Unmarshaler              *types.Func // When using external marshalling functions this will point to the Unmarshal function
 	IsMarshaler              bool        // Does the type implement graphql.Marshaler and graphql.Unmarshaler
-	IsOmittable              bool        // Is the type wrapped with Omittable
+	IsOmittable              bool        // Does the type support omittability via an unmarshaler function
+	OmittableUnmarshaler     *types.Func // If IsOmittable is true, this will point to the unmarshaler function that supports omittability
 	IsContext                bool        // Is the Marshaler/Unmarshaller the context version; applies to either the method or interface variety.
 	PointersInUnmarshalInput bool        // Inverse values and pointers in return.
 	IsRoot                   bool        // Is the type a root level definition such as Query, Mutation or Subscription
@@ -362,18 +364,44 @@ func isIntf(t types.Type) bool {
 	return ok
 }
 
-func unwrapOmittable(t types.Type) (types.Type, bool) {
-	if t == nil {
-		return nil, false
+func (b *Binder) unwrapOmittable(
+	goType types.Type,
+	bindTarget types.Type,
+) (types.Type, *types.Func, bool) {
+	if bindTarget == nil {
+		return nil, nil, false
 	}
-	named, ok := t.(*types.Named)
+	named, ok := bindTarget.(*types.Named)
 	if !ok {
-		return t, false
+		return bindTarget, nil, false
 	}
-	if named.Origin().String() != "github.com/99designs/gqlgen/graphql.Omittable[T any]" {
-		return t, false
+	for _, ot := range b.cfg.OmittableTypes {
+		pkgName, typeName := code.PkgAndType(ot)
+		obj, err := b.FindObject(pkgName, "Unmarshal"+typeName)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "unable to find Unmarshal function for Omittable type: %s.%s: %v\n", pkgName, typeName, err)
+			continue
+		}
+
+		t := code.Unalias(obj.Type())
+		fn, ok := obj.(*types.Func)
+		if !ok {
+			fmt.Fprintf(os.Stderr, "type for Omittable is not a function: %s.%s\n", pkgName, typeName)
+			continue
+		}
+
+		instantiated, err := b.InstantiateType(t, []types.Type{named})
+		if err == nil {
+			fmt.Printf("%s is an Omittable type\n", instantiated.String())
+		}
+
+		t.(*types.Signature).TypeParams()
+		fmt.Printf("%s\n", named.String())
+		if named.Origin().String() == t.(*types.Signature).Results().At(0).Type().(*types.Named).Origin().String() {
+			return named.TypeArgs().At(0), fn, true
+		}
 	}
-	return named.TypeArgs().At(0), true
+	return bindTarget, nil, false
 }
 
 func (b *Binder) TypeReference(
@@ -382,19 +410,6 @@ func (b *Binder) TypeReference(
 ) (ret *TypeReference, err error) {
 	if bindTarget != nil {
 		bindTarget = code.Unalias(bindTarget)
-	}
-	if innerType, ok := unwrapOmittable(bindTarget); ok {
-		if schemaType.NonNull {
-			return nil, fmt.Errorf("%s is wrapped with Omittable but non-null", schemaType.Name())
-		}
-
-		ref, err := b.TypeReference(schemaType, innerType)
-		if err != nil {
-			return nil, err
-		}
-
-		ref.IsOmittable = true
-		return ref, err
 	}
 
 	if !isValid(bindTarget) {
@@ -512,7 +527,12 @@ func (b *Binder) TypeReference(
 					ref.Marshaler = nil
 					ref.Unmarshaler = nil
 				} else {
-					continue
+					if newTarget, unmarshalFunc, isOmittable := b.unwrapOmittable(ref.GO, bindTarget); isOmittable {
+						ref.OmittableUnmarshaler = unmarshalFunc
+						ref.GO = newTarget
+					} else {
+						continue
+					}
 				}
 			}
 			ref.GO = bindTarget

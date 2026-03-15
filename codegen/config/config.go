@@ -31,6 +31,7 @@ type Config struct {
 	Resolver                             ResolverConfig             `yaml:"resolver,omitempty"`
 	AutoBind                             []string                   `yaml:"autobind"`
 	AutobindGetterHaser                  bool                       `yaml:"autobind_getter_haser,omitempty"`
+	OmittableTypes                       StringList                 `yaml:"omittable_types,omitempty"`
 	Models                               TypeMap                    `yaml:"models,omitempty"`
 	StructTag                            string                     `yaml:"struct_tag,omitempty"`
 	EmbeddedStructsPrefix                string                     `yaml:"embedded_structs_prefix,omitempty"`
@@ -134,6 +135,8 @@ const (
 	DirArgOverrideTags        = "overrideTags"
 	DirArgDescription         = "description"
 	DirArgOmittable           = "omittable"
+	DirArgOmittableType       = "omittableType"
+	DirArgOmittableTypes      = "omittableTypes"
 	DirArgAutoBindGetterHaser = "autoBindGetterHaser"
 	DirArgBatch               = "batch"
 )
@@ -505,6 +508,21 @@ func (c *Config) injectGoFieldDirectives(schemaType *ast.Definition) error {
 			}
 		}
 
+		if ma := fd.Arguments.ForName(DirArgOmittableType); ma != nil {
+			if ot, err := ma.Value.Value(nil); err == nil {
+				typeMapFieldEntry.OmittableType = append(typeMapFieldEntry.OmittableType,
+					ot.(string))
+			}
+		}
+
+		if ma := fd.Arguments.ForName(DirArgOmittableTypes); ma != nil {
+			if ots, err := ma.Value.Value(nil); err == nil {
+				for _, ot := range ots.([]any) {
+					c.Models.Add(schemaType.Name, ot.(string))
+				}
+			}
+		}
+
 		if arg := fd.Arguments.ForName(DirArgAutoBindGetterHaser); arg != nil {
 			if k, err := arg.Value.Value(nil); err == nil {
 				val := k.(bool)
@@ -645,6 +663,7 @@ func (c *Config) injectGoEnumDirectives(schemaType *ast.Definition) {
 
 type TypeMapEntry struct {
 	Model         StringList              `yaml:"model,omitempty"`
+	OmittableType StringList              `yaml:"omittableType,omitempty"`
 	ForceGenerate bool                    `yaml:"forceGenerate,omitempty"`
 	Fields        map[string]TypeMapField `yaml:"fields,omitempty"`
 	EnumValues    map[string]EnumValue    `yaml:"enum_values,omitempty"`
@@ -673,11 +692,12 @@ type TypeMapField struct {
 	// restrictions.
 	Type string `yaml:"type"`
 
-	Resolver            bool   `yaml:"resolver"`
-	FieldName           string `yaml:"fieldName"`
-	Omittable           *bool  `yaml:"omittable"`
-	GeneratedMethod     string `yaml:"-"`
-	AutoBindGetterHaser *bool  `yaml:"autoBindGetterHaser"`
+	Resolver            bool       `yaml:"resolver"`
+	FieldName           string     `yaml:"fieldName"`
+	Omittable           *bool      `yaml:"omittable"`
+	OmittableType       StringList `yaml:"omittableType,omitempty"`
+	GeneratedMethod     string     `yaml:"-"`
+	AutoBindGetterHaser *bool      `yaml:"autoBindGetterHaser"`
 
 	// Batch enables batch resolver generation for this field.
 	// When true, a batch resolver method (e.g., PostsBatch) will be generated

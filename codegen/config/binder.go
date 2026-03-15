@@ -377,28 +377,44 @@ func (b *Binder) unwrapOmittable(
 	}
 	for _, ot := range b.cfg.OmittableTypes {
 		pkgName, typeName := code.PkgAndType(ot)
+
 		obj, err := b.FindObject(pkgName, "Unmarshal"+typeName)
 		if err != nil {
 			fmt.Fprintf(os.Stderr, "unable to find Unmarshal function for Omittable type: %s.%s: %v\n", pkgName, typeName, err)
 			continue
 		}
 
-		t := code.Unalias(obj.Type())
 		fn, ok := obj.(*types.Func)
 		if !ok {
 			fmt.Fprintf(os.Stderr, "type for Omittable is not a function: %s.%s\n", pkgName, typeName)
 			continue
 		}
 
-		instantiated, err := b.InstantiateType(t, []types.Type{named})
-		if err == nil {
-			fmt.Printf("%s is an Omittable type\n", instantiated.String())
-		}
-
-		t.(*types.Signature).TypeParams()
-		fmt.Printf("%s\n", named.String())
-		if named.Origin().String() == t.(*types.Signature).Results().At(0).Type().(*types.Named).Origin().String() {
-			return named.TypeArgs().At(0), fn, true
+		sig := obj.Type().(*types.Signature)
+		_ = sig
+		if named.Origin().String() == sig.Results().At(0).Type().(*types.Named).Origin().String() {
+			// If we instantiate the unmarshaler function with the type arg in the bindTarget, does it result in compatible types?
+			named.Origin().TypeParams().At(0)
+			typeArg := named.TypeArgs().At(0)
+			if ptr, isPtr := typeArg.(*types.Pointer); isPtr {
+				typeArg = ptr.Elem()
+			}
+			ifun, err := b.InstantiateType(obj.Type(), []types.Type{typeArg})
+			if err != nil {
+				fmt.Fprintf(os.Stderr, "unable to instantiate Unmarshal function for Omittable type: %s.%s: %v\n", pkgName, typeName, err)
+				continue
+			}
+			isig := ifun.(*types.Signature)
+			fmt.Println(isig.String())
+			if goType.String() != isig.Params().At(0).Type().String() {
+				fmt.Fprintf(os.Stderr, "unmarshal function for Omittable type: %s.%s does not have a compatible parameter type. expected: %s, got: %s\n", pkgName, typeName, goType.String(), isig.Params().At(0).Type().String())
+				continue
+			}
+			if bindTarget.String() != isig.Results().At(0).Type().String() {
+				fmt.Fprintf(os.Stderr, "unmarshal function for Omittable type: %s.%s does not have a compatible return type. expected: %s, got: %s\n", pkgName, typeName, bindTarget.String(), isig.Results().At(0).Type().String())
+				continue
+			}
+			return goType, fn, true
 		}
 	}
 	return bindTarget, nil, false
@@ -526,13 +542,12 @@ func (b *Binder) TypeReference(
 					ref.IsMarshaler = true
 					ref.Marshaler = nil
 					ref.Unmarshaler = nil
+				} else if newTarget, unmarshalFunc, isOmittable := b.unwrapOmittable(ref.GO, bindTarget); isOmittable {
+					ref.IsOmittable = true
+					ref.OmittableUnmarshaler = unmarshalFunc
+					bindTarget = newTarget
 				} else {
-					if newTarget, unmarshalFunc, isOmittable := b.unwrapOmittable(ref.GO, bindTarget); isOmittable {
-						ref.OmittableUnmarshaler = unmarshalFunc
-						ref.GO = newTarget
-					} else {
-						continue
-					}
+					continue
 				}
 			}
 			ref.GO = bindTarget

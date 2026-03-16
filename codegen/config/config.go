@@ -31,7 +31,7 @@ type Config struct {
 	Resolver                             ResolverConfig             `yaml:"resolver,omitempty"`
 	AutoBind                             []string                   `yaml:"autobind"`
 	AutobindGetterHaser                  bool                       `yaml:"autobind_getter_haser,omitempty"`
-	OmittableTypes                       StringList                 `yaml:"omittable_types,omitempty"`
+	OmittableType                        StringList                 `yaml:"omittable_type,omitempty"`
 	Models                               TypeMap                    `yaml:"models,omitempty"`
 	StructTag                            string                     `yaml:"struct_tag,omitempty"`
 	EmbeddedStructsPrefix                string                     `yaml:"embedded_structs_prefix,omitempty"`

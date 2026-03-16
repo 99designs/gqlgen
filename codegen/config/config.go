@@ -172,6 +172,7 @@ func DefaultConfig() *Config {
 		SchemaFilename:                 StringList{"schema.graphql"},
 		Model:                          PackageConfig{Filename: "models_gen.go"},
 		Exec:                           ExecConfig{Filename: "generated.go"},
+		OmittableType:                  StringList{"github.com/99designs/gqlgen/graphql.OmittableOf"},
 		Directives:                     map[string]DirectiveConfig{},
 		Models:                         TypeMap{},
 		StructFieldsAlwaysPointers:     true,

@@ -584,7 +584,12 @@ func (b *Binder) TypeReference(
 				// if the bind type implements the
 				// graphql.ContextMarshaler/graphql.ContextUnmarshaler/graphql.Marshaler/graphql.Unmarshaler
 				// interface, we can use it
-				if hasMethod(bindTarget, "MarshalGQLContext") &&
+				if newTarget, unmarshalFunc, canError := b.unwrapOmittable(ref.GO, bindTarget); unmarshalFunc != nil {
+					ref.IsOmittable = true
+					ref.OmittableUnmarshaler = unmarshalFunc
+					ref.OmittableUnmarshalerCanError = canError
+					bindTarget = newTarget
+				} else if hasMethod(bindTarget, "MarshalGQLContext") &&
 					hasMethod(bindTarget, "UnmarshalGQLContext") {
 					ref.IsContext = true
 					ref.IsMarshaler = true
@@ -595,11 +600,6 @@ func (b *Binder) TypeReference(
 					ref.IsMarshaler = true
 					ref.Marshaler = nil
 					ref.Unmarshaler = nil
-				} else if newTarget, unmarshalFunc, canError := b.unwrapOmittable(ref.GO, bindTarget); unmarshalFunc != nil {
-					ref.IsOmittable = true
-					ref.OmittableUnmarshaler = unmarshalFunc
-					ref.OmittableUnmarshalerCanError = canError
-					bindTarget = newTarget
 				} else {
 					continue
 				}

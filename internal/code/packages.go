@@ -12,21 +12,12 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-// lightMode is used for operations that don't need full type info (fast)
-var lightMode = packages.NeedName |
-	packages.NeedFiles |
-	packages.NeedModule
-
-// fullMode is used when type information is required (slow - triggers compilation)
-var fullMode = packages.NeedName |
+var mode = packages.NeedName |
 	packages.NeedFiles |
 	packages.NeedTypes |
 	packages.NeedSyntax |
 	packages.NeedTypesInfo |
 	packages.NeedModule
-
-// mode is the default mode for backwards compatibility
-var mode = fullMode
 
 type (
 	// Packages is a wrapper around x/tools/go/packages that maintains a (hopefully prewarmed) cache
@@ -38,7 +29,6 @@ type (
 		loadErrors            []error
 		buildFlags            []string
 		packagesToCachePrefix string
-		useLightModePrefetch  bool // Use lightMode instead of fullMode for LoadAll
 
 		numLoadCalls int // stupid test steam. ignore.
 		numNameCalls int // stupid test steam. ignore.
@@ -68,21 +58,11 @@ func PackagePrefixToCache(prefixPath string) func(p *Packages) {
 	}
 }
 
-// WithLightModePrefetch option for NewPackages uses lightMode (NeedName|NeedFiles|NeedModule)
-// instead of fullMode for LoadAll, avoiding compilation until types are needed.
-func WithLightModePrefetch(enabled bool) func(p *Packages) {
-	return func(p *Packages) {
-		p.useLightModePrefetch = enabled
-	}
-}
-
 // NewPackages creates a new packages cache
 // It will load all packages in the current module, and any packages that are passed to Load or
 // LoadAll
 func NewPackages(opts ...Option) *Packages {
-	p := &Packages{
-		useLightModePrefetch: false, // Default to full mode for backwards compatibility
-	}
+	p := &Packages{}
 	for _, opt := range opts {
 		opt(p)
 	}
@@ -135,42 +115,14 @@ func (p *Packages) ReloadAll(importPaths ...string) []*packages.Package {
 
 // LoadAll will call packages.Load and return the package data for the given packages,
 // but if the package already have been loaded it will return cached values instead.
-// If useLightModePrefetch is true, uses lightMode (faster, no type info).
-// Otherwise uses fullMode (slower but includes type information).
 func (p *Packages) LoadAll(importPaths ...string) []*packages.Package {
-	if p.useLightModePrefetch {
-		return p.loadAllWithMode(lightMode, importPaths...)
-	}
-	return p.loadAllWithMode(fullMode, importPaths...)
-}
-
-// LoadAllLight loads packages with minimal info (no type checking).
-// This is ~200x faster than LoadAll because it doesn't trigger compilation.
-// Use this when you only need package names/files, not type information.
-func (p *Packages) LoadAllLight(importPaths ...string) []*packages.Package {
-	return p.loadAllWithMode(lightMode, importPaths...)
-}
-
-// loadAllWithMode is the internal implementation that supports different modes.
-func (p *Packages) loadAllWithMode(
-	loadMode packages.LoadMode,
-	importPaths ...string,
-) []*packages.Package {
 	if p.packages == nil {
 		p.packages = map[string]*packages.Package{}
 	}
 
-	needsTypes := loadMode&packages.NeedTypes != 0
-
 	missing := make([]string, 0, len(importPaths))
 	for _, path := range importPaths {
-		cached, ok := p.packages[path]
-		if !ok {
-			missing = append(missing, path)
-			continue
-		}
-		// If we need types but cached package doesn't have them, reload
-		if needsTypes && cached.Types == nil {
+		if _, ok := p.packages[path]; !ok {
 			missing = append(missing, path)
 		}
 	}
@@ -178,7 +130,7 @@ func (p *Packages) loadAllWithMode(
 	if len(missing) > 0 {
 		p.numLoadCalls++
 		pkgs, err := packages.Load(&packages.Config{
-			Mode:       loadMode,
+			Mode:       mode,
 			BuildFlags: p.buildFlags,
 		}, missing...)
 		if err != nil {

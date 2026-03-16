@@ -581,15 +581,25 @@ func (b *Binder) TypeReference(
 
 		if bindTarget != nil {
 			if err = code.CompatibleTypes(ref.GO, bindTarget); err != nil {
-				// if the bind type implements the
-				// graphql.ContextMarshaler/graphql.ContextUnmarshaler/graphql.Marshaler/graphql.Unmarshaler
-				// interface, we can use it
+				// Attempt to unwrap omittable types if the provided bindTarget is not compatible
+				// with the initial GO type. This allows users to specify their own omittable types.
 				if newTarget, unmarshalFunc, canError := b.unwrapOmittable(ref.GO, bindTarget); unmarshalFunc != nil {
+					ref, err := b.TypeReference(schemaType, newTarget)
+					if err != nil {
+						return nil, err
+					}
+
 					ref.IsOmittable = true
 					ref.OmittableUnmarshaler = unmarshalFunc
 					ref.OmittableUnmarshalerCanError = canError
-					bindTarget = newTarget
-				} else if hasMethod(bindTarget, "MarshalGQLContext") &&
+
+					return ref, nil
+				}
+
+				// if the bind type implements the
+				// graphql.ContextMarshaler/graphql.ContextUnmarshaler/graphql.Marshaler/graphql.Unmarshaler
+				// interface, we can use it
+				if hasMethod(bindTarget, "MarshalGQLContext") &&
 					hasMethod(bindTarget, "UnmarshalGQLContext") {
 					ref.IsContext = true
 					ref.IsMarshaler = true

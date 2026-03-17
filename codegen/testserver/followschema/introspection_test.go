@@ -68,6 +68,28 @@ func TestIntrospection(t *testing.T) {
 			require.Nil(t, resp.Type.Fields[0].DeprecationReason)
 		})
 
+		t.Run("chained interface possibleTypes", func(t *testing.T) {
+			var resp struct {
+				Type struct {
+					PossibleTypes []struct {
+						Name string
+					}
+				} `json:"__type"`
+			}
+
+			err := c.Post(`{ __type(name: "Animal") { possibleTypes { name } } }`, &resp)
+			require.NoError(t, err)
+
+			names := make([]string, len(resp.Type.PossibleTypes))
+			for i, pt := range resp.Type.PossibleTypes {
+				names[i] = pt.Name
+			}
+			require.Contains(t, names, "Dog")
+			require.Contains(t, names, "Cat")
+			// Horse implements Animal transitively via Mammalian
+			require.Contains(t, names, "Horse")
+		})
+
 		t.Run("deprecated directive on field arguments", func(t *testing.T) {
 			var resp struct {
 				Type struct {

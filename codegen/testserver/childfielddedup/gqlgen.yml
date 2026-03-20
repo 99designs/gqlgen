@@ -1,0 +1,25 @@
+schema:
+  - "*.graphql"
+skip_validation: true
+use_function_syntax_for_execution_context: true
+exec:
+  layout: follow-schema
+  dir: .
+  package: childfielddedup
+model:
+  filename: models-gen.go
+  package: childfielddedup
+resolver:
+  layout: follow-schema
+  dir: .
+  package: childfielddedup
+  type: Resolver
+omit_complexity: true
+
+models:
+  Invoice:
+    fields:
+      createdBy:
+        resolver: true
+      approvedBy:
+        resolver: true

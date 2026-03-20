@@ -86,6 +86,16 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 	{{- end }}
 }
 
+{{- /* Leaf fields without args: use newLeafFieldContext helper (saves ~8 lines per field) */ -}}
+{{- if and (not $field.Args) (not $field.TypeReference.Definition.Fields) }}
+{{ if $useFunctionSyntaxForExecutionContext -}}
+func {{ $field.FieldContextFunc }}(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+{{- else -}}
+func (ec *executionContext) {{ $field.FieldContextFunc }}(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+{{- end }}
+	return newLeafFieldContext({{quote $field.Object.Name}}, field, {{or $field.IsMethod $field.IsResolver}}, {{ $field.IsResolver }}, errors.New("field of type {{ $field.TypeReference.Definition.Name }} does not have child fields"))
+}
+{{- else }}
 {{ if $useFunctionSyntaxForExecutionContext -}}
 func {{ $field.FieldContextFunc }}({{ if not $field.Args }}_{{ else }}ctx{{ end }} context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 {{- else -}}
@@ -102,17 +112,11 @@ func (ec *executionContext) {{ $field.FieldContextFunc }}({{ if not $field.Args 
 			{{- else if ne $field.TypeReference.Definition.Kind "OBJECT" }}
 				return nil, errors.New("FieldContext.Child cannot be called on type {{ $field.TypeReference.Definition.Kind }}")
 			{{- else }}
-				switch field.Name {
-					{{- range $f := $field.TypeReference.Definition.Fields }}
-						case "{{ $f.Name }}":
-							{{ if $useFunctionSyntaxForExecutionContext -}}
-							return {{ $field.ChildFieldContextFunc $f.Name }}(ctx, ec, field)
-							{{- else -}}
-							return ec.{{ $field.ChildFieldContextFunc $f.Name }}(ctx, field)
-							{{- end }}
-					{{- end }}
-				}
-				return nil, fmt.Errorf("no field named %q was found under type {{ $field.TypeReference.Definition.Name }}", field.Name)
+				{{ if $useFunctionSyntaxForExecutionContext -}}
+				return childFields_{{ $field.ChildFieldContextTypeName }}(ctx, ec, field)
+				{{- else -}}
+				return ec.childFields_{{ $field.ChildFieldContextTypeName }}(ctx, field)
+				{{- end }}
 			{{- end }}
 		},
 	}
@@ -137,6 +141,7 @@ func (ec *executionContext) {{ $field.FieldContextFunc }}({{ if not $field.Args 
 	{{- end }}
 	return fc, nil
 }
+{{- end }}
 
 {{- if and $field.IsBatch (not $object.Root) }}
 func (ec *executionContext) resolveBatch_{{$object.Name}}_{{$field.Name}}(ctx context.Context, field graphql.CollectedField, obj {{$object.Reference | ref}}) (any, error) {

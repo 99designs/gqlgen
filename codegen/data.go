@@ -63,6 +63,46 @@ func (d *Data) HasBatchResolverFields() bool {
 	return false
 }
 
+// ChildFieldType represents a unique object type referenced as a return type
+// from fields across all objects. Used to generate shared childFields_*
+// functions that deduplicate the repeated switch statements in fieldContext_*.
+type ChildFieldType struct {
+	TypeName   string
+	Definition *ast.Definition
+}
+
+// UniqueChildFieldTypes collects all unique OBJECT types that appear as return
+// types from fields. Each type appears once, enabling generation of a shared
+// childFields_* lookup function instead of inlining the switch in every
+// fieldContext_* function.
+func (d *Data) UniqueChildFieldTypes() []*ChildFieldType {
+	seen := map[string]bool{}
+	var result []*ChildFieldType
+	for _, obj := range d.Objects {
+		for _, field := range obj.Fields {
+			if field.TypeReference == nil || field.TypeReference.Definition == nil {
+				continue
+			}
+			def := field.TypeReference.Definition
+			if def.Kind != ast.Object || len(def.Fields) == 0 {
+				continue
+			}
+			if seen[def.Name] {
+				continue
+			}
+			seen[def.Name] = true
+			result = append(result, &ChildFieldType{
+				TypeName:   def.Name,
+				Definition: def,
+			})
+		}
+	}
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].TypeName < result[j].TypeName
+	})
+	return result
+}
+
 // AugmentedSource contains extra information about graphql schema files which is not known directly
 // from the Config.Sources data
 type AugmentedSource struct {

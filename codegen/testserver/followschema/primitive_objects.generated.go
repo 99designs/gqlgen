@@ -53,18 +53,8 @@ func (ec *executionContext) _Primitive_value(ctx context.Context, field graphql.
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Primitive_value(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Primitive",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("Primitive", field, true, true, errors.New("field of type Int does not have child fields"))
 }
 
 func (ec *executionContext) _Primitive_squared(ctx context.Context, field graphql.CollectedField, obj *Primitive) (ret graphql.Marshaler) {
@@ -84,18 +74,8 @@ func (ec *executionContext) _Primitive_squared(ctx context.Context, field graphq
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Primitive_squared(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Primitive",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("Primitive", field, true, false, errors.New("field of type Int does not have child fields"))
 }
 
 func (ec *executionContext) _PrimitiveString_value(ctx context.Context, field graphql.CollectedField, obj *PrimitiveString) (ret graphql.Marshaler) {
@@ -115,18 +95,8 @@ func (ec *executionContext) _PrimitiveString_value(ctx context.Context, field gr
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_PrimitiveString_value(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PrimitiveString",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("PrimitiveString", field, true, true, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _PrimitiveString_doubled(ctx context.Context, field graphql.CollectedField, obj *PrimitiveString) (ret graphql.Marshaler) {
@@ -146,18 +116,8 @@ func (ec *executionContext) _PrimitiveString_doubled(ctx context.Context, field 
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_PrimitiveString_doubled(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PrimitiveString",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("PrimitiveString", field, true, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _PrimitiveString_len(ctx context.Context, field graphql.CollectedField, obj *PrimitiveString) (ret graphql.Marshaler) {
@@ -177,18 +137,8 @@ func (ec *executionContext) _PrimitiveString_len(ctx context.Context, field grap
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_PrimitiveString_len(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PrimitiveString",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("PrimitiveString", field, true, true, errors.New("field of type Int does not have child fields"))
 }
 
 // endregion **************************** field.gotpl *****************************

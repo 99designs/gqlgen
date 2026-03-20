@@ -44,18 +44,8 @@ func (ec *executionContext) _AIt_id(ctx context.Context, field graphql.Collected
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_AIt_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "AIt",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("AIt", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
 func (ec *executionContext) _AbIt_id(ctx context.Context, field graphql.CollectedField, obj *AbIt) (ret graphql.Marshaler) {
@@ -75,18 +65,8 @@ func (ec *executionContext) _AbIt_id(ctx context.Context, field graphql.Collecte
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_AbIt_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "AbIt",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("AbIt", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
 func (ec *executionContext) _XXIt_id(ctx context.Context, field graphql.CollectedField, obj *XXIt) (ret graphql.Marshaler) {
@@ -106,18 +86,8 @@ func (ec *executionContext) _XXIt_id(ctx context.Context, field graphql.Collecte
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_XXIt_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "XXIt",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("XXIt", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
 func (ec *executionContext) _XxIt_id(ctx context.Context, field graphql.CollectedField, obj *XxIt) (ret graphql.Marshaler) {
@@ -137,18 +107,8 @@ func (ec *executionContext) _XxIt_id(ctx context.Context, field graphql.Collecte
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_XxIt_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "XxIt",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("XxIt", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
 func (ec *executionContext) _asdfIt_id(ctx context.Context, field graphql.CollectedField, obj *AsdfIt) (ret graphql.Marshaler) {
@@ -168,18 +128,8 @@ func (ec *executionContext) _asdfIt_id(ctx context.Context, field graphql.Collec
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_asdfIt_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "asdfIt",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("asdfIt", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
 func (ec *executionContext) _iIt_id(ctx context.Context, field graphql.CollectedField, obj *IIt) (ret graphql.Marshaler) {
@@ -199,18 +149,8 @@ func (ec *executionContext) _iIt_id(ctx context.Context, field graphql.Collected
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_iIt_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "iIt",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("iIt", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
 // endregion **************************** field.gotpl *****************************

@@ -45,18 +45,8 @@ func (ec *executionContext) _MapNested_value(ctx context.Context, field graphql.
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_MapNested_value(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "MapNested",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type CustomScalar does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("MapNested", field, false, false, errors.New("field of type CustomScalar does not have child fields"))
 }
 
 func (ec *executionContext) _MapStringInterfaceType_a(ctx context.Context, field graphql.CollectedField, obj map[string]any) (ret graphql.Marshaler) {
@@ -85,18 +75,8 @@ func (ec *executionContext) _MapStringInterfaceType_a(ctx context.Context, field
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_MapStringInterfaceType_a(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "MapStringInterfaceType",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("MapStringInterfaceType", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _MapStringInterfaceType_b(ctx context.Context, field graphql.CollectedField, obj map[string]any) (ret graphql.Marshaler) {
@@ -125,18 +105,8 @@ func (ec *executionContext) _MapStringInterfaceType_b(ctx context.Context, field
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_MapStringInterfaceType_b(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "MapStringInterfaceType",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("MapStringInterfaceType", field, false, false, errors.New("field of type Int does not have child fields"))
 }
 
 func (ec *executionContext) _MapStringInterfaceType_c(ctx context.Context, field graphql.CollectedField, obj map[string]any) (ret graphql.Marshaler) {
@@ -165,18 +135,8 @@ func (ec *executionContext) _MapStringInterfaceType_c(ctx context.Context, field
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_MapStringInterfaceType_c(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "MapStringInterfaceType",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type CustomScalar does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("MapStringInterfaceType", field, false, false, errors.New("field of type CustomScalar does not have child fields"))
 }
 
 func (ec *executionContext) _MapStringInterfaceType_nested(ctx context.Context, field graphql.CollectedField, obj map[string]any) (ret graphql.Marshaler) {
@@ -205,7 +165,6 @@ func (ec *executionContext) _MapStringInterfaceType_nested(ctx context.Context, 
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_MapStringInterfaceType_nested(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "MapStringInterfaceType",
@@ -213,11 +172,7 @@ func (ec *executionContext) fieldContext_MapStringInterfaceType_nested(_ context
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "value":
-				return ec.fieldContext_MapNested_value(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type MapNested", field.Name)
+			return ec.childFields_MapNested(ctx, field)
 		},
 	}
 	return fc, nil

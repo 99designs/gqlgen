@@ -796,6 +796,297 @@ extend type Query {
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
+// newLeafFieldContext creates a FieldContext for fields that have no child fields
+// (scalars, enums). This replaces the per-field boilerplate that was previously
+// generated inline for every scalar field on every type.
+func newLeafFieldContext(objectName string, field graphql.CollectedField, isMethod, isResolver bool, childErr error) (*graphql.FieldContext, error) {
+	return &graphql.FieldContext{
+		Object:     objectName,
+		Field:      field,
+		IsMethod:   isMethod,
+		IsResolver: isResolver,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, childErr
+		},
+	}, nil
+}
+
+// childFields_* functions provide shared child field context lookups.
+// Each function is generated once per unique object type, deduplicating the
+// switch statements that were previously inlined in every fieldContext_* function.
+
+func childFields_Hello(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "name":
+		return fieldContext_Hello_name(ctx, ec, field)
+	case "secondary":
+		return fieldContext_Hello_secondary(ctx, ec, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type Hello", field.Name)
+}
+
+func childFields_HelloMultiSingleKeys(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "key1":
+		return fieldContext_HelloMultiSingleKeys_key1(ctx, ec, field)
+	case "key2":
+		return fieldContext_HelloMultiSingleKeys_key2(ctx, ec, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type HelloMultiSingleKeys", field.Name)
+}
+
+func childFields_HelloWithErrors(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "name":
+		return fieldContext_HelloWithErrors_name(ctx, ec, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type HelloWithErrors", field.Name)
+}
+
+func childFields_MultiHello(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "name":
+		return fieldContext_MultiHello_name(ctx, ec, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type MultiHello", field.Name)
+}
+
+func childFields_MultiHelloMultipleRequires(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "name":
+		return fieldContext_MultiHelloMultipleRequires_name(ctx, ec, field)
+	case "key1":
+		return fieldContext_MultiHelloMultipleRequires_key1(ctx, ec, field)
+	case "key2":
+		return fieldContext_MultiHelloMultipleRequires_key2(ctx, ec, field)
+	case "key3":
+		return fieldContext_MultiHelloMultipleRequires_key3(ctx, ec, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type MultiHelloMultipleRequires", field.Name)
+}
+
+func childFields_MultiHelloRequires(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "name":
+		return fieldContext_MultiHelloRequires_name(ctx, ec, field)
+	case "key1":
+		return fieldContext_MultiHelloRequires_key1(ctx, ec, field)
+	case "key2":
+		return fieldContext_MultiHelloRequires_key2(ctx, ec, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type MultiHelloRequires", field.Name)
+}
+
+func childFields_MultiHelloWithError(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "name":
+		return fieldContext_MultiHelloWithError_name(ctx, ec, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type MultiHelloWithError", field.Name)
+}
+
+func childFields_MultiPlanetRequiresNested(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "name":
+		return fieldContext_MultiPlanetRequiresNested_name(ctx, ec, field)
+	case "world":
+		return fieldContext_MultiPlanetRequiresNested_world(ctx, ec, field)
+	case "size":
+		return fieldContext_MultiPlanetRequiresNested_size(ctx, ec, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type MultiPlanetRequiresNested", field.Name)
+}
+
+func childFields_PlanetMultipleRequires(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "name":
+		return fieldContext_PlanetMultipleRequires_name(ctx, ec, field)
+	case "diameter":
+		return fieldContext_PlanetMultipleRequires_diameter(ctx, ec, field)
+	case "density":
+		return fieldContext_PlanetMultipleRequires_density(ctx, ec, field)
+	case "weight":
+		return fieldContext_PlanetMultipleRequires_weight(ctx, ec, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type PlanetMultipleRequires", field.Name)
+}
+
+func childFields_PlanetRequires(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "name":
+		return fieldContext_PlanetRequires_name(ctx, ec, field)
+	case "size":
+		return fieldContext_PlanetRequires_size(ctx, ec, field)
+	case "diameter":
+		return fieldContext_PlanetRequires_diameter(ctx, ec, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type PlanetRequires", field.Name)
+}
+
+func childFields_PlanetRequiresNested(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "name":
+		return fieldContext_PlanetRequiresNested_name(ctx, ec, field)
+	case "world":
+		return fieldContext_PlanetRequiresNested_world(ctx, ec, field)
+	case "size":
+		return fieldContext_PlanetRequiresNested_size(ctx, ec, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type PlanetRequiresNested", field.Name)
+}
+
+func childFields_World(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "foo":
+		return fieldContext_World_foo(ctx, ec, field)
+	case "bar":
+		return fieldContext_World_bar(ctx, ec, field)
+	case "hello":
+		return fieldContext_World_hello(ctx, ec, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type World", field.Name)
+}
+
+func childFields_WorldName(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "name":
+		return fieldContext_WorldName_name(ctx, ec, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type WorldName", field.Name)
+}
+
+func childFields_WorldWithMultipleKeys(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "foo":
+		return fieldContext_WorldWithMultipleKeys_foo(ctx, ec, field)
+	case "bar":
+		return fieldContext_WorldWithMultipleKeys_bar(ctx, ec, field)
+	case "hello":
+		return fieldContext_WorldWithMultipleKeys_hello(ctx, ec, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type WorldWithMultipleKeys", field.Name)
+}
+
+func childFields__Service(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "sdl":
+		return fieldContext__Service_sdl(ctx, ec, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type _Service", field.Name)
+}
+
+func childFields___Directive(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "name":
+		return fieldContext___Directive_name(ctx, ec, field)
+	case "description":
+		return fieldContext___Directive_description(ctx, ec, field)
+	case "isRepeatable":
+		return fieldContext___Directive_isRepeatable(ctx, ec, field)
+	case "locations":
+		return fieldContext___Directive_locations(ctx, ec, field)
+	case "args":
+		return fieldContext___Directive_args(ctx, ec, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type __Directive", field.Name)
+}
+
+func childFields___EnumValue(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "name":
+		return fieldContext___EnumValue_name(ctx, ec, field)
+	case "description":
+		return fieldContext___EnumValue_description(ctx, ec, field)
+	case "isDeprecated":
+		return fieldContext___EnumValue_isDeprecated(ctx, ec, field)
+	case "deprecationReason":
+		return fieldContext___EnumValue_deprecationReason(ctx, ec, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type __EnumValue", field.Name)
+}
+
+func childFields___Field(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "name":
+		return fieldContext___Field_name(ctx, ec, field)
+	case "description":
+		return fieldContext___Field_description(ctx, ec, field)
+	case "args":
+		return fieldContext___Field_args(ctx, ec, field)
+	case "type":
+		return fieldContext___Field_type(ctx, ec, field)
+	case "isDeprecated":
+		return fieldContext___Field_isDeprecated(ctx, ec, field)
+	case "deprecationReason":
+		return fieldContext___Field_deprecationReason(ctx, ec, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type __Field", field.Name)
+}
+
+func childFields___InputValue(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "name":
+		return fieldContext___InputValue_name(ctx, ec, field)
+	case "description":
+		return fieldContext___InputValue_description(ctx, ec, field)
+	case "type":
+		return fieldContext___InputValue_type(ctx, ec, field)
+	case "defaultValue":
+		return fieldContext___InputValue_defaultValue(ctx, ec, field)
+	case "isDeprecated":
+		return fieldContext___InputValue_isDeprecated(ctx, ec, field)
+	case "deprecationReason":
+		return fieldContext___InputValue_deprecationReason(ctx, ec, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type __InputValue", field.Name)
+}
+
+func childFields___Schema(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "description":
+		return fieldContext___Schema_description(ctx, ec, field)
+	case "types":
+		return fieldContext___Schema_types(ctx, ec, field)
+	case "queryType":
+		return fieldContext___Schema_queryType(ctx, ec, field)
+	case "mutationType":
+		return fieldContext___Schema_mutationType(ctx, ec, field)
+	case "subscriptionType":
+		return fieldContext___Schema_subscriptionType(ctx, ec, field)
+	case "directives":
+		return fieldContext___Schema_directives(ctx, ec, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
+}
+
+func childFields___Type(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "kind":
+		return fieldContext___Type_kind(ctx, ec, field)
+	case "name":
+		return fieldContext___Type_name(ctx, ec, field)
+	case "description":
+		return fieldContext___Type_description(ctx, ec, field)
+	case "specifiedByURL":
+		return fieldContext___Type_specifiedByURL(ctx, ec, field)
+	case "fields":
+		return fieldContext___Type_fields(ctx, ec, field)
+	case "interfaces":
+		return fieldContext___Type_interfaces(ctx, ec, field)
+	case "possibleTypes":
+		return fieldContext___Type_possibleTypes(ctx, ec, field)
+	case "enumValues":
+		return fieldContext___Type_enumValues(ctx, ec, field)
+	case "inputFields":
+		return fieldContext___Type_inputFields(ctx, ec, field)
+	case "ofType":
+		return fieldContext___Type_ofType(ctx, ec, field)
+	case "isOneOf":
+		return fieldContext___Type_isOneOf(ctx, ec, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
+}
+
 // endregion ************************** generated!.gotpl **************************
 
 // region    ***************************** args.gotpl *****************************
@@ -1074,7 +1365,6 @@ func _Entity_findHelloByName(ctx context.Context, ec *executionContext, field gr
 		true,
 	)
 }
-
 func fieldContext_Entity_findHelloByName(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Entity",
@@ -1082,13 +1372,7 @@ func fieldContext_Entity_findHelloByName(ctx context.Context, ec *executionConte
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return fieldContext_Hello_name(ctx, ec, field)
-			case "secondary":
-				return fieldContext_Hello_secondary(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Hello", field.Name)
+			return childFields_Hello(ctx, ec, field)
 		},
 	}
 	defer func() {
@@ -1125,7 +1409,6 @@ func _Entity_findHelloMultiSingleKeysByKey1AndKey2(ctx context.Context, ec *exec
 		true,
 	)
 }
-
 func fieldContext_Entity_findHelloMultiSingleKeysByKey1AndKey2(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Entity",
@@ -1133,13 +1416,7 @@ func fieldContext_Entity_findHelloMultiSingleKeysByKey1AndKey2(ctx context.Conte
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "key1":
-				return fieldContext_HelloMultiSingleKeys_key1(ctx, ec, field)
-			case "key2":
-				return fieldContext_HelloMultiSingleKeys_key2(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type HelloMultiSingleKeys", field.Name)
+			return childFields_HelloMultiSingleKeys(ctx, ec, field)
 		},
 	}
 	defer func() {
@@ -1176,7 +1453,6 @@ func _Entity_findHelloWithErrorsByName(ctx context.Context, ec *executionContext
 		true,
 	)
 }
-
 func fieldContext_Entity_findHelloWithErrorsByName(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Entity",
@@ -1184,11 +1460,7 @@ func fieldContext_Entity_findHelloWithErrorsByName(ctx context.Context, ec *exec
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return fieldContext_HelloWithErrors_name(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type HelloWithErrors", field.Name)
+			return childFields_HelloWithErrors(ctx, ec, field)
 		},
 	}
 	defer func() {
@@ -1225,7 +1497,6 @@ func _Entity_findManyMultiHelloByNames(ctx context.Context, ec *executionContext
 		false,
 	)
 }
-
 func fieldContext_Entity_findManyMultiHelloByNames(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Entity",
@@ -1233,11 +1504,7 @@ func fieldContext_Entity_findManyMultiHelloByNames(ctx context.Context, ec *exec
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return fieldContext_MultiHello_name(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type MultiHello", field.Name)
+			return childFields_MultiHello(ctx, ec, field)
 		},
 	}
 	defer func() {
@@ -1274,7 +1541,6 @@ func _Entity_findManyMultiHelloMultipleRequiresByNames(ctx context.Context, ec *
 		false,
 	)
 }
-
 func fieldContext_Entity_findManyMultiHelloMultipleRequiresByNames(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Entity",
@@ -1282,17 +1548,7 @@ func fieldContext_Entity_findManyMultiHelloMultipleRequiresByNames(ctx context.C
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return fieldContext_MultiHelloMultipleRequires_name(ctx, ec, field)
-			case "key1":
-				return fieldContext_MultiHelloMultipleRequires_key1(ctx, ec, field)
-			case "key2":
-				return fieldContext_MultiHelloMultipleRequires_key2(ctx, ec, field)
-			case "key3":
-				return fieldContext_MultiHelloMultipleRequires_key3(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type MultiHelloMultipleRequires", field.Name)
+			return childFields_MultiHelloMultipleRequires(ctx, ec, field)
 		},
 	}
 	defer func() {
@@ -1329,7 +1585,6 @@ func _Entity_findManyMultiHelloRequiresByNames(ctx context.Context, ec *executio
 		false,
 	)
 }
-
 func fieldContext_Entity_findManyMultiHelloRequiresByNames(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Entity",
@@ -1337,15 +1592,7 @@ func fieldContext_Entity_findManyMultiHelloRequiresByNames(ctx context.Context, 
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return fieldContext_MultiHelloRequires_name(ctx, ec, field)
-			case "key1":
-				return fieldContext_MultiHelloRequires_key1(ctx, ec, field)
-			case "key2":
-				return fieldContext_MultiHelloRequires_key2(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type MultiHelloRequires", field.Name)
+			return childFields_MultiHelloRequires(ctx, ec, field)
 		},
 	}
 	defer func() {
@@ -1382,7 +1629,6 @@ func _Entity_findManyMultiHelloWithErrorByNames(ctx context.Context, ec *executi
 		false,
 	)
 }
-
 func fieldContext_Entity_findManyMultiHelloWithErrorByNames(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Entity",
@@ -1390,11 +1636,7 @@ func fieldContext_Entity_findManyMultiHelloWithErrorByNames(ctx context.Context,
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return fieldContext_MultiHelloWithError_name(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type MultiHelloWithError", field.Name)
+			return childFields_MultiHelloWithError(ctx, ec, field)
 		},
 	}
 	defer func() {
@@ -1431,7 +1673,6 @@ func _Entity_findManyMultiPlanetRequiresNestedByNames(ctx context.Context, ec *e
 		false,
 	)
 }
-
 func fieldContext_Entity_findManyMultiPlanetRequiresNestedByNames(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Entity",
@@ -1439,15 +1680,7 @@ func fieldContext_Entity_findManyMultiPlanetRequiresNestedByNames(ctx context.Co
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return fieldContext_MultiPlanetRequiresNested_name(ctx, ec, field)
-			case "world":
-				return fieldContext_MultiPlanetRequiresNested_world(ctx, ec, field)
-			case "size":
-				return fieldContext_MultiPlanetRequiresNested_size(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type MultiPlanetRequiresNested", field.Name)
+			return childFields_MultiPlanetRequiresNested(ctx, ec, field)
 		},
 	}
 	defer func() {
@@ -1484,7 +1717,6 @@ func _Entity_findPlanetMultipleRequiresByName(ctx context.Context, ec *execution
 		true,
 	)
 }
-
 func fieldContext_Entity_findPlanetMultipleRequiresByName(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Entity",
@@ -1492,17 +1724,7 @@ func fieldContext_Entity_findPlanetMultipleRequiresByName(ctx context.Context, e
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return fieldContext_PlanetMultipleRequires_name(ctx, ec, field)
-			case "diameter":
-				return fieldContext_PlanetMultipleRequires_diameter(ctx, ec, field)
-			case "density":
-				return fieldContext_PlanetMultipleRequires_density(ctx, ec, field)
-			case "weight":
-				return fieldContext_PlanetMultipleRequires_weight(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PlanetMultipleRequires", field.Name)
+			return childFields_PlanetMultipleRequires(ctx, ec, field)
 		},
 	}
 	defer func() {
@@ -1539,7 +1761,6 @@ func _Entity_findPlanetRequiresByName(ctx context.Context, ec *executionContext,
 		true,
 	)
 }
-
 func fieldContext_Entity_findPlanetRequiresByName(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Entity",
@@ -1547,15 +1768,7 @@ func fieldContext_Entity_findPlanetRequiresByName(ctx context.Context, ec *execu
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return fieldContext_PlanetRequires_name(ctx, ec, field)
-			case "size":
-				return fieldContext_PlanetRequires_size(ctx, ec, field)
-			case "diameter":
-				return fieldContext_PlanetRequires_diameter(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PlanetRequires", field.Name)
+			return childFields_PlanetRequires(ctx, ec, field)
 		},
 	}
 	defer func() {
@@ -1592,7 +1805,6 @@ func _Entity_findPlanetRequiresNestedByName(ctx context.Context, ec *executionCo
 		true,
 	)
 }
-
 func fieldContext_Entity_findPlanetRequiresNestedByName(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Entity",
@@ -1600,15 +1812,7 @@ func fieldContext_Entity_findPlanetRequiresNestedByName(ctx context.Context, ec 
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return fieldContext_PlanetRequiresNested_name(ctx, ec, field)
-			case "world":
-				return fieldContext_PlanetRequiresNested_world(ctx, ec, field)
-			case "size":
-				return fieldContext_PlanetRequiresNested_size(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PlanetRequiresNested", field.Name)
+			return childFields_PlanetRequiresNested(ctx, ec, field)
 		},
 	}
 	defer func() {
@@ -1645,7 +1849,6 @@ func _Entity_findWorldByHelloNameAndFoo(ctx context.Context, ec *executionContex
 		true,
 	)
 }
-
 func fieldContext_Entity_findWorldByHelloNameAndFoo(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Entity",
@@ -1653,15 +1856,7 @@ func fieldContext_Entity_findWorldByHelloNameAndFoo(ctx context.Context, ec *exe
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "foo":
-				return fieldContext_World_foo(ctx, ec, field)
-			case "bar":
-				return fieldContext_World_bar(ctx, ec, field)
-			case "hello":
-				return fieldContext_World_hello(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type World", field.Name)
+			return childFields_World(ctx, ec, field)
 		},
 	}
 	defer func() {
@@ -1698,7 +1893,6 @@ func _Entity_findWorldNameByName(ctx context.Context, ec *executionContext, fiel
 		true,
 	)
 }
-
 func fieldContext_Entity_findWorldNameByName(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Entity",
@@ -1706,11 +1900,7 @@ func fieldContext_Entity_findWorldNameByName(ctx context.Context, ec *executionC
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return fieldContext_WorldName_name(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type WorldName", field.Name)
+			return childFields_WorldName(ctx, ec, field)
 		},
 	}
 	defer func() {
@@ -1747,7 +1937,6 @@ func _Entity_findWorldWithMultipleKeysByHelloNameAndFoo(ctx context.Context, ec 
 		true,
 	)
 }
-
 func fieldContext_Entity_findWorldWithMultipleKeysByHelloNameAndFoo(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Entity",
@@ -1755,15 +1944,7 @@ func fieldContext_Entity_findWorldWithMultipleKeysByHelloNameAndFoo(ctx context.
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "foo":
-				return fieldContext_WorldWithMultipleKeys_foo(ctx, ec, field)
-			case "bar":
-				return fieldContext_WorldWithMultipleKeys_bar(ctx, ec, field)
-			case "hello":
-				return fieldContext_WorldWithMultipleKeys_hello(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type WorldWithMultipleKeys", field.Name)
+			return childFields_WorldWithMultipleKeys(ctx, ec, field)
 		},
 	}
 	defer func() {
@@ -1800,7 +1981,6 @@ func _Entity_findWorldWithMultipleKeysByBar(ctx context.Context, ec *executionCo
 		true,
 	)
 }
-
 func fieldContext_Entity_findWorldWithMultipleKeysByBar(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Entity",
@@ -1808,15 +1988,7 @@ func fieldContext_Entity_findWorldWithMultipleKeysByBar(ctx context.Context, ec 
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "foo":
-				return fieldContext_WorldWithMultipleKeys_foo(ctx, ec, field)
-			case "bar":
-				return fieldContext_WorldWithMultipleKeys_bar(ctx, ec, field)
-			case "hello":
-				return fieldContext_WorldWithMultipleKeys_hello(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type WorldWithMultipleKeys", field.Name)
+			return childFields_WorldWithMultipleKeys(ctx, ec, field)
 		},
 	}
 	defer func() {
@@ -1852,18 +2024,8 @@ func _Hello_name(ctx context.Context, ec *executionContext, field graphql.Collec
 		true,
 	)
 }
-
 func fieldContext_Hello_name(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Hello",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("Hello", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _Hello_secondary(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.Hello) (ret graphql.Marshaler) {
@@ -1885,18 +2047,8 @@ func _Hello_secondary(ctx context.Context, ec *executionContext, field graphql.C
 		true,
 	)
 }
-
 func fieldContext_Hello_secondary(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Hello",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("Hello", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _HelloMultiSingleKeys_key1(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.HelloMultiSingleKeys) (ret graphql.Marshaler) {
@@ -1918,18 +2070,8 @@ func _HelloMultiSingleKeys_key1(ctx context.Context, ec *executionContext, field
 		true,
 	)
 }
-
 func fieldContext_HelloMultiSingleKeys_key1(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "HelloMultiSingleKeys",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("HelloMultiSingleKeys", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _HelloMultiSingleKeys_key2(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.HelloMultiSingleKeys) (ret graphql.Marshaler) {
@@ -1951,18 +2093,8 @@ func _HelloMultiSingleKeys_key2(ctx context.Context, ec *executionContext, field
 		true,
 	)
 }
-
 func fieldContext_HelloMultiSingleKeys_key2(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "HelloMultiSingleKeys",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("HelloMultiSingleKeys", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _HelloWithErrors_name(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.HelloWithErrors) (ret graphql.Marshaler) {
@@ -1984,18 +2116,8 @@ func _HelloWithErrors_name(ctx context.Context, ec *executionContext, field grap
 		true,
 	)
 }
-
 func fieldContext_HelloWithErrors_name(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "HelloWithErrors",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("HelloWithErrors", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _MultiHello_name(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.MultiHello) (ret graphql.Marshaler) {
@@ -2017,18 +2139,8 @@ func _MultiHello_name(ctx context.Context, ec *executionContext, field graphql.C
 		true,
 	)
 }
-
 func fieldContext_MultiHello_name(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "MultiHello",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("MultiHello", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _MultiHelloMultipleRequires_name(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.MultiHelloMultipleRequires) (ret graphql.Marshaler) {
@@ -2050,18 +2162,8 @@ func _MultiHelloMultipleRequires_name(ctx context.Context, ec *executionContext,
 		true,
 	)
 }
-
 func fieldContext_MultiHelloMultipleRequires_name(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "MultiHelloMultipleRequires",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("MultiHelloMultipleRequires", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _MultiHelloMultipleRequires_key1(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.MultiHelloMultipleRequires) (ret graphql.Marshaler) {
@@ -2083,18 +2185,8 @@ func _MultiHelloMultipleRequires_key1(ctx context.Context, ec *executionContext,
 		true,
 	)
 }
-
 func fieldContext_MultiHelloMultipleRequires_key1(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "MultiHelloMultipleRequires",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("MultiHelloMultipleRequires", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _MultiHelloMultipleRequires_key2(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.MultiHelloMultipleRequires) (ret graphql.Marshaler) {
@@ -2116,18 +2208,8 @@ func _MultiHelloMultipleRequires_key2(ctx context.Context, ec *executionContext,
 		true,
 	)
 }
-
 func fieldContext_MultiHelloMultipleRequires_key2(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "MultiHelloMultipleRequires",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("MultiHelloMultipleRequires", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _MultiHelloMultipleRequires_key3(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.MultiHelloMultipleRequires) (ret graphql.Marshaler) {
@@ -2149,18 +2231,8 @@ func _MultiHelloMultipleRequires_key3(ctx context.Context, ec *executionContext,
 		true,
 	)
 }
-
 func fieldContext_MultiHelloMultipleRequires_key3(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "MultiHelloMultipleRequires",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("MultiHelloMultipleRequires", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _MultiHelloRequires_name(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.MultiHelloRequires) (ret graphql.Marshaler) {
@@ -2182,18 +2254,8 @@ func _MultiHelloRequires_name(ctx context.Context, ec *executionContext, field g
 		true,
 	)
 }
-
 func fieldContext_MultiHelloRequires_name(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "MultiHelloRequires",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("MultiHelloRequires", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _MultiHelloRequires_key1(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.MultiHelloRequires) (ret graphql.Marshaler) {
@@ -2215,18 +2277,8 @@ func _MultiHelloRequires_key1(ctx context.Context, ec *executionContext, field g
 		true,
 	)
 }
-
 func fieldContext_MultiHelloRequires_key1(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "MultiHelloRequires",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("MultiHelloRequires", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _MultiHelloRequires_key2(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.MultiHelloRequires) (ret graphql.Marshaler) {
@@ -2248,18 +2300,8 @@ func _MultiHelloRequires_key2(ctx context.Context, ec *executionContext, field g
 		true,
 	)
 }
-
 func fieldContext_MultiHelloRequires_key2(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "MultiHelloRequires",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("MultiHelloRequires", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _MultiHelloWithError_name(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.MultiHelloWithError) (ret graphql.Marshaler) {
@@ -2281,18 +2323,8 @@ func _MultiHelloWithError_name(ctx context.Context, ec *executionContext, field 
 		true,
 	)
 }
-
 func fieldContext_MultiHelloWithError_name(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "MultiHelloWithError",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("MultiHelloWithError", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _MultiPlanetRequiresNested_name(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.MultiPlanetRequiresNested) (ret graphql.Marshaler) {
@@ -2314,18 +2346,8 @@ func _MultiPlanetRequiresNested_name(ctx context.Context, ec *executionContext, 
 		true,
 	)
 }
-
 func fieldContext_MultiPlanetRequiresNested_name(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "MultiPlanetRequiresNested",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("MultiPlanetRequiresNested", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _MultiPlanetRequiresNested_world(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.MultiPlanetRequiresNested) (ret graphql.Marshaler) {
@@ -2347,7 +2369,6 @@ func _MultiPlanetRequiresNested_world(ctx context.Context, ec *executionContext,
 		true,
 	)
 }
-
 func fieldContext_MultiPlanetRequiresNested_world(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "MultiPlanetRequiresNested",
@@ -2355,15 +2376,7 @@ func fieldContext_MultiPlanetRequiresNested_world(_ context.Context, ec *executi
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "foo":
-				return fieldContext_World_foo(ctx, ec, field)
-			case "bar":
-				return fieldContext_World_bar(ctx, ec, field)
-			case "hello":
-				return fieldContext_World_hello(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type World", field.Name)
+			return childFields_World(ctx, ec, field)
 		},
 	}
 	return fc, nil
@@ -2388,18 +2401,8 @@ func _MultiPlanetRequiresNested_size(ctx context.Context, ec *executionContext, 
 		true,
 	)
 }
-
 func fieldContext_MultiPlanetRequiresNested_size(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "MultiPlanetRequiresNested",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("MultiPlanetRequiresNested", field, false, false, errors.New("field of type Int does not have child fields"))
 }
 
 func _PlanetMultipleRequires_name(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.PlanetMultipleRequires) (ret graphql.Marshaler) {
@@ -2421,18 +2424,8 @@ func _PlanetMultipleRequires_name(ctx context.Context, ec *executionContext, fie
 		true,
 	)
 }
-
 func fieldContext_PlanetMultipleRequires_name(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PlanetMultipleRequires",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("PlanetMultipleRequires", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _PlanetMultipleRequires_diameter(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.PlanetMultipleRequires) (ret graphql.Marshaler) {
@@ -2454,18 +2447,8 @@ func _PlanetMultipleRequires_diameter(ctx context.Context, ec *executionContext,
 		true,
 	)
 }
-
 func fieldContext_PlanetMultipleRequires_diameter(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PlanetMultipleRequires",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("PlanetMultipleRequires", field, false, false, errors.New("field of type Int does not have child fields"))
 }
 
 func _PlanetMultipleRequires_density(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.PlanetMultipleRequires) (ret graphql.Marshaler) {
@@ -2487,18 +2470,8 @@ func _PlanetMultipleRequires_density(ctx context.Context, ec *executionContext, 
 		true,
 	)
 }
-
 func fieldContext_PlanetMultipleRequires_density(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PlanetMultipleRequires",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("PlanetMultipleRequires", field, false, false, errors.New("field of type Int does not have child fields"))
 }
 
 func _PlanetMultipleRequires_weight(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.PlanetMultipleRequires) (ret graphql.Marshaler) {
@@ -2520,18 +2493,8 @@ func _PlanetMultipleRequires_weight(ctx context.Context, ec *executionContext, f
 		true,
 	)
 }
-
 func fieldContext_PlanetMultipleRequires_weight(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PlanetMultipleRequires",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("PlanetMultipleRequires", field, false, false, errors.New("field of type Int does not have child fields"))
 }
 
 func _PlanetRequires_name(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.PlanetRequires) (ret graphql.Marshaler) {
@@ -2553,18 +2516,8 @@ func _PlanetRequires_name(ctx context.Context, ec *executionContext, field graph
 		true,
 	)
 }
-
 func fieldContext_PlanetRequires_name(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PlanetRequires",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("PlanetRequires", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _PlanetRequires_size(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.PlanetRequires) (ret graphql.Marshaler) {
@@ -2586,18 +2539,8 @@ func _PlanetRequires_size(ctx context.Context, ec *executionContext, field graph
 		true,
 	)
 }
-
 func fieldContext_PlanetRequires_size(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PlanetRequires",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("PlanetRequires", field, false, false, errors.New("field of type Int does not have child fields"))
 }
 
 func _PlanetRequires_diameter(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.PlanetRequires) (ret graphql.Marshaler) {
@@ -2619,18 +2562,8 @@ func _PlanetRequires_diameter(ctx context.Context, ec *executionContext, field g
 		true,
 	)
 }
-
 func fieldContext_PlanetRequires_diameter(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PlanetRequires",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("PlanetRequires", field, false, false, errors.New("field of type Int does not have child fields"))
 }
 
 func _PlanetRequiresNested_name(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.PlanetRequiresNested) (ret graphql.Marshaler) {
@@ -2652,18 +2585,8 @@ func _PlanetRequiresNested_name(ctx context.Context, ec *executionContext, field
 		true,
 	)
 }
-
 func fieldContext_PlanetRequiresNested_name(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PlanetRequiresNested",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("PlanetRequiresNested", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _PlanetRequiresNested_world(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.PlanetRequiresNested) (ret graphql.Marshaler) {
@@ -2685,7 +2608,6 @@ func _PlanetRequiresNested_world(ctx context.Context, ec *executionContext, fiel
 		true,
 	)
 }
-
 func fieldContext_PlanetRequiresNested_world(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "PlanetRequiresNested",
@@ -2693,15 +2615,7 @@ func fieldContext_PlanetRequiresNested_world(_ context.Context, ec *executionCon
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "foo":
-				return fieldContext_World_foo(ctx, ec, field)
-			case "bar":
-				return fieldContext_World_bar(ctx, ec, field)
-			case "hello":
-				return fieldContext_World_hello(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type World", field.Name)
+			return childFields_World(ctx, ec, field)
 		},
 	}
 	return fc, nil
@@ -2726,18 +2640,8 @@ func _PlanetRequiresNested_size(ctx context.Context, ec *executionContext, field
 		true,
 	)
 }
-
 func fieldContext_PlanetRequiresNested_size(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PlanetRequiresNested",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("PlanetRequiresNested", field, false, false, errors.New("field of type Int does not have child fields"))
 }
 
 func _Query__entities(ctx context.Context, ec *executionContext, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2760,7 +2664,6 @@ func _Query__entities(ctx context.Context, ec *executionContext, field graphql.C
 		true,
 	)
 }
-
 func fieldContext_Query__entities(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -2804,7 +2707,6 @@ func _Query__service(ctx context.Context, ec *executionContext, field graphql.Co
 		true,
 	)
 }
-
 func fieldContext_Query__service(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -2812,11 +2714,7 @@ func fieldContext_Query__service(_ context.Context, ec *executionContext, field 
 		IsMethod:   true,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "sdl":
-				return fieldContext__Service_sdl(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type _Service", field.Name)
+			return childFields__Service(ctx, ec, field)
 		},
 	}
 	return fc, nil
@@ -2842,7 +2740,6 @@ func _Query___type(ctx context.Context, ec *executionContext, field graphql.Coll
 		false,
 	)
 }
-
 func fieldContext_Query___type(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -2850,31 +2747,7 @@ func fieldContext_Query___type(ctx context.Context, ec *executionContext, field 
 		IsMethod:   true,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "kind":
-				return fieldContext___Type_kind(ctx, ec, field)
-			case "name":
-				return fieldContext___Type_name(ctx, ec, field)
-			case "description":
-				return fieldContext___Type_description(ctx, ec, field)
-			case "specifiedByURL":
-				return fieldContext___Type_specifiedByURL(ctx, ec, field)
-			case "fields":
-				return fieldContext___Type_fields(ctx, ec, field)
-			case "interfaces":
-				return fieldContext___Type_interfaces(ctx, ec, field)
-			case "possibleTypes":
-				return fieldContext___Type_possibleTypes(ctx, ec, field)
-			case "enumValues":
-				return fieldContext___Type_enumValues(ctx, ec, field)
-			case "inputFields":
-				return fieldContext___Type_inputFields(ctx, ec, field)
-			case "ofType":
-				return fieldContext___Type_ofType(ctx, ec, field)
-			case "isOneOf":
-				return fieldContext___Type_isOneOf(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
+			return childFields___Type(ctx, ec, field)
 		},
 	}
 	defer func() {
@@ -2910,7 +2783,6 @@ func _Query___schema(ctx context.Context, ec *executionContext, field graphql.Co
 		false,
 	)
 }
-
 func fieldContext_Query___schema(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
@@ -2918,21 +2790,7 @@ func fieldContext_Query___schema(_ context.Context, ec *executionContext, field 
 		IsMethod:   true,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "description":
-				return fieldContext___Schema_description(ctx, ec, field)
-			case "types":
-				return fieldContext___Schema_types(ctx, ec, field)
-			case "queryType":
-				return fieldContext___Schema_queryType(ctx, ec, field)
-			case "mutationType":
-				return fieldContext___Schema_mutationType(ctx, ec, field)
-			case "subscriptionType":
-				return fieldContext___Schema_subscriptionType(ctx, ec, field)
-			case "directives":
-				return fieldContext___Schema_directives(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
+			return childFields___Schema(ctx, ec, field)
 		},
 	}
 	return fc, nil
@@ -2957,18 +2815,8 @@ func _World_foo(ctx context.Context, ec *executionContext, field graphql.Collect
 		true,
 	)
 }
-
 func fieldContext_World_foo(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "World",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("World", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _World_bar(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.World) (ret graphql.Marshaler) {
@@ -2990,18 +2838,8 @@ func _World_bar(ctx context.Context, ec *executionContext, field graphql.Collect
 		true,
 	)
 }
-
 func fieldContext_World_bar(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "World",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("World", field, false, false, errors.New("field of type Int does not have child fields"))
 }
 
 func _World_hello(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.World) (ret graphql.Marshaler) {
@@ -3023,7 +2861,6 @@ func _World_hello(ctx context.Context, ec *executionContext, field graphql.Colle
 		false,
 	)
 }
-
 func fieldContext_World_hello(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "World",
@@ -3031,13 +2868,7 @@ func fieldContext_World_hello(_ context.Context, ec *executionContext, field gra
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return fieldContext_Hello_name(ctx, ec, field)
-			case "secondary":
-				return fieldContext_Hello_secondary(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Hello", field.Name)
+			return childFields_Hello(ctx, ec, field)
 		},
 	}
 	return fc, nil
@@ -3062,18 +2893,8 @@ func _WorldName_name(ctx context.Context, ec *executionContext, field graphql.Co
 		true,
 	)
 }
-
 func fieldContext_WorldName_name(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "WorldName",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("WorldName", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _WorldWithMultipleKeys_foo(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.WorldWithMultipleKeys) (ret graphql.Marshaler) {
@@ -3095,18 +2916,8 @@ func _WorldWithMultipleKeys_foo(ctx context.Context, ec *executionContext, field
 		true,
 	)
 }
-
 func fieldContext_WorldWithMultipleKeys_foo(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "WorldWithMultipleKeys",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("WorldWithMultipleKeys", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _WorldWithMultipleKeys_bar(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.WorldWithMultipleKeys) (ret graphql.Marshaler) {
@@ -3128,18 +2939,8 @@ func _WorldWithMultipleKeys_bar(ctx context.Context, ec *executionContext, field
 		true,
 	)
 }
-
 func fieldContext_WorldWithMultipleKeys_bar(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "WorldWithMultipleKeys",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("WorldWithMultipleKeys", field, false, false, errors.New("field of type Int does not have child fields"))
 }
 
 func _WorldWithMultipleKeys_hello(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.WorldWithMultipleKeys) (ret graphql.Marshaler) {
@@ -3161,7 +2962,6 @@ func _WorldWithMultipleKeys_hello(ctx context.Context, ec *executionContext, fie
 		false,
 	)
 }
-
 func fieldContext_WorldWithMultipleKeys_hello(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "WorldWithMultipleKeys",
@@ -3169,13 +2969,7 @@ func fieldContext_WorldWithMultipleKeys_hello(_ context.Context, ec *executionCo
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return fieldContext_Hello_name(ctx, ec, field)
-			case "secondary":
-				return fieldContext_Hello_secondary(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Hello", field.Name)
+			return childFields_Hello(ctx, ec, field)
 		},
 	}
 	return fc, nil
@@ -3200,18 +2994,8 @@ func __Service_sdl(ctx context.Context, ec *executionContext, field graphql.Coll
 		false,
 	)
 }
-
 func fieldContext__Service_sdl(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "_Service",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("_Service", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func ___Directive_name(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -3233,18 +3017,8 @@ func ___Directive_name(ctx context.Context, ec *executionContext, field graphql.
 		true,
 	)
 }
-
 func fieldContext___Directive_name(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__Directive",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("__Directive", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func ___Directive_description(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -3266,18 +3040,8 @@ func ___Directive_description(ctx context.Context, ec *executionContext, field g
 		false,
 	)
 }
-
 func fieldContext___Directive_description(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__Directive",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("__Directive", field, true, false, errors.New("field of type String does not have child fields"))
 }
 
 func ___Directive_isRepeatable(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -3299,18 +3063,8 @@ func ___Directive_isRepeatable(ctx context.Context, ec *executionContext, field 
 		true,
 	)
 }
-
 func fieldContext___Directive_isRepeatable(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__Directive",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("__Directive", field, false, false, errors.New("field of type Boolean does not have child fields"))
 }
 
 func ___Directive_locations(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -3332,18 +3086,8 @@ func ___Directive_locations(ctx context.Context, ec *executionContext, field gra
 		true,
 	)
 }
-
 func fieldContext___Directive_locations(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__Directive",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type __DirectiveLocation does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("__Directive", field, false, false, errors.New("field of type __DirectiveLocation does not have child fields"))
 }
 
 func ___Directive_args(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -3365,7 +3109,6 @@ func ___Directive_args(ctx context.Context, ec *executionContext, field graphql.
 		true,
 	)
 }
-
 func fieldContext___Directive_args(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Directive",
@@ -3373,21 +3116,7 @@ func fieldContext___Directive_args(ctx context.Context, ec *executionContext, fi
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return fieldContext___InputValue_name(ctx, ec, field)
-			case "description":
-				return fieldContext___InputValue_description(ctx, ec, field)
-			case "type":
-				return fieldContext___InputValue_type(ctx, ec, field)
-			case "defaultValue":
-				return fieldContext___InputValue_defaultValue(ctx, ec, field)
-			case "isDeprecated":
-				return fieldContext___InputValue_isDeprecated(ctx, ec, field)
-			case "deprecationReason":
-				return fieldContext___InputValue_deprecationReason(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type __InputValue", field.Name)
+			return childFields___InputValue(ctx, ec, field)
 		},
 	}
 	defer func() {
@@ -3423,18 +3152,8 @@ func ___EnumValue_name(ctx context.Context, ec *executionContext, field graphql.
 		true,
 	)
 }
-
 func fieldContext___EnumValue_name(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__EnumValue",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("__EnumValue", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func ___EnumValue_description(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.EnumValue) (ret graphql.Marshaler) {
@@ -3456,18 +3175,8 @@ func ___EnumValue_description(ctx context.Context, ec *executionContext, field g
 		false,
 	)
 }
-
 func fieldContext___EnumValue_description(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__EnumValue",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("__EnumValue", field, true, false, errors.New("field of type String does not have child fields"))
 }
 
 func ___EnumValue_isDeprecated(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.EnumValue) (ret graphql.Marshaler) {
@@ -3489,18 +3198,8 @@ func ___EnumValue_isDeprecated(ctx context.Context, ec *executionContext, field 
 		true,
 	)
 }
-
 func fieldContext___EnumValue_isDeprecated(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__EnumValue",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("__EnumValue", field, true, false, errors.New("field of type Boolean does not have child fields"))
 }
 
 func ___EnumValue_deprecationReason(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.EnumValue) (ret graphql.Marshaler) {
@@ -3522,18 +3221,8 @@ func ___EnumValue_deprecationReason(ctx context.Context, ec *executionContext, f
 		false,
 	)
 }
-
 func fieldContext___EnumValue_deprecationReason(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__EnumValue",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("__EnumValue", field, true, false, errors.New("field of type String does not have child fields"))
 }
 
 func ___Field_name(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.Field) (ret graphql.Marshaler) {
@@ -3555,18 +3244,8 @@ func ___Field_name(ctx context.Context, ec *executionContext, field graphql.Coll
 		true,
 	)
 }
-
 func fieldContext___Field_name(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__Field",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("__Field", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func ___Field_description(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.Field) (ret graphql.Marshaler) {
@@ -3588,18 +3267,8 @@ func ___Field_description(ctx context.Context, ec *executionContext, field graph
 		false,
 	)
 }
-
 func fieldContext___Field_description(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__Field",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("__Field", field, true, false, errors.New("field of type String does not have child fields"))
 }
 
 func ___Field_args(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.Field) (ret graphql.Marshaler) {
@@ -3621,7 +3290,6 @@ func ___Field_args(ctx context.Context, ec *executionContext, field graphql.Coll
 		true,
 	)
 }
-
 func fieldContext___Field_args(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Field",
@@ -3629,21 +3297,7 @@ func fieldContext___Field_args(ctx context.Context, ec *executionContext, field 
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return fieldContext___InputValue_name(ctx, ec, field)
-			case "description":
-				return fieldContext___InputValue_description(ctx, ec, field)
-			case "type":
-				return fieldContext___InputValue_type(ctx, ec, field)
-			case "defaultValue":
-				return fieldContext___InputValue_defaultValue(ctx, ec, field)
-			case "isDeprecated":
-				return fieldContext___InputValue_isDeprecated(ctx, ec, field)
-			case "deprecationReason":
-				return fieldContext___InputValue_deprecationReason(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type __InputValue", field.Name)
+			return childFields___InputValue(ctx, ec, field)
 		},
 	}
 	defer func() {
@@ -3679,7 +3333,6 @@ func ___Field_type(ctx context.Context, ec *executionContext, field graphql.Coll
 		true,
 	)
 }
-
 func fieldContext___Field_type(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Field",
@@ -3687,31 +3340,7 @@ func fieldContext___Field_type(_ context.Context, ec *executionContext, field gr
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "kind":
-				return fieldContext___Type_kind(ctx, ec, field)
-			case "name":
-				return fieldContext___Type_name(ctx, ec, field)
-			case "description":
-				return fieldContext___Type_description(ctx, ec, field)
-			case "specifiedByURL":
-				return fieldContext___Type_specifiedByURL(ctx, ec, field)
-			case "fields":
-				return fieldContext___Type_fields(ctx, ec, field)
-			case "interfaces":
-				return fieldContext___Type_interfaces(ctx, ec, field)
-			case "possibleTypes":
-				return fieldContext___Type_possibleTypes(ctx, ec, field)
-			case "enumValues":
-				return fieldContext___Type_enumValues(ctx, ec, field)
-			case "inputFields":
-				return fieldContext___Type_inputFields(ctx, ec, field)
-			case "ofType":
-				return fieldContext___Type_ofType(ctx, ec, field)
-			case "isOneOf":
-				return fieldContext___Type_isOneOf(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
+			return childFields___Type(ctx, ec, field)
 		},
 	}
 	return fc, nil
@@ -3736,18 +3365,8 @@ func ___Field_isDeprecated(ctx context.Context, ec *executionContext, field grap
 		true,
 	)
 }
-
 func fieldContext___Field_isDeprecated(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__Field",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("__Field", field, true, false, errors.New("field of type Boolean does not have child fields"))
 }
 
 func ___Field_deprecationReason(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.Field) (ret graphql.Marshaler) {
@@ -3769,18 +3388,8 @@ func ___Field_deprecationReason(ctx context.Context, ec *executionContext, field
 		false,
 	)
 }
-
 func fieldContext___Field_deprecationReason(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__Field",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("__Field", field, true, false, errors.New("field of type String does not have child fields"))
 }
 
 func ___InputValue_name(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.InputValue) (ret graphql.Marshaler) {
@@ -3802,18 +3411,8 @@ func ___InputValue_name(ctx context.Context, ec *executionContext, field graphql
 		true,
 	)
 }
-
 func fieldContext___InputValue_name(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__InputValue",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("__InputValue", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func ___InputValue_description(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.InputValue) (ret graphql.Marshaler) {
@@ -3835,18 +3434,8 @@ func ___InputValue_description(ctx context.Context, ec *executionContext, field 
 		false,
 	)
 }
-
 func fieldContext___InputValue_description(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__InputValue",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("__InputValue", field, true, false, errors.New("field of type String does not have child fields"))
 }
 
 func ___InputValue_type(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.InputValue) (ret graphql.Marshaler) {
@@ -3868,7 +3457,6 @@ func ___InputValue_type(ctx context.Context, ec *executionContext, field graphql
 		true,
 	)
 }
-
 func fieldContext___InputValue_type(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__InputValue",
@@ -3876,31 +3464,7 @@ func fieldContext___InputValue_type(_ context.Context, ec *executionContext, fie
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "kind":
-				return fieldContext___Type_kind(ctx, ec, field)
-			case "name":
-				return fieldContext___Type_name(ctx, ec, field)
-			case "description":
-				return fieldContext___Type_description(ctx, ec, field)
-			case "specifiedByURL":
-				return fieldContext___Type_specifiedByURL(ctx, ec, field)
-			case "fields":
-				return fieldContext___Type_fields(ctx, ec, field)
-			case "interfaces":
-				return fieldContext___Type_interfaces(ctx, ec, field)
-			case "possibleTypes":
-				return fieldContext___Type_possibleTypes(ctx, ec, field)
-			case "enumValues":
-				return fieldContext___Type_enumValues(ctx, ec, field)
-			case "inputFields":
-				return fieldContext___Type_inputFields(ctx, ec, field)
-			case "ofType":
-				return fieldContext___Type_ofType(ctx, ec, field)
-			case "isOneOf":
-				return fieldContext___Type_isOneOf(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
+			return childFields___Type(ctx, ec, field)
 		},
 	}
 	return fc, nil
@@ -3925,18 +3489,8 @@ func ___InputValue_defaultValue(ctx context.Context, ec *executionContext, field
 		false,
 	)
 }
-
 func fieldContext___InputValue_defaultValue(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__InputValue",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("__InputValue", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func ___InputValue_isDeprecated(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.InputValue) (ret graphql.Marshaler) {
@@ -3958,18 +3512,8 @@ func ___InputValue_isDeprecated(ctx context.Context, ec *executionContext, field
 		true,
 	)
 }
-
 func fieldContext___InputValue_isDeprecated(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__InputValue",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("__InputValue", field, true, false, errors.New("field of type Boolean does not have child fields"))
 }
 
 func ___InputValue_deprecationReason(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.InputValue) (ret graphql.Marshaler) {
@@ -3991,18 +3535,8 @@ func ___InputValue_deprecationReason(ctx context.Context, ec *executionContext, 
 		false,
 	)
 }
-
 func fieldContext___InputValue_deprecationReason(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__InputValue",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("__InputValue", field, true, false, errors.New("field of type String does not have child fields"))
 }
 
 func ___Schema_description(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.Schema) (ret graphql.Marshaler) {
@@ -4024,18 +3558,8 @@ func ___Schema_description(ctx context.Context, ec *executionContext, field grap
 		false,
 	)
 }
-
 func fieldContext___Schema_description(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__Schema",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("__Schema", field, true, false, errors.New("field of type String does not have child fields"))
 }
 
 func ___Schema_types(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.Schema) (ret graphql.Marshaler) {
@@ -4057,7 +3581,6 @@ func ___Schema_types(ctx context.Context, ec *executionContext, field graphql.Co
 		true,
 	)
 }
-
 func fieldContext___Schema_types(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Schema",
@@ -4065,31 +3588,7 @@ func fieldContext___Schema_types(_ context.Context, ec *executionContext, field 
 		IsMethod:   true,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "kind":
-				return fieldContext___Type_kind(ctx, ec, field)
-			case "name":
-				return fieldContext___Type_name(ctx, ec, field)
-			case "description":
-				return fieldContext___Type_description(ctx, ec, field)
-			case "specifiedByURL":
-				return fieldContext___Type_specifiedByURL(ctx, ec, field)
-			case "fields":
-				return fieldContext___Type_fields(ctx, ec, field)
-			case "interfaces":
-				return fieldContext___Type_interfaces(ctx, ec, field)
-			case "possibleTypes":
-				return fieldContext___Type_possibleTypes(ctx, ec, field)
-			case "enumValues":
-				return fieldContext___Type_enumValues(ctx, ec, field)
-			case "inputFields":
-				return fieldContext___Type_inputFields(ctx, ec, field)
-			case "ofType":
-				return fieldContext___Type_ofType(ctx, ec, field)
-			case "isOneOf":
-				return fieldContext___Type_isOneOf(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
+			return childFields___Type(ctx, ec, field)
 		},
 	}
 	return fc, nil
@@ -4114,7 +3613,6 @@ func ___Schema_queryType(ctx context.Context, ec *executionContext, field graphq
 		true,
 	)
 }
-
 func fieldContext___Schema_queryType(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Schema",
@@ -4122,31 +3620,7 @@ func fieldContext___Schema_queryType(_ context.Context, ec *executionContext, fi
 		IsMethod:   true,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "kind":
-				return fieldContext___Type_kind(ctx, ec, field)
-			case "name":
-				return fieldContext___Type_name(ctx, ec, field)
-			case "description":
-				return fieldContext___Type_description(ctx, ec, field)
-			case "specifiedByURL":
-				return fieldContext___Type_specifiedByURL(ctx, ec, field)
-			case "fields":
-				return fieldContext___Type_fields(ctx, ec, field)
-			case "interfaces":
-				return fieldContext___Type_interfaces(ctx, ec, field)
-			case "possibleTypes":
-				return fieldContext___Type_possibleTypes(ctx, ec, field)
-			case "enumValues":
-				return fieldContext___Type_enumValues(ctx, ec, field)
-			case "inputFields":
-				return fieldContext___Type_inputFields(ctx, ec, field)
-			case "ofType":
-				return fieldContext___Type_ofType(ctx, ec, field)
-			case "isOneOf":
-				return fieldContext___Type_isOneOf(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
+			return childFields___Type(ctx, ec, field)
 		},
 	}
 	return fc, nil
@@ -4171,7 +3645,6 @@ func ___Schema_mutationType(ctx context.Context, ec *executionContext, field gra
 		false,
 	)
 }
-
 func fieldContext___Schema_mutationType(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Schema",
@@ -4179,31 +3652,7 @@ func fieldContext___Schema_mutationType(_ context.Context, ec *executionContext,
 		IsMethod:   true,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "kind":
-				return fieldContext___Type_kind(ctx, ec, field)
-			case "name":
-				return fieldContext___Type_name(ctx, ec, field)
-			case "description":
-				return fieldContext___Type_description(ctx, ec, field)
-			case "specifiedByURL":
-				return fieldContext___Type_specifiedByURL(ctx, ec, field)
-			case "fields":
-				return fieldContext___Type_fields(ctx, ec, field)
-			case "interfaces":
-				return fieldContext___Type_interfaces(ctx, ec, field)
-			case "possibleTypes":
-				return fieldContext___Type_possibleTypes(ctx, ec, field)
-			case "enumValues":
-				return fieldContext___Type_enumValues(ctx, ec, field)
-			case "inputFields":
-				return fieldContext___Type_inputFields(ctx, ec, field)
-			case "ofType":
-				return fieldContext___Type_ofType(ctx, ec, field)
-			case "isOneOf":
-				return fieldContext___Type_isOneOf(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
+			return childFields___Type(ctx, ec, field)
 		},
 	}
 	return fc, nil
@@ -4228,7 +3677,6 @@ func ___Schema_subscriptionType(ctx context.Context, ec *executionContext, field
 		false,
 	)
 }
-
 func fieldContext___Schema_subscriptionType(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Schema",
@@ -4236,31 +3684,7 @@ func fieldContext___Schema_subscriptionType(_ context.Context, ec *executionCont
 		IsMethod:   true,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "kind":
-				return fieldContext___Type_kind(ctx, ec, field)
-			case "name":
-				return fieldContext___Type_name(ctx, ec, field)
-			case "description":
-				return fieldContext___Type_description(ctx, ec, field)
-			case "specifiedByURL":
-				return fieldContext___Type_specifiedByURL(ctx, ec, field)
-			case "fields":
-				return fieldContext___Type_fields(ctx, ec, field)
-			case "interfaces":
-				return fieldContext___Type_interfaces(ctx, ec, field)
-			case "possibleTypes":
-				return fieldContext___Type_possibleTypes(ctx, ec, field)
-			case "enumValues":
-				return fieldContext___Type_enumValues(ctx, ec, field)
-			case "inputFields":
-				return fieldContext___Type_inputFields(ctx, ec, field)
-			case "ofType":
-				return fieldContext___Type_ofType(ctx, ec, field)
-			case "isOneOf":
-				return fieldContext___Type_isOneOf(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
+			return childFields___Type(ctx, ec, field)
 		},
 	}
 	return fc, nil
@@ -4285,7 +3709,6 @@ func ___Schema_directives(ctx context.Context, ec *executionContext, field graph
 		true,
 	)
 }
-
 func fieldContext___Schema_directives(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Schema",
@@ -4293,19 +3716,7 @@ func fieldContext___Schema_directives(_ context.Context, ec *executionContext, f
 		IsMethod:   true,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return fieldContext___Directive_name(ctx, ec, field)
-			case "description":
-				return fieldContext___Directive_description(ctx, ec, field)
-			case "isRepeatable":
-				return fieldContext___Directive_isRepeatable(ctx, ec, field)
-			case "locations":
-				return fieldContext___Directive_locations(ctx, ec, field)
-			case "args":
-				return fieldContext___Directive_args(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type __Directive", field.Name)
+			return childFields___Directive(ctx, ec, field)
 		},
 	}
 	return fc, nil
@@ -4330,18 +3741,8 @@ func ___Type_kind(ctx context.Context, ec *executionContext, field graphql.Colle
 		true,
 	)
 }
-
 func fieldContext___Type_kind(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__Type",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type __TypeKind does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("__Type", field, true, false, errors.New("field of type __TypeKind does not have child fields"))
 }
 
 func ___Type_name(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
@@ -4363,18 +3764,8 @@ func ___Type_name(ctx context.Context, ec *executionContext, field graphql.Colle
 		false,
 	)
 }
-
 func fieldContext___Type_name(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__Type",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("__Type", field, true, false, errors.New("field of type String does not have child fields"))
 }
 
 func ___Type_description(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
@@ -4396,18 +3787,8 @@ func ___Type_description(ctx context.Context, ec *executionContext, field graphq
 		false,
 	)
 }
-
 func fieldContext___Type_description(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__Type",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("__Type", field, true, false, errors.New("field of type String does not have child fields"))
 }
 
 func ___Type_specifiedByURL(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
@@ -4429,18 +3810,8 @@ func ___Type_specifiedByURL(ctx context.Context, ec *executionContext, field gra
 		false,
 	)
 }
-
 func fieldContext___Type_specifiedByURL(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__Type",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("__Type", field, true, false, errors.New("field of type String does not have child fields"))
 }
 
 func ___Type_fields(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
@@ -4463,7 +3834,6 @@ func ___Type_fields(ctx context.Context, ec *executionContext, field graphql.Col
 		false,
 	)
 }
-
 func fieldContext___Type_fields(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
@@ -4471,21 +3841,7 @@ func fieldContext___Type_fields(ctx context.Context, ec *executionContext, field
 		IsMethod:   true,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return fieldContext___Field_name(ctx, ec, field)
-			case "description":
-				return fieldContext___Field_description(ctx, ec, field)
-			case "args":
-				return fieldContext___Field_args(ctx, ec, field)
-			case "type":
-				return fieldContext___Field_type(ctx, ec, field)
-			case "isDeprecated":
-				return fieldContext___Field_isDeprecated(ctx, ec, field)
-			case "deprecationReason":
-				return fieldContext___Field_deprecationReason(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type __Field", field.Name)
+			return childFields___Field(ctx, ec, field)
 		},
 	}
 	defer func() {
@@ -4521,7 +3877,6 @@ func ___Type_interfaces(ctx context.Context, ec *executionContext, field graphql
 		false,
 	)
 }
-
 func fieldContext___Type_interfaces(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
@@ -4529,31 +3884,7 @@ func fieldContext___Type_interfaces(_ context.Context, ec *executionContext, fie
 		IsMethod:   true,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "kind":
-				return fieldContext___Type_kind(ctx, ec, field)
-			case "name":
-				return fieldContext___Type_name(ctx, ec, field)
-			case "description":
-				return fieldContext___Type_description(ctx, ec, field)
-			case "specifiedByURL":
-				return fieldContext___Type_specifiedByURL(ctx, ec, field)
-			case "fields":
-				return fieldContext___Type_fields(ctx, ec, field)
-			case "interfaces":
-				return fieldContext___Type_interfaces(ctx, ec, field)
-			case "possibleTypes":
-				return fieldContext___Type_possibleTypes(ctx, ec, field)
-			case "enumValues":
-				return fieldContext___Type_enumValues(ctx, ec, field)
-			case "inputFields":
-				return fieldContext___Type_inputFields(ctx, ec, field)
-			case "ofType":
-				return fieldContext___Type_ofType(ctx, ec, field)
-			case "isOneOf":
-				return fieldContext___Type_isOneOf(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
+			return childFields___Type(ctx, ec, field)
 		},
 	}
 	return fc, nil
@@ -4578,7 +3909,6 @@ func ___Type_possibleTypes(ctx context.Context, ec *executionContext, field grap
 		false,
 	)
 }
-
 func fieldContext___Type_possibleTypes(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
@@ -4586,31 +3916,7 @@ func fieldContext___Type_possibleTypes(_ context.Context, ec *executionContext, 
 		IsMethod:   true,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "kind":
-				return fieldContext___Type_kind(ctx, ec, field)
-			case "name":
-				return fieldContext___Type_name(ctx, ec, field)
-			case "description":
-				return fieldContext___Type_description(ctx, ec, field)
-			case "specifiedByURL":
-				return fieldContext___Type_specifiedByURL(ctx, ec, field)
-			case "fields":
-				return fieldContext___Type_fields(ctx, ec, field)
-			case "interfaces":
-				return fieldContext___Type_interfaces(ctx, ec, field)
-			case "possibleTypes":
-				return fieldContext___Type_possibleTypes(ctx, ec, field)
-			case "enumValues":
-				return fieldContext___Type_enumValues(ctx, ec, field)
-			case "inputFields":
-				return fieldContext___Type_inputFields(ctx, ec, field)
-			case "ofType":
-				return fieldContext___Type_ofType(ctx, ec, field)
-			case "isOneOf":
-				return fieldContext___Type_isOneOf(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
+			return childFields___Type(ctx, ec, field)
 		},
 	}
 	return fc, nil
@@ -4636,7 +3942,6 @@ func ___Type_enumValues(ctx context.Context, ec *executionContext, field graphql
 		false,
 	)
 }
-
 func fieldContext___Type_enumValues(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
@@ -4644,17 +3949,7 @@ func fieldContext___Type_enumValues(ctx context.Context, ec *executionContext, f
 		IsMethod:   true,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return fieldContext___EnumValue_name(ctx, ec, field)
-			case "description":
-				return fieldContext___EnumValue_description(ctx, ec, field)
-			case "isDeprecated":
-				return fieldContext___EnumValue_isDeprecated(ctx, ec, field)
-			case "deprecationReason":
-				return fieldContext___EnumValue_deprecationReason(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type __EnumValue", field.Name)
+			return childFields___EnumValue(ctx, ec, field)
 		},
 	}
 	defer func() {
@@ -4690,7 +3985,6 @@ func ___Type_inputFields(ctx context.Context, ec *executionContext, field graphq
 		false,
 	)
 }
-
 func fieldContext___Type_inputFields(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
@@ -4698,21 +3992,7 @@ func fieldContext___Type_inputFields(_ context.Context, ec *executionContext, fi
 		IsMethod:   true,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return fieldContext___InputValue_name(ctx, ec, field)
-			case "description":
-				return fieldContext___InputValue_description(ctx, ec, field)
-			case "type":
-				return fieldContext___InputValue_type(ctx, ec, field)
-			case "defaultValue":
-				return fieldContext___InputValue_defaultValue(ctx, ec, field)
-			case "isDeprecated":
-				return fieldContext___InputValue_isDeprecated(ctx, ec, field)
-			case "deprecationReason":
-				return fieldContext___InputValue_deprecationReason(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type __InputValue", field.Name)
+			return childFields___InputValue(ctx, ec, field)
 		},
 	}
 	return fc, nil
@@ -4737,7 +4017,6 @@ func ___Type_ofType(ctx context.Context, ec *executionContext, field graphql.Col
 		false,
 	)
 }
-
 func fieldContext___Type_ofType(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
@@ -4745,31 +4024,7 @@ func fieldContext___Type_ofType(_ context.Context, ec *executionContext, field g
 		IsMethod:   true,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "kind":
-				return fieldContext___Type_kind(ctx, ec, field)
-			case "name":
-				return fieldContext___Type_name(ctx, ec, field)
-			case "description":
-				return fieldContext___Type_description(ctx, ec, field)
-			case "specifiedByURL":
-				return fieldContext___Type_specifiedByURL(ctx, ec, field)
-			case "fields":
-				return fieldContext___Type_fields(ctx, ec, field)
-			case "interfaces":
-				return fieldContext___Type_interfaces(ctx, ec, field)
-			case "possibleTypes":
-				return fieldContext___Type_possibleTypes(ctx, ec, field)
-			case "enumValues":
-				return fieldContext___Type_enumValues(ctx, ec, field)
-			case "inputFields":
-				return fieldContext___Type_inputFields(ctx, ec, field)
-			case "ofType":
-				return fieldContext___Type_ofType(ctx, ec, field)
-			case "isOneOf":
-				return fieldContext___Type_isOneOf(ctx, ec, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
+			return childFields___Type(ctx, ec, field)
 		},
 	}
 	return fc, nil
@@ -4794,18 +4049,8 @@ func ___Type_isOneOf(ctx context.Context, ec *executionContext, field graphql.Co
 		false,
 	)
 }
-
 func fieldContext___Type_isOneOf(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "__Type",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("__Type", field, true, false, errors.New("field of type Boolean does not have child fields"))
 }
 
 // endregion **************************** field.gotpl *****************************

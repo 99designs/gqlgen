@@ -314,4 +314,44 @@ func newExecutionContext(
 	{{- end }}
 	}
 	var parsedSchema = gqlparser.MustLoadSchema(sources...)
+
+// newLeafFieldContext creates a FieldContext for fields that have no child fields
+// (scalars, enums). This replaces the per-field boilerplate that was previously
+// generated inline for every scalar field on every type.
+func newLeafFieldContext(objectName string, field graphql.CollectedField, isMethod, isResolver bool, childErr error) (*graphql.FieldContext, error) {
+	return &graphql.FieldContext{
+		Object:     objectName,
+		Field:      field,
+		IsMethod:   isMethod,
+		IsResolver: isResolver,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, childErr
+		},
+	}, nil
+}
+
+// childFields_* functions provide shared child field context lookups.
+// Each function is generated once per unique object type, deduplicating the
+// switch statements that were previously inlined in every fieldContext_* function.
+{{- range $ct := .UniqueChildFieldTypes }}
+
+{{ if $useFunctionSyntaxForExecutionContext -}}
+func childFields_{{ $ct.TypeName }}(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+{{- else -}}
+func (ec *executionContext) childFields_{{ $ct.TypeName }}(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+{{- end }}
+	switch field.Name {
+	{{- range $f := $ct.Definition.Fields }}
+	case "{{ $f.Name }}":
+		{{ if $useFunctionSyntaxForExecutionContext -}}
+		return fieldContext_{{ $ct.TypeName }}_{{ $f.Name }}(ctx, ec, field)
+		{{- else -}}
+		return ec.fieldContext_{{ $ct.TypeName }}_{{ $f.Name }}(ctx, field)
+		{{- end }}
+	{{- end }}
+	}
+	return nil, fmt.Errorf("no field named %q was found under type {{ $ct.TypeName }}", field.Name)
+}
+{{- end }}
+
 {{ end }}

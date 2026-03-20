@@ -44,18 +44,8 @@ func (ec *executionContext) _PtrToSliceContainer_ptrToSlice(ctx context.Context,
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_PtrToSliceContainer_ptrToSlice(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PtrToSliceContainer",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("PtrToSliceContainer", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 // endregion **************************** field.gotpl *****************************

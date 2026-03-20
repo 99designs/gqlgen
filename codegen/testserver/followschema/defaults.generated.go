@@ -5,7 +5,6 @@ package followschema
 import (
 	"context"
 	"errors"
-	"fmt"
 	"math"
 	"strconv"
 	"sync/atomic"
@@ -130,18 +129,8 @@ func (ec *executionContext) _DefaultParametersMirror_falsyBoolean(ctx context.Co
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_DefaultParametersMirror_falsyBoolean(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "DefaultParametersMirror",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("DefaultParametersMirror", field, false, false, errors.New("field of type Boolean does not have child fields"))
 }
 
 func (ec *executionContext) _DefaultParametersMirror_truthyBoolean(ctx context.Context, field graphql.CollectedField, obj *DefaultParametersMirror) (ret graphql.Marshaler) {
@@ -161,18 +150,8 @@ func (ec *executionContext) _DefaultParametersMirror_truthyBoolean(ctx context.C
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_DefaultParametersMirror_truthyBoolean(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "DefaultParametersMirror",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("DefaultParametersMirror", field, false, false, errors.New("field of type Boolean does not have child fields"))
 }
 
 func (ec *executionContext) _Mutation_defaultInput(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -193,7 +172,6 @@ func (ec *executionContext) _Mutation_defaultInput(ctx context.Context, field gr
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_defaultInput(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -201,13 +179,7 @@ func (ec *executionContext) fieldContext_Mutation_defaultInput(ctx context.Conte
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "falsyBoolean":
-				return ec.fieldContext_DefaultParametersMirror_falsyBoolean(ctx, field)
-			case "truthyBoolean":
-				return ec.fieldContext_DefaultParametersMirror_truthyBoolean(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type DefaultParametersMirror", field.Name)
+			return ec.childFields_DefaultParametersMirror(ctx, field)
 		},
 	}
 	defer func() {
@@ -242,7 +214,6 @@ func (ec *executionContext) _Mutation_overrideValueViaInput(ctx context.Context,
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_overrideValueViaInput(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -250,11 +221,7 @@ func (ec *executionContext) fieldContext_Mutation_overrideValueViaInput(ctx cont
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "firstFieldValue":
-				return ec.fieldContext_FieldsOrderPayload_firstFieldValue(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type FieldsOrderPayload", field.Name)
+			return ec.childFields_FieldsOrderPayload(ctx, field)
 		},
 	}
 	defer func() {
@@ -293,7 +260,6 @@ func (ec *executionContext) _Mutation_updateProduct(ctx context.Context, field g
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_updateProduct(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -336,7 +302,6 @@ func (ec *executionContext) _Mutation_issue4053(ctx context.Context, field graph
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_issue4053(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -379,7 +344,6 @@ func (ec *executionContext) _Mutation_updateSomething(ctx context.Context, field
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_updateSomething(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -422,7 +386,6 @@ func (ec *executionContext) _Mutation_updatePtrToPtr(ctx context.Context, field 
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Mutation_updatePtrToPtr(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Mutation",
@@ -430,15 +393,7 @@ func (ec *executionContext) fieldContext_Mutation_updatePtrToPtr(ctx context.Con
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "name":
-				return ec.fieldContext_PtrToPtrOuter_name(ctx, field)
-			case "inner":
-				return ec.fieldContext_PtrToPtrOuter_inner(ctx, field)
-			case "stupidInner":
-				return ec.fieldContext_PtrToPtrOuter_stupidInner(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PtrToPtrOuter", field.Name)
+			return ec.childFields_PtrToPtrOuter(ctx, field)
 		},
 	}
 	defer func() {

@@ -71,18 +71,8 @@ func (ec *executionContext) _Panics_fieldScalarMarshal(ctx context.Context, fiel
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Panics_fieldScalarMarshal(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Panics",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type MarshalPanic does not have child fields")
-		},
-	}
-	return fc, nil
+	return newLeafFieldContext("Panics", field, true, true, errors.New("field of type MarshalPanic does not have child fields"))
 }
 
 func (ec *executionContext) _Panics_fieldFuncMarshal(ctx context.Context, field graphql.CollectedField, obj *Panics) (ret graphql.Marshaler) {
@@ -103,7 +93,6 @@ func (ec *executionContext) _Panics_fieldFuncMarshal(ctx context.Context, field 
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Panics_fieldFuncMarshal(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Panics",
@@ -146,7 +135,6 @@ func (ec *executionContext) _Panics_argUnmarshal(ctx context.Context, field grap
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Panics_argUnmarshal(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Panics",

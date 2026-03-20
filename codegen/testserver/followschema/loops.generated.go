@@ -4,7 +4,6 @@ package followschema
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"sync/atomic"
 
@@ -43,7 +42,6 @@ func (ec *executionContext) _LoopA_b(ctx context.Context, field graphql.Collecte
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_LoopA_b(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "LoopA",
@@ -51,11 +49,7 @@ func (ec *executionContext) fieldContext_LoopA_b(_ context.Context, field graphq
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "a":
-				return ec.fieldContext_LoopB_a(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type LoopB", field.Name)
+			return ec.childFields_LoopB(ctx, field)
 		},
 	}
 	return fc, nil
@@ -78,7 +72,6 @@ func (ec *executionContext) _LoopB_a(ctx context.Context, field graphql.Collecte
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_LoopB_a(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "LoopB",
@@ -86,11 +79,7 @@ func (ec *executionContext) fieldContext_LoopB_a(_ context.Context, field graphq
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "b":
-				return ec.fieldContext_LoopA_b(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type LoopA", field.Name)
+			return ec.childFields_LoopA(ctx, field)
 		},
 	}
 	return fc, nil

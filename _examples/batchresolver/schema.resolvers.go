@@ -14,6 +14,56 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 )
 
+// BatchProp is the batch resolver for the batchProp field.
+func (r *catResolver) BatchProp(ctx context.Context, objs []*Cat) ([]string, error) {
+	r.catBatchPropCalls.Add(1)
+	results := make([]string, len(objs))
+	for i, obj := range objs {
+		results[i] = "catBatchProp:" + obj.ID
+	}
+	return results, nil
+}
+
+// BatchProp is the batch resolver for the batchProp field.
+func (r *dogResolver) BatchProp(ctx context.Context, objs []*Dog) ([]string, error) {
+	r.dogBatchPropCalls.Add(1)
+	results := make([]string, len(objs))
+	for i, obj := range objs {
+		results[i] = "dogBatchProp:" + obj.ID
+	}
+	return results, nil
+}
+
+// BatchProp is the batch resolver for the batchProp field.
+func (r *domesticCatResolver) BatchProp(ctx context.Context, objs []*DomesticCat) ([]string, error) {
+	r.domesticCatBatchPropCalls.Add(1)
+	results := make([]string, len(objs))
+	for i, obj := range objs {
+		results[i] = "domesticCatBatchProp:" + obj.ID
+	}
+	return results, nil
+}
+
+// BatchName is the batch resolver for the batchName field.
+func (r *domesticCatResolver) BatchName(ctx context.Context, objs []*DomesticCat) ([]string, error) {
+	r.domesticCatBatchNameCalls.Add(1)
+	results := make([]string, len(objs))
+	for i, obj := range objs {
+		results[i] = "domesticCatBatchName:" + obj.Name
+	}
+	return results, nil
+}
+
+// BatchProp is the batch resolver for the batchProp field.
+func (r *pigResolver) BatchProp(ctx context.Context, objs []*Pig) ([]string, error) {
+	r.pigBatchPropCalls.Add(1)
+	results := make([]string, len(objs))
+	for i, obj := range objs {
+		results[i] = "pigBatchProp:" + obj.ID
+	}
+	return results, nil
+}
+
 // CoverBatch is the batch resolver for the coverBatch field.
 func (r *profileResolver) CoverBatch(ctx context.Context, objs []*Profile) ([]*Image, error) {
 	r.coverBatchCalls.Add(1)
@@ -38,6 +88,22 @@ func (r *queryResolver) Users(ctx context.Context) ([]*User, error) {
 		return nil, errors.New("users not set")
 	}
 	return r.users, nil
+}
+
+// Animals is the resolver for the animals field.
+func (r *queryResolver) Animals(ctx context.Context) ([]Animal, error) {
+	if r.animals == nil {
+		return nil, errors.New("animals not set")
+	}
+	return r.animals, nil
+}
+
+// Pets is the resolver for the pets field.
+func (r *queryResolver) Pets(ctx context.Context) ([]Pet, error) {
+	if r.pets == nil {
+		return nil, errors.New("pets not set")
+	}
+	return r.pets, nil
 }
 
 // NullableBatch is the batch resolver for the nullableBatch field.
@@ -257,6 +323,18 @@ func (r *userResolver) ProfileConnectionNonBatch(ctx context.Context, obj *User)
 	}, nil
 }
 
+// Cat returns CatResolver implementation.
+func (r *Resolver) Cat() CatResolver { return &catResolver{r} }
+
+// Dog returns DogResolver implementation.
+func (r *Resolver) Dog() DogResolver { return &dogResolver{r} }
+
+// DomesticCat returns DomesticCatResolver implementation.
+func (r *Resolver) DomesticCat() DomesticCatResolver { return &domesticCatResolver{r} }
+
+// Pig returns PigResolver implementation.
+func (r *Resolver) Pig() PigResolver { return &pigResolver{r} }
+
 // Profile returns ProfileResolver implementation.
 func (r *Resolver) Profile() ProfileResolver { return &profileResolver{r} }
 
@@ -266,6 +344,10 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 // User returns UserResolver implementation.
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
+type catResolver struct{ *Resolver }
+type dogResolver struct{ *Resolver }
+type domesticCatResolver struct{ *Resolver }
+type pigResolver struct{ *Resolver }
 type profileResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
 type userResolver struct{ *Resolver }

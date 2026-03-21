@@ -7,6 +7,40 @@ directive @goField(
 
 type Query {
     users: [User!]!
+    animals: [Animal!]!
+    pets: [Pet!]!
+}
+
+interface Animal {
+    id: ID!
+    batchProp: String! @goField(batch: true)
+}
+
+interface Pet {
+    name: String!
+    batchName: String! @goField(batch: true)
+}
+
+type Dog implements Animal {
+    id: ID!
+    batchProp: String! @goField(batch: true)
+}
+
+type Cat implements Animal {
+    id: ID!
+    batchProp: String! @goField(batch: true)
+}
+
+type Pig implements Animal {
+    id: ID!
+    batchProp: String! @goField(batch: true)
+}
+
+type DomesticCat implements Animal & Pet {
+    id: ID!
+    batchProp: String! @goField(batch: true)
+    name: String!
+    batchName: String! @goField(batch: true)
 }
 
 type User {

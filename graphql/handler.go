@@ -27,8 +27,8 @@ type (
 		OperationName string         `json:"operationName"`
 		Variables     map[string]any `json:"variables"`
 		Extensions    map[string]any `json:"extensions"`
-		Headers       http.Header    `json:"headers"`
 
+		Headers  http.Header `json:"-"`
 		ReadTime TraceTiming `json:"-"`
 	}
 

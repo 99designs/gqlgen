@@ -145,11 +145,15 @@
 					for i, item := range v {
 						switch concrete := item.(type) {
 						{{- range $impl := $iface.Implementors }}
-						{{- if $impl.CanBeNil }}
 						case {{ $impl.Type | ref }}:
 							batchIdxMap{{ $impl.Name }}[i] = len(batchItems{{ $impl.Name }})
+							{{- if $impl.CanBeNil }}
 							batchItems{{ $impl.Name }} = append(batchItems{{ $impl.Name }}, concrete)
-						{{- end }}
+							{{- else if $impl.TakeRef }}
+							batchItems{{ $impl.Name }} = append(batchItems{{ $impl.Name }}, &concrete)
+							{{- else }}
+							batchItems{{ $impl.Name }} = append(batchItems{{ $impl.Name }}, concrete)
+							{{- end }}
 						{{- end }}
 						}
 					}

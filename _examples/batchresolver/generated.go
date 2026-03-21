@@ -5644,15 +5644,27 @@ func (ec *executionContext) marshalNAnimal2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 		batchIdxMapCat := map[int]int{}
 		for i, item := range v {
 			switch concrete := item.(type) {
+			case DomesticCat:
+				batchIdxMapDomesticCat[i] = len(batchItemsDomesticCat)
+				batchItemsDomesticCat = append(batchItemsDomesticCat, &concrete)
 			case *DomesticCat:
 				batchIdxMapDomesticCat[i] = len(batchItemsDomesticCat)
 				batchItemsDomesticCat = append(batchItemsDomesticCat, concrete)
+			case Pig:
+				batchIdxMapPig[i] = len(batchItemsPig)
+				batchItemsPig = append(batchItemsPig, &concrete)
 			case *Pig:
 				batchIdxMapPig[i] = len(batchItemsPig)
 				batchItemsPig = append(batchItemsPig, concrete)
+			case Dog:
+				batchIdxMapDog[i] = len(batchItemsDog)
+				batchItemsDog = append(batchItemsDog, &concrete)
 			case *Dog:
 				batchIdxMapDog[i] = len(batchItemsDog)
 				batchItemsDog = append(batchItemsDog, concrete)
+			case Cat:
+				batchIdxMapCat[i] = len(batchItemsCat)
+				batchItemsCat = append(batchItemsCat, &concrete)
 			case *Cat:
 				batchIdxMapCat[i] = len(batchItemsCat)
 				batchItemsCat = append(batchItemsCat, concrete)
@@ -5750,6 +5762,9 @@ func (ec *executionContext) marshalNPet2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_
 		batchIdxMapDomesticCat := map[int]int{}
 		for i, item := range v {
 			switch concrete := item.(type) {
+			case DomesticCat:
+				batchIdxMapDomesticCat[i] = len(batchItemsDomesticCat)
+				batchItemsDomesticCat = append(batchItemsDomesticCat, &concrete)
 			case *DomesticCat:
 				batchIdxMapDomesticCat[i] = len(batchItemsDomesticCat)
 				batchItemsDomesticCat = append(batchItemsDomesticCat, concrete)

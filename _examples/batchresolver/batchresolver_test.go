@@ -775,6 +775,44 @@ func TestBatchResolver_InterfaceSingleType_CallCount(t *testing.T) {
 	)
 }
 
+func TestBatchResolver_InterfaceSingleType_MixedPointerAndValue_CallCount(t *testing.T) {
+	resolver := &Resolver{
+		animals: []Animal{
+			Cat{ID: "cat1"},
+			&Cat{ID: "cat2"},
+			Cat{ID: "cat3"},
+		},
+	}
+
+	c := newTestClient(resolver)
+	var resp struct {
+		Animals []struct {
+			ID        string `json:"id"`
+			BatchProp string `json:"batchProp"`
+		} `json:"animals"`
+	}
+
+	err := c.Post(`query { animals { id batchProp } }`, &resp)
+	require.NoError(t, err)
+	require.Len(t, resp.Animals, 3)
+	require.JSONEq(
+		t,
+		`{"animals":[
+			{"id":"cat1","batchProp":"catBatchProp:cat1"},
+			{"id":"cat2","batchProp":"catBatchProp:cat2"},
+			{"id":"cat3","batchProp":"catBatchProp:cat3"}
+		]}`,
+		marshalJSON(t, resp),
+	)
+
+	require.Equal(
+		t,
+		int32(1),
+		resolver.catBatchPropCalls.Load(),
+		"Cat.BatchProp should be called once for cats regardless of pointer/value form",
+	)
+}
+
 func TestBatchResolver_InterfaceMixedTypes_CallCount(t *testing.T) {
 	resolver := &Resolver{
 		animals: []Animal{
@@ -869,6 +907,44 @@ func TestBatchResolver_MultipleInterfaces_CallCount(t *testing.T) {
 		int32(1),
 		resolver.domesticCatBatchNameCalls.Load(),
 		"DomesticCat.BatchName should be called once for all domestic cats",
+	)
+}
+
+func TestBatchResolver_MultipleInterfaces_MixedPointerAndValue_CallCount(t *testing.T) {
+	resolver := &Resolver{
+		pets: []Pet{
+			DomesticCat{ID: "dc1", Name: "Tama"},
+			&DomesticCat{ID: "dc2", Name: "Mii"},
+			DomesticCat{ID: "dc3", Name: "Kuro"},
+		},
+	}
+
+	c := newTestClient(resolver)
+	var resp struct {
+		Pets []struct {
+			Name      string `json:"name"`
+			BatchName string `json:"batchName"`
+		} `json:"pets"`
+	}
+
+	err := c.Post(`query { pets { name batchName } }`, &resp)
+	require.NoError(t, err)
+	require.Len(t, resp.Pets, 3)
+	require.JSONEq(
+		t,
+		`{"pets":[
+			{"name":"Tama","batchName":"domesticCatBatchName:Tama"},
+			{"name":"Mii","batchName":"domesticCatBatchName:Mii"},
+			{"name":"Kuro","batchName":"domesticCatBatchName:Kuro"}
+		]}`,
+		marshalJSON(t, resp),
+	)
+
+	require.Equal(
+		t,
+		int32(1),
+		resolver.domesticCatBatchNameCalls.Load(),
+		"DomesticCat.BatchName should be called once regardless of pointer/value form",
 	)
 }
 

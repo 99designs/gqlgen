@@ -49,7 +49,10 @@ type BatchParentState struct {
 // BatchParentGroup represents a group of parent objects being resolved together.
 type BatchParentGroup struct {
 	Parents any
-	fields  sync.Map
+	// IndexMap is used to remap original array indices to group-specific indices,
+	// which is necessary when items are grouped by concrete type from an interface/union slice.
+	IndexMap map[int]int
+	fields   sync.Map
 }
 
 // BatchFieldResult represents the cached result of a batch field resolution.
@@ -61,7 +64,12 @@ type BatchFieldResult struct {
 }
 
 // WithBatchParents adds a batch parent group to the context.
-func WithBatchParents(ctx context.Context, typeName string, parents any) context.Context {
+func WithBatchParents(
+	ctx context.Context,
+	typeName string,
+	parents any,
+	indexMap map[int]int,
+) context.Context {
 	prev, _ := ctx.Value(batchContextKey{}).(*BatchParentState)
 	var groups map[string]*BatchParentGroup
 	if prev != nil {
@@ -70,7 +78,7 @@ func WithBatchParents(ctx context.Context, typeName string, parents any) context
 	} else {
 		groups = make(map[string]*BatchParentGroup, 1)
 	}
-	groups[typeName] = &BatchParentGroup{Parents: parents}
+	groups[typeName] = &BatchParentGroup{Parents: parents, IndexMap: indexMap}
 
 	return context.WithValue(ctx, batchContextKey{}, &BatchParentState{groups: groups})
 }
@@ -171,8 +179,23 @@ func ResolveBatchGroupResult[T any](
 	parentsLen int,
 	result *BatchFieldResult,
 	fieldName string,
+	indexMap map[int]int,
 ) (any, error) {
 	idxInt := int(idx)
+	resultIdx := idxInt
+	if indexMap != nil {
+		mapped, ok := indexMap[idxInt]
+		if !ok {
+			panic(
+				fmt.Sprintf(
+					"batch resolver %s: index %d not found in index map (this is a gqlgen bug)",
+					fieldName,
+					idx,
+				),
+			)
+		}
+		resultIdx = mapped
+	}
 	if result.Err != nil {
 		if batchErrs, ok := result.Err.(BatchErrors); ok {
 			results, ok := result.Results.([]T)
@@ -205,7 +228,7 @@ func ResolveBatchGroupResult[T any](
 				))
 				return nil, nil
 			}
-			if idxInt < 0 || idxInt >= len(results) {
+			if resultIdx < 0 || resultIdx >= len(results) {
 				AddBatchError(ctx, idxInt, fmt.Errorf(
 					"batch resolver %s could not resolve parent index %d",
 					fieldName,
@@ -213,11 +236,11 @@ func ResolveBatchGroupResult[T any](
 				))
 				return nil, nil
 			}
-			if err := errs[idxInt]; err != nil {
+			if err := errs[resultIdx]; err != nil {
 				AddBatchError(ctx, idxInt, err)
 				return nil, nil
 			}
-			return results[idxInt], nil
+			return results[resultIdx], nil
 		}
 		AddBatchError(ctx, idxInt, result.Err)
 		return nil, nil
@@ -242,7 +265,7 @@ func ResolveBatchGroupResult[T any](
 		))
 		return nil, nil
 	}
-	if idxInt < 0 || idxInt >= len(results) {
+	if resultIdx < 0 || resultIdx >= len(results) {
 		AddBatchError(ctx, idxInt, fmt.Errorf(
 			"batch resolver %s could not resolve parent index %d",
 			fieldName,
@@ -250,7 +273,7 @@ func ResolveBatchGroupResult[T any](
 		))
 		return nil, nil
 	}
-	return results[idxInt], nil
+	return results[resultIdx], nil
 }
 
 // ResolveBatchSingleResult handles batch resolver results for a single parent.

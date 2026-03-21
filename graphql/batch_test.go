@@ -60,6 +60,7 @@ func TestResolveBatchGroupResult_Success(t *testing.T) {
 		2,
 		result,
 		"User.profile",
+		nil,
 	)
 	require.NoError(t, err)
 	require.Equal(t, "b", got)
@@ -78,6 +79,7 @@ func TestResolveBatchGroupResult_ResultLenMismatch(t *testing.T) {
 		2,
 		result,
 		"User.profile",
+		nil,
 	)
 	require.NoError(t, err)
 	require.Nil(t, got)

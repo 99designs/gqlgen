@@ -130,7 +130,38 @@
 					}
 				{{- end }}
 				{{- if and $.HasBatchResolverFields (not $type.IsScalar) (eq $type.Elem.Definition.Kind "OBJECT") }}
-				ctx = graphql.WithBatchParents(ctx, {{ $type.Elem.Definition.Name | quote }}, v)
+				ctx = graphql.WithBatchParents(ctx, {{ $type.Elem.Definition.Name | quote }}, v, nil)
+				{{- end }}
+				{{- if and $.HasBatchResolverFields (not $type.IsScalar) (or (eq $type.Elem.Definition.Kind "INTERFACE") (eq $type.Elem.Definition.Kind "UNION")) }}
+				{{- $iface := index $.Interfaces $type.Elem.Definition.Name }}
+				{{- if $iface }}
+				{
+					{{- range $impl := $iface.Implementors }}
+					{{- if $impl.CanBeNil }}
+					var batchItems{{ $impl.Name }} []{{ $impl.Type | ref }}
+					batchIdxMap{{ $impl.Name }} := map[int]int{}
+					{{- end }}
+					{{- end }}
+					for i, item := range v {
+						switch concrete := item.(type) {
+						{{- range $impl := $iface.Implementors }}
+						{{- if $impl.CanBeNil }}
+						case {{ $impl.Type | ref }}:
+							batchIdxMap{{ $impl.Name }}[i] = len(batchItems{{ $impl.Name }})
+							batchItems{{ $impl.Name }} = append(batchItems{{ $impl.Name }}, concrete)
+						{{- end }}
+						{{- end }}
+						}
+					}
+					{{- range $impl := $iface.Implementors }}
+					{{- if $impl.CanBeNil }}
+					if len(batchItems{{ $impl.Name }}) > 0 {
+						ctx = graphql.WithBatchParents(ctx, {{ $impl.Name | quote }}, batchItems{{ $impl.Name }}, batchIdxMap{{ $impl.Name }})
+					}
+					{{- end }}
+					{{- end }}
+				}
+				{{- end }}
 				{{- end }}
 				{{- if not $type.IsScalar }}
 					ret := graphql.MarshalSliceConcurrently(ctx, len(v), {{ $.Config.Exec.WorkerLimit }}, {{ $.Config.OmitPanicHandler }}, func(ctx context.Context, i int) graphql.Marshaler {

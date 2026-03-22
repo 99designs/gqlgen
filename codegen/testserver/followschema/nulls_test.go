@@ -50,7 +50,7 @@ func TestNullBubbling(t *testing.T) {
 		require.EqualError(
 			t,
 			err,
-			`[{"message":"boom","path":["errorBubble","errorOnNonRequiredField"]}]`,
+			`[{"message":"boom","path":["errorBubble","errorOnNonRequiredField"],"locations":[{"line":1,"column":34}]}]`,
 		)
 		require.Equal(t, "E1234", resp.ErrorBubble.Id)
 		require.Nil(t, resp.ErrorBubble.ErrorOnNonRequiredField)
@@ -69,7 +69,7 @@ func TestNullBubbling(t *testing.T) {
 		require.EqualError(
 			t,
 			err,
-			`[{"message":"boom","path":["errorBubble","errorOnRequiredField"]}]`,
+			`[{"message":"boom","path":["errorBubble","errorOnRequiredField"],"locations":[{"line":1,"column":34}]}]`,
 		)
 		require.Nil(t, resp.ErrorBubble)
 		require.Equal(t, "Ok", resp.Valid)
@@ -170,6 +170,7 @@ func TestNullBubbling(t *testing.T) {
 		err := c.Post(`query { invalid }`, &resp)
 		require.Nil(t, resp)
 		require.Error(t, err)
-		require.Contains(t, err.Error(), `{"message":"ERROR","path":["invalid"]}`)
+		require.Contains(t, err.Error(), `"message":"ERROR"`)
+		require.Contains(t, err.Error(), `"path":["invalid"]`)
 	})
 }

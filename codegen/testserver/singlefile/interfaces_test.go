@@ -180,7 +180,7 @@ func TestInterfaces(t *testing.T) {
 		require.EqualError(
 			t,
 			err,
-			`[{"message":"boom","path":["notAnInterface","thisShouldBindWithError"]}]`,
+			`[{"message":"boom","path":["notAnInterface","thisShouldBindWithError"],"locations":[{"line":1,"column":40}]}]`,
 		)
 	})
 

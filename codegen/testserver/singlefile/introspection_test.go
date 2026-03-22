@@ -27,7 +27,7 @@ func TestIntrospection(t *testing.T) {
 		require.EqualError(
 			t,
 			err,
-			"[{\"message\":\"introspection disabled\",\"path\":[\"__schema\"]}]",
+			"[{\"message\":\"introspection disabled\",\"path\":[\"__schema\"],\"locations\":[{\"line\":3,\"column\":3}]}]",
 		)
 	})
 
@@ -149,7 +149,7 @@ func TestIntrospection(t *testing.T) {
 		require.EqualError(
 			t,
 			err,
-			"[{\"message\":\"introspection disabled\",\"path\":[\"__schema\"]}]",
+			"[{\"message\":\"introspection disabled\",\"path\":[\"__schema\"],\"locations\":[{\"line\":3,\"column\":3}]}]",
 		)
 	})
 }

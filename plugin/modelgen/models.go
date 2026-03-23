@@ -9,6 +9,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/99designs/gqlgen/internal/code"
 	"github.com/vektah/gqlparser/v2/ast"
 
 	"github.com/99designs/gqlgen/codegen/config"
@@ -494,20 +495,65 @@ func (m *Plugin) generateField(
 			)
 		}
 
-		omittableType, err := binder.FindTypeFromName(
-			"github.com/99designs/gqlgen/graphql.Omittable",
-		)
-		if err != nil {
-			return nil, err
-		}
-
-		f.Type, err = binder.InstantiateType(omittableType, []types.Type{f.Type})
+		omittableType, err := buildOmittableType(cfg, binder, f.Type)
 		if err != nil {
 			return nil, fmt.Errorf("generror: field %v.%v: %w", schemaType.Name, field.Name, err)
 		}
+
+		f.Type = omittableType
 	}
 
 	return f, nil
+}
+
+func buildOmittableType(cfg *config.Config, binder *config.Binder, typ types.Type) (types.Type, error) {
+	for _, ot := range cfg.OmittableType {
+		pkgName, funName := code.PkgAndType(ot)
+
+		obj, err := binder.FindObject(pkgName, funName)
+		if err != nil {
+			continue
+		}
+
+		fn, ok := obj.(*types.Func)
+		if !ok {
+			continue
+		}
+
+		if otype, ok := tryInstantiateOmittableType(binder, fn, typ, typ); ok {
+			return otype, nil
+		}
+
+		// Try and instantiate without pointer type
+		ptrTyp, ok := typ.(*types.Pointer)
+		if !ok {
+			continue
+		}
+
+		if otype, ok := tryInstantiateOmittableType(binder, fn, ptrTyp.Elem(), typ); ok {
+			return otype, nil
+		}
+	}
+
+	return nil, fmt.Errorf("generror: no suitable omittable type found for type %v", typ)
+}
+
+func tryInstantiateOmittableType(binder *config.Binder, fn *types.Func, instType, argType types.Type) (types.Type, bool) {
+	ifn, err := binder.InstantiateType(fn.Type(), []types.Type{instType})
+	if err != nil {
+		return nil, false
+	}
+
+	isig := ifn.(*types.Signature)
+	if isig.Params().Len() != 1 {
+		return nil, false
+	}
+
+	if isig.Params().At(0).Type().String() != argType.String() {
+		return nil, false
+	}
+
+	return isig.Results().At(0).Type(), true
 }
 
 func getExtraFields(cfg *config.Config, modelName string) []*Field {

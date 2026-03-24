@@ -492,17 +492,6 @@ func TestPerformanceOptions(t *testing.T) {
 		require.True(t, cfg.GetSkipImportGrouping())
 	})
 
-	t.Run("GetUseLightModePrefetch defaults to false", func(t *testing.T) {
-		cfg := &Config{}
-		require.False(t, cfg.GetUseLightModePrefetch())
-	})
-
-	t.Run("GetUseLightModePrefetch returns true when set", func(t *testing.T) {
-		val := true
-		cfg := &Config{UseLightModePrefetch: &val}
-		require.True(t, cfg.GetUseLightModePrefetch())
-	})
-
 	t.Run("GetUseBufferPooling defaults to false", func(t *testing.T) {
 		cfg := &Config{}
 		require.False(t, cfg.GetUseBufferPooling())

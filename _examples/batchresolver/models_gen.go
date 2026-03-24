@@ -2,9 +2,63 @@
 
 package batchresolver
 
+type Animal interface {
+	IsAnimal()
+	GetID() string
+	GetBatchProp() string
+}
+
+type Pet interface {
+	IsPet()
+	GetName() string
+	GetBatchName() string
+}
+
+type Cat struct {
+	ID        string `json:"id"`
+	BatchProp string `json:"batchProp"`
+}
+
+func (Cat) IsAnimal()                 {}
+func (this Cat) GetID() string        { return this.ID }
+func (this Cat) GetBatchProp() string { return this.BatchProp }
+
+type Dog struct {
+	ID        string `json:"id"`
+	BatchProp string `json:"batchProp"`
+}
+
+func (Dog) IsAnimal()                 {}
+func (this Dog) GetID() string        { return this.ID }
+func (this Dog) GetBatchProp() string { return this.BatchProp }
+
+type DomesticCat struct {
+	ID        string `json:"id"`
+	BatchProp string `json:"batchProp"`
+	Name      string `json:"name"`
+	BatchName string `json:"batchName"`
+}
+
+func (DomesticCat) IsAnimal()                 {}
+func (this DomesticCat) GetID() string        { return this.ID }
+func (this DomesticCat) GetBatchProp() string { return this.BatchProp }
+
+func (DomesticCat) IsPet()                    {}
+func (this DomesticCat) GetName() string      { return this.Name }
+func (this DomesticCat) GetBatchName() string { return this.BatchName }
+
 type Image struct {
 	URL string `json:"url"`
 }
+
+type Pig struct {
+	ID        string `json:"id"`
+	BatchProp string `json:"batchProp"`
+}
+
+func (Pig) IsAnimal()                 {}
+func (this Pig) GetID() string        { return this.ID }
+func (this Pig) GetBatchProp() string { return this.BatchProp }
 
 type Profile struct {
 	ID            string `json:"id"`

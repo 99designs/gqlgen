@@ -165,6 +165,7 @@ func (ec *executionContext) resolveBatch_{{$object.Name}}_{{$field.Name}}(ctx co
 					len(parents),
 					result,
 					{{ printf "%s.%s" $object.Name $field.Name | quote }},
+					group.IndexMap,
 				)
 			}
 		}

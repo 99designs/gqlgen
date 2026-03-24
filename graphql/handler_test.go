@@ -1,6 +1,7 @@
 package graphql
 
 import (
+	"encoding/json"
 	"os"
 	"testing"
 
@@ -92,4 +93,20 @@ func TestAddUploadToOperations(t *testing.T) {
 		require.Equal(t, (*gqlerror.Error)(nil), err)
 		require.Equal(t, expected, request)
 	})
+}
+
+func TestHeadersNotMarshalled(t *testing.T) {
+	// Injecting headers in the body should not override the request headers.
+	// Test that the Headers field is ignored when unmarshalling the body.
+	params := &RawParams{}
+	body := `{
+		"query":"query todos {todos{id}}",
+		"operationName":"todos",
+		"variables":{"id":"1"},
+		"extensions":{},
+		"headers":{"Authorization":["Bearer token"]}
+	}`
+	err := json.Unmarshal([]byte(body), &params)
+	require.NoError(t, err)
+	require.Empty(t, params.Headers, "Headers injected in Body will override request headers")
 }

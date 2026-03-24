@@ -321,7 +321,8 @@ func TestDirectives(t *testing.T) {
 			err := c.Post(`query { directiveFieldDef(ret: "") }`, &resp)
 
 			require.EqualError(
-				t, err,
+				t,
+				err,
 				`[{"message":"not valid","path":["directiveFieldDef"],"locations":[{"line":1,"column":9}]}]`,
 			)
 		})

@@ -71,10 +71,6 @@ type Config struct {
 	// formatting generated code. This is faster but doesn't group imports
 	// (stdlib/external/internal). Default: false (uses imports.Process)
 	SkipImportGrouping *bool `yaml:"skip_import_grouping,omitempty"`
-	// UseLightModePrefetch uses NeedName|NeedFiles|NeedModule instead of full
-	// NeedTypes for initial package loading. This avoids triggering compilation
-	// until types are actually needed. Default: false
-	UseLightModePrefetch *bool `yaml:"use_light_mode_prefetch,omitempty"`
 	// UseBufferPooling reuses byte buffers via sync.Pool during code formatting
 	// to reduce GC pressure. Default: false
 	UseBufferPooling *bool          `yaml:"use_buffer_pooling,omitempty"`
@@ -96,11 +92,6 @@ func (c *Config) GetFastValidation() bool {
 // GetSkipImportGrouping returns the value of SkipImportGrouping with default false.
 func (c *Config) GetSkipImportGrouping() bool {
 	return boolOrFalse(c.SkipImportGrouping)
-}
-
-// GetUseLightModePrefetch returns the value of UseLightModePrefetch with default false.
-func (c *Config) GetUseLightModePrefetch() bool {
-	return boolOrFalse(c.UseLightModePrefetch)
 }
 
 // GetUseBufferPooling returns the value of UseBufferPooling with default false.
@@ -348,7 +339,6 @@ func (c *Config) Init() error {
 			code.WithBuildTags(c.GoBuildTags...),
 			code.PackagePrefixToCache("github.com/99designs/gqlgen/graphql"),
 			code.WithPreloadNames(templatePackageNames...),
-			code.WithLightModePrefetch(c.GetUseLightModePrefetch()),
 		)
 	}
 
@@ -363,9 +353,7 @@ func (c *Config) Init() error {
 		return err
 	}
 
-	// prefetch all packages with light mode (no type checking, fast)
-	// Type info will be loaded on-demand only for packages that need it (e.g., autobind)
-	c.Packages.LoadAllLight(c.packageList()...)
+	c.Packages.LoadAll(c.packageList()...)
 
 	err = c.autobind()
 	if err != nil {
@@ -1060,7 +1048,6 @@ func (c *Config) LoadSchema() error {
 			code.WithBuildTags(c.GoBuildTags...),
 			code.PackagePrefixToCache("github.com/99designs/gqlgen/graphql"),
 			code.WithPreloadNames(templatePackageNames...),
-			code.WithLightModePrefetch(c.GetUseLightModePrefetch()),
 		)
 	}
 

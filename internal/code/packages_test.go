@@ -111,39 +111,6 @@ func TestLoadAllNames(t *testing.T) {
 	assert.Equal(t, "github_com", p.importToName["github.com"])
 }
 
-func TestWithLightModePrefetch(t *testing.T) {
-	t.Run("default is false", func(t *testing.T) {
-		p := NewPackages()
-		require.False(t, p.useLightModePrefetch)
-	})
-
-	t.Run("can be enabled", func(t *testing.T) {
-		p := NewPackages(WithLightModePrefetch(true))
-		require.True(t, p.useLightModePrefetch)
-	})
-
-	t.Run("can be disabled", func(t *testing.T) {
-		p := NewPackages(WithLightModePrefetch(false))
-		require.False(t, p.useLightModePrefetch)
-	})
-
-	t.Run("LoadAll uses full mode when disabled", func(t *testing.T) {
-		p := NewPackages(WithLightModePrefetch(false))
-		pkgs := p.LoadAll("github.com/99designs/gqlgen/internal/code/testdata/a")
-		require.NotEmpty(t, pkgs)
-		// Full mode includes type info
-		require.NotNil(t, pkgs[0].Types)
-	})
-
-	t.Run("LoadAll uses light mode when enabled", func(t *testing.T) {
-		p := NewPackages(WithLightModePrefetch(true))
-		pkgs := p.LoadAll("github.com/99designs/gqlgen/internal/code/testdata/a")
-		require.NotEmpty(t, pkgs)
-		// Light mode does not include type info
-		require.Nil(t, pkgs[0].Types)
-	})
-}
-
 func initialState(t *testing.T, opts ...Option) *Packages {
 	t.Helper()
 	p := NewPackages(opts...)

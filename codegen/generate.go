@@ -40,6 +40,7 @@ func generateSingleFile(data *Data) error {
 		GeneratedHeader: true,
 		Packages:        data.Config.Packages,
 		TemplateFS:      codegenTemplates,
+		PruneOptions:    data.Config.GetPruneOptions(),
 	})
 }
 
@@ -87,6 +88,7 @@ func generatePerSchema(data *Data) error {
 			GeneratedHeader: true,
 			Packages:        data.Config.Packages,
 			TemplateFS:      codegenTemplates,
+			PruneOptions:    data.Config.GetPruneOptions(),
 		})
 		if err != nil {
 			return err
@@ -145,6 +147,7 @@ func generateRootFile(data *Data) error {
 		GeneratedHeader: true,
 		Packages:        data.Config.Packages,
 		TemplateFS:      codegenTemplates,
+		PruneOptions:    data.Config.GetPruneOptions(),
 	})
 }
 

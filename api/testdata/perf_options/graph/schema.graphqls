@@ -1,0 +1,56 @@
+# Test schema for performance options validation
+# This schema tests that fast_validation, skip_import_grouping, and use_buffer_pooling
+# work correctly with autobind and @goModel mappings.
+
+directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+
+# LocationInfo is mapped to an external package via @goModel
+# This tests that type mapping works correctly with optimization options
+type LocationInfo @goModel(model: "github.com/99designs/gqlgen/api/testdata/perf_options/external.LocationInfo") {
+  country: String!
+  city: String!
+  latitude: Float!
+  longitude: Float!
+}
+
+# Metadata is in the autobind package
+type Metadata {
+  version: String!
+  createdAt: String!
+}
+
+# Connection is in the autobind package
+# gqlgen should use the autobind version, not generate a new one
+type Connection {
+  id: ID!
+  sourceIP: String!
+  destIP: String!
+  port: Int!
+}
+
+# Session contains connections - tests nested autobind types
+type Session {
+  id: ID!
+  connections: [Connection!]!
+  active: Boolean!
+}
+
+# Query type for the schema
+type Query {
+  connection(id: ID!): Connection
+  session(id: ID!): Session
+  locationInfo(country: String!): LocationInfo
+  activeConnections: [Connection!]!
+}
+
+# Mutation to test input handling with optimization options
+input NewConnectionInput {
+  sourceIP: String!
+  destIP: String!
+  port: Int!
+}
+
+type Mutation {
+  createConnection(input: NewConnectionInput!): Connection!
+}
+

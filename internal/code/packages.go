@@ -122,10 +122,9 @@ func (p *Packages) LoadAll(importPaths ...string) []*packages.Package {
 
 	missing := make([]string, 0, len(importPaths))
 	for _, path := range importPaths {
-		if _, ok := p.packages[path]; ok {
-			continue
+		if _, ok := p.packages[path]; !ok {
+			missing = append(missing, path)
 		}
-		missing = append(missing, path)
 	}
 
 	if len(missing) > 0 {
@@ -302,6 +301,32 @@ func (p *Packages) ModTidy() error {
 	tidyCmd.Stderr = os.Stdout
 	if err := tidyCmd.Run(); err != nil {
 		return fmt.Errorf("go mod tidy failed: %w", err)
+	}
+	return nil
+}
+
+// disableOptimizationsFlag is passed to go build to skip compiler optimizations.
+// This makes cold cache builds ~2x faster since we only need error checking.
+const disableOptimizationsFlag = "-gcflags=-N -l"
+
+// ValidateWithBuild validates packages by running `go build` instead of loading
+// with NeedTypes. This is more efficient because:
+// 1. It reuses the existing build cache
+// 2. The user will likely run `go build` anyway after generation
+// 3. It avoids double-loading type information
+//
+// If fastValidation is true, disables compiler optimizations for faster builds.
+func ValidateWithBuild(fastValidation bool, importPaths ...string) error {
+	args := []string{"build"}
+	if fastValidation {
+		args = append(args, disableOptimizationsFlag)
+	}
+	args = append(args, importPaths...)
+
+	cmd := exec.Command("go", args...)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		return fmt.Errorf("validation failed: %w\n%s", err, string(output))
 	}
 	return nil
 }

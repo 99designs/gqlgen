@@ -20,6 +20,7 @@ import (
 
 	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/99designs/gqlgen/internal/code"
+	"github.com/99designs/gqlgen/internal/imports"
 )
 
 type Config struct {
@@ -53,18 +54,57 @@ type Config struct {
 	//
 	// This enables argument directives to not just mutate
 	// argument values but to set them even if they're null.
-	CallArgumentDirectivesWithNull bool           `yaml:"call_argument_directives_with_null,omitempty"`
-	StructFieldsAlwaysPointers     bool           `yaml:"struct_fields_always_pointers,omitempty"`
-	ReturnPointersInUnmarshalInput bool           `yaml:"return_pointers_in_unmarshalinput,omitempty"`
-	ResolversAlwaysReturnPointers  bool           `yaml:"resolvers_always_return_pointers,omitempty"`
-	NullableInputOmittable         bool           `yaml:"nullable_input_omittable,omitempty"`
-	EnableModelJsonOmitemptyTag    *bool          `yaml:"enable_model_json_omitempty_tag,omitempty"`
-	EnableModelJsonOmitzeroTag     *bool          `yaml:"enable_model_json_omitzero_tag,omitempty"`
-	SkipValidation                 bool           `yaml:"skip_validation,omitempty"`
-	SkipModTidy                    bool           `yaml:"skip_mod_tidy,omitempty"`
-	Sources                        []*ast.Source  `yaml:"-"`
-	Packages                       *code.Packages `yaml:"-"`
-	Schema                         *ast.Schema    `yaml:"-"`
+	CallArgumentDirectivesWithNull bool  `yaml:"call_argument_directives_with_null,omitempty"`
+	StructFieldsAlwaysPointers     bool  `yaml:"struct_fields_always_pointers,omitempty"`
+	ReturnPointersInUnmarshalInput bool  `yaml:"return_pointers_in_unmarshalinput,omitempty"`
+	ResolversAlwaysReturnPointers  bool  `yaml:"resolvers_always_return_pointers,omitempty"`
+	NullableInputOmittable         bool  `yaml:"nullable_input_omittable,omitempty"`
+	EnableModelJsonOmitemptyTag    *bool `yaml:"enable_model_json_omitempty_tag,omitempty"`
+	EnableModelJsonOmitzeroTag     *bool `yaml:"enable_model_json_omitzero_tag,omitempty"`
+	SkipValidation                 bool  `yaml:"skip_validation,omitempty"`
+	SkipModTidy                    bool  `yaml:"skip_mod_tidy,omitempty"`
+	// FastValidation uses -gcflags="-N -l" to disable compiler optimizations
+	// during validation, making cold cache validation ~2x faster. The generated
+	// code is only used for error checking, not execution. Default: false
+	FastValidation *bool `yaml:"fast_validation,omitempty"`
+	// SkipImportGrouping uses go/format.Source instead of imports.Process for
+	// formatting generated code. This is faster but doesn't group imports
+	// (stdlib/external/internal). Default: false (uses imports.Process)
+	SkipImportGrouping *bool `yaml:"skip_import_grouping,omitempty"`
+	// UseBufferPooling reuses byte buffers via sync.Pool during code formatting
+	// to reduce GC pressure. Default: false
+	UseBufferPooling *bool          `yaml:"use_buffer_pooling,omitempty"`
+	Sources          []*ast.Source  `yaml:"-"`
+	Packages         *code.Packages `yaml:"-"`
+	Schema           *ast.Schema    `yaml:"-"`
+}
+
+// boolOrFalse returns the value of a *bool pointer, or false if nil.
+func boolOrFalse(ptr *bool) bool {
+	return ptr != nil && *ptr
+}
+
+// GetFastValidation returns the value of FastValidation with default false.
+func (c *Config) GetFastValidation() bool {
+	return boolOrFalse(c.FastValidation)
+}
+
+// GetSkipImportGrouping returns the value of SkipImportGrouping with default false.
+func (c *Config) GetSkipImportGrouping() bool {
+	return boolOrFalse(c.SkipImportGrouping)
+}
+
+// GetUseBufferPooling returns the value of UseBufferPooling with default false.
+func (c *Config) GetUseBufferPooling() bool {
+	return boolOrFalse(c.UseBufferPooling)
+}
+
+// GetPruneOptions returns the PruneOptions based on the config settings.
+func (c *Config) GetPruneOptions() imports.PruneOptions {
+	return imports.PruneOptions{
+		SkipImportGrouping: c.GetSkipImportGrouping(),
+		UseBufferPooling:   c.GetUseBufferPooling(),
+	}
 }
 
 const (
@@ -313,7 +353,6 @@ func (c *Config) Init() error {
 		return err
 	}
 
-	// prefetch all packages in one big packages.Load call
 	c.Packages.LoadAll(c.packageList()...)
 
 	err = c.autobind()

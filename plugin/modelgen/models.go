@@ -322,7 +322,6 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		Packages:        cfg.Packages,
 		Template:        newModelTemplate,
 		Funcs:           funcMap,
-		PruneOptions:    cfg.GetPruneOptions(),
 	})
 	if err != nil {
 		return err

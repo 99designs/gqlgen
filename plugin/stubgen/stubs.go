@@ -55,7 +55,6 @@ func (m *Plugin) GenerateCode(data *codegen.Data) error {
 		GeneratedHeader: true,
 		Packages:        data.Config.Packages,
 		Template:        stubsTemplate,
-		PruneOptions:    data.Config.GetPruneOptions(),
 	})
 }
 

@@ -380,7 +380,11 @@ func TestDirectives(t *testing.T) {
 
 			err := c.Post(`query { directiveFieldDef(ret: "") }`, &resp)
 
-			require.EqualError(t, err, `[{"message":"not valid","path":["directiveFieldDef"]}]`)
+			require.EqualError(
+				t,
+				err,
+				`[{"message":"not valid","path":["directiveFieldDef"],"locations":[{"line":1,"column":9}]}]`,
+			)
 		})
 
 		t.Run("has 2 directives", func(t *testing.T) {
@@ -403,7 +407,7 @@ func TestDirectives(t *testing.T) {
 			require.EqualError(
 				t,
 				err,
-				`[{"message":"directive unimplemented is not implemented","path":["directiveUnimplemented"]}]`,
+				`[{"message":"directive unimplemented is not implemented","path":["directiveUnimplemented"],"locations":[{"line":1,"column":9}]}]`,
 			)
 		})
 

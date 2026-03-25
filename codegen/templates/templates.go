@@ -61,9 +61,6 @@ type Options struct {
 
 	// Packages cache, you can find me on config.Config
 	Packages *code.Packages
-
-	// PruneOptions configures import pruning and formatting behavior.
-	PruneOptions imports.PruneOptions
 }
 
 var (
@@ -157,7 +154,8 @@ func Render(cfg Options) error {
 	}
 	CurrentImports = nil
 
-	if err = write(cfg.Filename, result.Bytes(), cfg.Packages, cfg.PruneOptions); err != nil {
+	err = write(cfg.Filename, result.Bytes(), cfg.Packages)
+	if err != nil {
 		return err
 	}
 
@@ -342,27 +340,27 @@ func goModelName(primaryToGoFunc func(string) string, parts []string) string {
 		}
 
 		applyToGoFunc = func(parts []string) string {
+			var out string
 			switch len(parts) {
 			case 0:
 				return ""
 			case 1:
 				return primaryToGoFunc(parts[0])
 			default:
-				var out strings.Builder
-				out.WriteString(primaryToGoFunc(parts[0]))
-				for _, p := range parts[1:] {
-					out.WriteString(ToGo(p))
-				}
-				return out.String()
+				out = primaryToGoFunc(parts[0])
 			}
+			for _, p := range parts[1:] {
+				out = fmt.Sprintf("%s%s", out, ToGo(p))
+			}
+			return out
 		}
 
 		applyValidGoName = func(parts []string) string {
-			var out strings.Builder
+			var out string
 			for _, p := range parts {
-				out.WriteString(replaceInvalidCharacters(p))
+				out = fmt.Sprintf("%s%s", out, replaceInvalidCharacters(p))
 			}
-			return out.String()
+			return out
 		}
 	)
 
@@ -703,13 +701,13 @@ func render(filename string, tpldata any) (*bytes.Buffer, error) {
 	return buf, t.Execute(buf, tpldata)
 }
 
-func write(filename string, b []byte, packages *code.Packages, opts imports.PruneOptions) error {
+func write(filename string, b []byte, packages *code.Packages) error {
 	err := os.MkdirAll(filepath.Dir(filename), 0o755)
 	if err != nil {
 		return fmt.Errorf("failed to create directory: %w", err)
 	}
 
-	formatted, err := imports.Prune(filename, b, packages, opts)
+	formatted, err := imports.Prune(filename, b, packages)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "gofmt failed on %s: %s\n", filepath.Base(filename), err.Error())
 		formatted = b
@@ -721,7 +719,12 @@ func write(filename string, b []byte, packages *code.Packages, opts imports.Prun
 		return nil
 	}
 
-	return os.WriteFile(filename, formatted, 0o644)
+	err = os.WriteFile(filename, formatted, 0o644)
+	if err != nil {
+		return fmt.Errorf("failed to write %s: %w", filename, err)
+	}
+
+	return nil
 }
 
 var pkgReplacer = strings.NewReplacer(

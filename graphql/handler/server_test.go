@@ -205,7 +205,7 @@ func TestRecover(t *testing.T) {
 	t.Run("recover from panic", func(t *testing.T) {
 		resp := get(srv, "/foo?query={name}")
 
-		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
+		assert.Equal(t, http.StatusInternalServerError, resp.Code, resp.Body.String())
 	})
 }
 

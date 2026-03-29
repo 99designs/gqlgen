@@ -333,11 +333,6 @@
       "type": "boolean",
       "default": false
     },
-    "use_light_mode_prefetch": {
-      "description": "Use light mode (NeedName|NeedFiles|NeedModule) for initial package loading instead of full NeedTypes",
-      "type": "boolean",
-      "default": false
-    },
     "use_buffer_pooling": {
       "description": "Reuse byte buffers via sync.Pool during code formatting to reduce GC pressure",
       "type": "boolean",

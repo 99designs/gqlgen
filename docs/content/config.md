@@ -124,11 +124,6 @@ resolver:
 # Imports will be sorted alphabetically instead. Default: false
 # skip_import_grouping: false
 
-# Optional: set to use light mode (NeedName|NeedFiles|NeedModule) for initial package
-# loading instead of full mode with NeedTypes. This avoids triggering compilation until
-# types are actually needed. Default: false (enable for large projects)
-# use_light_mode_prefetch: false
-
 # Optional: set to reuse byte buffers via sync.Pool during code formatting to reduce
 # GC pressure. Default: false (enable for large projects)
 # use_buffer_pooling: false
@@ -422,26 +417,6 @@ Skips running `go mod tidy` after code generation.
 
 ---
 
-### use_light_mode_prefetch
-
-```yaml
-use_light_mode_prefetch: true  # default: false
-```
-
-Uses `NeedName|NeedFiles|NeedModule` instead of full `NeedTypes` for initial package loading. This avoids triggering compilation until types are actually needed (e.g., for autobind).
-
-**When to use:**
-- Large codebases where `packages.Load` is slow
-- Projects with many packages that don't all need type information
-
-**When NOT to use:**
-- If you experience issues with type resolution
-- If you need full type info immediately for custom plugins
-
-**Performance impact:** ~200x faster initial package loading for large codebases.
-
----
-
 ### use_buffer_pooling
 
 ```yaml
@@ -469,7 +444,6 @@ skip_validation: true
 skip_mod_tidy: true
 skip_import_grouping: true
 fast_validation: true
-use_light_mode_prefetch: true
 use_buffer_pooling: true
 ```
 
@@ -479,7 +453,6 @@ skip_validation: false
 fast_validation: true
 skip_mod_tidy: true
 skip_import_grouping: true  # or false if import style matters
-use_light_mode_prefetch: true
 use_buffer_pooling: true
 ```
 

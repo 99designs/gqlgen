@@ -15033,7 +15033,7 @@ func (ec *executionContext) unmarshalInputInputDirectivesWithArgs(ctx context.Co
 		if ec.Directives.Directive3WithArg == nil {
 			return it, errors.New("directive directive3WithArg is not implemented")
 		}
-		return ec.Directives.Directive3WithArg(ctx, asMap, directive0)
+		return ec.Directives.Directive3WithArg(ctx, asMap, directive0, inputNamespace)
 	}
 	tmp, err := directive1(ctx)
 	if err != nil {

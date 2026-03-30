@@ -139,7 +139,7 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 			// Filter out INPUT_OBJECT directives from type references - they should
 			// only be executed on the input object itself, not on fields that use the type.
 			// See: https://github.com/99designs/gqlgen/issues/2281
-			var filteredDirs []*Directive
+			filteredDirs := make([]*Directive, 0, len(dirs))
 			for _, dir := range dirs {
 				if !dir.IsLocation(ast.LocationInputObject) {
 					filteredDirs = append(filteredDirs, dir)

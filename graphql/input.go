@@ -36,7 +36,7 @@ func UnmarshalInputFromContext(ctx context.Context, raw, v any) error {
 	}
 
 	rv := reflect.ValueOf(v)
-	if rv.Kind() != reflect.Ptr || rv.IsNil() {
+	if rv.Kind() != reflect.Pointer || rv.IsNil() {
 		return errors.New("graphql: input must be a non-nil pointer")
 	}
 	if fn, ok := m[rv.Elem().Type()]; ok {

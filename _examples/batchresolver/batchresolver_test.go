@@ -477,7 +477,7 @@ func TestBatchResolver_Nested_CallCount(t *testing.T) {
 	users := make([]*User, n)
 	profiles := make([]*Profile, n)
 	images := make([]*Image, n)
-	for i := 0; i < n; i++ {
+	for i := range n {
 		users[i] = &User{}
 		profiles[i] = &Profile{ID: fmt.Sprintf("p%d", i)}
 		images[i] = &Image{URL: fmt.Sprintf("https://img/%d", i)}
@@ -586,7 +586,7 @@ func TestBatchResolver_Nested_Connection_CallCount(t *testing.T) {
 	users := make([]*User, n)
 	profiles := make([]*Profile, n)
 	images := make([]*Image, n)
-	for i := 0; i < n; i++ {
+	for i := range n {
 		users[i] = &User{}
 		profiles[i] = &Profile{ID: fmt.Sprintf("p%d", i)}
 		images[i] = &Image{URL: fmt.Sprintf("https://img/%d", i)}
@@ -704,7 +704,7 @@ func BenchmarkBatchResolver_SingleLevel(b *testing.B) {
 	const n = 100
 	users := make([]*User, n)
 	profiles := make([]*Profile, n)
-	for i := 0; i < n; i++ {
+	for i := range n {
 		users[i] = &User{}
 		profiles[i] = &Profile{ID: fmt.Sprintf("p%d", i)}
 	}
@@ -998,7 +998,7 @@ func BenchmarkBatchResolver_Nested(b *testing.B) {
 	users := make([]*User, n)
 	profiles := make([]*Profile, n)
 	images := make([]*Image, n)
-	for i := 0; i < n; i++ {
+	for i := range n {
 		users[i] = &User{}
 		profiles[i] = &Profile{ID: fmt.Sprintf("p%d", i)}
 		images[i] = &Image{URL: fmt.Sprintf("https://img/%d", i)}

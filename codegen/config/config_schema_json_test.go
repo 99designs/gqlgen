@@ -41,7 +41,7 @@ func resolveSchemaProps(
 	prop jsonSchemaProperty,
 ) (structType reflect.Type, schemaProps map[string]jsonSchemaProperty) {
 	// Unwrap pointer(s).
-	for goType.Kind() == reflect.Ptr {
+	for goType.Kind() == reflect.Pointer {
 		goType = goType.Elem()
 	}
 
@@ -51,7 +51,7 @@ func resolveSchemaProps(
 
 	case reflect.Map:
 		valType := goType.Elem()
-		for valType.Kind() == reflect.Ptr {
+		for valType.Kind() == reflect.Pointer {
 			valType = valType.Elem()
 		}
 		if valType.Kind() == reflect.Struct && prop.AdditionalProperties != nil {
@@ -60,7 +60,7 @@ func resolveSchemaProps(
 
 	case reflect.Slice:
 		elemType := goType.Elem()
-		for elemType.Kind() == reflect.Ptr {
+		for elemType.Kind() == reflect.Pointer {
 			elemType = elemType.Elem()
 		}
 		if elemType.Kind() == reflect.Struct && prop.Items != nil {
@@ -127,7 +127,7 @@ func TestConfigFieldsPresentInSchemaJSON(t *testing.T) {
 		"federated": true,
 	}
 
-	configType := reflect.TypeOf(Config{})
+	configType := reflect.TypeFor[Config]()
 	for i := range configType.NumField() {
 		field := configType.Field(i)
 		yamlName := extractYAMLTagName(field)

@@ -611,7 +611,7 @@ func rawQuote(s string) string {
 func notNil(field string, data any) bool {
 	v := reflect.ValueOf(data)
 
-	if v.Kind() == reflect.Ptr {
+	if v.Kind() == reflect.Pointer {
 		v = v.Elem()
 	}
 	if v.Kind() != reflect.Struct {

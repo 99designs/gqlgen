@@ -150,6 +150,10 @@ type InputDirectives struct {
 	ThirdParty    *ThirdParty      `json:"thirdParty,omitempty"`
 }
 
+type InputDirectivesWithArgs struct {
+	Text string `json:"text"`
+}
+
 type InputWithEnumValue struct {
 	Enum EnumTest `json:"enum"`
 }

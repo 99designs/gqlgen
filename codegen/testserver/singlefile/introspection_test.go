@@ -27,7 +27,7 @@ func TestIntrospection(t *testing.T) {
 		require.EqualError(
 			t,
 			err,
-			"[{\"message\":\"introspection disabled\",\"path\":[\"__schema\"]}]",
+			"[{\"message\":\"introspection disabled\",\"path\":[\"__schema\"],\"locations\":[{\"line\":3,\"column\":3}]}]",
 		)
 	})
 
@@ -67,6 +67,28 @@ func TestIntrospection(t *testing.T) {
 
 			require.Equal(t, "id", resp.Type.Fields[0].Name)
 			require.Nil(t, resp.Type.Fields[0].DeprecationReason)
+		})
+
+		t.Run("chained interface possibleTypes", func(t *testing.T) {
+			var resp struct {
+				Type struct {
+					PossibleTypes []struct {
+						Name string
+					}
+				} `json:"__type"`
+			}
+
+			err := c.Post(`{ __type(name: "Animal") { possibleTypes { name } } }`, &resp)
+			require.NoError(t, err)
+
+			names := make([]string, len(resp.Type.PossibleTypes))
+			for i, pt := range resp.Type.PossibleTypes {
+				names[i] = pt.Name
+			}
+			require.Contains(t, names, "Dog")
+			require.Contains(t, names, "Cat")
+			// Horse implements Animal transitively via Mammalian
+			require.Contains(t, names, "Horse")
 		})
 
 		t.Run("deprecated arguments", func(t *testing.T) {
@@ -127,7 +149,7 @@ func TestIntrospection(t *testing.T) {
 		require.EqualError(
 			t,
 			err,
-			"[{\"message\":\"introspection disabled\",\"path\":[\"__schema\"]}]",
+			"[{\"message\":\"introspection disabled\",\"path\":[\"__schema\"],\"locations\":[{\"line\":3,\"column\":3}]}]",
 		)
 	})
 }

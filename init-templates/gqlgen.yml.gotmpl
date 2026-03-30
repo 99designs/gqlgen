@@ -23,7 +23,12 @@ exec:
 #   package: graph
 #   version: 2
 #   options:
-#     computed_requires: true
+#     # Generate a function to populate @requires fields (cannot be used with computed_requires)
+#     explicit_requires: false
+#     # Generate resolver functions to compute @requires field values (requires version 2 and call_argument_directives_with_null: true)
+#     computed_requires: false
+#     # Default engine for entityResolver generation, can be overridden per entity with @entityResolver(multi: Boolean)
+#     entity_resolver_multi: false
 
 # Where should any generated models go?
 model:
@@ -51,12 +56,28 @@ resolver:
   # resolver_template: [your/path/resolver.gotpl]
   # Optional: turn on to avoid rewriting existing resolver(s) when generating
   # preserve_resolver: false
+  # Optional: the name of the resolver struct type (default: Resolver)
+  # type: Resolver
 
 # Optional: turn on use ` + "`" + `gqlgen:"fieldName"` + "`" + ` tags in your models
 # struct_tag: json
 
+# Optional: prefix for embedded structs (default: "Base")
+# embedded_structs_prefix: Base
+
+# Optional: custom directive configuration
+# directives:
+#   hasRole:
+#     skip_runtime: false
+
+# Optional: local package prefix for import sorting
+# local_prefix: ""
+
 # Optional: turn on to use []Thing instead of []*Thing
 # omit_slice_element_pointers: false
+
+# Optional: turn on to omit getter methods on models
+# omit_getters: false
 
 # Optional: turn on to omit Is<Name>() methods to interface and unions
 # omit_interface_checks: true
@@ -76,6 +97,12 @@ resolver:
 # Optional: turn on to exclude resolver fields from the generated models file.
 # omit_resolver_fields: false
 
+# Optional: turn on to omit panic handler in the generated server
+# omit_panic_handler: false
+
+# Optional: turn on to omit JSON marshaler/unmarshaler generation for enums
+# omit_enum_json_marshalers: false
+
 # Optional: turn off to make struct-type struct fields not use pointers
 # e.g. type Thing struct { FieldA OtherThing } instead of { FieldA *OtherThing }
 # struct_fields_always_pointers: true
@@ -88,6 +115,12 @@ resolver:
 
 # Optional: wrap nullable input fields with Omittable
 # nullable_input_omittable: true
+
+# Optional: enable adding omitempty to the json tag of generated model fields
+# enable_model_json_omitempty_tag: false
+
+# Optional: enable adding omitzero to the json tag of generated model fields
+# enable_model_json_omitzero_tag: false
 
 # Optional: set to speed up generation time by not performing a final validation pass.
 # skip_validation: true
@@ -117,6 +150,9 @@ call_argument_directives_with_null: true
 #   initialisms: # List of initialisms to for Go names
 #     - 'CC'
 #     - 'BCC'
+
+# Optional: enable getter/haser methods for autobind
+# autobind_getter_haser: false
 
 # gqlgen will search for any type names in the schema in these go packages
 # if they match it will use them, otherwise it will generate them.

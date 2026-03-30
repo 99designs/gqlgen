@@ -37,13 +37,7 @@ func (h UrlEncodedForm) Supports(r *http.Request) bool {
 func (h UrlEncodedForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
 	ctx := r.Context()
 	writeHeaders(w, h.ResponseHeaders)
-	params := &graphql.RawParams{}
 	start := graphql.Now()
-	params.Headers = r.Header
-	params.ReadTime = graphql.TraceTiming{
-		Start: start,
-		End:   graphql.Now(),
-	}
 
 	bodyString, err := getRequestBody(r)
 	if err != nil {
@@ -54,13 +48,19 @@ func (h UrlEncodedForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.
 		return
 	}
 
-	params, err = h.parseBody(bodyString)
+	params, err := h.parseBody(bodyString)
 	if err != nil {
 		w.WriteHeader(http.StatusUnprocessableEntity)
 		gqlErr := gqlerror.Errorf("could not cleanup body: %+v", err)
 		resp := exec.DispatchError(ctx, gqlerror.List{gqlErr})
 		writeJson(w, resp)
 		return
+	}
+
+	params.Headers = r.Header
+	params.ReadTime = graphql.TraceTiming{
+		Start: start,
+		End:   graphql.Now(),
 	}
 
 	rc, opErr := exec.CreateOperationContext(ctx, params)

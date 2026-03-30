@@ -309,6 +309,10 @@ func (ec *executionContext) fieldContext_ObjectDirectivesWithCustomGoModel_nulla
 
 func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, obj any) (InnerDirectives, error) {
 	var it InnerDirectives
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -360,6 +364,10 @@ func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, o
 
 func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, obj any) (InputDirectives, error) {
 	var it InputDirectives
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -506,6 +514,10 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 
 func (ec *executionContext) unmarshalInputOuterWrapperInput(ctx context.Context, obj any) (OuterWrapperInput, error) {
 	var it OuterWrapperInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v

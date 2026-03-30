@@ -83,13 +83,7 @@ func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecu
 
 		pool.Put(params)
 	}()
-	params.Headers = r.Header
-
 	start := graphql.Now()
-	params.ReadTime = graphql.TraceTiming{
-		Start: start,
-		End:   graphql.Now(),
-	}
 
 	bodyBytes, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -110,6 +104,12 @@ func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecu
 		resp := exec.DispatchError(ctx, gqlerror.List{gqlErr})
 		writeJson(w, resp)
 		return
+	}
+
+	params.Headers = r.Header
+	params.ReadTime = graphql.TraceTiming{
+		Start: start,
+		End:   graphql.Now(),
 	}
 
 	rc, opErr := exec.CreateOperationContext(ctx, params)

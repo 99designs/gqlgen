@@ -9,6 +9,7 @@ import (
 
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
+	"github.com/99designs/gqlgen/internal/code"
 	"github.com/99designs/gqlgen/plugin"
 	"github.com/99designs/gqlgen/plugin/federation"
 	"github.com/99designs/gqlgen/plugin/modelgen"
@@ -24,7 +25,34 @@ var (
 	) // regex to grab the version number from a url
 )
 
+// Generate generates GraphQL code based on the provided config.
 func Generate(cfg *config.Config, option ...Option) error {
+	return generate(cfg, nil, option...)
+}
+
+// GenerateIncremental generates code only for schemas affected by changes.
+// changedSchemas should contain paths to schema files that have changed
+// (e.g., from git diff). If empty, performs full generation.
+// Use verbose to enable detailed logging of what's being regenerated.
+func GenerateIncremental(
+	cfg *config.Config,
+	changedSchemas []string,
+	verbose bool,
+	option ...Option,
+) error {
+	return generate(cfg, &codegen.IncrementalOptions{
+		ChangedSchemas: changedSchemas,
+		Verbose:        verbose,
+	}, option...)
+}
+
+// generate is the shared implementation for both Generate and GenerateIncremental.
+// If incrementalOpts is nil, performs full generation. Otherwise, uses incremental generation.
+func generate(
+	cfg *config.Config,
+	incrementalOpts *codegen.IncrementalOptions,
+	option ...Option,
+) error {
 	_ = syscall.Unlink(cfg.Exec.Filename)
 	if cfg.Model.IsDefined() {
 		_ = syscall.Unlink(cfg.Model.Filename)
@@ -153,8 +181,15 @@ func Generate(cfg *config.Config, option ...Option) error {
 		}
 	}
 
-	if err = codegen.GenerateCode(data); err != nil {
-		return fmt.Errorf("generating core failed: %w", err)
+	// Use incremental generation if options provided, otherwise full generation
+	if incrementalOpts != nil {
+		if err = codegen.GenerateCodeIncremental(data, *incrementalOpts); err != nil {
+			return fmt.Errorf("generating core failed: %w", err)
+		}
+	} else {
+		if err = codegen.GenerateCode(data); err != nil {
+			return fmt.Errorf("generating core failed: %w", err)
+		}
 	}
 
 	if !cfg.SkipModTidy {
@@ -172,19 +207,29 @@ func Generate(cfg *config.Config, option ...Option) error {
 }
 
 func validate(cfg *config.Config) error {
-	roots := []string{cfg.Exec.ImportPath()}
+	roots := []string{withSubpackages(cfg.Exec.ImportPath())}
 	if cfg.Model.IsDefined() {
-		roots = append(roots, cfg.Model.ImportPath())
+		roots = append(roots, withSubpackages(cfg.Model.ImportPath()))
 	}
-
 	if cfg.Resolver.IsDefined() {
-		roots = append(roots, cfg.Resolver.ImportPath())
+		roots = append(roots, withSubpackages(cfg.Resolver.ImportPath()))
 	}
 
-	cfg.Packages.LoadAll(roots...)
-	errs := cfg.Packages.Errors()
-	if len(errs) > 0 {
-		return errs
-	}
-	return nil
+	// Use go build for validation instead of packages.Load with NeedTypes.
+	// go build benefits from incremental compilation - only changed files
+	// are recompiled. Since we use content-based file writing, unchanged
+	// generated files keep their mtime, so go build skips them.
+	//
+	// FastValidation uses -gcflags="-N -l" to disable compiler
+	// optimizations, making cold cache validation ~2x faster.
+	return code.ValidateWithBuild(cfg.GetFastValidation(), roots...)
+}
+
+// subpackagesWildcard is the Go tooling pattern for "this package and all subpackages".
+// Used by go build, go test, etc. (e.g., "go build ./...")
+const subpackagesWildcard = "/..."
+
+// withSubpackages appends the Go wildcard pattern to include all subpackages.
+func withSubpackages(importPath string) string {
+	return importPath + subpackagesWildcard
 }

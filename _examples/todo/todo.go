@@ -130,7 +130,7 @@ func (r *MutationResolver) UpdateTodo(
 ) (*Todo, error) {
 	var affectedTodo *Todo
 
-	for i := 0; i < len(r.todos); i++ {
+	for i := range len(r.todos) {
 		if r.todos[i].ID == id {
 			affectedTodo = r.todos[i]
 			break

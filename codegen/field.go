@@ -103,22 +103,6 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 		f.TypeReference = b.Binder.PointerTo(f.TypeReference)
 	}
 
-	// Set Batch flag from config (independent of resolver setting)
-	if fieldCfg, ok := b.Config.Models[obj.Name]; ok {
-		if fieldEntry, ok := fieldCfg.Fields[field.Name]; ok {
-			f.Batch = fieldEntry.Batch
-			if f.Batch {
-				// batch resolvers are always user-provided
-				f.IsResolver = true
-			}
-		}
-	}
-
-	if f.IsResolver && b.Config.ResolversAlwaysReturnPointers && !f.TypeReference.IsPtr() &&
-		f.TypeReference.IsStruct() {
-		f.TypeReference = b.Binder.PointerTo(f.TypeReference)
-	}
-
 	return &f, nil
 }
 
@@ -361,7 +345,7 @@ func (b *builder) findBindStructTagTarget(in types.Type, name string) (types.Obj
 		return b.findBindStructTagTarget(t.Underlying(), name)
 	case *types.Struct:
 		var found types.Object
-		for i := 0; i < t.NumFields(); i++ {
+		for i := range t.NumFields() {
 			field := t.Field(i)
 			if !field.Exported() || field.Embedded() {
 				continue

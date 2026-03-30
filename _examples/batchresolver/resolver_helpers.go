@@ -46,3 +46,10 @@ func resolveProfile(r *Resolver, idx int) (*Profile, error) {
 	}
 	return r.profiles[idx], nil
 }
+
+func resolveImage(r *Resolver, idx int) (*Image, error) {
+	if idx < 0 || idx >= len(r.images) {
+		return nil, fmt.Errorf("image not set at index %d", idx)
+	}
+	return r.images[idx], nil
+}

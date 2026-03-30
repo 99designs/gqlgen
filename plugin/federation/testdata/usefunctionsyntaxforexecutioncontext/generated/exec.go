@@ -4813,6 +4813,10 @@ func fieldContext___Type_isOneOf(_ context.Context, ec *executionContext, field 
 
 func unmarshalInputMultiHelloByNamesInput(ctx context.Context, ec *executionContext, obj any) (model.MultiHelloByNamesInput, error) {
 	var it model.MultiHelloByNamesInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -4839,6 +4843,10 @@ func unmarshalInputMultiHelloByNamesInput(ctx context.Context, ec *executionCont
 
 func unmarshalInputMultiHelloMultipleRequiresByNamesInput(ctx context.Context, ec *executionContext, obj any) (model.MultiHelloMultipleRequiresByNamesInput, error) {
 	var it model.MultiHelloMultipleRequiresByNamesInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -4865,6 +4873,10 @@ func unmarshalInputMultiHelloMultipleRequiresByNamesInput(ctx context.Context, e
 
 func unmarshalInputMultiHelloRequiresByNamesInput(ctx context.Context, ec *executionContext, obj any) (model.MultiHelloRequiresByNamesInput, error) {
 	var it model.MultiHelloRequiresByNamesInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -4891,6 +4903,10 @@ func unmarshalInputMultiHelloRequiresByNamesInput(ctx context.Context, ec *execu
 
 func unmarshalInputMultiHelloWithErrorByNamesInput(ctx context.Context, ec *executionContext, obj any) (model.MultiHelloWithErrorByNamesInput, error) {
 	var it model.MultiHelloWithErrorByNamesInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -4917,6 +4933,10 @@ func unmarshalInputMultiHelloWithErrorByNamesInput(ctx context.Context, ec *exec
 
 func unmarshalInputMultiPlanetRequiresNestedByNamesInput(ctx context.Context, ec *executionContext, obj any) (model.MultiPlanetRequiresNestedByNamesInput, error) {
 	var it model.MultiPlanetRequiresNestedByNamesInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v

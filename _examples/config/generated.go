@@ -2363,6 +2363,10 @@ func (ec *executionContext) fieldContext_role_name(_ context.Context, field grap
 
 func (ec *executionContext) unmarshalInputNewTodo(ctx context.Context, obj any) (NewTodo, error) {
 	var it NewTodo
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v

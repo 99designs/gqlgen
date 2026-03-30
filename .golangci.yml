@@ -95,14 +95,6 @@ linters:
     modernize:
       disable:
         - any
-        - fmtappendf
-        - minmax
-        - rangeint
-        - reflecttypefor
-        - stditerators
-        - stringscut
-        - stringscutprefix
-        - stringsseq
     perfsprint:
       int-conversion: false
       err-error: false

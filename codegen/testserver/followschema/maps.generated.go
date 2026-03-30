@@ -228,6 +228,10 @@ func (ec *executionContext) fieldContext_MapStringInterfaceType_nested(_ context
 
 func (ec *executionContext) unmarshalInputMapNestedInput(ctx context.Context, obj any) (MapNested, error) {
 	var it MapNested
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -253,13 +257,18 @@ func (ec *executionContext) unmarshalInputMapNestedInput(ctx context.Context, ob
 }
 
 func (ec *executionContext) unmarshalInputMapNestedMapSliceInput(ctx context.Context, obj any) (map[string]any, error) {
-	it := make(map[string]any, len(obj.(map[string]any)))
+	var it map[string]any
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
 	fieldsInOrder := [...]string{"name", "recurse"}
+	it = make(map[string]any, len(asMap))
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -286,13 +295,18 @@ func (ec *executionContext) unmarshalInputMapNestedMapSliceInput(ctx context.Con
 }
 
 func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Context, obj any) (map[string]any, error) {
-	it := make(map[string]any, len(obj.(map[string]any)))
+	var it map[string]any
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
 	fieldsInOrder := [...]string{"a", "b", "c", "nested"}
+	it = make(map[string]any, len(asMap))
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -334,6 +348,10 @@ func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Co
 
 func (ec *executionContext) unmarshalInputNestedMapInput(ctx context.Context, obj any) (NestedMapInput, error) {
 	var it NestedMapInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v

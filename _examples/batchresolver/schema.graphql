@@ -1,5 +1,46 @@
+directive @goField(
+	forceResolver: Boolean
+	name: String
+	omittable: Boolean
+	batch: Boolean
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
 type Query {
     users: [User!]!
+    animals: [Animal!]!
+    pets: [Pet!]!
+}
+
+interface Animal {
+    id: ID!
+    batchProp: String! @goField(batch: true)
+}
+
+interface Pet {
+    name: String!
+    batchName: String! @goField(batch: true)
+}
+
+type Dog implements Animal {
+    id: ID!
+    batchProp: String! @goField(batch: true)
+}
+
+type Cat implements Animal {
+    id: ID!
+    batchProp: String! @goField(batch: true)
+}
+
+type Pig implements Animal {
+    id: ID!
+    batchProp: String! @goField(batch: true)
+}
+
+type DomesticCat implements Animal & Pet {
+    id: ID!
+    batchProp: String! @goField(batch: true)
+    name: String!
+    batchName: String! @goField(batch: true)
 }
 
 type User {
@@ -9,8 +50,37 @@ type User {
     nullableNonBatchWithArg(offset: Int!): Profile
     nonNullableBatch: Profile!
     nonNullableNonBatch: Profile!
+
+    directiveNullableBatch: Profile @goField(batch: true)
+    directiveNullableNonBatch: Profile @goField(forceResolver: true)
+    directiveNullableBatchWithArg(offset: Int!): Profile @goField(batch: true)
+    directiveNullableNonBatchWithArg(offset: Int!): Profile @goField(forceResolver: true)
+    directiveNonNullableBatch: Profile! @goField(batch: true)
+    directiveNonNullableNonBatch: Profile! @goField(forceResolver: true)
+
+    profileBatch: Profile
+    profileNonBatch: Profile
+    profileConnectionBatch: ProfilesConnection
+    profileConnectionNonBatch: ProfilesConnection
 }
 
 type Profile {
     id: ID!
+    coverBatch: Image
+    coverNonBatch: Image
+}
+
+
+type Image {
+    url: String!
+}
+
+type ProfilesConnection {
+    edges: [ProfileEdge!]!
+    totalCount: Int!
+}
+
+type ProfileEdge {
+    node: Profile!
+    cursor: ID!
 }

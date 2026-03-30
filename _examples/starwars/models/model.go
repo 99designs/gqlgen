@@ -74,5 +74,5 @@ func (f *FriendsConnection) PageInfo() PageInfo {
 }
 
 func EncodeCursor(i int) string {
-	return base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("cursor%d", i+1)))
+	return base64.StdEncoding.EncodeToString(fmt.Appendf(nil, "cursor%d", i+1))
 }

@@ -102,10 +102,7 @@ func (r *Resolver) resolveFriendConnection(
 
 	to := len(ids)
 	if first != nil {
-		to = from + *first
-		if to > len(ids) {
-			to = len(ids)
-		}
+		to = min(from+*first, len(ids))
 	}
 
 	return &models.FriendsConnection{

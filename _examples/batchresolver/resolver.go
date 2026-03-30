@@ -5,9 +5,12 @@ package batchresolver
 // It serves as dependency injection for your app, add any dependencies you require
 // here.
 
+import "sync/atomic"
+
 type Resolver struct {
 	users                   []*User
 	profiles                []*Profile
+	images                  []*Image
 	profileErrIdx           int
 	profileErrWithValueIdxs map[int]struct{}
 	profileErrListIdxs      map[int]struct{}
@@ -19,6 +22,25 @@ type Resolver struct {
 	batchResultsWrongLen    bool
 	batchResultsLen         int
 	batchErrListIdxs        map[int]struct{}
+
+	// Call counters for the nested batch performance test (atomic for -race safety)
+	profileBatchCalls              atomic.Int32
+	profileNonBatchCalls           atomic.Int32
+	coverBatchCalls                atomic.Int32
+	coverNonBatchCalls             atomic.Int32
+	profileConnectionBatchCalls    atomic.Int32
+	profileConnectionNonBatchCalls atomic.Int32
+
+	// Animals for interface batch test
+	animals []Animal
+	pets    []Pet
+
+	// Call counters for interface batch resolvers
+	catBatchPropCalls         atomic.Int32
+	dogBatchPropCalls         atomic.Int32
+	pigBatchPropCalls         atomic.Int32
+	domesticCatBatchPropCalls atomic.Int32
+	domesticCatBatchNameCalls atomic.Int32
 }
 
 func (r *Resolver) userIndex(obj *User) int {
@@ -27,6 +49,18 @@ func (r *Resolver) userIndex(obj *User) int {
 	}
 	for i := range r.users {
 		if r.users[i] == obj {
+			return i
+		}
+	}
+	return -1
+}
+
+func (r *Resolver) profileIndex(obj *Profile) int {
+	if obj == nil {
+		return -1
+	}
+	for i := range r.profiles {
+		if r.profiles[i] == obj {
 			return i
 		}
 	}

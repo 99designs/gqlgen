@@ -67,6 +67,10 @@ func (ec *executionContext) fieldContext_FieldsOrderPayload_firstFieldValue(_ co
 
 func (ec *executionContext) unmarshalInputFieldsOrderInput(ctx context.Context, obj any) (FieldsOrderInput, error) {
 	var it FieldsOrderInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v

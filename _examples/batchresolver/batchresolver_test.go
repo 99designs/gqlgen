@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
+	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
@@ -416,6 +417,32 @@ func TestBatchResolver_BatchErrors_ResultLenMismatch_AddsErrorPerParent(t *testi
 	)
 }
 
+func TestBatchDirectiveConfig(t *testing.T) {
+	cfg, err := config.LoadConfig("gqlgen.yml")
+	require.NoError(t, err)
+	require.NoError(t, cfg.Init())
+
+	userFields := cfg.Models["User"].Fields
+
+	// YAML-configured fields
+	require.True(t, userFields["nullableBatch"].Batch)
+	require.True(t, userFields["nullableBatchWithArg"].Batch)
+	require.True(t, userFields["nonNullableBatch"].Batch)
+
+	require.False(t, userFields["nullableNonBatch"].Batch)
+	require.False(t, userFields["nullableNonBatchWithArg"].Batch)
+	require.False(t, userFields["nonNullableNonBatch"].Batch)
+
+	// Directive-configured fields
+	require.True(t, userFields["directiveNullableBatch"].Batch)
+	require.True(t, userFields["directiveNullableBatchWithArg"].Batch)
+	require.True(t, userFields["directiveNonNullableBatch"].Batch)
+
+	require.False(t, userFields["directiveNullableNonBatch"].Batch)
+	require.False(t, userFields["directiveNullableNonBatchWithArg"].Batch)
+	require.False(t, userFields["directiveNonNullableNonBatch"].Batch)
+}
+
 func TestBatchResolver_BatchErrors_ListPerIndex_AddsMultipleErrors(t *testing.T) {
 	resolver := &Resolver{
 		users:            []*User{{}, {}},
@@ -443,4 +470,579 @@ func TestBatchResolver_BatchErrors_ListPerIndex_AddsMultipleErrors(t *testing.T)
 		`{"users":[{"nullableBatch":null},{"nullableBatch":{"id":"p2"}}]}`,
 		marshalJSON(t, resp),
 	)
+}
+
+func TestBatchResolver_Nested_CallCount(t *testing.T) {
+	const n = 10
+	users := make([]*User, n)
+	profiles := make([]*Profile, n)
+	images := make([]*Image, n)
+	for i := range n {
+		users[i] = &User{}
+		profiles[i] = &Profile{ID: fmt.Sprintf("p%d", i)}
+		images[i] = &Image{URL: fmt.Sprintf("https://img/%d", i)}
+	}
+	resolver := &Resolver{
+		users:         users,
+		profiles:      profiles,
+		images:        images,
+		profileErrIdx: -1,
+	}
+	client := newTestClient(resolver)
+
+	type graphqlResp struct {
+		Users []struct {
+			Profile *struct {
+				ID    string `json:"id"`
+				Cover *struct {
+					URL string `json:"url"`
+				} `json:"cover"`
+			} `json:"profile"`
+		} `json:"users"`
+	}
+
+	assertData := func(t *testing.T, resp graphqlResp, label string) {
+		t.Helper()
+		require.Len(t, resp.Users, n)
+		for i, u := range resp.Users {
+			require.NotNil(t, u.Profile, "%s user %d profile nil", label, i)
+			require.Equal(t, fmt.Sprintf("p%d", i), u.Profile.ID)
+			require.NotNil(t, u.Profile.Cover, "%s user %d cover nil", label, i)
+			require.Equal(t, fmt.Sprintf("https://img/%d", i), u.Profile.Cover.URL)
+		}
+	}
+
+	// --- Batch path ---
+
+	var batchResp graphqlResp
+	err := client.Post(`query {
+		users {
+			profile: profileBatch {
+				id
+				cover: coverBatch {
+					url
+				}
+			}
+		}
+	}`, &batchResp)
+	require.NoError(t, err)
+	assertData(t, batchResp, "batch")
+	require.Equal(
+		t,
+		int32(1),
+		resolver.profileBatchCalls.Load(),
+		"profileBatch should be called once for all users",
+	)
+	// TODO: coverBatch is called once per profile (not batched) because profiles
+	// are resolved as individual values, not as a list. The batch parent context
+	// for "Profile" is only set when marshalling a [Profile] list field.
+	// Nested batching should propagate the batch parent context from batch
+	// resolver results so coverBatchCalls == 1 here.
+	require.Equal(
+		t,
+		int32(n),
+		resolver.coverBatchCalls.Load(),
+		"coverBatch called once per profile (no list parent context)",
+	)
+
+	// --- Non-batch path ---
+	var nonBatchResp graphqlResp
+	err = client.Post(`query {
+		users {
+			profile: profileNonBatch {
+				id
+				cover: coverNonBatch {
+					url
+				}
+			}
+		}
+	}`, &nonBatchResp)
+	require.NoError(t, err)
+	assertData(t, nonBatchResp, "non-batch")
+	require.Equal(
+		t,
+		int32(n),
+		resolver.profileNonBatchCalls.Load(),
+		"profileNonBatch should be called once per user",
+	)
+	require.Equal(
+		t,
+		int32(n),
+		resolver.coverNonBatchCalls.Load(),
+		"coverNonBatch should be called once per profile",
+	)
+
+	// --- Verify both paths produce identical data ---
+	require.Equal(
+		t,
+		marshalJSON(t, batchResp),
+		marshalJSON(t, nonBatchResp),
+		"batch and non-batch should return identical data",
+	)
+}
+
+func TestBatchResolver_Nested_Connection_CallCount(t *testing.T) {
+	const n = 10
+	users := make([]*User, n)
+	profiles := make([]*Profile, n)
+	images := make([]*Image, n)
+	for i := range n {
+		users[i] = &User{}
+		profiles[i] = &Profile{ID: fmt.Sprintf("p%d", i)}
+		images[i] = &Image{URL: fmt.Sprintf("https://img/%d", i)}
+	}
+	resolver := &Resolver{
+		users:         users,
+		profiles:      profiles,
+		images:        images,
+		profileErrIdx: -1,
+	}
+	client := newTestClient(resolver)
+
+	type graphqlResp struct {
+		Users []struct {
+			Conn *struct {
+				Edges []struct {
+					Node *struct {
+						ID    string `json:"id"`
+						Cover *struct {
+							URL string `json:"url"`
+						} `json:"cover"`
+					} `json:"node"`
+				} `json:"edges"`
+			} `json:"conn"`
+		} `json:"users"`
+	}
+
+	assertData := func(t *testing.T, resp graphqlResp, label string) {
+		t.Helper()
+		require.Len(t, resp.Users, n)
+		for i, u := range resp.Users {
+			require.NotNil(t, u.Conn, "%s user %d connection nil", label, i)
+			require.Len(t, u.Conn.Edges, 1, "%s user %d edges", label, i)
+			node := u.Conn.Edges[0].Node
+			require.NotNil(t, node, "%s user %d node nil", label, i)
+			require.Equal(t, fmt.Sprintf("p%d", i), node.ID)
+			require.NotNil(t, node.Cover, "%s user %d cover nil", label, i)
+			require.Equal(t, fmt.Sprintf("https://img/%d", i), node.Cover.URL)
+		}
+	}
+
+	// --- Batch path ---
+
+	var batchResp graphqlResp
+	err := client.Post(`query {
+		users {
+			conn: profileConnectionBatch {
+				edges {
+					node {
+						id
+						cover: coverBatch { url }
+					}
+				}
+			}
+		}
+	}`, &batchResp)
+	require.NoError(t, err)
+	assertData(t, batchResp, "batch")
+	require.Equal(
+		t,
+		int32(1),
+		resolver.profileConnectionBatchCalls.Load(),
+		"profileConnectionBatch should be called once for all users",
+	)
+	// TODO: coverBatch is not batched because the immediate parent (Profile)
+	// and its edge are not batched — only the connection is. This should be 1
+	// once nested batching propagates through non-batched intermediate types.
+	require.Equal(
+		t,
+		int32(n),
+		resolver.coverBatchCalls.Load(),
+		"coverBatch called once per profile (immediate parent not batched)",
+	)
+
+	// --- Non-batch path ---
+
+	var nonBatchResp graphqlResp
+	err = client.Post(`query {
+		users {
+			conn: profileConnectionNonBatch {
+				edges {
+					node {
+						id
+						cover: coverNonBatch { url }
+					}
+				}
+			}
+		}
+	}`, &nonBatchResp)
+	require.NoError(t, err)
+	assertData(t, nonBatchResp, "non-batch")
+	require.Equal(
+		t,
+		int32(n),
+		resolver.profileConnectionNonBatchCalls.Load(),
+		"profileConnectionNonBatch should be called once per user",
+	)
+	require.Equal(
+		t,
+		int32(n),
+		resolver.coverNonBatchCalls.Load(),
+		"coverNonBatch should be called once per profile",
+	)
+
+	// --- Verify both paths produce identical data ---
+	require.Equal(
+		t,
+		marshalJSON(t, batchResp),
+		marshalJSON(t, nonBatchResp),
+		"batch and non-batch should return identical data",
+	)
+}
+
+func BenchmarkBatchResolver_SingleLevel(b *testing.B) {
+	const n = 100
+	users := make([]*User, n)
+	profiles := make([]*Profile, n)
+	for i := range n {
+		users[i] = &User{}
+		profiles[i] = &Profile{ID: fmt.Sprintf("p%d", i)}
+	}
+
+	b.Run("batch", func(b *testing.B) {
+		resolver := &Resolver{
+			users:         users,
+			profiles:      profiles,
+			profileErrIdx: -1,
+		}
+		c := newTestClient(resolver)
+		var resp json.RawMessage
+		for b.Loop() {
+			_ = c.Post(`query { users { nullableBatch { id } } }`, &resp)
+		}
+	})
+
+	b.Run("non-batch", func(b *testing.B) {
+		resolver := &Resolver{
+			users:         users,
+			profiles:      profiles,
+			profileErrIdx: -1,
+		}
+		c := newTestClient(resolver)
+		var resp json.RawMessage
+		for b.Loop() {
+			_ = c.Post(`query { users { nullableNonBatch { id } } }`, &resp)
+		}
+	})
+}
+
+func TestBatchResolver_InterfaceSingleType_CallCount(t *testing.T) {
+	resolver := &Resolver{
+		animals: []Animal{
+			&Cat{ID: "cat1"},
+			&Cat{ID: "cat2"},
+			&Cat{ID: "cat3"},
+		},
+	}
+
+	c := newTestClient(resolver)
+	var resp struct {
+		Animals []struct {
+			ID        string `json:"id"`
+			BatchProp string `json:"batchProp"`
+		} `json:"animals"`
+	}
+
+	err := c.Post(`query { animals { id batchProp } }`, &resp)
+	require.NoError(t, err)
+	require.Len(t, resp.Animals, 3)
+	require.JSONEq(
+		t,
+		`{"animals":[
+			{"id":"cat1","batchProp":"catBatchProp:cat1"},
+			{"id":"cat2","batchProp":"catBatchProp:cat2"},
+			{"id":"cat3","batchProp":"catBatchProp:cat3"}
+		]}`,
+		marshalJSON(t, resp),
+	)
+
+	// The batch resolver should be called ONCE with all 3 cats, not 3 times with 1 cat each.
+	require.Equal(
+		t,
+		int32(1),
+		resolver.catBatchPropCalls.Load(),
+		"Cat.BatchProp should be called once for all cats (batch), not once per cat",
+	)
+}
+
+func TestBatchResolver_InterfaceSingleType_MixedPointerAndValue_CallCount(t *testing.T) {
+	resolver := &Resolver{
+		animals: []Animal{
+			Cat{ID: "cat1"},
+			&Cat{ID: "cat2"},
+			Cat{ID: "cat3"},
+		},
+	}
+
+	c := newTestClient(resolver)
+	var resp struct {
+		Animals []struct {
+			ID        string `json:"id"`
+			BatchProp string `json:"batchProp"`
+		} `json:"animals"`
+	}
+
+	err := c.Post(`query { animals { id batchProp } }`, &resp)
+	require.NoError(t, err)
+	require.Len(t, resp.Animals, 3)
+	require.JSONEq(
+		t,
+		`{"animals":[
+			{"id":"cat1","batchProp":"catBatchProp:cat1"},
+			{"id":"cat2","batchProp":"catBatchProp:cat2"},
+			{"id":"cat3","batchProp":"catBatchProp:cat3"}
+		]}`,
+		marshalJSON(t, resp),
+	)
+
+	require.Equal(
+		t,
+		int32(1),
+		resolver.catBatchPropCalls.Load(),
+		"Cat.BatchProp should be called once for cats regardless of pointer/value form",
+	)
+}
+
+func TestBatchResolver_InterfaceMixedTypes_CallCount(t *testing.T) {
+	resolver := &Resolver{
+		animals: []Animal{
+			&Dog{ID: "dog1"},
+			&Cat{ID: "cat1"},
+			&Dog{ID: "dog2"},
+			&Pig{ID: "pig1"},
+			&Cat{ID: "cat2"},
+			&Pig{ID: "pig2"},
+		},
+	}
+
+	c := newTestClient(resolver)
+	var resp struct {
+		Animals []struct {
+			ID        string `json:"id"`
+			BatchProp string `json:"batchProp"`
+		} `json:"animals"`
+	}
+
+	err := c.Post(`query { animals { id batchProp } }`, &resp)
+	require.NoError(t, err)
+	require.Len(t, resp.Animals, 6)
+
+	// Verify data correctness
+	require.Equal(t, "dog1", resp.Animals[0].ID)
+	require.Equal(t, "dogBatchProp:dog1", resp.Animals[0].BatchProp)
+	require.Equal(t, "cat1", resp.Animals[1].ID)
+	require.Equal(t, "catBatchProp:cat1", resp.Animals[1].BatchProp)
+	require.Equal(t, "dog2", resp.Animals[2].ID)
+	require.Equal(t, "dogBatchProp:dog2", resp.Animals[2].BatchProp)
+	require.Equal(t, "pig1", resp.Animals[3].ID)
+	require.Equal(t, "pigBatchProp:pig1", resp.Animals[3].BatchProp)
+	require.Equal(t, "cat2", resp.Animals[4].ID)
+	require.Equal(t, "catBatchProp:cat2", resp.Animals[4].BatchProp)
+	require.Equal(t, "pig2", resp.Animals[5].ID)
+	require.Equal(t, "pigBatchProp:pig2", resp.Animals[5].BatchProp)
+
+	// Each concrete type's batch resolver should be called exactly once.
+	require.Equal(
+		t,
+		int32(1),
+		resolver.dogBatchPropCalls.Load(),
+		"Dog.BatchProp should be called once for all dogs",
+	)
+	require.Equal(
+		t,
+		int32(1),
+		resolver.catBatchPropCalls.Load(),
+		"Cat.BatchProp should be called once for all cats",
+	)
+	require.Equal(
+		t,
+		int32(1),
+		resolver.pigBatchPropCalls.Load(),
+		"Pig.BatchProp should be called once for all pigs",
+	)
+}
+
+func TestBatchResolver_MultipleInterfaces_CallCount(t *testing.T) {
+	resolver := &Resolver{
+		pets: []Pet{
+			&DomesticCat{ID: "dc1", Name: "Tama"},
+			&DomesticCat{ID: "dc2", Name: "Mii"},
+			&DomesticCat{ID: "dc3", Name: "Kuro"},
+		},
+	}
+
+	c := newTestClient(resolver)
+	var resp struct {
+		Pets []struct {
+			Name      string `json:"name"`
+			BatchName string `json:"batchName"`
+		} `json:"pets"`
+	}
+
+	err := c.Post(`query { pets { name batchName } }`, &resp)
+	require.NoError(t, err)
+	require.Len(t, resp.Pets, 3)
+	require.JSONEq(
+		t,
+		`{"pets":[
+			{"name":"Tama","batchName":"domesticCatBatchName:Tama"},
+			{"name":"Mii","batchName":"domesticCatBatchName:Mii"},
+			{"name":"Kuro","batchName":"domesticCatBatchName:Kuro"}
+		]}`,
+		marshalJSON(t, resp),
+	)
+
+	require.Equal(
+		t,
+		int32(1),
+		resolver.domesticCatBatchNameCalls.Load(),
+		"DomesticCat.BatchName should be called once for all domestic cats",
+	)
+}
+
+func TestBatchResolver_MultipleInterfaces_MixedPointerAndValue_CallCount(t *testing.T) {
+	resolver := &Resolver{
+		pets: []Pet{
+			DomesticCat{ID: "dc1", Name: "Tama"},
+			&DomesticCat{ID: "dc2", Name: "Mii"},
+			DomesticCat{ID: "dc3", Name: "Kuro"},
+		},
+	}
+
+	c := newTestClient(resolver)
+	var resp struct {
+		Pets []struct {
+			Name      string `json:"name"`
+			BatchName string `json:"batchName"`
+		} `json:"pets"`
+	}
+
+	err := c.Post(`query { pets { name batchName } }`, &resp)
+	require.NoError(t, err)
+	require.Len(t, resp.Pets, 3)
+	require.JSONEq(
+		t,
+		`{"pets":[
+			{"name":"Tama","batchName":"domesticCatBatchName:Tama"},
+			{"name":"Mii","batchName":"domesticCatBatchName:Mii"},
+			{"name":"Kuro","batchName":"domesticCatBatchName:Kuro"}
+		]}`,
+		marshalJSON(t, resp),
+	)
+
+	require.Equal(
+		t,
+		int32(1),
+		resolver.domesticCatBatchNameCalls.Load(),
+		"DomesticCat.BatchName should be called once regardless of pointer/value form",
+	)
+}
+
+func TestBatchResolver_InterfaceMixed_WithMultipleInterfaces_CallCount(t *testing.T) {
+	resolver := &Resolver{
+		animals: []Animal{
+			&Cat{ID: "cat1"},
+			&DomesticCat{ID: "dc1", Name: "Tama"},
+			&Cat{ID: "cat2"},
+			&DomesticCat{ID: "dc2", Name: "Mii"},
+		},
+	}
+
+	c := newTestClient(resolver)
+	var resp struct {
+		Animals []struct {
+			ID        string `json:"id"`
+			BatchProp string `json:"batchProp"`
+		} `json:"animals"`
+	}
+
+	err := c.Post(`query { animals { id batchProp } }`, &resp)
+	require.NoError(t, err)
+	require.Len(t, resp.Animals, 4)
+
+	require.Equal(t, "cat1", resp.Animals[0].ID)
+	require.Equal(t, "catBatchProp:cat1", resp.Animals[0].BatchProp)
+	require.Equal(t, "dc1", resp.Animals[1].ID)
+	require.Equal(t, "domesticCatBatchProp:dc1", resp.Animals[1].BatchProp)
+	require.Equal(t, "cat2", resp.Animals[2].ID)
+	require.Equal(t, "catBatchProp:cat2", resp.Animals[2].BatchProp)
+	require.Equal(t, "dc2", resp.Animals[3].ID)
+	require.Equal(t, "domesticCatBatchProp:dc2", resp.Animals[3].BatchProp)
+
+	require.Equal(
+		t,
+		int32(1),
+		resolver.catBatchPropCalls.Load(),
+		"Cat.BatchProp should be called once for all cats",
+	)
+	require.Equal(
+		t,
+		int32(1),
+		resolver.domesticCatBatchPropCalls.Load(),
+		"DomesticCat.BatchProp should be called once for all domestic cats",
+	)
+}
+
+func BenchmarkBatchResolver_Nested(b *testing.B) {
+	const n = 100
+	users := make([]*User, n)
+	profiles := make([]*Profile, n)
+	images := make([]*Image, n)
+	for i := range n {
+		users[i] = &User{}
+		profiles[i] = &Profile{ID: fmt.Sprintf("p%d", i)}
+		images[i] = &Image{URL: fmt.Sprintf("https://img/%d", i)}
+	}
+
+	b.Run("batch", func(b *testing.B) {
+		resolver := &Resolver{
+			users:         users,
+			profiles:      profiles,
+			images:        images,
+			profileErrIdx: -1,
+		}
+		c := newTestClient(resolver)
+		var resp json.RawMessage
+		for b.Loop() {
+			_ = c.Post(`query {
+				users {
+					profile: profileBatch {
+						id
+						cover: coverBatch { url }
+					}
+				}
+			}`, &resp)
+		}
+	})
+
+	b.Run("non-batch", func(b *testing.B) {
+		resolver := &Resolver{
+			users:         users,
+			profiles:      profiles,
+			images:        images,
+			profileErrIdx: -1,
+		}
+		c := newTestClient(resolver)
+		var resp json.RawMessage
+		for b.Loop() {
+			_ = c.Post(`query {
+				users {
+					profile: profileNonBatch {
+						id
+						cover: coverNonBatch { url }
+					}
+				}
+			}`, &resp)
+		}
+	})
 }

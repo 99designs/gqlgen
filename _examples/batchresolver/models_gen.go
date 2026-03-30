@@ -2,18 +2,98 @@
 
 package batchresolver
 
+type Animal interface {
+	IsAnimal()
+	GetID() string
+	GetBatchProp() string
+}
+
+type Pet interface {
+	IsPet()
+	GetName() string
+	GetBatchName() string
+}
+
+type Cat struct {
+	ID        string `json:"id"`
+	BatchProp string `json:"batchProp"`
+}
+
+func (Cat) IsAnimal()                 {}
+func (this Cat) GetID() string        { return this.ID }
+func (this Cat) GetBatchProp() string { return this.BatchProp }
+
+type Dog struct {
+	ID        string `json:"id"`
+	BatchProp string `json:"batchProp"`
+}
+
+func (Dog) IsAnimal()                 {}
+func (this Dog) GetID() string        { return this.ID }
+func (this Dog) GetBatchProp() string { return this.BatchProp }
+
+type DomesticCat struct {
+	ID        string `json:"id"`
+	BatchProp string `json:"batchProp"`
+	Name      string `json:"name"`
+	BatchName string `json:"batchName"`
+}
+
+func (DomesticCat) IsAnimal()                 {}
+func (this DomesticCat) GetID() string        { return this.ID }
+func (this DomesticCat) GetBatchProp() string { return this.BatchProp }
+
+func (DomesticCat) IsPet()                    {}
+func (this DomesticCat) GetName() string      { return this.Name }
+func (this DomesticCat) GetBatchName() string { return this.BatchName }
+
+type Image struct {
+	URL string `json:"url"`
+}
+
+type Pig struct {
+	ID        string `json:"id"`
+	BatchProp string `json:"batchProp"`
+}
+
+func (Pig) IsAnimal()                 {}
+func (this Pig) GetID() string        { return this.ID }
+func (this Pig) GetBatchProp() string { return this.BatchProp }
+
 type Profile struct {
-	ID string `json:"id"`
+	ID            string `json:"id"`
+	CoverBatch    *Image `json:"coverBatch,omitempty"`
+	CoverNonBatch *Image `json:"coverNonBatch,omitempty"`
+}
+
+type ProfileEdge struct {
+	Node   *Profile `json:"node"`
+	Cursor string   `json:"cursor"`
+}
+
+type ProfilesConnection struct {
+	Edges      []*ProfileEdge `json:"edges"`
+	TotalCount int            `json:"totalCount"`
 }
 
 type Query struct {
 }
 
 type User struct {
-	NullableBatch           *Profile `json:"nullableBatch,omitempty"`
-	NullableNonBatch        *Profile `json:"nullableNonBatch,omitempty"`
-	NullableBatchWithArg    *Profile `json:"nullableBatchWithArg,omitempty"`
-	NullableNonBatchWithArg *Profile `json:"nullableNonBatchWithArg,omitempty"`
-	NonNullableBatch        *Profile `json:"nonNullableBatch"`
-	NonNullableNonBatch     *Profile `json:"nonNullableNonBatch"`
+	NullableBatch                    *Profile            `json:"nullableBatch,omitempty"`
+	NullableNonBatch                 *Profile            `json:"nullableNonBatch,omitempty"`
+	NullableBatchWithArg             *Profile            `json:"nullableBatchWithArg,omitempty"`
+	NullableNonBatchWithArg          *Profile            `json:"nullableNonBatchWithArg,omitempty"`
+	NonNullableBatch                 *Profile            `json:"nonNullableBatch"`
+	NonNullableNonBatch              *Profile            `json:"nonNullableNonBatch"`
+	DirectiveNullableBatch           *Profile            `json:"directiveNullableBatch,omitempty"`
+	DirectiveNullableNonBatch        *Profile            `json:"directiveNullableNonBatch,omitempty"`
+	DirectiveNullableBatchWithArg    *Profile            `json:"directiveNullableBatchWithArg,omitempty"`
+	DirectiveNullableNonBatchWithArg *Profile            `json:"directiveNullableNonBatchWithArg,omitempty"`
+	DirectiveNonNullableBatch        *Profile            `json:"directiveNonNullableBatch"`
+	DirectiveNonNullableNonBatch     *Profile            `json:"directiveNonNullableNonBatch"`
+	ProfileBatch                     *Profile            `json:"profileBatch,omitempty"`
+	ProfileNonBatch                  *Profile            `json:"profileNonBatch,omitempty"`
+	ProfileConnectionBatch           *ProfilesConnection `json:"profileConnectionBatch,omitempty"`
+	ProfileConnectionNonBatch        *ProfilesConnection `json:"profileConnectionNonBatch,omitempty"`
 }

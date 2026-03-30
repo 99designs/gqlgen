@@ -239,6 +239,7 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		DefaultInput          func(childComplexity int, input DefaultInput) int
+		Issue4053             func(childComplexity int, input *Issue4053Input1) int
 		OverrideValueViaInput func(childComplexity int, input FieldsOrderInput) int
 		UpdateProduct         func(childComplexity int, id string, name *string, price *float64) int
 		UpdatePtrToPtr        func(childComplexity int, input UpdatePtrToPtrOuter) int
@@ -1001,6 +1002,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.DefaultInput(childComplexity, args["input"].(DefaultInput)), true
+
+	case "Mutation.issue4053":
+		if e.ComplexityRoot.Mutation.Issue4053 == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_issue4053_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.Issue4053(childComplexity, args["input"].(*Issue4053Input1)), true
 
 	case "Mutation.overrideValueViaInput":
 		if e.ComplexityRoot.Mutation.OverrideValueViaInput == nil {
@@ -2331,6 +2344,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		ec.unmarshalInputInnerInput,
 		ec.unmarshalInputInputDirectives,
 		ec.unmarshalInputInputWithEnumValue,
+		ec.unmarshalInputIssue4053Input1,
+		ec.unmarshalInputIssue4053Input2,
 		ec.unmarshalInputMapNestedInput,
 		ec.unmarshalInputMapNestedMapSliceInput,
 		ec.unmarshalInputMapStringInterfaceInput,
@@ -2632,6 +2647,13 @@ input InputWithEnumValue {
 type InvalidIdentifier {
 	id: Int!
 }
+input Issue4053Input1 {
+	input2: Issue4053Input2
+}
+input Issue4053Input2 {
+	hello: String
+	helloWithDefault: String = "world"
+}
 type It {
 	id: ID!
 }
@@ -2684,6 +2706,7 @@ type Mutation {
 	defaultInput(input: DefaultInput!): DefaultParametersMirror!
 	overrideValueViaInput(input: FieldsOrderInput!): FieldsOrderPayload!
 	updateProduct(id: ID!, name: String, price: Float): String!
+	issue4053(input: Issue4053Input1): Boolean!
 	updateSomething(input: SpecialInput!): String!
 	updatePtrToPtr(input: UpdatePtrToPtrOuter!): PtrToPtrOuter!
 }

@@ -264,23 +264,6 @@ func TestConfigCheck(t *testing.T) {
 					"exec and federation define the same import path (github.com/99designs/gqlgen/codegen/config/generated) with different package names (generated vs federation)",
 				)
 			})
-
-			t.Run("deprecated federated flag raises an error", func(t *testing.T) {
-				config := Config{
-					Exec: ExecConfig{
-						Layout:   execLayout,
-						Filename: "generated/exec.go",
-						DirName:  "generated",
-					},
-					Federated: true,
-				}
-
-				require.EqualError(
-					t,
-					config.check(),
-					"federated has been removed, instead use\nfederation:\n    filename: path/to/federated.go",
-				)
-			})
 		})
 	}
 }
@@ -483,5 +466,49 @@ unknown: foo`))
 		if err == nil && cfg == nil {
 			t.Fatal("ReadConfig returned nil config without error")
 		}
+	})
+}
+
+func TestPerformanceOptions(t *testing.T) {
+	t.Run("GetFastValidation defaults to false", func(t *testing.T) {
+		cfg := &Config{}
+		require.False(t, cfg.GetFastValidation())
+	})
+
+	t.Run("GetFastValidation returns true when set", func(t *testing.T) {
+		val := true
+		cfg := &Config{FastValidation: &val}
+		require.True(t, cfg.GetFastValidation())
+	})
+
+	t.Run("GetSkipImportGrouping defaults to false", func(t *testing.T) {
+		cfg := &Config{}
+		require.False(t, cfg.GetSkipImportGrouping())
+	})
+
+	t.Run("GetSkipImportGrouping returns true when set", func(t *testing.T) {
+		val := true
+		cfg := &Config{SkipImportGrouping: &val}
+		require.True(t, cfg.GetSkipImportGrouping())
+	})
+
+	t.Run("GetUseBufferPooling defaults to false", func(t *testing.T) {
+		cfg := &Config{}
+		require.False(t, cfg.GetUseBufferPooling())
+	})
+
+	t.Run("GetUseBufferPooling returns true when set", func(t *testing.T) {
+		val := true
+		cfg := &Config{UseBufferPooling: &val}
+		require.True(t, cfg.GetUseBufferPooling())
+	})
+
+	t.Run("GetPruneOptions returns correct values", func(t *testing.T) {
+		skipImport := true
+		useBuffer := true
+		cfg := &Config{SkipImportGrouping: &skipImport, UseBufferPooling: &useBuffer}
+		opts := cfg.GetPruneOptions()
+		require.True(t, opts.SkipImportGrouping)
+		require.True(t, opts.UseBufferPooling)
 	})
 }

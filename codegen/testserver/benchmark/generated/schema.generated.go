@@ -614,6 +614,10 @@ func (ec *executionContext) fieldContext_UserEdge_node(_ context.Context, field 
 
 func (ec *executionContext) unmarshalInputUserOrderBy(ctx context.Context, obj any) (models.UserOrderBy, error) {
 	var it models.UserOrderBy
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v

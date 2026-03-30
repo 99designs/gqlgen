@@ -5754,13 +5754,18 @@ func (ec *executionContext) fieldContext_User_pets(ctx context.Context, field gr
 // region    **************************** input.gotpl *****************************
 
 func (ec *executionContext) unmarshalInputChanges(ctx context.Context, obj any) (map[string]any, error) {
-	it := make(map[string]any, len(obj.(map[string]any)))
+	var it map[string]any
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
 	}
 
 	fieldsInOrder := [...]string{"a", "b"}
+	it = make(map[string]any, len(asMap))
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -5788,6 +5793,10 @@ func (ec *executionContext) unmarshalInputChanges(ctx context.Context, obj any) 
 
 func (ec *executionContext) unmarshalInputInnerInput(ctx context.Context, obj any) (InnerInput, error) {
 	var it InnerInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -5814,6 +5823,10 @@ func (ec *executionContext) unmarshalInputInnerInput(ctx context.Context, obj an
 
 func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, obj any) (OmittableInput, error) {
 	var it OmittableInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -5889,6 +5902,10 @@ func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, ob
 
 func (ec *executionContext) unmarshalInputOuterInput(ctx context.Context, obj any) (OuterInput, error) {
 	var it OuterInput
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v
@@ -5915,6 +5932,10 @@ func (ec *executionContext) unmarshalInputOuterInput(ctx context.Context, obj an
 
 func (ec *executionContext) unmarshalInputRecursiveInputSlice(ctx context.Context, obj any) (RecursiveInputSlice, error) {
 	var it RecursiveInputSlice
+	if obj == nil {
+		return it, nil
+	}
+
 	asMap := map[string]any{}
 	for k, v := range obj.(map[string]any) {
 		asMap[k] = v

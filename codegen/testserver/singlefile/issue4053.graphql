@@ -1,0 +1,15 @@
+# This is a reproduction of https://github.com/99designs/gqlgen/issues/4053
+
+extend type Mutation {
+    issue4053(input: Issue4053Input1): Boolean!
+}
+
+input Issue4053Input1 {
+    input2: Issue4053Input2
+}
+
+# Issue4053Input2 exists in issue4053.go
+input Issue4053Input2 {
+    hello: String
+    helloWithDefault: String = "world"
+}

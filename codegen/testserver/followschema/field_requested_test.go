@@ -153,7 +153,10 @@ func TestFieldRequested(t *testing.T) {
 		}
 		err := c.Post(`{ user(id: 1) { friends { id } } }`, &resp)
 		require.NoError(t, err)
-		assert.False(t, nestedResult, "friends.created should be false when only friends.id is selected")
+		assert.False(
+			t, nestedResult,
+			"friends.created should be false when only friends.id is selected",
+		)
 	})
 
 	t.Run("inline fragment", func(t *testing.T) {
@@ -242,7 +245,11 @@ func TestFieldRequested(t *testing.T) {
 			client.Var("inc", false),
 		)
 		require.NoError(t, err)
-		assert.False(t, friendsRequested, "friends should not be requested when @include(if: false)")
+		assert.False(
+			t,
+			friendsRequested,
+			"friends should not be requested when @include(if: false)",
+		)
 	})
 
 	t.Run("field that does not exist in selection", func(t *testing.T) {
@@ -271,7 +278,11 @@ func TestFieldRequested(t *testing.T) {
 		}
 		err := c.Post(`{ user(id: 1) { id mates: friends { id } } }`, &resp)
 		require.NoError(t, err)
-		assert.True(t, friendsRequested, "aliased field should still be detected by its original name")
+		assert.True(
+			t,
+			friendsRequested,
+			"aliased field should still be detected by its original name",
+		)
 	})
 
 	t.Run("AnyFieldRequested - one matches", func(t *testing.T) {

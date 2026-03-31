@@ -49,7 +49,7 @@ func (p *Client) Websocket(query string, options ...Option) *Subscription {
 func (p *Client) WebsocketOnce(query string, resp any, options ...Option) error {
 	sock := p.Websocket(query, options...)
 	defer func() { _ = sock.Close() }()
-	if reflect.ValueOf(resp).Kind() == reflect.Ptr {
+	if reflect.ValueOf(resp).Kind() == reflect.Pointer {
 		return sock.Next(resp)
 	}
 	// TODO: verify this is never called and remove it

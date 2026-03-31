@@ -56,7 +56,7 @@ func CompatibleTypes(expected, actual types.Type) error {
 				return errors.New("number of struct fields differ")
 			}
 
-			for i := 0; i < expected.NumFields(); i++ {
+			for i := range expected.NumFields() {
 				if expected.Field(i).Name() != actual.Field(i).Name() {
 					return fmt.Errorf(
 						"struct field %d name differs, %s != %s",
@@ -81,7 +81,7 @@ func CompatibleTypes(expected, actual types.Type) error {
 				return fmt.Errorf("tuple length differs, %d != %d", expected.Len(), actual.Len())
 			}
 
-			for i := 0; i < expected.Len(); i++ {
+			for i := range expected.Len() {
 				if err := CompatibleTypes(expected.At(i).Type(), actual.At(i).Type()); err != nil {
 					return err
 				}
@@ -108,7 +108,7 @@ func CompatibleTypes(expected, actual types.Type) error {
 				)
 			}
 
-			for i := 0; i < expected.NumMethods(); i++ {
+			for i := range expected.NumMethods() {
 				if expected.Method(i).Name() != actual.Method(i).Name() {
 					return fmt.Errorf(
 						"interface method %d name differs, %s != %s",

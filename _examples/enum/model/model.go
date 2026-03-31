@@ -33,7 +33,7 @@ func (t IntTyped) String() string {
 }
 
 func (t IntTyped) MarshalJSON() ([]byte, error) {
-	return []byte(fmt.Sprintf(`"%s"`, t.String())), nil
+	return fmt.Appendf(nil, `"%s"`, t.String()), nil
 }
 
 func (t *IntTyped) UnmarshalJSON(b []byte) (err error) {

@@ -48,7 +48,7 @@ func TestPanics(t *testing.T) {
 		require.EqualError(
 			t,
 			err,
-			"http 422: {\"errors\":[{\"message\":\"presented: panic: BOOM\"}],\"data\":null}",
+			"http 500: {\"errors\":[{\"message\":\"presented: panic: BOOM\"}],\"data\":null}",
 		)
 	})
 
@@ -81,7 +81,7 @@ func TestPanics(t *testing.T) {
 		require.EqualError(
 			t,
 			err,
-			"http 422: {\"errors\":[{\"message\":\"presented: panic: BOOM\"}],\"data\":null}",
+			"http 500: {\"errors\":[{\"message\":\"presented: panic: BOOM\"}],\"data\":null}",
 		)
 	})
 }

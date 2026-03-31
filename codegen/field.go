@@ -345,7 +345,7 @@ func (b *builder) findBindStructTagTarget(in types.Type, name string) (types.Obj
 		return b.findBindStructTagTarget(t.Underlying(), name)
 	case *types.Struct:
 		var found types.Object
-		for i := 0; i < t.NumFields(); i++ {
+		for i := range t.NumFields() {
 			field := t.Field(i)
 			if !field.Exported() || field.Embedded() {
 				continue

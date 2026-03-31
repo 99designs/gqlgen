@@ -30,6 +30,17 @@ type Resolver struct {
 	coverNonBatchCalls             atomic.Int32
 	profileConnectionBatchCalls    atomic.Int32
 	profileConnectionNonBatchCalls atomic.Int32
+
+	// Animals for interface batch test
+	animals []Animal
+	pets    []Pet
+
+	// Call counters for interface batch resolvers
+	catBatchPropCalls         atomic.Int32
+	dogBatchPropCalls         atomic.Int32
+	pigBatchPropCalls         atomic.Int32
+	domesticCatBatchPropCalls atomic.Int32
+	domesticCatBatchNameCalls atomic.Int32
 }
 
 func (r *Resolver) userIndex(obj *User) int {

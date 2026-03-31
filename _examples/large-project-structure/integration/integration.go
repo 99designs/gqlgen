@@ -28,7 +28,7 @@ func (r *Resolver) GetYaSome(
 
 	if input.Limit != nil {
 		count := int(*input.Limit)
-		for i := 0; i < count; i++ {
+		for i := range count {
 			czi := &model.CustomZeekIntel{
 				ID:         fmt.Sprintf("%d", i),
 				Name:       fmt.Sprintf("external-%d", i),

@@ -477,7 +477,7 @@ func TestBatchResolver_Nested_CallCount(t *testing.T) {
 	users := make([]*User, n)
 	profiles := make([]*Profile, n)
 	images := make([]*Image, n)
-	for i := 0; i < n; i++ {
+	for i := range n {
 		users[i] = &User{}
 		profiles[i] = &Profile{ID: fmt.Sprintf("p%d", i)}
 		images[i] = &Image{URL: fmt.Sprintf("https://img/%d", i)}
@@ -586,7 +586,7 @@ func TestBatchResolver_Nested_Connection_CallCount(t *testing.T) {
 	users := make([]*User, n)
 	profiles := make([]*Profile, n)
 	images := make([]*Image, n)
-	for i := 0; i < n; i++ {
+	for i := range n {
 		users[i] = &User{}
 		profiles[i] = &Profile{ID: fmt.Sprintf("p%d", i)}
 		images[i] = &Image{URL: fmt.Sprintf("https://img/%d", i)}
@@ -704,7 +704,7 @@ func BenchmarkBatchResolver_SingleLevel(b *testing.B) {
 	const n = 100
 	users := make([]*User, n)
 	profiles := make([]*Profile, n)
-	for i := 0; i < n; i++ {
+	for i := range n {
 		users[i] = &User{}
 		profiles[i] = &Profile{ID: fmt.Sprintf("p%d", i)}
 	}
@@ -736,12 +736,269 @@ func BenchmarkBatchResolver_SingleLevel(b *testing.B) {
 	})
 }
 
+func TestBatchResolver_InterfaceSingleType_CallCount(t *testing.T) {
+	resolver := &Resolver{
+		animals: []Animal{
+			&Cat{ID: "cat1"},
+			&Cat{ID: "cat2"},
+			&Cat{ID: "cat3"},
+		},
+	}
+
+	c := newTestClient(resolver)
+	var resp struct {
+		Animals []struct {
+			ID        string `json:"id"`
+			BatchProp string `json:"batchProp"`
+		} `json:"animals"`
+	}
+
+	err := c.Post(`query { animals { id batchProp } }`, &resp)
+	require.NoError(t, err)
+	require.Len(t, resp.Animals, 3)
+	require.JSONEq(
+		t,
+		`{"animals":[
+			{"id":"cat1","batchProp":"catBatchProp:cat1"},
+			{"id":"cat2","batchProp":"catBatchProp:cat2"},
+			{"id":"cat3","batchProp":"catBatchProp:cat3"}
+		]}`,
+		marshalJSON(t, resp),
+	)
+
+	// The batch resolver should be called ONCE with all 3 cats, not 3 times with 1 cat each.
+	require.Equal(
+		t,
+		int32(1),
+		resolver.catBatchPropCalls.Load(),
+		"Cat.BatchProp should be called once for all cats (batch), not once per cat",
+	)
+}
+
+func TestBatchResolver_InterfaceSingleType_MixedPointerAndValue_CallCount(t *testing.T) {
+	resolver := &Resolver{
+		animals: []Animal{
+			Cat{ID: "cat1"},
+			&Cat{ID: "cat2"},
+			Cat{ID: "cat3"},
+		},
+	}
+
+	c := newTestClient(resolver)
+	var resp struct {
+		Animals []struct {
+			ID        string `json:"id"`
+			BatchProp string `json:"batchProp"`
+		} `json:"animals"`
+	}
+
+	err := c.Post(`query { animals { id batchProp } }`, &resp)
+	require.NoError(t, err)
+	require.Len(t, resp.Animals, 3)
+	require.JSONEq(
+		t,
+		`{"animals":[
+			{"id":"cat1","batchProp":"catBatchProp:cat1"},
+			{"id":"cat2","batchProp":"catBatchProp:cat2"},
+			{"id":"cat3","batchProp":"catBatchProp:cat3"}
+		]}`,
+		marshalJSON(t, resp),
+	)
+
+	require.Equal(
+		t,
+		int32(1),
+		resolver.catBatchPropCalls.Load(),
+		"Cat.BatchProp should be called once for cats regardless of pointer/value form",
+	)
+}
+
+func TestBatchResolver_InterfaceMixedTypes_CallCount(t *testing.T) {
+	resolver := &Resolver{
+		animals: []Animal{
+			&Dog{ID: "dog1"},
+			&Cat{ID: "cat1"},
+			&Dog{ID: "dog2"},
+			&Pig{ID: "pig1"},
+			&Cat{ID: "cat2"},
+			&Pig{ID: "pig2"},
+		},
+	}
+
+	c := newTestClient(resolver)
+	var resp struct {
+		Animals []struct {
+			ID        string `json:"id"`
+			BatchProp string `json:"batchProp"`
+		} `json:"animals"`
+	}
+
+	err := c.Post(`query { animals { id batchProp } }`, &resp)
+	require.NoError(t, err)
+	require.Len(t, resp.Animals, 6)
+
+	// Verify data correctness
+	require.Equal(t, "dog1", resp.Animals[0].ID)
+	require.Equal(t, "dogBatchProp:dog1", resp.Animals[0].BatchProp)
+	require.Equal(t, "cat1", resp.Animals[1].ID)
+	require.Equal(t, "catBatchProp:cat1", resp.Animals[1].BatchProp)
+	require.Equal(t, "dog2", resp.Animals[2].ID)
+	require.Equal(t, "dogBatchProp:dog2", resp.Animals[2].BatchProp)
+	require.Equal(t, "pig1", resp.Animals[3].ID)
+	require.Equal(t, "pigBatchProp:pig1", resp.Animals[3].BatchProp)
+	require.Equal(t, "cat2", resp.Animals[4].ID)
+	require.Equal(t, "catBatchProp:cat2", resp.Animals[4].BatchProp)
+	require.Equal(t, "pig2", resp.Animals[5].ID)
+	require.Equal(t, "pigBatchProp:pig2", resp.Animals[5].BatchProp)
+
+	// Each concrete type's batch resolver should be called exactly once.
+	require.Equal(
+		t,
+		int32(1),
+		resolver.dogBatchPropCalls.Load(),
+		"Dog.BatchProp should be called once for all dogs",
+	)
+	require.Equal(
+		t,
+		int32(1),
+		resolver.catBatchPropCalls.Load(),
+		"Cat.BatchProp should be called once for all cats",
+	)
+	require.Equal(
+		t,
+		int32(1),
+		resolver.pigBatchPropCalls.Load(),
+		"Pig.BatchProp should be called once for all pigs",
+	)
+}
+
+func TestBatchResolver_MultipleInterfaces_CallCount(t *testing.T) {
+	resolver := &Resolver{
+		pets: []Pet{
+			&DomesticCat{ID: "dc1", Name: "Tama"},
+			&DomesticCat{ID: "dc2", Name: "Mii"},
+			&DomesticCat{ID: "dc3", Name: "Kuro"},
+		},
+	}
+
+	c := newTestClient(resolver)
+	var resp struct {
+		Pets []struct {
+			Name      string `json:"name"`
+			BatchName string `json:"batchName"`
+		} `json:"pets"`
+	}
+
+	err := c.Post(`query { pets { name batchName } }`, &resp)
+	require.NoError(t, err)
+	require.Len(t, resp.Pets, 3)
+	require.JSONEq(
+		t,
+		`{"pets":[
+			{"name":"Tama","batchName":"domesticCatBatchName:Tama"},
+			{"name":"Mii","batchName":"domesticCatBatchName:Mii"},
+			{"name":"Kuro","batchName":"domesticCatBatchName:Kuro"}
+		]}`,
+		marshalJSON(t, resp),
+	)
+
+	require.Equal(
+		t,
+		int32(1),
+		resolver.domesticCatBatchNameCalls.Load(),
+		"DomesticCat.BatchName should be called once for all domestic cats",
+	)
+}
+
+func TestBatchResolver_MultipleInterfaces_MixedPointerAndValue_CallCount(t *testing.T) {
+	resolver := &Resolver{
+		pets: []Pet{
+			DomesticCat{ID: "dc1", Name: "Tama"},
+			&DomesticCat{ID: "dc2", Name: "Mii"},
+			DomesticCat{ID: "dc3", Name: "Kuro"},
+		},
+	}
+
+	c := newTestClient(resolver)
+	var resp struct {
+		Pets []struct {
+			Name      string `json:"name"`
+			BatchName string `json:"batchName"`
+		} `json:"pets"`
+	}
+
+	err := c.Post(`query { pets { name batchName } }`, &resp)
+	require.NoError(t, err)
+	require.Len(t, resp.Pets, 3)
+	require.JSONEq(
+		t,
+		`{"pets":[
+			{"name":"Tama","batchName":"domesticCatBatchName:Tama"},
+			{"name":"Mii","batchName":"domesticCatBatchName:Mii"},
+			{"name":"Kuro","batchName":"domesticCatBatchName:Kuro"}
+		]}`,
+		marshalJSON(t, resp),
+	)
+
+	require.Equal(
+		t,
+		int32(1),
+		resolver.domesticCatBatchNameCalls.Load(),
+		"DomesticCat.BatchName should be called once regardless of pointer/value form",
+	)
+}
+
+func TestBatchResolver_InterfaceMixed_WithMultipleInterfaces_CallCount(t *testing.T) {
+	resolver := &Resolver{
+		animals: []Animal{
+			&Cat{ID: "cat1"},
+			&DomesticCat{ID: "dc1", Name: "Tama"},
+			&Cat{ID: "cat2"},
+			&DomesticCat{ID: "dc2", Name: "Mii"},
+		},
+	}
+
+	c := newTestClient(resolver)
+	var resp struct {
+		Animals []struct {
+			ID        string `json:"id"`
+			BatchProp string `json:"batchProp"`
+		} `json:"animals"`
+	}
+
+	err := c.Post(`query { animals { id batchProp } }`, &resp)
+	require.NoError(t, err)
+	require.Len(t, resp.Animals, 4)
+
+	require.Equal(t, "cat1", resp.Animals[0].ID)
+	require.Equal(t, "catBatchProp:cat1", resp.Animals[0].BatchProp)
+	require.Equal(t, "dc1", resp.Animals[1].ID)
+	require.Equal(t, "domesticCatBatchProp:dc1", resp.Animals[1].BatchProp)
+	require.Equal(t, "cat2", resp.Animals[2].ID)
+	require.Equal(t, "catBatchProp:cat2", resp.Animals[2].BatchProp)
+	require.Equal(t, "dc2", resp.Animals[3].ID)
+	require.Equal(t, "domesticCatBatchProp:dc2", resp.Animals[3].BatchProp)
+
+	require.Equal(
+		t,
+		int32(1),
+		resolver.catBatchPropCalls.Load(),
+		"Cat.BatchProp should be called once for all cats",
+	)
+	require.Equal(
+		t,
+		int32(1),
+		resolver.domesticCatBatchPropCalls.Load(),
+		"DomesticCat.BatchProp should be called once for all domestic cats",
+	)
+}
+
 func BenchmarkBatchResolver_Nested(b *testing.B) {
 	const n = 100
 	users := make([]*User, n)
 	profiles := make([]*Profile, n)
 	images := make([]*Image, n)
-	for i := 0; i < n; i++ {
+	for i := range n {
 		users[i] = &User{}
 		profiles[i] = &Profile{ID: fmt.Sprintf("p%d", i)}
 		images[i] = &Image{URL: fmt.Sprintf("https://img/%d", i)}

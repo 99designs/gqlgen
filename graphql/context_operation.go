@@ -134,7 +134,10 @@ Next:
 //	}
 func FieldRequested(ctx context.Context, path string) bool {
 	resctx := GetFieldContext(ctx)
-	return fieldPathRequested(GetOperationContext(ctx), resctx.Field.Selections, strings.Split(path, "."))
+	opCtx := GetOperationContext(ctx)
+	return fieldPathRequested(
+		opCtx, resctx.Field.Selections, strings.Split(path, "."),
+	)
 }
 
 // AnyFieldRequested returns true if any of the given field paths were requested in the current

@@ -56,6 +56,31 @@ The type `Circle` would satisfy `Circle`, `Shape`, and `Shapes` — these values
 >
 > `CollectFieldsCtx` is just a convenience wrapper around `CollectFields` that calls the later with the selection set automatically passed through from the resolver context.
 
+## FieldRequested
+
+`FieldRequested` checks whether a specific field was requested in the current resolver's selection set. It supports dot-notation to check nested fields and respects `@skip`/`@include` directives.
+
+This is particularly useful when you want to conditionally fetch related data as part of the parent query (e.g. a SQL JOIN) rather than in a separate field-level resolver. A field-level resolver always requires a separate round-trip to the database. When the relationship doesn't cleanly map to an independent query — or when combining the data into a single query is more efficient — `FieldRequested` lets you conditionally include that data without fetching things the client never asked for.
+
+```golang
+func (r *queryResolver) User(ctx context.Context, id int) (*User, error) {
+    includeReviews := graphql.FieldRequested(ctx, "reviews")
+    return fetchUser(id, includeReviews)  // JOIN reviews only if requested
+}
+```
+
+## AnyFieldRequested
+
+`AnyFieldRequested` returns true if **any** of the given field paths were requested. This is useful when multiple fields represent the same unit of work — for example, `reviews`, `reviewCount`, and `averageRating` might all require the same SQL JOIN:
+
+```golang
+if graphql.AnyFieldRequested(ctx, "reviews", "reviewCount", "averageRating") {
+    // JOIN reviews table — needed by any of these fields
+}
+```
+
+Both functions work with inline fragments, named fragment spreads, aliases, and federation entity resolvers.
+
 ## Practical example
 
 Say we have the following GraphQL query

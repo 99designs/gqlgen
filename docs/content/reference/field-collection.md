@@ -56,6 +56,63 @@ The type `Circle` would satisfy `Circle`, `Shape`, and `Shapes` — these values
 >
 > `CollectFieldsCtx` is just a convenience wrapper around `CollectFields` that calls the later with the selection set automatically passed through from the resolver context.
 
+## FieldRequested
+
+`FieldRequested` checks whether a specific field was requested in the current resolver's selection set. It respects `@skip`/`@include` directives and works with inline fragments, named fragment spreads, and aliases.
+
+This is particularly useful when you want to conditionally fetch related data as part of the parent query (e.g. a SQL JOIN) rather than in a separate field-level resolver. A field-level resolver always requires a separate round-trip to the database. When the relationship doesn't cleanly map to an independent query — or when combining the data into a single query is more efficient — `FieldRequested` lets you conditionally include that data without fetching things the client never asked for.
+
+```golang
+func (r *queryResolver) User(ctx context.Context, id int) (*User, error) {
+    includeReviews := graphql.FieldRequested(ctx, "reviews")
+    return fetchUser(id, includeReviews)  // JOIN reviews only if requested
+}
+```
+
+### Dot-notation for nested fields
+
+`FieldRequested` supports dot-notation to check nested fields. The path is **relative to the current resolver's selection set** — not the root of the query.
+
+For example, given this query:
+
+```graphql
+query {
+    user(id: 1) {
+        id
+        reviews {
+            body
+            author {
+                name
+            }
+        }
+    }
+}
+```
+
+Inside the `User` resolver, the selection set starts at the fields under `user`. So:
+
+| Call | Result | Why |
+|------|--------|-----|
+| `graphql.FieldRequested(ctx, "id")` | `true` | `id` is in the selection set |
+| `graphql.FieldRequested(ctx, "reviews")` | `true` | `reviews` is in the selection set |
+| `graphql.FieldRequested(ctx, "reviews.body")` | `true` | `body` is under `reviews` |
+| `graphql.FieldRequested(ctx, "reviews.author")` | `true` | `author` is under `reviews` |
+| `graphql.FieldRequested(ctx, "reviews.author.name")` | `true` | `name` is under `reviews.author` |
+| `graphql.FieldRequested(ctx, "reviews.author.email")` | `false` | `email` was not requested |
+| `graphql.FieldRequested(ctx, "user")` | `false` | `user` is the parent — not in this selection set |
+
+## AnyFieldRequested
+
+`AnyFieldRequested` returns true if **any** of the given field paths were requested. This is useful when multiple fields represent the same unit of work — for example, `reviews`, `reviewCount`, and `averageRating` might all require the same SQL JOIN:
+
+```golang
+if graphql.AnyFieldRequested(ctx, "reviews", "reviewCount", "averageRating") {
+    // JOIN reviews table — needed by any of these fields
+}
+```
+
+Both functions work with inline fragments, named fragment spreads, aliases, and federation entity resolvers.
+
 ## Practical example
 
 Say we have the following GraphQL query

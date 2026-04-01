@@ -151,7 +151,7 @@
 					return {{$it}}, errors.New("directive {{$directive.Name}} is not implemented")
 				}
 			{{- end}}
-			return {{$directive.CallPath}}(ctx, asMap, directive{{$i}})
+			return {{$directive.CallPath}}({{$directive.ResolveArgs "asMap" $i}})
 		}
 		{{- end }}
 		tmp, err := directive{{$input.InputObjectDirectives|len}}(ctx)

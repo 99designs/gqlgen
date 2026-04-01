@@ -71,6 +71,7 @@ func (s *callStore) reset(directiveName string) {
 type directiveCall struct {
 	TypeName string
 	Value    any
+	Args     map[string]any
 }
 
 func TestDirectives(t *testing.T) {
@@ -105,6 +106,10 @@ func TestDirectives(t *testing.T) {
 	}
 
 	resolvers.QueryResolver.DirectiveInputOuter = func(ctx context.Context, arg OuterWrapperInput) (i *string, e error) {
+		return &ok, nil
+	}
+
+	resolvers.QueryResolver.DirectiveInputWithArgs = func(ctx context.Context, arg InputDirectivesWithArgs) (i *string, e error) {
 		return &ok, nil
 	}
 
@@ -262,6 +267,18 @@ func TestDirectives(t *testing.T) {
 					call.Value = typedObj
 				}
 				callStore.addCall("Directive3", call)
+				return typedObj, err
+			},
+			Directive3WithArg: func(ctx context.Context, obj any, next graphql.Resolver, inputNamespace string) (res any, err error) {
+				call := directiveCall{
+					Args: map[string]any{"inputNamespace": inputNamespace},
+				}
+				typedObj, err := next(ctx)
+				if typedObj != nil {
+					call.TypeName = reflect.TypeOf(typedObj).String()
+					call.Value = typedObj
+				}
+				callStore.addCall("Directive3WithArg", call)
 				return typedObj, err
 			},
 			Order1: func(ctx context.Context, obj any, next graphql.Resolver, location string) (res any, err error) {
@@ -549,6 +566,25 @@ func TestDirectives(t *testing.T) {
 				"@directive3 should receive type InputDirectives, but received %s",
 				calls[0].TypeName)
 			require.Equal(t, "test", calls[0].Value.(InputDirectives).Text)
+		})
+		t.Run("INPUT_OBJECT directive with args passes arguments", func(t *testing.T) {
+			callStore.reset("Directive3WithArg")
+
+			var resp struct {
+				DirectiveInputWithArgs *string
+			}
+
+			query := `query { directiveInputWithArgs(arg: {text:"test"}) }`
+			err := c.Post(query, &resp)
+			require.NoError(t, err)
+
+			calls := callStore.getCalls("Directive3WithArg")
+			require.Len(t, calls, 1,
+				"@directive3WithArg should be called exactly once")
+			require.Equal(t, "followschema.InputDirectivesWithArgs", calls[0].TypeName)
+			require.Equal(t, "test", calls[0].Value.(InputDirectivesWithArgs).Text)
+			require.Equal(t, "InputDirectivesWithArgs", calls[0].Args["inputNamespace"],
+				"inputNamespace argument should be passed to the directive")
 		})
 	})
 	t.Run("object field directives", func(t *testing.T) {

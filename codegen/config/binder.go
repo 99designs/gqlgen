@@ -197,19 +197,21 @@ func (b *Binder) PointerTo(ref *TypeReference) *TypeReference {
 // TypeReference is used by args and field types. The Definition can refer to both input and output
 // types.
 type TypeReference struct {
-	Definition               *ast.Definition
-	GQL                      *ast.Type
-	GO                       types.Type  // Type of the field being bound. Could be a pointer or a value type of Target.
-	Target                   types.Type  // The actual type that we know how to bind to. May require pointer juggling when traversing to fields.
-	CastType                 types.Type  // Before calling marshalling functions cast from/to this base type
-	Marshaler                *types.Func // When using external marshalling functions this will point to the Marshal function
-	Unmarshaler              *types.Func // When using external marshalling functions this will point to the Unmarshal function
-	IsMarshaler              bool        // Does the type implement graphql.Marshaler and graphql.Unmarshaler
-	IsOmittable              bool        // Is the type wrapped with Omittable
-	IsContext                bool        // Is the Marshaler/Unmarshaller the context version; applies to either the method or interface variety.
-	PointersInUnmarshalInput bool        // Inverse values and pointers in return.
-	IsRoot                   bool        // Is the type a root level definition such as Query, Mutation or Subscription
-	EnumValues               []EnumValueReference
+	Definition                   *ast.Definition
+	GQL                          *ast.Type
+	GO                           types.Type  // Type of the field being bound. Could be a pointer or a value type of Target.
+	Target                       types.Type  // The actual type that we know how to bind to. May require pointer juggling when traversing to fields.
+	CastType                     types.Type  // Before calling marshalling functions cast from/to this base type
+	Marshaler                    *types.Func // When using external marshalling functions this will point to the Marshal function
+	Unmarshaler                  *types.Func // When using external marshalling functions this will point to the Unmarshal function
+	IsMarshaler                  bool        // Does the type implement graphql.Marshaler and graphql.Unmarshaler
+	IsOmittable                  bool        // Does the type support omittability via an unmarshaler function
+	OmittableUnmarshaler         *types.Func // If IsOmittable is true, this will point to the unmarshaler function that supports omittability
+	OmittableUnmarshalerCanError bool        // If IsOmittable is true, indicates whether the unmarshaler function returns an error as a second return value
+	IsContext                    bool        // Is the Marshaler/Unmarshaller the context version; applies to either the method or interface variety.
+	PointersInUnmarshalInput     bool        // Inverse values and pointers in return.
+	IsRoot                       bool        // Is the type a root level definition such as Query, Mutation or Subscription
+	EnumValues                   []EnumValueReference
 }
 
 func (ref *TypeReference) Elem() *TypeReference {
@@ -362,18 +364,113 @@ func isIntf(t types.Type) bool {
 	return ok
 }
 
-func unwrapOmittable(t types.Type) (types.Type, bool) {
-	if t == nil {
-		return nil, false
+func (b *Binder) unwrapOmittable(
+	goType types.Type,
+	bindTarget types.Type,
+) (
+	unwrappedType types.Type,
+	unmarshalOmittable *types.Func,
+	unmarshalerCanError bool,
+) {
+	if bindTarget == nil {
+		return nil, nil, false
 	}
-	named, ok := t.(*types.Named)
+	named, ok := bindTarget.(*types.Named)
 	if !ok {
-		return t, false
+		return bindTarget, nil, false
 	}
-	if named.Origin().String() != "github.com/99designs/gqlgen/graphql.Omittable[T any]" {
-		return t, false
+	for _, ot := range b.cfg.OmittableType {
+		pkgName, funName := code.PkgAndType(ot)
+
+		obj, err := b.FindObject(pkgName, funName)
+		if err != nil {
+			continue
+		}
+
+		fn, ok := obj.(*types.Func)
+		if !ok {
+			continue
+		}
+
+		sig := obj.Type().(*types.Signature)
+		if named.Origin().String() == sig.Results().At(0).Type().(*types.Named).Origin().String() {
+			// If we instantiate the unmarshaler function with the type arg in the bindTarget, does it result in compatible types?
+			typeArg := named.TypeArgs().At(0)
+
+			// There are four potential cases to check for compatibility:
+			// 1) The type arg and goType as-is
+			// 2) The type arg as a non-pointer (if it's a pointer), and the goType as-is
+			// 3) The type arg as-is, and the goType as a non-pointer (if it's a pointer)
+			// 4) Both the type arg and the goType as non-pointers (if they're pointers)
+			typeArgPtr, isTypeArgPtr := typeArg.(*types.Pointer)
+			goTypePtr, isGoTypePtr := goType.(*types.Pointer)
+
+			if canError, ok := b.instantiateAndCheckOmittable(fn, typeArg, goType, bindTarget); ok {
+				return goType, fn, canError
+			}
+			if isTypeArgPtr {
+				if canError, ok := b.instantiateAndCheckOmittable(fn, typeArgPtr.Elem(), goType, bindTarget); ok {
+					return goType, fn, canError
+				}
+			}
+			if isGoTypePtr {
+				if canError, ok := b.instantiateAndCheckOmittable(fn, typeArg, goTypePtr.Elem(), bindTarget); ok {
+					return goTypePtr.Elem(), fn, canError
+				}
+			}
+			if isTypeArgPtr && isGoTypePtr {
+				if canError, ok := b.instantiateAndCheckOmittable(fn, typeArgPtr.Elem(), goTypePtr.Elem(), bindTarget); ok {
+					return goTypePtr.Elem(), fn, canError
+				}
+			}
+		}
 	}
-	return named.TypeArgs().At(0), true
+	return bindTarget, nil, false
+}
+
+// instantiateAndCheckOmittable attemps to instantiate the given function with the provided type
+// argument and checks if the resulting signature is compatible with the expected argument and
+// result types for an omittable unmarshaler function. It returns true if the function can be used
+// as an omittable unmarshaler for the given type, and false otherwise.
+func (b *Binder) instantiateAndCheckOmittable(fn *types.Func, typeArg, expectedArg, expectedResult types.Type) (canError, ok bool) {
+	ifun, err := b.InstantiateType(fn.Type(), []types.Type{typeArg})
+	if err != nil {
+		return false, false
+	}
+	isig := ifun.(*types.Signature)
+
+	// The signature of an omittable unmarshaler function can be one of:
+	// func[T any](T) U
+	// func[T any](T) (U, error)
+	// where U is the type we want to unmarshal into (the bindTarget) and T is the type argument in the function definition.
+
+	// Check the parameters. There should be exactly one parameter of the expected type (the type argument).
+	if isig.Params().Len() != 1 {
+		return false, false
+	}
+	if isig.Params().At(0).Type().String() != expectedArg.String() {
+		return false, false
+	}
+
+	// Check the results. We allow either a single result of the expected type, or a tuple of (expected type, error).
+	switch isig.Results().Len() {
+	case 1:
+		if isig.Results().At(0).Type().String() != expectedResult.String() {
+			return false, false
+		}
+	case 2:
+		if isig.Results().At(0).Type().String() != expectedResult.String() {
+			return false, false
+		}
+		if isig.Results().At(1).Type().String() != "error" {
+			return false, false
+		}
+		canError = true
+	default:
+		return false, false
+	}
+
+	return canError, true
 }
 
 func (b *Binder) TypeReference(
@@ -382,19 +479,6 @@ func (b *Binder) TypeReference(
 ) (ret *TypeReference, err error) {
 	if bindTarget != nil {
 		bindTarget = code.Unalias(bindTarget)
-	}
-	if innerType, ok := unwrapOmittable(bindTarget); ok {
-		if schemaType.NonNull {
-			return nil, fmt.Errorf("%s is wrapped with Omittable but non-null", schemaType.Name())
-		}
-
-		ref, err := b.TypeReference(schemaType, innerType)
-		if err != nil {
-			return nil, err
-		}
-
-		ref.IsOmittable = true
-		return ref, err
 	}
 
 	if !isValid(bindTarget) {
@@ -497,6 +581,21 @@ func (b *Binder) TypeReference(
 
 		if bindTarget != nil {
 			if err = code.CompatibleTypes(ref.GO, bindTarget); err != nil {
+				// Attempt to unwrap omittable types if the provided bindTarget is not compatible
+				// with the initial GO type. This allows users to specify their own omittable types.
+				if newTarget, unmarshalFunc, canError := b.unwrapOmittable(ref.GO, bindTarget); unmarshalFunc != nil {
+					ref, err := b.TypeReference(schemaType, newTarget)
+					if err != nil {
+						return nil, err
+					}
+
+					ref.IsOmittable = true
+					ref.OmittableUnmarshaler = unmarshalFunc
+					ref.OmittableUnmarshalerCanError = canError
+
+					return ref, nil
+				}
+
 				// if the bind type implements the
 				// graphql.ContextMarshaler/graphql.ContextUnmarshaler/graphql.Marshaler/graphql.Unmarshaler
 				// interface, we can use it

@@ -45,7 +45,7 @@ func (ec *executionContext) _EmbeddedDefaultScalar_value(ctx context.Context, fi
 	)
 }
 func (ec *executionContext) fieldContext_EmbeddedDefaultScalar_value(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("EmbeddedDefaultScalar", field, false, false, errors.New("field of type DefaultScalarImplementation does not have child fields"))
+	return graphql.NewScalarFieldContext("EmbeddedDefaultScalar", field, false, false, errors.New("field of type DefaultScalarImplementation does not have child fields"))
 }
 
 // endregion **************************** field.gotpl *****************************

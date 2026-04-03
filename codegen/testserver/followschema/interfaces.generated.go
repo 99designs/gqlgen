@@ -50,7 +50,7 @@ func (ec *executionContext) _BackedByInterface_id(ctx context.Context, field gra
 	)
 }
 func (ec *executionContext) fieldContext_BackedByInterface_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("BackedByInterface", field, true, true, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("BackedByInterface", field, true, true, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _BackedByInterface_thisShouldBind(ctx context.Context, field graphql.CollectedField, obj BackedByInterface) (ret graphql.Marshaler) {
@@ -71,7 +71,7 @@ func (ec *executionContext) _BackedByInterface_thisShouldBind(ctx context.Contex
 	)
 }
 func (ec *executionContext) fieldContext_BackedByInterface_thisShouldBind(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("BackedByInterface", field, true, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("BackedByInterface", field, true, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _BackedByInterface_thisShouldBindWithError(ctx context.Context, field graphql.CollectedField, obj BackedByInterface) (ret graphql.Marshaler) {
@@ -92,7 +92,7 @@ func (ec *executionContext) _BackedByInterface_thisShouldBindWithError(ctx conte
 	)
 }
 func (ec *executionContext) fieldContext_BackedByInterface_thisShouldBindWithError(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("BackedByInterface", field, true, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("BackedByInterface", field, true, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _Cat_species(ctx context.Context, field graphql.CollectedField, obj *Cat) (ret graphql.Marshaler) {
@@ -113,7 +113,7 @@ func (ec *executionContext) _Cat_species(ctx context.Context, field graphql.Coll
 	)
 }
 func (ec *executionContext) fieldContext_Cat_species(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Cat", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Cat", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _Cat_size(ctx context.Context, field graphql.CollectedField, obj *Cat) (ret graphql.Marshaler) {
@@ -164,7 +164,7 @@ func (ec *executionContext) _Cat_catBreed(ctx context.Context, field graphql.Col
 	)
 }
 func (ec *executionContext) fieldContext_Cat_catBreed(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Cat", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Cat", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _Circle_radius(ctx context.Context, field graphql.CollectedField, obj *Circle) (ret graphql.Marshaler) {
@@ -185,7 +185,7 @@ func (ec *executionContext) _Circle_radius(ctx context.Context, field graphql.Co
 	)
 }
 func (ec *executionContext) fieldContext_Circle_radius(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Circle", field, false, false, errors.New("field of type Float does not have child fields"))
+	return graphql.NewScalarFieldContext("Circle", field, false, false, errors.New("field of type Float does not have child fields"))
 }
 
 func (ec *executionContext) _Circle_area(ctx context.Context, field graphql.CollectedField, obj *Circle) (ret graphql.Marshaler) {
@@ -206,7 +206,7 @@ func (ec *executionContext) _Circle_area(ctx context.Context, field graphql.Coll
 	)
 }
 func (ec *executionContext) fieldContext_Circle_area(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Circle", field, true, false, errors.New("field of type Float does not have child fields"))
+	return graphql.NewScalarFieldContext("Circle", field, true, false, errors.New("field of type Float does not have child fields"))
 }
 
 func (ec *executionContext) _Circle_coordinates(ctx context.Context, field graphql.CollectedField, obj *Circle) (ret graphql.Marshaler) {
@@ -257,7 +257,7 @@ func (ec *executionContext) _ConcreteNodeA_id(ctx context.Context, field graphql
 	)
 }
 func (ec *executionContext) fieldContext_ConcreteNodeA_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("ConcreteNodeA", field, false, false, errors.New("field of type ID does not have child fields"))
+	return graphql.NewScalarFieldContext("ConcreteNodeA", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
 func (ec *executionContext) _ConcreteNodeA_child(ctx context.Context, field graphql.CollectedField, obj *ConcreteNodeA) (ret graphql.Marshaler) {
@@ -308,7 +308,7 @@ func (ec *executionContext) _ConcreteNodeA_name(ctx context.Context, field graph
 	)
 }
 func (ec *executionContext) fieldContext_ConcreteNodeA_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("ConcreteNodeA", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("ConcreteNodeA", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _ConcreteNodeInterface_id(ctx context.Context, field graphql.CollectedField, obj ConcreteNodeInterface) (ret graphql.Marshaler) {
@@ -329,7 +329,7 @@ func (ec *executionContext) _ConcreteNodeInterface_id(ctx context.Context, field
 	)
 }
 func (ec *executionContext) fieldContext_ConcreteNodeInterface_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("ConcreteNodeInterface", field, true, false, errors.New("field of type ID does not have child fields"))
+	return graphql.NewScalarFieldContext("ConcreteNodeInterface", field, true, false, errors.New("field of type ID does not have child fields"))
 }
 
 func (ec *executionContext) _ConcreteNodeInterface_child(ctx context.Context, field graphql.CollectedField, obj ConcreteNodeInterface) (ret graphql.Marshaler) {
@@ -380,7 +380,7 @@ func (ec *executionContext) _Coordinates_x(ctx context.Context, field graphql.Co
 	)
 }
 func (ec *executionContext) fieldContext_Coordinates_x(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Coordinates", field, false, false, errors.New("field of type Float does not have child fields"))
+	return graphql.NewScalarFieldContext("Coordinates", field, false, false, errors.New("field of type Float does not have child fields"))
 }
 
 func (ec *executionContext) _Coordinates_y(ctx context.Context, field graphql.CollectedField, obj *Coordinates) (ret graphql.Marshaler) {
@@ -401,7 +401,7 @@ func (ec *executionContext) _Coordinates_y(ctx context.Context, field graphql.Co
 	)
 }
 func (ec *executionContext) fieldContext_Coordinates_y(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Coordinates", field, false, false, errors.New("field of type Float does not have child fields"))
+	return graphql.NewScalarFieldContext("Coordinates", field, false, false, errors.New("field of type Float does not have child fields"))
 }
 
 func (ec *executionContext) _Dog_species(ctx context.Context, field graphql.CollectedField, obj *Dog) (ret graphql.Marshaler) {
@@ -422,7 +422,7 @@ func (ec *executionContext) _Dog_species(ctx context.Context, field graphql.Coll
 	)
 }
 func (ec *executionContext) fieldContext_Dog_species(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Dog", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Dog", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _Dog_size(ctx context.Context, field graphql.CollectedField, obj *Dog) (ret graphql.Marshaler) {
@@ -473,7 +473,7 @@ func (ec *executionContext) _Dog_dogBreed(ctx context.Context, field graphql.Col
 	)
 }
 func (ec *executionContext) fieldContext_Dog_dogBreed(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Dog", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Dog", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _Horse_species(ctx context.Context, field graphql.CollectedField, obj *Horse) (ret graphql.Marshaler) {
@@ -494,7 +494,7 @@ func (ec *executionContext) _Horse_species(ctx context.Context, field graphql.Co
 	)
 }
 func (ec *executionContext) fieldContext_Horse_species(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Horse", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Horse", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _Horse_size(ctx context.Context, field graphql.CollectedField, obj *Horse) (ret graphql.Marshaler) {
@@ -545,7 +545,7 @@ func (ec *executionContext) _Horse_horseBreed(ctx context.Context, field graphql
 	)
 }
 func (ec *executionContext) fieldContext_Horse_horseBreed(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Horse", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Horse", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _Rectangle_length(ctx context.Context, field graphql.CollectedField, obj *Rectangle) (ret graphql.Marshaler) {
@@ -566,7 +566,7 @@ func (ec *executionContext) _Rectangle_length(ctx context.Context, field graphql
 	)
 }
 func (ec *executionContext) fieldContext_Rectangle_length(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Rectangle", field, false, false, errors.New("field of type Float does not have child fields"))
+	return graphql.NewScalarFieldContext("Rectangle", field, false, false, errors.New("field of type Float does not have child fields"))
 }
 
 func (ec *executionContext) _Rectangle_width(ctx context.Context, field graphql.CollectedField, obj *Rectangle) (ret graphql.Marshaler) {
@@ -587,7 +587,7 @@ func (ec *executionContext) _Rectangle_width(ctx context.Context, field graphql.
 	)
 }
 func (ec *executionContext) fieldContext_Rectangle_width(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Rectangle", field, false, false, errors.New("field of type Float does not have child fields"))
+	return graphql.NewScalarFieldContext("Rectangle", field, false, false, errors.New("field of type Float does not have child fields"))
 }
 
 func (ec *executionContext) _Rectangle_area(ctx context.Context, field graphql.CollectedField, obj *Rectangle) (ret graphql.Marshaler) {
@@ -608,7 +608,7 @@ func (ec *executionContext) _Rectangle_area(ctx context.Context, field graphql.C
 	)
 }
 func (ec *executionContext) fieldContext_Rectangle_area(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Rectangle", field, true, false, errors.New("field of type Float does not have child fields"))
+	return graphql.NewScalarFieldContext("Rectangle", field, true, false, errors.New("field of type Float does not have child fields"))
 }
 
 func (ec *executionContext) _Rectangle_coordinates(ctx context.Context, field graphql.CollectedField, obj *Rectangle) (ret graphql.Marshaler) {
@@ -659,7 +659,7 @@ func (ec *executionContext) _Size_height(ctx context.Context, field graphql.Coll
 	)
 }
 func (ec *executionContext) fieldContext_Size_height(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Size", field, false, false, errors.New("field of type Int does not have child fields"))
+	return graphql.NewScalarFieldContext("Size", field, false, false, errors.New("field of type Int does not have child fields"))
 }
 
 func (ec *executionContext) _Size_weight(ctx context.Context, field graphql.CollectedField, obj *Size) (ret graphql.Marshaler) {
@@ -680,7 +680,7 @@ func (ec *executionContext) _Size_weight(ctx context.Context, field graphql.Coll
 	)
 }
 func (ec *executionContext) fieldContext_Size_weight(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Size", field, false, false, errors.New("field of type Int does not have child fields"))
+	return graphql.NewScalarFieldContext("Size", field, false, false, errors.New("field of type Int does not have child fields"))
 }
 
 // endregion **************************** field.gotpl *****************************

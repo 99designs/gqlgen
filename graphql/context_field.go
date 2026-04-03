@@ -99,6 +99,25 @@ func WithFieldContext(ctx context.Context, rc *FieldContext) context.Context {
 	return context.WithValue(ctx, resolverCtx, rc)
 }
 
+// NewScalarFieldContext creates a FieldContext for scalar or enum fields that
+// have no child fields. The returned Child callback always returns (nil, childErr).
+func NewScalarFieldContext(
+	objectName string,
+	field CollectedField,
+	isMethod, isResolver bool,
+	childErr error,
+) (*FieldContext, error) {
+	return &FieldContext{
+		Object:     objectName,
+		Field:      field,
+		IsMethod:   isMethod,
+		IsResolver: isResolver,
+		Child: func(ctx context.Context, field CollectedField) (*FieldContext, error) {
+			return nil, childErr
+		},
+	}, nil
+}
+
 func equalPath(a, b ast.Path) bool {
 	if len(a) != len(b) {
 		return false

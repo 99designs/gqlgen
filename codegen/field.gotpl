@@ -86,14 +86,14 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 	{{- end }}
 }
 
-{{- /* Leaf fields without args: use newLeafFieldContext helper (saves ~8 lines per field) */ -}}
+{{- /* Scalar/enum fields without args: use graphql.NewScalarFieldContext (saves ~8 lines per field) */ -}}
 {{- if and (not $field.Args) (not $field.TypeReference.Definition.Fields) }}
 {{ if $useFunctionSyntaxForExecutionContext -}}
 func {{ $field.FieldContextFunc }}(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 {{- else -}}
 func (ec *executionContext) {{ $field.FieldContextFunc }}(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 {{- end }}
-	return newLeafFieldContext({{quote $field.Object.Name}}, field, {{or $field.IsMethod $field.IsResolver}}, {{ $field.IsResolver }}, errors.New("field of type {{ $field.TypeReference.Definition.Name }} does not have child fields"))
+	return graphql.NewScalarFieldContext({{quote $field.Object.Name}}, field, {{or $field.IsMethod $field.IsResolver}}, {{ $field.IsResolver }}, errors.New("field of type {{ $field.TypeReference.Definition.Name }} does not have child fields"))
 }
 {{- else }}
 {{ if $useFunctionSyntaxForExecutionContext -}}

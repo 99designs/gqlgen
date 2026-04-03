@@ -45,7 +45,7 @@ func (ec *executionContext) _SkipIncludeTestType_a(ctx context.Context, field gr
 	)
 }
 func (ec *executionContext) fieldContext_SkipIncludeTestType_a(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("SkipIncludeTestType", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("SkipIncludeTestType", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _SkipIncludeTestType_b(ctx context.Context, field graphql.CollectedField, obj *SkipIncludeTestType) (ret graphql.Marshaler) {
@@ -66,7 +66,7 @@ func (ec *executionContext) _SkipIncludeTestType_b(ctx context.Context, field gr
 	)
 }
 func (ec *executionContext) fieldContext_SkipIncludeTestType_b(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("SkipIncludeTestType", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("SkipIncludeTestType", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 // endregion **************************** field.gotpl *****************************

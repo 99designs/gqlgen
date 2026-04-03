@@ -49,7 +49,7 @@ func (ec *executionContext) _FieldsOrderPayload_firstFieldValue(ctx context.Cont
 	)
 }
 func (ec *executionContext) fieldContext_FieldsOrderPayload_firstFieldValue(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("FieldsOrderPayload", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("FieldsOrderPayload", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 // endregion **************************** field.gotpl *****************************

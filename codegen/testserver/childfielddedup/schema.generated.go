@@ -137,7 +137,7 @@ func _Article_id(ctx context.Context, ec *executionContext, field graphql.Collec
 	)
 }
 func fieldContext_Article_id(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Article", field, false, false, errors.New("field of type ID does not have child fields"))
+	return graphql.NewScalarFieldContext("Article", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
 func _Article_headline(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *Article) (ret graphql.Marshaler) {
@@ -160,7 +160,7 @@ func _Article_headline(ctx context.Context, ec *executionContext, field graphql.
 	)
 }
 func fieldContext_Article_headline(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Article", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Article", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _Article_author(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *Article) (ret graphql.Marshaler) {
@@ -247,7 +247,7 @@ func _Author_id(ctx context.Context, ec *executionContext, field graphql.Collect
 	)
 }
 func fieldContext_Author_id(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Author", field, false, false, errors.New("field of type ID does not have child fields"))
+	return graphql.NewScalarFieldContext("Author", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
 func _Author_name(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *Author) (ret graphql.Marshaler) {
@@ -270,7 +270,7 @@ func _Author_name(ctx context.Context, ec *executionContext, field graphql.Colle
 	)
 }
 func fieldContext_Author_name(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Author", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Author", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _Author_email(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *Author) (ret graphql.Marshaler) {
@@ -293,7 +293,7 @@ func _Author_email(ctx context.Context, ec *executionContext, field graphql.Coll
 	)
 }
 func fieldContext_Author_email(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Author", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Author", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _Book_id(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *Book) (ret graphql.Marshaler) {
@@ -316,7 +316,7 @@ func _Book_id(ctx context.Context, ec *executionContext, field graphql.Collected
 	)
 }
 func fieldContext_Book_id(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Book", field, false, false, errors.New("field of type ID does not have child fields"))
+	return graphql.NewScalarFieldContext("Book", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
 func _Book_title(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *Book) (ret graphql.Marshaler) {
@@ -339,7 +339,7 @@ func _Book_title(ctx context.Context, ec *executionContext, field graphql.Collec
 	)
 }
 func fieldContext_Book_title(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Book", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Book", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _Book_author(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *Book) (ret graphql.Marshaler) {
@@ -458,7 +458,7 @@ func _Comment_id(ctx context.Context, ec *executionContext, field graphql.Collec
 	)
 }
 func fieldContext_Comment_id(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Comment", field, false, false, errors.New("field of type ID does not have child fields"))
+	return graphql.NewScalarFieldContext("Comment", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
 func _Comment_text(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *Comment) (ret graphql.Marshaler) {
@@ -481,7 +481,7 @@ func _Comment_text(ctx context.Context, ec *executionContext, field graphql.Coll
 	)
 }
 func fieldContext_Comment_text(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Comment", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Comment", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _Comment_commenter(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *Comment) (ret graphql.Marshaler) {
@@ -536,7 +536,7 @@ func _Invoice_id(ctx context.Context, ec *executionContext, field graphql.Collec
 	)
 }
 func fieldContext_Invoice_id(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Invoice", field, false, false, errors.New("field of type ID does not have child fields"))
+	return graphql.NewScalarFieldContext("Invoice", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
 func _Invoice_total(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *Invoice) (ret graphql.Marshaler) {
@@ -559,7 +559,7 @@ func _Invoice_total(ctx context.Context, ec *executionContext, field graphql.Col
 	)
 }
 func fieldContext_Invoice_total(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Invoice", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Invoice", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _Invoice_createdBy(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *Invoice) (ret graphql.Marshaler) {
@@ -986,7 +986,7 @@ func _Review_id(ctx context.Context, ec *executionContext, field graphql.Collect
 	)
 }
 func fieldContext_Review_id(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Review", field, false, false, errors.New("field of type ID does not have child fields"))
+	return graphql.NewScalarFieldContext("Review", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
 func _Review_body(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *Review) (ret graphql.Marshaler) {
@@ -1009,7 +1009,7 @@ func _Review_body(ctx context.Context, ec *executionContext, field graphql.Colle
 	)
 }
 func fieldContext_Review_body(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Review", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Review", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _Review_author(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *Review) (ret graphql.Marshaler) {
@@ -1096,7 +1096,7 @@ func _Task_id(ctx context.Context, ec *executionContext, field graphql.Collected
 	)
 }
 func fieldContext_Task_id(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Task", field, false, false, errors.New("field of type ID does not have child fields"))
+	return graphql.NewScalarFieldContext("Task", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
 func _Task_title(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *Task) (ret graphql.Marshaler) {
@@ -1119,7 +1119,7 @@ func _Task_title(ctx context.Context, ec *executionContext, field graphql.Collec
 	)
 }
 func fieldContext_Task_title(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Task", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Task", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _Task_assignee(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *Task) (ret graphql.Marshaler) {
@@ -1206,7 +1206,7 @@ func _User_id(ctx context.Context, ec *executionContext, field graphql.Collected
 	)
 }
 func fieldContext_User_id(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("User", field, false, false, errors.New("field of type ID does not have child fields"))
+	return graphql.NewScalarFieldContext("User", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
 func _User_name(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -1229,7 +1229,7 @@ func _User_name(ctx context.Context, ec *executionContext, field graphql.Collect
 	)
 }
 func fieldContext_User_name(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("User", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("User", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _User_email(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -1252,7 +1252,7 @@ func _User_email(ctx context.Context, ec *executionContext, field graphql.Collec
 	)
 }
 func fieldContext_User_email(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("User", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("User", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _User_phone(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -1275,7 +1275,7 @@ func _User_phone(ctx context.Context, ec *executionContext, field graphql.Collec
 	)
 }
 func fieldContext_User_phone(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("User", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("User", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _User_avatar(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -1298,7 +1298,7 @@ func _User_avatar(ctx context.Context, ec *executionContext, field graphql.Colle
 	)
 }
 func fieldContext_User_avatar(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("User", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("User", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _User_role(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -1321,7 +1321,7 @@ func _User_role(ctx context.Context, ec *executionContext, field graphql.Collect
 	)
 }
 func fieldContext_User_role(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("User", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("User", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _User_status(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -1344,7 +1344,7 @@ func _User_status(ctx context.Context, ec *executionContext, field graphql.Colle
 	)
 }
 func fieldContext_User_status(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("User", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("User", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _User_language(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -1367,7 +1367,7 @@ func _User_language(ctx context.Context, ec *executionContext, field graphql.Col
 	)
 }
 func fieldContext_User_language(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("User", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("User", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _User_timezone(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -1390,7 +1390,7 @@ func _User_timezone(ctx context.Context, ec *executionContext, field graphql.Col
 	)
 }
 func fieldContext_User_timezone(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("User", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("User", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func _User_createdAt(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -1413,7 +1413,7 @@ func _User_createdAt(ctx context.Context, ec *executionContext, field graphql.Co
 	)
 }
 func fieldContext_User_createdAt(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("User", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("User", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 // endregion **************************** field.gotpl *****************************

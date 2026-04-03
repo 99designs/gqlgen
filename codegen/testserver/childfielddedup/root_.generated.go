@@ -125,21 +125,6 @@ var sources = []*ast.Source{
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
-// newLeafFieldContext creates a FieldContext for fields that have no child fields
-// (scalars, enums). This replaces the per-field boilerplate that was previously
-// generated inline for every scalar field on every type.
-func newLeafFieldContext(objectName string, field graphql.CollectedField, isMethod, isResolver bool, childErr error) (*graphql.FieldContext, error) {
-	return &graphql.FieldContext{
-		Object:     objectName,
-		Field:      field,
-		IsMethod:   isMethod,
-		IsResolver: isResolver,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, childErr
-		},
-	}, nil
-}
-
 // childFields_* functions provide shared child field context lookups.
 // Each function is generated once per unique object type, deduplicating the
 // switch statements that were previously inlined in every fieldContext_* function.

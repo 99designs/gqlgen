@@ -59,7 +59,7 @@ func (ec *executionContext) _Query_inSchemadir(ctx context.Context, field graphq
 	)
 }
 func (ec *executionContext) fieldContext_Query_inSchemadir(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Query", field, true, true, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Query", field, true, true, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _Query_parentdir(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -78,7 +78,7 @@ func (ec *executionContext) _Query_parentdir(ctx context.Context, field graphql.
 	)
 }
 func (ec *executionContext) fieldContext_Query_parentdir(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Query", field, true, true, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Query", field, true, true, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _Query_subdir(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -97,7 +97,7 @@ func (ec *executionContext) _Query_subdir(ctx context.Context, field graphql.Col
 	)
 }
 func (ec *executionContext) fieldContext_Query_subdir(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Query", field, true, true, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Query", field, true, true, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _Query__service(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {

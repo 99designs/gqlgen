@@ -158,7 +158,7 @@ func (ec *executionContext) _WrappedStruct_name(ctx context.Context, field graph
 	)
 }
 func (ec *executionContext) fieldContext_WrappedStruct_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("WrappedStruct", field, false, false, errors.New("field of type WrappedScalar does not have child fields"))
+	return graphql.NewScalarFieldContext("WrappedStruct", field, false, false, errors.New("field of type WrappedScalar does not have child fields"))
 }
 
 func (ec *executionContext) _WrappedStruct_desc(ctx context.Context, field graphql.CollectedField, obj *WrappedStruct) (ret graphql.Marshaler) {
@@ -179,7 +179,7 @@ func (ec *executionContext) _WrappedStruct_desc(ctx context.Context, field graph
 	)
 }
 func (ec *executionContext) fieldContext_WrappedStruct_desc(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("WrappedStruct", field, false, false, errors.New("field of type WrappedScalar does not have child fields"))
+	return graphql.NewScalarFieldContext("WrappedStruct", field, false, false, errors.New("field of type WrappedScalar does not have child fields"))
 }
 
 // endregion **************************** field.gotpl *****************************

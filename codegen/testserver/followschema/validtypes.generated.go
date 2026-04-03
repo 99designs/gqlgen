@@ -192,7 +192,7 @@ func (ec *executionContext) _Content_Post_foo(ctx context.Context, field graphql
 	)
 }
 func (ec *executionContext) fieldContext_Content_Post_foo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Content_Post", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Content_Post", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _Content_User_foo(ctx context.Context, field graphql.CollectedField, obj *ContentUser) (ret graphql.Marshaler) {
@@ -213,7 +213,7 @@ func (ec *executionContext) _Content_User_foo(ctx context.Context, field graphql
 	)
 }
 func (ec *executionContext) fieldContext_Content_User_foo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Content_User", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Content_User", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _ValidType_differentCase(ctx context.Context, field graphql.CollectedField, obj *ValidType) (ret graphql.Marshaler) {
@@ -234,7 +234,7 @@ func (ec *executionContext) _ValidType_differentCase(ctx context.Context, field 
 	)
 }
 func (ec *executionContext) fieldContext_ValidType_differentCase(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("ValidType", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("ValidType", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _ValidType_different_case(ctx context.Context, field graphql.CollectedField, obj *ValidType) (ret graphql.Marshaler) {
@@ -255,7 +255,7 @@ func (ec *executionContext) _ValidType_different_case(ctx context.Context, field
 	)
 }
 func (ec *executionContext) fieldContext_ValidType_different_case(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("ValidType", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("ValidType", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _ValidType_validInputKeywords(ctx context.Context, field graphql.CollectedField, obj *ValidType) (ret graphql.Marshaler) {

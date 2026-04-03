@@ -54,7 +54,7 @@ func (ec *executionContext) _Primitive_value(ctx context.Context, field graphql.
 	)
 }
 func (ec *executionContext) fieldContext_Primitive_value(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Primitive", field, true, true, errors.New("field of type Int does not have child fields"))
+	return graphql.NewScalarFieldContext("Primitive", field, true, true, errors.New("field of type Int does not have child fields"))
 }
 
 func (ec *executionContext) _Primitive_squared(ctx context.Context, field graphql.CollectedField, obj *Primitive) (ret graphql.Marshaler) {
@@ -75,7 +75,7 @@ func (ec *executionContext) _Primitive_squared(ctx context.Context, field graphq
 	)
 }
 func (ec *executionContext) fieldContext_Primitive_squared(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("Primitive", field, true, false, errors.New("field of type Int does not have child fields"))
+	return graphql.NewScalarFieldContext("Primitive", field, true, false, errors.New("field of type Int does not have child fields"))
 }
 
 func (ec *executionContext) _PrimitiveString_value(ctx context.Context, field graphql.CollectedField, obj *PrimitiveString) (ret graphql.Marshaler) {
@@ -96,7 +96,7 @@ func (ec *executionContext) _PrimitiveString_value(ctx context.Context, field gr
 	)
 }
 func (ec *executionContext) fieldContext_PrimitiveString_value(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("PrimitiveString", field, true, true, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("PrimitiveString", field, true, true, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _PrimitiveString_doubled(ctx context.Context, field graphql.CollectedField, obj *PrimitiveString) (ret graphql.Marshaler) {
@@ -117,7 +117,7 @@ func (ec *executionContext) _PrimitiveString_doubled(ctx context.Context, field 
 	)
 }
 func (ec *executionContext) fieldContext_PrimitiveString_doubled(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("PrimitiveString", field, true, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("PrimitiveString", field, true, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _PrimitiveString_len(ctx context.Context, field graphql.CollectedField, obj *PrimitiveString) (ret graphql.Marshaler) {
@@ -138,7 +138,7 @@ func (ec *executionContext) _PrimitiveString_len(ctx context.Context, field grap
 	)
 }
 func (ec *executionContext) fieldContext_PrimitiveString_len(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("PrimitiveString", field, true, true, errors.New("field of type Int does not have child fields"))
+	return graphql.NewScalarFieldContext("PrimitiveString", field, true, true, errors.New("field of type Int does not have child fields"))
 }
 
 // endregion **************************** field.gotpl *****************************

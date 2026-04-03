@@ -49,7 +49,7 @@ func (ec *executionContext) _DeferModel_id(ctx context.Context, field graphql.Co
 	)
 }
 func (ec *executionContext) fieldContext_DeferModel_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("DeferModel", field, false, false, errors.New("field of type ID does not have child fields"))
+	return graphql.NewScalarFieldContext("DeferModel", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
 func (ec *executionContext) _DeferModel_name(ctx context.Context, field graphql.CollectedField, obj *DeferModel) (ret graphql.Marshaler) {
@@ -70,7 +70,7 @@ func (ec *executionContext) _DeferModel_name(ctx context.Context, field graphql.
 	)
 }
 func (ec *executionContext) fieldContext_DeferModel_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("DeferModel", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("DeferModel", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _DeferModel_values(ctx context.Context, field graphql.CollectedField, obj *DeferModel) (ret graphql.Marshaler) {
@@ -91,7 +91,7 @@ func (ec *executionContext) _DeferModel_values(ctx context.Context, field graphq
 	)
 }
 func (ec *executionContext) fieldContext_DeferModel_values(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("DeferModel", field, true, true, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("DeferModel", field, true, true, errors.New("field of type String does not have child fields"))
 }
 
 // endregion **************************** field.gotpl *****************************

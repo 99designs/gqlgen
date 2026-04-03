@@ -46,7 +46,7 @@ func (ec *executionContext) _A_id(ctx context.Context, field graphql.CollectedFi
 	)
 }
 func (ec *executionContext) fieldContext_A_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("A", field, false, false, errors.New("field of type ID does not have child fields"))
+	return graphql.NewScalarFieldContext("A", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
 func (ec *executionContext) _B_id(ctx context.Context, field graphql.CollectedField, obj *B) (ret graphql.Marshaler) {
@@ -67,7 +67,7 @@ func (ec *executionContext) _B_id(ctx context.Context, field graphql.CollectedFi
 	)
 }
 func (ec *executionContext) fieldContext_B_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return newLeafFieldContext("B", field, false, false, errors.New("field of type ID does not have child fields"))
+	return graphql.NewScalarFieldContext("B", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
 // endregion **************************** field.gotpl *****************************

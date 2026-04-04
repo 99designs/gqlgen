@@ -110,7 +110,7 @@ func (h UrlEncodedForm) parseJson(bodyString string) (*graphql.RawParams, error)
 	params := &graphql.RawParams{}
 	bodyReader := io.NopCloser(strings.NewReader(bodyString))
 
-	err := jsonDecode(bodyReader, &params)
+	err := jsonDecode(bodyReader, params)
 	if err != nil {
 		return nil, err
 	}

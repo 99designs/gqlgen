@@ -94,7 +94,7 @@ func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecu
 	}
 
 	bodyReader := bytes.NewReader(bodyBytes)
-	if err := jsonDecode(bodyReader, &params); err != nil {
+	if err := jsonDecode(bodyReader, params); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		gqlErr := gqlerror.Errorf(
 			"json request body could not be decoded: %+v body:%s",

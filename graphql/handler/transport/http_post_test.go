@@ -114,7 +114,11 @@ func TestPOST(t *testing.T) {
 		)
 		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code)
 		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
-		assert.JSONEq(t, `{"errors":[{"message":"no operation provided","extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`, resp.Body.String())
+		assert.JSONEq(
+			t,
+			`{"errors":[{"message":"no operation provided","extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`,
+			resp.Body.String(),
+		)
 	})
 
 	t.Run("decode failure", func(t *testing.T) {

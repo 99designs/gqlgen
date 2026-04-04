@@ -732,7 +732,11 @@ func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {
 		msg := readOp(c)
 		require.Equal(t, errorMsg, msg.Type, string(msg.Payload))
 		require.Equal(t, "test_1", msg.ID, string(msg.Payload))
-		require.JSONEq(t, `[{"message":"no operation provided","extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}]`, string(msg.Payload))
+		require.JSONEq(
+			t,
+			`[{"message":"no operation provided","extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}]`,
+			string(msg.Payload),
+		)
 		require.NoError(
 			t,
 			c.WriteJSON(&operationMessage{Type: graphqltransportwsCompleteMsg, ID: "test_1"}),

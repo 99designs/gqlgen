@@ -382,8 +382,8 @@ func (c *wsConnection) closeOnCancel(ctx context.Context) {
 
 func (c *wsConnection) subscribe(start time.Time, msg *message) {
 	ctx := graphql.StartOperationTrace(c.ctx)
-	var params *graphql.RawParams
-	if err := jsonDecode(bytes.NewReader(msg.payload), &params); err != nil {
+	params := &graphql.RawParams{}
+	if err := jsonDecode(bytes.NewReader(msg.payload), params); err != nil {
 		c.sendError(msg.id, &gqlerror.Error{Message: "invalid json"})
 		c.complete(msg.id)
 		return

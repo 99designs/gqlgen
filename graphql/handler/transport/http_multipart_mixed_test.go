@@ -47,6 +47,14 @@ func TestMultipartMixed(t *testing.T) {
 		return w
 	}
 
+	t.Run("fail on null body", func(t *testing.T) {
+		handler, srv := initializeWithServer()
+		resp := doRequest(handler, srv.URL, "null")
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code)
+		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
+		assert.JSONEq(t, `{"errors":[{"message":"no operation provided","extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`, resp.Body.String())
+	})
+
 	t.Run("decode failure", func(t *testing.T) {
 		handler, srv := initializeWithServer()
 		resp := doRequest(handler, srv.URL, "notjson")

@@ -709,6 +709,40 @@ func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {
 		require.Equal(t, "test_1", msg.ID)
 	})
 
+	t.Run("fail on null payload", func(t *testing.T) {
+		handler, srv := initialize(transport.Websocket{})
+		defer srv.Close()
+
+		c := wsConnectWithSubprotocol(srv.URL, graphqltransportwsSubprotocol)
+		defer c.Close()
+
+		require.NoError(
+			t,
+			c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}),
+		)
+		assert.Equal(t, graphqltransportwsConnectionAckMsg, readOp(c).Type)
+
+		require.NoError(t, c.WriteJSON(&operationMessage{
+			Type:    graphqltransportwsSubscribeMsg,
+			ID:      "test_1",
+			Payload: json.RawMessage(`null`),
+		}))
+
+		handler.SendNextSubscriptionMessage()
+		msg := readOp(c)
+		require.Equal(t, errorMsg, msg.Type, string(msg.Payload))
+		require.Equal(t, "test_1", msg.ID, string(msg.Payload))
+		require.JSONEq(t, `[{"message":"no operation provided","extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}]`, string(msg.Payload))
+		require.NoError(
+			t,
+			c.WriteJSON(&operationMessage{Type: graphqltransportwsCompleteMsg, ID: "test_1"}),
+		)
+
+		msg = readOp(c)
+		require.Equal(t, graphqltransportwsCompleteMsg, msg.Type)
+		require.Equal(t, "test_1", msg.ID)
+	})
+
 	t.Run("receives no graphql-ws keep alive messages", func(t *testing.T) {
 		_, srv := initialize(transport.Websocket{KeepAlivePingInterval: 5 * time.Millisecond})
 		defer srv.Close()

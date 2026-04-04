@@ -103,6 +103,20 @@ func TestPOST(t *testing.T) {
 		assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 	})
 
+	t.Run("fail on null body", func(t *testing.T) {
+		resp := doRequest(
+			jsonH,
+			http.MethodPost,
+			"/graphql",
+			"null",
+			"",
+			"application/json",
+		)
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code)
+		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
+		assert.JSONEq(t, `{"errors":[{"message":"no operation provided","extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`, resp.Body.String())
+	})
+
 	t.Run("decode failure", func(t *testing.T) {
 		resp := doRequest(
 			h,

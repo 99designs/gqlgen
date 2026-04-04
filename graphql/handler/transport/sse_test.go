@@ -78,6 +78,32 @@ func TestSSE(t *testing.T) {
 		)
 	})
 
+	t.Run("fail on null body", func(t *testing.T) {
+		h := initialize()
+		req := createHTTPTestRequest("null")
+		w := httptest.NewRecorder()
+		h.ServeHTTP(w, req)
+		assert.Equal(t, 200, w.Code, "Request return wrong status -> %d", w.Code)
+		assert.Equal(t, "text/event-stream", w.Header().Get("Content-Type"))
+
+		br := bufio.NewReader(w.Body)
+
+		assert.Equal(t, ":\n", readLine(br))
+		assert.Equal(t, "\n", readLine(br))
+		assert.Equal(t, "event: next\n", readLine(br))
+		assert.Equal(
+			t,
+			`data: {"errors":[{"message":"no operation provided","extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`+"\n",
+			readLine(br),
+		)
+		assert.Equal(t, "\n", readLine(br))
+		assert.Equal(t, "event: complete\n", readLine(br))
+		assert.Equal(t, "\n", readLine(br))
+
+		_, err := br.ReadByte()
+		assert.Equal(t, err, io.EOF)
+	})
+
 	t.Run("decode failure", func(t *testing.T) {
 		h := initialize()
 		req := createHTTPTestRequest("notjson")

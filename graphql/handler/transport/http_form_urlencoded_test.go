@@ -56,6 +56,20 @@ func TestUrlEncodedForm(t *testing.T) {
 		assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 	})
 
+	t.Run("fail on no query", func(t *testing.T) {
+		resp := doRequest(
+			h,
+			http.MethodPost,
+			"/graphql",
+			`{"query": ""}`,
+			"",
+			"application/x-www-form-urlencoded",
+		)
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code)
+		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
+		assert.JSONEq(t, `{"errors":[{"message":"no operation provided","extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`, resp.Body.String())
+	})
+
 	t.Run("decode failure json", func(t *testing.T) {
 		resp := doRequest(
 			h,

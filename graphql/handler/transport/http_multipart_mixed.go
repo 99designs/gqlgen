@@ -91,7 +91,7 @@ func (t MultipartMixed) Do(w http.ResponseWriter, r *http.Request, exec graphql.
 	}
 
 	bodyReader := io.NopCloser(strings.NewReader(bodyString))
-	if err = jsonDecode(bodyReader, &params); err != nil {
+	if err = jsonDecode(bodyReader, params); err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		gqlErr := gqlerror.Errorf(
 			"json request body could not be decoded: %+v body:%s",

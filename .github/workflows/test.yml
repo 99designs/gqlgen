@@ -35,7 +35,7 @@ jobs:
     - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v5
       with:
         persist-credentials: "false"
-    - uses: actions/setup-go@4b73464bb391d4059bd26b0524d20df3927bd417 # v6
+    - uses: actions/setup-go@4a3601121dd01d1626a1e23e37211e3254c1c06c # v6
       with:
         go-version: ${{ matrix.go }}
     # Install gotestsum on the VM running the action.
@@ -67,7 +67,7 @@ jobs:
       run: |
         echo "### mikepenz/action-junit-report! :rocket:" >> $GITHUB_STEP_SUMMARY
     - name: Publish Test Report
-      uses: mikepenz/action-junit-report@49b2ca06f62aa7ef83ae6769a2179271e160d8e4 # v5
+      uses: mikepenz/action-junit-report@bccf2e31636835cf0874589931c4116687171386 # v5
       if: success() || failure() # always run even if the previous step fails
       with:
         report_paths: |

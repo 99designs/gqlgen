@@ -689,8 +689,20 @@ func (f *Field) FieldContextFunc() string {
 	return "fieldContext_" + f.Object.Name + "_" + f.Name
 }
 
+// ChildFieldContextFunc returns the fieldContext function name for a child field.
+// Callers must ensure TypeReference and Definition are non-nil (guaranteed by the
+// template rendering path, which only calls this for bound fields).
 func (f *Field) ChildFieldContextFunc(name string) string {
 	return "fieldContext_" + f.TypeReference.Definition.Name + "_" + name
+}
+
+// ChildFieldContextTypeName returns the GraphQL type name that this field
+// resolves to. Used by templates to reference shared childFields_* functions.
+func (f *Field) ChildFieldContextTypeName() string {
+	if f.TypeReference == nil || f.TypeReference.Definition == nil {
+		return ""
+	}
+	return f.TypeReference.Definition.Name
 }
 
 func (f *Field) ResolverType() string {

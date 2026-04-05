@@ -74,7 +74,6 @@ func (ec *executionContext) _WrappedMap_get(ctx context.Context, field graphql.C
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_WrappedMap_get(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "WrappedMap",
@@ -117,7 +116,6 @@ func (ec *executionContext) _WrappedSlice_get(ctx context.Context, field graphql
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_WrappedSlice_get(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "WrappedSlice",
@@ -159,18 +157,8 @@ func (ec *executionContext) _WrappedStruct_name(ctx context.Context, field graph
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_WrappedStruct_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "WrappedStruct",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type WrappedScalar does not have child fields")
-		},
-	}
-	return fc, nil
+	return graphql.NewScalarFieldContext("WrappedStruct", field, false, false, errors.New("field of type WrappedScalar does not have child fields"))
 }
 
 func (ec *executionContext) _WrappedStruct_desc(ctx context.Context, field graphql.CollectedField, obj *WrappedStruct) (ret graphql.Marshaler) {
@@ -190,18 +178,8 @@ func (ec *executionContext) _WrappedStruct_desc(ctx context.Context, field graph
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_WrappedStruct_desc(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "WrappedStruct",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type WrappedScalar does not have child fields")
-		},
-	}
-	return fc, nil
+	return graphql.NewScalarFieldContext("WrappedStruct", field, false, false, errors.New("field of type WrappedScalar does not have child fields"))
 }
 
 // endregion **************************** field.gotpl *****************************

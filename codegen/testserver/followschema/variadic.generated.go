@@ -55,7 +55,6 @@ func (ec *executionContext) _VariadicModel_value(ctx context.Context, field grap
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_VariadicModel_value(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "VariadicModel",

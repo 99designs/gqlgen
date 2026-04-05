@@ -43,18 +43,8 @@ func (ec *executionContext) _PtrToAnyContainer_ptrToAny(ctx context.Context, fie
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_PtrToAnyContainer_ptrToAny(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PtrToAnyContainer",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Any does not have child fields")
-		},
-	}
-	return fc, nil
+	return graphql.NewScalarFieldContext("PtrToAnyContainer", field, false, false, errors.New("field of type Any does not have child fields"))
 }
 
 func (ec *executionContext) _PtrToAnyContainer_binding(ctx context.Context, field graphql.CollectedField, obj *PtrToAnyContainer) (ret graphql.Marshaler) {
@@ -74,18 +64,8 @@ func (ec *executionContext) _PtrToAnyContainer_binding(ctx context.Context, fiel
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_PtrToAnyContainer_binding(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PtrToAnyContainer",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Any does not have child fields")
-		},
-	}
-	return fc, nil
+	return graphql.NewScalarFieldContext("PtrToAnyContainer", field, true, false, errors.New("field of type Any does not have child fields"))
 }
 
 // endregion **************************** field.gotpl *****************************

@@ -43,18 +43,8 @@ func (ec *executionContext) _CheckIssue896_id(ctx context.Context, field graphql
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_CheckIssue896_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "CheckIssue896",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Int does not have child fields")
-		},
-	}
-	return fc, nil
+	return graphql.NewScalarFieldContext("CheckIssue896", field, false, false, errors.New("field of type Int does not have child fields"))
 }
 
 // endregion **************************** field.gotpl *****************************

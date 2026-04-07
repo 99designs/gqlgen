@@ -373,3 +373,24 @@ func TestField_ShortBatchResolverDeclaration(t *testing.T) {
 		f.ShortBatchResolverDeclaration(),
 	)
 }
+
+func TestField_ChildFieldContextTypeName(t *testing.T) {
+	t.Run("returns definition name", func(t *testing.T) {
+		f := Field{
+			TypeReference: &config.TypeReference{
+				Definition: &ast2.Definition{Name: "User"},
+			},
+		}
+		require.Equal(t, "User", f.ChildFieldContextTypeName())
+	})
+
+	t.Run("nil TypeReference", func(t *testing.T) {
+		f := Field{TypeReference: nil}
+		require.Empty(t, f.ChildFieldContextTypeName())
+	})
+
+	t.Run("nil Definition", func(t *testing.T) {
+		f := Field{TypeReference: &config.TypeReference{Definition: nil}}
+		require.Empty(t, f.ChildFieldContextTypeName())
+	})
+}

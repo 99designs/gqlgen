@@ -2585,7 +2585,6 @@ func (ec *executionContext) _Query_directiveInputWithArgs(ctx context.Context, f
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Query_directiveInputWithArgs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",

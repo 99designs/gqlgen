@@ -8,6 +8,7 @@
 {{ reserveImport "sync/atomic" }}
 {{ reserveImport "bytes"  }}
 {{ reserveImport "embed"  }}
+{{ reserveImport "math"  }}
 
 {{ reserveImport "github.com/vektah/gqlparser/v2" "gqlparser" }}
 {{ reserveImport "github.com/vektah/gqlparser/v2/ast" }}

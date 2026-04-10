@@ -37,6 +37,11 @@ type Data struct {
 	SubscriptionRoot *Object
 	AugmentedSources []AugmentedSource
 	Plugins          []any
+
+	// SkipLocationDirectives suppresses generation of location directive middleware
+	// (_fieldMiddleware, _queryMiddleware, etc.) in per-schema builds.
+	// In follow-schema layout these are generated in the root file instead.
+	SkipLocationDirectives bool
 }
 
 func (d *Data) HasEmbeddableSources() bool {
@@ -116,6 +121,46 @@ func (d *Data) Directives() DirectiveList {
 		}
 	}
 	return res
+}
+
+// DirectiveArgs returns directive argument parser functions that are not generated
+// by any per-schema build. A directive's args are orphaned when its source file
+// contains no type definitions (Objects, Inputs, Interfaces, ReferencedTypes),
+// meaning no per-schema build exists for that file.
+func (d *Data) DirectiveArgs() map[string][]*FieldArgument {
+	sourcesWithTypes := map[string]bool{}
+	for _, o := range d.Objects {
+		if o.Position != nil && o.Position.Src != nil {
+			sourcesWithTypes[o.Position.Src.Name] = true
+		}
+	}
+	for _, in := range d.Inputs {
+		if in.Position != nil && in.Position.Src != nil {
+			sourcesWithTypes[in.Position.Src.Name] = true
+		}
+	}
+	for _, inf := range d.Interfaces {
+		if inf.Position != nil && inf.Position.Src != nil {
+			sourcesWithTypes[inf.Position.Src.Name] = true
+		}
+	}
+	for _, rt := range d.ReferencedTypes {
+		if rt.Definition != nil && rt.Definition.Position != nil && rt.Definition.Position.Src != nil {
+			sourcesWithTypes[rt.Definition.Position.Src.Name] = true
+		}
+	}
+
+	ret := map[string][]*FieldArgument{}
+	for _, directive := range d.AllDirectives {
+		if len(directive.Args) == 0 {
+			continue
+		}
+		if directive.Position != nil && directive.Position.Src != nil &&
+			!sourcesWithTypes[directive.Position.Src.Name] {
+			ret[directive.ArgsFunc()] = directive.Args
+		}
+	}
+	return ret
 }
 
 func BuildData(cfg *config.Config, plugins ...any) (*Data, error) {

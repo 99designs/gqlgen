@@ -121,26 +121,32 @@ func addBuild(filename string, p *ast.Position, data *Data, builds *map[string]*
 	}
 
 	(*builds)[filename] = &Data{
-		Config:           &buildConfig,
-		QueryRoot:        data.QueryRoot,
-		MutationRoot:     data.MutationRoot,
-		SubscriptionRoot: data.SubscriptionRoot,
-		AllDirectives:    data.AllDirectives,
+		Config:                 &buildConfig,
+		QueryRoot:              data.QueryRoot,
+		MutationRoot:           data.MutationRoot,
+		SubscriptionRoot:       data.SubscriptionRoot,
+		AllDirectives:          data.AllDirectives,
+		SkipLocationDirectives: true,
 	}
 }
 
 //go:embed root_.gotpl
 var rootTemplate string
 
+//go:embed directives.gotpl
+var directivesTemplate string
+
 // Root file contains top-level definitions that should not be duplicated across the generated
 // files for each schema file.
+// In follow-schema layout, location directive middleware (_fieldMiddleware etc.)
+// and orphan directive args are generated here instead of per-schema files.
 func generateRootFile(data *Data) error {
 	dir := data.Config.Exec.DirName
 	path := filepath.Join(dir, "root_.generated.go")
 
 	return templates.Render(templates.Options{
 		PackageName:     data.Config.Exec.Package,
-		Template:        rootTemplate,
+		Template:        rootTemplate + "\n" + directivesTemplate,
 		Filename:        path,
 		Data:            data,
 		RegionTags:      false,

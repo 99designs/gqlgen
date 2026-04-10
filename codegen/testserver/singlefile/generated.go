@@ -56,15 +56,19 @@ type DirectiveRoot struct {
 	Directive2        func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
 	Directive3        func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
 	Directive3WithArg func(ctx context.Context, obj any, next graphql.Resolver, inputNamespace string) (res any, err error)
+	FieldOnly         func(ctx context.Context, obj any, next graphql.Resolver, reason string) (res any, err error)
 	Length            func(ctx context.Context, obj any, next graphql.Resolver, min int, max *int, message *string) (res any, err error)
 	Logged            func(ctx context.Context, obj any, next graphql.Resolver, id string) (res any, err error)
 	MakeNil           func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
 	MakeTypedNil      func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
+	MutationOnly      func(ctx context.Context, obj any, next graphql.Resolver, reason string) (res any, err error)
 	Noop              func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
 	Order1            func(ctx context.Context, obj any, next graphql.Resolver, location string) (res any, err error)
 	Order2            func(ctx context.Context, obj any, next graphql.Resolver, location string) (res any, err error)
 	Populate          func(ctx context.Context, obj any, next graphql.Resolver, value string) (res any, err error)
+	QueryOnly         func(ctx context.Context, obj any, next graphql.Resolver, reason string) (res any, err error)
 	Range             func(ctx context.Context, obj any, next graphql.Resolver, min *int, max *int) (res any, err error)
+	SubscriptionOnly  func(ctx context.Context, obj any, next graphql.Resolver, reason string) (res any, err error)
 	ToNull            func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
 	Unimplemented     func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
 }
@@ -2399,7 +2403,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			if first {
 				first = false
 				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-				data = ec._Query(ctx, opCtx.Operation.SelectionSet)
+				data = ec._queryMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (any, error) {
+					return ec._Query(ctx, opCtx.Operation.SelectionSet), nil
+				})
 			} else {
 				if atomic.LoadInt32(&ec.PendingDeferred) > 0 {
 					result := <-ec.DeferredResults
@@ -2429,7 +2435,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			}
 			first = false
 			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-			data := ec._Mutation(ctx, opCtx.Operation.SelectionSet)
+			data := ec._mutationMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (any, error) {
+				return ec._Mutation(ctx, opCtx.Operation.SelectionSet), nil
+			})
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 
@@ -2438,7 +2446,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			}
 		}
 	case ast.Subscription:
-		next := ec._Subscription(ctx, opCtx.Operation.SelectionSet)
+		next := ec._subscriptionMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (any, error) {
+			return ec._Subscription(ctx, opCtx.Operation.SelectionSet), nil
+		})
 
 		var buf bytes.Buffer
 		return func(ctx context.Context) *graphql.Response {
@@ -2486,6 +2496,7 @@ directive @directive1 on FIELD_DEFINITION
 directive @directive2 on FIELD_DEFINITION
 directive @directive3 on INPUT_OBJECT
 directive @directive3WithArg(inputNamespace: String!) on INPUT_OBJECT
+directive @fieldOnly(reason: String!) on FIELD
 directive @goField(forceResolver: Boolean, name: String, omittable: Boolean, type: String) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 directive @goModel(model: String, models: [String!]) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
 directive @inlineArguments on ARGUMENT_DEFINITION
@@ -2493,11 +2504,14 @@ directive @length(min: Int!, max: Int, message: String) on ARGUMENT_DEFINITION |
 directive @logged(id: UUID!) on FIELD
 directive @makeNil on FIELD_DEFINITION
 directive @makeTypedNil on FIELD_DEFINITION
+directive @mutationOnly(reason: String!) on MUTATION
 directive @noop on ARGUMENT_DEFINITION
 directive @order1(location: String!) repeatable on FIELD_DEFINITION | OBJECT
 directive @order2(location: String!) on OBJECT
 directive @populate(value: String!) on ARGUMENT_DEFINITION
+directive @queryOnly(reason: String!) on QUERY
 directive @range(min: Int = 0, max: Int) on ARGUMENT_DEFINITION
+directive @subscriptionOnly(reason: String!) on SUBSCRIPTION
 directive @toNull on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 directive @unimplemented on FIELD_DEFINITION
 type A {
@@ -3094,6 +3108,17 @@ func (ec *executionContext) dir_directive3WithArg_args(ctx context.Context, rawA
 	return args, nil
 }
 
+func (ec *executionContext) dir_fieldOnly_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "reason", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["reason"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) dir_length_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -3123,6 +3148,17 @@ func (ec *executionContext) dir_logged_args(ctx context.Context, rawArgs map[str
 		return nil, err
 	}
 	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) dir_mutationOnly_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "reason", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["reason"] = arg0
 	return args, nil
 }
 
@@ -3159,6 +3195,17 @@ func (ec *executionContext) dir_populate_args(ctx context.Context, rawArgs map[s
 	return args, nil
 }
 
+func (ec *executionContext) dir_queryOnly_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "reason", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["reason"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) dir_range_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -3172,6 +3219,17 @@ func (ec *executionContext) dir_range_args(ctx context.Context, rawArgs map[stri
 		return nil, err
 	}
 	args["max"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) dir_subscriptionOnly_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "reason", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["reason"] = arg0
 	return args, nil
 }
 
@@ -4517,10 +4575,127 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    ************************** directives.gotpl **************************
 
+func (ec *executionContext) _queryMiddleware(ctx context.Context, obj *ast.OperationDefinition, next func(ctx context.Context) (any, error)) graphql.Marshaler {
+
+	for _, d := range obj.Directives {
+		switch d.Name {
+		case "queryOnly":
+			rawArgs := d.ArgumentMap(ec.Variables)
+			args, err := ec.dir_queryOnly_args(ctx, rawArgs)
+			if err != nil {
+				ec.Error(ctx, err)
+				return graphql.Null
+			}
+			n := next
+			next = func(ctx context.Context) (any, error) {
+				if ec.Directives.QueryOnly == nil {
+					return nil, errors.New("directive queryOnly is not implemented")
+				}
+				return ec.Directives.QueryOnly(ctx, obj, n, args["reason"].(string))
+			}
+		}
+	}
+	tmp, err := next(ctx)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if data, ok := tmp.(graphql.Marshaler); ok {
+		return data
+	}
+	graphql.AddErrorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
+	return graphql.Null
+
+}
+
+func (ec *executionContext) _mutationMiddleware(ctx context.Context, obj *ast.OperationDefinition, next func(ctx context.Context) (any, error)) graphql.Marshaler {
+
+	for _, d := range obj.Directives {
+		switch d.Name {
+		case "mutationOnly":
+			rawArgs := d.ArgumentMap(ec.Variables)
+			args, err := ec.dir_mutationOnly_args(ctx, rawArgs)
+			if err != nil {
+				ec.Error(ctx, err)
+				return graphql.Null
+			}
+			n := next
+			next = func(ctx context.Context) (any, error) {
+				if ec.Directives.MutationOnly == nil {
+					return nil, errors.New("directive mutationOnly is not implemented")
+				}
+				return ec.Directives.MutationOnly(ctx, obj, n, args["reason"].(string))
+			}
+		}
+	}
+	tmp, err := next(ctx)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if data, ok := tmp.(graphql.Marshaler); ok {
+		return data
+	}
+	graphql.AddErrorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
+	return graphql.Null
+
+}
+
+func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *ast.OperationDefinition, next func(ctx context.Context) (any, error)) func(ctx context.Context) graphql.Marshaler {
+	for _, d := range obj.Directives {
+		switch d.Name {
+		case "subscriptionOnly":
+			rawArgs := d.ArgumentMap(ec.Variables)
+			args, err := ec.dir_subscriptionOnly_args(ctx, rawArgs)
+			if err != nil {
+				ec.Error(ctx, err)
+				return func(ctx context.Context) graphql.Marshaler {
+					return graphql.Null
+				}
+			}
+			n := next
+			next = func(ctx context.Context) (any, error) {
+				if ec.Directives.SubscriptionOnly == nil {
+					return nil, errors.New("directive subscriptionOnly is not implemented")
+				}
+				return ec.Directives.SubscriptionOnly(ctx, obj, n, args["reason"].(string))
+			}
+		}
+	}
+	tmp, err := next(ctx)
+	if err != nil {
+		ec.Error(ctx, err)
+		return func(ctx context.Context) graphql.Marshaler {
+			return graphql.Null
+		}
+	}
+	if data, ok := tmp.(func(ctx context.Context) graphql.Marshaler); ok {
+		return data
+	}
+	graphql.AddErrorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
+	return func(ctx context.Context) graphql.Marshaler {
+		return graphql.Null
+	}
+}
+
 func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj any, next graphql.Resolver) graphql.Resolver {
 	fc := graphql.GetFieldContext(ctx)
 	for _, d := range fc.Field.Directives {
 		switch d.Name {
+		case "fieldOnly":
+			rawArgs := d.ArgumentMap(ec.Variables)
+			args, err := ec.dir_fieldOnly_args(ctx, rawArgs)
+			if err != nil {
+				ec.Error(ctx, err)
+				return nil
+			}
+			n := next
+			next = func(ctx context.Context) (any, error) {
+				if ec.Directives.FieldOnly == nil {
+					return nil, errors.New("directive fieldOnly is not implemented")
+				}
+				return ec.Directives.FieldOnly(ctx, obj, n, args["reason"].(string))
+			}
 		case "logged":
 			rawArgs := d.ArgumentMap(ec.Variables)
 			args, err := ec.dir_logged_args(ctx, rawArgs)

@@ -232,8 +232,20 @@ func TestDirectives(t *testing.T) {
 			Custom: func(ctx context.Context, obj any, next graphql.Resolver) (any, error) {
 				return next(ctx)
 			},
+			FieldOnly: func(ctx context.Context, obj any, next graphql.Resolver, reason string) (any, error) {
+				return next(context.WithValue(ctx, ckey("request_id"), &reason))
+			},
 			Logged: func(ctx context.Context, obj any, next graphql.Resolver, id string) (any, error) {
 				return next(context.WithValue(ctx, ckey("request_id"), &id))
+			},
+			MutationOnly: func(ctx context.Context, obj any, next graphql.Resolver, reason string) (any, error) {
+				return next(context.WithValue(ctx, ckey("request_id"), &reason))
+			},
+			QueryOnly: func(ctx context.Context, obj any, next graphql.Resolver, reason string) (any, error) {
+				return next(context.WithValue(ctx, ckey("request_id"), &reason))
+			},
+			SubscriptionOnly: func(ctx context.Context, obj any, next graphql.Resolver, reason string) (any, error) {
+				return next(context.WithValue(ctx, ckey("request_id"), &reason))
 			},
 			ToNull: func(ctx context.Context, obj any, next graphql.Resolver) (any, error) {
 				return nil, nil
@@ -457,6 +469,15 @@ func TestDirectives(t *testing.T) {
 
 			require.Nil(t, resp.DirectiveField)
 		})
+		t.Run("directive defined in a separate file with no type definitions", func(t *testing.T) {
+			var resp struct {
+				DirectiveField string
+			}
+
+			c.MustPost(`query { directiveField@fieldOnly(reason:"test_reason") }`, &resp)
+
+			require.Equal(t, "test_reason", resp.DirectiveField)
+		})
 	})
 	t.Run("input field directives", func(t *testing.T) {
 		t.Run("when function errors on directives", func(t *testing.T) {
@@ -618,6 +639,44 @@ func TestDirectives(t *testing.T) {
 
 			require.NoError(t, err)
 			require.Nil(t, resp.DirectiveObjectWithCustomGoModel.NullableText)
+		})
+	})
+
+	t.Run("operation directives from separate file with no type definitions", func(t *testing.T) {
+		t.Run("query directive", func(t *testing.T) {
+			var resp struct {
+				DirectiveField string
+			}
+
+			c.MustPost(`query @queryOnly(reason:"query_test") { directiveField@logged(id:"id1") }`, &resp)
+
+			require.Equal(t, "id1", resp.DirectiveField)
+		})
+		t.Run("mutation directive", func(t *testing.T) {
+			resolvers.MutationResolver.UpdateSomething = func(ctx context.Context, input SpecialInput) (string, error) {
+				if s, ok := ctx.Value(ckey("request_id")).(*string); ok {
+					return *s, nil
+				}
+				return "no directive", nil
+			}
+
+			var resp struct {
+				UpdateSomething string
+			}
+
+			c.MustPost(`mutation @mutationOnly(reason:"mutation_test") { updateSomething(input:{nesting:{field:"a@b.c"}}) }`, &resp)
+
+			require.Equal(t, "mutation_test", resp.UpdateSomething)
+		})
+		t.Run("subscription directive", func(t *testing.T) {
+			var resp struct {
+				DirectiveArg *string
+			}
+
+			err := c.WebsocketOnce(`subscription @subscriptionOnly(reason:"sub_test") { directiveArg(arg: "test") }`, &resp)
+
+			require.NoError(t, err)
+			require.Equal(t, "Ok", *resp.DirectiveArg)
 		})
 	})
 

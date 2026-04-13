@@ -648,7 +648,10 @@ func TestDirectives(t *testing.T) {
 				DirectiveField string
 			}
 
-			c.MustPost(`query @queryOnly(reason:"query_test") { directiveField@logged(id:"id1") }`, &resp)
+			c.MustPost(
+				`query @queryOnly(reason:"query_test") { directiveField@logged(id:"id1") }`,
+				&resp,
+			)
 
 			require.Equal(t, "id1", resp.DirectiveField)
 		})
@@ -664,7 +667,10 @@ func TestDirectives(t *testing.T) {
 				UpdateSomething string
 			}
 
-			c.MustPost(`mutation @mutationOnly(reason:"mutation_test") { updateSomething(input:{nesting:{field:"a@b.c"}}) }`, &resp)
+			c.MustPost(
+				`mutation @mutationOnly(reason:"mutation_test") { updateSomething(input:{nesting:{field:"a@b.c"}}) }`,
+				&resp,
+			)
 
 			require.Equal(t, "mutation_test", resp.UpdateSomething)
 		})
@@ -673,7 +679,10 @@ func TestDirectives(t *testing.T) {
 				DirectiveArg *string
 			}
 
-			err := c.WebsocketOnce(`subscription @subscriptionOnly(reason:"sub_test") { directiveArg(arg: "test") }`, &resp)
+			err := c.WebsocketOnce(
+				`subscription @subscriptionOnly(reason:"sub_test") { directiveArg(arg: "test") }`,
+				&resp,
+			)
 
 			require.NoError(t, err)
 			require.Equal(t, "Ok", *resp.DirectiveArg)

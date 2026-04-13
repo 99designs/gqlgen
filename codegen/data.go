@@ -145,7 +145,9 @@ func (d *Data) DirectiveArgs() map[string][]*FieldArgument {
 		}
 	}
 	for _, rt := range d.ReferencedTypes {
-		if rt.Definition != nil && rt.Definition.Position != nil && rt.Definition.Position.Src != nil {
+		if rt.Definition != nil &&
+			rt.Definition.Position != nil &&
+			rt.Definition.Position.Src != nil {
 			sourcesWithTypes[rt.Definition.Position.Src.Name] = true
 		}
 	}

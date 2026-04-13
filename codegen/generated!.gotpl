@@ -9,6 +9,7 @@
 {{ reserveImport "errors"  }}
 {{ reserveImport "bytes"  }}
 {{ reserveImport "embed"  }}
+{{ reserveImport "math"  }}
 
 {{ reserveImport "golang.org/x/sync/semaphore"}}
 {{ reserveImport "github.com/vektah/gqlparser/v2" "gqlparser" }}

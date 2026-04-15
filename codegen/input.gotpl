@@ -63,7 +63,15 @@
 							}
 						{{- else }}
 							{{- if $field.TypeReference.IsOmittable }}
-								{{ $lhs }} = graphql.OmittableOf(data)
+								{{- if $field.TypeReference.OmittableUnmarshalerCanError }}
+									odata, err := {{ $field.TypeReference.OmittableUnmarshaler | call }}(data)
+									if err != nil {
+										return {{$it}}, graphql.ErrorOnPath(ctx, err)
+									}
+									{{ $lhs }} = odata
+								{{- else }}
+									{{ $lhs }} = {{ $field.TypeReference.OmittableUnmarshaler | call }}(data)
+								{{- end }}
 							{{- else }}
 								{{ $lhs }} = data
 							{{- end }}
@@ -72,7 +80,15 @@
 						{{- if not $field.IsResolver }}
 						} else if tmp == nil {
 							{{- if $field.TypeReference.IsOmittable }}
-								{{ $lhs }} = graphql.OmittableOf[{{ $field.TypeReference.GO | ref }}](nil)
+								{{- if $field.TypeReference.OmittableUnmarshalerCanError }}
+									odata, err := {{ $field.TypeReference.OmittableUnmarshaler | call }}(data)
+									if err != nil {
+										return {{$it}}, graphql.ErrorOnPath(ctx, err)
+									}
+									{{ $lhs }} = odata
+								{{- else }}
+									{{ $lhs }} = {{ $field.TypeReference.OmittableUnmarshaler | call }}(data)
+								{{- end }}
 							{{- else }}
 								{{ $lhs }} = nil
 							{{- end }}
@@ -105,7 +121,15 @@
 							return {{$it}}, err
 						}
 						{{- if $field.TypeReference.IsOmittable }}
-							{{ $lhs }} = graphql.OmittableOf(data)
+							{{- if $field.TypeReference.OmittableUnmarshalerCanError }}
+								odata, err := {{ $field.TypeReference.OmittableUnmarshaler | call }}(data)
+								if err != nil {
+									return {{$it}}, graphql.ErrorOnPath(ctx, err)
+								}
+								{{ $lhs }} = odata
+							{{- else }}
+								{{ $lhs }} = {{ $field.TypeReference.OmittableUnmarshaler | call }}(data)
+							{{- end }}
 						{{- else }}
 							{{ $lhs }} = data
 						{{- end }}

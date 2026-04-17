@@ -1,0 +1,4 @@
+directive @fieldOnly(reason: String!) on FIELD
+directive @queryOnly(reason: String!) on QUERY
+directive @mutationOnly(reason: String!) on MUTATION
+directive @subscriptionOnly(reason: String!) on SUBSCRIPTION

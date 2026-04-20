@@ -63,7 +63,7 @@ func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.Selec
 			{{- if $field.IsConcurrent }}
 				field := field
 
-				innerFunc := func(ctx context.Context, {{ if $field.TypeReference.GQL.NonNull }}fs{{ else }}_{{ end }} *graphql.FieldSet) (res graphql.Marshaler) {
+				innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 					{{- if not $.Config.OmitPanicHandler }}
 					defer func() {
 						if r := recover(); r != nil {
@@ -78,6 +78,14 @@ func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.Selec
 					{{- end }}
 					{{- if $field.TypeReference.GQL.NonNull }}
 						if res == graphql.Null {
+							{{- if $object.IsConcurrent }}
+								atomic.AddUint32(&fs.Invalids, 1)
+							{{- else }}
+								fs.Invalids++
+							{{- end }}
+						}
+					{{- else }}
+						if res == graphql.RequiredNull {
 							{{- if $object.IsConcurrent }}
 								atomic.AddUint32(&fs.Invalids, 1)
 							{{- else }}
@@ -142,6 +150,14 @@ func (ec *executionContext) _{{$object.Name}}(ctx context.Context, sel ast.Selec
 
 				{{- if $field.TypeReference.GQL.NonNull }}
 					if out.Values[i] == graphql.Null {
+						{{- if $object.IsConcurrent }}
+							atomic.AddUint32(&out.Invalids, 1)
+						{{- else }}
+							out.Invalids++
+						{{- end }}
+					}
+				{{- else }}
+					if out.Values[i] == graphql.RequiredNull {
 						{{- if $object.IsConcurrent }}
 							atomic.AddUint32(&out.Invalids, 1)
 						{{- else }}

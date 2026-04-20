@@ -320,6 +320,239 @@ func testResolveField[R any](
 	}
 }
 
+func TestResolveFieldRuntimeNonNull(t *testing.T) {
+	t.Run("should return RequiredNull when MarkNonNull is called and resolver returns nil", func(t *testing.T) {
+		ctx := WithResponseContext(context.Background(), DefaultErrorPresenter, nil)
+		oc := &OperationContext{
+			ResolverMiddleware: func(ctx context.Context, next Resolver) (res any, err error) {
+				return next(ctx)
+			},
+		}
+		field := CollectedField{
+			Field: &ast.Field{
+				Alias: "testField",
+			},
+		}
+		result := ResolveField(
+			ctx,
+			oc,
+			field,
+			func(ctx context.Context, field CollectedField) (*FieldContext, error) {
+				return &FieldContext{Object: "Test", Field: field}, nil
+			},
+			func(ctx context.Context) (any, error) {
+				MarkNonNull(ctx)
+				return nil, nil
+			},
+			func(ctx context.Context, next Resolver) Resolver { return next },
+			func(ctx context.Context, sel ast.SelectionSet, v string) Marshaler {
+				t.Error("marshal should not be called for nil result")
+				return nil
+			},
+			false,
+			false, // nullable in schema
+		)
+		assert.Same(t, RequiredNull, result, "should return RequiredNull sentinel for runtime non-null violation")
+		require.EqualError(t, GetErrors(ctx), "input: testField must not be null\n")
+	})
+
+	t.Run("should return RequiredNull when MarkNonNull is called and resolver returns error", func(t *testing.T) {
+		ctx := WithResponseContext(context.Background(), DefaultErrorPresenter, nil)
+		oc := &OperationContext{
+			ResolverMiddleware: func(ctx context.Context, next Resolver) (res any, err error) {
+				return next(ctx)
+			},
+		}
+		field := CollectedField{
+			Field: &ast.Field{
+				Alias: "testField",
+			},
+		}
+		result := ResolveField(
+			ctx,
+			oc,
+			field,
+			func(ctx context.Context, field CollectedField) (*FieldContext, error) {
+				return &FieldContext{Object: "Test", Field: field}, nil
+			},
+			func(ctx context.Context) (any, error) {
+				MarkNonNull(ctx)
+				return nil, errors.New("backend failure")
+			},
+			func(ctx context.Context, next Resolver) Resolver { return next },
+			func(ctx context.Context, sel ast.SelectionSet, v string) Marshaler {
+				t.Error("marshal should not be called")
+				return nil
+			},
+			false,
+			false, // nullable in schema
+		)
+		assert.Same(t, RequiredNull, result, "should return RequiredNull when resolver errors with MarkNonNull")
+	})
+
+	t.Run("should return normal result when MarkNonNull is called and resolver succeeds", func(t *testing.T) {
+		ctx := WithResponseContext(context.Background(), DefaultErrorPresenter, nil)
+		oc := &OperationContext{
+			ResolverMiddleware: func(ctx context.Context, next Resolver) (res any, err error) {
+				return next(ctx)
+			},
+		}
+		field := CollectedField{
+			Field: &ast.Field{
+				Alias: "testField",
+			},
+		}
+		result := ResolveField(
+			ctx,
+			oc,
+			field,
+			func(ctx context.Context, field CollectedField) (*FieldContext, error) {
+				return &FieldContext{Object: "Test", Field: field}, nil
+			},
+			func(ctx context.Context) (any, error) {
+				MarkNonNull(ctx)
+				return "hello", nil
+			},
+			func(ctx context.Context, next Resolver) Resolver { return next },
+			func(ctx context.Context, sel ast.SelectionSet, v string) Marshaler {
+				return MarshalString(v)
+			},
+			false,
+			false,
+		)
+		var sb strings.Builder
+		result.MarshalGQL(&sb)
+		assert.Equal(t, `"hello"`, sb.String(), "successful resolve should return marshaled value, not a null sentinel")
+	})
+
+	t.Run("should return Null (not RequiredNull) without MarkNonNull", func(t *testing.T) {
+		ctx := WithResponseContext(context.Background(), DefaultErrorPresenter, nil)
+		oc := &OperationContext{
+			ResolverMiddleware: func(ctx context.Context, next Resolver) (res any, err error) {
+				return next(ctx)
+			},
+		}
+		field := CollectedField{
+			Field: &ast.Field{
+				Alias: "testField",
+			},
+		}
+		result := ResolveField(
+			ctx,
+			oc,
+			field,
+			func(ctx context.Context, field CollectedField) (*FieldContext, error) {
+				return &FieldContext{Object: "Test", Field: field}, nil
+			},
+			func(ctx context.Context) (any, error) {
+				return nil, nil
+			},
+			func(ctx context.Context, next Resolver) Resolver { return next },
+			func(ctx context.Context, sel ast.SelectionSet, v string) Marshaler {
+				t.Error("marshal should not be called")
+				return nil
+			},
+			false,
+			false,
+		)
+		assert.Same(t, Null, result, "nullable field without MarkNonNull should return Null")
+	})
+
+	t.Run("should return Null when both static nonNull and MarkNonNull are set", func(t *testing.T) {
+		ctx := WithResponseContext(context.Background(), DefaultErrorPresenter, nil)
+		oc := &OperationContext{
+			ResolverMiddleware: func(ctx context.Context, next Resolver) (res any, err error) {
+				return next(ctx)
+			},
+		}
+		field := CollectedField{
+			Field: &ast.Field{
+				Alias: "testField",
+			},
+		}
+		result := ResolveField(
+			ctx,
+			oc,
+			field,
+			func(ctx context.Context, field CollectedField) (*FieldContext, error) {
+				return &FieldContext{Object: "Test", Field: field}, nil
+			},
+			func(ctx context.Context) (any, error) {
+				MarkNonNull(ctx)
+				return nil, nil
+			},
+			func(ctx context.Context, next Resolver) Resolver { return next },
+			func(ctx context.Context, sel ast.SelectionSet, v string) Marshaler {
+				t.Error("marshal should not be called")
+				return nil
+			},
+			false,
+			true, // static nonNull
+		)
+		assert.Same(t, Null, result, "static nonNull should return Null (existing template handles Invalids)")
+	})
+
+	t.Run("MarkNonNull should work when called from middleware chain", func(t *testing.T) {
+		ctx := WithResponseContext(context.Background(), DefaultErrorPresenter, nil)
+		oc := &OperationContext{
+			ResolverMiddleware: func(ctx context.Context, next Resolver) (res any, err error) {
+				res, err = next(ctx)
+				if err != nil {
+					MarkNonNull(ctx)
+				}
+				return res, err
+			},
+		}
+		field := CollectedField{
+			Field: &ast.Field{
+				Alias: "testField",
+			},
+		}
+		result := ResolveField(
+			ctx,
+			oc,
+			field,
+			func(ctx context.Context, field CollectedField) (*FieldContext, error) {
+				return &FieldContext{Object: "Test", Field: field}, nil
+			},
+			func(ctx context.Context) (any, error) {
+				return nil, errors.New("resolver failed")
+			},
+			func(ctx context.Context, next Resolver) Resolver { return next },
+			func(ctx context.Context, sel ast.SelectionSet, v string) Marshaler {
+				t.Error("marshal should not be called")
+				return nil
+			},
+			false,
+			false,
+		)
+		assert.Same(t, RequiredNull, result, "MarkNonNull from ResolverMiddleware should trigger RequiredNull")
+	})
+}
+
+func TestMarkNonNull(t *testing.T) {
+	t.Run("sets NonNull on FieldContext", func(t *testing.T) {
+		fc := &FieldContext{Object: "Test"}
+		ctx := WithFieldContext(context.Background(), fc)
+		assert.False(t, fc.NonNull)
+		MarkNonNull(ctx)
+		assert.True(t, fc.NonNull)
+	})
+
+	t.Run("no-op without FieldContext", func(t *testing.T) {
+		assert.NotPanics(t, func() {
+			MarkNonNull(context.Background())
+		})
+	})
+}
+
+func TestRequiredNullMarshal(t *testing.T) {
+	var sb strings.Builder
+	RequiredNull.MarshalGQL(&sb)
+	assert.Equal(t, "null", sb.String(), "RequiredNull should marshal to null")
+	assert.NotSame(t, Null, RequiredNull, "RequiredNull must be a distinct pointer from Null")
+}
+
 func TestResolveFieldMiddlewareReturningMarshaler(t *testing.T) {
 	t.Run(
 		"should not call field resolver when field resolver returns a Marshaler",

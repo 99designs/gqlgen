@@ -1,0 +1,9 @@
+extend type Query {
+    resource(id: ID!): Resource
+    resources: ResourceConnection!
+}
+
+type ResourceConnection {
+  resources: [Resource!]!
+  count: Int!
+}

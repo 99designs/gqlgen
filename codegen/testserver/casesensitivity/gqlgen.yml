@@ -1,0 +1,16 @@
+schema:
+  - "schema.graphql"
+  - "queries/*.graphql"
+  - "types/*.graphql"
+skip_validation: true
+exec:
+  layout: follow-schema
+  dir: .
+  package: casesensitivity
+model:
+  filename: models.generated.go
+  package: casesensitivity
+resolver:
+  layout: follow-schema
+  dir: .
+  package: casesensitivity

@@ -106,6 +106,9 @@ func (ec *executionContext) _VOkCaseNil(ctx context.Context, sel ast.SelectionSe
 			out.Values[i] = graphql.MarshalString("VOkCaseNil")
 		case "value":
 			out.Values[i] = ec._VOkCaseNil_value(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -142,6 +145,9 @@ func (ec *executionContext) _VOkCaseValue(ctx context.Context, sel ast.Selection
 			out.Values[i] = graphql.MarshalString("VOkCaseValue")
 		case "value":
 			out.Values[i] = ec._VOkCaseValue_value(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

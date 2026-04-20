@@ -148,8 +148,14 @@ func (ec *executionContext) _Slices(ctx context.Context, sel ast.SelectionSet, o
 			out.Values[i] = graphql.MarshalString("Slices")
 		case "test1":
 			out.Values[i] = ec._Slices_test1(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "test2":
 			out.Values[i] = ec._Slices_test2(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "test3":
 			out.Values[i] = ec._Slices_test3(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

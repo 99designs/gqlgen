@@ -531,8 +531,14 @@ func (ec *executionContext) _DefaultParametersMirror(ctx context.Context, sel as
 			out.Values[i] = graphql.MarshalString("DefaultParametersMirror")
 		case "falsyBoolean":
 			out.Values[i] = ec._DefaultParametersMirror_falsyBoolean(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "truthyBoolean":
 			out.Values[i] = ec._DefaultParametersMirror_truthyBoolean(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

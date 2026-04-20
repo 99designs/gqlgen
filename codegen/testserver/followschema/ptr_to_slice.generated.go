@@ -73,6 +73,9 @@ func (ec *executionContext) _PtrToSliceContainer(ctx context.Context, sel ast.Se
 			out.Values[i] = graphql.MarshalString("PtrToSliceContainer")
 		case "ptrToSlice":
 			out.Values[i] = ec._PtrToSliceContainer_ptrToSlice(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

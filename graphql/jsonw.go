@@ -21,6 +21,14 @@ var (
 	Null  = &lit{nullLit}
 	True  = &lit{trueLit}
 	False = &lit{falseLit}
+
+	// RequiredNull is a sentinel Marshaler that serializes to "null" just
+	// like Null, but is a distinct pointer value. It is returned by
+	// resolveField when a field was marked as non-null at runtime (via
+	// MarkNonNull) and resolved to nil. The generated object-dispatching
+	// code checks for this value to trigger null propagation for nullable
+	// fields that are semantically required.
+	RequiredNull = &lit{nullLit}
 )
 
 type Marshaler interface {

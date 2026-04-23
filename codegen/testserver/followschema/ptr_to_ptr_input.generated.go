@@ -5,7 +5,6 @@ package followschema
 import (
 	"context"
 	"errors"
-	"fmt"
 	"math"
 	"strconv"
 	"sync/atomic"
@@ -45,18 +44,8 @@ func (ec *executionContext) _PtrToPtrInner_key(ctx context.Context, field graphq
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_PtrToPtrInner_key(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PtrToPtrInner",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return graphql.NewScalarFieldContext("PtrToPtrInner", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _PtrToPtrInner_value(ctx context.Context, field graphql.CollectedField, obj *PtrToPtrInner) (ret graphql.Marshaler) {
@@ -76,18 +65,8 @@ func (ec *executionContext) _PtrToPtrInner_value(ctx context.Context, field grap
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_PtrToPtrInner_value(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PtrToPtrInner",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return graphql.NewScalarFieldContext("PtrToPtrInner", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _PtrToPtrOuter_name(ctx context.Context, field graphql.CollectedField, obj *PtrToPtrOuter) (ret graphql.Marshaler) {
@@ -107,18 +86,8 @@ func (ec *executionContext) _PtrToPtrOuter_name(ctx context.Context, field graph
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_PtrToPtrOuter_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "PtrToPtrOuter",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return graphql.NewScalarFieldContext("PtrToPtrOuter", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _PtrToPtrOuter_inner(ctx context.Context, field graphql.CollectedField, obj *PtrToPtrOuter) (ret graphql.Marshaler) {
@@ -138,7 +107,6 @@ func (ec *executionContext) _PtrToPtrOuter_inner(ctx context.Context, field grap
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_PtrToPtrOuter_inner(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "PtrToPtrOuter",
@@ -146,13 +114,7 @@ func (ec *executionContext) fieldContext_PtrToPtrOuter_inner(_ context.Context, 
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "key":
-				return ec.fieldContext_PtrToPtrInner_key(ctx, field)
-			case "value":
-				return ec.fieldContext_PtrToPtrInner_value(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PtrToPtrInner", field.Name)
+			return ec.childFields_PtrToPtrInner(ctx, field)
 		},
 	}
 	return fc, nil
@@ -175,7 +137,6 @@ func (ec *executionContext) _PtrToPtrOuter_stupidInner(ctx context.Context, fiel
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_PtrToPtrOuter_stupidInner(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "PtrToPtrOuter",
@@ -183,13 +144,7 @@ func (ec *executionContext) fieldContext_PtrToPtrOuter_stupidInner(_ context.Con
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "key":
-				return ec.fieldContext_PtrToPtrInner_key(ctx, field)
-			case "value":
-				return ec.fieldContext_PtrToPtrInner_value(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type PtrToPtrInner", field.Name)
+			return ec.childFields_PtrToPtrInner(ctx, field)
 		},
 	}
 	return fc, nil

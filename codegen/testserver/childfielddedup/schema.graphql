@@ -1,0 +1,75 @@
+# Test schema for childFields deduplication.
+# User type has many fields and is referenced by 5 entities.
+# Without dedup: the User field switch (10 cases) is inlined 5 times = 50 case statements.
+# With dedup: the switch is generated once = 10 case statements.
+
+type User {
+  id: ID!
+  name: String!
+  email: String!
+  phone: String
+  avatar: String
+  role: String!
+  status: String!
+  language: String
+  timezone: String
+  createdAt: String
+}
+
+type Author {
+  id: ID!
+  name: String!
+  email: String!
+}
+
+type Book {
+  id: ID!
+  title: String!
+  author: Author!
+  reviewer: User
+  editor: User
+}
+
+type Article {
+  id: ID!
+  headline: String!
+  author: Author!
+  assignee: User
+}
+
+type Review {
+  id: ID!
+  body: String!
+  author: Author!
+  moderator: User
+}
+
+type Comment {
+  id: ID!
+  text: String!
+  commenter: User!
+}
+
+type Task {
+  id: ID!
+  title: String!
+  assignee: User!
+  reporter: User
+}
+
+# forceResolver test: createdBy returns User via resolver (not direct field binding)
+type Invoice {
+  id: ID!
+  total: String!
+  createdBy: User!
+  approvedBy: User
+}
+
+type Query {
+  book(id: ID!): Book
+  article(id: ID!): Article
+  review(id: ID!): Review
+  comment(id: ID!): Comment
+  task(id: ID!): Task
+  invoice(id: ID!): Invoice
+}

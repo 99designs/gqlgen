@@ -5,7 +5,6 @@ package followschema
 import (
 	"context"
 	"errors"
-	"fmt"
 	"math"
 	"strconv"
 	"sync/atomic"
@@ -53,18 +52,8 @@ func (ec *executionContext) _Error_id(ctx context.Context, field graphql.Collect
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Error_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Error",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
-		},
-	}
-	return fc, nil
+	return graphql.NewScalarFieldContext("Error", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
 func (ec *executionContext) _Error_errorOnNonRequiredField(ctx context.Context, field graphql.CollectedField, obj *Error) (ret graphql.Marshaler) {
@@ -84,18 +73,8 @@ func (ec *executionContext) _Error_errorOnNonRequiredField(ctx context.Context, 
 		false,
 	)
 }
-
 func (ec *executionContext) fieldContext_Error_errorOnNonRequiredField(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Error",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return graphql.NewScalarFieldContext("Error", field, true, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _Error_errorOnRequiredField(ctx context.Context, field graphql.CollectedField, obj *Error) (ret graphql.Marshaler) {
@@ -115,18 +94,8 @@ func (ec *executionContext) _Error_errorOnRequiredField(ctx context.Context, fie
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Error_errorOnRequiredField(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Error",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return graphql.NewScalarFieldContext("Error", field, true, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _Error_nilOnRequiredField(ctx context.Context, field graphql.CollectedField, obj *Error) (ret graphql.Marshaler) {
@@ -146,18 +115,8 @@ func (ec *executionContext) _Error_nilOnRequiredField(ctx context.Context, field
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Error_nilOnRequiredField(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Error",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	return fc, nil
+	return graphql.NewScalarFieldContext("Error", field, true, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _Errors_a(ctx context.Context, field graphql.CollectedField, obj *Errors) (ret graphql.Marshaler) {
@@ -177,7 +136,6 @@ func (ec *executionContext) _Errors_a(ctx context.Context, field graphql.Collect
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Errors_a(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Errors",
@@ -185,17 +143,7 @@ func (ec *executionContext) fieldContext_Errors_a(_ context.Context, field graph
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Error_id(ctx, field)
-			case "errorOnNonRequiredField":
-				return ec.fieldContext_Error_errorOnNonRequiredField(ctx, field)
-			case "errorOnRequiredField":
-				return ec.fieldContext_Error_errorOnRequiredField(ctx, field)
-			case "nilOnRequiredField":
-				return ec.fieldContext_Error_nilOnRequiredField(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Error", field.Name)
+			return ec.childFields_Error(ctx, field)
 		},
 	}
 	return fc, nil
@@ -218,7 +166,6 @@ func (ec *executionContext) _Errors_b(ctx context.Context, field graphql.Collect
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Errors_b(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Errors",
@@ -226,17 +173,7 @@ func (ec *executionContext) fieldContext_Errors_b(_ context.Context, field graph
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Error_id(ctx, field)
-			case "errorOnNonRequiredField":
-				return ec.fieldContext_Error_errorOnNonRequiredField(ctx, field)
-			case "errorOnRequiredField":
-				return ec.fieldContext_Error_errorOnRequiredField(ctx, field)
-			case "nilOnRequiredField":
-				return ec.fieldContext_Error_nilOnRequiredField(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Error", field.Name)
+			return ec.childFields_Error(ctx, field)
 		},
 	}
 	return fc, nil
@@ -259,7 +196,6 @@ func (ec *executionContext) _Errors_c(ctx context.Context, field graphql.Collect
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Errors_c(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Errors",
@@ -267,17 +203,7 @@ func (ec *executionContext) fieldContext_Errors_c(_ context.Context, field graph
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Error_id(ctx, field)
-			case "errorOnNonRequiredField":
-				return ec.fieldContext_Error_errorOnNonRequiredField(ctx, field)
-			case "errorOnRequiredField":
-				return ec.fieldContext_Error_errorOnRequiredField(ctx, field)
-			case "nilOnRequiredField":
-				return ec.fieldContext_Error_nilOnRequiredField(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Error", field.Name)
+			return ec.childFields_Error(ctx, field)
 		},
 	}
 	return fc, nil
@@ -300,7 +226,6 @@ func (ec *executionContext) _Errors_d(ctx context.Context, field graphql.Collect
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Errors_d(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Errors",
@@ -308,17 +233,7 @@ func (ec *executionContext) fieldContext_Errors_d(_ context.Context, field graph
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Error_id(ctx, field)
-			case "errorOnNonRequiredField":
-				return ec.fieldContext_Error_errorOnNonRequiredField(ctx, field)
-			case "errorOnRequiredField":
-				return ec.fieldContext_Error_errorOnRequiredField(ctx, field)
-			case "nilOnRequiredField":
-				return ec.fieldContext_Error_nilOnRequiredField(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Error", field.Name)
+			return ec.childFields_Error(ctx, field)
 		},
 	}
 	return fc, nil
@@ -341,7 +256,6 @@ func (ec *executionContext) _Errors_e(ctx context.Context, field graphql.Collect
 		true,
 	)
 }
-
 func (ec *executionContext) fieldContext_Errors_e(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Errors",
@@ -349,17 +263,7 @@ func (ec *executionContext) fieldContext_Errors_e(_ context.Context, field graph
 		IsMethod:   true,
 		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Error_id(ctx, field)
-			case "errorOnNonRequiredField":
-				return ec.fieldContext_Error_errorOnNonRequiredField(ctx, field)
-			case "errorOnRequiredField":
-				return ec.fieldContext_Error_errorOnRequiredField(ctx, field)
-			case "nilOnRequiredField":
-				return ec.fieldContext_Error_nilOnRequiredField(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Error", field.Name)
+			return ec.childFields_Error(ctx, field)
 		},
 	}
 	return fc, nil

@@ -1,0 +1,5 @@
+type Resource {
+    id: ID!
+    name: String!
+    children: [Resource!]! @goField(forceResolver: true)
+}

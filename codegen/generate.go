@@ -44,13 +44,18 @@ func generateSingleFile(data *Data) error {
 	})
 }
 
+type build struct {
+	name string // original case filename for file I/O
+	data *Data
+}
+
 func generatePerSchema(data *Data) error {
 	err := generateRootFile(data)
 	if err != nil {
 		return err
 	}
 
-	builds := map[string]*Data{}
+	builds := map[string]*build{}
 
 	err = addObjects(data, &builds)
 	if err != nil {
@@ -72,18 +77,18 @@ func generatePerSchema(data *Data) error {
 		return err
 	}
 
-	for filename, build := range builds {
-		if filename == "" {
+	for _, b := range builds {
+		if b.name == "" {
 			continue
 		}
 
 		dir := data.Config.Exec.DirName
-		path := filepath.Join(dir, filename)
+		path := filepath.Join(dir, b.name)
 
 		err = templates.Render(templates.Options{
 			PackageName:     data.Config.Exec.Package,
 			Filename:        path,
-			Data:            build,
+			Data:            b.data,
 			RegionTags:      true,
 			GeneratedHeader: true,
 			Packages:        data.Config.Packages,
@@ -114,18 +119,21 @@ func filename(p *ast.Position, config *config.Config) string {
 	return strings.ReplaceAll(filenameTempl, "{name}", name)
 }
 
-func addBuild(filename string, p *ast.Position, data *Data, builds *map[string]*Data) {
+func addBuild(fnCase string, fnKey string, p *ast.Position, data *Data, builds *map[string]*build) {
 	buildConfig := *data.Config
 	if p != nil {
 		buildConfig.Sources = []*ast.Source{p.Src}
 	}
 
-	(*builds)[filename] = &Data{
-		Config:           &buildConfig,
-		QueryRoot:        data.QueryRoot,
-		MutationRoot:     data.MutationRoot,
-		SubscriptionRoot: data.SubscriptionRoot,
-		AllDirectives:    data.AllDirectives,
+	(*builds)[fnKey] = &build{
+		name: fnCase,
+		data: &Data{
+			Config:           &buildConfig,
+			QueryRoot:        data.QueryRoot,
+			MutationRoot:     data.MutationRoot,
+			SubscriptionRoot: data.SubscriptionRoot,
+			AllDirectives:    data.AllDirectives,
+		},
 	}
 }
 
@@ -151,66 +159,70 @@ func generateRootFile(data *Data) error {
 	})
 }
 
-func addObjects(data *Data, builds *map[string]*Data) error {
+func addObjects(data *Data, builds *map[string]*build) error {
 	for _, o := range data.Objects {
-		filename := filename(o.Position, data.Config)
-		if (*builds)[filename] == nil {
-			addBuild(filename, o.Position, data, builds)
+		fnCase := filename(o.Position, data.Config)
+		fn := strings.ToLower(fnCase)
+		if (*builds)[fn] == nil {
+			addBuild(fnCase, fn, o.Position, data, builds)
 		}
 
-		(*builds)[filename].Objects = append((*builds)[filename].Objects, o)
+		(*builds)[fn].data.Objects = append((*builds)[fn].data.Objects, o)
 	}
 	return nil
 }
 
-func addInputs(data *Data, builds *map[string]*Data) error {
+func addInputs(data *Data, builds *map[string]*build) error {
 	for _, in := range data.Inputs {
-		filename := filename(in.Position, data.Config)
-		if (*builds)[filename] == nil {
-			addBuild(filename, in.Position, data, builds)
+		fnCase := filename(in.Position, data.Config)
+		fn := strings.ToLower(fnCase)
+		if (*builds)[fn] == nil {
+			addBuild(fnCase, fn, in.Position, data, builds)
 		}
 
-		(*builds)[filename].Inputs = append((*builds)[filename].Inputs, in)
+		(*builds)[fn].data.Inputs = append((*builds)[fn].data.Inputs, in)
 	}
 	return nil
 }
 
-func addInterfaces(data *Data, builds *map[string]*Data) error {
+func addInterfaces(data *Data, builds *map[string]*build) error {
 	for k, inf := range data.Interfaces {
-		filename := filename(inf.Position, data.Config)
-		if (*builds)[filename] == nil {
-			addBuild(filename, inf.Position, data, builds)
+		fnCase := filename(inf.Position, data.Config)
+		fn := strings.ToLower(fnCase)
+		if (*builds)[fn] == nil {
+			addBuild(fnCase, fn, inf.Position, data, builds)
 		}
-		build := (*builds)[filename]
+		b := (*builds)[fn]
 
-		if build.Interfaces == nil {
-			build.Interfaces = map[string]*Interface{}
+		if b.data.Interfaces == nil {
+			b.data.Interfaces = map[string]*Interface{}
 		}
-		if build.Interfaces[k] != nil {
+		if b.data.Interfaces[k] != nil {
 			return errors.New("conflicting interface keys")
 		}
 
-		build.Interfaces[k] = inf
+		b.data.Interfaces[k] = inf
 	}
 	return nil
 }
 
-func addReferencedTypes(data *Data, builds *map[string]*Data) error {
+func addReferencedTypes(data *Data, builds *map[string]*build) error {
 	for k, rt := range data.ReferencedTypes {
-		filename := filename(rt.Definition.Position, data.Config)
-		if (*builds)[filename] == nil {
-			addBuild(filename, rt.Definition.Position, data, builds)
+		fnCase := filename(rt.Definition.Position, data.Config)
+		fn := strings.ToLower(fnCase)
+		if (*builds)[fn] == nil {
+			addBuild(fnCase, fn, rt.Definition.Position, data, builds)
 		}
-		build := (*builds)[filename]
+		b := (*builds)[fn]
 
-		if build.ReferencedTypes == nil {
-			build.ReferencedTypes = map[string]*config.TypeReference{}
+		if b.data.ReferencedTypes == nil {
+			b.data.ReferencedTypes = map[string]*config.TypeReference{}
 		}
-		if build.ReferencedTypes[k] != nil {
+		if b.data.ReferencedTypes[k] != nil {
 			return errors.New("conflicting referenced type keys")
 		}
 
-		build.ReferencedTypes[k] = rt
+		b.data.ReferencedTypes[k] = rt
 	}
 	return nil
 }

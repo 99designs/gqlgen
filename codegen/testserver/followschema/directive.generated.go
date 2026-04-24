@@ -116,29 +116,6 @@ func (ec *executionContext) dir_range_args(ctx context.Context, rawArgs map[stri
 
 // region    ************************** directives.gotpl **************************
 
-func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj any, next graphql.Resolver) graphql.Resolver {
-	fc := graphql.GetFieldContext(ctx)
-	for _, d := range fc.Field.Directives {
-		switch d.Name {
-		case "logged":
-			rawArgs := d.ArgumentMap(ec.Variables)
-			args, err := ec.dir_logged_args(ctx, rawArgs)
-			if err != nil {
-				ec.Error(ctx, err)
-				return nil
-			}
-			n := next
-			next = func(ctx context.Context) (any, error) {
-				if ec.Directives.Logged == nil {
-					return nil, errors.New("directive logged is not implemented")
-				}
-				return ec.Directives.Logged(ctx, obj, n, args["id"].(string))
-			}
-		}
-	}
-	return next
-}
-
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************

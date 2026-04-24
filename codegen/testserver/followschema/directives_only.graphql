@@ -1,0 +1,8 @@
+# Regression fixture: a .graphql file with only directive declarations and no
+# type definitions. Verifies that follow-schema layout generates the expected
+# dir_*_args functions even when no types are present in the same file.
+
+directive @fieldOnly(reason: String!) on FIELD
+directive @queryOnly(reason: String!) on QUERY
+directive @mutationOnly(reason: String!) on MUTATION
+directive @subscriptionOnly(reason: String!) on SUBSCRIPTION

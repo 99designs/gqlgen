@@ -7,3 +7,12 @@ type Dummy struct {
 	Text string `json:"text"`
 	Done bool   `json:"done"`
 }
+
+type Mutation struct {
+}
+
+type Query struct {
+}
+
+type Subscription struct {
+}

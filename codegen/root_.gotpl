@@ -7,6 +7,7 @@
 {{ reserveImport "sync"  }}
 {{ reserveImport "sync/atomic" }}
 {{ reserveImport "bytes"  }}
+{{ reserveImport "errors"  }}
 {{ reserveImport "embed"  }}
 {{ reserveImport "math"  }}
 
@@ -136,7 +137,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			if first {
 				first = false
 				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-				{{ if .Directives.LocationDirectives "QUERY" -}}
+				{{ if .AllDirectives.LocationDirectives "QUERY" -}}
 					{{ if $useFunctionSyntaxForExecutionContext -}}
 					data = _queryMiddleware(ctx, ec, opCtx.Operation, func(ctx context.Context) (any, error){
 						return _{{.QueryRoot.Name}}(ctx, &ec, opCtx.Operation.SelectionSet), nil
@@ -181,7 +182,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			if !first { return nil }
 			first = false
 			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-			{{ if .Directives.LocationDirectives "MUTATION" -}}
+			{{ if .AllDirectives.LocationDirectives "MUTATION" -}}
 				{{ if $useFunctionSyntaxForExecutionContext -}}
 				data := _mutationMiddleware(ctx, &ec, opCtx.Operation, func(ctx context.Context) (any, error){
 					return _{{.MutationRoot.Name}}(ctx, ec, opCtx.Operation.SelectionSet), nil
@@ -207,7 +208,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	{{ end }}
 
 	{{- if .SubscriptionRoot }} case ast.Subscription:
-		{{ if .Directives.LocationDirectives "SUBSCRIPTION" -}}
+		{{ if .AllDirectives.LocationDirectives "SUBSCRIPTION" -}}
 			{{ if $useFunctionSyntaxForExecutionContext -}}
 			next := _subscriptionMiddleware(ctx, &ec, opCtx.Operation, func(ctx context.Context) (any, error){
 				return _{{.SubscriptionRoot.Name}}(ctx, ec, opCtx.Operation.SelectionSet),nil
@@ -307,3 +308,5 @@ func (ec *executionContext) childFields_{{ $ct.TypeName }}(ctx context.Context, 
 	return nil, fmt.Errorf("no field named %q was found under type {{ $ct.TypeName }}", field.Name)
 }
 {{- end }}
+
+{{ template "globalMiddleware" . }}

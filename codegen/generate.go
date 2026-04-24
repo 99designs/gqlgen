@@ -72,6 +72,11 @@ func generatePerSchema(data *Data) error {
 		return err
 	}
 
+	err = addDirectives(data, &builds)
+	if err != nil {
+		return err
+	}
+
 	for filename, build := range builds {
 		if filename == "" {
 			continue
@@ -191,6 +196,27 @@ func addInterfaces(data *Data, builds *map[string]*Data) error {
 		}
 
 		build.Interfaces[k] = inf
+	}
+	return nil
+}
+
+// addDirectives ensures a per-schema build exists for every source file that
+// declares directives with arguments. Without this, a .graphql file containing
+// only directive declarations (no type definitions) would produce no generated
+// file, leaving the dir_*_args argument-parsing functions undefined.
+//
+// No directive data is added to the build struct: Data.Args() calls
+// Directives(), which is scoped to the build's Config.Sources, so it
+// automatically picks up the right directive args for each per-schema file.
+func addDirectives(data *Data, builds *map[string]*Data) error {
+	for _, directive := range data.Directives() {
+		if len(directive.Args) == 0 {
+			continue
+		}
+		fname := filename(directive.Position, data.Config)
+		if (*builds)[fname] == nil {
+			addBuild(fname, directive.Position, data, builds)
+		}
 	}
 	return nil
 }

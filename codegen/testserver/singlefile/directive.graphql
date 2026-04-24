@@ -12,6 +12,10 @@ directive @unimplemented on FIELD_DEFINITION
 directive @order1(location: String!) repeatable on FIELD_DEFINITION | OBJECT
 directive @order2(location: String!) on OBJECT
 directive @noop on ARGUMENT_DEFINITION
+directive @fieldOnly(reason: String!) on FIELD
+directive @queryOnly(reason: String!) on QUERY
+directive @mutationOnly(reason: String!) on MUTATION
+directive @subscriptionOnly(reason: String!) on SUBSCRIPTION
 
 extend type Query {
     directiveArg(arg: String! @length(min:1, max: 255, message: "invalid length")): String

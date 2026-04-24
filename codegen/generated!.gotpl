@@ -339,4 +339,6 @@ func (ec *executionContext) childFields_{{ $ct.TypeName }}(ctx context.Context, 
 }
 {{- end }}
 
+{{ template "globalMiddleware" . }}
+
 {{ end }}

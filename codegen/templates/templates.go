@@ -91,16 +91,25 @@ func Render(cfg Options) error {
 		return err
 	}
 
-	roots := make([]string, 0, len(t.Templates()))
-	for _, templ := range t.Templates() {
-		// templates that end with _.gotpl are special files we don't want to include
-		if strings.HasSuffix(templ.Name(), "_.gotpl") ||
-			// filter out templates added with {{ template xxx }} syntax inside the template file
-			!strings.HasSuffix(templ.Name(), ".gotpl") {
-			continue
+	var roots []string
+	if cfg.Template != "" {
+		// When a primary Template string is provided, only execute it.
+		// TemplateFS files are parsed solely to make their named templates available
+		// (e.g. callDirective, queryDirectives from directives.gotpl) but must
+		// not be executed as additional roots.
+		roots = []string{"template.gotpl"}
+	} else {
+		roots = make([]string, 0, len(t.Templates()))
+		for _, templ := range t.Templates() {
+			name := templ.Name()
+			// templates that end with _.gotpl are special files we don't want to include
+			if strings.HasSuffix(name, "_.gotpl") ||
+				// filter out templates added with {{ template xxx }} syntax inside the template file
+				!strings.HasSuffix(name, ".gotpl") {
+				continue
+			}
+			roots = append(roots, name)
 		}
-
-		roots = append(roots, templ.Name())
 	}
 
 	// then execute all the important looking ones in order, adding them to the same file
@@ -171,6 +180,15 @@ func parseTemplates(cfg Options, t *template.Template) (*template.Template, erro
 		t, err = t.New("template.gotpl").Parse(cfg.Template)
 		if err != nil {
 			return nil, fmt.Errorf("error with provided template: %w", err)
+		}
+		// Also parse TemplateFS so that named templates defined there (e.g.
+		// callDirective, queryDirectives from directives.gotpl) are available
+		// to the primary template. Render only executes "template.gotpl", so
+		// the TemplateFS files contribute named templates but no top-level output.
+		if cfg.TemplateFS != nil {
+			if t, err = t.ParseFS(cfg.TemplateFS, "*.gotpl"); err != nil {
+				return nil, fmt.Errorf("locating templates: %w", err)
+			}
 		}
 		return t, nil
 	}

@@ -41,6 +41,29 @@ type Field struct {
 	Batch            bool   // Enable batch resolver for this field
 }
 
+func isFieldOmittable(field *ast.FieldDefinition) bool {
+	for _, dir := range field.Directives {
+		if dir.Name != "goField" {
+			continue
+		}
+		for _, arg := range dir.Arguments {
+			if arg.Name != "omittable" {
+				continue
+			}
+			v, err := arg.Value.Value(nil)
+			if err != nil {
+				continue
+			}
+			omittable, ok := v.(bool)
+			if !ok {
+				continue
+			}
+			return omittable
+		}
+	}
+	return false
+}
+
 func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, error) {
 	dirs, err := b.getDirectives(field.Directives)
 	if err != nil {
@@ -62,6 +85,10 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 		if err != nil {
 			return nil, fmt.Errorf("default value %s is not valid: %w", field.Name, err)
 		}
+	}
+
+	if isFieldOmittable(field) && field.Type.NonNull {
+		return nil, fmt.Errorf("field %s.%s must be nullable if it is omittable", obj.Name, field.Name)
 	}
 
 	for _, arg := range field.Arguments {

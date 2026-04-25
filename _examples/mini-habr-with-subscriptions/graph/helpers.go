@@ -2,8 +2,8 @@ package graph
 
 import (
 	"github.com/gqlgen/_examples/mini-habr-with-subscriptions/graph/model"
-	"github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/pkg/cursor"
 	internalmodel "github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/model"
+	"github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/pkg/cursor"
 )
 
 const defaultFirst int = 5

@@ -17,8 +17,6 @@
 {{ reserveImport "github.com/99designs/gqlgen/graphql" }}
 {{ reserveImport "github.com/99designs/gqlgen/graphql/introspection" }}
 
-{{ $useFunctionSyntaxForExecutionContext := .Config.UseFunctionSyntaxForExecutionContext }}
-
 {{ if eq .Config.Exec.Layout "single-file" }}
 	// NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 	func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
@@ -123,11 +121,7 @@
 									break
 								}
 								{{ if $field.Args }}
-									{{ if $useFunctionSyntaxForExecutionContext -}}
-									args, err := {{ $field.ArgsFunc }}(ctx, &ec, rawArgs)
-									{{- else -}}
-									args, err := ec.{{ $field.ArgsFunc }}(ctx,rawArgs)
-									{{- end }}
+									args, err := {{$.ECDot}}{{ $field.ArgsFunc }}(ctx, {{$.ECArg}}rawArgs)
 									if err != nil {
 										return 0, false
 									}
@@ -150,11 +144,7 @@
 		inputUnmarshalMap := graphql.BuildUnmarshalerMap(
 			{{- range $input := .Inputs -}}
 				{{ if not $input.HasUnmarshal }}
-					{{ if $useFunctionSyntaxForExecutionContext -}}
-					unmarshalInput{{ $input.Name }},
-					{{- else -}}
-					ec.unmarshalInput{{ $input.Name }},
-					{{- end }}
+					{{$.ECDot}}unmarshalInput{{ $input.Name }},
 				{{- end }}
 			{{- end }}
 		)
@@ -169,20 +159,11 @@
 					first = false
 					ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
 					{{ if .Directives.LocationDirectives "QUERY" -}}
-						{{ if $useFunctionSyntaxForExecutionContext -}}
-						data = _queryMiddleware(ctx, &ec, opCtx.Operation, func(ctx context.Context) (any, error){
-							return _{{.QueryRoot.Name}}(ctx, ec, opCtx.Operation.SelectionSet), nil
-						{{- else -}}
-						data = ec._queryMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (any, error){
-							return ec._{{.QueryRoot.Name}}(ctx, opCtx.Operation.SelectionSet), nil
-						{{- end }}
+						data = {{$.ECDot}}_queryMiddleware(ctx, {{$.ECArg}}opCtx.Operation, func(ctx context.Context) (any, error){
+							return {{$.ECDot}}_{{.QueryRoot.Name}}(ctx, {{$.ECArg}}opCtx.Operation.SelectionSet), nil
 						})
 					{{- else -}}
-						{{ if $useFunctionSyntaxForExecutionContext -}}
-						data = _{{.QueryRoot.Name}}(ctx, &ec, opCtx.Operation.SelectionSet)
-						{{- else -}}
-						data = ec._{{.QueryRoot.Name}}(ctx, opCtx.Operation.SelectionSet)
-						{{- end }}
+						data = {{$.ECDot}}_{{.QueryRoot.Name}}(ctx, {{$.ECArg}}opCtx.Operation.SelectionSet)
 					{{- end }}
 				} else {
 					if atomic.LoadInt32(&ec.PendingDeferred) > 0 {
@@ -214,20 +195,11 @@
 				first = false
 				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
 				{{ if .Directives.LocationDirectives "MUTATION" -}}
-					{{ if $useFunctionSyntaxForExecutionContext -}}
-					data := _mutationMiddleware(ctx, &ec, opCtx.Operation, func(ctx context.Context) (any, error){
-						return _{{.MutationRoot.Name}}(ctx, ec, opCtx.Operation.SelectionSet), nil
-					{{- else -}}
-					data := ec._mutationMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (any, error){
-						return ec._{{.MutationRoot.Name}}(ctx, opCtx.Operation.SelectionSet), nil
-					{{- end }}
+					data := {{$.ECDot}}_mutationMiddleware(ctx, {{$.ECArg}}opCtx.Operation, func(ctx context.Context) (any, error){
+						return {{$.ECDot}}_{{.MutationRoot.Name}}(ctx, {{$.ECArg}}opCtx.Operation.SelectionSet), nil
 					})
 				{{- else -}}
-					{{ if $useFunctionSyntaxForExecutionContext -}}
-					data := _{{.MutationRoot.Name}}(ctx, &ec, opCtx.Operation.SelectionSet)
-					{{- else -}}
-					data := ec._{{.MutationRoot.Name}}(ctx, opCtx.Operation.SelectionSet)
-					{{- end }}
+					data := {{$.ECDot}}_{{.MutationRoot.Name}}(ctx, {{$.ECArg}}opCtx.Operation.SelectionSet)
 				{{- end }}
 				var buf bytes.Buffer
 				data.MarshalGQL(&buf)
@@ -240,20 +212,11 @@
 
 		{{- if .SubscriptionRoot }} case ast.Subscription:
 			{{ if .Directives.LocationDirectives "SUBSCRIPTION" -}}
-				{{ if $useFunctionSyntaxForExecutionContext -}}
-				next := _subscriptionMiddleware(ctx, &ec, opCtx.Operation, func(ctx context.Context) (any, error){
-					return _{{.SubscriptionRoot.Name}}(ctx, ec, opCtx.Operation.SelectionSet),nil
-				{{- else -}}
-				next := ec._subscriptionMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (any, error){
-					return ec._{{.SubscriptionRoot.Name}}(ctx, opCtx.Operation.SelectionSet),nil
-				{{- end }}
+				next := {{$.ECDot}}_subscriptionMiddleware(ctx, {{$.ECArg}}opCtx.Operation, func(ctx context.Context) (any, error){
+					return {{$.ECDot}}_{{.SubscriptionRoot.Name}}(ctx, {{$.ECArg}}opCtx.Operation.SelectionSet),nil
 				})
 			{{- else -}}
-				{{ if $useFunctionSyntaxForExecutionContext -}}
-				next := _{{.SubscriptionRoot.Name}}(ctx, &ec, opCtx.Operation.SelectionSet)
-				{{- else -}}
-				next := ec._{{.SubscriptionRoot.Name}}(ctx, opCtx.Operation.SelectionSet)
-				{{- end }}
+				next := {{$.ECDot}}_{{.SubscriptionRoot.Name}}(ctx, {{$.ECArg}}opCtx.Operation.SelectionSet)
 			{{- end }}
 
 			var buf bytes.Buffer
@@ -284,8 +247,8 @@ func newExecutionContext(
 	opCtx *graphql.OperationContext,
 	execSchema *executableSchema,
 	deferredResults chan graphql.DeferredResult,
-) executionContext {
-	return executionContext{
+) *executionContext {
+	return &executionContext{
 		ExecutionContextState: graphql.NewExecutionContextState[ResolverRoot, DirectiveRoot, ComplexityRoot](
 			opCtx,
 			(*graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot])(execSchema),
@@ -320,19 +283,11 @@ func newExecutionContext(
 // switch statements that were previously inlined in every fieldContext_* function.
 {{- range $ct := .UniqueChildFieldTypes }}
 
-{{ if $useFunctionSyntaxForExecutionContext -}}
-func childFields_{{ $ct.TypeName }}(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
-{{- else -}}
-func (ec *executionContext) childFields_{{ $ct.TypeName }}(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-{{- end }}
+func {{$.FuncReceiver}}childFields_{{ $ct.TypeName }}(ctx context.Context, {{$.ECFuncParam}}field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	{{- range $f := $ct.Definition.Fields }}
 	case "{{ $f.Name }}":
-		{{ if $useFunctionSyntaxForExecutionContext -}}
-		return fieldContext_{{ $ct.TypeName }}_{{ $f.Name }}(ctx, ec, field)
-		{{- else -}}
-		return ec.fieldContext_{{ $ct.TypeName }}_{{ $f.Name }}(ctx, field)
-		{{- end }}
+		return {{$.ECDot}}fieldContext_{{ $ct.TypeName }}_{{ $f.Name }}(ctx, {{$.ECArg}}field)
 	{{- end }}
 	}
 	return nil, fmt.Errorf("no field named %q was found under type {{ $ct.TypeName }}", field.Name)

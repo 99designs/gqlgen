@@ -33,14 +33,18 @@ func (ec *executionContext) _MapNested_value(ctx context.Context, field graphql.
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_MapNested_value,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MapNested_value(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.Value, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNCustomScalar2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCustomScalar,
+		func(ctx context.Context, selections ast.SelectionSet, v CustomScalar) graphql.Marshaler {
+			return ec.marshalNCustomScalar2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCustomScalar(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -54,7 +58,9 @@ func (ec *executionContext) _MapStringInterfaceType_a(ctx context.Context, field
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_MapStringInterfaceType_a,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MapStringInterfaceType_a(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			switch v := obj["a"].(type) {
 			case *string:
@@ -70,7 +76,9 @@ func (ec *executionContext) _MapStringInterfaceType_a(ctx context.Context, field
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalOString2ᚖstring,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -84,7 +92,9 @@ func (ec *executionContext) _MapStringInterfaceType_b(ctx context.Context, field
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_MapStringInterfaceType_b,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MapStringInterfaceType_b(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			switch v := obj["b"].(type) {
 			case *int:
@@ -100,7 +110,9 @@ func (ec *executionContext) _MapStringInterfaceType_b(ctx context.Context, field
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalOInt2ᚖint,
+		func(ctx context.Context, selections ast.SelectionSet, v *int) graphql.Marshaler {
+			return ec.marshalOInt2ᚖint(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -114,7 +126,9 @@ func (ec *executionContext) _MapStringInterfaceType_c(ctx context.Context, field
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_MapStringInterfaceType_c,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MapStringInterfaceType_c(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			switch v := obj["c"].(type) {
 			case *CustomScalar:
@@ -130,7 +144,9 @@ func (ec *executionContext) _MapStringInterfaceType_c(ctx context.Context, field
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalOCustomScalar2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCustomScalar,
+		func(ctx context.Context, selections ast.SelectionSet, v *CustomScalar) graphql.Marshaler {
+			return ec.marshalOCustomScalar2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCustomScalar(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -144,7 +160,9 @@ func (ec *executionContext) _MapStringInterfaceType_nested(ctx context.Context, 
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_MapStringInterfaceType_nested,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MapStringInterfaceType_nested(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			switch v := obj["nested"].(type) {
 			case *MapNested:
@@ -160,7 +178,9 @@ func (ec *executionContext) _MapStringInterfaceType_nested(ctx context.Context, 
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalOMapNested2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐMapNested,
+		func(ctx context.Context, selections ast.SelectionSet, v *MapNested) graphql.Marshaler {
+			return ec.marshalOMapNested2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐMapNested(ctx, selections, v)
+		},
 		true,
 		false,
 	)

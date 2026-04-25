@@ -125,7 +125,9 @@ func (ec *executionContext) _ObjectDirectives_text(ctx context.Context, field gr
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_ObjectDirectives_text,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ObjectDirectives_text(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.Text, nil
 		},
@@ -158,7 +160,9 @@ func (ec *executionContext) _ObjectDirectives_text(ctx context.Context, field gr
 			next = directive1
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNString2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -172,7 +176,9 @@ func (ec *executionContext) _ObjectDirectives_nullableText(ctx context.Context, 
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_ObjectDirectives_nullableText,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ObjectDirectives_nullableText(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.NullableText, nil
 		},
@@ -190,7 +196,9 @@ func (ec *executionContext) _ObjectDirectives_nullableText(ctx context.Context, 
 			next = directive1
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalOString2ᚖstring,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -204,14 +212,18 @@ func (ec *executionContext) _ObjectDirectives_order(ctx context.Context, field g
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_ObjectDirectives_order,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ObjectDirectives_order(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.Order, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNString2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNString2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -225,7 +237,9 @@ func (ec *executionContext) _ObjectDirectivesWithCustomGoModel_nullableText(ctx 
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_ObjectDirectivesWithCustomGoModel_nullableText,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ObjectDirectivesWithCustomGoModel_nullableText(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.NullableText, nil
 		},
@@ -243,7 +257,9 @@ func (ec *executionContext) _ObjectDirectivesWithCustomGoModel_nullableText(ctx 
 			next = directive1
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalOString2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalOString2string(ctx, selections, v)
+		},
 		true,
 		false,
 	)

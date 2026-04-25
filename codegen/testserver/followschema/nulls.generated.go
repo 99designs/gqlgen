@@ -40,14 +40,18 @@ func (ec *executionContext) _Error_id(ctx context.Context, field graphql.Collect
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Error_id,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Error_id(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -61,14 +65,18 @@ func (ec *executionContext) _Error_errorOnNonRequiredField(ctx context.Context, 
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Error_errorOnNonRequiredField,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Error_errorOnNonRequiredField(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.ErrorOnNonRequiredField()
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalOString2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalOString2string(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -82,14 +90,18 @@ func (ec *executionContext) _Error_errorOnRequiredField(ctx context.Context, fie
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Error_errorOnRequiredField,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Error_errorOnRequiredField(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.ErrorOnRequiredField()
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNString2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -103,14 +115,18 @@ func (ec *executionContext) _Error_nilOnRequiredField(ctx context.Context, field
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Error_nilOnRequiredField,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Error_nilOnRequiredField(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.NilOnRequiredField(), nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNString2ᚖstring,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalNString2ᚖstring(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -124,14 +140,18 @@ func (ec *executionContext) _Errors_a(ctx context.Context, field graphql.Collect
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Errors_a,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Errors_a(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Errors().A(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError,
+		func(ctx context.Context, selections ast.SelectionSet, v *Error) graphql.Marshaler {
+			return ec.marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -154,14 +174,18 @@ func (ec *executionContext) _Errors_b(ctx context.Context, field graphql.Collect
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Errors_b,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Errors_b(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Errors().B(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError,
+		func(ctx context.Context, selections ast.SelectionSet, v *Error) graphql.Marshaler {
+			return ec.marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -184,14 +208,18 @@ func (ec *executionContext) _Errors_c(ctx context.Context, field graphql.Collect
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Errors_c,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Errors_c(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Errors().C(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError,
+		func(ctx context.Context, selections ast.SelectionSet, v *Error) graphql.Marshaler {
+			return ec.marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -214,14 +242,18 @@ func (ec *executionContext) _Errors_d(ctx context.Context, field graphql.Collect
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Errors_d,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Errors_d(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Errors().D(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError,
+		func(ctx context.Context, selections ast.SelectionSet, v *Error) graphql.Marshaler {
+			return ec.marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -244,14 +276,18 @@ func (ec *executionContext) _Errors_e(ctx context.Context, field graphql.Collect
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Errors_e,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Errors_e(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Errors().E(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError,
+		func(ctx context.Context, selections ast.SelectionSet, v *Error) graphql.Marshaler {
+			return ec.marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError(ctx, selections, v)
+		},
 		true,
 		true,
 	)

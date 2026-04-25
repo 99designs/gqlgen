@@ -32,14 +32,18 @@ func (ec *executionContext) _PtrToAnyContainer_ptrToAny(ctx context.Context, fie
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_PtrToAnyContainer_ptrToAny,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PtrToAnyContainer_ptrToAny(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.PtrToAny, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalOAny2ᚖinterface,
+		func(ctx context.Context, selections ast.SelectionSet, v *any) graphql.Marshaler {
+			return ec.marshalOAny2ᚖinterface(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -53,14 +57,18 @@ func (ec *executionContext) _PtrToAnyContainer_binding(ctx context.Context, fiel
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_PtrToAnyContainer_binding,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PtrToAnyContainer_binding(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.Binding(), nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalOAny2ᚖinterface,
+		func(ctx context.Context, selections ast.SelectionSet, v *any) graphql.Marshaler {
+			return ec.marshalOAny2ᚖinterface(ctx, selections, v)
+		},
 		true,
 		false,
 	)

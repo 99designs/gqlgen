@@ -32,7 +32,9 @@ func (ec *executionContext) _VOkCaseNil_value(ctx context.Context, field graphql
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_VOkCaseNil_value,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_VOkCaseNil_value(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			v, ok := obj.Value()
 			if !ok {
@@ -43,7 +45,9 @@ func (ec *executionContext) _VOkCaseNil_value(ctx context.Context, field graphql
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalOString2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalOString2string(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -57,7 +61,9 @@ func (ec *executionContext) _VOkCaseValue_value(ctx context.Context, field graph
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_VOkCaseValue_value,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_VOkCaseValue_value(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			v, ok := obj.Value()
 			if !ok {
@@ -68,7 +74,9 @@ func (ec *executionContext) _VOkCaseValue_value(ctx context.Context, field graph
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalOString2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalOString2string(ctx, selections, v)
+		},
 		true,
 		false,
 	)

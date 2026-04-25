@@ -31,14 +31,18 @@ func (ec *executionContext) _LoopA_b(ctx context.Context, field graphql.Collecte
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_LoopA_b,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_LoopA_b(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.B, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNLoopB2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐLoopB,
+		func(ctx context.Context, selections ast.SelectionSet, v *LoopB) graphql.Marshaler {
+			return ec.marshalNLoopB2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐLoopB(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -61,14 +65,18 @@ func (ec *executionContext) _LoopB_a(ctx context.Context, field graphql.Collecte
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_LoopB_a,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_LoopB_a(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.A, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNLoopA2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐLoopA,
+		func(ctx context.Context, selections ast.SelectionSet, v *LoopA) graphql.Marshaler {
+			return ec.marshalNLoopA2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐLoopA(ctx, selections, v)
+		},
 		true,
 		true,
 	)

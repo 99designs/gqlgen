@@ -1,20 +1,11 @@
-{{ $useFunctionSyntaxForExecutionContext := .Config.UseFunctionSyntaxForExecutionContext }}
 {{- range $type := .ReferencedTypes }}
 	{{ with $type.UnmarshalFunc }}
-		{{ if $useFunctionSyntaxForExecutionContext -}}
-		func {{ . }}(ctx context.Context, ec *executionContext, v any) ({{ $type.GO | ref }}, error) {
-		{{- else -}}
-		func (ec *executionContext) {{ . }}(ctx context.Context, v any) ({{ $type.GO | ref }}, error) {
-		{{- end -}}
+		func {{$.FuncReceiver}}{{ . }}(ctx context.Context, {{$.ECFuncParam}}v any) ({{ $type.GO | ref }}, error) {
 			{{- if and $type.IsNilable (not $type.GQL.NonNull) (not $type.IsPtrToPtr) }}
 				if v == nil { return nil, nil }
 			{{- end }}
 			{{- if or $type.IsPtrToSlice $type.IsPtrToIntf }}
-				{{ if $useFunctionSyntaxForExecutionContext -}}
-				res, err := {{ $type.Elem.UnmarshalFunc }}(ctx, ec, v)
-				{{- else -}}
-				res, err := ec.{{ $type.Elem.UnmarshalFunc }}(ctx, v)
-				{{- end }}
+				res, err := {{$.ECDot}}{{ $type.Elem.UnmarshalFunc }}(ctx, {{$.ECArg}}v)
 				return &res, graphql.ErrorOnPath(ctx, err)
 			{{- else if $type.IsSlice }}
 				var vSlice []any
@@ -23,11 +14,7 @@
 				res := make([]{{$type.GO.Elem | ref}}, len(vSlice))
 				for i := range vSlice {
 					ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-					{{ if $useFunctionSyntaxForExecutionContext -}}
-					res[i], err = {{ $type.Elem.UnmarshalFunc }}(ctx, ec, vSlice[i])
-					{{- else -}}
-					res[i], err = ec.{{ $type.Elem.UnmarshalFunc }}(ctx, vSlice[i])
-					{{- end }}
+					res[i], err = {{$.ECDot}}{{ $type.Elem.UnmarshalFunc }}(ctx, {{$.ECArg}}vSlice[i])
 					if err != nil {
 						return nil, err
 					}
@@ -36,11 +23,7 @@
 			{{- else if and $type.IsPtrToPtr (not $type.Unmarshaler) (not $type.IsMarshaler) }}
 				var pres {{ $type.Elem.GO | ref }}
 				if v != nil {
-					{{ if $useFunctionSyntaxForExecutionContext -}}
-					res, err := {{ $type.Elem.UnmarshalFunc }}(ctx, ec, v)
-					{{- else -}}
-					res, err := ec.{{ $type.Elem.UnmarshalFunc }}(ctx, v)
-					{{- end }}
+					res, err := {{$.ECDot}}{{ $type.Elem.UnmarshalFunc }}(ctx, {{$.ECArg}}v)
 					if err != nil {
 						return nil, graphql.ErrorOnPath(ctx, err)
 					}
@@ -51,11 +34,7 @@
 				{{- if $type.Unmarshaler }}
 					{{- if $type.HasEnumValues }}
 						tmp, err := {{ $type.Unmarshaler | call }}(v)
-						{{ if $useFunctionSyntaxForExecutionContext -}}
-						res := {{ $type.UnmarshalFuncFunctionSyntax }}[tmp]
-						{{- else -}}
-						res := {{ $type.UnmarshalFunc }}[tmp]
-						{{- end -}}
+						res := {{ ($type.EnumUnmarshalVar $.Config.UseFunctionSyntaxForExecutionContext) }}[tmp]
 					{{- else if $type.CastType }}
 						{{- if $type.IsContext }}
 							tmp, err := {{ $type.Unmarshaler | call }}(ctx, v)
@@ -94,11 +73,7 @@
 					{{- end }}
 						return res, graphql.ErrorOnPath(ctx, err)
 				{{- else }}
-					{{ if $useFunctionSyntaxForExecutionContext -}}
-					res, err := unmarshalInput{{ $type.GQL.Name }}(ctx, ec, v)
-					{{- else -}}
-					res, err := ec.unmarshalInput{{ $type.GQL.Name }}(ctx, v)
-					{{- end }}
+					res, err := {{$.ECDot}}unmarshalInput{{ $type.GQL.Name }}(ctx, {{$.ECArg}}v)
 					{{- if and $type.IsNilable (not $type.IsMap) (not $type.PointersInUnmarshalInput) }}
 						return &res, graphql.ErrorOnPath(ctx, err)
 					{{- else if and (not $type.IsNilable) $type.PointersInUnmarshalInput }}
@@ -112,17 +87,9 @@
 	{{- end }}
 
 	{{ with $type.MarshalFunc }}
-		{{ if $useFunctionSyntaxForExecutionContext -}}
-		func {{ . }}(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v {{ $type.GO | ref }}) graphql.Marshaler {
-		{{- else -}}
-		func (ec *executionContext) {{ . }}(ctx context.Context, sel ast.SelectionSet, v {{ $type.GO | ref }}) graphql.Marshaler {
-		{{- end -}}
+		func {{$.FuncReceiver}}{{ . }}(ctx context.Context, {{$.ECFuncParam}}sel ast.SelectionSet, v {{ $type.GO | ref }}) graphql.Marshaler {
 			{{- if or $type.IsPtrToSlice $type.IsPtrToIntf }}
-				{{ if $useFunctionSyntaxForExecutionContext -}}
-				return {{ $type.Elem.MarshalFunc }}(ctx, ec, sel, *v)
-				{{- else -}}
-				return ec.{{ $type.Elem.MarshalFunc }}(ctx, sel, *v)
-				{{- end }}
+				return {{$.ECDot}}{{ $type.Elem.MarshalFunc }}(ctx, {{$.ECArg}}sel, *v)
 			{{- else if $type.IsSlice }}
 				{{- if not $type.GQL.NonNull }}
 					if v == nil {
@@ -171,20 +138,12 @@
 					ret := graphql.MarshalSliceConcurrently(ctx, len(v), {{ $.Config.Exec.WorkerLimit }}, {{ $.Config.OmitPanicHandler }}, func(ctx context.Context, i int) graphql.Marshaler {
 						fc := graphql.GetFieldContext(ctx)
 						fc.Result = &v[i]
-						{{ if $useFunctionSyntaxForExecutionContext -}}
-						return {{ $type.Elem.MarshalFunc }}(ctx, ec, sel, v[i])
-						{{- else -}}
-						return ec.{{ $type.Elem.MarshalFunc }}(ctx, sel, v[i])
-						{{- end }}
+						return {{$.ECDot}}{{ $type.Elem.MarshalFunc }}(ctx, {{$.ECArg}}sel, v[i])
 					})
 				{{- else }}
 					ret := make(graphql.Array, len(v))
 					for i := range v {
-						{{ if $useFunctionSyntaxForExecutionContext -}}
-						ret[i] = {{ $type.Elem.MarshalFunc }}(ctx, ec, sel, v[i])
-						{{- else -}}
-						ret[i] = ec.{{ $type.Elem.MarshalFunc }}(ctx, sel, v[i])
-						{{- end }}
+						ret[i] = {{$.ECDot}}{{ $type.Elem.MarshalFunc }}(ctx, {{$.ECArg}}sel, v[i])
 					}
 				{{- end }}
 				{{ if $type.Elem.GQL.NonNull }}
@@ -199,11 +158,7 @@
 				if v == nil {
 					return graphql.Null
 				}
-				{{ if $useFunctionSyntaxForExecutionContext -}}
-				return {{ $type.Elem.MarshalFunc }}(ctx, ec, sel, *v)
-				{{- else -}}
-				return ec.{{ $type.Elem.MarshalFunc }}(ctx, sel, *v)
-				{{- end }}
+				return {{$.ECDot}}{{ $type.Elem.MarshalFunc }}(ctx, {{$.ECArg}}sel, *v)
 			{{- else }}
 				{{- if $type.IsNilable }}
 					if v == nil {
@@ -233,11 +188,7 @@
 						{{- $v = "*v" }}
 					{{- end }}
 					{{- if $type.HasEnumValues }}
-						{{- if $useFunctionSyntaxForExecutionContext -}}
-						{{- $v = printf "%v[%v]" $type.MarshalFuncFunctionSyntax $v }}
-						{{- else -}}
-						{{- $v = printf "%v[%v]" $type.MarshalFunc $v }}
-						{{- end -}}
+						{{- $v = printf "%v[%v]" ($type.EnumMarshalVar $.Config.UseFunctionSyntaxForExecutionContext) $v }}
 					{{- else if $type.CastType }}
 						{{- $v = printf "%v(%v)" ($type.CastType | ref) $v}}
 					{{- end }}
@@ -256,25 +207,13 @@
 					{{- end }}
 				{{- else if $type.IsRoot }}
 					{{- if eq $type.Definition.Name "Subscription" }}
-						{{ if $useFunctionSyntaxForExecutionContext -}}
-						res := _{{$type.Definition.Name}}(ctx, ec, sel)
-						{{- else -}}
-						res := ec._{{$type.Definition.Name}}(ctx, sel)
-						{{- end }}
+						res := {{$.ECDot}}_{{$type.Definition.Name}}(ctx, {{$.ECArg}}sel)
 						return res(ctx)
 					{{- else }}
-						{{ if $useFunctionSyntaxForExecutionContext -}}
-						return _{{$type.Definition.Name}}(ctx, ec, sel)
-						{{- else -}}
-						return ec._{{$type.Definition.Name}}(ctx, sel)
-						{{- end }}
+						return {{$.ECDot}}_{{$type.Definition.Name}}(ctx, {{$.ECArg}}sel)
 					{{- end }}
 				{{- else }}
-					{{ if $useFunctionSyntaxForExecutionContext -}}
-					return _{{$type.Definition.Name}}(ctx, ec, sel, {{ if not $type.IsNilable}}&{{end}} v)
-					{{- else -}}
-					return ec._{{$type.Definition.Name}}(ctx, sel, {{ if not $type.IsNilable}}&{{end}} v)
-					{{- end }}
+					return {{$.ECDot}}_{{$type.Definition.Name}}(ctx, {{$.ECArg}}sel, {{ if not $type.IsNilable}}&{{end}} v)
 				{{- end }}
 			{{- end }}
 		}
@@ -286,20 +225,12 @@
 		{{- $enum = $type.GO.Elem }}
 	{{- end }}
 	var (
-		{{ if $useFunctionSyntaxForExecutionContext -}}
-		{{ $type.UnmarshalFuncFunctionSyntax }} = map[string]{{ $enum | ref }}{
-		{{- else -}}
-		{{ $type.UnmarshalFunc }} = map[string]{{ $enum | ref }}{
-		{{- end -}}
+		{{ ($type.EnumUnmarshalVar $.Config.UseFunctionSyntaxForExecutionContext) }} = map[string]{{ $enum | ref }}{
 		{{- range $value := $type.EnumValues }}
 			"{{ $value.Definition.Name }}": {{ $value.Object | obj }},
 		{{- end }}
 		}
-		{{ if $useFunctionSyntaxForExecutionContext -}}
-		{{ $type.MarshalFuncFunctionSyntax }} = map[{{ $enum | ref }}]string{
-		{{- else -}}
-		{{ $type.MarshalFunc }} = map[{{ $enum | ref }}]string{
-		{{- end -}}
+		{{ ($type.EnumMarshalVar $.Config.UseFunctionSyntaxForExecutionContext) }} = map[{{ $enum | ref }}]string{
 		{{- range $value := $type.EnumValues }}
 			 {{ $value.Object | obj }}: "{{ $value.Definition.Name }}",
 		{{- end }}

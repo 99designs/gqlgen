@@ -132,7 +132,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := field_Mutation_createUser_args(ctx, &ec, rawArgs)
+		args, err := field_Mutation_createUser_args(ctx, ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -143,7 +143,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := field_Mutation_deleteUser_args(ctx, &ec, rawArgs)
+		args, err := field_Mutation_deleteUser_args(ctx, ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -168,7 +168,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := field_Query_getEntity_args(ctx, &ec, rawArgs)
+		args, err := field_Query_getEntity_args(ctx, ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -179,7 +179,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := field_Query_getUser_args(ctx, &ec, rawArgs)
+		args, err := field_Query_getUser_args(ctx, ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -191,7 +191,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := field_Query_listUsers_args(ctx, &ec, rawArgs)
+		args, err := field_Query_listUsers_args(ctx, ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -263,7 +263,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			if first {
 				first = false
 				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-				data = _Query(ctx, &ec, opCtx.Operation.SelectionSet)
+				data = _Query(ctx, ec, opCtx.Operation.SelectionSet)
 			} else {
 				if atomic.LoadInt32(&ec.PendingDeferred) > 0 {
 					result := <-ec.DeferredResults
@@ -293,7 +293,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			}
 			first = false
 			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-			data := _Mutation(ctx, &ec, opCtx.Operation.SelectionSet)
+			data := _Mutation(ctx, ec, opCtx.Operation.SelectionSet)
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 
@@ -302,7 +302,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			}
 		}
 	case ast.Subscription:
-		next := _Subscription(ctx, &ec, opCtx.Operation.SelectionSet)
+		next := _Subscription(ctx, ec, opCtx.Operation.SelectionSet)
 
 		var buf bytes.Buffer
 		return func(ctx context.Context) *graphql.Response {
@@ -332,8 +332,8 @@ func newExecutionContext(
 	opCtx *graphql.OperationContext,
 	execSchema *executableSchema,
 	deferredResults chan graphql.DeferredResult,
-) executionContext {
-	return executionContext{
+) *executionContext {
+	return &executionContext{
 		ExecutionContextState: graphql.NewExecutionContextState[ResolverRoot, DirectiveRoot, ComplexityRoot](
 			opCtx,
 			(*graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot])(execSchema),

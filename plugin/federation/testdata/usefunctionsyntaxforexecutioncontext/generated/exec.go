@@ -177,7 +177,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := field_Entity_findHelloByName_args(ctx, &ec, rawArgs)
+		args, err := field_Entity_findHelloByName_args(ctx, ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -188,7 +188,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := field_Entity_findHelloMultiSingleKeysByKey1AndKey2_args(ctx, &ec, rawArgs)
+		args, err := field_Entity_findHelloMultiSingleKeysByKey1AndKey2_args(ctx, ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -199,7 +199,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := field_Entity_findHelloWithErrorsByName_args(ctx, &ec, rawArgs)
+		args, err := field_Entity_findHelloWithErrorsByName_args(ctx, ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -210,7 +210,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := field_Entity_findManyMultiHelloByNames_args(ctx, &ec, rawArgs)
+		args, err := field_Entity_findManyMultiHelloByNames_args(ctx, ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -221,7 +221,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := field_Entity_findManyMultiHelloMultipleRequiresByNames_args(ctx, &ec, rawArgs)
+		args, err := field_Entity_findManyMultiHelloMultipleRequiresByNames_args(ctx, ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -232,7 +232,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := field_Entity_findManyMultiHelloRequiresByNames_args(ctx, &ec, rawArgs)
+		args, err := field_Entity_findManyMultiHelloRequiresByNames_args(ctx, ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -243,7 +243,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := field_Entity_findManyMultiHelloWithErrorByNames_args(ctx, &ec, rawArgs)
+		args, err := field_Entity_findManyMultiHelloWithErrorByNames_args(ctx, ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -254,7 +254,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := field_Entity_findManyMultiPlanetRequiresNestedByNames_args(ctx, &ec, rawArgs)
+		args, err := field_Entity_findManyMultiPlanetRequiresNestedByNames_args(ctx, ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -265,7 +265,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := field_Entity_findPlanetMultipleRequiresByName_args(ctx, &ec, rawArgs)
+		args, err := field_Entity_findPlanetMultipleRequiresByName_args(ctx, ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -276,7 +276,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := field_Entity_findPlanetRequiresByName_args(ctx, &ec, rawArgs)
+		args, err := field_Entity_findPlanetRequiresByName_args(ctx, ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -287,7 +287,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := field_Entity_findPlanetRequiresNestedByName_args(ctx, &ec, rawArgs)
+		args, err := field_Entity_findPlanetRequiresNestedByName_args(ctx, ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -298,7 +298,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := field_Entity_findWorldByHelloNameAndFoo_args(ctx, &ec, rawArgs)
+		args, err := field_Entity_findWorldByHelloNameAndFoo_args(ctx, ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -309,7 +309,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := field_Entity_findWorldNameByName_args(ctx, &ec, rawArgs)
+		args, err := field_Entity_findWorldNameByName_args(ctx, ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -320,7 +320,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := field_Entity_findWorldWithMultipleKeysByBar_args(ctx, &ec, rawArgs)
+		args, err := field_Entity_findWorldWithMultipleKeysByBar_args(ctx, ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -331,7 +331,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := field_Entity_findWorldWithMultipleKeysByHelloNameAndFoo_args(ctx, &ec, rawArgs)
+		args, err := field_Entity_findWorldWithMultipleKeysByHelloNameAndFoo_args(ctx, ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -522,7 +522,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			break
 		}
 
-		args, err := field_Query__entities_args(ctx, &ec, rawArgs)
+		args, err := field_Query__entities_args(ctx, ec, rawArgs)
 		if err != nil {
 			return 0, false
 		}
@@ -605,7 +605,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			if first {
 				first = false
 				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
-				data = _Query(ctx, &ec, opCtx.Operation.SelectionSet)
+				data = _Query(ctx, ec, opCtx.Operation.SelectionSet)
 			} else {
 				if atomic.LoadInt32(&ec.PendingDeferred) > 0 {
 					result := <-ec.DeferredResults
@@ -642,8 +642,8 @@ func newExecutionContext(
 	opCtx *graphql.OperationContext,
 	execSchema *executableSchema,
 	deferredResults chan graphql.DeferredResult,
-) executionContext {
-	return executionContext{
+) *executionContext {
+	return &executionContext{
 		ExecutionContextState: graphql.NewExecutionContextState[ResolverRoot, DirectiveRoot, ComplexityRoot](
 			opCtx,
 			(*graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot])(execSchema),

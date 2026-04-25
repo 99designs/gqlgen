@@ -15,6 +15,7 @@ import (
 	invalid_packagename "github.com/99designs/gqlgen/codegen/testserver/followschema/invalid-packagename"
 	"github.com/99designs/gqlgen/codegen/testserver/followschema/otherpkg"
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
@@ -1181,14 +1182,18 @@ func (ec *executionContext) _Autobind_int(ctx context.Context, field graphql.Col
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Autobind_int,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Autobind_int(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.Int, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNInt2int,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -1202,14 +1207,18 @@ func (ec *executionContext) _Autobind_int32(ctx context.Context, field graphql.C
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Autobind_int32,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Autobind_int32(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.Int32, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNInt2int32,
+		func(ctx context.Context, selections ast.SelectionSet, v int32) graphql.Marshaler {
+			return ec.marshalNInt2int32(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -1223,14 +1232,18 @@ func (ec *executionContext) _Autobind_int64(ctx context.Context, field graphql.C
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Autobind_int64,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Autobind_int64(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.Int64, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNInt2int64,
+		func(ctx context.Context, selections ast.SelectionSet, v int64) graphql.Marshaler {
+			return ec.marshalNInt2int64(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -1244,14 +1257,18 @@ func (ec *executionContext) _Autobind_idStr(ctx context.Context, field graphql.C
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Autobind_idStr,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Autobind_idStr(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.IdStr, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -1265,14 +1282,18 @@ func (ec *executionContext) _Autobind_idInt(ctx context.Context, field graphql.C
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Autobind_idInt,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Autobind_idInt(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.IdInt, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNID2int,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNID2int(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -1286,14 +1307,18 @@ func (ec *executionContext) _EmbeddedPointer_ID(ctx context.Context, field graph
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_EmbeddedPointer_ID,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_EmbeddedPointer_ID(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalOString2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalOString2string(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -1307,14 +1332,18 @@ func (ec *executionContext) _EmbeddedPointer_Title(ctx context.Context, field gr
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_EmbeddedPointer_Title,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_EmbeddedPointer_Title(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.Title, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalOString2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalOString2string(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -1328,14 +1357,18 @@ func (ec *executionContext) _ForcedResolver_field(ctx context.Context, field gra
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_ForcedResolver_field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ForcedResolver_field(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.ForcedResolver().Field(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalOCircle2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCircle,
+		func(ctx context.Context, selections ast.SelectionSet, v *Circle) graphql.Marshaler {
+			return ec.marshalOCircle2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCircle(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -1358,14 +1391,18 @@ func (ec *executionContext) _InnerObject_id(ctx context.Context, field graphql.C
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_InnerObject_id,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_InnerObject_id(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNInt2int,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -1379,14 +1416,18 @@ func (ec *executionContext) _InvalidIdentifier_id(ctx context.Context, field gra
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_InvalidIdentifier_id,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_InvalidIdentifier_id(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNInt2int,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -1400,14 +1441,18 @@ func (ec *executionContext) _It_id(ctx context.Context, field graphql.CollectedF
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_It_id,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_It_id(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNID2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -1421,14 +1466,18 @@ func (ec *executionContext) _ModelMethods_resolverField(ctx context.Context, fie
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_ModelMethods_resolverField,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ModelMethods_resolverField(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.ModelMethods().ResolverField(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNBoolean2bool,
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -1442,14 +1491,18 @@ func (ec *executionContext) _ModelMethods_noContext(ctx context.Context, field g
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_ModelMethods_noContext,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ModelMethods_noContext(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.NoContext(), nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNBoolean2bool,
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -1463,14 +1516,18 @@ func (ec *executionContext) _ModelMethods_withContext(ctx context.Context, field
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_ModelMethods_withContext,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ModelMethods_withContext(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.WithContext(ctx), nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNBoolean2bool,
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -1484,14 +1541,18 @@ func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphq
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_OuterObject_inner,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_OuterObject_inner(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.Inner, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNInnerObject2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInnerObject,
+		func(ctx context.Context, selections ast.SelectionSet, v *InnerObject) graphql.Marshaler {
+			return ec.marshalNInnerObject2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInnerObject(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -1514,14 +1575,18 @@ func (ec *executionContext) _Pet_id(ctx context.Context, field graphql.Collected
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Pet_id,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Pet_id(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNInt2int,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -1535,7 +1600,9 @@ func (ec *executionContext) _Pet_friends(ctx context.Context, field graphql.Coll
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Pet_friends,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Pet_friends(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Pet().Friends(ctx, obj, fc.Args["limit"].(*int))
@@ -1543,7 +1610,9 @@ func (ec *executionContext) _Pet_friends(ctx context.Context, field graphql.Coll
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalOPet2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPetᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*Pet) graphql.Marshaler {
+			return ec.marshalOPet2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPetᚄ(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -1577,14 +1646,18 @@ func (ec *executionContext) _Query_invalidIdentifier(ctx context.Context, field 
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_invalidIdentifier,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_invalidIdentifier(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().InvalidIdentifier(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOInvalidIdentifier2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚋinvalidᚑpackagenameᚐInvalidIdentifier,
+		func(ctx context.Context, selections ast.SelectionSet, v *invalid_packagename.InvalidIdentifier) graphql.Marshaler {
+			return ec.marshalOInvalidIdentifier2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚋinvalidᚑpackagenameᚐInvalidIdentifier(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -1607,14 +1680,18 @@ func (ec *executionContext) _Query_collision(ctx context.Context, field graphql.
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_collision,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_collision(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Collision(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOIt2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚋintrospectionᚐIt,
+		func(ctx context.Context, selections ast.SelectionSet, v *introspection1.It) graphql.Marshaler {
+			return ec.marshalOIt2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚋintrospectionᚐIt(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -1637,7 +1714,9 @@ func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.C
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_mapInput,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_mapInput(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().MapInput(ctx, fc.Args["input"].(map[string]any))
@@ -1645,7 +1724,9 @@ func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.C
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOBoolean2ᚖbool,
+		func(ctx context.Context, selections ast.SelectionSet, v *bool) graphql.Marshaler {
+			return ec.marshalOBoolean2ᚖbool(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -1679,7 +1760,9 @@ func (ec *executionContext) _Query_recursive(ctx context.Context, field graphql.
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_recursive,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_recursive(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().Recursive(ctx, fc.Args["input"].(*RecursiveInputSlice))
@@ -1687,7 +1770,9 @@ func (ec *executionContext) _Query_recursive(ctx context.Context, field graphql.
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOBoolean2ᚖbool,
+		func(ctx context.Context, selections ast.SelectionSet, v *bool) graphql.Marshaler {
+			return ec.marshalOBoolean2ᚖbool(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -1721,7 +1806,9 @@ func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graph
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_nestedInputs,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_nestedInputs(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().NestedInputs(ctx, fc.Args["input"].([][]*OuterInput))
@@ -1729,7 +1816,9 @@ func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graph
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOBoolean2ᚖbool,
+		func(ctx context.Context, selections ast.SelectionSet, v *bool) graphql.Marshaler {
+			return ec.marshalOBoolean2ᚖbool(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -1763,14 +1852,18 @@ func (ec *executionContext) _Query_nestedOutputs(ctx context.Context, field grap
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_nestedOutputs,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_nestedOutputs(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().NestedOutputs(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOOuterObject2ᚕᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐOuterObject,
+		func(ctx context.Context, selections ast.SelectionSet, v [][]*OuterObject) graphql.Marshaler {
+			return ec.marshalOOuterObject2ᚕᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐOuterObject(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -1793,14 +1886,18 @@ func (ec *executionContext) _Query_modelMethods(ctx context.Context, field graph
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_modelMethods,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_modelMethods(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().ModelMethods(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOModelMethods2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐModelMethods,
+		func(ctx context.Context, selections ast.SelectionSet, v *ModelMethods) graphql.Marshaler {
+			return ec.marshalOModelMethods2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐModelMethods(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -1823,7 +1920,9 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_user,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_user(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().User(ctx, fc.Args["id"].(int))
@@ -1831,7 +1930,9 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐUser,
+		func(ctx context.Context, selections ast.SelectionSet, v *User) graphql.Marshaler {
+			return ec.marshalNUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐUser(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -1865,7 +1966,9 @@ func (ec *executionContext) _Query_nullableArg(ctx context.Context, field graphq
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_nullableArg,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_nullableArg(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().NullableArg(ctx, fc.Args["arg"].(*int))
@@ -1873,7 +1976,9 @@ func (ec *executionContext) _Query_nullableArg(ctx context.Context, field graphq
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOString2ᚖstring,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -1907,7 +2012,9 @@ func (ec *executionContext) _Query_inputSlice(ctx context.Context, field graphql
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_inputSlice,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_inputSlice(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().InputSlice(ctx, fc.Args["arg"].([]string))
@@ -1915,7 +2022,9 @@ func (ec *executionContext) _Query_inputSlice(ctx context.Context, field graphql
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNBoolean2bool,
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -1949,7 +2058,9 @@ func (ec *executionContext) _Query_inputNullableSlice(ctx context.Context, field
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_inputNullableSlice,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_inputNullableSlice(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().InputNullableSlice(ctx, fc.Args["arg"].([]string))
@@ -1957,7 +2068,9 @@ func (ec *executionContext) _Query_inputNullableSlice(ctx context.Context, field
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNBoolean2bool,
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -1991,7 +2104,9 @@ func (ec *executionContext) _Query_inputOmittable(ctx context.Context, field gra
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_inputOmittable,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_inputOmittable(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().InputOmittable(ctx, fc.Args["arg"].(OmittableInput))
@@ -1999,7 +2114,9 @@ func (ec *executionContext) _Query_inputOmittable(ctx context.Context, field gra
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNString2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -2033,14 +2150,18 @@ func (ec *executionContext) _Query_shapeUnion(ctx context.Context, field graphql
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_shapeUnion,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_shapeUnion(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().ShapeUnion(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNShapeUnion2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐShapeUnion,
+		func(ctx context.Context, selections ast.SelectionSet, v ShapeUnion) graphql.Marshaler {
+			return ec.marshalNShapeUnion2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐShapeUnion(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -2054,14 +2175,18 @@ func (ec *executionContext) _Query_autobind(ctx context.Context, field graphql.C
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_autobind,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_autobind(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Autobind(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOAutobind2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐAutobind,
+		func(ctx context.Context, selections ast.SelectionSet, v *Autobind) graphql.Marshaler {
+			return ec.marshalOAutobind2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐAutobind(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -2084,14 +2209,18 @@ func (ec *executionContext) _Query_deprecatedField(ctx context.Context, field gr
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_deprecatedField,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_deprecatedField(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().DeprecatedField(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNString2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -2105,7 +2234,9 @@ func (ec *executionContext) _Query_fieldWithDeprecatedArg(ctx context.Context, f
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_fieldWithDeprecatedArg,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_fieldWithDeprecatedArg(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().FieldWithDeprecatedArg(ctx, fc.Args["oldArg"].(*int), fc.Args["newArg"].(*int))
@@ -2113,7 +2244,9 @@ func (ec *executionContext) _Query_fieldWithDeprecatedArg(ctx context.Context, f
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOString2ᚖstring,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -2147,14 +2280,18 @@ func (ec *executionContext) _Query_overlapping(ctx context.Context, field graphq
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_overlapping,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_overlapping(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Overlapping(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOOverlappingFields2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐOverlappingFields,
+		func(ctx context.Context, selections ast.SelectionSet, v *OverlappingFields) graphql.Marshaler {
+			return ec.marshalOOverlappingFields2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐOverlappingFields(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -2177,7 +2314,9 @@ func (ec *executionContext) _Query_defaultParameters(ctx context.Context, field 
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_defaultParameters,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_defaultParameters(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().DefaultParameters(ctx, fc.Args["falsyBoolean"].(*bool), fc.Args["truthyBoolean"].(*bool))
@@ -2185,7 +2324,9 @@ func (ec *executionContext) _Query_defaultParameters(ctx context.Context, field 
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNDefaultParametersMirror2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐDefaultParametersMirror,
+		func(ctx context.Context, selections ast.SelectionSet, v *DefaultParametersMirror) graphql.Marshaler {
+			return ec.marshalNDefaultParametersMirror2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐDefaultParametersMirror(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -2219,14 +2360,18 @@ func (ec *executionContext) _Query_deferSingle(ctx context.Context, field graphq
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_deferSingle,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_deferSingle(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().DeferSingle(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalODeferModel2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐDeferModel,
+		func(ctx context.Context, selections ast.SelectionSet, v *DeferModel) graphql.Marshaler {
+			return ec.marshalODeferModel2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐDeferModel(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -2249,14 +2394,18 @@ func (ec *executionContext) _Query_deferMultiple(ctx context.Context, field grap
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_deferMultiple,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_deferMultiple(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().DeferMultiple(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalODeferModel2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐDeferModelᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*DeferModel) graphql.Marshaler {
+			return ec.marshalODeferModel2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐDeferModelᚄ(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -2279,7 +2428,9 @@ func (ec *executionContext) _Query_directiveArg(ctx context.Context, field graph
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_directiveArg,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_directiveArg(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().DirectiveArg(ctx, fc.Args["arg"].(string))
@@ -2287,7 +2438,9 @@ func (ec *executionContext) _Query_directiveArg(ctx context.Context, field graph
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOString2ᚖstring,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -2321,7 +2474,9 @@ func (ec *executionContext) _Query_directiveNullableArg(ctx context.Context, fie
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_directiveNullableArg,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_directiveNullableArg(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().DirectiveNullableArg(ctx, fc.Args["arg"].(*int), fc.Args["arg2"].(*int), fc.Args["arg3"].(*string))
@@ -2329,7 +2484,9 @@ func (ec *executionContext) _Query_directiveNullableArg(ctx context.Context, fie
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOString2ᚖstring,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -2363,7 +2520,9 @@ func (ec *executionContext) _Query_directiveSingleNullableArg(ctx context.Contex
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_directiveSingleNullableArg,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_directiveSingleNullableArg(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().DirectiveSingleNullableArg(ctx, fc.Args["arg1"].(*string))
@@ -2371,7 +2530,9 @@ func (ec *executionContext) _Query_directiveSingleNullableArg(ctx context.Contex
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOString2ᚖstring,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -2405,7 +2566,9 @@ func (ec *executionContext) _Query_directiveInputNullable(ctx context.Context, f
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_directiveInputNullable,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_directiveInputNullable(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().DirectiveInputNullable(ctx, fc.Args["arg"].(*InputDirectives))
@@ -2413,7 +2576,9 @@ func (ec *executionContext) _Query_directiveInputNullable(ctx context.Context, f
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOString2ᚖstring,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -2447,7 +2612,9 @@ func (ec *executionContext) _Query_directiveInput(ctx context.Context, field gra
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_directiveInput,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_directiveInput(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().DirectiveInput(ctx, fc.Args["arg"].(InputDirectives))
@@ -2455,7 +2622,9 @@ func (ec *executionContext) _Query_directiveInput(ctx context.Context, field gra
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOString2ᚖstring,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -2489,7 +2658,9 @@ func (ec *executionContext) _Query_directiveInputType(ctx context.Context, field
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_directiveInputType,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_directiveInputType(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().DirectiveInputType(ctx, fc.Args["arg"].(InnerInput))
@@ -2497,7 +2668,9 @@ func (ec *executionContext) _Query_directiveInputType(ctx context.Context, field
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOString2ᚖstring,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -2531,7 +2704,9 @@ func (ec *executionContext) _Query_directiveInputOuter(ctx context.Context, fiel
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_directiveInputOuter,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_directiveInputOuter(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().DirectiveInputOuter(ctx, fc.Args["arg"].(OuterWrapperInput))
@@ -2539,7 +2714,9 @@ func (ec *executionContext) _Query_directiveInputOuter(ctx context.Context, fiel
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOString2ᚖstring,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -2573,7 +2750,9 @@ func (ec *executionContext) _Query_directiveInputWithArgs(ctx context.Context, f
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_directiveInputWithArgs,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_directiveInputWithArgs(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().DirectiveInputWithArgs(ctx, fc.Args["arg"].(InputDirectivesWithArgs))
@@ -2581,7 +2760,9 @@ func (ec *executionContext) _Query_directiveInputWithArgs(ctx context.Context, f
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOString2ᚖstring,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -2615,7 +2796,9 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_directiveObject,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_directiveObject(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().DirectiveObject(ctx)
 		},
@@ -2674,7 +2857,9 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 			next = directive4
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOObjectDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐObjectDirectives,
+		func(ctx context.Context, selections ast.SelectionSet, v *ObjectDirectives) graphql.Marshaler {
+			return ec.marshalOObjectDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐObjectDirectives(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -2697,14 +2882,18 @@ func (ec *executionContext) _Query_directiveObjectWithCustomGoModel(ctx context.
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_directiveObjectWithCustomGoModel,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_directiveObjectWithCustomGoModel(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().DirectiveObjectWithCustomGoModel(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOObjectDirectivesWithCustomGoModel2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐObjectDirectivesWithCustomGoModel,
+		func(ctx context.Context, selections ast.SelectionSet, v *ObjectDirectivesWithCustomGoModel) graphql.Marshaler {
+			return ec.marshalOObjectDirectivesWithCustomGoModel2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐObjectDirectivesWithCustomGoModel(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -2727,7 +2916,9 @@ func (ec *executionContext) _Query_directiveFieldDef(ctx context.Context, field 
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_directiveFieldDef,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_directiveFieldDef(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().DirectiveFieldDef(ctx, fc.Args["ret"].(string))
@@ -2756,7 +2947,9 @@ func (ec *executionContext) _Query_directiveFieldDef(ctx context.Context, field 
 			next = directive1
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNString2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -2790,14 +2983,18 @@ func (ec *executionContext) _Query_directiveField(ctx context.Context, field gra
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_directiveField,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_directiveField(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().DirectiveField(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOString2ᚖstring,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -2811,7 +3008,9 @@ func (ec *executionContext) _Query_directiveDouble(ctx context.Context, field gr
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_directiveDouble,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_directiveDouble(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().DirectiveDouble(ctx)
 		},
@@ -2836,7 +3035,9 @@ func (ec *executionContext) _Query_directiveDouble(ctx context.Context, field gr
 			next = directive2
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOString2ᚖstring,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -2850,7 +3051,9 @@ func (ec *executionContext) _Query_directiveUnimplemented(ctx context.Context, f
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_directiveUnimplemented,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_directiveUnimplemented(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().DirectiveUnimplemented(ctx)
 		},
@@ -2868,7 +3071,9 @@ func (ec *executionContext) _Query_directiveUnimplemented(ctx context.Context, f
 			next = directive1
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOString2ᚖstring,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -2882,14 +3087,18 @@ func (ec *executionContext) _Query_embeddedCase1(ctx context.Context, field grap
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_embeddedCase1,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_embeddedCase1(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().EmbeddedCase1(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOEmbeddedCase12ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐEmbeddedCase1,
+		func(ctx context.Context, selections ast.SelectionSet, v *EmbeddedCase1) graphql.Marshaler {
+			return ec.marshalOEmbeddedCase12ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐEmbeddedCase1(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -2912,14 +3121,18 @@ func (ec *executionContext) _Query_embeddedCase2(ctx context.Context, field grap
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_embeddedCase2,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_embeddedCase2(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().EmbeddedCase2(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOEmbeddedCase22ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐEmbeddedCase2,
+		func(ctx context.Context, selections ast.SelectionSet, v *EmbeddedCase2) graphql.Marshaler {
+			return ec.marshalOEmbeddedCase22ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐEmbeddedCase2(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -2942,14 +3155,18 @@ func (ec *executionContext) _Query_embeddedCase3(ctx context.Context, field grap
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_embeddedCase3,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_embeddedCase3(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().EmbeddedCase3(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOEmbeddedCase32ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐEmbeddedCase3,
+		func(ctx context.Context, selections ast.SelectionSet, v *EmbeddedCase3) graphql.Marshaler {
+			return ec.marshalOEmbeddedCase32ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐEmbeddedCase3(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -2972,7 +3189,9 @@ func (ec *executionContext) _Query_enumInInput(ctx context.Context, field graphq
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_enumInInput,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_enumInInput(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().EnumInInput(ctx, fc.Args["input"].(*InputWithEnumValue))
@@ -2980,7 +3199,9 @@ func (ec *executionContext) _Query_enumInInput(ctx context.Context, field graphq
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNEnumTest2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐEnumTest,
+		func(ctx context.Context, selections ast.SelectionSet, v EnumTest) graphql.Marshaler {
+			return ec.marshalNEnumTest2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐEnumTest(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -3014,7 +3235,9 @@ func (ec *executionContext) _Query_searchProducts(ctx context.Context, field gra
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_searchProducts,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_searchProducts(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().SearchProducts(ctx, map[string]interface{}{
@@ -3026,7 +3249,9 @@ func (ec *executionContext) _Query_searchProducts(ctx context.Context, field gra
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNString2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNString2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -3060,7 +3285,9 @@ func (ec *executionContext) _Query_searchRequired(ctx context.Context, field gra
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_searchRequired,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_searchRequired(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().SearchRequired(ctx, map[string]interface{}{
@@ -3071,7 +3298,9 @@ func (ec *executionContext) _Query_searchRequired(ctx context.Context, field gra
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNString2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNString2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -3105,7 +3334,9 @@ func (ec *executionContext) _Query_searchProductsNormal(ctx context.Context, fie
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_searchProductsNormal,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_searchProductsNormal(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().SearchProductsNormal(ctx, fc.Args["filters"].(map[string]any))
@@ -3113,7 +3344,9 @@ func (ec *executionContext) _Query_searchProductsNormal(ctx context.Context, fie
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNString2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNString2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -3147,7 +3380,9 @@ func (ec *executionContext) _Query_searchWithDefaults(ctx context.Context, field
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_searchWithDefaults,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_searchWithDefaults(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().SearchWithDefaults(ctx, map[string]interface{}{
@@ -3159,7 +3394,9 @@ func (ec *executionContext) _Query_searchWithDefaults(ctx context.Context, field
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNString2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNString2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -3193,7 +3430,9 @@ func (ec *executionContext) _Query_searchMixed(ctx context.Context, field graphq
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_searchMixed,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_searchMixed(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().SearchMixed(ctx, map[string]interface{}{
@@ -3205,7 +3444,9 @@ func (ec *executionContext) _Query_searchMixed(ctx context.Context, field graphq
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNString2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNString2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -3239,7 +3480,9 @@ func (ec *executionContext) _Query_filterProducts(ctx context.Context, field gra
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_filterProducts,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_filterProducts(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().FilterProducts(ctx, map[string]interface{}{
@@ -3251,7 +3494,9 @@ func (ec *executionContext) _Query_filterProducts(ctx context.Context, field gra
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNString2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNString2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -3285,7 +3530,9 @@ func (ec *executionContext) _Query_findProducts(ctx context.Context, field graph
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_findProducts,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_findProducts(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().FindProducts(ctx, map[string]interface{}{
@@ -3297,7 +3544,9 @@ func (ec *executionContext) _Query_findProducts(ctx context.Context, field graph
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNString2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNString2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -3331,7 +3580,9 @@ func (ec *executionContext) _Query_searchWithDirectives(ctx context.Context, fie
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_searchWithDirectives,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_searchWithDirectives(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().SearchWithDirectives(ctx, map[string]interface{}{
@@ -3342,7 +3593,9 @@ func (ec *executionContext) _Query_searchWithDirectives(ctx context.Context, fie
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNString2ᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNString2ᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -3376,14 +3629,18 @@ func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.Col
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_shapes,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_shapes(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Shapes(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOShape2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐShape,
+		func(ctx context.Context, selections ast.SelectionSet, v []Shape) graphql.Marshaler {
+			return ec.marshalOShape2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐShape(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -3406,7 +3663,9 @@ func (ec *executionContext) _Query_noShape(ctx context.Context, field graphql.Co
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_noShape,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_noShape(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().NoShape(ctx)
 		},
@@ -3424,7 +3683,9 @@ func (ec *executionContext) _Query_noShape(ctx context.Context, field graphql.Co
 			next = directive1
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOShape2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐShape,
+		func(ctx context.Context, selections ast.SelectionSet, v Shape) graphql.Marshaler {
+			return ec.marshalOShape2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐShape(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -3447,14 +3708,18 @@ func (ec *executionContext) _Query_node(ctx context.Context, field graphql.Colle
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_node,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_node(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Node(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNNode2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐNode,
+		func(ctx context.Context, selections ast.SelectionSet, v Node) graphql.Marshaler {
+			return ec.marshalNNode2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐNode(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -3477,7 +3742,9 @@ func (ec *executionContext) _Query_noShapeTypedNil(ctx context.Context, field gr
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_noShapeTypedNil,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_noShapeTypedNil(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().NoShapeTypedNil(ctx)
 		},
@@ -3495,7 +3762,9 @@ func (ec *executionContext) _Query_noShapeTypedNil(ctx context.Context, field gr
 			next = directive1
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOShape2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐShape,
+		func(ctx context.Context, selections ast.SelectionSet, v Shape) graphql.Marshaler {
+			return ec.marshalOShape2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐShape(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -3518,7 +3787,9 @@ func (ec *executionContext) _Query_animal(ctx context.Context, field graphql.Col
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_animal,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_animal(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Animal(ctx)
 		},
@@ -3536,7 +3807,9 @@ func (ec *executionContext) _Query_animal(ctx context.Context, field graphql.Col
 			next = directive1
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOAnimal2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐAnimal,
+		func(ctx context.Context, selections ast.SelectionSet, v Animal) graphql.Marshaler {
+			return ec.marshalOAnimal2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐAnimal(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -3559,14 +3832,18 @@ func (ec *executionContext) _Query_notAnInterface(ctx context.Context, field gra
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_notAnInterface,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_notAnInterface(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().NotAnInterface(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOBackedByInterface2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐBackedByInterface,
+		func(ctx context.Context, selections ast.SelectionSet, v BackedByInterface) graphql.Marshaler {
+			return ec.marshalOBackedByInterface2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐBackedByInterface(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -3589,14 +3866,18 @@ func (ec *executionContext) _Query_dog(ctx context.Context, field graphql.Collec
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_dog,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_dog(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Dog(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalODog2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐDog,
+		func(ctx context.Context, selections ast.SelectionSet, v *Dog) graphql.Marshaler {
+			return ec.marshalODog2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐDog(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -3619,14 +3900,18 @@ func (ec *executionContext) _Query_issue896a(ctx context.Context, field graphql.
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_issue896a,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_issue896a(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Issue896a(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOCheckIssue8962ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCheckIssue896ᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*CheckIssue896) graphql.Marshaler {
+			return ec.marshalOCheckIssue8962ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCheckIssue896ᚄ(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -3649,7 +3934,9 @@ func (ec *executionContext) _Query_mapStringInterface(ctx context.Context, field
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_mapStringInterface,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_mapStringInterface(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().MapStringInterface(ctx, fc.Args["in"].(map[string]any))
@@ -3657,7 +3944,9 @@ func (ec *executionContext) _Query_mapStringInterface(ctx context.Context, field
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOMapStringInterfaceType2map,
+		func(ctx context.Context, selections ast.SelectionSet, v map[string]any) graphql.Marshaler {
+			return ec.marshalOMapStringInterfaceType2map(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -3691,7 +3980,9 @@ func (ec *executionContext) _Query_mapNestedStringInterface(ctx context.Context,
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_mapNestedStringInterface,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_mapNestedStringInterface(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().MapNestedStringInterface(ctx, fc.Args["in"].(*NestedMapInput))
@@ -3699,7 +3990,9 @@ func (ec *executionContext) _Query_mapNestedStringInterface(ctx context.Context,
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOMapStringInterfaceType2map,
+		func(ctx context.Context, selections ast.SelectionSet, v map[string]any) graphql.Marshaler {
+			return ec.marshalOMapStringInterfaceType2map(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -3733,7 +4026,9 @@ func (ec *executionContext) _Query_mapNestedMapSlice(ctx context.Context, field 
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_mapNestedMapSlice,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_mapNestedMapSlice(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().MapNestedMapSlice(ctx, fc.Args["input"].(map[string]any))
@@ -3741,7 +4036,9 @@ func (ec *executionContext) _Query_mapNestedMapSlice(ctx context.Context, field 
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOBoolean2ᚖbool,
+		func(ctx context.Context, selections ast.SelectionSet, v *bool) graphql.Marshaler {
+			return ec.marshalOBoolean2ᚖbool(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -3775,14 +4072,18 @@ func (ec *executionContext) _Query_errorBubble(ctx context.Context, field graphq
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_errorBubble,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_errorBubble(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().ErrorBubble(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError,
+		func(ctx context.Context, selections ast.SelectionSet, v *Error) graphql.Marshaler {
+			return ec.marshalOError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -3805,14 +4106,18 @@ func (ec *executionContext) _Query_errorBubbleList(ctx context.Context, field gr
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_errorBubbleList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_errorBubbleList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().ErrorBubbleList(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOError2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐErrorᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*Error) graphql.Marshaler {
+			return ec.marshalOError2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐErrorᚄ(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -3835,14 +4140,18 @@ func (ec *executionContext) _Query_errorList(ctx context.Context, field graphql.
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_errorList,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_errorList(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().ErrorList(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOError2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError,
+		func(ctx context.Context, selections ast.SelectionSet, v []*Error) graphql.Marshaler {
+			return ec.marshalOError2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -3865,14 +4174,18 @@ func (ec *executionContext) _Query_errors(ctx context.Context, field graphql.Col
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_errors,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_errors(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Errors(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOErrors2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐErrors,
+		func(ctx context.Context, selections ast.SelectionSet, v *Errors) graphql.Marshaler {
+			return ec.marshalOErrors2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐErrors(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -3895,14 +4208,18 @@ func (ec *executionContext) _Query_valid(ctx context.Context, field graphql.Coll
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_valid,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_valid(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Valid(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNString2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -3916,14 +4233,18 @@ func (ec *executionContext) _Query_invalid(ctx context.Context, field graphql.Co
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_invalid,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_invalid(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Invalid(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNString2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -3937,14 +4258,18 @@ func (ec *executionContext) _Query_panics(ctx context.Context, field graphql.Col
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_panics,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_panics(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Panics(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOPanics2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPanics,
+		func(ctx context.Context, selections ast.SelectionSet, v *Panics) graphql.Marshaler {
+			return ec.marshalOPanics2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPanics(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -3967,14 +4292,18 @@ func (ec *executionContext) _Query_primitiveObject(ctx context.Context, field gr
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_primitiveObject,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_primitiveObject(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().PrimitiveObject(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNPrimitive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPrimitiveᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []Primitive) graphql.Marshaler {
+			return ec.marshalNPrimitive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPrimitiveᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -3997,14 +4326,18 @@ func (ec *executionContext) _Query_primitiveStringObject(ctx context.Context, fi
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_primitiveStringObject,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_primitiveStringObject(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().PrimitiveStringObject(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNPrimitiveString2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPrimitiveStringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []PrimitiveString) graphql.Marshaler {
+			return ec.marshalNPrimitiveString2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPrimitiveStringᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -4027,14 +4360,18 @@ func (ec *executionContext) _Query_ptrToAnyContainer(ctx context.Context, field 
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_ptrToAnyContainer,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_ptrToAnyContainer(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().PtrToAnyContainer(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNPtrToAnyContainer2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPtrToAnyContainer,
+		func(ctx context.Context, selections ast.SelectionSet, v *PtrToAnyContainer) graphql.Marshaler {
+			return ec.marshalNPtrToAnyContainer2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPtrToAnyContainer(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -4057,14 +4394,18 @@ func (ec *executionContext) _Query_ptrToSliceContainer(ctx context.Context, fiel
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_ptrToSliceContainer,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_ptrToSliceContainer(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().PtrToSliceContainer(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNPtrToSliceContainer2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPtrToSliceContainer,
+		func(ctx context.Context, selections ast.SelectionSet, v *PtrToSliceContainer) graphql.Marshaler {
+			return ec.marshalNPtrToSliceContainer2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPtrToSliceContainer(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -4087,14 +4428,18 @@ func (ec *executionContext) _Query_infinity(ctx context.Context, field graphql.C
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_infinity,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_infinity(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Infinity(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNFloat2float64,
+		func(ctx context.Context, selections ast.SelectionSet, v float64) graphql.Marshaler {
+			return ec.marshalNFloat2float64(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -4108,14 +4453,18 @@ func (ec *executionContext) _Query_stringFromContextInterface(ctx context.Contex
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_stringFromContextInterface,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_stringFromContextInterface(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().StringFromContextInterface(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNStringFromContextInterface2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐStringFromContextInterface,
+		func(ctx context.Context, selections ast.SelectionSet, v *StringFromContextInterface) graphql.Marshaler {
+			return ec.marshalNStringFromContextInterface2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐStringFromContextInterface(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -4129,14 +4478,18 @@ func (ec *executionContext) _Query_stringFromContextFunction(ctx context.Context
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_stringFromContextFunction,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_stringFromContextFunction(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().StringFromContextFunction(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNStringFromContextFunction2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNStringFromContextFunction2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -4150,7 +4503,9 @@ func (ec *executionContext) _Query_defaultScalar(ctx context.Context, field grap
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_defaultScalar,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_defaultScalar(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().DefaultScalar(ctx, fc.Args["arg"].(string))
@@ -4158,7 +4513,9 @@ func (ec *executionContext) _Query_defaultScalar(ctx context.Context, field grap
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNDefaultScalarImplementation2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNDefaultScalarImplementation2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -4192,14 +4549,18 @@ func (ec *executionContext) _Query_skipInclude(ctx context.Context, field graphq
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_skipInclude,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_skipInclude(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().SkipInclude(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOSkipIncludeTestType2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐSkipIncludeTestType,
+		func(ctx context.Context, selections ast.SelectionSet, v *SkipIncludeTestType) graphql.Marshaler {
+			return ec.marshalOSkipIncludeTestType2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐSkipIncludeTestType(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -4222,14 +4583,18 @@ func (ec *executionContext) _Query_slices(ctx context.Context, field graphql.Col
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_slices,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_slices(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Slices(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOSlices2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐSlices,
+		func(ctx context.Context, selections ast.SelectionSet, v *Slices) graphql.Marshaler {
+			return ec.marshalOSlices2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐSlices(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -4252,14 +4617,18 @@ func (ec *executionContext) _Query_scalarSlice(ctx context.Context, field graphq
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_scalarSlice,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_scalarSlice(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().ScalarSlice(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNBytes2ᚕbyte,
+		func(ctx context.Context, selections ast.SelectionSet, v []byte) graphql.Marshaler {
+			return ec.marshalNBytes2ᚕbyte(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -4273,7 +4642,9 @@ func (ec *executionContext) _Query_fallback(ctx context.Context, field graphql.C
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_fallback,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_fallback(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Query().Fallback(ctx, fc.Args["arg"].(FallbackToStringEncoding))
@@ -4281,7 +4652,9 @@ func (ec *executionContext) _Query_fallback(ctx context.Context, field graphql.C
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNFallbackToStringEncoding2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐFallbackToStringEncoding,
+		func(ctx context.Context, selections ast.SelectionSet, v FallbackToStringEncoding) graphql.Marshaler {
+			return ec.marshalNFallbackToStringEncoding2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐFallbackToStringEncoding(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -4315,14 +4688,18 @@ func (ec *executionContext) _Query_optionalUnion(ctx context.Context, field grap
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_optionalUnion,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_optionalUnion(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().OptionalUnion(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOTestUnion2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐTestUnion,
+		func(ctx context.Context, selections ast.SelectionSet, v TestUnion) graphql.Marshaler {
+			return ec.marshalOTestUnion2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐTestUnion(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -4336,14 +4713,18 @@ func (ec *executionContext) _Query_vOkCaseValue(ctx context.Context, field graph
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_vOkCaseValue,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_vOkCaseValue(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().VOkCaseValue(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOVOkCaseValue2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐVOkCaseValue,
+		func(ctx context.Context, selections ast.SelectionSet, v *VOkCaseValue) graphql.Marshaler {
+			return ec.marshalOVOkCaseValue2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐVOkCaseValue(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -4366,14 +4747,18 @@ func (ec *executionContext) _Query_vOkCaseNil(ctx context.Context, field graphql
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_vOkCaseNil,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_vOkCaseNil(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().VOkCaseNil(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOVOkCaseNil2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐVOkCaseNil,
+		func(ctx context.Context, selections ast.SelectionSet, v *VOkCaseNil) graphql.Marshaler {
+			return ec.marshalOVOkCaseNil2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐVOkCaseNil(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -4396,14 +4781,18 @@ func (ec *executionContext) _Query_validType(ctx context.Context, field graphql.
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_validType,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_validType(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().ValidType(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOValidType2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐValidType,
+		func(ctx context.Context, selections ast.SelectionSet, v *ValidType) graphql.Marshaler {
+			return ec.marshalOValidType2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐValidType(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -4426,14 +4815,18 @@ func (ec *executionContext) _Query_variadicModel(ctx context.Context, field grap
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_variadicModel,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_variadicModel(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().VariadicModel(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOVariadicModel2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐVariadicModel,
+		func(ctx context.Context, selections ast.SelectionSet, v *VariadicModel) graphql.Marshaler {
+			return ec.marshalOVariadicModel2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐVariadicModel(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -4456,14 +4849,18 @@ func (ec *executionContext) _Query_wrappedStruct(ctx context.Context, field grap
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_wrappedStruct,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_wrappedStruct(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().WrappedStruct(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNWrappedStruct2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐWrappedStruct,
+		func(ctx context.Context, selections ast.SelectionSet, v *WrappedStruct) graphql.Marshaler {
+			return ec.marshalNWrappedStruct2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐWrappedStruct(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -4486,14 +4883,18 @@ func (ec *executionContext) _Query_wrappedScalar(ctx context.Context, field grap
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_wrappedScalar,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_wrappedScalar(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().WrappedScalar(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNWrappedScalar2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚋotherpkgᚐScalar,
+		func(ctx context.Context, selections ast.SelectionSet, v otherpkg.Scalar) graphql.Marshaler {
+			return ec.marshalNWrappedScalar2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚋotherpkgᚐScalar(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -4507,14 +4908,18 @@ func (ec *executionContext) _Query_wrappedMap(ctx context.Context, field graphql
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_wrappedMap,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_wrappedMap(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().WrappedMap(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNWrappedMap2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐWrappedMap,
+		func(ctx context.Context, selections ast.SelectionSet, v WrappedMap) graphql.Marshaler {
+			return ec.marshalNWrappedMap2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐWrappedMap(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -4537,14 +4942,18 @@ func (ec *executionContext) _Query_wrappedSlice(ctx context.Context, field graph
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_wrappedSlice,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_wrappedSlice(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().WrappedSlice(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNWrappedSlice2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐWrappedSlice,
+		func(ctx context.Context, selections ast.SelectionSet, v WrappedSlice) graphql.Marshaler {
+			return ec.marshalNWrappedSlice2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐWrappedSlice(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -4567,7 +4976,9 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query___type,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query___type(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.IntrospectType(fc.Args["name"].(string))
@@ -4575,7 +4986,9 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType,
+		func(ctx context.Context, selections ast.SelectionSet, v *introspection.Type) graphql.Marshaler {
+			return ec.marshalO__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -4609,14 +5022,18 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query___schema,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query___schema(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.IntrospectSchema()
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema,
+		func(ctx context.Context, selections ast.SelectionSet, v *introspection.Schema) graphql.Marshaler {
+			return ec.marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -4639,14 +5056,18 @@ func (ec *executionContext) _Subscription_updated(ctx context.Context, field gra
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Subscription_updated,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Subscription_updated(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Subscription().Updated(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNString2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -4660,14 +5081,18 @@ func (ec *executionContext) _Subscription_initPayload(ctx context.Context, field
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Subscription_initPayload,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Subscription_initPayload(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Subscription().InitPayload(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNString2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -4681,7 +5106,9 @@ func (ec *executionContext) _Subscription_directiveArg(ctx context.Context, fiel
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Subscription_directiveArg,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Subscription_directiveArg(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Subscription().DirectiveArg(ctx, fc.Args["arg"].(string))
@@ -4689,7 +5116,9 @@ func (ec *executionContext) _Subscription_directiveArg(ctx context.Context, fiel
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOString2ᚖstring,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -4723,7 +5152,9 @@ func (ec *executionContext) _Subscription_directiveNullableArg(ctx context.Conte
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Subscription_directiveNullableArg,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Subscription_directiveNullableArg(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Subscription().DirectiveNullableArg(ctx, fc.Args["arg"].(*int), fc.Args["arg2"].(*int), fc.Args["arg3"].(*string))
@@ -4731,7 +5162,9 @@ func (ec *executionContext) _Subscription_directiveNullableArg(ctx context.Conte
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOString2ᚖstring,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -4765,7 +5198,9 @@ func (ec *executionContext) _Subscription_directiveDouble(ctx context.Context, f
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Subscription_directiveDouble,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Subscription_directiveDouble(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Subscription().DirectiveDouble(ctx)
 		},
@@ -4790,7 +5225,9 @@ func (ec *executionContext) _Subscription_directiveDouble(ctx context.Context, f
 			next = directive2
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOString2ᚖstring,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -4804,7 +5241,9 @@ func (ec *executionContext) _Subscription_directiveUnimplemented(ctx context.Con
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Subscription_directiveUnimplemented,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Subscription_directiveUnimplemented(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Subscription().DirectiveUnimplemented(ctx)
 		},
@@ -4822,7 +5261,9 @@ func (ec *executionContext) _Subscription_directiveUnimplemented(ctx context.Con
 			next = directive1
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOString2ᚖstring,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -4836,14 +5277,18 @@ func (ec *executionContext) _Subscription_issue896b(ctx context.Context, field g
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Subscription_issue896b,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Subscription_issue896b(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Subscription().Issue896b(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalOCheckIssue8962ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCheckIssue896,
+		func(ctx context.Context, selections ast.SelectionSet, v []*CheckIssue896) graphql.Marshaler {
+			return ec.marshalOCheckIssue8962ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCheckIssue896(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -4866,14 +5311,18 @@ func (ec *executionContext) _Subscription_errorRequired(ctx context.Context, fie
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Subscription_errorRequired,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Subscription_errorRequired(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Subscription().ErrorRequired(ctx)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError,
+		func(ctx context.Context, selections ast.SelectionSet, v *Error) graphql.Marshaler {
+			return ec.marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -4896,14 +5345,18 @@ func (ec *executionContext) _User_id(ctx context.Context, field graphql.Collecte
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_User_id,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_User_id(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNInt2int,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -4917,14 +5370,18 @@ func (ec *executionContext) _User_friends(ctx context.Context, field graphql.Col
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_User_friends,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_User_friends(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.User().Friends(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNUser2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐUserᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*User) graphql.Marshaler {
+			return ec.marshalNUser2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐUserᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -4947,14 +5404,18 @@ func (ec *executionContext) _User_created(ctx context.Context, field graphql.Col
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_User_created,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_User_created(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.Created, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNTime2timeᚐTime,
+		func(ctx context.Context, selections ast.SelectionSet, v time.Time) graphql.Marshaler {
+			return ec.marshalNTime2timeᚐTime(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -4968,14 +5429,18 @@ func (ec *executionContext) _User_updated(ctx context.Context, field graphql.Col
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_User_updated,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_User_updated(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.Updated, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalOTime2ᚖtimeᚐTime,
+		func(ctx context.Context, selections ast.SelectionSet, v *time.Time) graphql.Marshaler {
+			return ec.marshalOTime2ᚖtimeᚐTime(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -4989,7 +5454,9 @@ func (ec *executionContext) _User_pets(ctx context.Context, field graphql.Collec
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_User_pets,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_User_pets(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.User().Pets(ctx, obj, fc.Args["limit"].(*int))
@@ -4997,7 +5464,9 @@ func (ec *executionContext) _User_pets(ctx context.Context, field graphql.Collec
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalOPet2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPetᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []*Pet) graphql.Marshaler {
+			return ec.marshalOPet2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPetᚄ(ctx, selections, v)
+		},
 		true,
 		false,
 	)

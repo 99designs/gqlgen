@@ -158,6 +158,50 @@ func (d *Data) Directives() DirectiveList {
 	return res
 }
 
+// FuncReceiver returns the receiver clause for a generated function declaration.
+//
+//	function syntax:  ""
+//	receiver syntax:  "(ec *executionContext) "
+func (d *Data) FuncReceiver() string {
+	if d.Config.UseFunctionSyntaxForExecutionContext {
+		return ""
+	}
+	return "(ec *executionContext) "
+}
+
+// ECFuncParam returns the ec parameter in a generated function declaration.
+//
+//	function syntax:  "ec *executionContext, "
+//	receiver syntax:  ""
+func (d *Data) ECFuncParam() string {
+	if d.Config.UseFunctionSyntaxForExecutionContext {
+		return "ec *executionContext, "
+	}
+	return ""
+}
+
+// ECDot returns the call-site prefix for a generated function call.
+//
+//	function syntax:  ""
+//	receiver syntax:  "ec."
+func (d *Data) ECDot() string {
+	if d.Config.UseFunctionSyntaxForExecutionContext {
+		return ""
+	}
+	return "ec."
+}
+
+// ECArg returns the ec argument at a generated call site.
+//
+//	function syntax:  "ec, "
+//	receiver syntax:  ""
+func (d *Data) ECArg() string {
+	if d.Config.UseFunctionSyntaxForExecutionContext {
+		return "ec, "
+	}
+	return ""
+}
+
 func BuildData(cfg *config.Config, plugins ...any) (*Data, error) {
 	cfg.ReloadAllPackages()
 

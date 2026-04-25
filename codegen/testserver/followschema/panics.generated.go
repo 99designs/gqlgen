@@ -60,14 +60,18 @@ func (ec *executionContext) _Panics_fieldScalarMarshal(ctx context.Context, fiel
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Panics_fieldScalarMarshal,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Panics_fieldScalarMarshal(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Panics().FieldScalarMarshal(ctx, obj)
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNMarshalPanic2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐMarshalPanicᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []MarshalPanic) graphql.Marshaler {
+			return ec.marshalNMarshalPanic2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐMarshalPanicᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -81,7 +85,9 @@ func (ec *executionContext) _Panics_fieldFuncMarshal(ctx context.Context, field 
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Panics_fieldFuncMarshal,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Panics_fieldFuncMarshal(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return obj.FieldFuncMarshal(ctx, fc.Args["u"].([]MarshalPanic)), nil
@@ -89,7 +95,9 @@ func (ec *executionContext) _Panics_fieldFuncMarshal(ctx context.Context, field 
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNMarshalPanic2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐMarshalPanicᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v []MarshalPanic) graphql.Marshaler {
+			return ec.marshalNMarshalPanic2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐMarshalPanicᚄ(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -123,7 +131,9 @@ func (ec *executionContext) _Panics_argUnmarshal(ctx context.Context, field grap
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Panics_argUnmarshal,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Panics_argUnmarshal(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Panics().ArgUnmarshal(ctx, obj, fc.Args["u"].([]MarshalPanic))
@@ -131,7 +141,9 @@ func (ec *executionContext) _Panics_argUnmarshal(ctx context.Context, field grap
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalNBoolean2bool,
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
 		true,
 		true,
 	)

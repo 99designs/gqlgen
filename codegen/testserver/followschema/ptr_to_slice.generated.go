@@ -32,14 +32,18 @@ func (ec *executionContext) _PtrToSliceContainer_ptrToSlice(ctx context.Context,
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_PtrToSliceContainer_ptrToSlice,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_PtrToSliceContainer_ptrToSlice(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.PtrToSlice, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalOString2ᚖᚕstringᚄ,
+		func(ctx context.Context, selections ast.SelectionSet, v *[]string) graphql.Marshaler {
+			return ec.marshalOString2ᚖᚕstringᚄ(ctx, selections, v)
+		},
 		true,
 		false,
 	)

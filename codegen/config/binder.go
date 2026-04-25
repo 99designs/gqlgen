@@ -334,6 +334,24 @@ func (ref *TypeReference) UnmarshalFuncFunctionSyntax() string {
 	return ref.UnmarshalFunc() + "F"
 }
 
+// EnumMarshalVar returns the generated enum marshal variable name for the
+// given generation mode.
+func (ref *TypeReference) EnumMarshalVar(functionSyntax bool) string {
+	if functionSyntax {
+		return ref.MarshalFuncFunctionSyntax()
+	}
+	return ref.MarshalFunc()
+}
+
+// EnumUnmarshalVar returns the generated enum unmarshal variable name for the
+// given generation mode.
+func (ref *TypeReference) EnumUnmarshalVar(functionSyntax bool) string {
+	if functionSyntax {
+		return ref.UnmarshalFuncFunctionSyntax()
+	}
+	return ref.UnmarshalFunc()
+}
+
 func (ref *TypeReference) IsTargetNilable() bool {
 	return IsNilable(ref.Target)
 }

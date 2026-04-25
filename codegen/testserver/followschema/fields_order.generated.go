@@ -36,14 +36,18 @@ func (ec *executionContext) _FieldsOrderPayload_firstFieldValue(ctx context.Cont
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_FieldsOrderPayload_firstFieldValue,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_FieldsOrderPayload_firstFieldValue(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.FirstFieldValue, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalOString2ᚖstring,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
 		true,
 		false,
 	)

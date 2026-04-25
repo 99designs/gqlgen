@@ -117,14 +117,18 @@ func (ec *executionContext) _DefaultParametersMirror_falsyBoolean(ctx context.Co
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_DefaultParametersMirror_falsyBoolean,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_DefaultParametersMirror_falsyBoolean(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.FalsyBoolean, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalOBoolean2ᚖbool,
+		func(ctx context.Context, selections ast.SelectionSet, v *bool) graphql.Marshaler {
+			return ec.marshalOBoolean2ᚖbool(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -138,14 +142,18 @@ func (ec *executionContext) _DefaultParametersMirror_truthyBoolean(ctx context.C
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_DefaultParametersMirror_truthyBoolean,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_DefaultParametersMirror_truthyBoolean(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			return obj.TruthyBoolean, nil
 		},
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, obj, next)
 		},
-		ec.marshalOBoolean2ᚖbool,
+		func(ctx context.Context, selections ast.SelectionSet, v *bool) graphql.Marshaler {
+			return ec.marshalOBoolean2ᚖbool(ctx, selections, v)
+		},
 		true,
 		false,
 	)
@@ -159,7 +167,9 @@ func (ec *executionContext) _Mutation_defaultInput(ctx context.Context, field gr
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_defaultInput,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_defaultInput(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().DefaultInput(ctx, fc.Args["input"].(DefaultInput))
@@ -167,7 +177,9 @@ func (ec *executionContext) _Mutation_defaultInput(ctx context.Context, field gr
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNDefaultParametersMirror2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐDefaultParametersMirror,
+		func(ctx context.Context, selections ast.SelectionSet, v *DefaultParametersMirror) graphql.Marshaler {
+			return ec.marshalNDefaultParametersMirror2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐDefaultParametersMirror(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -201,7 +213,9 @@ func (ec *executionContext) _Mutation_overrideValueViaInput(ctx context.Context,
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_overrideValueViaInput,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_overrideValueViaInput(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().OverrideValueViaInput(ctx, fc.Args["input"].(FieldsOrderInput))
@@ -209,7 +223,9 @@ func (ec *executionContext) _Mutation_overrideValueViaInput(ctx context.Context,
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNFieldsOrderPayload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐFieldsOrderPayload,
+		func(ctx context.Context, selections ast.SelectionSet, v *FieldsOrderPayload) graphql.Marshaler {
+			return ec.marshalNFieldsOrderPayload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐFieldsOrderPayload(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -243,7 +259,9 @@ func (ec *executionContext) _Mutation_updateProduct(ctx context.Context, field g
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_updateProduct,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_updateProduct(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().UpdateProduct(ctx, map[string]interface{}{
@@ -255,7 +273,9 @@ func (ec *executionContext) _Mutation_updateProduct(ctx context.Context, field g
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNString2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -289,7 +309,9 @@ func (ec *executionContext) _Mutation_issue4053(ctx context.Context, field graph
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_issue4053,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_issue4053(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().Issue4053(ctx, fc.Args["input"].(*Issue4053Input1))
@@ -297,7 +319,9 @@ func (ec *executionContext) _Mutation_issue4053(ctx context.Context, field graph
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNBoolean2bool,
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -331,7 +355,9 @@ func (ec *executionContext) _Mutation_updateSomething(ctx context.Context, field
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_updateSomething,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_updateSomething(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().UpdateSomething(ctx, fc.Args["input"].(SpecialInput))
@@ -339,7 +365,9 @@ func (ec *executionContext) _Mutation_updateSomething(ctx context.Context, field
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNString2string,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
 		true,
 		true,
 	)
@@ -373,7 +401,9 @@ func (ec *executionContext) _Mutation_updatePtrToPtr(ctx context.Context, field 
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Mutation_updatePtrToPtr,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_updatePtrToPtr(ctx, field)
+		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
 			return ec.Resolvers.Mutation().UpdatePtrToPtr(ctx, fc.Args["input"].(UpdatePtrToPtrOuter))
@@ -381,7 +411,9 @@ func (ec *executionContext) _Mutation_updatePtrToPtr(ctx context.Context, field 
 		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 			return ec._fieldMiddleware(ctx, nil, next)
 		},
-		ec.marshalNPtrToPtrOuter2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPtrToPtrOuter,
+		func(ctx context.Context, selections ast.SelectionSet, v *PtrToPtrOuter) graphql.Marshaler {
+			return ec.marshalNPtrToPtrOuter2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPtrToPtrOuter(ctx, selections, v)
+		},
 		true,
 		true,
 	)

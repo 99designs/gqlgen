@@ -1,23 +1,13 @@
-{{ $useFunctionSyntaxForExecutionContext := .Config.UseFunctionSyntaxForExecutionContext }}
-
 {{- range $object := .Objects }}{{- range $field := $object.Fields }}
 
-{{ if $useFunctionSyntaxForExecutionContext -}}
-func _{{$object.Name}}_{{$field.Name}}(ctx context.Context, ec *executionContext, field graphql.CollectedField{{ if not $object.Root }}, obj {{$object.Reference | ref}}{{end}}) (ret {{ if $object.Stream }}func(ctx context.Context){{ end }}graphql.Marshaler) {
-{{- else -}}
-func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Context, field graphql.CollectedField{{ if not $object.Root }}, obj {{$object.Reference | ref}}{{end}}) (ret {{ if $object.Stream }}func(ctx context.Context){{ end }}graphql.Marshaler) {
-{{- end }}
+func {{$.FuncReceiver}}_{{$object.Name}}_{{$field.Name}}(ctx context.Context, {{$.ECFuncParam}}field graphql.CollectedField{{ if not $object.Root }}, obj {{$object.Reference | ref}}{{end}}) (ret {{ if $object.Stream }}func(ctx context.Context){{ end }}graphql.Marshaler) {
 	{{- $null := "graphql.Null" }}
 	{{- if $object.Stream }}
 		{{- $null = "nil" }}
 	{{- end }}
 
 	{{- if $field.TypeReference.IsRoot }}
-		{{ if $useFunctionSyntaxForExecutionContext -}}
-		fc, err := {{ $field.FieldContextFunc }}(ctx, ec, field)
-		{{- else -}}
-		fc, err := ec.{{ $field.FieldContextFunc }}(ctx, field)
-		{{- end }}
+		fc, err := {{$.ECDot}}{{ $field.FieldContextFunc }}(ctx, {{$.ECArg}}field)
 		if err != nil {
 			return {{ $null }}
 		}
@@ -37,21 +27,13 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 			res := {{ $field.TypeReference.GO | ref }}{}
 		{{- end }}
 		fc.Result = res
-		{{ if $useFunctionSyntaxForExecutionContext -}}
-		return {{ $field.TypeReference.MarshalFunc }}(ctx, ec, field.Selections, res)
-		{{- else -}}
-		return ec.{{ $field.TypeReference.MarshalFunc }}(ctx, field.Selections, res)
-		{{- end }}
+		return {{$.ECDot}}{{ $field.TypeReference.MarshalFunc }}(ctx, {{$.ECArg}}field.Selections, res)
 	{{- else}}
 		return graphql.ResolveField{{- if $object.Stream }}Stream{{- end }}(
 			ctx,
 			ec.OperationContext,
 			field,
-			{{ if $useFunctionSyntaxForExecutionContext -}}
-			func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) { return {{ $field.FieldContextFunc }}(ctx, ec, field) },
-			{{- else -}}
-			ec.{{ $field.FieldContextFunc }},
-			{{- end }}
+			func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) { return {{$.ECDot}}{{ $field.FieldContextFunc }}(ctx, {{$.ECArg}}field) },
 			func(ctx context.Context) (any, error) {
 				{{- template "fieldDefinition" $field }}
 			},
@@ -59,15 +41,11 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 			func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 				{{- if $field.HasDirectives -}}
 				directive0 := next
-				{{ template "implDirectives" (dict "Field" $field "UseFunctionSyntaxForExecutionContext" $useFunctionSyntaxForExecutionContext) }}
+				{{ template "implDirectives" (dict "Field" $field "UseFunctionSyntaxForExecutionContext" $.Config.UseFunctionSyntaxForExecutionContext) }}
 				next = directive{{$field.ImplDirectives|len}}
 				{{end}}
 				{{- if  $.AllDirectives.LocationDirectives "FIELD" -}}
-						{{ if $useFunctionSyntaxForExecutionContext -}}
-						return _fieldMiddleware(ctx, ec, {{if $object.Root}}nil{{else}}obj{{end}}, next)
-						{{- else -}}
-						return ec._fieldMiddleware(ctx, {{if $object.Root}}nil{{else}}obj{{end}}, next)
-						{{- end }}
+						return {{$.ECDot}}_fieldMiddleware(ctx, {{$.ECArg}}{{if $object.Root}}nil{{else}}obj{{end}}, next)
 				{{- else -}}
 				return next
 				{{end -}}
@@ -75,11 +53,7 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 			{{else -}}
 		    nil,
 			{{end -}}
-			{{ if $useFunctionSyntaxForExecutionContext -}}
-			func(ctx context.Context, selections ast.SelectionSet, v {{ $field.TypeReference.GO | ref }}) graphql.Marshaler { return {{ $field.TypeReference.MarshalFunc }}(ctx, ec, selections, v) },
-			{{- else -}}
-			ec.{{ $field.TypeReference.MarshalFunc }},
-			{{- end }}
+			func(ctx context.Context, selections ast.SelectionSet, v {{ $field.TypeReference.GO | ref }}) graphql.Marshaler { return {{$.ECDot}}{{ $field.TypeReference.MarshalFunc }}(ctx, {{$.ECArg}}selections, v) },
 			{{ not $.Config.OmitPanicHandler }},
 			{{ $field.TypeReference.GQL.NonNull }},
 		)
@@ -88,19 +62,11 @@ func (ec *executionContext) _{{$object.Name}}_{{$field.Name}}(ctx context.Contex
 
 {{- /* Scalar/enum fields without args: use graphql.NewScalarFieldContext (saves ~8 lines per field) */ -}}
 {{- if and (not $field.Args) (not $field.TypeReference.Definition.Fields) }}
-{{ if $useFunctionSyntaxForExecutionContext -}}
-func {{ $field.FieldContextFunc }}(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-{{- else -}}
-func (ec *executionContext) {{ $field.FieldContextFunc }}(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-{{- end }}
+func {{$.FuncReceiver}}{{ $field.FieldContextFunc }}(_ context.Context, {{$.ECFuncParam}}field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext({{quote $field.Object.Name}}, field, {{or $field.IsMethod $field.IsResolver}}, {{ $field.IsResolver }}, errors.New("field of type {{ $field.TypeReference.Definition.Name }} does not have child fields"))
 }
 {{- else }}
-{{ if $useFunctionSyntaxForExecutionContext -}}
-func {{ $field.FieldContextFunc }}({{ if not $field.Args }}_{{ else }}ctx{{ end }} context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-{{- else -}}
-func (ec *executionContext) {{ $field.FieldContextFunc }}({{ if not $field.Args }}_{{ else }}ctx{{ end }} context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-{{- end }}
+func {{$.FuncReceiver}}{{ $field.FieldContextFunc }}({{ if not $field.Args }}_{{ else }}ctx{{ end }} context.Context, {{$.ECFuncParam}}field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object: {{quote $field.Object.Name}},
 		Field: field,
@@ -112,11 +78,7 @@ func (ec *executionContext) {{ $field.FieldContextFunc }}({{ if not $field.Args 
 			{{- else if ne $field.TypeReference.Definition.Kind "OBJECT" }}
 				return nil, errors.New("FieldContext.Child cannot be called on type {{ $field.TypeReference.Definition.Kind }}")
 			{{- else }}
-				{{ if $useFunctionSyntaxForExecutionContext -}}
-				return childFields_{{ $field.ChildFieldContextTypeName }}(ctx, ec, field)
-				{{- else -}}
-				return ec.childFields_{{ $field.ChildFieldContextTypeName }}(ctx, field)
-				{{- end }}
+				return {{$.ECDot}}childFields_{{ $field.ChildFieldContextTypeName }}(ctx, {{$.ECArg}}field)
 			{{- end }}
 		},
 	}
@@ -130,11 +92,7 @@ func (ec *executionContext) {{ $field.FieldContextFunc }}({{ if not $field.Args 
 		}()
 		{{- end }}
 		ctx = graphql.WithFieldContext(ctx, fc)
-		{{ if $useFunctionSyntaxForExecutionContext -}}
-		if fc.Args, err = {{ $field.ArgsFunc }}(ctx, ec, field.ArgumentMap(ec.Variables)); err != nil {
-		{{- else -}}
-		if fc.Args, err = ec.{{ $field.ArgsFunc }}(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		{{- end }}
+		if fc.Args, err = {{$.ECDot}}{{ $field.ArgsFunc }}(ctx, {{$.ECArg}}field.ArgumentMap(ec.Variables)); err != nil {
 			ec.Error(ctx, err)
 			return fc, err
 		}

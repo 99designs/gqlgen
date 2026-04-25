@@ -1,16 +1,10 @@
-{{ $useFunctionSyntaxForExecutionContext := .Config.UseFunctionSyntaxForExecutionContext }}
-
 {{- range $input := .Inputs }}
 	{{- if not .HasUnmarshal }}
 	{{- $it := "it" }}
 	{{- if .PointersInUnmarshalInput }}
 	  {{- $it = "&it" }}
 	{{- end }}
-	{{ if $useFunctionSyntaxForExecutionContext -}}
-	func unmarshalInput{{ .Name }}(ctx context.Context, ec *executionContext, obj any) ({{ if .PointersInUnmarshalInput }}*{{ end }}{{.Type | ref}}, error) {
-	{{- else -}}
-	func (ec *executionContext) unmarshalInput{{ .Name }}(ctx context.Context, obj any) ({{ if .PointersInUnmarshalInput }}*{{ end }}{{.Type | ref}}, error) {
-	{{- end }}
+	func {{$.FuncReceiver}}unmarshalInput{{ .Name }}(ctx context.Context, {{$.ECFuncParam}}obj any) ({{ if .PointersInUnmarshalInput }}*{{ end }}{{.Type | ref}}, error) {
 		var it {{.Type | ref}}
 		if obj == nil {
 			return it, nil
@@ -46,12 +40,8 @@
 				{{- end }}
 				ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField({{$field.Name|quote}}))
 				{{- if $field.ImplDirectives }}
-					{{ if $useFunctionSyntaxForExecutionContext -}}
-					directive0 := func(ctx context.Context) (any, error) { return {{ $field.TypeReference.UnmarshalFunc }}(ctx, ec, v) }
-					{{- else -}}
-					directive0 := func(ctx context.Context) (any, error) { return ec.{{ $field.TypeReference.UnmarshalFunc }}(ctx, v) }
-					{{- end }}
-					{{ template "implDirectives" (dict "Field" $field "UseFunctionSyntaxForExecutionContext" $useFunctionSyntaxForExecutionContext) }}
+					directive0 := func(ctx context.Context) (any, error) { return {{$.ECDot}}{{ $field.TypeReference.UnmarshalFunc }}(ctx, {{$.ECArg}}v) }
+					{{ template "implDirectives" (dict "Field" $field "UseFunctionSyntaxForExecutionContext" $.Config.UseFunctionSyntaxForExecutionContext) }}
 					tmp, err := directive{{$field.ImplDirectives|len}}(ctx)
 					if err != nil {
 						return {{$it}}, graphql.ErrorOnPath(ctx, err)
@@ -84,11 +74,7 @@
 					}
 				{{- else }}
 					{{- if $field.IsResolver }}
-						{{ if $useFunctionSyntaxForExecutionContext -}}
-						data, err := {{ $field.TypeReference.UnmarshalFunc }}(ctx, ec, v)
-						{{- else -}}
-						data, err := ec.{{ $field.TypeReference.UnmarshalFunc }}(ctx, v)
-						{{- end }}
+						data, err := {{$.ECDot}}{{ $field.TypeReference.UnmarshalFunc }}(ctx, {{$.ECArg}}v)
 						if err != nil {
 							return {{$it}}, err
 						}
@@ -96,11 +82,7 @@
 							return {{$it}}, err
 						}
 					{{- else }}
-						{{ if $useFunctionSyntaxForExecutionContext -}}
-						data, err := {{ $field.TypeReference.UnmarshalFunc }}(ctx, ec, v)
-						{{- else -}}
-						data, err := ec.{{ $field.TypeReference.UnmarshalFunc }}(ctx, v)
-						{{- end }}
+						data, err := {{$.ECDot}}{{ $field.TypeReference.UnmarshalFunc }}(ctx, {{$.ECArg}}v)
 						if err != nil {
 							return {{$it}}, err
 						}
@@ -118,29 +100,17 @@
 		{{- if $input.InputObjectDirectives }}
 		// Execute INPUT_OBJECT level directives (e.g., @oneOf, @directive3)
 		// These run after all fields have been unmarshaled
-		{{ if $useFunctionSyntaxForExecutionContext -}}
 		directive0 := func(ctx context.Context) (any, error) { return {{$it}}, nil }
-		{{- else -}}
-		directive0 := func(ctx context.Context) (any, error) { return {{$it}}, nil }
-		{{- end }}
 		{{- range $i, $directive := $input.InputObjectDirectives }}
 		directive{{add $i 1}} := func(ctx context.Context) (any, error) {
 			{{- range $arg := $directive.Args }}
 				{{- if notNil "Value" $arg }}
-					{{ if $useFunctionSyntaxForExecutionContext -}}
-					{{ $arg.VarName }}, err := {{ $arg.TypeReference.UnmarshalFunc }}(ctx, ec, {{ $arg.Value | dump }})
-					{{- else -}}
-					{{ $arg.VarName }}, err := ec.{{ $arg.TypeReference.UnmarshalFunc }}(ctx, {{ $arg.Value | dump }})
-					{{- end }}
+					{{ $arg.VarName }}, err := {{$.ECDot}}{{ $arg.TypeReference.UnmarshalFunc }}(ctx, {{$.ECArg}}{{ $arg.Value | dump }})
 					if err != nil {
 						return {{$it}}, graphql.ErrorOnPath(ctx, err)
 					}
 				{{- else if notNil "Default" $arg }}
-					{{ if $useFunctionSyntaxForExecutionContext -}}
-					{{ $arg.VarName }}, err := {{ $arg.TypeReference.UnmarshalFunc }}(ctx, ec, {{ $arg.Default | dump }})
-					{{- else -}}
-					{{ $arg.VarName }}, err := ec.{{ $arg.TypeReference.UnmarshalFunc }}(ctx, {{ $arg.Default | dump }})
-					{{- end }}
+					{{ $arg.VarName }}, err := {{$.ECDot}}{{ $arg.TypeReference.UnmarshalFunc }}(ctx, {{$.ECArg}}{{ $arg.Default | dump }})
 					if err != nil {
 						return {{$it}}, graphql.ErrorOnPath(ctx, err)
 					}

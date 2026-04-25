@@ -713,6 +713,13 @@ func (f *Field) ResolverType() string {
 	return fmt.Sprintf("%s().%s(%s)", f.Object.Name, f.GoFieldName, f.CallArgs())
 }
 
+// ZeroVal returns the Go declaration for the typed zero value of this field's
+// return type, suitable for use as an error-path return value inside a
+// directive closure.
+func (f *Field) ZeroVal() string {
+	return fmt.Sprintf("var zeroVal %s", templates.CurrentImports.LookupType(f.TypeReference.GO))
+}
+
 func (f *Field) IsInputObject() bool {
 	return f.Object.Kind == ast.InputObject
 }

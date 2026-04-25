@@ -41,7 +41,7 @@
 				ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField({{$field.Name|quote}}))
 				{{- if $field.ImplDirectives }}
 					directive0 := func(ctx context.Context) (any, error) { return {{$.ECDot}}{{ $field.TypeReference.UnmarshalFunc }}(ctx, {{$.ECArg}}v) }
-					{{ template "implDirectives" (dict "Field" $field "UseFunctionSyntaxForExecutionContext" $.Config.UseFunctionSyntaxForExecutionContext) }}
+					{{ template "implDirectives" ($.ImplDirectivesCtx $field) }}
 					tmp, err := directive{{$field.ImplDirectives|len}}(ctx)
 					if err != nil {
 						return {{$it}}, graphql.ErrorOnPath(ctx, err)
@@ -101,29 +101,7 @@
 		// Execute INPUT_OBJECT level directives (e.g., @oneOf, @directive3)
 		// These run after all fields have been unmarshaled
 		directive0 := func(ctx context.Context) (any, error) { return {{$it}}, nil }
-		{{- range $i, $directive := $input.InputObjectDirectives }}
-		directive{{add $i 1}} := func(ctx context.Context) (any, error) {
-			{{- range $arg := $directive.Args }}
-				{{- if notNil "Value" $arg }}
-					{{ $arg.VarName }}, err := {{$.ECDot}}{{ $arg.TypeReference.UnmarshalFunc }}(ctx, {{$.ECArg}}{{ $arg.Value | dump }})
-					if err != nil {
-						return {{$it}}, graphql.ErrorOnPath(ctx, err)
-					}
-				{{- else if notNil "Default" $arg }}
-					{{ $arg.VarName }}, err := {{$.ECDot}}{{ $arg.TypeReference.UnmarshalFunc }}(ctx, {{$.ECArg}}{{ $arg.Default | dump }})
-					if err != nil {
-						return {{$it}}, graphql.ErrorOnPath(ctx, err)
-					}
-				{{- end }}
-			{{- end }}
-			{{- if not $directive.IsBuiltIn}}
-				if {{$directive.CallPath}} == nil {
-					return {{$it}}, errors.New("directive {{$directive.Name}} is not implemented")
-				}
-			{{- end}}
-			return {{$directive.CallPath}}({{$directive.ResolveArgs "asMap" $i}})
-		}
-		{{- end }}
+		{{ template "implDirectives" ($.InputObjectImplDirectivesCtx $input $it) }}
 		tmp, err := directive{{$input.InputObjectDirectives|len}}(ctx)
 		if err != nil {
 			return {{$it}}, graphql.ErrorOnPath(ctx, err)

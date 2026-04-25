@@ -36,7 +36,7 @@ func {{$.FuncReceiver}}{{ $name }}(ctx context.Context, {{$.ECFuncParam}}rawArgs
 				even if the argument is null.
 				*/ -}}
 				if _, ok := rawArgs[{{$arg.Name|quote}}]; !ok {
-					var zeroVal {{ $arg.TypeReference.GO | ref}}
+					{{ $arg.ZeroVal }}
 					return zeroVal, nil
 				}
 			{{end}}
@@ -45,26 +45,26 @@ func {{$.FuncReceiver}}{{ $name }}(ctx context.Context, {{$.ECFuncParam}}rawArgs
 				directive0 := func(ctx context.Context) (any, error) {
 					tmp, ok := rawArgs[{{$arg.Name|quote}}]
 					if !ok {
-						var zeroVal {{ $arg.TypeReference.GO | ref}}
+						{{ $arg.ZeroVal }}
 						return zeroVal, nil
 					}
 					return {{$.ECDot}}{{ $arg.TypeReference.UnmarshalFunc }}(ctx, {{$.ECArg}}tmp)
 				}
-				{{ template "implDirectives" (dict "Field" $arg "UseFunctionSyntaxForExecutionContext" $.Config.UseFunctionSyntaxForExecutionContext) }}
+				{{ template "implDirectives" ($.ImplDirectivesCtx $arg) }}
 				tmp, err := directive{{$arg.ImplDirectives|len}}(ctx)
 				if err != nil {
-					var zeroVal {{ $arg.TypeReference.GO | ref}}
+					{{ $arg.ZeroVal }}
 					return zeroVal, graphql.ErrorOnPath(ctx, err)
 				}
 				if data, ok := tmp.({{ $arg.TypeReference.GO | ref }}) ; ok {
 					return data, nil
 				{{- if $arg.TypeReference.IsNilable }}
 					} else if tmp == nil {
-						var zeroVal {{ $arg.TypeReference.GO | ref}}
+						{{ $arg.ZeroVal }}
 						return zeroVal, nil
 				{{- end }}
 				} else {
-					var zeroVal {{ $arg.TypeReference.GO | ref}}
+					{{ $arg.ZeroVal }}
 					return zeroVal, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be {{ $arg.TypeReference.GO }}`, tmp))
 				}
 			{{- else }}
@@ -72,7 +72,7 @@ func {{$.FuncReceiver}}{{ $name }}(ctx context.Context, {{$.ECFuncParam}}rawArgs
 					return {{$.ECDot}}{{ $arg.TypeReference.UnmarshalFunc }}(ctx, {{$.ECArg}}tmp)
 				}
 
-				var zeroVal {{ $arg.TypeReference.GO | ref}}
+				{{ $arg.ZeroVal }}
 				return zeroVal, nil
 			{{- end }}
 		}

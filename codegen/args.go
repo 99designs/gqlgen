@@ -44,6 +44,12 @@ func (f *FieldArgument) DirectiveObjName() string {
 	return "rawArgs"
 }
 
+// ZeroVal returns the Go declaration for the typed zero value of this argument's
+// type, suitable for use as an error-path return value inside a directive closure.
+func (f *FieldArgument) ZeroVal() string {
+	return fmt.Sprintf("var zeroVal %s", templates.CurrentImports.LookupType(f.TypeReference.GO))
+}
+
 func (f *FieldArgument) Stream() bool {
 	return f.Object != nil && f.Object.Stream
 }

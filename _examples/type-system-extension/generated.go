@@ -1892,12 +1892,14 @@ func (ec *executionContext) unmarshalInputTodoInput(ctx context.Context, obj any
 	// Execute INPUT_OBJECT level directives (e.g., @oneOf, @directive3)
 	// These run after all fields have been unmarshaled
 	directive0 := func(ctx context.Context) (any, error) { return it, nil }
+
 	directive1 := func(ctx context.Context) (any, error) {
 		if ec.Directives.InputLogging == nil {
-			return it, errors.New("directive inputLogging is not implemented")
+			return it, graphql.ErrorOnPath(ctx, errors.New("directive inputLogging is not implemented"))
 		}
 		return ec.Directives.InputLogging(ctx, asMap, directive0)
 	}
+
 	tmp, err := directive1(ctx)
 	if err != nil {
 		return it, graphql.ErrorOnPath(ctx, err)

@@ -202,6 +202,79 @@ func (d *Data) ECArg() string {
 	return ""
 }
 
+// ImplDirectivesField is the subset of Field and FieldArgument needed by the
+// implDirectives template.
+type ImplDirectivesField interface {
+	DirectiveObjName() string
+	ImplDirectives() []*Directive
+	ZeroVal() string
+}
+
+// ImplDirectivesContext is the typed context passed to the implDirectives template.
+// ErrVal is the Go variable name to return on error ("zeroVal" for the standard
+// case, or the partially-built struct variable for INPUT_OBJECT directives).
+// ErrWrap controls whether the error is wrapped in graphql.ErrorOnPath(ctx, err).
+type ImplDirectivesContext struct {
+	Field   ImplDirectivesField
+	Data    *Data
+	ErrVal  string
+	ErrWrap bool
+}
+
+// QueryDirectivesContext is the typed context passed to the queryDirectives template.
+type QueryDirectivesContext struct {
+	DirectiveList DirectiveList
+	Data          *Data
+}
+
+// ImplDirectivesCtx returns a context for the implDirectives template suitable
+// for field and argument directive processing (ErrVal="zeroVal", ErrWrap=false).
+func (d *Data) ImplDirectivesCtx(f ImplDirectivesField) ImplDirectivesContext {
+	return ImplDirectivesContext{Field: f, Data: d, ErrVal: "zeroVal", ErrWrap: false}
+}
+
+// QueryDirectivesCtx returns a context for the queryDirectives template.
+func (d *Data) QueryDirectivesCtx(dl DirectiveList) QueryDirectivesContext {
+	return QueryDirectivesContext{DirectiveList: dl, Data: d}
+}
+
+// inputObjectImplDirectivesField adapts an *Object for use as an ImplDirectivesField
+// in INPUT_OBJECT-level directive processing, where the directive receiver is the
+// map representation of the input rather than a typed struct field.
+type inputObjectImplDirectivesField struct {
+	object *Object
+}
+
+func (f *inputObjectImplDirectivesField) DirectiveObjName() string { return "asMap" }
+func (f *inputObjectImplDirectivesField) ImplDirectives() []*Directive {
+	return f.object.InputObjectDirectives()
+}
+func (f *inputObjectImplDirectivesField) ZeroVal() string { return "" } // unused when ErrWrap=true
+
+// InputObjectImplDirectivesCtx returns a context for the implDirectives template
+// for INPUT_OBJECT-level directive processing. errVal is the Go variable name to
+// return on error (e.g., "it" or "&it").
+func (d *Data) InputObjectImplDirectivesCtx(obj *Object, errVal string) ImplDirectivesContext {
+	return ImplDirectivesContext{
+		Field:   &inputObjectImplDirectivesField{object: obj},
+		Data:    d,
+		ErrVal:  errVal,
+		ErrWrap: true,
+	}
+}
+
+// ErrReturn returns the Go statements for the error path inside a directive
+// closure. When ErrWrap is true the error is wrapped in
+// graphql.ErrorOnPath; when false the typed zero value is declared before
+// the plain error return. errExpr is the Go error expression to return
+// (e.g. "err" or `errors.New("not implemented")`).
+func (c ImplDirectivesContext) ErrReturn(errExpr string) string {
+	if c.ErrWrap {
+		return fmt.Sprintf("return %s, graphql.ErrorOnPath(ctx, %s)", c.ErrVal, errExpr)
+	}
+	return c.Field.ZeroVal() + "\nreturn " + c.ErrVal + ", " + errExpr
+}
+
 func BuildData(cfg *config.Config, plugins ...any) (*Data, error) {
 	cfg.ReloadAllPackages()
 

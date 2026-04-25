@@ -41,7 +41,7 @@ func {{$.FuncReceiver}}_{{$object.Name}}_{{$field.Name}}(ctx context.Context, {{
 			func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
 				{{- if $field.HasDirectives -}}
 				directive0 := next
-				{{ template "implDirectives" (dict "Field" $field "UseFunctionSyntaxForExecutionContext" $.Config.UseFunctionSyntaxForExecutionContext) }}
+				{{ template "implDirectives" ($.ImplDirectivesCtx $field) }}
 				next = directive{{$field.ImplDirectives|len}}
 				{{end}}
 				{{- if  $.AllDirectives.LocationDirectives "FIELD" -}}

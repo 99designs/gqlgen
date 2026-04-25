@@ -1,37 +1,18 @@
 {{ define "implDirectives" }}
 	{{ $in := .Field.DirectiveObjName }}
-	{{ $useFunctionSyntaxForExecutionContext := .UseFunctionSyntaxForExecutionContext }}
-	{{ $zeroVal := .Field.TypeReference.GO | ref}}
 	{{- range $i, $directive := .Field.ImplDirectives -}}
 		directive{{add $i 1}} := func(ctx context.Context) (any, error) {
 			{{- range $arg := $directive.Args }}
 				{{- if notNil "Value" $arg }}
-						{{ if $useFunctionSyntaxForExecutionContext -}}
-						{{ $arg.VarName }}, err := {{ $arg.TypeReference.UnmarshalFunc }}(ctx, ec, {{ $arg.Value | dump }})
-						{{- else -}}
-						{{ $arg.VarName }}, err := ec.{{ $arg.TypeReference.UnmarshalFunc }}(ctx, {{ $arg.Value | dump }})
-						{{- end }}
-						if err != nil{
-							var zeroVal {{$zeroVal}}
-							return zeroVal, err
-						}
+						{{ $arg.VarName }}, err := {{$.Data.ECDot}}{{ $arg.TypeReference.UnmarshalFunc }}(ctx, {{$.Data.ECArg}}{{ $arg.Value | dump }})
+						if err != nil { {{ $.ErrReturn "err" }} }
 					{{- else if notNil "Default" $arg }}
-						{{ if $useFunctionSyntaxForExecutionContext -}}
-						{{ $arg.VarName }}, err := {{ $arg.TypeReference.UnmarshalFunc }}(ctx, ec, {{ $arg.Default | dump }})
-						{{- else -}}
-						{{ $arg.VarName }}, err := ec.{{ $arg.TypeReference.UnmarshalFunc }}(ctx, {{ $arg.Default | dump }})
-						{{- end }}
-						if err != nil{
-							var zeroVal {{$zeroVal}}
-							return zeroVal, err
-						}
+						{{ $arg.VarName }}, err := {{$.Data.ECDot}}{{ $arg.TypeReference.UnmarshalFunc }}(ctx, {{$.Data.ECArg}}{{ $arg.Default | dump }})
+						if err != nil { {{ $.ErrReturn "err" }} }
 					{{- end }}
 			{{- end }}
 			{{- if not $directive.IsBuiltIn}}
-				if {{$directive.CallPath}} == nil {
-					var zeroVal {{$zeroVal}}
-					return zeroVal, errors.New("directive {{$directive.Name}} is not implemented")
-				}
+				if {{$directive.CallPath}} == nil { {{ $.ErrReturn (printf "errors.New(%q)" (print "directive " $directive.Name " is not implemented")) }} }
 			{{- end}}
 			return {{$directive.CallPath}}({{$directive.ResolveArgs $in $i }})
 		}
@@ -39,18 +20,13 @@
 {{ end }}
 
 {{define "queryDirectives"}}
-	{{ $useFunctionSyntaxForExecutionContext := .UseFunctionSyntaxForExecutionContext }}
 	for _, d := range obj.Directives {
 		switch d.Name {
 		{{- range $directive := .DirectiveList }}
 		case "{{$directive.Name}}":
 			{{- if $directive.Args }}
 				rawArgs := d.ArgumentMap(ec.Variables)
-				{{ if $useFunctionSyntaxForExecutionContext -}}
-				args, err := {{ $directive.ArgsFunc }}(ctx,ec,rawArgs)
-				{{- else -}}
-				args, err := ec.{{ $directive.ArgsFunc }}(ctx,rawArgs)
-				{{- end }}
+				args, err := {{$.Data.ECDot}}{{ $directive.ArgsFunc }}(ctx,{{$.Data.ECArg}}rawArgs)
 				if err != nil {
 					ec.Error(ctx, err)
 					return graphql.Null
@@ -90,14 +66,14 @@
 {{ define "globalMiddleware" }}
 
 {{ if .AllDirectives.LocationDirectives "QUERY" }}
-func {{$.FuncReceiver}}_queryMiddleware(ctx context.Context, {{$.ECFuncParam}}obj *ast.OperationDefinition, next func(ctx context.Context) (any, error)) graphql.Marshaler {
-	{{ template "queryDirectives" (dict "DirectiveList" (.AllDirectives.LocationDirectives "QUERY") "UseFunctionSyntaxForExecutionContext" $.Config.UseFunctionSyntaxForExecutionContext) }}
+func {{.FuncReceiver}}_queryMiddleware(ctx context.Context, {{.ECFuncParam}}obj *ast.OperationDefinition, next func(ctx context.Context) (any, error)) graphql.Marshaler {
+	{{ template "queryDirectives" (.QueryDirectivesCtx (.AllDirectives.LocationDirectives "QUERY")) }}
 }
 {{ end }}
 
 {{ if .AllDirectives.LocationDirectives "MUTATION" }}
-func {{$.FuncReceiver}}_mutationMiddleware(ctx context.Context, {{$.ECFuncParam}}obj *ast.OperationDefinition, next func(ctx context.Context) (any, error)) graphql.Marshaler {
-	{{ template "queryDirectives" (dict "DirectiveList" (.AllDirectives.LocationDirectives "MUTATION") "UseFunctionSyntaxForExecutionContext" $.Config.UseFunctionSyntaxForExecutionContext) }}
+func {{.FuncReceiver}}_mutationMiddleware(ctx context.Context, {{.ECFuncParam}}obj *ast.OperationDefinition, next func(ctx context.Context) (any, error)) graphql.Marshaler {
+	{{ template "queryDirectives" (.QueryDirectivesCtx (.AllDirectives.LocationDirectives "MUTATION")) }}
 }
 {{ end }}
 

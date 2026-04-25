@@ -128,3 +128,52 @@ func TestUniqueChildFieldTypes_Empty(t *testing.T) {
 	d := Data{}
 	assert.Empty(t, d.UniqueChildFieldTypes())
 }
+
+func TestDataECHelpers(t *testing.T) {
+	receiver := &Data{Config: &config.Config{UseFunctionSyntaxForExecutionContext: false}}
+	assert.Equal(t, "(ec *executionContext) ", receiver.FuncReceiver())
+	assert.Empty(t, receiver.ECFuncParam())
+	assert.Equal(t, "ec.", receiver.ECDot())
+	assert.Empty(t, receiver.ECArg())
+
+	function := &Data{Config: &config.Config{UseFunctionSyntaxForExecutionContext: true}}
+	assert.Empty(t, function.FuncReceiver())
+	assert.Equal(t, "ec *executionContext, ", function.ECFuncParam())
+	assert.Empty(t, function.ECDot())
+	assert.Equal(t, "ec, ", function.ECArg())
+}
+
+// implDirectivesFieldStub satisfies ImplDirectivesField for testing purposes.
+type implDirectivesFieldStub struct{ zeroVal string }
+
+func (s *implDirectivesFieldStub) DirectiveObjName() string     { return "obj" }
+func (s *implDirectivesFieldStub) ImplDirectives() []*Directive { return nil }
+func (s *implDirectivesFieldStub) ZeroVal() string              { return s.zeroVal }
+
+func TestImplDirectivesContext_ErrReturn(t *testing.T) {
+	// ErrWrap=false: declares the zero value then returns with plain error.
+	plain := ImplDirectivesContext{
+		ErrWrap: false,
+		ErrVal:  "zeroVal",
+		Field:   &implDirectivesFieldStub{zeroVal: "var zeroVal string"},
+		Data:    &Data{Config: &config.Config{}},
+	}
+	assert.Equal(t, "var zeroVal string\nreturn zeroVal, err", plain.ErrReturn("err"))
+	assert.Equal(t,
+		"var zeroVal string\nreturn zeroVal, errors.New(\"not found\")",
+		plain.ErrReturn(`errors.New("not found")`),
+	)
+
+	// ErrWrap=true: wraps error in graphql.ErrorOnPath, no zero-value declaration.
+	wrapped := ImplDirectivesContext{
+		ErrWrap: true,
+		ErrVal:  "it",
+		Field:   &inputObjectImplDirectivesField{},
+		Data:    &Data{Config: &config.Config{}},
+	}
+	assert.Equal(t, "return it, graphql.ErrorOnPath(ctx, err)", wrapped.ErrReturn("err"))
+	assert.Equal(t,
+		`return it, graphql.ErrorOnPath(ctx, errors.New("directive foo is not implemented"))`,
+		wrapped.ErrReturn(`errors.New("directive foo is not implemented")`),
+	)
+}

@@ -14507,12 +14507,14 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 	// Execute INPUT_OBJECT level directives (e.g., @oneOf, @directive3)
 	// These run after all fields have been unmarshaled
 	directive0 := func(ctx context.Context) (any, error) { return it, nil }
+
 	directive1 := func(ctx context.Context) (any, error) {
 		if ec.Directives.Directive3 == nil {
-			return it, errors.New("directive directive3 is not implemented")
+			return it, graphql.ErrorOnPath(ctx, errors.New("directive directive3 is not implemented"))
 		}
 		return ec.Directives.Directive3(ctx, asMap, directive0)
 	}
+
 	tmp, err := directive1(ctx)
 	if err != nil {
 		return it, graphql.ErrorOnPath(ctx, err)
@@ -14553,16 +14555,18 @@ func (ec *executionContext) unmarshalInputInputDirectivesWithArgs(ctx context.Co
 	// Execute INPUT_OBJECT level directives (e.g., @oneOf, @directive3)
 	// These run after all fields have been unmarshaled
 	directive0 := func(ctx context.Context) (any, error) { return it, nil }
+
 	directive1 := func(ctx context.Context) (any, error) {
 		inputNamespace, err := ec.unmarshalNString2string(ctx, "InputDirectivesWithArgs")
 		if err != nil {
 			return it, graphql.ErrorOnPath(ctx, err)
 		}
 		if ec.Directives.Directive3WithArg == nil {
-			return it, errors.New("directive directive3WithArg is not implemented")
+			return it, graphql.ErrorOnPath(ctx, errors.New("directive directive3WithArg is not implemented"))
 		}
 		return ec.Directives.Directive3WithArg(ctx, asMap, directive0, inputNamespace)
 	}
+
 	tmp, err := directive1(ctx)
 	if err != nil {
 		return it, graphql.ErrorOnPath(ctx, err)

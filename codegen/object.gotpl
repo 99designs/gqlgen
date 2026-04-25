@@ -59,13 +59,7 @@ func {{$.FuncReceiver}}_{{$object.Name}}(ctx context.Context, {{$.ECFuncParam}}s
 					{{- end }}
 					res = {{$.ECDot}}_{{$object.Name}}_{{$field.Name}}(ctx, {{$.ECArg}}field{{if not $object.Root}}, obj{{end}})
 					{{- if $field.TypeReference.GQL.NonNull }}
-						if res == graphql.Null {
-							{{- if $object.IsConcurrent }}
-								atomic.AddUint32(&fs.Invalids, 1)
-							{{- else }}
-								fs.Invalids++
-							{{- end }}
-						}
+						if res == graphql.Null { {{ $object.InvalidsIncrement "fs" }} }
 					{{- end }}
 					return res
 				}
@@ -115,13 +109,7 @@ func {{$.FuncReceiver}}_{{$object.Name}}(ctx context.Context, {{$.ECFuncParam}}s
 				{{- end -}}
 
 				{{- if $field.TypeReference.GQL.NonNull }}
-					if out.Values[i] == graphql.Null {
-						{{- if $object.IsConcurrent }}
-							atomic.AddUint32(&out.Invalids, 1)
-						{{- else }}
-							out.Invalids++
-						{{- end }}
-					}
+					if out.Values[i] == graphql.Null { {{ $object.InvalidsIncrement "out" }} }
 				{{- end }}
 			{{- end }}
 		{{- end }}

@@ -140,12 +140,18 @@ type UserResolver interface {
 func (ec *executionContext) dir_defer_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "if", ec.unmarshalOBoolean2ᚖbool)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "if",
+		func(ctx context.Context, v any) (*bool, error) {
+			return ec.unmarshalOBoolean2ᚖbool(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["if"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "label", ec.unmarshalOString2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "label",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -156,7 +162,10 @@ func (ec *executionContext) dir_defer_args(ctx context.Context, rawArgs map[stri
 func (ec *executionContext) field_Pet_friends_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "limit", ec.unmarshalOInt2ᚖint)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "limit",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -167,7 +176,10 @@ func (ec *executionContext) field_Pet_friends_args(ctx context.Context, rawArgs 
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "name",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNString2string(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -178,12 +190,18 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 func (ec *executionContext) field_Query_defaultParameters_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "falsyBoolean", ec.unmarshalOBoolean2ᚖbool)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "falsyBoolean",
+		func(ctx context.Context, v any) (*bool, error) {
+			return ec.unmarshalOBoolean2ᚖbool(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["falsyBoolean"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "truthyBoolean", ec.unmarshalOBoolean2ᚖbool)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "truthyBoolean",
+		func(ctx context.Context, v any) (*bool, error) {
+			return ec.unmarshalOBoolean2ᚖbool(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -194,7 +212,10 @@ func (ec *executionContext) field_Query_defaultParameters_args(ctx context.Conte
 func (ec *executionContext) field_Query_defaultScalar_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "arg", ec.unmarshalNDefaultScalarImplementation2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "arg",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNDefaultScalarImplementation2string(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -272,7 +293,10 @@ func (ec *executionContext) field_Query_directiveArg_argsArg(
 func (ec *executionContext) field_Query_directiveFieldDef_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "ret", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "ret",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNString2string(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -283,7 +307,10 @@ func (ec *executionContext) field_Query_directiveFieldDef_args(ctx context.Conte
 func (ec *executionContext) field_Query_directiveInputNullable_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "arg", ec.unmarshalOInputDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInputDirectives)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "arg",
+		func(ctx context.Context, v any) (*InputDirectives, error) {
+			return ec.unmarshalOInputDirectives2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInputDirectives(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -294,7 +321,10 @@ func (ec *executionContext) field_Query_directiveInputNullable_args(ctx context.
 func (ec *executionContext) field_Query_directiveInputOuter_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "arg", ec.unmarshalNOuterWrapperInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐOuterWrapperInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "arg",
+		func(ctx context.Context, v any) (OuterWrapperInput, error) {
+			return ec.unmarshalNOuterWrapperInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐOuterWrapperInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -357,7 +387,10 @@ func (ec *executionContext) field_Query_directiveInputType_argsArg(
 func (ec *executionContext) field_Query_directiveInputWithArgs_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "arg", ec.unmarshalNInputDirectivesWithArgs2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInputDirectivesWithArgs)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "arg",
+		func(ctx context.Context, v any) (InputDirectivesWithArgs, error) {
+			return ec.unmarshalNInputDirectivesWithArgs2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInputDirectivesWithArgs(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -368,7 +401,10 @@ func (ec *executionContext) field_Query_directiveInputWithArgs_args(ctx context.
 func (ec *executionContext) field_Query_directiveInput_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "arg", ec.unmarshalNInputDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInputDirectives)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "arg",
+		func(ctx context.Context, v any) (InputDirectives, error) {
+			return ec.unmarshalNInputDirectives2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInputDirectives(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -609,7 +645,10 @@ func (ec *executionContext) field_Query_directiveSingleNullableArg_argsArg1(
 func (ec *executionContext) field_Query_enumInInput_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalOInputWithEnumValue2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInputWithEnumValue)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (*InputWithEnumValue, error) {
+			return ec.unmarshalOInputWithEnumValue2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐInputWithEnumValue(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -620,7 +659,10 @@ func (ec *executionContext) field_Query_enumInInput_args(ctx context.Context, ra
 func (ec *executionContext) field_Query_fallback_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "arg", ec.unmarshalNFallbackToStringEncoding2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐFallbackToStringEncoding)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "arg",
+		func(ctx context.Context, v any) (FallbackToStringEncoding, error) {
+			return ec.unmarshalNFallbackToStringEncoding2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐFallbackToStringEncoding(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -631,12 +673,18 @@ func (ec *executionContext) field_Query_fallback_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Query_fieldWithDeprecatedArg_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "oldArg", ec.unmarshalOInt2ᚖint)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "oldArg",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["oldArg"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "newArg", ec.unmarshalOInt2ᚖint)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "newArg",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -647,17 +695,26 @@ func (ec *executionContext) field_Query_fieldWithDeprecatedArg_args(ctx context.
 func (ec *executionContext) field_Query_filterProducts_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "query", ec.unmarshalOString2ᚖstring)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "query",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["query"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "category", ec.unmarshalOString2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "category",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["category"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "minPrice", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "minPrice",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -668,17 +725,26 @@ func (ec *executionContext) field_Query_filterProducts_args(ctx context.Context,
 func (ec *executionContext) field_Query_findProducts_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "query", ec.unmarshalOString2ᚖstring)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "query",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["query"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "category", ec.unmarshalOString2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "category",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["category"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "minPrice", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "minPrice",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -689,7 +755,10 @@ func (ec *executionContext) field_Query_findProducts_args(ctx context.Context, r
 func (ec *executionContext) field_Query_inputNullableSlice_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "arg", ec.unmarshalOString2ᚕstringᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "arg",
+		func(ctx context.Context, v any) ([]string, error) {
+			return ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -700,7 +769,10 @@ func (ec *executionContext) field_Query_inputNullableSlice_args(ctx context.Cont
 func (ec *executionContext) field_Query_inputOmittable_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "arg", ec.unmarshalNOmittableInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐOmittableInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "arg",
+		func(ctx context.Context, v any) (OmittableInput, error) {
+			return ec.unmarshalNOmittableInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐOmittableInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -711,7 +783,10 @@ func (ec *executionContext) field_Query_inputOmittable_args(ctx context.Context,
 func (ec *executionContext) field_Query_inputSlice_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "arg", ec.unmarshalNString2ᚕstringᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "arg",
+		func(ctx context.Context, v any) ([]string, error) {
+			return ec.unmarshalNString2ᚕstringᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -722,7 +797,10 @@ func (ec *executionContext) field_Query_inputSlice_args(ctx context.Context, raw
 func (ec *executionContext) field_Query_mapInput_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalOChanges2map)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (map[string]any, error) {
+			return ec.unmarshalOChanges2map(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -733,7 +811,10 @@ func (ec *executionContext) field_Query_mapInput_args(ctx context.Context, rawAr
 func (ec *executionContext) field_Query_mapNestedMapSlice_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalOMapNestedMapSliceInput2map)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (map[string]any, error) {
+			return ec.unmarshalOMapNestedMapSliceInput2map(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -744,7 +825,10 @@ func (ec *executionContext) field_Query_mapNestedMapSlice_args(ctx context.Conte
 func (ec *executionContext) field_Query_mapNestedStringInterface_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "in", ec.unmarshalONestedMapInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐNestedMapInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "in",
+		func(ctx context.Context, v any) (*NestedMapInput, error) {
+			return ec.unmarshalONestedMapInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐNestedMapInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -755,7 +839,10 @@ func (ec *executionContext) field_Query_mapNestedStringInterface_args(ctx contex
 func (ec *executionContext) field_Query_mapStringInterface_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "in", ec.unmarshalOMapStringInterfaceInput2map)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "in",
+		func(ctx context.Context, v any) (map[string]any, error) {
+			return ec.unmarshalOMapStringInterfaceInput2map(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -766,7 +853,10 @@ func (ec *executionContext) field_Query_mapStringInterface_args(ctx context.Cont
 func (ec *executionContext) field_Query_nestedInputs_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalOOuterInput2ᚕᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐOuterInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) ([][]*OuterInput, error) {
+			return ec.unmarshalOOuterInput2ᚕᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐOuterInput(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -777,7 +867,10 @@ func (ec *executionContext) field_Query_nestedInputs_args(ctx context.Context, r
 func (ec *executionContext) field_Query_nullableArg_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "arg", ec.unmarshalOInt2ᚖint)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "arg",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -788,7 +881,10 @@ func (ec *executionContext) field_Query_nullableArg_args(ctx context.Context, ra
 func (ec *executionContext) field_Query_recursive_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input", ec.unmarshalORecursiveInputSlice2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐRecursiveInputSlice)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (*RecursiveInputSlice, error) {
+			return ec.unmarshalORecursiveInputSlice2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐRecursiveInputSlice(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -799,32 +895,50 @@ func (ec *executionContext) field_Query_recursive_args(ctx context.Context, rawA
 func (ec *executionContext) field_Query_searchMixed_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "query", ec.unmarshalOString2ᚖstring)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "query",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["query"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "category", ec.unmarshalOString2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "category",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["category"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "minPrice", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "minPrice",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["minPrice"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "limit", ec.unmarshalOInt2ᚖint)
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "limit",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["limit"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "offset", ec.unmarshalOInt2ᚖint)
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "offset",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["offset"] = arg4
-	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "sortBy", ec.unmarshalOString2ᚖstring)
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "sortBy",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -835,7 +949,10 @@ func (ec *executionContext) field_Query_searchMixed_args(ctx context.Context, ra
 func (ec *executionContext) field_Query_searchProductsNormal_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "filters", ec.unmarshalOSearchFilters2map)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "filters",
+		func(ctx context.Context, v any) (map[string]any, error) {
+			return ec.unmarshalOSearchFilters2map(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -846,17 +963,26 @@ func (ec *executionContext) field_Query_searchProductsNormal_args(ctx context.Co
 func (ec *executionContext) field_Query_searchProducts_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "query", ec.unmarshalOString2ᚖstring)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "query",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["query"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "category", ec.unmarshalOString2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "category",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["category"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "minPrice", ec.unmarshalOInt2ᚖint)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "minPrice",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -867,12 +993,18 @@ func (ec *executionContext) field_Query_searchProducts_args(ctx context.Context,
 func (ec *executionContext) field_Query_searchRequired_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "name", ec.unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "name",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNString2string(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["name"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "age", ec.unmarshalNInt2int)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "age",
+		func(ctx context.Context, v any) (int, error) {
+			return ec.unmarshalNInt2int(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -883,17 +1015,26 @@ func (ec *executionContext) field_Query_searchRequired_args(ctx context.Context,
 func (ec *executionContext) field_Query_searchWithDefaults_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "query", ec.unmarshalOString2ᚖstring)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "query",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["query"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "limit", ec.unmarshalOInt2ᚖint)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "limit",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["limit"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "includeArchived", ec.unmarshalOBoolean2ᚖbool)
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "includeArchived",
+		func(ctx context.Context, v any) (*bool, error) {
+			return ec.unmarshalOBoolean2ᚖbool(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -904,12 +1045,18 @@ func (ec *executionContext) field_Query_searchWithDefaults_args(ctx context.Cont
 func (ec *executionContext) field_Query_searchWithDirectives_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "oldField", ec.unmarshalOString2ᚖstring)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "oldField",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["oldField"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "newField", ec.unmarshalOString2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "newField",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -920,7 +1067,10 @@ func (ec *executionContext) field_Query_searchWithDirectives_args(ctx context.Co
 func (ec *executionContext) field_Query_user_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNInt2int)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (int, error) {
+			return ec.unmarshalNInt2int(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -1161,7 +1311,10 @@ func (ec *executionContext) field_Subscription_directiveNullableArg_argsArg3(
 func (ec *executionContext) field_User_pets_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "limit", ec.unmarshalOInt2ᚖint)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "limit",
+		func(ctx context.Context, v any) (*int, error) {
+			return ec.unmarshalOInt2ᚖint(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}

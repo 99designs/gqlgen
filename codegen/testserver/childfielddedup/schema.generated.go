@@ -36,7 +36,10 @@ type QueryResolver interface {
 func field_Query___type_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "name", unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "name",
+		func(ctx context.Context, v any) (string, error) {
+			return unmarshalNString2string(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +50,10 @@ func field_Query___type_args(ctx context.Context, ec *executionContext, rawArgs 
 func field_Query_article_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "id", unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (string, error) {
+			return unmarshalNID2string(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +64,10 @@ func field_Query_article_args(ctx context.Context, ec *executionContext, rawArgs
 func field_Query_book_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "id", unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (string, error) {
+			return unmarshalNID2string(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -69,7 +78,10 @@ func field_Query_book_args(ctx context.Context, ec *executionContext, rawArgs ma
 func field_Query_comment_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "id", unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (string, error) {
+			return unmarshalNID2string(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +92,10 @@ func field_Query_comment_args(ctx context.Context, ec *executionContext, rawArgs
 func field_Query_invoice_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "id", unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (string, error) {
+			return unmarshalNID2string(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +106,10 @@ func field_Query_invoice_args(ctx context.Context, ec *executionContext, rawArgs
 func field_Query_review_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "id", unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (string, error) {
+			return unmarshalNID2string(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -102,7 +120,10 @@ func field_Query_review_args(ctx context.Context, ec *executionContext, rawArgs 
 func field_Query_task_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "id", unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (string, error) {
+			return unmarshalNID2string(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}

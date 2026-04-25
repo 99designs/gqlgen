@@ -7,11 +7,10 @@ func {{$.FuncReceiver}}{{ $name }}(ctx context.Context, {{$.ECFuncParam}}rawArgs
 		{{ if $arg.ImplDirectives }}
 			arg{{$i}}, err := {{$.ECDot}}{{ $name }}{{$arg.Name | go}}(ctx, {{$.ECArg}}rawArgs)
 		{{- else -}}
-			{{ if $.Config.UseFunctionSyntaxForExecutionContext -}}
-			arg{{$i}}, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, {{$arg.Name|quote}}, {{ $arg.TypeReference.UnmarshalFunc }})
-			{{- else -}}
-			arg{{$i}}, err := graphql.ProcessArgField(ctx, rawArgs, {{$arg.Name|quote}}, ec.{{ $arg.TypeReference.UnmarshalFunc }})
-			{{- end }}
+			arg{{$i}}, err := graphql.ProcessArgField(ctx, rawArgs, {{$arg.Name|quote}},
+				func(ctx context.Context, v any) ({{ $arg.TypeReference.GO | ref }}, error) {
+					return {{$.ECDot}}{{$arg.TypeReference.UnmarshalFunc}}(ctx, {{$.ECArg}}v)
+				})
 		{{- end }}
 		if err != nil {
 			return nil, err

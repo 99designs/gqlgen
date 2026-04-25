@@ -23,12 +23,18 @@ import (
 func dir_defer_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "if", unmarshalOBoolean2ᚖbool)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "if",
+		func(ctx context.Context, v any) (*bool, error) {
+			return unmarshalOBoolean2ᚖbool(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}
 	args["if"] = arg0
-	arg1, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "label", unmarshalOString2ᚖstring)
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "label",
+		func(ctx context.Context, v any) (*string, error) {
+			return unmarshalOString2ᚖstring(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +45,10 @@ func dir_defer_args(ctx context.Context, ec *executionContext, rawArgs map[strin
 func field___Directive_args_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "includeDeprecated", unmarshalOBoolean2ᚖbool)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated",
+		func(ctx context.Context, v any) (*bool, error) {
+			return unmarshalOBoolean2ᚖbool(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +59,10 @@ func field___Directive_args_args(ctx context.Context, ec *executionContext, rawA
 func field___Field_args_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "includeDeprecated", unmarshalOBoolean2ᚖbool)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated",
+		func(ctx context.Context, v any) (*bool, error) {
+			return unmarshalOBoolean2ᚖbool(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +73,10 @@ func field___Field_args_args(ctx context.Context, ec *executionContext, rawArgs 
 func field___Type_enumValues_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "includeDeprecated", unmarshalOBoolean2bool)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated",
+		func(ctx context.Context, v any) (bool, error) {
+			return unmarshalOBoolean2bool(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +87,10 @@ func field___Type_enumValues_args(ctx context.Context, ec *executionContext, raw
 func field___Type_fields_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "includeDeprecated", unmarshalOBoolean2bool)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated",
+		func(ctx context.Context, v any) (bool, error) {
+			return unmarshalOBoolean2bool(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}

@@ -28,7 +28,10 @@ type PanicsResolver interface {
 func (ec *executionContext) field_Panics_argUnmarshal_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "u", ec.unmarshalNMarshalPanic2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐMarshalPanicᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "u",
+		func(ctx context.Context, v any) ([]MarshalPanic, error) {
+			return ec.unmarshalNMarshalPanic2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐMarshalPanicᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +42,10 @@ func (ec *executionContext) field_Panics_argUnmarshal_args(ctx context.Context, 
 func (ec *executionContext) field_Panics_fieldFuncMarshal_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "u", ec.unmarshalNMarshalPanic2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐMarshalPanicᚄ)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "u",
+		func(ctx context.Context, v any) ([]MarshalPanic, error) {
+			return ec.unmarshalNMarshalPanic2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐMarshalPanicᚄ(ctx, v)
+		})
 	if err != nil {
 		return nil, err
 	}

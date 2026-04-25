@@ -510,7 +510,10 @@ func childFields___Type(ctx context.Context, ec *executionContext, field graphql
 func dir_log_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "message", unmarshalOString2ᚖstring)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "message",
+		func(ctx context.Context, v any) (*string, error) {
+			return unmarshalOString2ᚖstring(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -521,7 +524,10 @@ func dir_log_args(ctx context.Context, ec *executionContext, rawArgs map[string]
 func field_Mutation_createUser_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "input", unmarshalNCreateUserInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐCreateUserInput)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (CreateUserInput, error) {
+			return unmarshalNCreateUserInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐCreateUserInput(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -532,7 +538,10 @@ func field_Mutation_createUser_args(ctx context.Context, ec *executionContext, r
 func field_Mutation_deleteUser_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "id", unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (string, error) {
+			return unmarshalNID2string(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -543,7 +552,10 @@ func field_Mutation_deleteUser_args(ctx context.Context, ec *executionContext, r
 func field_Query___type_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "name", unmarshalNString2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "name",
+		func(ctx context.Context, v any) (string, error) {
+			return unmarshalNString2string(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -554,7 +566,10 @@ func field_Query___type_args(ctx context.Context, ec *executionContext, rawArgs 
 func field_Query_getEntity_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "id", unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (string, error) {
+			return unmarshalNID2string(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -565,7 +580,10 @@ func field_Query_getEntity_args(ctx context.Context, ec *executionContext, rawAr
 func field_Query_getUser_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "id", unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (string, error) {
+			return unmarshalNID2string(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -576,7 +594,10 @@ func field_Query_getUser_args(ctx context.Context, ec *executionContext, rawArgs
 func field_Query_listUsers_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "filter", unmarshalOUserFilter2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐUserFilter)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "filter",
+		func(ctx context.Context, v any) (*UserFilter, error) {
+			return unmarshalOUserFilter2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐUserFilter(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -587,7 +608,10 @@ func field_Query_listUsers_args(ctx context.Context, ec *executionContext, rawAr
 func field___Directive_args_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "includeDeprecated", unmarshalOBoolean2ᚖbool)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated",
+		func(ctx context.Context, v any) (*bool, error) {
+			return unmarshalOBoolean2ᚖbool(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -598,7 +622,10 @@ func field___Directive_args_args(ctx context.Context, ec *executionContext, rawA
 func field___Field_args_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "includeDeprecated", unmarshalOBoolean2ᚖbool)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated",
+		func(ctx context.Context, v any) (*bool, error) {
+			return unmarshalOBoolean2ᚖbool(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -609,7 +636,10 @@ func field___Field_args_args(ctx context.Context, ec *executionContext, rawArgs 
 func field___Type_enumValues_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "includeDeprecated", unmarshalOBoolean2bool)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated",
+		func(ctx context.Context, v any) (bool, error) {
+			return unmarshalOBoolean2bool(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}
@@ -620,7 +650,10 @@ func field___Type_enumValues_args(ctx context.Context, ec *executionContext, raw
 func field___Type_fields_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgFieldWithEC(ctx, ec, rawArgs, "includeDeprecated", unmarshalOBoolean2bool)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated",
+		func(ctx context.Context, v any) (bool, error) {
+			return unmarshalOBoolean2bool(ctx, ec, v)
+		})
 	if err != nil {
 		return nil, err
 	}

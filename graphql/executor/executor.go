@@ -131,6 +131,12 @@ func (e *Executor) DispatchOperation(
 		}
 
 		return func(ctx context.Context) *graphql.Response {
+			// nil is the end-of-stream signal for transports that iterate on
+			// this handler; honor context cancellation by emitting it instead
+			// of producing further responses no consumer will receive.
+			if ctx.Err() != nil {
+				return nil
+			}
 			ctx = graphql.WithResponseContext(ctx, e.errorPresenter, e.recoverFunc)
 			resp := e.ext.responseMiddleware(ctx, func(ctx context.Context) *graphql.Response {
 				resp := responses(ctx)

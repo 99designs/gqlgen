@@ -183,6 +183,31 @@ func TestExecutor(t *testing.T) {
 	})
 }
 
+func TestDispatchOperationContextCancel(t *testing.T) {
+	exec := testexecutor.New()
+
+	ctx, cancel := context.WithCancel(graphql.StartOperationTrace(context.Background()))
+	now := graphql.Now()
+	rc, listErr := exec.CreateOperationContext(ctx, &graphql.RawParams{
+		Query: "{name}",
+		ReadTime: graphql.TraceTiming{
+			Start: now,
+			End:   now,
+		},
+	})
+	require.Nil(t, listErr)
+
+	responses, opCtx := exec.DispatchOperation(ctx, rc)
+	require.NotNil(t, responses(opCtx))
+
+	responses, opCtx = exec.DispatchOperation(ctx, rc)
+	require.NotNil(t, responses(opCtx))
+
+	cancel()
+	responses, opCtx = exec.DispatchOperation(ctx, rc)
+	assert.Nil(t, responses(opCtx))
+}
+
 func TestExecutorDisableSuggestion(t *testing.T) {
 	t.Run("by default, the error message will include suggestions", func(t *testing.T) {
 		exec := testexecutor.New()

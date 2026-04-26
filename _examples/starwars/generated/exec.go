@@ -1216,10 +1216,6 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // endregion ***************************** args.gotpl *****************************
 
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
-
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _Droid_id(ctx context.Context, field graphql.CollectedField, obj *models.Droid) (ret graphql.Marshaler) {

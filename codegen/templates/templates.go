@@ -95,7 +95,7 @@ func Render(cfg Options) error {
 	if cfg.Template != "" {
 		// When a primary Template string is provided, only execute it.
 		// TemplateFS files are parsed solely to make their named templates available
-		// (e.g. callDirective, queryDirectives from directives.gotpl) but must
+		// (e.g. callDirective, queryDirectives from directives_.gotpl) but must
 		// not be executed as additional roots.
 		roots = []string{"template.gotpl"}
 	} else {
@@ -182,7 +182,7 @@ func parseTemplates(cfg Options, t *template.Template) (*template.Template, erro
 			return nil, fmt.Errorf("error with provided template: %w", err)
 		}
 		// Also parse TemplateFS so that named templates defined there (e.g.
-		// callDirective, queryDirectives from directives.gotpl) are available
+		// callDirective, queryDirectives from directives_.gotpl) are available
 		// to the primary template. Render only executes "template.gotpl", so
 		// the TemplateFS files contribute named templates but no top-level output.
 		if cfg.TemplateFS != nil {

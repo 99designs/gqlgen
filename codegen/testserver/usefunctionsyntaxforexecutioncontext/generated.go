@@ -663,10 +663,6 @@ func field___Type_fields_args(ctx context.Context, ec *executionContext, rawArgs
 
 // endregion ***************************** args.gotpl *****************************
 
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
-
 // region    **************************** field.gotpl *****************************
 
 func _Admin_id(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *Admin) (ret graphql.Marshaler) {

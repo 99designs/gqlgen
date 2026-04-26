@@ -25,10 +25,6 @@ type FieldsOrderInputResolver interface {
 
 // endregion ***************************** args.gotpl *****************************
 
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
-
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _FieldsOrderPayload_firstFieldValue(ctx context.Context, field graphql.CollectedField, obj *FieldsOrderPayload) (ret graphql.Marshaler) {

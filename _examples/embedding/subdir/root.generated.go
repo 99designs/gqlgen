@@ -43,10 +43,6 @@ func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs
 
 // endregion ***************************** args.gotpl *****************************
 
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
-
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _Query_inSchemadir(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {

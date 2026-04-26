@@ -1396,10 +1396,6 @@ func field___Type_fields_args(ctx context.Context, ec *executionContext, rawArgs
 
 // endregion ***************************** args.gotpl *****************************
 
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
-
 // region    **************************** field.gotpl *****************************
 
 func _Entity_findHelloByName(ctx context.Context, ec *executionContext, field graphql.CollectedField) (ret graphql.Marshaler) {

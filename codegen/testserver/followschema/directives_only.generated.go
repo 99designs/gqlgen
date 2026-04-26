@@ -72,10 +72,6 @@ func (ec *executionContext) dir_subscriptionOnly_args(ctx context.Context, rawAr
 
 // endregion ***************************** args.gotpl *****************************
 
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
-
 // region    **************************** field.gotpl *****************************
 
 // endregion **************************** field.gotpl *****************************

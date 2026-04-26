@@ -116,6 +116,33 @@ srv.AddTransport(transport.Websocket{
 })
 ```
 
+### Limiting Payload Size
+
+By default, the WebSocket transport enforces a **1 MB read limit** per message. This protects
+your server against DoS/DDoS attacks where clients send very large payloads over many concurrent
+connections — even when compression makes those payloads tiny on the wire.
+
+You can tune this limit using `PayloadReadLimit`:
+
+```go
+// Tighten the limit to 512 KB for your use case.
+limit := int64(512 * 1024)
+srv.AddTransport(transport.Websocket{
+	PayloadReadLimit: &limit,
+})
+```
+
+```go
+// Relax the limit to 10 MB if your application sends large payloads.
+limit := int64(10 * 1024 * 1024)
+srv.AddTransport(transport.Websocket{
+	PayloadReadLimit: &limit,
+})
+```
+
+When a client sends a message that exceeds the limit, gorilla/websocket closes the connection
+immediately without processing the payload.
+
 [code]: https://github.com/99designs/gqlgen/blob/master/graphql/handler/transport/websocket.go
 [gorilla]: https://pkg.go.dev/github.com/gorilla/websocket
 [graphql-ws]: https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md

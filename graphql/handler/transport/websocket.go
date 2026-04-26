@@ -39,6 +39,10 @@ type (
 		 */
 		MissingPongOk bool
 
+		// PayloadReadLimit is the maximum size in bytes of a WebSocket message read from the client.
+		// If nil, defaults to 1 MB. Set to a pointer of -1 to disable the limit entirely.
+		PayloadReadLimit *int64
+
 		didInjectSubprotocols bool
 	}
 	wsConnection struct {
@@ -65,6 +69,9 @@ type (
 	// Callback called when websocket is closed.
 	WebsocketCloseFunc func(ctx context.Context, closeCode int)
 )
+
+// defaultPayloadReadLimit is applied when PayloadReadLimit is 0.
+const defaultPayloadReadLimit = 1024 * 1024 // 1 MB
 
 var errReadTimeout = errors.New("read timeout")
 
@@ -116,6 +123,14 @@ func (t Websocket) Do(w http.ResponseWriter, r *http.Request, exec graphql.Graph
 		me = graphqlwsMessageExchanger{c: ws}
 	case graphqltransportwsSubprotocol:
 		me = graphqltransportwsMessageExchanger{c: ws}
+	}
+
+	readLimit := int64(defaultPayloadReadLimit)
+	if t.PayloadReadLimit != nil {
+		readLimit = *t.PayloadReadLimit
+	}
+	if readLimit > 0 {
+		ws.SetReadLimit(readLimit)
 	}
 
 	conn := wsConnection{

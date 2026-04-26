@@ -21,7 +21,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-// region    ************************** generated!.gotpl **************************
+// region    ***************************** api!.gotpl *****************************
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
@@ -65,6 +65,10 @@ type ComplexityRoot struct {
 	}
 }
 
+// endregion ***************************** api!.gotpl *****************************
+
+// region    ************************** generated!.gotpl **************************
+
 type QueryResolver interface {
 	User(ctx context.Context, id external.ObjectID) (*model.User, error)
 	Search(ctx context.Context, input *model.SearchArgs) ([]*model.User, error)
@@ -74,6 +78,10 @@ type UserResolver interface {
 	PrimitiveResolver(ctx context.Context, obj *model.User) (string, error)
 	CustomResolver(ctx context.Context, obj *model.User) (*model.Point, error)
 }
+
+// endregion ************************** generated!.gotpl **************************
+
+// region    ************************** internal!.gotpl ***************************
 
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
@@ -95,6 +103,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Address.ID(childComplexity), true
+
 	case "Address.location":
 		if e.ComplexityRoot.Address.Location == nil {
 			break
@@ -113,6 +122,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Search(childComplexity, args["input"].(*model.SearchArgs)), true
+
 	case "Query.user":
 		if e.ComplexityRoot.Query.User == nil {
 			break
@@ -124,6 +134,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.User(childComplexity, args["id"].(external.ObjectID)), true
+
 	case "Query.userByTier":
 		if e.ComplexityRoot.Query.UserByTier == nil {
 			break
@@ -142,60 +153,70 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.Address(childComplexity), true
+
 	case "User.created":
 		if e.ComplexityRoot.User.Created == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.Created(childComplexity), true
+
 	case "User.customResolver":
 		if e.ComplexityRoot.User.CustomResolver == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.CustomResolver(childComplexity), true
+
 	case "User.id":
 		if e.ComplexityRoot.User.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.ID(childComplexity), true
+
 	case "User.isBanned":
 		if e.ComplexityRoot.User.IsBanned == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.IsBanned(childComplexity), true
+
 	case "User.modified":
 		if e.ComplexityRoot.User.Modified == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.Modified(childComplexity), true
+
 	case "User.name":
 		if e.ComplexityRoot.User.Name == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.Name(childComplexity), true
+
 	case "User.primitiveResolver":
 		if e.ComplexityRoot.User.PrimitiveResolver == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.PrimitiveResolver(childComplexity), true
+
 	case "User.ptrPrefs":
 		if e.ComplexityRoot.User.PtrPrefs == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.PtrPrefs(childComplexity), true
+
 	case "User.tier":
 		if e.ComplexityRoot.User.Tier == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.Tier(childComplexity), true
+
 	case "User.valPrefs":
 		if e.ComplexityRoot.User.ValPrefs == nil {
 			break
@@ -441,7 +462,7 @@ func (ec *executionContext) childFields___Type(ctx context.Context, field graphq
 	return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 }
 
-// endregion ************************** generated!.gotpl **************************
+// endregion ************************** internal!.gotpl ***************************
 
 // region    ***************************** args.gotpl *****************************
 

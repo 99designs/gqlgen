@@ -19,7 +19,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-// region    ************************** generated!.gotpl **************************
+// region    ***************************** api!.gotpl *****************************
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
@@ -140,6 +140,10 @@ type ComplexityRoot struct {
 	}
 }
 
+// endregion ***************************** api!.gotpl *****************************
+
+// region    ************************** generated!.gotpl **************************
+
 type EntityResolver interface {
 	FindHelloByName(ctx context.Context, name string) (*model.Hello, error)
 	FindHelloMultiSingleKeysByKey1AndKey2(ctx context.Context, key1 string, key2 string) (*model.HelloMultiSingleKeys, error)
@@ -157,6 +161,10 @@ type EntityResolver interface {
 	FindWorldWithMultipleKeysByHelloNameAndFoo(ctx context.Context, helloName string, foo string) (*model.WorldWithMultipleKeys, error)
 	FindWorldWithMultipleKeysByBar(ctx context.Context, bar int) (*model.WorldWithMultipleKeys, error)
 }
+
+// endregion ************************** generated!.gotpl **************************
+
+// region    ************************** internal!.gotpl ***************************
 
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
@@ -183,6 +191,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindHelloByName(childComplexity, args["name"].(string)), true
+
 	case "Entity.findHelloMultiSingleKeysByKey1AndKey2":
 		if e.ComplexityRoot.Entity.FindHelloMultiSingleKeysByKey1AndKey2 == nil {
 			break
@@ -194,6 +203,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindHelloMultiSingleKeysByKey1AndKey2(childComplexity, args["key1"].(string), args["key2"].(string)), true
+
 	case "Entity.findHelloWithErrorsByName":
 		if e.ComplexityRoot.Entity.FindHelloWithErrorsByName == nil {
 			break
@@ -205,6 +215,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindHelloWithErrorsByName(childComplexity, args["name"].(string)), true
+
 	case "Entity.findManyMultiHelloByNames":
 		if e.ComplexityRoot.Entity.FindManyMultiHelloByNames == nil {
 			break
@@ -216,6 +227,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindManyMultiHelloByNames(childComplexity, args["reps"].([]*model.MultiHelloByNamesInput)), true
+
 	case "Entity.findManyMultiHelloMultipleRequiresByNames":
 		if e.ComplexityRoot.Entity.FindManyMultiHelloMultipleRequiresByNames == nil {
 			break
@@ -227,6 +239,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindManyMultiHelloMultipleRequiresByNames(childComplexity, args["reps"].([]*model.MultiHelloMultipleRequiresByNamesInput)), true
+
 	case "Entity.findManyMultiHelloRequiresByNames":
 		if e.ComplexityRoot.Entity.FindManyMultiHelloRequiresByNames == nil {
 			break
@@ -238,6 +251,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindManyMultiHelloRequiresByNames(childComplexity, args["reps"].([]*model.MultiHelloRequiresByNamesInput)), true
+
 	case "Entity.findManyMultiHelloWithErrorByNames":
 		if e.ComplexityRoot.Entity.FindManyMultiHelloWithErrorByNames == nil {
 			break
@@ -249,6 +263,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindManyMultiHelloWithErrorByNames(childComplexity, args["reps"].([]*model.MultiHelloWithErrorByNamesInput)), true
+
 	case "Entity.findManyMultiPlanetRequiresNestedByNames":
 		if e.ComplexityRoot.Entity.FindManyMultiPlanetRequiresNestedByNames == nil {
 			break
@@ -260,6 +275,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindManyMultiPlanetRequiresNestedByNames(childComplexity, args["reps"].([]*model.MultiPlanetRequiresNestedByNamesInput)), true
+
 	case "Entity.findPlanetMultipleRequiresByName":
 		if e.ComplexityRoot.Entity.FindPlanetMultipleRequiresByName == nil {
 			break
@@ -271,6 +287,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindPlanetMultipleRequiresByName(childComplexity, args["name"].(string)), true
+
 	case "Entity.findPlanetRequiresByName":
 		if e.ComplexityRoot.Entity.FindPlanetRequiresByName == nil {
 			break
@@ -282,6 +299,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindPlanetRequiresByName(childComplexity, args["name"].(string)), true
+
 	case "Entity.findPlanetRequiresNestedByName":
 		if e.ComplexityRoot.Entity.FindPlanetRequiresNestedByName == nil {
 			break
@@ -293,6 +311,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindPlanetRequiresNestedByName(childComplexity, args["name"].(string)), true
+
 	case "Entity.findWorldByHelloNameAndFoo":
 		if e.ComplexityRoot.Entity.FindWorldByHelloNameAndFoo == nil {
 			break
@@ -304,6 +323,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindWorldByHelloNameAndFoo(childComplexity, args["helloName"].(string), args["foo"].(string)), true
+
 	case "Entity.findWorldNameByName":
 		if e.ComplexityRoot.Entity.FindWorldNameByName == nil {
 			break
@@ -315,6 +335,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindWorldNameByName(childComplexity, args["name"].(string)), true
+
 	case "Entity.findWorldWithMultipleKeysByBar":
 		if e.ComplexityRoot.Entity.FindWorldWithMultipleKeysByBar == nil {
 			break
@@ -326,6 +347,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindWorldWithMultipleKeysByBar(childComplexity, args["bar"].(int)), true
+
 	case "Entity.findWorldWithMultipleKeysByHelloNameAndFoo":
 		if e.ComplexityRoot.Entity.FindWorldWithMultipleKeysByHelloNameAndFoo == nil {
 			break
@@ -344,6 +366,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Hello.Name(childComplexity), true
+
 	case "Hello.secondary":
 		if e.ComplexityRoot.Hello.Secondary == nil {
 			break
@@ -357,6 +380,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.HelloMultiSingleKeys.Key1(childComplexity), true
+
 	case "HelloMultiSingleKeys.key2":
 		if e.ComplexityRoot.HelloMultiSingleKeys.Key2 == nil {
 			break
@@ -384,18 +408,21 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.MultiHelloMultipleRequires.Key1(childComplexity), true
+
 	case "MultiHelloMultipleRequires.key2":
 		if e.ComplexityRoot.MultiHelloMultipleRequires.Key2 == nil {
 			break
 		}
 
 		return e.ComplexityRoot.MultiHelloMultipleRequires.Key2(childComplexity), true
+
 	case "MultiHelloMultipleRequires.key3":
 		if e.ComplexityRoot.MultiHelloMultipleRequires.Key3 == nil {
 			break
 		}
 
 		return e.ComplexityRoot.MultiHelloMultipleRequires.Key3(childComplexity), true
+
 	case "MultiHelloMultipleRequires.name":
 		if e.ComplexityRoot.MultiHelloMultipleRequires.Name == nil {
 			break
@@ -409,12 +436,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.MultiHelloRequires.Key1(childComplexity), true
+
 	case "MultiHelloRequires.key2":
 		if e.ComplexityRoot.MultiHelloRequires.Key2 == nil {
 			break
 		}
 
 		return e.ComplexityRoot.MultiHelloRequires.Key2(childComplexity), true
+
 	case "MultiHelloRequires.name":
 		if e.ComplexityRoot.MultiHelloRequires.Name == nil {
 			break
@@ -435,12 +464,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.MultiPlanetRequiresNested.Name(childComplexity), true
+
 	case "MultiPlanetRequiresNested.size":
 		if e.ComplexityRoot.MultiPlanetRequiresNested.Size == nil {
 			break
 		}
 
 		return e.ComplexityRoot.MultiPlanetRequiresNested.Size(childComplexity), true
+
 	case "MultiPlanetRequiresNested.world":
 		if e.ComplexityRoot.MultiPlanetRequiresNested.World == nil {
 			break
@@ -454,18 +485,21 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.PlanetMultipleRequires.Density(childComplexity), true
+
 	case "PlanetMultipleRequires.diameter":
 		if e.ComplexityRoot.PlanetMultipleRequires.Diameter == nil {
 			break
 		}
 
 		return e.ComplexityRoot.PlanetMultipleRequires.Diameter(childComplexity), true
+
 	case "PlanetMultipleRequires.name":
 		if e.ComplexityRoot.PlanetMultipleRequires.Name == nil {
 			break
 		}
 
 		return e.ComplexityRoot.PlanetMultipleRequires.Name(childComplexity), true
+
 	case "PlanetMultipleRequires.weight":
 		if e.ComplexityRoot.PlanetMultipleRequires.Weight == nil {
 			break
@@ -479,12 +513,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.PlanetRequires.Diameter(childComplexity), true
+
 	case "PlanetRequires.name":
 		if e.ComplexityRoot.PlanetRequires.Name == nil {
 			break
 		}
 
 		return e.ComplexityRoot.PlanetRequires.Name(childComplexity), true
+
 	case "PlanetRequires.size":
 		if e.ComplexityRoot.PlanetRequires.Size == nil {
 			break
@@ -498,12 +534,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.PlanetRequiresNested.Name(childComplexity), true
+
 	case "PlanetRequiresNested.size":
 		if e.ComplexityRoot.PlanetRequiresNested.Size == nil {
 			break
 		}
 
 		return e.ComplexityRoot.PlanetRequiresNested.Size(childComplexity), true
+
 	case "PlanetRequiresNested.world":
 		if e.ComplexityRoot.PlanetRequiresNested.World == nil {
 			break
@@ -517,6 +555,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.__resolve__service(childComplexity), true
+
 	case "Query._entities":
 		if e.ComplexityRoot.Query.__resolve_entities == nil {
 			break
@@ -535,12 +574,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.World.Bar(childComplexity), true
+
 	case "World.foo":
 		if e.ComplexityRoot.World.Foo == nil {
 			break
 		}
 
 		return e.ComplexityRoot.World.Foo(childComplexity), true
+
 	case "World.hello":
 		if e.ComplexityRoot.World.Hello == nil {
 			break
@@ -561,12 +602,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.WorldWithMultipleKeys.Bar(childComplexity), true
+
 	case "WorldWithMultipleKeys.foo":
 		if e.ComplexityRoot.WorldWithMultipleKeys.Foo == nil {
 			break
 		}
 
 		return e.ComplexityRoot.WorldWithMultipleKeys.Foo(childComplexity), true
+
 	case "WorldWithMultipleKeys.hello":
 		if e.ComplexityRoot.WorldWithMultipleKeys.Hello == nil {
 			break
@@ -1072,7 +1115,7 @@ func (ec *executionContext) childFields___Type(ctx context.Context, field graphq
 	return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 }
 
-// endregion ************************** generated!.gotpl **************************
+// endregion ************************** internal!.gotpl ***************************
 
 // region    ***************************** args.gotpl *****************************
 

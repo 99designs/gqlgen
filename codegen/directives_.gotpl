@@ -61,8 +61,8 @@
 {{end}}
 
 {{/* globalMiddleware emits the four schema-wide middleware function definitions.
-     It must be called exactly once per generated package — in root_.gotpl for
-     follow-schema layout and in generated!.gotpl for single-file layout. */}}
+     It must be called exactly once per generated package — internal!.gotpl
+     invokes it for both follow-schema and single-file layouts. */}}
 {{ define "globalMiddleware" }}
 
 {{ if .AllDirectives.LocationDirectives "QUERY" }}

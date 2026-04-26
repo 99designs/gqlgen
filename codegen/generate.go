@@ -45,7 +45,7 @@ func generateSingleFile(data *Data) error {
 		RegionTags:      true,
 		GeneratedHeader: true,
 		Packages:        data.Config.Packages,
-		TemplateFS:      schemaTemplateFS,
+		TemplateFS:      singleFileTemplateFS,
 		PruneOptions:    data.Config.GetPruneOptions(),
 	})
 }

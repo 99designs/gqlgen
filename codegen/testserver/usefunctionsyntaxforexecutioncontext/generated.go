@@ -18,7 +18,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-// region    ************************** generated!.gotpl **************************
+// region    ***************************** api!.gotpl *****************************
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
@@ -75,6 +75,10 @@ type ComplexityRoot struct {
 	}
 }
 
+// endregion ***************************** api!.gotpl *****************************
+
+// region    ************************** generated!.gotpl **************************
+
 type MutationResolver interface {
 	CreateUser(ctx context.Context, input CreateUserInput) (*User, error)
 	DeleteUser(ctx context.Context, id string) (*MutationResponse, error)
@@ -87,6 +91,10 @@ type QueryResolver interface {
 type SubscriptionResolver interface {
 	UserCreated(ctx context.Context) (<-chan *User, error)
 }
+
+// endregion ************************** generated!.gotpl **************************
+
+// region    ************************** internal!.gotpl ***************************
 
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
@@ -108,18 +116,21 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Admin.CreatedAt(childComplexity), true
+
 	case "Admin.id":
 		if e.ComplexityRoot.Admin.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Admin.ID(childComplexity), true
+
 	case "Admin.name":
 		if e.ComplexityRoot.Admin.Name == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Admin.Name(childComplexity), true
+
 	case "Admin.permissions":
 		if e.ComplexityRoot.Admin.Permissions == nil {
 			break
@@ -138,6 +149,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.CreateUser(childComplexity, args["input"].(CreateUserInput)), true
+
 	case "Mutation.deleteUser":
 		if e.ComplexityRoot.Mutation.DeleteUser == nil {
 			break
@@ -156,6 +168,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.MutationResponse.Message(childComplexity), true
+
 	case "MutationResponse.success":
 		if e.ComplexityRoot.MutationResponse.Success == nil {
 			break
@@ -174,6 +187,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.GetEntity(childComplexity, args["id"].(string)), true
+
 	case "Query.getUser":
 		if e.ComplexityRoot.Query.GetUser == nil {
 			break
@@ -211,30 +225,35 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.Age(childComplexity), true
+
 	case "User.createdAt":
 		if e.ComplexityRoot.User.CreatedAt == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.CreatedAt(childComplexity), true
+
 	case "User.email":
 		if e.ComplexityRoot.User.Email == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.Email(childComplexity), true
+
 	case "User.id":
 		if e.ComplexityRoot.User.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.ID(childComplexity), true
+
 	case "User.name":
 		if e.ComplexityRoot.User.Name == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.Name(childComplexity), true
+
 	case "User.role":
 		if e.ComplexityRoot.User.Role == nil {
 			break
@@ -503,7 +522,7 @@ func childFields___Type(ctx context.Context, ec *executionContext, field graphql
 	return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 }
 
-// endregion ************************** generated!.gotpl **************************
+// endregion ************************** internal!.gotpl ***************************
 
 // region    ***************************** args.gotpl *****************************
 

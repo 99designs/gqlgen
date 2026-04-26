@@ -21,7 +21,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-// region    ************************** generated!.gotpl **************************
+// region    ***************************** api!.gotpl *****************************
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
@@ -73,6 +73,10 @@ type ComplexityRoot struct {
 	}
 }
 
+// endregion ***************************** api!.gotpl *****************************
+
+// region    ************************** generated!.gotpl **************************
+
 type ElementResolver interface {
 	Child(ctx context.Context, obj *models.Element) (*models.Element, error)
 	Error(ctx context.Context, obj *models.Element) (bool, error)
@@ -90,6 +94,10 @@ type QueryResolver interface {
 type UserResolver interface {
 	Likes(ctx context.Context, obj *remote_api.User) ([]string, error)
 }
+
+// endregion ************************** generated!.gotpl **************************
+
+// region    ************************** internal!.gotpl ***************************
 
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
@@ -111,12 +119,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Element.Child(childComplexity), true
+
 	case "Element.error":
 		if e.ComplexityRoot.Element.Error == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Element.Error(childComplexity), true
+
 	case "Element.mismatched":
 		if e.ComplexityRoot.Element.Mismatched == nil {
 			break
@@ -135,6 +145,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Coercion(childComplexity, args["value"].([]*models.ListCoercion)), true
+
 	case "Query.complexity":
 		if e.ComplexityRoot.Query.Complexity == nil {
 			break
@@ -146,6 +157,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Complexity(childComplexity, args["value"].(int)), true
+
 	case "Query.date":
 		if e.ComplexityRoot.Query.Date == nil {
 			break
@@ -157,6 +169,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Date(childComplexity, args["filter"].(models.DateFilter)), true
+
 	case "Query.error":
 		if e.ComplexityRoot.Query.Error == nil {
 			break
@@ -175,12 +188,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.JSONEncoding(childComplexity), true
+
 	case "Query.path":
 		if e.ComplexityRoot.Query.Path == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Query.Path(childComplexity), true
+
 	case "Query.viewer":
 		if e.ComplexityRoot.Query.Viewer == nil {
 			break
@@ -201,18 +216,21 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.Likes(childComplexity), true
+
 	case "User.name":
 		if e.ComplexityRoot.User.Name == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.Name(childComplexity), true
+
 	case "User.phoneNumber":
 		if e.ComplexityRoot.User.PhoneNumber == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.PhoneNumber(childComplexity), true
+
 	case "User.query":
 		if e.ComplexityRoot.User.Query == nil {
 			break
@@ -488,7 +506,7 @@ func (ec *executionContext) childFields___Type(ctx context.Context, field graphq
 	return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 }
 
-// endregion ************************** generated!.gotpl **************************
+// endregion ************************** internal!.gotpl ***************************
 
 // region    ***************************** args.gotpl *****************************
 

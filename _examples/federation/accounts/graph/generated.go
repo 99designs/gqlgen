@@ -20,7 +20,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-// region    ************************** generated!.gotpl **************************
+// region    ***************************** api!.gotpl *****************************
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
@@ -67,6 +67,10 @@ type ComplexityRoot struct {
 	}
 }
 
+// endregion ***************************** api!.gotpl *****************************
+
+// region    ************************** generated!.gotpl **************************
+
 type EntityResolver interface {
 	FindEmailHostByID(ctx context.Context, id string) (*model.EmailHost, error)
 	FindUserByID(ctx context.Context, id string) (*model.User, error)
@@ -77,6 +81,10 @@ type QueryResolver interface {
 type UserResolver interface {
 	Host(ctx context.Context, obj *model.User) (*model.EmailHost, error)
 }
+
+// endregion ************************** generated!.gotpl **************************
+
+// region    ************************** internal!.gotpl ***************************
 
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
@@ -98,6 +106,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.EmailHost.ID(childComplexity), true
+
 	case "EmailHost.name":
 		if e.ComplexityRoot.EmailHost.Name == nil {
 			break
@@ -116,6 +125,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindEmailHostByID(childComplexity, args["id"].(string)), true
+
 	case "Entity.findUserByID":
 		if e.ComplexityRoot.Entity.FindUserByID == nil {
 			break
@@ -134,12 +144,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Me(childComplexity), true
+
 	case "Query._service":
 		if e.ComplexityRoot.Query.__resolve__service == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Query.__resolve__service(childComplexity), true
+
 	case "Query._entities":
 		if e.ComplexityRoot.Query.__resolve_entities == nil {
 			break
@@ -158,18 +170,21 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.Email(childComplexity), true
+
 	case "User.host":
 		if e.ComplexityRoot.User.Host == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.Host(childComplexity), true
+
 	case "User.id":
 		if e.ComplexityRoot.User.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.ID(childComplexity), true
+
 	case "User.username":
 		if e.ComplexityRoot.User.Username == nil {
 			break
@@ -484,7 +499,7 @@ func (ec *executionContext) childFields___Type(ctx context.Context, field graphq
 	return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 }
 
-// endregion ************************** generated!.gotpl **************************
+// endregion ************************** internal!.gotpl ***************************
 
 // region    ***************************** args.gotpl *****************************
 

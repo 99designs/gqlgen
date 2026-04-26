@@ -19,7 +19,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-// region    ************************** generated!.gotpl **************************
+// region    ***************************** api!.gotpl *****************************
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
@@ -66,6 +66,10 @@ type ComplexityRoot struct {
 	}
 }
 
+// endregion ***************************** api!.gotpl *****************************
+
+// region    ************************** generated!.gotpl **************************
+
 type MutationResolver interface {
 	Post(ctx context.Context, text string, username string, roomName string) (*Message, error)
 }
@@ -75,6 +79,10 @@ type QueryResolver interface {
 type SubscriptionResolver interface {
 	MessageAdded(ctx context.Context, roomName string) (<-chan *Message, error)
 }
+
+// endregion ************************** generated!.gotpl **************************
+
+// region    ************************** internal!.gotpl ***************************
 
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
@@ -96,12 +104,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Chatroom.Messages(childComplexity), true
+
 	case "Chatroom.name":
 		if e.ComplexityRoot.Chatroom.Name == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Chatroom.Name(childComplexity), true
+
 	case "Chatroom.subscription":
 		if e.ComplexityRoot.Chatroom.Subscription == nil {
 			break
@@ -115,24 +125,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Message.CreatedAt(childComplexity), true
+
 	case "Message.createdBy":
 		if e.ComplexityRoot.Message.CreatedBy == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Message.CreatedBy(childComplexity), true
+
 	case "Message.id":
 		if e.ComplexityRoot.Message.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Message.ID(childComplexity), true
+
 	case "Message.subscription":
 		if e.ComplexityRoot.Message.Subscription == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Message.Subscription(childComplexity), true
+
 	case "Message.text":
 		if e.ComplexityRoot.Message.Text == nil {
 			break
@@ -481,7 +495,7 @@ func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *as
 	}
 }
 
-// endregion ************************** generated!.gotpl **************************
+// endregion ************************** internal!.gotpl ***************************
 
 // region    ***************************** args.gotpl *****************************
 

@@ -18,7 +18,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-// region    ************************** generated!.gotpl **************************
+// region    ***************************** api!.gotpl *****************************
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
@@ -67,6 +67,10 @@ type ComplexityRoot struct {
 	}
 }
 
+// endregion ***************************** api!.gotpl *****************************
+
+// region    ************************** generated!.gotpl **************************
+
 type MutationResolver interface {
 	CreateTodo(ctx context.Context, input NewTodo) (*Todo, error)
 }
@@ -79,6 +83,10 @@ type TodoResolver interface {
 type RoleResolver interface {
 	Name(ctx context.Context, obj *UserRole) (string, error)
 }
+
+// endregion ************************** generated!.gotpl **************************
+
+// region    ************************** internal!.gotpl ***************************
 
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
@@ -119,36 +127,42 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Todo.DatabaseID(childComplexity), true
+
 	case "Todo.text":
 		if e.ComplexityRoot.Todo.Description == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Todo.Description(childComplexity), true
+
 	case "Todo.done":
 		if e.ComplexityRoot.Todo.Done == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Todo.Done(childComplexity), true
+
 	case "Todo.id":
 		if e.ComplexityRoot.Todo.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Todo.ID(childComplexity), true
+
 	case "Todo.mutation":
 		if e.ComplexityRoot.Todo.Mutation == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Todo.Mutation(childComplexity), true
+
 	case "Todo.query":
 		if e.ComplexityRoot.Todo.Query == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Todo.Query(childComplexity), true
+
 	case "Todo.user":
 		if e.ComplexityRoot.Todo.User == nil {
 			break
@@ -162,12 +176,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.FullName(childComplexity), true
+
 	case "User.id":
 		if e.ComplexityRoot.User.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.ID(childComplexity), true
+
 	case "User.role":
 		if e.ComplexityRoot.User.Role == nil {
 			break
@@ -459,7 +475,7 @@ func (ec *executionContext) childFields_role(ctx context.Context, field graphql.
 	return nil, fmt.Errorf("no field named %q was found under type role", field.Name)
 }
 
-// endregion ************************** generated!.gotpl **************************
+// endregion ************************** internal!.gotpl ***************************
 
 // region    ***************************** args.gotpl *****************************
 

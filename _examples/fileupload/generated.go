@@ -19,7 +19,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-// region    ************************** generated!.gotpl **************************
+// region    ***************************** api!.gotpl *****************************
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
@@ -56,6 +56,10 @@ type ComplexityRoot struct {
 	}
 }
 
+// endregion ***************************** api!.gotpl *****************************
+
+// region    ************************** generated!.gotpl **************************
+
 type MutationResolver interface {
 	SingleUpload(ctx context.Context, file graphql.Upload) (*model.File, error)
 	SingleUploadWithPayload(ctx context.Context, req model.UploadFile) (*model.File, error)
@@ -65,6 +69,10 @@ type MutationResolver interface {
 type QueryResolver interface {
 	Empty(ctx context.Context) (string, error)
 }
+
+// endregion ************************** generated!.gotpl **************************
+
+// region    ************************** internal!.gotpl ***************************
 
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
@@ -86,18 +94,21 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.File.Content(childComplexity), true
+
 	case "File.contentType":
 		if e.ComplexityRoot.File.ContentType == nil {
 			break
 		}
 
 		return e.ComplexityRoot.File.ContentType(childComplexity), true
+
 	case "File.id":
 		if e.ComplexityRoot.File.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.File.ID(childComplexity), true
+
 	case "File.name":
 		if e.ComplexityRoot.File.Name == nil {
 			break
@@ -116,6 +127,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.MultipleUpload(childComplexity, args["files"].([]*graphql.Upload)), true
+
 	case "Mutation.multipleUploadWithPayload":
 		if e.ComplexityRoot.Mutation.MultipleUploadWithPayload == nil {
 			break
@@ -127,6 +139,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.MultipleUploadWithPayload(childComplexity, args["req"].([]*model.UploadFile)), true
+
 	case "Mutation.singleUpload":
 		if e.ComplexityRoot.Mutation.SingleUpload == nil {
 			break
@@ -138,6 +151,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.SingleUpload(childComplexity, args["file"].(graphql.Upload)), true
+
 	case "Mutation.singleUploadWithPayload":
 		if e.ComplexityRoot.Mutation.SingleUploadWithPayload == nil {
 			break
@@ -386,7 +400,7 @@ func (ec *executionContext) childFields___Type(ctx context.Context, field graphq
 	return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 }
 
-// endregion ************************** generated!.gotpl **************************
+// endregion ************************** internal!.gotpl ***************************
 
 // region    ***************************** args.gotpl *****************************
 

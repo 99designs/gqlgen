@@ -17,7 +17,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-// region    ************************** generated!.gotpl **************************
+// region    ***************************** api!.gotpl *****************************
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
@@ -50,12 +50,20 @@ type ComplexityRoot struct {
 	}
 }
 
+// endregion ***************************** api!.gotpl *****************************
+
+// region    ************************** generated!.gotpl **************************
+
 type QueryResolver interface {
 	EchoIntToInt(ctx context.Context, n *int32) (int32, error)
 	EchoInt64ToInt64(ctx context.Context, n *int) (int, error)
 	EchoIntInputToIntObject(ctx context.Context, input Input) (*Result, error)
 	EchoInt64InputToInt64Object(ctx context.Context, input Input64) (*Result64, error)
 }
+
+// endregion ************************** generated!.gotpl **************************
+
+// region    ************************** internal!.gotpl ***************************
 
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
@@ -82,6 +90,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.EchoInt64InputToInt64Object(childComplexity, args["input"].(Input64)), true
+
 	case "Query.echoInt64ToInt64":
 		if e.ComplexityRoot.Query.EchoInt64ToInt64 == nil {
 			break
@@ -93,6 +102,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.EchoInt64ToInt64(childComplexity, args["n"].(*int)), true
+
 	case "Query.echoIntInputToIntObject":
 		if e.ComplexityRoot.Query.EchoIntInputToIntObject == nil {
 			break
@@ -104,6 +114,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.EchoIntInputToIntObject(childComplexity, args["input"].(Input)), true
+
 	case "Query.echoIntToInt":
 		if e.ComplexityRoot.Query.EchoIntToInt == nil {
 			break
@@ -360,7 +371,7 @@ func (ec *executionContext) childFields___Type(ctx context.Context, field graphq
 	return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 }
 
-// endregion ************************** generated!.gotpl **************************
+// endregion ************************** internal!.gotpl ***************************
 
 // region    ***************************** args.gotpl *****************************
 

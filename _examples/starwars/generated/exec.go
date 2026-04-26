@@ -19,7 +19,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-// region    ************************** generated!.gotpl **************************
+// region    ***************************** api!.gotpl *****************************
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
@@ -109,6 +109,10 @@ type ComplexityRoot struct {
 	}
 }
 
+// endregion ***************************** api!.gotpl *****************************
+
+// region    ************************** generated!.gotpl **************************
+
 type DroidResolver interface {
 	Friends(ctx context.Context, obj *models.Droid) ([]models.Character, error)
 	FriendsConnection(ctx context.Context, obj *models.Droid, first *int, after *string) (*models.FriendsConnection, error)
@@ -139,6 +143,10 @@ type StarshipResolver interface {
 	Length(ctx context.Context, obj *models.Starship, unit *models.LengthUnit) (float64, error)
 }
 
+// endregion ************************** generated!.gotpl **************************
+
+// region    ************************** internal!.gotpl ***************************
+
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
@@ -159,12 +167,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Droid.AppearsIn(childComplexity), true
+
 	case "Droid.friends":
 		if e.ComplexityRoot.Droid.Friends == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Droid.Friends(childComplexity), true
+
 	case "Droid.friendsConnection":
 		if e.ComplexityRoot.Droid.FriendsConnection == nil {
 			break
@@ -176,18 +186,21 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Droid.FriendsConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
+
 	case "Droid.id":
 		if e.ComplexityRoot.Droid.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Droid.ID(childComplexity), true
+
 	case "Droid.name":
 		if e.ComplexityRoot.Droid.Name == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Droid.Name(childComplexity), true
+
 	case "Droid.primaryFunction":
 		if e.ComplexityRoot.Droid.PrimaryFunction == nil {
 			break
@@ -201,18 +214,21 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.FriendsConnection.Edges(childComplexity), true
+
 	case "FriendsConnection.friends":
 		if e.ComplexityRoot.FriendsConnection.Friends == nil {
 			break
 		}
 
 		return e.ComplexityRoot.FriendsConnection.Friends(childComplexity), true
+
 	case "FriendsConnection.pageInfo":
 		if e.ComplexityRoot.FriendsConnection.PageInfo == nil {
 			break
 		}
 
 		return e.ComplexityRoot.FriendsConnection.PageInfo(childComplexity), true
+
 	case "FriendsConnection.totalCount":
 		if e.ComplexityRoot.FriendsConnection.TotalCount == nil {
 			break
@@ -226,6 +242,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.FriendsEdge.Cursor(childComplexity), true
+
 	case "FriendsEdge.node":
 		if e.ComplexityRoot.FriendsEdge.Node == nil {
 			break
@@ -239,12 +256,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Human.AppearsIn(childComplexity), true
+
 	case "Human.friends":
 		if e.ComplexityRoot.Human.Friends == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Human.Friends(childComplexity), true
+
 	case "Human.friendsConnection":
 		if e.ComplexityRoot.Human.FriendsConnection == nil {
 			break
@@ -256,6 +275,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Human.FriendsConnection(childComplexity, args["first"].(*int), args["after"].(*string)), true
+
 	case "Human.height":
 		if e.ComplexityRoot.Human.Height == nil {
 			break
@@ -267,36 +287,42 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Human.Height(childComplexity, args["unit"].(models.LengthUnit)), true
+
 	case "Human.id":
 		if e.ComplexityRoot.Human.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Human.ID(childComplexity), true
+
 	case "Human.mass":
 		if e.ComplexityRoot.Human.Mass == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Human.Mass(childComplexity), true
+
 	case "Human.mutation":
 		if e.ComplexityRoot.Human.Mutation == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Human.Mutation(childComplexity), true
+
 	case "Human.name":
 		if e.ComplexityRoot.Human.Name == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Human.Name(childComplexity), true
+
 	case "Human.query":
 		if e.ComplexityRoot.Human.Query == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Human.Query(childComplexity), true
+
 	case "Human.starships":
 		if e.ComplexityRoot.Human.Starships == nil {
 			break
@@ -322,12 +348,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.PageInfo.EndCursor(childComplexity), true
+
 	case "PageInfo.hasNextPage":
 		if e.ComplexityRoot.PageInfo.HasNextPage == nil {
 			break
 		}
 
 		return e.ComplexityRoot.PageInfo.HasNextPage(childComplexity), true
+
 	case "PageInfo.startCursor":
 		if e.ComplexityRoot.PageInfo.StartCursor == nil {
 			break
@@ -346,6 +374,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Character(childComplexity, args["id"].(string)), true
+
 	case "Query.droid":
 		if e.ComplexityRoot.Query.Droid == nil {
 			break
@@ -357,6 +386,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Droid(childComplexity, args["id"].(string)), true
+
 	case "Query.hero":
 		if e.ComplexityRoot.Query.Hero == nil {
 			break
@@ -368,6 +398,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Hero(childComplexity, args["episode"].(*models.Episode)), true
+
 	case "Query.human":
 		if e.ComplexityRoot.Query.Human == nil {
 			break
@@ -391,6 +422,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Reviews(childComplexity, args["episode"].(models.Episode), args["since"].(*time.Time)), true
+
 	case "Query.search":
 		if e.ComplexityRoot.Query.Search == nil {
 			break
@@ -402,6 +434,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Search(childComplexity, args["text"].(string)), true
+
 	case "Query.starship":
 		if e.ComplexityRoot.Query.Starship == nil {
 			break
@@ -420,12 +453,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Review.Commentary(childComplexity), true
+
 	case "Review.stars":
 		if e.ComplexityRoot.Review.Stars == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Review.Stars(childComplexity), true
+
 	case "Review.time":
 		if e.ComplexityRoot.Review.Time == nil {
 			break
@@ -439,12 +474,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Starship.History(childComplexity), true
+
 	case "Starship.id":
 		if e.ComplexityRoot.Starship.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Starship.ID(childComplexity), true
+
 	case "Starship.length":
 		if e.ComplexityRoot.Starship.Length == nil {
 			break
@@ -456,6 +493,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Starship.Length(childComplexity, args["unit"].(*models.LengthUnit)), true
+
 	case "Starship.name":
 		if e.ComplexityRoot.Starship.Name == nil {
 			break
@@ -940,7 +978,7 @@ func (ec *executionContext) childFields___Type(ctx context.Context, field graphq
 	return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 }
 
-// endregion ************************** generated!.gotpl **************************
+// endregion ************************** internal!.gotpl ***************************
 
 // region    ***************************** args.gotpl *****************************
 
@@ -1215,10 +1253,6 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 }
 
 // endregion ***************************** args.gotpl *****************************
-
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
 

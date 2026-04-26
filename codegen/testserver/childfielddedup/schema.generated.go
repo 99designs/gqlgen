@@ -133,10 +133,6 @@ func field_Query_task_args(ctx context.Context, ec *executionContext, rawArgs ma
 
 // endregion ***************************** args.gotpl *****************************
 
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
-
 // region    **************************** field.gotpl *****************************
 
 func _Article_id(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *Article) (ret graphql.Marshaler) {

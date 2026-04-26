@@ -18,7 +18,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-// region    ************************** generated!.gotpl **************************
+// region    ***************************** api!.gotpl *****************************
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
@@ -74,6 +74,10 @@ type ComplexityRoot struct {
 	}
 }
 
+// endregion ***************************** api!.gotpl *****************************
+
+// region    ************************** generated!.gotpl **************************
+
 type EntityResolver interface {
 	FindBasicByID(ctx context.Context, id string) (*Basic, error)
 	FindPersonByID(ctx context.Context, id string) (*Person, error)
@@ -84,6 +88,10 @@ type QueryResolver interface {
 	GetProduct(ctx context.Context, sku string) (*Product, error)
 	GetBasic(ctx context.Context, id string) (*Basic, error)
 }
+
+// endregion ************************** generated!.gotpl **************************
+
+// region    ************************** internal!.gotpl ***************************
 
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
@@ -105,6 +113,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Basic.ID(childComplexity), true
+
 	case "Basic.value":
 		if e.ComplexityRoot.Basic.Value == nil {
 			break
@@ -123,6 +132,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindBasicByID(childComplexity, args["id"].(string)), true
+
 	case "Entity.findPersonByID":
 		if e.ComplexityRoot.Entity.FindPersonByID == nil {
 			break
@@ -134,6 +144,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindPersonByID(childComplexity, args["id"].(string)), true
+
 	case "Entity.findProductBySku":
 		if e.ComplexityRoot.Entity.FindProductBySku == nil {
 			break
@@ -152,12 +163,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Person.Email(childComplexity), true
+
 	case "Person.id":
 		if e.ComplexityRoot.Person.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Person.ID(childComplexity), true
+
 	case "Person.phone":
 		if e.ComplexityRoot.Person.Phone == nil {
 			break
@@ -171,12 +184,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Product.Name(childComplexity), true
+
 	case "Product.price":
 		if e.ComplexityRoot.Product.Price == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Product.Price(childComplexity), true
+
 	case "Product.sku":
 		if e.ComplexityRoot.Product.Sku == nil {
 			break
@@ -195,6 +210,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.GetBasic(childComplexity, args["id"].(string)), true
+
 	case "Query.getPerson":
 		if e.ComplexityRoot.Query.GetPerson == nil {
 			break
@@ -206,6 +222,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.GetPerson(childComplexity, args["id"].(string)), true
+
 	case "Query.getProduct":
 		if e.ComplexityRoot.Query.GetProduct == nil {
 			break
@@ -224,6 +241,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.__resolve__service(childComplexity), true
+
 	case "Query._entities":
 		if e.ComplexityRoot.Query.__resolve_entities == nil {
 			break
@@ -527,7 +545,7 @@ func (ec *executionContext) childFields___Type(ctx context.Context, field graphq
 	return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 }
 
-// endregion ************************** generated!.gotpl **************************
+// endregion ************************** internal!.gotpl ***************************
 
 // region    ***************************** args.gotpl *****************************
 
@@ -728,10 +746,6 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 }
 
 // endregion ***************************** args.gotpl *****************************
-
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
 

@@ -18,7 +18,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-// region    ************************** generated!.gotpl **************************
+// region    ***************************** api!.gotpl *****************************
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
@@ -109,6 +109,10 @@ type ComplexityRoot struct {
 	}
 }
 
+// endregion ***************************** api!.gotpl *****************************
+
+// region    ************************** generated!.gotpl **************************
+
 type CatResolver interface {
 	BatchProp(ctx context.Context, objs []*Cat) ([]string, error)
 }
@@ -151,6 +155,10 @@ type UserResolver interface {
 	ProfileConnectionNonBatch(ctx context.Context, obj *User) (*ProfilesConnection, error)
 }
 
+// endregion ************************** generated!.gotpl **************************
+
+// region    ************************** internal!.gotpl ***************************
+
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 func (e *executableSchema) Schema() *ast.Schema {
@@ -171,6 +179,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Cat.BatchProp(childComplexity), true
+
 	case "Cat.id":
 		if e.ComplexityRoot.Cat.ID == nil {
 			break
@@ -184,6 +193,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Dog.BatchProp(childComplexity), true
+
 	case "Dog.id":
 		if e.ComplexityRoot.Dog.ID == nil {
 			break
@@ -197,18 +207,21 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.DomesticCat.BatchName(childComplexity), true
+
 	case "DomesticCat.batchProp":
 		if e.ComplexityRoot.DomesticCat.BatchProp == nil {
 			break
 		}
 
 		return e.ComplexityRoot.DomesticCat.BatchProp(childComplexity), true
+
 	case "DomesticCat.id":
 		if e.ComplexityRoot.DomesticCat.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.DomesticCat.ID(childComplexity), true
+
 	case "DomesticCat.name":
 		if e.ComplexityRoot.DomesticCat.Name == nil {
 			break
@@ -229,6 +242,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Pig.BatchProp(childComplexity), true
+
 	case "Pig.id":
 		if e.ComplexityRoot.Pig.ID == nil {
 			break
@@ -242,12 +256,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Profile.CoverBatch(childComplexity), true
+
 	case "Profile.coverNonBatch":
 		if e.ComplexityRoot.Profile.CoverNonBatch == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Profile.CoverNonBatch(childComplexity), true
+
 	case "Profile.id":
 		if e.ComplexityRoot.Profile.ID == nil {
 			break
@@ -261,6 +277,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.ProfileEdge.Cursor(childComplexity), true
+
 	case "ProfileEdge.node":
 		if e.ComplexityRoot.ProfileEdge.Node == nil {
 			break
@@ -274,6 +291,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.ProfilesConnection.Edges(childComplexity), true
+
 	case "ProfilesConnection.totalCount":
 		if e.ComplexityRoot.ProfilesConnection.TotalCount == nil {
 			break
@@ -294,6 +312,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Pets(childComplexity), true
+
 	case "Query.users":
 		if e.ComplexityRoot.Query.Users == nil {
 			break
@@ -307,18 +326,21 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.DirectiveNonNullableBatch(childComplexity), true
+
 	case "User.directiveNonNullableNonBatch":
 		if e.ComplexityRoot.User.DirectiveNonNullableNonBatch == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.DirectiveNonNullableNonBatch(childComplexity), true
+
 	case "User.directiveNullableBatch":
 		if e.ComplexityRoot.User.DirectiveNullableBatch == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.DirectiveNullableBatch(childComplexity), true
+
 	case "User.directiveNullableBatchWithArg":
 		if e.ComplexityRoot.User.DirectiveNullableBatchWithArg == nil {
 			break
@@ -330,12 +352,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.DirectiveNullableBatchWithArg(childComplexity, args["offset"].(int)), true
+
 	case "User.directiveNullableNonBatch":
 		if e.ComplexityRoot.User.DirectiveNullableNonBatch == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.DirectiveNullableNonBatch(childComplexity), true
+
 	case "User.directiveNullableNonBatchWithArg":
 		if e.ComplexityRoot.User.DirectiveNullableNonBatchWithArg == nil {
 			break
@@ -347,24 +371,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.DirectiveNullableNonBatchWithArg(childComplexity, args["offset"].(int)), true
+
 	case "User.nonNullableBatch":
 		if e.ComplexityRoot.User.NonNullableBatch == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.NonNullableBatch(childComplexity), true
+
 	case "User.nonNullableNonBatch":
 		if e.ComplexityRoot.User.NonNullableNonBatch == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.NonNullableNonBatch(childComplexity), true
+
 	case "User.nullableBatch":
 		if e.ComplexityRoot.User.NullableBatch == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.NullableBatch(childComplexity), true
+
 	case "User.nullableBatchWithArg":
 		if e.ComplexityRoot.User.NullableBatchWithArg == nil {
 			break
@@ -376,12 +404,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.NullableBatchWithArg(childComplexity, args["offset"].(int)), true
+
 	case "User.nullableNonBatch":
 		if e.ComplexityRoot.User.NullableNonBatch == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.NullableNonBatch(childComplexity), true
+
 	case "User.nullableNonBatchWithArg":
 		if e.ComplexityRoot.User.NullableNonBatchWithArg == nil {
 			break
@@ -393,24 +423,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.NullableNonBatchWithArg(childComplexity, args["offset"].(int)), true
+
 	case "User.profileBatch":
 		if e.ComplexityRoot.User.ProfileBatch == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.ProfileBatch(childComplexity), true
+
 	case "User.profileConnectionBatch":
 		if e.ComplexityRoot.User.ProfileConnectionBatch == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.ProfileConnectionBatch(childComplexity), true
+
 	case "User.profileConnectionNonBatch":
 		if e.ComplexityRoot.User.ProfileConnectionNonBatch == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.ProfileConnectionNonBatch(childComplexity), true
+
 	case "User.profileNonBatch":
 		if e.ComplexityRoot.User.ProfileNonBatch == nil {
 			break
@@ -694,7 +728,7 @@ func (ec *executionContext) childFields___Type(ctx context.Context, field graphq
 	return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 }
 
-// endregion ************************** generated!.gotpl **************************
+// endregion ************************** internal!.gotpl ***************************
 
 // region    ***************************** args.gotpl *****************************
 
@@ -825,10 +859,6 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 }
 
 // endregion ***************************** args.gotpl *****************************
-
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
 

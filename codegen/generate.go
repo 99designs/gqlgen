@@ -13,8 +13,14 @@ import (
 	"github.com/99designs/gqlgen/codegen/templates"
 )
 
-//go:embed *.gotpl
-var codegenTemplates embed.FS
+//go:embed api!.gotpl internal!.gotpl directives_.gotpl
+var rootTemplateFS embed.FS
+
+//go:embed args.gotpl field.gotpl input.gotpl interface.gotpl object.gotpl type.gotpl generated!.gotpl directives_.gotpl
+var schemaTemplateFS embed.FS
+
+//go:embed api!.gotpl internal!.gotpl args.gotpl field.gotpl input.gotpl interface.gotpl object.gotpl type.gotpl generated!.gotpl directives_.gotpl
+var singleFileTemplateFS embed.FS
 
 func GenerateCode(data *Data) error {
 	if !data.Config.Exec.IsDefined() {
@@ -39,7 +45,7 @@ func generateSingleFile(data *Data) error {
 		RegionTags:      true,
 		GeneratedHeader: true,
 		Packages:        data.Config.Packages,
-		TemplateFS:      codegenTemplates,
+		TemplateFS:      singleFileTemplateFS,
 		PruneOptions:    data.Config.GetPruneOptions(),
 	})
 }
@@ -92,7 +98,7 @@ func generatePerSchema(data *Data) error {
 			RegionTags:      true,
 			GeneratedHeader: true,
 			Packages:        data.Config.Packages,
-			TemplateFS:      codegenTemplates,
+			TemplateFS:      schemaTemplateFS,
 			PruneOptions:    data.Config.GetPruneOptions(),
 		})
 		if err != nil {
@@ -134,9 +140,6 @@ func addBuild(filename string, p *ast.Position, data *Data, builds *map[string]*
 	}
 }
 
-//go:embed root_.gotpl
-var rootTemplate string
-
 // Root file contains top-level definitions that should not be duplicated across the generated
 // files for each schema file.
 func generateRootFile(data *Data) error {
@@ -145,13 +148,12 @@ func generateRootFile(data *Data) error {
 
 	return templates.Render(templates.Options{
 		PackageName:     data.Config.Exec.Package,
-		Template:        rootTemplate,
 		Filename:        path,
 		Data:            data,
 		RegionTags:      false,
 		GeneratedHeader: true,
 		Packages:        data.Config.Packages,
-		TemplateFS:      codegenTemplates,
+		TemplateFS:      rootTemplateFS,
 		PruneOptions:    data.Config.GetPruneOptions(),
 	})
 }

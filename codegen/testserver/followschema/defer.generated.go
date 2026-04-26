@@ -25,10 +25,6 @@ type DeferModelResolver interface {
 
 // endregion ***************************** args.gotpl *****************************
 
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
-
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _DeferModel_id(ctx context.Context, field graphql.CollectedField, obj *DeferModel) (ret graphql.Marshaler) {

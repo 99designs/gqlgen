@@ -992,6 +992,28 @@ func readOp(conn *websocket.Conn) operationMessage {
 	return msg
 }
 
+func TestWebsocketWithPayloadReadLimit(t *testing.T) {
+	// Set a very small limit so we can trigger it easily in a test
+	limit := int64(100)
+	h := testserver.New()
+	h.AddTransport(transport.Websocket{PayloadReadLimit: &limit})
+
+	srv := httptest.NewServer(h)
+	defer srv.Close()
+
+	c := wsConnect(srv.URL)
+	defer c.Close()
+
+	// Send a payload that exceeds the 100-byte limit
+	oversized := strings.Repeat("x", 200)
+	err := c.WriteMessage(websocket.TextMessage, []byte(oversized))
+	require.NoError(t, err)
+
+	// Gorilla closes the connection when the read limit is exceeded
+	_, _, err = c.ReadMessage()
+	require.Error(t, err)
+}
+
 // copied out from websocket_graphqlws.go to keep these private
 
 const (

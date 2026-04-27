@@ -87,21 +87,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Like.Collected(childComplexity), true
-
 	case "Like.reaction":
 		if e.ComplexityRoot.Like.Reaction == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Like.Reaction(childComplexity), true
-
 	case "Like.selection":
 		if e.ComplexityRoot.Like.Selection == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Like.Selection(childComplexity), true
-
 	case "Like.sent":
 		if e.ComplexityRoot.Like.Sent == nil {
 			break
@@ -115,21 +112,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Post.Collected(childComplexity), true
-
 	case "Post.message":
 		if e.ComplexityRoot.Post.Message == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Post.Message(childComplexity), true
-
 	case "Post.selection":
 		if e.ComplexityRoot.Post.Selection == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Post.Selection(childComplexity), true
-
 	case "Post.sent":
 		if e.ComplexityRoot.Post.Sent == nil {
 			break

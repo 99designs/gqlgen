@@ -93,7 +93,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindHelloByID(childComplexity, args["id"].(string)), true
-
 	case "Entity.findWorldByID":
 		if e.ComplexityRoot.Entity.FindWorldByID == nil {
 			break
@@ -112,7 +111,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.__resolve__service(childComplexity), true
-
 	case "Query._entities":
 		if e.ComplexityRoot.Query.__resolve_entities == nil {
 			break
@@ -131,7 +129,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.World.ID(childComplexity), true
-
 	case "World.title":
 		if e.ComplexityRoot.World.Title == nil {
 			break

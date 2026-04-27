@@ -110,14 +110,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Address.Country(childComplexity), true
-
 	case "Address.id":
 		if e.ComplexityRoot.Address.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Address.ID(childComplexity), true
-
 	case "Address.street":
 		if e.ComplexityRoot.Address.Street == nil {
 			break
@@ -131,21 +129,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Customer.Address(childComplexity), true
-
 	case "Customer.id":
 		if e.ComplexityRoot.Customer.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Customer.ID(childComplexity), true
-
 	case "Customer.name":
 		if e.ComplexityRoot.Customer.Name == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Customer.Name(childComplexity), true
-
 	case "Customer.orders":
 		if e.ComplexityRoot.Customer.Orders == nil {
 			break
@@ -166,21 +161,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Order.Amount(childComplexity), true
-
 	case "Order.date":
 		if e.ComplexityRoot.Order.Date == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Order.Date(childComplexity), true
-
 	case "Order.id":
 		if e.ComplexityRoot.Order.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Order.ID(childComplexity), true
-
 	case "Order.items":
 		if e.ComplexityRoot.Order.Items == nil {
 			break
@@ -206,7 +198,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Torture1d(childComplexity, args["customerIds"].([]int)), true
-
 	case "Query.torture2d":
 		if e.ComplexityRoot.Query.Torture2d == nil {
 			break

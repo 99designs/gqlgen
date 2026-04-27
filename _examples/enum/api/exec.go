@@ -105,7 +105,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.BoolTyped(childComplexity, args["arg"].(model.BoolTyped)), true
-
 	case "Query.boolTypedN":
 		if e.ComplexityRoot.Query.BoolTypedN == nil {
 			break
@@ -117,7 +116,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.BoolTypedN(childComplexity, args["arg"].(*model.BoolTyped)), true
-
 	case "Query.boolUntyped":
 		if e.ComplexityRoot.Query.BoolUntyped == nil {
 			break
@@ -129,7 +127,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.BoolUntyped(childComplexity, args["arg"].(bool)), true
-
 	case "Query.boolUntypedN":
 		if e.ComplexityRoot.Query.BoolUntypedN == nil {
 			break
@@ -141,7 +138,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.BoolUntypedN(childComplexity, args["arg"].(*bool)), true
-
 	case "Query.inPackage":
 		if e.ComplexityRoot.Query.InPackage == nil {
 			break
@@ -153,7 +149,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.InPackage(childComplexity, args["arg"].(InPackage)), true
-
 	case "Query.intTyped":
 		if e.ComplexityRoot.Query.IntTyped == nil {
 			break
@@ -165,7 +160,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.IntTyped(childComplexity, args["arg"].(model.IntTyped)), true
-
 	case "Query.intTypedN":
 		if e.ComplexityRoot.Query.IntTypedN == nil {
 			break
@@ -177,7 +171,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.IntTypedN(childComplexity, args["arg"].(*model.IntTyped)), true
-
 	case "Query.intUntyped":
 		if e.ComplexityRoot.Query.IntUntyped == nil {
 			break
@@ -189,7 +182,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.IntUntyped(childComplexity, args["arg"].(int)), true
-
 	case "Query.intUntypedN":
 		if e.ComplexityRoot.Query.IntUntypedN == nil {
 			break
@@ -213,7 +205,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.StringTyped(childComplexity, args["arg"].(model.StringTyped)), true
-
 	case "Query.stringTypedN":
 		if e.ComplexityRoot.Query.StringTypedN == nil {
 			break
@@ -225,7 +216,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.StringTypedN(childComplexity, args["arg"].(*model.StringTyped)), true
-
 	case "Query.stringUntyped":
 		if e.ComplexityRoot.Query.StringUntyped == nil {
 			break
@@ -237,7 +227,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.StringUntyped(childComplexity, args["arg"].(string)), true
-
 	case "Query.stringUntypedN":
 		if e.ComplexityRoot.Query.StringUntypedN == nil {
 			break
@@ -249,7 +238,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.StringUntypedN(childComplexity, args["arg"].(*string)), true
-
 	case "Query.varTyped":
 		if e.ComplexityRoot.Query.VarTyped == nil {
 			break
@@ -261,7 +249,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.VarTyped(childComplexity, args["arg"].(model.VarTyped)), true
-
 	case "Query.varUntyped":
 		if e.ComplexityRoot.Query.VarUntyped == nil {
 			break

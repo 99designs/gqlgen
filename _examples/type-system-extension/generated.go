@@ -113,7 +113,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.MyQuery.Todo(childComplexity, args["id"].(string)), true
-
 	case "MyQuery.todos":
 		if e.ComplexityRoot.MyQuery.Todos == nil {
 			break
@@ -127,21 +126,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Todo.ID(childComplexity), true
-
 	case "Todo.state":
 		if e.ComplexityRoot.Todo.State == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Todo.State(childComplexity), true
-
 	case "Todo.text":
 		if e.ComplexityRoot.Todo.Text == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Todo.Text(childComplexity), true
-
 	case "Todo.verified":
 		if e.ComplexityRoot.Todo.Verified == nil {
 			break

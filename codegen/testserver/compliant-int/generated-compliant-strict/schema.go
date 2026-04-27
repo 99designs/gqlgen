@@ -90,7 +90,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.EchoInt64InputToInt64Object(childComplexity, args["input"].(Input64)), true
-
 	case "Query.echoInt64ToInt64":
 		if e.ComplexityRoot.Query.EchoInt64ToInt64 == nil {
 			break
@@ -102,7 +101,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.EchoInt64ToInt64(childComplexity, args["n"].(*int)), true
-
 	case "Query.echoIntInputToIntObject":
 		if e.ComplexityRoot.Query.EchoIntInputToIntObject == nil {
 			break
@@ -114,7 +112,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.EchoIntInputToIntObject(childComplexity, args["input"].(Input)), true
-
 	case "Query.echoIntToInt":
 		if e.ComplexityRoot.Query.EchoIntToInt == nil {
 			break

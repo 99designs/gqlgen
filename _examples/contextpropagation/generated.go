@@ -93,7 +93,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Todo.Context(childComplexity), true
-
 	case "Todo.text":
 		if e.ComplexityRoot.Todo.Text == nil {
 			break

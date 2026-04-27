@@ -88,14 +88,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Parentdir(childComplexity), true
-
 	case "Query.subdir":
 		if e.ComplexityRoot.Query.Subdir == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Query.Subdir(childComplexity), true
-
 	case "Query._service":
 		if e.ComplexityRoot.Query.__resolve__service == nil {
 			break

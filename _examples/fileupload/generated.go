@@ -94,21 +94,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.File.Content(childComplexity), true
-
 	case "File.contentType":
 		if e.ComplexityRoot.File.ContentType == nil {
 			break
 		}
 
 		return e.ComplexityRoot.File.ContentType(childComplexity), true
-
 	case "File.id":
 		if e.ComplexityRoot.File.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.File.ID(childComplexity), true
-
 	case "File.name":
 		if e.ComplexityRoot.File.Name == nil {
 			break
@@ -127,7 +124,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.MultipleUpload(childComplexity, args["files"].([]*graphql.Upload)), true
-
 	case "Mutation.multipleUploadWithPayload":
 		if e.ComplexityRoot.Mutation.MultipleUploadWithPayload == nil {
 			break
@@ -139,7 +135,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.MultipleUploadWithPayload(childComplexity, args["req"].([]*model.UploadFile)), true
-
 	case "Mutation.singleUpload":
 		if e.ComplexityRoot.Mutation.SingleUpload == nil {
 			break
@@ -151,7 +146,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Mutation.SingleUpload(childComplexity, args["file"].(graphql.Upload)), true
-
 	case "Mutation.singleUploadWithPayload":
 		if e.ComplexityRoot.Mutation.SingleUploadWithPayload == nil {
 			break

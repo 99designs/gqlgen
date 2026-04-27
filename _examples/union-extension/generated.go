@@ -96,7 +96,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.CachedEvents(childComplexity), true
-
 	case "Query.events":
 		if e.ComplexityRoot.Query.Events == nil {
 			break

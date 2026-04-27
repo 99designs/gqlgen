@@ -127,42 +127,36 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Todo.DatabaseID(childComplexity), true
-
 	case "Todo.text":
 		if e.ComplexityRoot.Todo.Description == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Todo.Description(childComplexity), true
-
 	case "Todo.done":
 		if e.ComplexityRoot.Todo.Done == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Todo.Done(childComplexity), true
-
 	case "Todo.id":
 		if e.ComplexityRoot.Todo.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Todo.ID(childComplexity), true
-
 	case "Todo.mutation":
 		if e.ComplexityRoot.Todo.Mutation == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Todo.Mutation(childComplexity), true
-
 	case "Todo.query":
 		if e.ComplexityRoot.Todo.Query == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Todo.Query(childComplexity), true
-
 	case "Todo.user":
 		if e.ComplexityRoot.Todo.User == nil {
 			break
@@ -176,14 +170,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.FullName(childComplexity), true
-
 	case "User.id":
 		if e.ComplexityRoot.User.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.ID(childComplexity), true
-
 	case "User.role":
 		if e.ComplexityRoot.User.Role == nil {
 			break

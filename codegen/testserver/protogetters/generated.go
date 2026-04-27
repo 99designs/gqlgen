@@ -92,21 +92,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.GetAge(childComplexity), true
-
 	case "User.email":
 		if e.ComplexityRoot.User.GetEmail == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.GetEmail(childComplexity), true
-
 	case "User.id":
 		if e.ComplexityRoot.User.GetId == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.GetId(childComplexity), true
-
 	case "User.name":
 		if e.ComplexityRoot.User.GetName == nil {
 			break

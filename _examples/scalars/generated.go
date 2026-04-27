@@ -103,7 +103,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Address.ID(childComplexity), true
-
 	case "Address.location":
 		if e.ComplexityRoot.Address.Location == nil {
 			break
@@ -122,7 +121,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Search(childComplexity, args["input"].(*model.SearchArgs)), true
-
 	case "Query.user":
 		if e.ComplexityRoot.Query.User == nil {
 			break
@@ -134,7 +132,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.User(childComplexity, args["id"].(external.ObjectID)), true
-
 	case "Query.userByTier":
 		if e.ComplexityRoot.Query.UserByTier == nil {
 			break
@@ -153,70 +150,60 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.Address(childComplexity), true
-
 	case "User.created":
 		if e.ComplexityRoot.User.Created == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.Created(childComplexity), true
-
 	case "User.customResolver":
 		if e.ComplexityRoot.User.CustomResolver == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.CustomResolver(childComplexity), true
-
 	case "User.id":
 		if e.ComplexityRoot.User.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.ID(childComplexity), true
-
 	case "User.isBanned":
 		if e.ComplexityRoot.User.IsBanned == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.IsBanned(childComplexity), true
-
 	case "User.modified":
 		if e.ComplexityRoot.User.Modified == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.Modified(childComplexity), true
-
 	case "User.name":
 		if e.ComplexityRoot.User.Name == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.Name(childComplexity), true
-
 	case "User.primitiveResolver":
 		if e.ComplexityRoot.User.PrimitiveResolver == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.PrimitiveResolver(childComplexity), true
-
 	case "User.ptrPrefs":
 		if e.ComplexityRoot.User.PtrPrefs == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.PtrPrefs(childComplexity), true
-
 	case "User.tier":
 		if e.ComplexityRoot.User.Tier == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.Tier(childComplexity), true
-
 	case "User.valPrefs":
 		if e.ComplexityRoot.User.ValPrefs == nil {
 			break

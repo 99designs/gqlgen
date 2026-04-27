@@ -37,7 +37,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 							}
 						{{ end }}
 						return e.ComplexityRoot.{{ucFirst $object.Name}}.{{$field.GoFieldName}}(childComplexity{{if $field.Args}}, {{$field.ComplexityArgs}} {{ end }}), true
-						{{ end }}
+						{{- end }}
 					{{- end }}
 				{{- end }}
 			{{ end }}

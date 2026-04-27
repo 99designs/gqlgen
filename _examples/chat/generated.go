@@ -104,14 +104,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Chatroom.Messages(childComplexity), true
-
 	case "Chatroom.name":
 		if e.ComplexityRoot.Chatroom.Name == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Chatroom.Name(childComplexity), true
-
 	case "Chatroom.subscription":
 		if e.ComplexityRoot.Chatroom.Subscription == nil {
 			break
@@ -125,28 +123,24 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Message.CreatedAt(childComplexity), true
-
 	case "Message.createdBy":
 		if e.ComplexityRoot.Message.CreatedBy == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Message.CreatedBy(childComplexity), true
-
 	case "Message.id":
 		if e.ComplexityRoot.Message.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Message.ID(childComplexity), true
-
 	case "Message.subscription":
 		if e.ComplexityRoot.Message.Subscription == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Message.Subscription(childComplexity), true
-
 	case "Message.text":
 		if e.ComplexityRoot.Message.Text == nil {
 			break

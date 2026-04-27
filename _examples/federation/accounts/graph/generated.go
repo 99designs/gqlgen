@@ -106,7 +106,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.EmailHost.ID(childComplexity), true
-
 	case "EmailHost.name":
 		if e.ComplexityRoot.EmailHost.Name == nil {
 			break
@@ -125,7 +124,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindEmailHostByID(childComplexity, args["id"].(string)), true
-
 	case "Entity.findUserByID":
 		if e.ComplexityRoot.Entity.FindUserByID == nil {
 			break
@@ -144,14 +142,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Me(childComplexity), true
-
 	case "Query._service":
 		if e.ComplexityRoot.Query.__resolve__service == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Query.__resolve__service(childComplexity), true
-
 	case "Query._entities":
 		if e.ComplexityRoot.Query.__resolve_entities == nil {
 			break
@@ -170,21 +166,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.Email(childComplexity), true
-
 	case "User.host":
 		if e.ComplexityRoot.User.Host == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.Host(childComplexity), true
-
 	case "User.id":
 		if e.ComplexityRoot.User.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.ID(childComplexity), true
-
 	case "User.username":
 		if e.ComplexityRoot.User.Username == nil {
 			break

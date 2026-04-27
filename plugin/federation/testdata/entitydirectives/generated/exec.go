@@ -113,7 +113,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Basic.ID(childComplexity), true
-
 	case "Basic.value":
 		if e.ComplexityRoot.Basic.Value == nil {
 			break
@@ -132,7 +131,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindBasicByID(childComplexity, args["id"].(string)), true
-
 	case "Entity.findPersonByID":
 		if e.ComplexityRoot.Entity.FindPersonByID == nil {
 			break
@@ -144,7 +142,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindPersonByID(childComplexity, args["id"].(string)), true
-
 	case "Entity.findProductBySku":
 		if e.ComplexityRoot.Entity.FindProductBySku == nil {
 			break
@@ -163,14 +160,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Person.Email(childComplexity), true
-
 	case "Person.id":
 		if e.ComplexityRoot.Person.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Person.ID(childComplexity), true
-
 	case "Person.phone":
 		if e.ComplexityRoot.Person.Phone == nil {
 			break
@@ -184,14 +179,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Product.Name(childComplexity), true
-
 	case "Product.price":
 		if e.ComplexityRoot.Product.Price == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Product.Price(childComplexity), true
-
 	case "Product.sku":
 		if e.ComplexityRoot.Product.Sku == nil {
 			break
@@ -210,7 +203,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.GetBasic(childComplexity, args["id"].(string)), true
-
 	case "Query.getPerson":
 		if e.ComplexityRoot.Query.GetPerson == nil {
 			break
@@ -222,7 +214,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.GetPerson(childComplexity, args["id"].(string)), true
-
 	case "Query.getProduct":
 		if e.ComplexityRoot.Query.GetProduct == nil {
 			break
@@ -241,7 +232,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.__resolve__service(childComplexity), true
-
 	case "Query._entities":
 		if e.ComplexityRoot.Query.__resolve_entities == nil {
 			break

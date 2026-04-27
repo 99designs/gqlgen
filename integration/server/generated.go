@@ -119,14 +119,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Element.Child(childComplexity), true
-
 	case "Element.error":
 		if e.ComplexityRoot.Element.Error == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Element.Error(childComplexity), true
-
 	case "Element.mismatched":
 		if e.ComplexityRoot.Element.Mismatched == nil {
 			break
@@ -145,7 +143,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Coercion(childComplexity, args["value"].([]*models.ListCoercion)), true
-
 	case "Query.complexity":
 		if e.ComplexityRoot.Query.Complexity == nil {
 			break
@@ -157,7 +154,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Complexity(childComplexity, args["value"].(int)), true
-
 	case "Query.date":
 		if e.ComplexityRoot.Query.Date == nil {
 			break
@@ -169,7 +165,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Date(childComplexity, args["filter"].(models.DateFilter)), true
-
 	case "Query.error":
 		if e.ComplexityRoot.Query.Error == nil {
 			break
@@ -188,14 +183,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.JSONEncoding(childComplexity), true
-
 	case "Query.path":
 		if e.ComplexityRoot.Query.Path == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Query.Path(childComplexity), true
-
 	case "Query.viewer":
 		if e.ComplexityRoot.Query.Viewer == nil {
 			break
@@ -216,21 +209,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.Likes(childComplexity), true
-
 	case "User.name":
 		if e.ComplexityRoot.User.Name == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.Name(childComplexity), true
-
 	case "User.phoneNumber":
 		if e.ComplexityRoot.User.PhoneNumber == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.PhoneNumber(childComplexity), true
-
 	case "User.query":
 		if e.ComplexityRoot.User.Query == nil {
 			break

@@ -99,7 +99,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.MyMutation.CreateTodo(childComplexity, args["todo"].(TodoInput)), true
-
 	case "MyMutation.updateTodo":
 		if e.ComplexityRoot.MyMutation.UpdateTodo == nil {
 			break
@@ -118,7 +117,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.MyQuery.LastTodo(childComplexity), true
-
 	case "MyQuery.todo":
 		if e.ComplexityRoot.MyQuery.Todo == nil {
 			break
@@ -130,7 +128,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.MyQuery.Todo(childComplexity, args["id"].(int)), true
-
 	case "MyQuery.todos":
 		if e.ComplexityRoot.MyQuery.Todos == nil {
 			break
@@ -144,14 +141,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Todo.Done(childComplexity), true
-
 	case "Todo.id":
 		if e.ComplexityRoot.Todo.ID == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Todo.ID(childComplexity), true
-
 	case "Todo.text":
 		if e.ComplexityRoot.Todo.Text == nil {
 			break

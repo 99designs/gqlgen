@@ -130,10 +130,6 @@ func (ec *executionContext) field_Mutation_updateSomething_args(ctx context.Cont
 
 // endregion ***************************** args.gotpl *****************************
 
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
-
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _DefaultParametersMirror_falsyBoolean(ctx context.Context, field graphql.CollectedField, obj *DefaultParametersMirror) (ret graphql.Marshaler) {

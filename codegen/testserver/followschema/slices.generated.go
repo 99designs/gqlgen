@@ -21,10 +21,6 @@ import (
 
 // endregion ***************************** args.gotpl *****************************
 
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
-
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _Slices_test1(ctx context.Context, field graphql.CollectedField, obj *Slices) (ret graphql.Marshaler) {

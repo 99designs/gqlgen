@@ -26,10 +26,6 @@ type BackedByInterfaceResolver interface {
 
 // endregion ***************************** args.gotpl *****************************
 
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
-
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _BackedByInterface_id(ctx context.Context, field graphql.CollectedField, obj BackedByInterface) (ret graphql.Marshaler) {

@@ -78,21 +78,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.PageInfo.EndCursor(childComplexity), true
-
 	case "PageInfo.hasNextPage":
 		if e.ComplexityRoot.PageInfo.HasNextPage == nil {
 			break
 		}
 
 		return e.ComplexityRoot.PageInfo.HasNextPage(childComplexity), true
-
 	case "PageInfo.hasPreviousPage":
 		if e.ComplexityRoot.PageInfo.HasPreviousPage == nil {
 			break
 		}
 
 		return e.ComplexityRoot.PageInfo.HasPreviousPage(childComplexity), true
-
 	case "PageInfo.startCursor":
 		if e.ComplexityRoot.PageInfo.StartCursor == nil {
 			break
@@ -118,14 +115,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.User.Email(childComplexity), true
-
 	case "User.firstName":
 		if e.ComplexityRoot.User.FirstName == nil {
 			break
 		}
 
 		return e.ComplexityRoot.User.FirstName(childComplexity), true
-
 	case "User.lastName":
 		if e.ComplexityRoot.User.LastName == nil {
 			break
@@ -139,14 +134,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.UserConnection.Edges(childComplexity), true
-
 	case "UserConnection.pageInfo":
 		if e.ComplexityRoot.UserConnection.PageInfo == nil {
 			break
 		}
 
 		return e.ComplexityRoot.UserConnection.PageInfo(childComplexity), true
-
 	case "UserConnection.totalCount":
 		if e.ComplexityRoot.UserConnection.TotalCount == nil {
 			break
@@ -160,7 +153,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.UserEdge.Cursor(childComplexity), true
-
 	case "UserEdge.node":
 		if e.ComplexityRoot.UserEdge.Node == nil {
 			break

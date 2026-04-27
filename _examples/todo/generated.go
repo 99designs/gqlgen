@@ -18,7 +18,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-// region    ************************** generated!.gotpl **************************
+// region    ***************************** api!.gotpl *****************************
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
@@ -56,6 +56,10 @@ type ComplexityRoot struct {
 	}
 }
 
+// endregion ***************************** api!.gotpl *****************************
+
+// region    ************************** generated!.gotpl **************************
+
 type MyMutationResolver interface {
 	CreateTodo(ctx context.Context, todo TodoInput) (*Todo, error)
 	UpdateTodo(ctx context.Context, id int, changes map[string]any) (*Todo, error)
@@ -65,6 +69,10 @@ type MyQueryResolver interface {
 	LastTodo(ctx context.Context) (*Todo, error)
 	Todos(ctx context.Context) ([]*Todo, error)
 }
+
+// endregion ************************** generated!.gotpl **************************
+
+// region    ************************** internal!.gotpl ***************************
 
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
@@ -466,7 +474,7 @@ func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj any, next 
 	return next
 }
 
-// endregion ************************** generated!.gotpl **************************
+// endregion ************************** internal!.gotpl ***************************
 
 // region    ***************************** args.gotpl *****************************
 
@@ -619,10 +627,6 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 }
 
 // endregion ***************************** args.gotpl *****************************
-
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
 

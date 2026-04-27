@@ -21,7 +21,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-// region    ************************** generated!.gotpl **************************
+// region    ***************************** api!.gotpl *****************************
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
@@ -65,6 +65,10 @@ type ComplexityRoot struct {
 	}
 }
 
+// endregion ***************************** api!.gotpl *****************************
+
+// region    ************************** generated!.gotpl **************************
+
 type QueryResolver interface {
 	User(ctx context.Context, id external.ObjectID) (*model.User, error)
 	Search(ctx context.Context, input *model.SearchArgs) ([]*model.User, error)
@@ -74,6 +78,10 @@ type UserResolver interface {
 	PrimitiveResolver(ctx context.Context, obj *model.User) (string, error)
 	CustomResolver(ctx context.Context, obj *model.User) (*model.Point, error)
 }
+
+// endregion ************************** generated!.gotpl **************************
+
+// region    ************************** internal!.gotpl ***************************
 
 type executableSchema graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
@@ -441,7 +449,7 @@ func (ec *executionContext) childFields___Type(ctx context.Context, field graphq
 	return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 }
 
-// endregion ************************** generated!.gotpl **************************
+// endregion ************************** internal!.gotpl ***************************
 
 // region    ***************************** args.gotpl *****************************
 
@@ -566,10 +574,6 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 }
 
 // endregion ***************************** args.gotpl *****************************
-
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
 

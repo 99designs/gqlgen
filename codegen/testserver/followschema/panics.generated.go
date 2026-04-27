@@ -55,10 +55,6 @@ func (ec *executionContext) field_Panics_fieldFuncMarshal_args(ctx context.Conte
 
 // endregion ***************************** args.gotpl *****************************
 
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
-
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _Panics_fieldScalarMarshal(ctx context.Context, field graphql.CollectedField, obj *Panics) (ret graphql.Marshaler) {

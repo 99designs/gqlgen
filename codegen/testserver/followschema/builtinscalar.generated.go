@@ -21,10 +21,6 @@ import (
 
 // endregion ***************************** args.gotpl *****************************
 
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
-
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _Map_id(ctx context.Context, field graphql.CollectedField, obj *Map) (ret graphql.Marshaler) {

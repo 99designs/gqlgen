@@ -21,10 +21,6 @@ import (
 
 // endregion ***************************** args.gotpl *****************************
 
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
-
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _CheckIssue896_id(ctx context.Context, field graphql.CollectedField, obj *CheckIssue896) (ret graphql.Marshaler) {

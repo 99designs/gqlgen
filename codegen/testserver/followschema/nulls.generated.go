@@ -29,10 +29,6 @@ type ErrorsResolver interface {
 
 // endregion ***************************** args.gotpl *****************************
 
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
-
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _Error_id(ctx context.Context, field graphql.CollectedField, obj *Error) (ret graphql.Marshaler) {

@@ -35,10 +35,6 @@ func (ec *executionContext) field_VariadicModel_value_args(ctx context.Context, 
 
 // endregion ***************************** args.gotpl *****************************
 
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
-
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _VariadicModel_value(ctx context.Context, field graphql.CollectedField, obj *VariadicModel) (ret graphql.Marshaler) {

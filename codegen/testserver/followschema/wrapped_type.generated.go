@@ -57,10 +57,6 @@ func (ec *executionContext) field_WrappedSlice_get_args(ctx context.Context, raw
 
 // endregion ***************************** args.gotpl *****************************
 
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
-
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _WrappedMap_get(ctx context.Context, field graphql.CollectedField, obj WrappedMap) (ret graphql.Marshaler) {

@@ -117,10 +117,6 @@ func (ec *executionContext) field_Query_directiveSingleNullableArg_argsArg1(
 
 // endregion ***************************** args.gotpl *****************************
 
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
-
 // region    **************************** field.gotpl *****************************
 
 func (ec *executionContext) _Query_directiveSingleNullableArg(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {

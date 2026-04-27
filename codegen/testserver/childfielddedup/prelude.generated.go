@@ -100,10 +100,6 @@ func field___Type_fields_args(ctx context.Context, ec *executionContext, rawArgs
 
 // endregion ***************************** args.gotpl *****************************
 
-// region    ************************** directives.gotpl **************************
-
-// endregion ************************** directives.gotpl **************************
-
 // region    **************************** field.gotpl *****************************
 
 func ___Directive_name(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {

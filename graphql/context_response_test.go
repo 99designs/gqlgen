@@ -120,3 +120,15 @@ func TestGetErrorFromPresenter(t *testing.T) {
 	ctx = WithFieldContext(ctx, &FieldContext{})
 	AddError(ctx, errors.New("foo1"))
 }
+
+func TestHasErrors(t *testing.T) {
+	ctx := WithResponseContext(context.Background(), DefaultErrorPresenter, nil)
+
+	ctx = WithFieldContext(ctx, &FieldContext{})
+	assert.False(t, HasErrors(ctx))
+	AddError(ctx, errors.New("foo1"))
+	assert.True(t, HasErrors(ctx))
+}
+func TestHasErrorsWithoutResponseContext(t *testing.T) {
+	assert.False(t, HasErrors(context.Background()))
+}

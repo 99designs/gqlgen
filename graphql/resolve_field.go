@@ -118,6 +118,10 @@ func resolveField[T, R any](
 		oc.Error(ctx, AddFieldLocationToError(ctx, err))
 		return defaultResult
 	}
+	// If all errors were added into ctx, and none returned directly, check the context and action accordingly.
+	if HasErrors(ctx) {
+		return defaultResult
+	}
 	if resTmp == nil {
 		if nonNull {
 			if !HasFieldError(ctx, fc) {

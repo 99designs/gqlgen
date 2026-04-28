@@ -134,6 +134,17 @@ func GetErrors(ctx context.Context) gqlerror.List {
 	return cpy
 }
 
+func HasErrors(ctx context.Context) bool {
+	resCtx, ok := ctx.Value(resultCtx).(*responseContext)
+	if !ok {
+		return false
+	}
+	resCtx.errorsMu.Lock()
+	defer resCtx.errorsMu.Unlock()
+
+	return len(resCtx.errors) > 0
+}
+
 // RegisterExtension allows you to add a new extension into the graphql response
 func RegisterExtension(ctx context.Context, key string, value any) {
 	c := getResponseContext(ctx)

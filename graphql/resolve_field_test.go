@@ -18,6 +18,7 @@ type ResolveFieldTest struct {
 	initializeFieldContextErr error
 	panicMiddlewareChain      string
 	panicResolverMiddleware   string
+	resolverMiddlewareErr     error // error added to context by resolver middleware
 	panicFieldResolver        string
 	fieldResolverValue        any
 	fieldResolverErr          error
@@ -97,6 +98,14 @@ var commonResolveFieldTests = []ResolveFieldTest{
 		expected:         "null",
 		expectedErr:      "input: testField test field resolver error\n",
 		expectedCalls:    4,
+	},
+	{
+		name:                  "should return default when resolver middleware adds error to context",
+		resolverMiddlewareErr: errors.New("test resolver middleware context error"),
+		fieldResolverValue:    "test value",
+		expected:              "null",
+		expectedErr:           "input: testField test resolver middleware context error\n",
+		expectedCalls:         3,
 	},
 }
 
@@ -241,6 +250,10 @@ func testResolveField[R any](
 					)
 					if test.panicResolverMiddleware != "" {
 						panic(test.panicResolverMiddleware)
+					}
+					if test.resolverMiddlewareErr != nil {
+						AddError(ctx, test.resolverMiddlewareErr)
+						return nil, nil
 					}
 					return next(ctx)
 				},

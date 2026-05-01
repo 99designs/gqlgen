@@ -165,7 +165,8 @@ var page = template.Must(template.New("graphiql").Parse(`<!DOCTYPE html>
           shouldPersistHeaders: true,
 		  headers: JSON.stringify(uiHeaders, null, 2),
 		  plugins: plugins,
-          storage: new PrefixedStorage('{{.StoragePrefix}}')
+          storage: new PrefixedStorage('{{.StoragePrefix}}'),
+          inputValueDeprecation: true
         }),
         document.getElementById('graphiql'),
       );

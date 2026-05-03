@@ -73,6 +73,9 @@ func (ec *executionContext) _CheckIssue896(ctx context.Context, sel ast.Selectio
 			out.Values[i] = graphql.MarshalString("CheckIssue896")
 		case "id":
 			out.Values[i] = ec._CheckIssue896_id(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

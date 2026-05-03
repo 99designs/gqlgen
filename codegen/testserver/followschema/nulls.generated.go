@@ -331,6 +331,9 @@ func (ec *executionContext) _Error(ctx context.Context, sel ast.SelectionSet, ob
 			}
 		case "errorOnNonRequiredField":
 			out.Values[i] = ec._Error_errorOnNonRequiredField(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "errorOnRequiredField":
 			out.Values[i] = ec._Error_errorOnRequiredField(ctx, field, obj)
 			if out.Values[i] == graphql.Null {

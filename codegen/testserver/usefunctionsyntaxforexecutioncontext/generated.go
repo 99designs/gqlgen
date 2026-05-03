@@ -2624,6 +2624,9 @@ func _Admin(ctx context.Context, ec *executionContext, sel ast.SelectionSet, obj
 			}
 		case "createdAt":
 			out.Values[i] = _Admin_createdAt(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2721,6 +2724,9 @@ func _MutationResponse(ctx context.Context, ec *executionContext, sel ast.Select
 			}
 		case "message":
 			out.Values[i] = _MutationResponse_message(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2766,13 +2772,16 @@ func _Query(ctx context.Context, ec *executionContext, sel ast.SelectionSet) gra
 		case "getUser":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = _Query_getUser(ctx, ec, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -2807,13 +2816,16 @@ func _Query(ctx context.Context, ec *executionContext, sel ast.SelectionSet) gra
 		case "getEntity":
 			field := field
 
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 				defer func() {
 					if r := recover(); r != nil {
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
 				res = _Query_getEntity(ctx, ec, field)
+				if res == graphql.RequiredNull {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
 				return res
 			}
 
@@ -2827,10 +2839,16 @@ func _Query(ctx context.Context, ec *executionContext, sel ast.SelectionSet) gra
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return _Query___type(ctx, ec, field)
 			})
+			if out.Values[i] == graphql.RequiredNull {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		case "__schema":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return _Query___schema(ctx, ec, field)
 			})
+			if out.Values[i] == graphql.RequiredNull {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2902,6 +2920,9 @@ func _User(ctx context.Context, ec *executionContext, sel ast.SelectionSet, obj 
 			}
 		case "age":
 			out.Values[i] = _User_age(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "role":
 			out.Values[i] = _User_role(ctx, ec, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -2909,6 +2930,9 @@ func _User(ctx context.Context, ec *executionContext, sel ast.SelectionSet, obj 
 			}
 		case "createdAt":
 			out.Values[i] = _User_createdAt(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2950,6 +2974,9 @@ func ___Directive(ctx context.Context, ec *executionContext, sel ast.SelectionSe
 			}
 		case "description":
 			out.Values[i] = ___Directive_description(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "isRepeatable":
 			out.Values[i] = ___Directive_isRepeatable(ctx, ec, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -3006,6 +3033,9 @@ func ___EnumValue(ctx context.Context, ec *executionContext, sel ast.SelectionSe
 			}
 		case "description":
 			out.Values[i] = ___EnumValue_description(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "isDeprecated":
 			out.Values[i] = ___EnumValue_isDeprecated(ctx, ec, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -3013,6 +3043,9 @@ func ___EnumValue(ctx context.Context, ec *executionContext, sel ast.SelectionSe
 			}
 		case "deprecationReason":
 			out.Values[i] = ___EnumValue_deprecationReason(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3054,6 +3087,9 @@ func ___Field(ctx context.Context, ec *executionContext, sel ast.SelectionSet, o
 			}
 		case "description":
 			out.Values[i] = ___Field_description(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "args":
 			out.Values[i] = ___Field_args(ctx, ec, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -3071,6 +3107,9 @@ func ___Field(ctx context.Context, ec *executionContext, sel ast.SelectionSet, o
 			}
 		case "deprecationReason":
 			out.Values[i] = ___Field_deprecationReason(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3112,6 +3151,9 @@ func ___InputValue(ctx context.Context, ec *executionContext, sel ast.SelectionS
 			}
 		case "description":
 			out.Values[i] = ___InputValue_description(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "type":
 			out.Values[i] = ___InputValue_type(ctx, ec, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -3119,6 +3161,9 @@ func ___InputValue(ctx context.Context, ec *executionContext, sel ast.SelectionS
 			}
 		case "defaultValue":
 			out.Values[i] = ___InputValue_defaultValue(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "isDeprecated":
 			out.Values[i] = ___InputValue_isDeprecated(ctx, ec, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -3126,6 +3171,9 @@ func ___InputValue(ctx context.Context, ec *executionContext, sel ast.SelectionS
 			}
 		case "deprecationReason":
 			out.Values[i] = ___InputValue_deprecationReason(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -3162,6 +3210,9 @@ func ___Schema(ctx context.Context, ec *executionContext, sel ast.SelectionSet, 
 			out.Values[i] = graphql.MarshalString("__Schema")
 		case "description":
 			out.Values[i] = ___Schema_description(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "types":
 			out.Values[i] = ___Schema_types(ctx, ec, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -3174,8 +3225,14 @@ func ___Schema(ctx context.Context, ec *executionContext, sel ast.SelectionSet, 
 			}
 		case "mutationType":
 			out.Values[i] = ___Schema_mutationType(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "subscriptionType":
 			out.Values[i] = ___Schema_subscriptionType(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "directives":
 			out.Values[i] = ___Schema_directives(ctx, ec, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -3222,24 +3279,54 @@ func ___Type(ctx context.Context, ec *executionContext, sel ast.SelectionSet, ob
 			}
 		case "name":
 			out.Values[i] = ___Type_name(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "description":
 			out.Values[i] = ___Type_description(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "specifiedByURL":
 			out.Values[i] = ___Type_specifiedByURL(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "fields":
 			out.Values[i] = ___Type_fields(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "interfaces":
 			out.Values[i] = ___Type_interfaces(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "possibleTypes":
 			out.Values[i] = ___Type_possibleTypes(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "enumValues":
 			out.Values[i] = ___Type_enumValues(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "inputFields":
 			out.Values[i] = ___Type_inputFields(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "ofType":
 			out.Values[i] = ___Type_ofType(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "isOneOf":
 			out.Values[i] = ___Type_isOneOf(ctx, ec, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

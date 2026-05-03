@@ -98,8 +98,14 @@ func (ec *executionContext) _SkipIncludeTestType(ctx context.Context, sel ast.Se
 			out.Values[i] = graphql.MarshalString("SkipIncludeTestType")
 		case "a":
 			out.Values[i] = ec._SkipIncludeTestType_a(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "b":
 			out.Values[i] = ec._SkipIncludeTestType_b(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

@@ -28,6 +28,7 @@ func ResolveField[T any](
 		recoverFromPanic,
 		nonNull,
 		Null,
+		RequiredNull,
 		func(ctx context.Context, res T) Marshaler {
 			return marshal(ctx, field.Selections, res)
 		},
@@ -54,6 +55,7 @@ func ResolveFieldStream[T any](
 		middlewareChain,
 		recoverFromPanic,
 		nonNull,
+		nil,
 		nil,
 		func(ctx context.Context, res <-chan T) func(context.Context) Marshaler {
 			return func(ctx context.Context) Marshaler {
@@ -87,6 +89,7 @@ func resolveField[T, R any](
 	recoverFromPanic bool,
 	nonNull bool,
 	defaultResult R,
+	requiredNullResult R,
 	result func(ctx context.Context, res T) R,
 ) (ret R) {
 	fc, err := initializeFieldContext(ctx, field)
@@ -116,13 +119,19 @@ func resolveField[T, R any](
 	resTmp, err := oc.ResolverMiddleware(ctx, next)
 	if err != nil {
 		oc.Error(ctx, AddFieldLocationToError(ctx, err))
+		if fc.NonNull && !nonNull {
+			return requiredNullResult
+		}
 		return defaultResult
 	}
 	if resTmp == nil {
-		if nonNull {
+		if nonNull || fc.NonNull {
 			if !HasFieldError(ctx, fc) {
 				oc.Errorf(ctx, "must not be null")
 			}
+		}
+		if fc.NonNull && !nonNull {
+			return requiredNullResult
 		}
 		return defaultResult
 	}

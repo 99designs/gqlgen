@@ -31,6 +31,11 @@ type FieldContext struct {
 	IsMethod bool
 	// IsResolver indicates if the field has a user-specified resolver
 	IsResolver bool
+	// NonNull is set to true at runtime by a FieldInterceptor (via MarkNonNull)
+	// to indicate this field should be treated as semantically non-null.
+	// When true and the field resolves to nil, null propagation occurs
+	// as if the field were declared non-null (!) in the schema.
+	NonNull bool
 	// Child allows getting a child FieldContext by its field collection description.
 	// Note that, the returned child FieldContext represents the context as it was
 	// before the execution of the field resolver. For example:
@@ -116,6 +121,20 @@ func NewScalarFieldContext(
 			return nil, childErr
 		},
 	}, nil
+}
+
+// MarkNonNull marks the current field as semantically non-null at runtime.
+// When a field is marked non-null and resolves to nil, null propagation
+// occurs as if the field were declared non-null (!) in the schema.
+//
+// This is intended for use by FieldInterceptors that need runtime
+// required-field semantics (e.g., a @priority(value: Required) directive).
+// It must be called before the resolver returns, typically inside an
+// AroundFields middleware or FieldInterceptor.
+func MarkNonNull(ctx context.Context) {
+	if fc := GetFieldContext(ctx); fc != nil {
+		fc.NonNull = true
+	}
 }
 
 func equalPath(a, b ast.Path) bool {

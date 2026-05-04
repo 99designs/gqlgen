@@ -62,7 +62,7 @@ jobs:
         ref: ${{ github.event.inputs.git-ref }}
     - name: Run actionlint
       if: ${{ always() }}
-      uses: devops-actions/actionlint@469810fd82c015d3c43815cd2b0e4d02eecc4819 # v0.1.11
+      uses: devops-actions/actionlint@9fb9c192862f19e684586ca84b500461bcd8a541 # v0.1.12
       with: # https://www.shellcheck.net/wiki/SC2086 https://www.shellcheck.net/wiki/SC2129
         shellcheck_opts: '-e SC2086 -e SC2129'
     - name: Lint Any Shell scripts

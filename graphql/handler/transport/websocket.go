@@ -20,6 +20,11 @@ import (
 )
 
 type (
+	// Websocket transport configuration.
+	//
+	// Note: when an OperationInterceptor returns an error instead of calling next(),
+	// it must use graphql.OneShot to ensure the transport doesn't infinitely loop
+	// on a continuous stream of errors.
 	Websocket struct {
 		Upgrader              websocket.Upgrader
 		InitFunc              WebsocketInitFunc

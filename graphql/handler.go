@@ -13,6 +13,9 @@ type (
 	OperationMiddleware func(ctx context.Context, next OperationHandler) ResponseHandler
 	OperationHandler    func(ctx context.Context) ResponseHandler
 
+	// ResponseHandler acts as an iterator for responses. For simple requests, it will
+	// yield a single response and then nil. For streaming requests (like subscriptions),
+	// it can yield multiple responses before returning nil to indicate the end of the stream.
 	ResponseHandler    func(ctx context.Context) *Response
 	ResponseMiddleware func(ctx context.Context, next ResponseHandler) *Response
 
@@ -45,9 +48,8 @@ type (
 	}
 
 	// HandlerExtension adds functionality to the http handler. See the list of possible hook points
-	// below Its important to understand the lifecycle of a graphql request and the terminology we
-	// use in gqlgen
-	// before working with these
+	// below. Its important to understand the lifecycle of a graphql request and the terminology we
+	// use in gqlgen before working with these.
 	//
 	//  +--- REQUEST   POST /graphql --------------------------------------------+
 	//  | +- OPERATION query OpName { viewer { name } } -----------------------+ |
@@ -57,6 +59,10 @@ type (
 	//  | |  RESPONSE  { "data": { "chat": { "message": "byee" } } }           | |
 	//  | +--------------------------------------------------------------------+ |
 	//  +------------------------------------------------------------------------+
+	//
+	// NOTE When aborting the http handler using a HandlerExtension, it is important to use the
+	// graphql.OneShot function to wrap the static response, otherwise streaming transports like
+	// Websockets will spin indefinitely.
 	HandlerExtension interface {
 		// ExtensionName should be a CamelCase string version of the extension which may be shown in
 		// stats and logging.
@@ -82,6 +88,10 @@ type (
 	// OperationInterceptor is called for each incoming query, for basic requests the writer will be
 	// invoked once,
 	// for subscriptions it will be invoked multiple times.
+	//
+	// WARNING: If you choose to short-circuit the request and return an error without calling next(),
+	// you MUST wrap your error response in graphql.OneShot(graphql.ErrorResponse(...)).
+	// Otherwise, streaming transports like WebSockets will loop infinitely.
 	OperationInterceptor interface {
 		InterceptOperation(ctx context.Context, next OperationHandler) ResponseHandler
 	}

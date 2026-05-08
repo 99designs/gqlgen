@@ -220,7 +220,7 @@ func (c *wsConnection) init() bool {
 			ctx, initAckPayload, err = c.InitFunc(c.ctx, c.initPayload)
 			if err != nil {
 				c.sendConnectionError("%s", err.Error())
-				var reason = closeReasonForContext(ctx)
+				reason := closeReasonForContext(ctx)
 				if reason == "" {
 					reason = "terminated"
 				}

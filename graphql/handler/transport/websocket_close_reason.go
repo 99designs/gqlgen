@@ -30,7 +30,7 @@ func WithWebsocketCloseCode(ctx context.Context, v int) context.Context {
 }
 
 func websocketCloseCodeForContext(ctx context.Context) int {
-	var code, ok = ctx.Value(contextKeyWebsocketCloseCode{}).(int)
+	code, ok := ctx.Value(contextKeyWebsocketCloseCode{}).(int)
 	if !ok {
 		return websocket.CloseNormalClosure
 	}

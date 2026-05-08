@@ -148,7 +148,11 @@ func webSocketInit(ctx context.Context, initPayload transport.InitPayload) (cont
 	any := initPayload["authToken"]
 	token, ok := any.(string)
 	if !ok || token == "" {
-		return nil, errors.New("authToken not found in transport payload")
+		// When authentication fails, you can set a custom close code and reason
+		// BEFORE returning the error. Make sure to return the modified context.
+		ctx = transport.WithWebsocketCloseCode(ctx, websocket.ClosePolicyViolation) // 1008
+		ctx = transport.AppendCloseReason(ctx, "missing or invalid authToken")
+		return ctx, nil, errors.New("authToken not found in transport payload")
 	}
 
 	// Perform token verification and authentication...

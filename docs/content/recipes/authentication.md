@@ -143,7 +143,7 @@ import (
 	"github.com/rs/cors"
 )
 
-func webSocketInit(ctx context.Context, initPayload transport.InitPayload) (context.Context, error) {
+func webSocketInit(ctx context.Context, initPayload transport.InitPayload) (context.Context, *transport.InitPayload, error) {
 	// Get the token from payload
 	any := initPayload["authToken"]
 	token, ok := any.(string)
@@ -161,7 +161,7 @@ func webSocketInit(ctx context.Context, initPayload transport.InitPayload) (cont
 	// put it in context
 	ctxNew := context.WithValue(ctx, "username", userId)
 
-	return ctxNew, nil
+	return ctxNew, nil, nil
 }
 
 const defaultPort = "8080"
@@ -190,9 +190,7 @@ func main() {
 				return true
 			},
 		},
-		InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, error) {
-			return webSocketInit(ctx, initPayload)
-		},
+		InitFunc: transport.WebsocketInitFunc(webSocketInit),
 	})
 	srv.AddTransport(transport.POST{})
 	srv.Use(extension.Introspection{})

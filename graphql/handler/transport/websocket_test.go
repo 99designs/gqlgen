@@ -455,7 +455,7 @@ func TestWebSocketErrorFunc(t *testing.T) {
 			ErrorFunc: func(_ context.Context, err error) {
 				require.EqualError(t, err, "websocket read: invalid message received")
 
-				var websocketError *transport.WebsocketError
+				var websocketError transport.WebsocketError
 				require.ErrorAs(t, err, &websocketError)
 				require.True(t, websocketError.IsReadError)
 				require.NotNil(t, websocketError.Unwrap())

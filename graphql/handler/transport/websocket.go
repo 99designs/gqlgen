@@ -94,6 +94,10 @@ func (e WebsocketError) Error() string {
 	return fmt.Sprintf("websocket write: %v", e.Err)
 }
 
+func (e WebsocketError) Unwrap() error {
+	return e.Err
+}
+
 var (
 	_ graphql.Transport = Websocket{}
 	_ error             = WebsocketError{}

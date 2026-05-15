@@ -44,4 +44,31 @@ func TestDirectiveParsing(t *testing.T) {
 		field3 := cfg.Models["MyType"].Fields["field3"]
 		require.Nil(t, field3.AutoBindGetterHaser)
 	})
+
+	t.Run("batch argument in goField", func(t *testing.T) {
+		cfg := Config{
+			Models:     TypeMap{},
+			Directives: map[string]DirectiveConfig{},
+		}
+
+		cfg.Schema = gqlparser.MustLoadSchema(&ast.Source{Name: "schema.graphql", Input: `
+			directive @goField(batch: Boolean) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
+			type MyType {
+				batchNull: String @goField(batch: null)
+				batchTrue: String @goField(batch: true)
+				batchFalse: String @goField(batch: false)
+				noBatch: String
+			}
+		`})
+
+		err := cfg.injectTypesFromSchema()
+		require.NoError(t, err)
+
+		m := cfg.Models["MyType"]
+		require.False(t, m.Fields["batchNull"].Batch)
+		require.True(t, m.Fields["batchTrue"].Batch)
+		require.False(t, m.Fields["batchFalse"].Batch)
+		require.False(t, m.Fields["noBatch"].Batch)
+	})
 }

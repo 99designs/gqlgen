@@ -502,7 +502,9 @@ func (c *Config) injectGoFieldDirectives(schemaType *ast.Definition) error {
 
 		if arg := fd.Arguments.ForName(DirArgBatch); arg != nil {
 			if k, err := arg.Value.Value(nil); err == nil {
-				typeMapFieldEntry.Batch = k.(bool)
+				if val, ok := k.(bool); ok {
+					typeMapFieldEntry.Batch = val
+				}
 			}
 		}
 

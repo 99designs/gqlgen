@@ -458,7 +458,7 @@ func TestWebSocketErrorFunc(t *testing.T) {
 				var websocketError transport.WebsocketError
 				require.ErrorAs(t, err, &websocketError)
 				require.True(t, websocketError.IsReadError)
-				require.NotNil(t, websocketError.Unwrap())
+				require.Error(t, websocketError.Unwrap())
 
 				errFuncCalled <- true
 			},

@@ -21,7 +21,7 @@ jobs:
         workflow: ${{ github.event.workflow.id }}
         run_id: ${{ github.event.workflow_run.id }}
     - name: Publish Test Report
-      uses: mikepenz/action-junit-report@bccf2e31636835cf0874589931c4116687171386 # v5
+      uses: mikepenz/action-junit-report@3a81627bfac62268172037048872e8ebd4207e6d # v5
       with:
         commit: ${{github.event.workflow_run.head_sha}}
         report_paths: '**/*.xml'

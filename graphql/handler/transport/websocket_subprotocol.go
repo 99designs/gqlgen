@@ -74,7 +74,3 @@ func (t messageType) String() string {
 	}
 	return text
 }
-
-func websocketSubprotocols() []string {
-	return append([]string(nil), supportedSubprotocols...)
-}

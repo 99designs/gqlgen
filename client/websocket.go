@@ -74,13 +74,17 @@ func (p *Client) WebsocketWithPayload(
 
 	srv := httptest.NewServer(p.h)
 	host := strings.ReplaceAll(srv.URL, "http://", "ws://")
-	c, _, err := websocket.Dial(context.Background(), host+r.URL.Path, &websocket.DialOptions{
+	c, resp, err := websocket.Dial(context.Background(), host+r.URL.Path, &websocket.DialOptions{
 		HTTPHeader: r.Header,
 	})
 	if err != nil {
+		if resp != nil && resp.Body != nil {
+			_ = resp.Body.Close()
+		}
 		srv.Close()
 		return errorSubscription(fmt.Errorf("dial: %w", err))
 	}
+
 	closeFn := func() error {
 		srv.Close()
 		return c.CloseNow()

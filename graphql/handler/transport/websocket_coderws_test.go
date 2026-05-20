@@ -27,20 +27,20 @@ func TestCoderWebsocketImplementation(t *testing.T) {
 	defer srv.Close()
 
 	ctx := context.Background()
-	c := coderwsDial(t, ctx, srv.URL)
+	c := coderwsDial(ctx, t, srv.URL)
 	defer c.CloseNow()
 
-	coderwsWriteOperation(t, ctx, c, operationMessage{Type: graphqltransportwsConnectionInitMsg})
-	assert.Equal(t, graphqltransportwsConnectionAckMsg, coderwsReadOperation(t, ctx, c).Type)
+	coderwsWriteOperation(ctx, t, c, operationMessage{Type: graphqltransportwsConnectionInitMsg})
+	assert.Equal(t, graphqltransportwsConnectionAckMsg, coderwsReadOperation(ctx, t, c).Type)
 
-	coderwsWriteOperation(t, ctx, c, operationMessage{
+	coderwsWriteOperation(ctx, t, c, operationMessage{
 		Type:    graphqltransportwsSubscribeMsg,
 		ID:      "test_1",
 		Payload: json.RawMessage(`{"query": "subscription { name }"}`),
 	})
 
 	h.SendNextSubscriptionMessage()
-	msg := coderwsReadOperation(t, ctx, c)
+	msg := coderwsReadOperation(ctx, t, c)
 	require.Equal(t, graphqltransportwsNextMsg, msg.Type, string(msg.Payload))
 	require.Equal(t, "test_1", msg.ID, string(msg.Payload))
 	require.JSONEq(t, `{"data":{"name":"test"}}`, string(msg.Payload))
@@ -60,12 +60,12 @@ func TestCoderWebsocketImplementationPreservesAcceptOptionsSubprotocolPreference
 	defer srv.Close()
 
 	ctx := context.Background()
-	c := coderwsDial(t, ctx, srv.URL, "graphql-ws", graphqltransportwsSubprotocol)
+	c := coderwsDial(ctx, t, srv.URL, "graphql-ws", graphqltransportwsSubprotocol)
 	defer c.CloseNow()
 
 	require.Equal(t, graphqltransportwsSubprotocol, c.Subprotocol())
-	coderwsWriteOperation(t, ctx, c, operationMessage{Type: graphqltransportwsConnectionInitMsg})
-	assert.Equal(t, graphqltransportwsConnectionAckMsg, coderwsReadOperation(t, ctx, c).Type)
+	coderwsWriteOperation(ctx, t, c, operationMessage{Type: graphqltransportwsConnectionInitMsg})
+	assert.Equal(t, graphqltransportwsConnectionAckMsg, coderwsReadOperation(ctx, t, c).Type)
 }
 
 func TestCoderWebsocketImplementationEnforcesReadDeadline(t *testing.T) {
@@ -84,12 +84,12 @@ func TestCoderWebsocketImplementationEnforcesReadDeadline(t *testing.T) {
 	defer srv.Close()
 
 	ctx := context.Background()
-	c := coderwsDial(t, ctx, srv.URL)
+	c := coderwsDial(ctx, t, srv.URL)
 	defer c.CloseNow()
 
-	coderwsWriteOperation(t, ctx, c, operationMessage{Type: graphqltransportwsConnectionInitMsg})
-	assert.Equal(t, graphqltransportwsConnectionAckMsg, coderwsReadOperation(t, ctx, c).Type)
-	assert.Equal(t, graphqltransportwsPingMsg, coderwsReadOperation(t, ctx, c).Type)
+	coderwsWriteOperation(ctx, t, c, operationMessage{Type: graphqltransportwsConnectionInitMsg})
+	assert.Equal(t, graphqltransportwsConnectionAckMsg, coderwsReadOperation(ctx, t, c).Type)
+	assert.Equal(t, graphqltransportwsPingMsg, coderwsReadOperation(ctx, t, c).Type)
 
 	select {
 	case res := <-closeFuncCalled:
@@ -99,7 +99,12 @@ func TestCoderWebsocketImplementationEnforcesReadDeadline(t *testing.T) {
 	}
 }
 
-func coderwsDial(t *testing.T, ctx context.Context, url string, subprotocols ...string) *coderws.Conn {
+func coderwsDial(
+	ctx context.Context,
+	t *testing.T,
+	url string,
+	subprotocols ...string,
+) *coderws.Conn {
 	t.Helper()
 
 	if len(subprotocols) == 0 {
@@ -107,17 +112,20 @@ func coderwsDial(t *testing.T, ctx context.Context, url string, subprotocols ...
 	}
 
 	wsURL := strings.ReplaceAll(url, "http://", "ws://")
-	c, _, err := coderws.Dial(ctx, wsURL, &coderws.DialOptions{
+	c, resp, err := coderws.Dial(ctx, wsURL, &coderws.DialOptions{
 		Subprotocols: subprotocols,
 	})
 	require.NoError(t, err)
+	if resp != nil && resp.Body != nil {
+		require.NoError(t, resp.Body.Close())
+	}
 
 	return c
 }
 
 func coderwsWriteOperation(
-	t *testing.T,
 	ctx context.Context,
+	t *testing.T,
 	c *coderws.Conn,
 	msg operationMessage,
 ) {
@@ -128,7 +136,7 @@ func coderwsWriteOperation(
 	require.NoError(t, c.Write(ctx, coderws.MessageText, data))
 }
 
-func coderwsReadOperation(t *testing.T, ctx context.Context, c *coderws.Conn) operationMessage {
+func coderwsReadOperation(ctx context.Context, t *testing.T, c *coderws.Conn) operationMessage {
 	t.Helper()
 
 	messageType, r, err := c.Reader(ctx)

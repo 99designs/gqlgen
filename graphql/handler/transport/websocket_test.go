@@ -487,7 +487,7 @@ func TestWebSocketErrorFunc(t *testing.T) {
 		}
 	})
 
-	t.Run("normal gorilla websocket close errors do not call the error handler", func(t *testing.T) {
+	t.Run("normal close errors do not call the error handler", func(t *testing.T) {
 		errFuncCalled := make(chan error, 1)
 		h := testserver.New()
 		h.AddTransport(transport.Websocket{

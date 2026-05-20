@@ -27,6 +27,7 @@ type (
 	// on a continuous stream of errors.
 	Websocket struct {
 		// Upgrader configures the legacy Gorilla websocket upgrader.
+		//
 		// Deprecated: Please use the Implementation field instead.
 		Upgrader websocket.Upgrader
 
@@ -120,7 +121,7 @@ func (t Websocket) Supports(r *http.Request) bool {
 func (t Websocket) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
 	ws, err := t.websocketImplementation().Accept(w, r, WebsocketAcceptOptions{
 		ResponseHeader: http.Header{},
-		Subprotocols:   websocketSubprotocols(),
+		Subprotocols:   supportedSubprotocols,
 	})
 	if err != nil {
 		log.Printf("unable to upgrade %T to websocket %s: ", w, err.Error())

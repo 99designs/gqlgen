@@ -35,7 +35,7 @@ require (
 
 require (
 	github.com/pkg/errors v0.9.1 // indirect
-	golang.org/x/text v0.36.0
+	golang.org/x/text v0.37.0
 )
 
 replace github.com/gorilla/websocket => github.com/gorilla/websocket v1.5.0

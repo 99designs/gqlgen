@@ -75,11 +75,34 @@ The WebSocket transport is complex, and for any non-trivial application you will
 configure it. The transport handles this configuration by setting fields on the `transport.Websocket`
 struct. For an in-depth look at all configuration options, [explore the implementation][code].
 
-At it's most basic, the transport uses [`github.com/gorilla/websocket`][gorilla] to implement
-a WebSocket connection that sets up the subscription and then sends data to the client from
+At its most basic, the transport sets up the subscription and then sends data to the client from
 the Go channel returned by the resolver. The initial handshake and the structure of the data
-payloads are defined by one of two protocols: `graphql-ws` or `graphql-transport-ws` Which
+payloads are defined by one of two protocols: `graphql-ws` or `graphql-transport-ws`. Which
 one is used is negotiated by the client, defaulting to [`graphql-ws`][graphql-ws].
+
+For backwards compatibility, gqlgen still uses [`github.com/gorilla/websocket`][gorilla] by
+default. Gorilla is no longer maintained, so the Gorilla-backed default and `Upgrader`
+field are deprecated. Gorilla users should migrate to other maintained implementations
+such as github.com/coder/websocket.
+
+```go
+import (
+	"time"
+
+	coderws "github.com/coder/websocket"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+)
+
+srv.AddTransport(transport.Websocket{
+	KeepAlivePingInterval: 10 * time.Second,
+	Implementation: transport.CoderWebsocketImplementation{
+		AcceptOptions: coderws.AcceptOptions{
+			OriginPatterns: []string{"https://ui.mysite.com"},
+			Subprotocols:  []string{"graphql-transport-ws", "graphql-ws"},
+		},
+	},
+})
+```
 
 A minimal WebSocket configuration will handle two basic things: keep-alives and security
 checks that are normally handled by HTTP middleware that may not be available or compatible
@@ -97,10 +120,12 @@ srv.AddTransport(transport.Websocket{
 	// long since walked to the kitchen to make a sandwich instead.
 	KeepAlivePingInterval: 10 * time.Second,
 
-	// The `github.com/gorilla/websocket.Upgrader` is used to handle the transition
-	// from an HTTP connection to a WebSocket connection. Among other options, here
-	// you must check the origin of the request to prevent cross-site request forgery
-	// attacks.
+	// The Gorilla-specific Upgrader field remains supported for backwards
+	// compatibility. New applications should prefer Implementation with an
+	// adapter for their chosen websocket implementation.
+	//
+	// Among other options, you must check the origin of the request to prevent
+	// cross-site request forgery attacks.
 	Upgrader: websocket.Upgrader{
 		CheckOrigin: func(r *http.Request) bool {
 				// Allow exact match on host.
@@ -140,11 +165,13 @@ srv.AddTransport(transport.Websocket{
 })
 ```
 
-When a client sends a message that exceeds the limit, gorilla/websocket closes the connection
-immediately without processing the payload.
+When a client sends a message that exceeds the limit, the default Gorilla-backed adapter closes
+the connection immediately without processing the payload. Custom websocket adapters should
+implement `transport.WebsocketReadLimiter` to preserve this behavior.
 
 [code]: https://github.com/99designs/gqlgen/blob/master/graphql/handler/transport/websocket.go
 [gorilla]: https://pkg.go.dev/github.com/gorilla/websocket
+[coder-websocket]: https://pkg.go.dev/github.com/coder/websocket
 [graphql-ws]: https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md
 
 ## Adding Subscriptions to your Schema

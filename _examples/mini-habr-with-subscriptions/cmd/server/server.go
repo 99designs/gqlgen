@@ -3,18 +3,18 @@ package server
 import (
 	"net/http"
 	"os"
-	"slices"
 	"time"
 
-	"github.com/gorilla/websocket"
+	"github.com/coder/websocket"
+	"github.com/rs/zerolog/log"
+	"github.com/vektah/gqlparser/v2/ast"
+
 	"github.com/gqlgen/_examples/mini-habr-with-subscriptions/graph"
 	commentmutation "github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/handlers/comment_mutation"
 	commentquery "github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/handlers/comment_query"
 	postmutation "github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/handlers/post_mutation"
 	postquery "github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/handlers/post_query"
 	"github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/storage"
-	"github.com/rs/zerolog/log"
-	"github.com/vektah/gqlparser/v2/ast"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
@@ -55,16 +55,9 @@ func RunServer(storage storage.StorageImp) {
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.Websocket{
 		KeepAlivePingInterval: 10 * time.Second,
-		Upgrader: websocket.Upgrader{
-			CheckOrigin: func(r *http.Request) bool {
-				origin := r.Header.Get("Origin")
-				if origin == "" || origin == r.Header.Get("Host") {
-					return true
-				}
-				return slices.Contains(
-					[]string{"http://localhost:8080", "https://ozonhabr.com"},
-					origin,
-				)
+		Implementation: transport.CoderWebsocketImplementation{
+			AcceptOptions: websocket.AcceptOptions{
+				OriginPatterns: []string{"http://localhost:8080", "https://ozonhabr.com"},
 			},
 		},
 	})

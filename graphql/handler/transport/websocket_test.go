@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -24,6 +25,8 @@ import (
 )
 
 type ckey string
+
+var _ transport.WebsocketImplementation = transport.GorillaWebsocketImplementation{}
 
 func TestWebsocket(t *testing.T) {
 	handler := testserver.New()
@@ -484,6 +487,36 @@ func TestWebSocketErrorFunc(t *testing.T) {
 		}
 	})
 
+	t.Run("normal close errors do not call the error handler", func(t *testing.T) {
+		errFuncCalled := make(chan error, 1)
+		h := testserver.New()
+		h.AddTransport(transport.Websocket{
+			ErrorFunc: func(_ context.Context, err error) {
+				errFuncCalled <- err
+			},
+		})
+
+		srv := httptest.NewServer(h)
+		defer srv.Close()
+
+		c := wsConnect(srv.URL)
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
+		assert.Equal(t, connectionAckMsg, readOp(c).Type)
+		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
+		require.NoError(t, c.WriteMessage(
+			websocket.CloseMessage,
+			websocket.FormatCloseMessage(websocket.CloseNormalClosure, "bye"),
+		))
+		defer c.Close()
+
+		select {
+		case err := <-errFuncCalled:
+			assert.Fail(t, "The error handler was called for a normal websocket close", err.Error())
+		case <-time.NewTimer(time.Millisecond * 20).C:
+			// ok
+		}
+	})
+
 	t.Run("init func errors do not call the error handler", func(t *testing.T) {
 		h := testserver.New()
 		h.AddTransport(transport.Websocket{
@@ -775,6 +808,30 @@ func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {
 	})
 }
 
+func TestWebsocketWithCustomImplementation(t *testing.T) {
+	customImplementation := &customWebsocketImplementation{}
+	h := testserver.New()
+	h.AddTransport(transport.Websocket{
+		Upgrader:       websocket.Upgrader{Subprotocols: []string{"gorilla-only"}},
+		Implementation: customImplementation,
+	})
+
+	srv := httptest.NewServer(h)
+	defer srv.Close()
+
+	c := wsConnectWithSubprotocol(srv.URL, graphqltransportwsSubprotocol)
+	defer c.Close()
+
+	require.NoError(
+		t,
+		c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}),
+	)
+	assert.Equal(t, graphqltransportwsConnectionAckMsg, readOp(c).Type)
+	assert.Contains(t, customImplementation.subprotocols, "graphql-ws")
+	assert.Contains(t, customImplementation.subprotocols, graphqltransportwsSubprotocol)
+	assert.NotContains(t, customImplementation.subprotocols, "gorilla-only")
+}
+
 func TestWebsocketWithPingPongInterval(t *testing.T) {
 	initialize := func(ws transport.Websocket) (*testserver.TestServer, *httptest.Server) {
 		h := testserver.New()
@@ -1052,4 +1109,49 @@ type operationMessage struct {
 	Payload json.RawMessage `json:"payload,omitempty"`
 	ID      string          `json:"id,omitempty"`
 	Type    string          `json:"type"`
+}
+
+type customWebsocketImplementation struct {
+	subprotocols []string
+}
+
+func (u *customWebsocketImplementation) Accept(
+	w http.ResponseWriter,
+	r *http.Request,
+	options transport.WebsocketAcceptOptions,
+) (transport.WebsocketConn, error) {
+	u.subprotocols = append([]string(nil), options.Subprotocols...)
+	upgrader := websocket.Upgrader{
+		Subprotocols: options.Subprotocols,
+	}
+	conn, err := upgrader.Upgrade(w, r, options.ResponseHeader)
+	if err != nil {
+		return nil, err
+	}
+
+	return customWebsocketConn{Conn: conn}, nil
+}
+
+type customWebsocketConn struct {
+	*websocket.Conn
+}
+
+func (c customWebsocketConn) NextReader() (int, io.Reader, error) {
+	messageType, r, err := c.Conn.NextReader()
+	if err != nil && websocket.IsCloseError(
+		err,
+		transport.WebsocketCloseNormalClosure,
+		transport.WebsocketCloseNoStatusReceived,
+	) {
+		return messageType, r, transport.ErrWebsocketClosed
+	}
+
+	return messageType, r, err
+}
+
+func (c customWebsocketConn) WriteClose(closeCode int, message string) error {
+	return c.WriteMessage(
+		websocket.CloseMessage,
+		websocket.FormatCloseMessage(closeCode, message),
+	)
 }

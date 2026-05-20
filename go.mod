@@ -22,7 +22,10 @@ require (
 	google.golang.org/protobuf v1.36.11
 )
 
-require golang.org/x/sync v0.20.0
+require (
+	github.com/coder/websocket v1.8.14
+	golang.org/x/sync v0.20.0
+)
 
 require (
 	github.com/agnivade/levenshtein v1.2.1 // indirect

@@ -3,8 +3,6 @@ package transport
 import (
 	"encoding/json"
 	"fmt"
-
-	"github.com/gorilla/websocket"
 )
 
 // https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md
@@ -38,7 +36,7 @@ var allGraphqlwsMessageTypes = []graphqlwsMessageType{
 
 type (
 	graphqlwsMessageExchanger struct {
-		c *websocket.Conn
+		c WebsocketConn
 	}
 
 	graphqlwsMessage struct {
@@ -54,7 +52,7 @@ type (
 func (me graphqlwsMessageExchanger) NextMessage() (message, error) {
 	_, r, err := me.c.NextReader()
 	if err != nil {
-		return message{}, handleNextReaderError(err)
+		return message{}, err
 	}
 
 	var graphqlwsMessage graphqlwsMessage

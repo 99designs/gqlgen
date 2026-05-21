@@ -114,6 +114,52 @@ They will be returned in the same order in the response, eg:
 }
 ```
 
+### Returning errors from extensions
+
+When writing a HandlerExtension (such as for rate limiting or authentication),
+you might want to short-circuit the request and return an error without executing
+the query.
+
+When doing so, you must wrap your error response using `graphql.OneShot`.
+Since streaming transports like WebSockets or Server-Sent Events expect a stream
+of responses ending in `nil`, returning a bare closure that always yields the
+error will cause the transport to loop infinitely and spam the client, or
+cause high CPU consumption and flood logs.
+
+```go
+package foo
+
+import (
+	"context"
+
+	"github.com/99designs/gqlgen/graphql"
+	"github.com/vektah/gqlparser/v2/gqlerror"
+)
+
+type MyInterceptor struct{}
+
+func (m MyInterceptor) ExtensionName() string {
+	return "MyInterceptor"
+}
+
+func (m MyInterceptor) Validate(schema graphql.ExecutableSchema) error {
+	return nil
+}
+
+func (m MyInterceptor) InterceptOperation(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+	if !isAuthorized(ctx) {
+		err := gqlerror.Errorf("unauthorized")
+		// ALWAYS use graphql.OneShot when short-circuiting a request!
+		return graphql.OneShot(graphql.ErrorResponse(ctx, err.Message))
+	}
+	return next(ctx)
+}
+
+func isAuthorized(ctx context.Context) bool {
+    return false // implement authorization logic here
+}
+```
+
 ## Hooks
 
 ### The error presenter

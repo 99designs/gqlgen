@@ -15,14 +15,17 @@ require (
 	github.com/mattn/go-isatty v0.0.21
 	github.com/sosodev/duration v1.4.0
 	github.com/stretchr/testify v1.11.1
-	github.com/urfave/cli/v3 v3.8.0
+	github.com/urfave/cli/v3 v3.9.0
 	github.com/vektah/gqlparser/v2 v2.5.33
 	golang.org/x/text v0.36.0
 	golang.org/x/tools v0.44.0
 	google.golang.org/protobuf v1.36.11
 )
 
-require golang.org/x/sync v0.20.0
+require (
+	github.com/coder/websocket v1.8.14
+	golang.org/x/sync v0.20.0
+)
 
 require (
 	github.com/agnivade/levenshtein v1.2.1 // indirect

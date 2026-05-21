@@ -20,8 +20,22 @@ import (
 )
 
 type (
+	// Websocket transport configuration.
+	//
+	// Note: when an OperationInterceptor returns an error instead of calling next(),
+	// it must use graphql.OneShot to ensure the transport doesn't infinitely loop
+	// on a continuous stream of errors.
 	Websocket struct {
-		Upgrader              websocket.Upgrader
+		// Upgrader configures the legacy Gorilla websocket upgrader.
+		//
+		// Deprecated: Please use the Implementation field instead.
+		Upgrader websocket.Upgrader
+
+		// Implementation accepts HTTP requests as websocket connections. If nil,
+		// gqlgen uses a Gorilla-backed implementation built from Upgrader for
+		// backwards compatibility.
+		Implementation WebsocketImplementation
+
 		InitFunc              WebsocketInitFunc
 		InitTimeout           time.Duration
 		ErrorFunc             WebsocketErrorFunc
@@ -41,14 +55,13 @@ type (
 
 		// PayloadReadLimit is the maximum size in bytes of a WebSocket message read from the client.
 		// If nil, defaults to 1 MB. Set to a pointer of -1 to disable the limit entirely.
+		// Custom websocket adapters must implement WebsocketReadLimiter to enforce this limit.
 		PayloadReadLimit *int64
-
-		didInjectSubprotocols bool
 	}
 	wsConnection struct {
 		Websocket
 		ctx             context.Context
-		conn            *websocket.Conn
+		conn            WebsocketConn
 		me              messageExchanger
 		active          map[string]context.CancelFunc
 		mu              sync.Mutex
@@ -75,6 +88,9 @@ const defaultPayloadReadLimit = 1024 * 1024 // 1 MB
 
 var errReadTimeout = errors.New("read timeout")
 
+// ErrWebsocketClosed indicates that the peer closed the websocket connection.
+var ErrWebsocketClosed = errors.New("websocket connection closed")
+
 type WebsocketError struct {
 	Err error
 
@@ -89,6 +105,10 @@ func (e WebsocketError) Error() string {
 	return fmt.Sprintf("websocket write: %v", e.Err)
 }
 
+func (e WebsocketError) Unwrap() error {
+	return e.Err
+}
+
 var (
 	_ graphql.Transport = Websocket{}
 	_ error             = WebsocketError{}
@@ -99,8 +119,10 @@ func (t Websocket) Supports(r *http.Request) bool {
 }
 
 func (t Websocket) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecutor) {
-	t.injectGraphQLWSSubprotocols()
-	ws, err := t.Upgrader.Upgrade(w, r, http.Header{})
+	ws, err := t.websocketImplementation().Accept(w, r, WebsocketAcceptOptions{
+		ResponseHeader: http.Header{},
+		Subprotocols:   supportedSubprotocols,
+	})
 	if err != nil {
 		log.Printf("unable to upgrade %T to websocket %s: ", w, err.Error())
 		SendErrorf(w, http.StatusBadRequest, "unable to upgrade")
@@ -110,11 +132,10 @@ func (t Websocket) Do(w http.ResponseWriter, r *http.Request, exec graphql.Graph
 	var me messageExchanger
 	switch ws.Subprotocol() {
 	default:
-		msg := websocket.FormatCloseMessage(
-			websocket.CloseProtocolError,
+		_ = ws.WriteClose(
+			WebsocketCloseProtocolError,
 			fmt.Sprintf("unsupported negotiated subprotocol %s", ws.Subprotocol()),
 		)
-		_ = ws.WriteMessage(websocket.CloseMessage, msg)
 		return
 	case graphqlwsSubprotocol, "":
 		// clients are required to send a subprotocol, to be backward compatible with the previous
@@ -130,7 +151,9 @@ func (t Websocket) Do(w http.ResponseWriter, r *http.Request, exec graphql.Graph
 		readLimit = *t.PayloadReadLimit
 	}
 	if readLimit > 0 {
-		ws.SetReadLimit(readLimit)
+		if limiter, ok := ws.(WebsocketReadLimiter); ok {
+			limiter.SetReadLimit(readLimit)
+		}
 	}
 
 	conn := wsConnection{
@@ -148,6 +171,14 @@ func (t Websocket) Do(w http.ResponseWriter, r *http.Request, exec graphql.Graph
 	}
 
 	conn.run()
+}
+
+func (t Websocket) websocketImplementation() WebsocketImplementation {
+	if t.Implementation != nil {
+		return t.Implementation
+	}
+
+	return gorillaWebsocketImplementation{Upgrader: t.Upgrader}
 }
 
 func (c *wsConnection) handlePossibleError(err error, isReadError bool) {
@@ -192,7 +223,7 @@ func (c *wsConnection) init() bool {
 
 	if err != nil {
 		if err == errReadTimeout {
-			c.close(websocket.CloseProtocolError, "connection initialisation timeout")
+			c.close(WebsocketCloseProtocolError, "connection initialisation timeout")
 			return false
 		}
 
@@ -200,7 +231,7 @@ func (c *wsConnection) init() bool {
 			c.sendConnectionError("invalid json")
 		}
 
-		c.close(websocket.CloseProtocolError, "decoding error")
+		c.close(WebsocketCloseProtocolError, "decoding error")
 		return false
 	}
 
@@ -241,11 +272,11 @@ func (c *wsConnection) init() bool {
 		}
 		c.write(&message{t: keepAliveMessageType})
 	case connectionCloseMessageType:
-		c.close(websocket.CloseNormalClosure, "terminated")
+		c.close(WebsocketCloseNormalClosure, "terminated")
 		return false
 	default:
 		c.sendConnectionError("unexpected message %s", m.t)
-		c.close(websocket.CloseProtocolError, "unexpected message")
+		c.close(WebsocketCloseProtocolError, "unexpected message")
 		return false
 	}
 
@@ -297,7 +328,7 @@ func (c *wsConnection) run() {
 		if !c.MissingPongOk {
 			// Note: when the connection is closed by this deadline, the client
 			// will receive an "invalid close code"
-			_ = c.conn.SetReadDeadline(time.Now().UTC().Add(2 * c.PingPongInterval))
+			c.setReadDeadline(time.Now().UTC().Add(2 * c.PingPongInterval))
 		}
 		go c.ping(ctx)
 	}
@@ -311,7 +342,7 @@ func (c *wsConnection) run() {
 		m, err := c.me.NextMessage()
 		if err != nil {
 			// If the connection got closed by us, don't report the error
-			if !errors.Is(err, net.ErrClosed) {
+			if !errors.Is(err, net.ErrClosed) && !errors.Is(err, ErrWebsocketClosed) {
 				c.handlePossibleError(err, true)
 			}
 			return
@@ -328,7 +359,7 @@ func (c *wsConnection) run() {
 				closer()
 			}
 		case connectionCloseMessageType:
-			c.close(websocket.CloseNormalClosure, "terminated")
+			c.close(WebsocketCloseNormalClosure, "terminated")
 			return
 		case pingMessageType:
 			c.write(&message{t: pongMessageType, payload: m.payload})
@@ -337,12 +368,18 @@ func (c *wsConnection) run() {
 			c.receivedPong = true
 			c.mu.Unlock()
 			// Clear ReadTimeout -- 0 time val clears.
-			_ = c.conn.SetReadDeadline(time.Time{})
+			c.setReadDeadline(time.Time{})
 		default:
 			c.sendConnectionError("unexpected message %s", m.t)
-			c.close(websocket.CloseProtocolError, "unexpected message")
+			c.close(WebsocketCloseProtocolError, "unexpected message")
 			return
 		}
+	}
+}
+
+func (c *wsConnection) setReadDeadline(t time.Time) {
+	if deadliner, ok := c.conn.(WebsocketReadDeadliner); ok {
+		_ = deadliner.SetReadDeadline(t)
 	}
 }
 
@@ -382,7 +419,7 @@ func (c *wsConnection) ping(ctx context.Context) {
 			// if we have not yet received a pong, don't reset the deadline.
 			c.mu.Lock()
 			if !c.MissingPongOk && c.receivedPong {
-				_ = c.conn.SetReadDeadline(time.Now().UTC().Add(2 * c.PingPongInterval))
+				c.setReadDeadline(time.Now().UTC().Add(2 * c.PingPongInterval))
 			}
 			c.receivedPong = false
 			c.mu.Unlock()
@@ -396,7 +433,7 @@ func (c *wsConnection) closeOnCancel(ctx context.Context) {
 	if r := closeReasonForContext(ctx); r != "" {
 		c.sendConnectionError("%s", r)
 	}
-	c.close(websocket.CloseNormalClosure, "terminated")
+	c.close(WebsocketCloseNormalClosure, "terminated")
 }
 
 func (c *wsConnection) subscribe(start time.Time, msg *message) {
@@ -522,10 +559,7 @@ func (c *wsConnection) close(closeCode int, message string) {
 		c.mu.Unlock()
 		return
 	}
-	_ = c.conn.WriteMessage(
-		websocket.CloseMessage,
-		websocket.FormatCloseMessage(closeCode, message),
-	)
+	_ = c.conn.WriteClose(closeCode, message)
 	for _, closer := range c.active {
 		closer()
 	}

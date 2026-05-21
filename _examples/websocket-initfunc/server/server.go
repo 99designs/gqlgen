@@ -8,10 +8,11 @@ import (
 	"os"
 	"time"
 
-	"github.com/go-chi/chi"
-	"github.com/gorilla/websocket"
-	"github.com/gqlgen/_examples/websocket-initfunc/server/graph"
+	"github.com/coder/websocket"
+	"github.com/go-chi/chi/v5"
 	"github.com/rs/cors"
+
+	"github.com/gqlgen/_examples/websocket-initfunc/server/graph"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
@@ -61,9 +62,9 @@ func main() {
 	srv.AddTransport(transport.POST{})
 	srv.AddTransport(transport.Websocket{
 		KeepAlivePingInterval: 10 * time.Second,
-		Upgrader: websocket.Upgrader{
-			CheckOrigin: func(r *http.Request) bool {
-				return true
+		Implementation: transport.CoderWebsocketImplementation{
+			AcceptOptions: websocket.AcceptOptions{
+				InsecureSkipVerify: true,
 			},
 		},
 		InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, *transport.InitPayload, error) {

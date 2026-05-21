@@ -6,10 +6,10 @@ replace github.com/99designs/gqlgen => ../
 
 require (
 	github.com/99designs/gqlgen v0.17.89
+	github.com/coder/websocket v1.8.14
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/goccy/go-yaml v1.19.2
 	github.com/google/uuid v1.6.0
-	github.com/gorilla/websocket v1.5.1
 	github.com/rs/cors v1.11.1
 	github.com/stretchr/testify v1.11.1
 	github.com/vektah/dataloaden v0.3.0
@@ -20,6 +20,7 @@ require (
 require (
 	github.com/agnivade/levenshtein v1.2.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/gorilla/websocket v1.5.1 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/logrusorgru/aurora/v4 v4.0.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
@@ -34,7 +35,7 @@ require (
 
 require (
 	github.com/pkg/errors v0.9.1 // indirect
-	golang.org/x/text v0.36.0
+	golang.org/x/text v0.37.0
 )
 
 replace github.com/gorilla/websocket => github.com/gorilla/websocket v1.5.0

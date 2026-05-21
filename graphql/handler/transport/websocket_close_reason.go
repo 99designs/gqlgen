@@ -2,8 +2,6 @@ package transport
 
 import (
 	"context"
-
-	"github.com/gorilla/websocket"
 )
 
 // A private key for context that only this package can access. This is important
@@ -32,7 +30,7 @@ func WithWebsocketCloseCode(ctx context.Context, v int) context.Context {
 func websocketCloseCodeForContext(ctx context.Context) int {
 	code, ok := ctx.Value(contextKeyWebsocketCloseCode{}).(int)
 	if !ok {
-		return websocket.CloseNormalClosure
+		return WebsocketCloseNormalClosure
 	}
 	return code
 }

@@ -9,9 +9,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/PuerkitoBio/goquery"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/net/html"
 )
 
 func testResourceIntegrity(t *testing.T, handler func(title, endpoint string) http.HandlerFunc) {
@@ -26,17 +26,11 @@ func testResourceIntegrity(t *testing.T, handler func(title, endpoint string) ht
 	assert.Equal(t, http.StatusOK, res.StatusCode)
 	assert.True(t, strings.HasPrefix(res.Header.Get("Content-Type"), "text/html"))
 
-	doc, err := goquery.NewDocumentFromReader(res.Body)
+	doc, err := html.Parse(res.Body)
 	require.NoError(t, err)
 	assert.NotNil(t, doc)
 
-	var baseUrl string
-	if base := doc.Find("base"); len(base.Nodes) != 0 {
-		if value, exists := base.Attr("href"); exists {
-			baseUrl = value
-		}
-	}
-
+	baseUrl := findBaseRef(doc)
 	assertNodesIntegrity(t, baseUrl, doc, "script", "src", "integrity")
 	assertNodesIntegrity(t, baseUrl, doc, "link", "href", "integrity")
 }
@@ -44,36 +38,62 @@ func testResourceIntegrity(t *testing.T, handler func(title, endpoint string) ht
 func assertNodesIntegrity(
 	t *testing.T,
 	baseUrl string,
-	doc *goquery.Document,
-	selector, urlAttrKey, integrityAttrKey string,
+	root *html.Node,
+	tagName, urlAttrKey, integrityAttrKey string,
 ) {
 	t.Helper()
-	selection := doc.Find(selector)
-	for _, node := range selection.Nodes {
-		var url string
-		var integrity string
-		for _, attribute := range node.Attr {
-			switch attribute.Key {
-			case urlAttrKey:
-				url = attribute.Val
-			case integrityAttrKey:
-				integrity = attribute.Val
+
+	var walk func(*html.Node)
+	walk = func(n *html.Node) {
+		if n.Type == html.ElementNode && n.Data == tagName {
+			url, _ := getAttr(n, urlAttrKey)
+			integrity, found := getAttr(n, integrityAttrKey)
+			if found {
+				assert.NotEmpty(t, url)
+				assert.NotEmpty(t, integrity)
+			}
+
+			if url != "" && integrity != "" {
+				resp, err := http.Get(baseUrl + url)
+				require.NoError(t, err)
+				hasher := sha256.New()
+				_, err = io.Copy(hasher, resp.Body)
+				require.NoError(t, err)
+				require.NoError(t, resp.Body.Close())
+				actual := "sha256-" + base64.StdEncoding.EncodeToString(hasher.Sum(nil))
+				assert.Equal(t, integrity, actual)
 			}
 		}
-
-		if integrity != "" {
-			assert.NotEmpty(t, url)
-		}
-
-		if url != "" && integrity != "" {
-			resp, err := http.Get(baseUrl + url)
-			require.NoError(t, err)
-			hasher := sha256.New()
-			_, err = io.Copy(hasher, resp.Body)
-			require.NoError(t, err)
-			require.NoError(t, resp.Body.Close())
-			actual := "sha256-" + base64.StdEncoding.EncodeToString(hasher.Sum(nil))
-			assert.Equal(t, integrity, actual)
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			walk(c)
 		}
 	}
+	walk(root)
+}
+
+func getAttr(n *html.Node, key string) (string, bool) {
+	for _, attr := range n.Attr {
+		if attr.Key == key {
+			return attr.Val, true
+		}
+	}
+	return "", false
+}
+
+func findBaseRef(root *html.Node) string {
+	var base string
+	var walk func(*html.Node)
+	walk = func(n *html.Node) {
+		if n.Type == html.ElementNode && n.Data == "base" {
+			if href, ok := getAttr(n, "href"); ok {
+				base = href
+				return
+			}
+		}
+		for c := n.FirstChild; c != nil && base == ""; c = c.NextSibling {
+			walk(c)
+		}
+	}
+	walk(root)
+	return base
 }

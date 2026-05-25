@@ -20,3 +20,17 @@ func closeReasonForContext(ctx context.Context) string {
 	reason, _ := ctx.Value(closeReasonCtxKey).(string)
 	return reason
 }
+
+type contextKeyWebsocketCloseCode struct{}
+
+func WithWebsocketCloseCode(ctx context.Context, v int) context.Context {
+	return context.WithValue(ctx, contextKeyWebsocketCloseCode{}, v)
+}
+
+func websocketCloseCodeForContext(ctx context.Context) int {
+	code, ok := ctx.Value(contextKeyWebsocketCloseCode{}).(int)
+	if !ok {
+		return WebsocketCloseNormalClosure
+	}
+	return code
+}

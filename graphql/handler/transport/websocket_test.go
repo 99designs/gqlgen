@@ -402,6 +402,71 @@ func TestWebsocketInitFunc(t *testing.T) {
 			assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
 		},
 	)
+
+	t.Run(
+		"closes with custom close code and reason when InitFunc returns error",
+		func(t *testing.T) {
+			h := testserver.New()
+			customCode := websocket.ClosePolicyViolation // 1008
+			customReason := "unauthorized: token expired"
+
+			h.AddTransport(transport.Websocket{
+				InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, *transport.InitPayload, error) {
+					ctx = transport.WithWebsocketCloseCode(ctx, customCode)
+					ctx = transport.AppendCloseReason(ctx, customReason)
+					return ctx, nil, errors.New("invalid init payload")
+				},
+			})
+			srv := httptest.NewServer(h)
+			defer srv.Close()
+
+			c := wsConnect(srv.URL)
+			defer c.Close()
+
+			require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
+
+			errMsg := readOp(c)
+			assert.Equal(t, connectionErrorMsg, errMsg.Type)
+			assert.JSONEq(t, `{"message":"invalid init payload"}`, string(errMsg.Payload))
+
+			_, _, err := c.ReadMessage()
+			require.Error(t, err)
+
+			var closeErr *websocket.CloseError
+			ok := errors.As(err, &closeErr)
+			assert.True(t, ok, "expected *websocket.CloseError, got %T", err)
+			assert.Equal(t, customCode, closeErr.Code)
+			assert.Equal(t, customReason, closeErr.Text)
+		},
+	)
+
+	t.Run("uses default close code and reason when not set via context", func(t *testing.T) {
+		h := testserver.New()
+		h.AddTransport(transport.Websocket{
+			InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, *transport.InitPayload, error) {
+				return ctx, nil, errors.New("auth failed")
+			},
+		})
+		srv := httptest.NewServer(h)
+		defer srv.Close()
+
+		c := wsConnect(srv.URL)
+		defer c.Close()
+
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
+
+		errMsg := readOp(c)
+		assert.Equal(t, connectionErrorMsg, errMsg.Type)
+
+		_, _, err := c.ReadMessage()
+		require.Error(t, err)
+
+		var closeErr *websocket.CloseError
+		ok := errors.As(err, &closeErr)
+		assert.True(t, ok)
+		assert.Equal(t, websocket.CloseNormalClosure, closeErr.Code)
+		assert.Equal(t, "terminated", closeErr.Text)
+	})
 }
 
 func TestWebSocketInitTimeout(t *testing.T) {

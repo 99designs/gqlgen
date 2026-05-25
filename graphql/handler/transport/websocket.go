@@ -251,7 +251,11 @@ func (c *wsConnection) init() bool {
 			ctx, initAckPayload, err = c.InitFunc(c.ctx, c.initPayload)
 			if err != nil {
 				c.sendConnectionError("%s", err.Error())
-				c.close(WebsocketCloseNormalClosure, "terminated")
+				reason := closeReasonForContext(ctx)
+				if reason == "" {
+					reason = "terminated"
+				}
+				c.close(websocketCloseCodeForContext(ctx), reason)
 				return false
 			}
 			c.ctx = ctx

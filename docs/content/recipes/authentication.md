@@ -143,12 +143,16 @@ import (
 	"github.com/rs/cors"
 )
 
-func webSocketInit(ctx context.Context, initPayload transport.InitPayload) (context.Context, error) {
+func webSocketInit(ctx context.Context, initPayload transport.InitPayload) (context.Context, *transport.InitPayload, error) {
 	// Get the token from payload
 	any := initPayload["authToken"]
 	token, ok := any.(string)
 	if !ok || token == "" {
-		return nil, errors.New("authToken not found in transport payload")
+		// When authentication fails, you can set a custom close code and reason
+		// BEFORE returning the error. Make sure to return the modified context.
+		ctx = transport.WithWebsocketCloseCode(ctx, websocket.ClosePolicyViolation) // 1008
+		ctx = transport.AppendCloseReason(ctx, "missing or invalid authToken")
+		return ctx, nil, errors.New("authToken not found in transport payload")
 	}
 
 	// Perform token verification and authentication...
@@ -157,7 +161,7 @@ func webSocketInit(ctx context.Context, initPayload transport.InitPayload) (cont
 	// put it in context
 	ctxNew := context.WithValue(ctx, "username", userId)
 
-	return ctxNew, nil
+	return ctxNew, nil, nil
 }
 
 const defaultPort = "8080"
@@ -186,9 +190,7 @@ func main() {
 				return true
 			},
 		},
-		InitFunc: func(ctx context.Context, initPayload transport.InitPayload) (context.Context, error) {
-			return webSocketInit(ctx, initPayload)
-		},
+		InitFunc: transport.WebsocketInitFunc(webSocketInit),
 	})
 	srv.AddTransport(transport.POST{})
 	srv.Use(extension.Introspection{})

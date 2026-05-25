@@ -117,6 +117,7 @@ type (
 	Transport interface {
 		Supports(r *http.Request) bool
 		Do(w http.ResponseWriter, r *http.Request, exec GraphExecutor)
+		String() string
 	}
 )
 

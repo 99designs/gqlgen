@@ -73,6 +73,8 @@ type (
 		closed          bool
 		headers         http.Header
 
+		shutdownGracePeriod time.Duration
+
 		initPayload InitPayload
 	}
 
@@ -157,13 +159,14 @@ func (t Websocket) Do(w http.ResponseWriter, r *http.Request, exec graphql.Graph
 	}
 
 	conn := wsConnection{
-		active:    map[string]context.CancelFunc{},
-		conn:      ws,
-		ctx:       r.Context(),
-		exec:      exec,
-		me:        me,
-		headers:   r.Header,
-		Websocket: t,
+		active:              map[string]context.CancelFunc{},
+		conn:                ws,
+		ctx:                 r.Context(),
+		exec:                exec,
+		me:                  me,
+		headers:             r.Header,
+		Websocket:           t,
+		shutdownGracePeriod: 0 * time.Millisecond,
 	}
 
 	if !conn.init() {
@@ -561,6 +564,10 @@ func (c *wsConnection) close(closeCode int, message string) {
 	}
 	c.closed = true
 	c.mu.Unlock()
+
+	if c.shutdownGracePeriod > 0 {
+		time.Sleep(c.shutdownGracePeriod)
+	}
 	_ = c.conn.Close()
 
 	if c.CloseFunc != nil {

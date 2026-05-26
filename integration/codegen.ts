@@ -6,7 +6,10 @@ const config: CodegenConfig = {
     documents: 'src/**/*.graphql',
     generates: {
         'src/generated/': {
-            preset: 'client-preset'
+            preset: 'client-preset',
+            config: {
+                enumType: 'native',
+            },
         },
         'src/generated/schema-fetched.graphql': {
             plugins: ['schema-ast'],

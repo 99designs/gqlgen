@@ -460,10 +460,6 @@ func (ec *executionContext) childFields___Type(ctx context.Context, field graphq
 	return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 }
 
-// endregion ***************************** args.gotpl *****************************
-
-// region    ************************** directives.gotpl **************************
-
 func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *ast.OperationDefinition, next func(ctx context.Context) (any, error)) func(ctx context.Context) (context.Context, graphql.Marshaler) {
 	for _, d := range obj.Directives {
 		switch d.Name {

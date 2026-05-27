@@ -140,16 +140,16 @@ func TestResolveField(t *testing.T) {
 }
 
 func TestResolveFieldStream(t *testing.T) {
-	resultChan := make(chan string, 3)
-	resultChan <- "test one"
-	resultChan <- "test two"
-	resultChan <- "test three"
+	resultChan := make(chan SubscriptionField[string], 3)
+	resultChan <- NewSubscriptionField(context.Background(), "test one")
+	resultChan <- NewSubscriptionField(context.Background(), "test two")
+	resultChan <- NewSubscriptionField(context.Background(), "test three")
 	close(resultChan)
 	tests := append(
 		[]ResolveFieldTest{
 			{
 				name:               "should resolve field",
-				fieldResolverValue: (<-chan string)(resultChan),
+				fieldResolverValue: (<-chan SubscriptionField[string])(resultChan),
 				marshalCalls:       []int{5, 6, 7},
 				expected:           `{"testField":"test one"}{"testField":"test two"}{"testField":"test three"}`,
 				expectedCalls:      7,
@@ -178,11 +178,14 @@ func TestResolveFieldStream(t *testing.T) {
 		tests,
 		ResolveFieldStream,
 		true,
-		func(t *testing.T, test ResolveFieldTest, result func(ctx context.Context) Marshaler) {
+		func(t *testing.T, test ResolveFieldTest, result func(ctx context.Context) (context.Context, Marshaler)) {
 			var sb strings.Builder
 			if result != nil {
 				for range 3 {
-					result(context.Background()).MarshalGQL(&sb)
+					_, m := result(context.Background())
+					if m != nil {
+						m.MarshalGQL(&sb)
+					}
 				}
 			}
 			assert.Equal(t, test.expected, sb.String())

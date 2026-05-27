@@ -2864,7 +2864,7 @@ func _Query(ctx context.Context, ec *executionContext, sel ast.SelectionSet) gra
 
 var subscriptionImplementors = []string{"Subscription"}
 
-func _Subscription(ctx context.Context, ec *executionContext, sel ast.SelectionSet) func(ctx context.Context) graphql.Marshaler {
+func _Subscription(ctx context.Context, ec *executionContext, sel ast.SelectionSet) func(ctx context.Context) (context.Context, graphql.Marshaler) {
 	fields := graphql.CollectFields(ec.OperationContext, sel, subscriptionImplementors)
 	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
 		Object: "Subscription",

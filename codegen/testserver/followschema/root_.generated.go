@@ -3570,7 +3570,7 @@ func (ec *executionContext) _mutationMiddleware(ctx context.Context, obj *ast.Op
 
 }
 
-func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *ast.OperationDefinition, next func(ctx context.Context) (any, error)) func(ctx context.Context) graphql.Marshaler {
+func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *ast.OperationDefinition, next func(ctx context.Context) (any, error)) func(ctx context.Context) (context.Context, graphql.Marshaler) {
 	for _, d := range obj.Directives {
 		switch d.Name {
 		case "subscriptionOnly":
@@ -3578,8 +3578,8 @@ func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *as
 			args, err := ec.dir_subscriptionOnly_args(ctx, rawArgs)
 			if err != nil {
 				ec.Error(ctx, err)
-				return func(ctx context.Context) graphql.Marshaler {
-					return graphql.Null
+				return func(ctx context.Context) (context.Context, graphql.Marshaler) {
+					return ctx, graphql.Null
 				}
 			}
 			n := next
@@ -3594,16 +3594,16 @@ func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *as
 	tmp, err := next(ctx)
 	if err != nil {
 		ec.Error(ctx, err)
-		return func(ctx context.Context) graphql.Marshaler {
-			return graphql.Null
+		return func(ctx context.Context) (context.Context, graphql.Marshaler) {
+			return ctx, graphql.Null
 		}
 	}
-	if data, ok := tmp.(func(ctx context.Context) graphql.Marshaler); ok {
+	if data, ok := tmp.(func(ctx context.Context) (context.Context, graphql.Marshaler)); ok {
 		return data
 	}
 	graphql.AddErrorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
-	return func(ctx context.Context) graphql.Marshaler {
-		return graphql.Null
+	return func(ctx context.Context) (context.Context, graphql.Marshaler) {
+		return ctx, graphql.Null
 	}
 }
 

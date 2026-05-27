@@ -12,6 +12,7 @@ import (
 	"github.com/stretchr/testify/require"
 
 	"github.com/99designs/gqlgen/client"
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
@@ -241,18 +242,18 @@ func TestSubscription(t *testing.T) {
 	c := client.New(srv)
 
 	createdAt := "2021-01-01"
-	resolvers.SubscriptionResolver.UserCreated = func(ctx context.Context) (<-chan *User, error) {
-		ch := make(chan *User, 1)
+	resolvers.SubscriptionResolver.UserCreated = func(ctx context.Context) (<-chan graphql.SubscriptionField[*User], error) {
+		ch := make(chan graphql.SubscriptionField[*User], 1)
 		go func() {
 			defer close(ch)
-			ch <- &User{
+			ch <- graphql.NewSubscriptionField(ctx, &User{
 				ID:        "1",
 				Name:      "testUser",
 				Email:     "testEmail",
 				Age:       nil,
 				Role:      "ADMIN",
 				CreatedAt: &createdAt,
-			}
+			})
 		}()
 		return ch, nil
 	}

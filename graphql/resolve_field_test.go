@@ -157,10 +157,10 @@ func TestResolveFieldStream(t *testing.T) {
 			{
 				name:    "should fail when field resolver returns invalid type",
 				nonNull: true,
-				// the tests are using <-chan string so int should fail
+				// the tests are using <-chan SubscriptionField[string] so int should fail
 				fieldResolverValue: 123,
 				expected:           "null",
-				expectedErr:        "input: testField unexpected type int from middleware/directive chain, should be <-chan string\n",
+				expectedErr:        "input: testField unexpected type int from middleware/directive chain, should be <-chan graphql.SubscriptionField[string]\n",
 				expectedCalls:      4,
 			},
 		},

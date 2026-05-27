@@ -111,11 +111,12 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 	}
 
 	resolverBuild := &ResolverBuild{
-		File:                &file,
-		PackageName:         data.Config.Resolver.Package,
-		ResolverType:        data.Config.Resolver.Type,
-		HasRoot:             true,
-		OmitTemplateComment: data.Config.Resolver.OmitTemplateComment,
+		File:                     &file,
+		PackageName:              data.Config.Resolver.Package,
+		ResolverType:             data.Config.Resolver.Type,
+		HasRoot:                  true,
+		OmitTemplateComment:      data.Config.Resolver.OmitTemplateComment,
+		SubscriptionContextField: data.Config.SubscriptionContextField,
 	}
 
 	newResolverTemplate := resolverTemplate
@@ -242,10 +243,11 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 			continue
 		}
 		resolverBuild := &ResolverBuild{
-			File:                file,
-			PackageName:         data.Config.Resolver.Package,
-			ResolverType:        data.Config.Resolver.Type,
-			OmitTemplateComment: data.Config.Resolver.OmitTemplateComment,
+			File:                     file,
+			PackageName:              data.Config.Resolver.Package,
+			ResolverType:             data.Config.Resolver.Type,
+			OmitTemplateComment:      data.Config.Resolver.OmitTemplateComment,
+			SubscriptionContextField: data.Config.SubscriptionContextField,
 		}
 
 		var fileNotice strings.Builder
@@ -299,10 +301,11 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 
 type ResolverBuild struct {
 	*File
-	HasRoot             bool
-	PackageName         string
-	ResolverType        string
-	OmitTemplateComment bool
+	HasRoot                  bool
+	PackageName              string
+	ResolverType             string
+	OmitTemplateComment      bool
+	SubscriptionContextField bool
 }
 
 type File struct {

@@ -89,26 +89,26 @@ func TestDirectives(t *testing.T) {
 		return &ok, nil
 	}
 
-	okchan := func() (<-chan graphql.SubscriptionField[*string], error) { //nolint:unparam // interface purposes
-		res := make(chan graphql.SubscriptionField[*string], 1)
-		res <- graphql.NewSubscriptionField(context.Background(), &ok)
+	okchan := func() (<-chan *string, error) { //nolint:unparam // interface purposes
+		res := make(chan *string, 1)
+		res <- &ok
 		close(res)
 		return res, nil
 	}
 
-	resolvers.SubscriptionResolver.DirectiveArg = func(ctx context.Context, arg string) (<-chan graphql.SubscriptionField[*string], error) {
+	resolvers.SubscriptionResolver.DirectiveArg = func(ctx context.Context, arg string) (<-chan *string, error) {
 		return okchan()
 	}
 
-	resolvers.SubscriptionResolver.DirectiveNullableArg = func(ctx context.Context, arg *int, arg2 *int, arg3 *string) (<-chan graphql.SubscriptionField[*string], error) {
+	resolvers.SubscriptionResolver.DirectiveNullableArg = func(ctx context.Context, arg *int, arg2 *int, arg3 *string) (<-chan *string, error) {
 		return okchan()
 	}
 
-	resolvers.SubscriptionResolver.DirectiveDouble = func(ctx context.Context) (<-chan graphql.SubscriptionField[*string], error) {
+	resolvers.SubscriptionResolver.DirectiveDouble = func(ctx context.Context) (<-chan *string, error) {
 		return okchan()
 	}
 
-	resolvers.SubscriptionResolver.DirectiveUnimplemented = func(ctx context.Context) (<-chan graphql.SubscriptionField[*string], error) {
+	resolvers.SubscriptionResolver.DirectiveUnimplemented = func(ctx context.Context) (<-chan *string, error) {
 		return okchan()
 	}
 	srv := handler.New(NewExecutableSchema(Config{

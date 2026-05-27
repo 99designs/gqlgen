@@ -89,7 +89,7 @@ type QueryResolver interface {
 	GetEntity(ctx context.Context, id string) (Entity, error)
 }
 type SubscriptionResolver interface {
-	UserCreated(ctx context.Context) (<-chan graphql.SubscriptionField[*User], error)
+	UserCreated(ctx context.Context) (<-chan *User, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -318,20 +318,16 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		var buf bytes.Buffer
 		return func(ctx context.Context) *graphql.Response {
 			buf.Reset()
-			respCtx, data := next(ctx)
+			data := next(ctx)
 
 			if data == nil {
 				return nil
 			}
 			data.MarshalGQL(&buf)
 
-			if respCtx == nil {
-				respCtx = ctx
-			}
-
 			return &graphql.Response{
-				Context: respCtx,
-				Data:    buf.Bytes(),
+
+				Data: buf.Bytes(),
 			}
 		}
 
@@ -1205,7 +1201,7 @@ func fieldContext_Query___schema(_ context.Context, ec *executionContext, field 
 	return fc, nil
 }
 
-func _Subscription_userCreated(ctx context.Context, ec *executionContext, field graphql.CollectedField) (ret func(ctx context.Context) (context.Context, graphql.Marshaler)) {
+func _Subscription_userCreated(ctx context.Context, ec *executionContext, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	return graphql.ResolveFieldStream(
 		ctx,
 		ec.OperationContext,
@@ -2864,7 +2860,7 @@ func _Query(ctx context.Context, ec *executionContext, sel ast.SelectionSet) gra
 
 var subscriptionImplementors = []string{"Subscription"}
 
-func _Subscription(ctx context.Context, ec *executionContext, sel ast.SelectionSet) func(ctx context.Context) (context.Context, graphql.Marshaler) {
+func _Subscription(ctx context.Context, ec *executionContext, sel ast.SelectionSet) func(ctx context.Context) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, subscriptionImplementors)
 	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
 		Object: "Subscription",

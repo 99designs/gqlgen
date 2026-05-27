@@ -1,0 +1,16 @@
+schema:
+  - schema.graphql
+exec:
+  filename: generated.go
+  package: chat
+model:
+  filename: models_gen.go
+  package: chat
+resolver:
+  dir: .
+  type: Resolver
+  layout: follow-schema
+subscription_context_field: true
+models:
+  Chatroom:
+    model: github.com/99designs/gqlgen/_examples/chat.Chatroom

@@ -642,14 +642,14 @@ type QueryResolver interface {
 	WrappedSlice(ctx context.Context) (WrappedSlice, error)
 }
 type SubscriptionResolver interface {
-	Updated(ctx context.Context) (<-chan graphql.SubscriptionField[string], error)
-	InitPayload(ctx context.Context) (<-chan graphql.SubscriptionField[string], error)
-	DirectiveArg(ctx context.Context, arg string) (<-chan graphql.SubscriptionField[*string], error)
-	DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int, arg3 *string) (<-chan graphql.SubscriptionField[*string], error)
-	DirectiveDouble(ctx context.Context) (<-chan graphql.SubscriptionField[*string], error)
-	DirectiveUnimplemented(ctx context.Context) (<-chan graphql.SubscriptionField[*string], error)
-	Issue896b(ctx context.Context) (<-chan graphql.SubscriptionField[[]*CheckIssue896], error)
-	ErrorRequired(ctx context.Context) (<-chan graphql.SubscriptionField[*Error], error)
+	Updated(ctx context.Context) (<-chan string, error)
+	InitPayload(ctx context.Context) (<-chan string, error)
+	DirectiveArg(ctx context.Context, arg string) (<-chan *string, error)
+	DirectiveNullableArg(ctx context.Context, arg *int, arg2 *int, arg3 *string) (<-chan *string, error)
+	DirectiveDouble(ctx context.Context) (<-chan *string, error)
+	DirectiveUnimplemented(ctx context.Context) (<-chan *string, error)
+	Issue896b(ctx context.Context) (<-chan []*CheckIssue896, error)
+	ErrorRequired(ctx context.Context) (<-chan *Error, error)
 }
 type UserResolver interface {
 	Friends(ctx context.Context, obj *User) ([]*User, error)
@@ -2465,20 +2465,16 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		var buf bytes.Buffer
 		return func(ctx context.Context) *graphql.Response {
 			buf.Reset()
-			respCtx, data := next(ctx)
+			data := next(ctx)
 
 			if data == nil {
 				return nil
 			}
 			data.MarshalGQL(&buf)
 
-			if respCtx == nil {
-				respCtx = ctx
-			}
-
 			return &graphql.Response{
-				Context: respCtx,
-				Data:    buf.Bytes(),
+
+				Data: buf.Bytes(),
 			}
 		}
 
@@ -3746,7 +3742,7 @@ func (ec *executionContext) _mutationMiddleware(ctx context.Context, obj *ast.Op
 
 }
 
-func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *ast.OperationDefinition, next func(ctx context.Context) (any, error)) func(ctx context.Context) (context.Context, graphql.Marshaler) {
+func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *ast.OperationDefinition, next func(ctx context.Context) (any, error)) func(ctx context.Context) graphql.Marshaler {
 	for _, d := range obj.Directives {
 		switch d.Name {
 		case "subscriptionOnly":
@@ -3754,8 +3750,8 @@ func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *as
 			args, err := ec.dir_subscriptionOnly_args(ctx, rawArgs)
 			if err != nil {
 				ec.Error(ctx, err)
-				return func(ctx context.Context) (context.Context, graphql.Marshaler) {
-					return ctx, graphql.Null
+				return func(ctx context.Context) graphql.Marshaler {
+					return graphql.Null
 				}
 			}
 			n := next
@@ -3770,16 +3766,16 @@ func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *as
 	tmp, err := next(ctx)
 	if err != nil {
 		ec.Error(ctx, err)
-		return func(ctx context.Context) (context.Context, graphql.Marshaler) {
-			return ctx, graphql.Null
+		return func(ctx context.Context) graphql.Marshaler {
+			return graphql.Null
 		}
 	}
-	if data, ok := tmp.(func(ctx context.Context) (context.Context, graphql.Marshaler)); ok {
+	if data, ok := tmp.(func(ctx context.Context) graphql.Marshaler); ok {
 		return data
 	}
 	graphql.AddErrorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
-	return func(ctx context.Context) (context.Context, graphql.Marshaler) {
-		return ctx, graphql.Null
+	return func(ctx context.Context) graphql.Marshaler {
+		return graphql.Null
 	}
 }
 
@@ -12403,7 +12399,7 @@ func (ec *executionContext) fieldContext_Slices_test4(_ context.Context, field g
 	return graphql.NewScalarFieldContext("Slices", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
-func (ec *executionContext) _Subscription_updated(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) (context.Context, graphql.Marshaler)) {
+func (ec *executionContext) _Subscription_updated(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	return graphql.ResolveFieldStream(
 		ctx,
 		ec.OperationContext,
@@ -12428,7 +12424,7 @@ func (ec *executionContext) fieldContext_Subscription_updated(_ context.Context,
 	return graphql.NewScalarFieldContext("Subscription", field, true, true, errors.New("field of type String does not have child fields"))
 }
 
-func (ec *executionContext) _Subscription_initPayload(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) (context.Context, graphql.Marshaler)) {
+func (ec *executionContext) _Subscription_initPayload(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	return graphql.ResolveFieldStream(
 		ctx,
 		ec.OperationContext,
@@ -12453,7 +12449,7 @@ func (ec *executionContext) fieldContext_Subscription_initPayload(_ context.Cont
 	return graphql.NewScalarFieldContext("Subscription", field, true, true, errors.New("field of type String does not have child fields"))
 }
 
-func (ec *executionContext) _Subscription_directiveArg(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) (context.Context, graphql.Marshaler)) {
+func (ec *executionContext) _Subscription_directiveArg(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	return graphql.ResolveFieldStream(
 		ctx,
 		ec.OperationContext,
@@ -12499,7 +12495,7 @@ func (ec *executionContext) fieldContext_Subscription_directiveArg(ctx context.C
 	return fc, nil
 }
 
-func (ec *executionContext) _Subscription_directiveNullableArg(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) (context.Context, graphql.Marshaler)) {
+func (ec *executionContext) _Subscription_directiveNullableArg(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	return graphql.ResolveFieldStream(
 		ctx,
 		ec.OperationContext,
@@ -12545,7 +12541,7 @@ func (ec *executionContext) fieldContext_Subscription_directiveNullableArg(ctx c
 	return fc, nil
 }
 
-func (ec *executionContext) _Subscription_directiveDouble(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) (context.Context, graphql.Marshaler)) {
+func (ec *executionContext) _Subscription_directiveDouble(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	return graphql.ResolveFieldStream(
 		ctx,
 		ec.OperationContext,
@@ -12588,7 +12584,7 @@ func (ec *executionContext) fieldContext_Subscription_directiveDouble(_ context.
 	return graphql.NewScalarFieldContext("Subscription", field, true, true, errors.New("field of type String does not have child fields"))
 }
 
-func (ec *executionContext) _Subscription_directiveUnimplemented(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) (context.Context, graphql.Marshaler)) {
+func (ec *executionContext) _Subscription_directiveUnimplemented(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	return graphql.ResolveFieldStream(
 		ctx,
 		ec.OperationContext,
@@ -12624,7 +12620,7 @@ func (ec *executionContext) fieldContext_Subscription_directiveUnimplemented(_ c
 	return graphql.NewScalarFieldContext("Subscription", field, true, true, errors.New("field of type String does not have child fields"))
 }
 
-func (ec *executionContext) _Subscription_issue896b(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) (context.Context, graphql.Marshaler)) {
+func (ec *executionContext) _Subscription_issue896b(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	return graphql.ResolveFieldStream(
 		ctx,
 		ec.OperationContext,
@@ -12658,7 +12654,7 @@ func (ec *executionContext) fieldContext_Subscription_issue896b(_ context.Contex
 	return fc, nil
 }
 
-func (ec *executionContext) _Subscription_errorRequired(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) (context.Context, graphql.Marshaler)) {
+func (ec *executionContext) _Subscription_errorRequired(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	return graphql.ResolveFieldStream(
 		ctx,
 		ec.OperationContext,
@@ -20682,7 +20678,7 @@ func (ec *executionContext) _Slices(ctx context.Context, sel ast.SelectionSet, o
 
 var subscriptionImplementors = []string{"Subscription"}
 
-func (ec *executionContext) _Subscription(ctx context.Context, sel ast.SelectionSet) func(ctx context.Context) (context.Context, graphql.Marshaler) {
+func (ec *executionContext) _Subscription(ctx context.Context, sel ast.SelectionSet) func(ctx context.Context) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, subscriptionImplementors)
 	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
 		Object: "Subscription",

@@ -49,6 +49,7 @@ type Config struct {
 	OmitPanicHandler                     bool                       `yaml:"omit_panic_handler,omitempty"`
 	OmitEnumJSONMarshalers               bool                       `yaml:"omit_enum_json_marshalers,omitempty"`
 	UseFunctionSyntaxForExecutionContext bool                       `yaml:"use_function_syntax_for_execution_context,omitempty"`
+	SubscriptionContextField             bool                       `yaml:"subscription_context_field,omitempty"`
 	// If this is set to true, argument directives that
 	// decorate a field with a null value will still be called.
 	//

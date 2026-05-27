@@ -51,7 +51,7 @@ func getUsername(ctx context.Context) string {
 
 type Observer struct {
 	Username string
-	Message  chan graphql.SubscriptionField[*Message]
+	Message  chan *Message
 }
 
 type Chatroom struct {
@@ -79,7 +79,7 @@ func (r *mutationResolver) Post(
 	room.Observers.Range(func(_, v any) bool {
 		observer := v.(*Observer)
 		if observer.Username == "" || observer.Username == message.CreatedBy {
-			observer.Message <- graphql.NewSubscriptionField(ctx, message)
+			observer.Message <- message
 		}
 		return true
 	})
@@ -102,11 +102,11 @@ func (r *queryResolver) Room(ctx context.Context, name string) (*Chatroom, error
 
 type subscriptionResolver struct{ *resolver }
 
-func (r *subscriptionResolver) MessageAdded(ctx context.Context, roomName string) (<-chan graphql.SubscriptionField[*Message], error) {
+func (r *subscriptionResolver) MessageAdded(ctx context.Context, roomName string) (<-chan *Message, error) {
 	room := r.getRoom(roomName)
 
 	id := randString(8)
-	events := make(chan graphql.SubscriptionField[*Message], 1)
+	events := make(chan *Message, 1)
 
 	go func() {
 		<-ctx.Done()
@@ -118,12 +118,12 @@ func (r *subscriptionResolver) MessageAdded(ctx context.Context, roomName string
 		Message:  events,
 	})
 
-	events <- graphql.NewSubscriptionField(ctx, &Message{
+	events <- &Message{
 		ID:        randString(8),
 		CreatedAt: time.Now(),
 		Text:      "You've joined the room",
 		CreatedBy: "system",
-	})
+	}
 
 	return events, nil
 }

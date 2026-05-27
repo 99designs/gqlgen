@@ -21,9 +21,9 @@ func TestSubscriptions(t *testing.T) {
 
 	resolvers := &Stub{}
 
-	resolvers.SubscriptionResolver.InitPayload = func(ctx context.Context) (<-chan graphql.SubscriptionField[string], error) {
+	resolvers.SubscriptionResolver.InitPayload = func(ctx context.Context) (<-chan string, error) {
 		payload := transport.GetInitPayload(ctx)
-		channel := make(chan graphql.SubscriptionField[string], len(payload)+1)
+		channel := make(chan string, len(payload)+1)
 
 		go func() {
 			<-ctx.Done()
@@ -33,9 +33,9 @@ func TestSubscriptions(t *testing.T) {
 		// Test the helper function separately
 		auth := payload.Authorization()
 		if auth != "" {
-			channel <- graphql.NewSubscriptionField(ctx, "AUTH:"+auth)
+			channel <- "AUTH:" + auth
 		} else {
-			channel <- graphql.NewSubscriptionField(ctx, "AUTH:NONE")
+			channel <- "AUTH:NONE"
 		}
 
 		// Send them over the channel in alphabetic order
@@ -45,21 +45,21 @@ func TestSubscriptions(t *testing.T) {
 		}
 		sort.Strings(keys)
 		for _, key := range keys {
-			channel <- graphql.NewSubscriptionField(ctx, fmt.Sprintf("%s = %#+v", key, payload[key]))
+			channel <- fmt.Sprintf("%s = %#+v", key, payload[key])
 		}
 
 		return channel, nil
 	}
 
 	errorTick := make(chan *Error, 1)
-	resolvers.SubscriptionResolver.ErrorRequired = func(ctx context.Context) (<-chan graphql.SubscriptionField[*Error], error) {
-		res := make(chan graphql.SubscriptionField[*Error], 1)
+	resolvers.SubscriptionResolver.ErrorRequired = func(ctx context.Context) (<-chan *Error, error) {
+		res := make(chan *Error, 1)
 
 		go func() {
 			for {
 				select {
 				case e := <-errorTick:
-					res <- graphql.NewSubscriptionField(ctx, e)
+					res <- e
 				case <-ctx.Done():
 					close(res)
 					return
@@ -69,14 +69,14 @@ func TestSubscriptions(t *testing.T) {
 		return res, nil
 	}
 
-	resolvers.SubscriptionResolver.Updated = func(ctx context.Context) (<-chan graphql.SubscriptionField[string], error) {
-		res := make(chan graphql.SubscriptionField[string], 1)
+	resolvers.SubscriptionResolver.Updated = func(ctx context.Context) (<-chan string, error) {
+		res := make(chan string, 1)
 
 		go func() {
 			for {
 				select {
 				case v := <-tick:
-					res <- graphql.NewSubscriptionField(ctx, v)
+					res <- v
 				case <-ctx.Done():
 					close(res)
 					return

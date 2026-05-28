@@ -1073,10 +1073,19 @@ func (ec *executionContext) _Circle(ctx context.Context, sel ast.SelectionSet, o
 			out.Values[i] = graphql.MarshalString("Circle")
 		case "radius":
 			out.Values[i] = ec._Circle_radius(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "area":
 			out.Values[i] = ec._Circle_area(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "coordinates":
 			out.Values[i] = ec._Circle_coordinates(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -1348,12 +1357,24 @@ func (ec *executionContext) _Rectangle(ctx context.Context, sel ast.SelectionSet
 			out.Values[i] = graphql.MarshalString("Rectangle")
 		case "length":
 			out.Values[i] = ec._Rectangle_length(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "width":
 			out.Values[i] = ec._Rectangle_width(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "area":
 			out.Values[i] = ec._Rectangle_area(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "coordinates":
 			out.Values[i] = ec._Rectangle_coordinates(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

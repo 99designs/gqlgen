@@ -321,8 +321,14 @@ func (ec *executionContext) _PtrToPtrOuter(ctx context.Context, sel ast.Selectio
 			}
 		case "inner":
 			out.Values[i] = ec._PtrToPtrOuter_inner(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "stupidInner":
 			out.Values[i] = ec._PtrToPtrOuter_stupidInner(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

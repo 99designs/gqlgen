@@ -371,6 +371,9 @@ func (ec *executionContext) _WrappedStruct(ctx context.Context, sel ast.Selectio
 			}
 		case "desc":
 			out.Values[i] = ec._WrappedStruct_desc(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

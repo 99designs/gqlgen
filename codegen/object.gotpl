@@ -49,7 +49,7 @@ func {{$.FuncReceiver}}_{{$object.Name}}(ctx context.Context, {{$.ECFuncParam}}s
 			{{- if $field.IsConcurrent }}
 				field := field
 
-				innerFunc := func(ctx context.Context, {{ if $field.TypeReference.GQL.NonNull }}fs{{ else }}_{{ end }} *graphql.FieldSet) (res graphql.Marshaler) {
+				innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
 					{{- if not $.Config.OmitPanicHandler }}
 					defer func() {
 						if r := recover(); r != nil {
@@ -60,6 +60,14 @@ func {{$.FuncReceiver}}_{{$object.Name}}(ctx context.Context, {{$.ECFuncParam}}s
 					res = {{$.ECDot}}_{{$object.Name}}_{{$field.Name}}(ctx, {{$.ECArg}}field{{if not $object.Root}}, obj{{end}})
 					{{- if $field.TypeReference.GQL.NonNull }}
 						if res == graphql.Null { {{ $object.InvalidsIncrement "fs" }} }
+					{{- else }}
+						if res == graphql.RequiredNull {
+							{{- if $object.IsConcurrent }}
+								atomic.AddUint32(&fs.Invalids, 1)
+							{{- else }}
+								fs.Invalids++
+							{{- end }}
+						}
 					{{- end }}
 					return res
 				}
@@ -110,6 +118,14 @@ func {{$.FuncReceiver}}_{{$object.Name}}(ctx context.Context, {{$.ECFuncParam}}s
 
 				{{- if $field.TypeReference.GQL.NonNull }}
 					if out.Values[i] == graphql.Null { {{ $object.InvalidsIncrement "out" }} }
+				{{- else }}
+					if out.Values[i] == graphql.RequiredNull {
+						{{- if $object.IsConcurrent }}
+							atomic.AddUint32(&out.Invalids, 1)
+						{{- else }}
+							out.Invalids++
+						{{- end }}
+					}
 				{{- end }}
 			{{- end }}
 		{{- end }}

@@ -159,6 +159,11 @@ call_argument_directives_with_null: true
 autobind:
 #  - "{{.}}/graph/model"
 
+# Optional: can be used to specify custom omittable type unmarshallers for input fields. For example, if you wanted to use
+# github.com/samber/mo.Option[T] for omittable fields instead of the built-in graphql.Omittable[T]
+# omittable_type:
+# - github.com/99designs/gqlgen/graphql.OmittableOf
+
 # This section declares type mapping between the GraphQL and go type systems
 #
 # The first line in each type will be used as defaults for resolver arguments and

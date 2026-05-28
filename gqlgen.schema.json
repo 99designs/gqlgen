@@ -124,6 +124,11 @@
       "type": "boolean",
       "default": false
     },
+    "omittable_type": {
+      "type": "array",
+      "description": "Custom omittable type definitions to use instead of the default github.com/99designs/gqlgen/graphql.Omittable.",
+      "items": { "type": "string" }
+    },
     "models": {
       "description": "Type mapping between the GraphQL and go type systems",
       "type": "object",

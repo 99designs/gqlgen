@@ -20,6 +20,8 @@ import (
 	"github.com/99designs/gqlgen/internal/code"
 )
 
+const federationRequiresArgName = "_federationRequires"
+
 type Field struct {
 	*ast.FieldDefinition
 
@@ -609,6 +611,35 @@ func (f *Field) IsBatch() bool {
 	return f.Batch
 }
 
+// HasFederationRequiresArg reports whether this field has the computed_requires
+// _federationRequires argument injected by the federation plugin.
+func (f *Field) HasFederationRequiresArg() bool {
+	for _, arg := range f.Args {
+		if arg.Name == federationRequiresArgName {
+			return true
+		}
+	}
+	return false
+}
+
+// BatchUsesFieldContextArgs reports whether a batch resolver reads fc.Args
+// (args other than _federationRequires, which uses FederationRequiresForBatch).
+func (f *Field) BatchUsesFieldContextArgs() bool {
+	for _, arg := range f.Args {
+		if arg.Name != federationRequiresArgName {
+			return true
+		}
+	}
+	return false
+}
+
+func (f *Field) resolverArgType(arg *FieldArgument, batch bool) string {
+	if batch && arg.Name == federationRequiresArgName {
+		return "[]" + templates.CurrentImports.LookupType(arg.TypeReference.GO)
+	}
+	return templates.CurrentImports.LookupType(arg.TypeReference.GO)
+}
+
 // ShortBatchResolverDeclaration returns the method signature for a batch resolver.
 // Batch resolvers accept multiple parent objects and return results for all of them.
 // For example, if the normal resolver is:
@@ -642,7 +673,7 @@ func (f *Field) ShortBatchResolverDeclaration() string {
 					&resSb,
 					", %s %s",
 					arg.VarName,
-					templates.CurrentImports.LookupType(arg.TypeReference.GO),
+					f.resolverArgType(arg, true),
 				)
 			}
 		}
@@ -652,7 +683,7 @@ func (f *Field) ShortBatchResolverDeclaration() string {
 				&resSb,
 				", %s %s",
 				arg.VarName,
-				templates.CurrentImports.LookupType(arg.TypeReference.GO),
+				f.resolverArgType(arg, true),
 			)
 		}
 	}
@@ -871,11 +902,35 @@ func (f *Field) CallArgs() string {
 		args = append(args, "ctx")
 	}
 
-	args = append(args, f.callArgExpressions()...)
+	args = append(args, f.callArgExpressions("")...)
 	return strings.Join(args, ", ")
 }
 
-func (f *Field) callArgExpressions() []string {
+func (f *Field) fieldArgExpression(arg *FieldArgument, federationRequiresReplacement string) string {
+	if arg.Name == federationRequiresArgName && federationRequiresReplacement != "" {
+		return federationRequiresReplacement
+	}
+
+	tmp := "fc.Args[" + strconv.Quote(
+		arg.Name,
+	) + "].(" + templates.CurrentImports.LookupType(
+		arg.TypeReference.GO,
+	) + ")"
+
+	if iface, ok := arg.TypeReference.GO.(*types.Interface); ok && iface.Empty() {
+		tmp = fmt.Sprintf(`
+				func () any {
+					if fc.Args["%s"] == nil {
+						return nil
+					}
+					return fc.Args["%s"].(any)
+				}()`, arg.Name, arg.Name,
+		)
+	}
+	return tmp
+}
+
+func (f *Field) callArgExpressions(federationRequiresReplacement string) []string {
 	args := make([]string, 0, len(f.Args))
 	var inlineInfo *InlineArgsInfo
 	if f.Object != nil && f.Object.Definition != nil {
@@ -912,46 +967,12 @@ func (f *Field) callArgExpressions() []string {
 
 		for _, arg := range f.Args {
 			if !slices.Contains(inlineInfo.ExpandedArgs, arg.Name) {
-				tmp := "fc.Args[" + strconv.Quote(
-					arg.Name,
-				) + "].(" + templates.CurrentImports.LookupType(
-					arg.TypeReference.GO,
-				) + ")"
-
-				if iface, ok := arg.TypeReference.GO.(*types.Interface); ok && iface.Empty() {
-					tmp = fmt.Sprintf(`
-				func () any {
-					if fc.Args["%s"] == nil {
-						return nil
-					}
-					return fc.Args["%s"].(any)
-				}()`, arg.Name, arg.Name,
-					)
-				}
-
-				args = append(args, tmp)
+				args = append(args, f.fieldArgExpression(arg, federationRequiresReplacement))
 			}
 		}
 	} else {
 		for _, arg := range f.Args {
-			tmp := "fc.Args[" + strconv.Quote(
-				arg.Name,
-			) + "].(" + templates.CurrentImports.LookupType(
-				arg.TypeReference.GO,
-			) + ")"
-
-			if iface, ok := arg.TypeReference.GO.(*types.Interface); ok && iface.Empty() {
-				tmp = fmt.Sprintf(`
-				func () any {
-					if fc.Args["%s"] == nil {
-						return nil
-					}
-					return fc.Args["%s"].(any)
-				}()`, arg.Name, arg.Name,
-				)
-			}
-
-			args = append(args, tmp)
+			args = append(args, f.fieldArgExpression(arg, federationRequiresReplacement))
 		}
 	}
 
@@ -959,14 +980,16 @@ func (f *Field) callArgExpressions() []string {
 }
 
 // BatchCallArgs returns a comma-separated list of resolver call arguments for batch resolvers.
-func (f *Field) BatchCallArgs(parentVar string) string {
+// When federationRequiresReplacement is non-empty it is used instead of fc.Args for
+// _federationRequires (per-parent requires built for batch resolvers).
+func (f *Field) BatchCallArgs(parentVar string, federationRequiresReplacement string) string {
 	args := make([]string, 0, len(f.Args)+2)
 	args = append(args, "ctx")
 	if parentVar != "" {
 		args = append(args, parentVar)
 	}
 
-	args = append(args, f.callArgExpressions()...)
+	args = append(args, f.callArgExpressions(federationRequiresReplacement)...)
 	return strings.Join(args, ", ")
 }
 

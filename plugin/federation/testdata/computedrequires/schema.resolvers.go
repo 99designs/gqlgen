@@ -27,10 +27,14 @@ func (r *multiHelloRequiresResolver) Key2(ctx context.Context, obj *model.MultiH
 	return key1, nil
 }
 
-// Size is the resolver for the size field.
-func (r *multiPlanetRequiresNestedResolver) Size(ctx context.Context, obj *model.MultiPlanetRequiresNested, federationRequires map[string]any) (int, error) {
-	foo := federationRequires["world"].(map[string]any)["foo"].(string)
-	return len(foo), nil
+// Size is the batch resolver for the size field.
+func (r *multiPlanetRequiresNestedResolver) Size(ctx context.Context, objs []*model.MultiPlanetRequiresNested, federationRequires []map[string]any) ([]int, error) {
+	results := make([]int, len(objs))
+	for i := range objs {
+		foo := federationRequires[i]["world"].(map[string]any)["foo"].(string)
+		results[i] = len(foo)
+	}
+	return results, nil
 }
 
 // Sizes is the resolver for the sizes field.

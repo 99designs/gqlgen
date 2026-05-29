@@ -1,5 +1,6 @@
 directive @entityResolver(multi: Boolean) on OBJECT
 directive @goField(
+    batch: Boolean
     forceResolver: Boolean
     name: String
     omittable: Boolean
@@ -86,7 +87,7 @@ type MultiPlanetRequiresNested
     name: String! @external
     world: World! @external
     worlds: [World!] @external
-    size: Int! @requires(fields: "world{ foo }")
+    size: Int! @requires(fields: "world{ foo }") @goField(batch: true)
     sizes: [Int!] @requires(fields: "worlds{ foo }")
 }
 

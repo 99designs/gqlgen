@@ -272,4 +272,43 @@ func TestMultiExplicitRequires(t *testing.T) {
 			require.Equal(t, "B", resp.Entities[1].World.Foo)
 		},
 	)
+
+	t.Run(
+		"MultiPlanetRequiresNested batch size with explicit requires per entity",
+		func(t *testing.T) {
+			representations := []map[string]any{
+				{
+					"__typename": "MultiPlanetRequiresNested",
+					"name":       "earth",
+					"world": map[string]any{
+						"foo": "AAA",
+					},
+				}, {
+					"__typename": "MultiPlanetRequiresNested",
+					"name":       "mars",
+					"world": map[string]any{
+						"foo": "BB",
+					},
+				},
+			}
+
+			var resp struct {
+				Entities []struct {
+					Size int `json:"size"`
+				} `json:"_entities"`
+			}
+
+			err := c.Post(
+				entityQuery([]string{
+					"MultiPlanetRequiresNested {size}",
+				}),
+				&resp,
+				client.Var("representations", representations),
+			)
+
+			require.NoError(t, err)
+			require.Equal(t, 3, resp.Entities[0].Size)
+			require.Equal(t, 2, resp.Entities[1].Size)
+		},
+	)
 }

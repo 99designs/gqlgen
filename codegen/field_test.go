@@ -335,9 +335,52 @@ func TestField_BatchCallArgs(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.Name, func(t *testing.T) {
-			require.Equal(t, tc.Expected, tc.Field.BatchCallArgs("parents"))
+			require.Equal(t, tc.Expected, tc.Field.BatchCallArgs("parents", ""))
 		})
 	}
+}
+
+func TestField_HasFederationRequiresArg(t *testing.T) {
+	f := Field{
+		Args: []*FieldArgument{
+			{ArgumentDefinition: &ast2.ArgumentDefinition{Name: "_federationRequires"}},
+		},
+	}
+	require.True(t, f.HasFederationRequiresArg())
+
+	f.Args = nil
+	require.False(t, f.HasFederationRequiresArg())
+}
+
+func TestField_ShortBatchResolverDeclaration_FederationRequires(t *testing.T) {
+	mapType := types.NewMap(types.Typ[types.String], types.NewInterfaceType(nil, nil).Complete())
+	f := Field{
+		FieldDefinition: &ast2.FieldDefinition{Name: "size"},
+		Object: &Object{
+			Definition: &ast2.Definition{Name: "Product"},
+			Type: types.NewPointer(
+				types.NewNamed(
+					types.NewTypeName(0, nil, "Product", nil),
+					types.NewStruct(nil, nil),
+					nil,
+				),
+			),
+		},
+		TypeReference: &config.TypeReference{GO: types.Typ[types.Int]},
+		Args: []*FieldArgument{
+			{
+				ArgumentDefinition: &ast2.ArgumentDefinition{Name: "_federationRequires"},
+				VarName:            "federationRequires",
+				TypeReference:      &config.TypeReference{GO: mapType},
+			},
+		},
+	}
+
+	require.Equal(
+		t,
+		"(ctx context.Context, objs []*Product, federationRequires []map[string]interface{}) ([]int, error)",
+		f.ShortBatchResolverDeclaration(),
+	)
 }
 
 func TestField_ShortBatchResolverDeclaration(t *testing.T) {

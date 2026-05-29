@@ -1,4 +1,11 @@
 directive @entityResolver(multi: Boolean) on OBJECT
+directive @goField(
+    batch: Boolean
+    forceResolver: Boolean
+    name: String
+    omittable: Boolean
+    type: String
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 type Hello @key(fields: "name") {
     name: String!
@@ -66,7 +73,7 @@ type MultiPlanetRequiresNested @key(fields: "name") @entityResolver(multi: true)
     name: String! @external
     world: World! @external
     worlds: [World!] @external
-    size: Int! @requires(fields: "world{ foo }")
+    size: Int! @requires(fields: "world{ foo }") @goField(batch: true)
     sizes: [Int!] @requires(fields: "worlds{ foo }")
 }
 

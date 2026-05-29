@@ -104,7 +104,7 @@ func {{$.FuncReceiver}}{{ $field.FieldContextFunc }}({{ if not $field.Args }}_{{
 {{- if and $field.IsBatch (not $object.Root) }}
 func (ec *executionContext) resolveBatch_{{$object.Name}}_{{$field.Name}}(ctx context.Context, field graphql.CollectedField, obj {{$object.Reference | ref}}) (any, error) {
 	resolver := ec.Resolvers.{{ ucFirst $object.Name }}()
-	{{- if $field.Args }}
+	{{- if $field.BatchUsesFieldContextArgs }}
 	fc := graphql.GetFieldContext(ctx)
 	{{- end }}
 	group := graphql.GetBatchParentGroup(ctx, {{ $object.Name | quote }})
@@ -120,7 +120,13 @@ func (ec *executionContext) resolveBatch_{{$object.Name}}_{{$field.Name}}(ctx co
 				{{/* TODO: resolveBatch_* runs per parent even when grouped; consider a single
 				dispatch per field if the execution flow can support it. */ -}}
 				result := group.GetFieldResult(key, func() (any, error) {
-					return resolver.{{ $field.GoFieldName }}({{ $field.BatchCallArgs "parents" }})
+					{{- if $field.HasFederationRequiresArg }}
+					federationRequires, err := graphql.FederationRequiresForBatch(ctx, len(parents), group.IndexMap)
+					if err != nil {
+						return nil, err
+					}
+					{{- end }}
+					return resolver.{{ $field.GoFieldName }}({{ if $field.HasFederationRequiresArg }}{{ $field.BatchCallArgs "parents" "federationRequires" }}{{ else }}{{ $field.BatchCallArgs "parents" "" }}{{ end }})
 				})
 				return graphql.ResolveBatchGroupResult[{{ $field.TypeReference.GO | ref }}](
 					ctx,
@@ -133,8 +139,15 @@ func (ec *executionContext) resolveBatch_{{$object.Name}}_{{$field.Name}}(ctx co
 			}
 		}
 	}
-
-	results, err := resolver.{{ $field.GoFieldName }}({{ $field.BatchCallArgs (printf "[]%s{obj}" ($object.Reference | ref)) }})
+{{- if $field.HasFederationRequiresArg }}
+	federationRequires, err := graphql.FederationRequiresForBatch(ctx, 1, nil)
+	if err != nil {
+		return nil, err
+	}
+	results, err := resolver.{{ $field.GoFieldName }}({{ $field.BatchCallArgs (printf "[]%s{obj}" ($object.Reference | ref)) "federationRequires" }})
+	{{- else }}
+	results, err := resolver.{{ $field.GoFieldName }}({{ $field.BatchCallArgs (printf "[]%s{obj}" ($object.Reference | ref)) "" }})
+	{{- end }}
 	return graphql.ResolveBatchSingleResult[{{ $field.TypeReference.GO | ref }}](
 		ctx,
 		results,

@@ -29,6 +29,7 @@ type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 type ResolverRoot interface {
 	Entity() EntityResolver
+	MultiPlanetRequiresNested() MultiPlanetRequiresNestedResolver
 }
 
 type DirectiveRoot struct {
@@ -58,6 +59,9 @@ type EntityResolver interface {
 	FindWorldNameByName(ctx context.Context, name string) (*WorldName, error)
 	FindWorldWithMultipleKeysByHelloNameAndFoo(ctx context.Context, helloName string, foo string) (*WorldWithMultipleKeys, error)
 	FindWorldWithMultipleKeysByBar(ctx context.Context, bar int) (*WorldWithMultipleKeys, error)
+}
+type MultiPlanetRequiresNestedResolver interface {
+	Size(ctx context.Context, objs []*MultiPlanetRequiresNested) ([]int, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -149,6 +153,13 @@ func newExecutionContext(
 
 var sources = []*ast.Source{
 	{Name: "../schema.graphql", Input: `directive @entityResolver(multi: Boolean) on OBJECT
+directive @goField(
+    batch: Boolean
+    forceResolver: Boolean
+    name: String
+    omittable: Boolean
+    type: String
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 type Hello @key(fields: "name") {
     name: String!
@@ -216,7 +227,7 @@ type MultiPlanetRequiresNested @key(fields: "name") @entityResolver(multi: true)
     name: String! @external
     world: World! @external
     worlds: [World!] @external
-    size: Int! @requires(fields: "world{ foo }")
+    size: Int! @requires(fields: "world{ foo }") @goField(batch: true)
     sizes: [Int!] @requires(fields: "worlds{ foo }")
 }
 
@@ -2115,7 +2126,7 @@ func (ec *executionContext) _MultiPlanetRequiresNested_size(ctx context.Context,
 			return ec.fieldContext_MultiPlanetRequiresNested_size(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
-			return obj.Size, nil
+			return ec.resolveBatch_MultiPlanetRequiresNested_size(ctx, field, obj)
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
@@ -2126,7 +2137,41 @@ func (ec *executionContext) _MultiPlanetRequiresNested_size(ctx context.Context,
 	)
 }
 func (ec *executionContext) fieldContext_MultiPlanetRequiresNested_size(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("MultiPlanetRequiresNested", field, false, false, errors.New("field of type Int does not have child fields"))
+	return graphql.NewScalarFieldContext("MultiPlanetRequiresNested", field, true, true, errors.New("field of type Int does not have child fields"))
+}
+func (ec *executionContext) resolveBatch_MultiPlanetRequiresNested_size(ctx context.Context, field graphql.CollectedField, obj *MultiPlanetRequiresNested) (any, error) {
+	resolver := ec.Resolvers.MultiPlanetRequiresNested()
+	group := graphql.GetBatchParentGroup(ctx, "MultiPlanetRequiresNested")
+	if group != nil {
+		parents, ok := group.Parents.([]*MultiPlanetRequiresNested)
+		if ok {
+			idx, ok := graphql.BatchParentIndex(ctx)
+			if ok {
+				key := field.Alias
+				if key == "" {
+					key = field.Name
+				}
+				result := group.GetFieldResult(key, func() (any, error) {
+					return resolver.Size(ctx, parents)
+				})
+				return graphql.ResolveBatchGroupResult[int](
+					ctx,
+					idx,
+					len(parents),
+					result,
+					"MultiPlanetRequiresNested.size",
+					group.IndexMap,
+				)
+			}
+		}
+	}
+	results, err := resolver.Size(ctx, []*MultiPlanetRequiresNested{obj})
+	return graphql.ResolveBatchSingleResult[int](
+		ctx,
+		results,
+		err,
+		"MultiPlanetRequiresNested.size",
+	)
 }
 
 func (ec *executionContext) _MultiPlanetRequiresNested_sizes(ctx context.Context, field graphql.CollectedField, obj *MultiPlanetRequiresNested) (ret graphql.Marshaler) {
@@ -5010,20 +5055,51 @@ func (ec *executionContext) _MultiPlanetRequiresNested(ctx context.Context, sel 
 		case "name":
 			out.Values[i] = ec._MultiPlanetRequiresNested_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "world":
 			out.Values[i] = ec._MultiPlanetRequiresNested_world(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "worlds":
 			out.Values[i] = ec._MultiPlanetRequiresNested_worlds(ctx, field, obj)
 		case "size":
-			out.Values[i] = ec._MultiPlanetRequiresNested_size(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._MultiPlanetRequiresNested_size(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.Deferrable != nil {
+				dfs, ok := deferred[field.Deferrable.Label]
+				di := 0
+				if ok {
+					dfs.AddField(field)
+					di = len(dfs.Values) - 1
+				} else {
+					dfs = graphql.NewFieldSet([]graphql.CollectedField{field})
+					deferred[field.Deferrable.Label] = dfs
+				}
+				dfs.Concurrently(di, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, dfs)
+				})
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "sizes":
 			out.Values[i] = ec._MultiPlanetRequiresNested_sizes(ctx, field, obj)
 		default:
@@ -6173,6 +6249,177 @@ func (ec *executionContext) marshalN_Any2ᚕmapᚄ(ctx context.Context, sel ast.
 }
 
 func (ec *executionContext) marshalN_Entity2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfedruntimeᚐEntity(ctx context.Context, sel ast.SelectionSet, v []fedruntime.Entity) graphql.Marshaler {
+	{
+		var batchItemsWorldWithMultipleKeys []*WorldWithMultipleKeys
+		batchIdxMapWorldWithMultipleKeys := map[int]int{}
+		var batchItemsWorldName []*WorldName
+		batchIdxMapWorldName := map[int]int{}
+		var batchItemsWorld []*World
+		batchIdxMapWorld := map[int]int{}
+		var batchItemsPlanetRequiresNested []*PlanetRequiresNested
+		batchIdxMapPlanetRequiresNested := map[int]int{}
+		var batchItemsPlanetRequires []*PlanetRequires
+		batchIdxMapPlanetRequires := map[int]int{}
+		var batchItemsPlanetMultipleRequires []*PlanetMultipleRequires
+		batchIdxMapPlanetMultipleRequires := map[int]int{}
+		var batchItemsPerson []*Person
+		batchIdxMapPerson := map[int]int{}
+		var batchItemsMultiPlanetRequiresNested []*MultiPlanetRequiresNested
+		batchIdxMapMultiPlanetRequiresNested := map[int]int{}
+		var batchItemsMultiHelloWithError []*MultiHelloWithError
+		batchIdxMapMultiHelloWithError := map[int]int{}
+		var batchItemsMultiHelloRequires []*MultiHelloRequires
+		batchIdxMapMultiHelloRequires := map[int]int{}
+		var batchItemsMultiHelloMultipleRequires []*MultiHelloMultipleRequires
+		batchIdxMapMultiHelloMultipleRequires := map[int]int{}
+		var batchItemsMultiHello []*MultiHello
+		batchIdxMapMultiHello := map[int]int{}
+		var batchItemsHelloWithErrors []*HelloWithErrors
+		batchIdxMapHelloWithErrors := map[int]int{}
+		var batchItemsHelloMultiSingleKeys []*HelloMultiSingleKeys
+		batchIdxMapHelloMultiSingleKeys := map[int]int{}
+		var batchItemsHello []*Hello
+		batchIdxMapHello := map[int]int{}
+		for i, item := range v {
+			switch concrete := item.(type) {
+			case WorldWithMultipleKeys:
+				batchIdxMapWorldWithMultipleKeys[i] = len(batchItemsWorldWithMultipleKeys)
+				batchItemsWorldWithMultipleKeys = append(batchItemsWorldWithMultipleKeys, &concrete)
+			case *WorldWithMultipleKeys:
+				batchIdxMapWorldWithMultipleKeys[i] = len(batchItemsWorldWithMultipleKeys)
+				batchItemsWorldWithMultipleKeys = append(batchItemsWorldWithMultipleKeys, concrete)
+			case WorldName:
+				batchIdxMapWorldName[i] = len(batchItemsWorldName)
+				batchItemsWorldName = append(batchItemsWorldName, &concrete)
+			case *WorldName:
+				batchIdxMapWorldName[i] = len(batchItemsWorldName)
+				batchItemsWorldName = append(batchItemsWorldName, concrete)
+			case World:
+				batchIdxMapWorld[i] = len(batchItemsWorld)
+				batchItemsWorld = append(batchItemsWorld, &concrete)
+			case *World:
+				batchIdxMapWorld[i] = len(batchItemsWorld)
+				batchItemsWorld = append(batchItemsWorld, concrete)
+			case PlanetRequiresNested:
+				batchIdxMapPlanetRequiresNested[i] = len(batchItemsPlanetRequiresNested)
+				batchItemsPlanetRequiresNested = append(batchItemsPlanetRequiresNested, &concrete)
+			case *PlanetRequiresNested:
+				batchIdxMapPlanetRequiresNested[i] = len(batchItemsPlanetRequiresNested)
+				batchItemsPlanetRequiresNested = append(batchItemsPlanetRequiresNested, concrete)
+			case PlanetRequires:
+				batchIdxMapPlanetRequires[i] = len(batchItemsPlanetRequires)
+				batchItemsPlanetRequires = append(batchItemsPlanetRequires, &concrete)
+			case *PlanetRequires:
+				batchIdxMapPlanetRequires[i] = len(batchItemsPlanetRequires)
+				batchItemsPlanetRequires = append(batchItemsPlanetRequires, concrete)
+			case PlanetMultipleRequires:
+				batchIdxMapPlanetMultipleRequires[i] = len(batchItemsPlanetMultipleRequires)
+				batchItemsPlanetMultipleRequires = append(batchItemsPlanetMultipleRequires, &concrete)
+			case *PlanetMultipleRequires:
+				batchIdxMapPlanetMultipleRequires[i] = len(batchItemsPlanetMultipleRequires)
+				batchItemsPlanetMultipleRequires = append(batchItemsPlanetMultipleRequires, concrete)
+			case Person:
+				batchIdxMapPerson[i] = len(batchItemsPerson)
+				batchItemsPerson = append(batchItemsPerson, &concrete)
+			case *Person:
+				batchIdxMapPerson[i] = len(batchItemsPerson)
+				batchItemsPerson = append(batchItemsPerson, concrete)
+			case MultiPlanetRequiresNested:
+				batchIdxMapMultiPlanetRequiresNested[i] = len(batchItemsMultiPlanetRequiresNested)
+				batchItemsMultiPlanetRequiresNested = append(batchItemsMultiPlanetRequiresNested, &concrete)
+			case *MultiPlanetRequiresNested:
+				batchIdxMapMultiPlanetRequiresNested[i] = len(batchItemsMultiPlanetRequiresNested)
+				batchItemsMultiPlanetRequiresNested = append(batchItemsMultiPlanetRequiresNested, concrete)
+			case MultiHelloWithError:
+				batchIdxMapMultiHelloWithError[i] = len(batchItemsMultiHelloWithError)
+				batchItemsMultiHelloWithError = append(batchItemsMultiHelloWithError, &concrete)
+			case *MultiHelloWithError:
+				batchIdxMapMultiHelloWithError[i] = len(batchItemsMultiHelloWithError)
+				batchItemsMultiHelloWithError = append(batchItemsMultiHelloWithError, concrete)
+			case MultiHelloRequires:
+				batchIdxMapMultiHelloRequires[i] = len(batchItemsMultiHelloRequires)
+				batchItemsMultiHelloRequires = append(batchItemsMultiHelloRequires, &concrete)
+			case *MultiHelloRequires:
+				batchIdxMapMultiHelloRequires[i] = len(batchItemsMultiHelloRequires)
+				batchItemsMultiHelloRequires = append(batchItemsMultiHelloRequires, concrete)
+			case MultiHelloMultipleRequires:
+				batchIdxMapMultiHelloMultipleRequires[i] = len(batchItemsMultiHelloMultipleRequires)
+				batchItemsMultiHelloMultipleRequires = append(batchItemsMultiHelloMultipleRequires, &concrete)
+			case *MultiHelloMultipleRequires:
+				batchIdxMapMultiHelloMultipleRequires[i] = len(batchItemsMultiHelloMultipleRequires)
+				batchItemsMultiHelloMultipleRequires = append(batchItemsMultiHelloMultipleRequires, concrete)
+			case MultiHello:
+				batchIdxMapMultiHello[i] = len(batchItemsMultiHello)
+				batchItemsMultiHello = append(batchItemsMultiHello, &concrete)
+			case *MultiHello:
+				batchIdxMapMultiHello[i] = len(batchItemsMultiHello)
+				batchItemsMultiHello = append(batchItemsMultiHello, concrete)
+			case HelloWithErrors:
+				batchIdxMapHelloWithErrors[i] = len(batchItemsHelloWithErrors)
+				batchItemsHelloWithErrors = append(batchItemsHelloWithErrors, &concrete)
+			case *HelloWithErrors:
+				batchIdxMapHelloWithErrors[i] = len(batchItemsHelloWithErrors)
+				batchItemsHelloWithErrors = append(batchItemsHelloWithErrors, concrete)
+			case HelloMultiSingleKeys:
+				batchIdxMapHelloMultiSingleKeys[i] = len(batchItemsHelloMultiSingleKeys)
+				batchItemsHelloMultiSingleKeys = append(batchItemsHelloMultiSingleKeys, &concrete)
+			case *HelloMultiSingleKeys:
+				batchIdxMapHelloMultiSingleKeys[i] = len(batchItemsHelloMultiSingleKeys)
+				batchItemsHelloMultiSingleKeys = append(batchItemsHelloMultiSingleKeys, concrete)
+			case Hello:
+				batchIdxMapHello[i] = len(batchItemsHello)
+				batchItemsHello = append(batchItemsHello, &concrete)
+			case *Hello:
+				batchIdxMapHello[i] = len(batchItemsHello)
+				batchItemsHello = append(batchItemsHello, concrete)
+			}
+		}
+		if len(batchItemsWorldWithMultipleKeys) > 0 {
+			ctx = graphql.WithBatchParents(ctx, "WorldWithMultipleKeys", batchItemsWorldWithMultipleKeys, batchIdxMapWorldWithMultipleKeys)
+		}
+		if len(batchItemsWorldName) > 0 {
+			ctx = graphql.WithBatchParents(ctx, "WorldName", batchItemsWorldName, batchIdxMapWorldName)
+		}
+		if len(batchItemsWorld) > 0 {
+			ctx = graphql.WithBatchParents(ctx, "World", batchItemsWorld, batchIdxMapWorld)
+		}
+		if len(batchItemsPlanetRequiresNested) > 0 {
+			ctx = graphql.WithBatchParents(ctx, "PlanetRequiresNested", batchItemsPlanetRequiresNested, batchIdxMapPlanetRequiresNested)
+		}
+		if len(batchItemsPlanetRequires) > 0 {
+			ctx = graphql.WithBatchParents(ctx, "PlanetRequires", batchItemsPlanetRequires, batchIdxMapPlanetRequires)
+		}
+		if len(batchItemsPlanetMultipleRequires) > 0 {
+			ctx = graphql.WithBatchParents(ctx, "PlanetMultipleRequires", batchItemsPlanetMultipleRequires, batchIdxMapPlanetMultipleRequires)
+		}
+		if len(batchItemsPerson) > 0 {
+			ctx = graphql.WithBatchParents(ctx, "Person", batchItemsPerson, batchIdxMapPerson)
+		}
+		if len(batchItemsMultiPlanetRequiresNested) > 0 {
+			ctx = graphql.WithBatchParents(ctx, "MultiPlanetRequiresNested", batchItemsMultiPlanetRequiresNested, batchIdxMapMultiPlanetRequiresNested)
+		}
+		if len(batchItemsMultiHelloWithError) > 0 {
+			ctx = graphql.WithBatchParents(ctx, "MultiHelloWithError", batchItemsMultiHelloWithError, batchIdxMapMultiHelloWithError)
+		}
+		if len(batchItemsMultiHelloRequires) > 0 {
+			ctx = graphql.WithBatchParents(ctx, "MultiHelloRequires", batchItemsMultiHelloRequires, batchIdxMapMultiHelloRequires)
+		}
+		if len(batchItemsMultiHelloMultipleRequires) > 0 {
+			ctx = graphql.WithBatchParents(ctx, "MultiHelloMultipleRequires", batchItemsMultiHelloMultipleRequires, batchIdxMapMultiHelloMultipleRequires)
+		}
+		if len(batchItemsMultiHello) > 0 {
+			ctx = graphql.WithBatchParents(ctx, "MultiHello", batchItemsMultiHello, batchIdxMapMultiHello)
+		}
+		if len(batchItemsHelloWithErrors) > 0 {
+			ctx = graphql.WithBatchParents(ctx, "HelloWithErrors", batchItemsHelloWithErrors, batchIdxMapHelloWithErrors)
+		}
+		if len(batchItemsHelloMultiSingleKeys) > 0 {
+			ctx = graphql.WithBatchParents(ctx, "HelloMultiSingleKeys", batchItemsHelloMultiSingleKeys, batchIdxMapHelloMultiSingleKeys)
+		}
+		if len(batchItemsHello) > 0 {
+			ctx = graphql.WithBatchParents(ctx, "Hello", batchItemsHello, batchIdxMapHello)
+		}
+	}
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -6207,6 +6454,7 @@ func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlge
 }
 
 func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Directive) graphql.Marshaler {
+	ctx = graphql.WithBatchParents(ctx, "__Directive", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -6282,6 +6530,7 @@ func (ec *executionContext) marshalN__InputValue2githubᚗcomᚋ99designsᚋgqlg
 }
 
 func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
+	ctx = graphql.WithBatchParents(ctx, "__InputValue", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -6302,6 +6551,7 @@ func (ec *executionContext) marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋg
 }
 
 func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
+	ctx = graphql.WithBatchParents(ctx, "__Type", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -6420,6 +6670,7 @@ func (ec *executionContext) marshalOMultiHello2ᚕᚖgithubᚗcomᚋ99designsᚋ
 	if v == nil {
 		return graphql.Null
 	}
+	ctx = graphql.WithBatchParents(ctx, "MultiHello", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -6448,6 +6699,7 @@ func (ec *executionContext) marshalOMultiHelloMultipleRequires2ᚕᚖgithubᚗco
 	if v == nil {
 		return graphql.Null
 	}
+	ctx = graphql.WithBatchParents(ctx, "MultiHelloMultipleRequires", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -6476,6 +6728,7 @@ func (ec *executionContext) marshalOMultiHelloRequires2ᚕᚖgithubᚗcomᚋ99de
 	if v == nil {
 		return graphql.Null
 	}
+	ctx = graphql.WithBatchParents(ctx, "MultiHelloRequires", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -6504,6 +6757,7 @@ func (ec *executionContext) marshalOMultiHelloWithError2ᚕᚖgithubᚗcomᚋ99d
 	if v == nil {
 		return graphql.Null
 	}
+	ctx = graphql.WithBatchParents(ctx, "MultiHelloWithError", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -6532,6 +6786,7 @@ func (ec *executionContext) marshalOMultiPlanetRequiresNested2ᚕᚖgithubᚗcom
 	if v == nil {
 		return graphql.Null
 	}
+	ctx = graphql.WithBatchParents(ctx, "MultiPlanetRequiresNested", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -6590,6 +6845,7 @@ func (ec *executionContext) marshalOWorld2ᚕᚖgithubᚗcomᚋ99designsᚋgqlge
 	if v == nil {
 		return graphql.Null
 	}
+	ctx = graphql.WithBatchParents(ctx, "World", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -6616,6 +6872,7 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 	if v == nil {
 		return graphql.Null
 	}
+	ctx = graphql.WithBatchParents(ctx, "__EnumValue", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -6635,6 +6892,7 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 	if v == nil {
 		return graphql.Null
 	}
+	ctx = graphql.WithBatchParents(ctx, "__Field", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -6654,6 +6912,7 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 	if v == nil {
 		return graphql.Null
 	}
+	ctx = graphql.WithBatchParents(ctx, "__InputValue", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -6680,6 +6939,7 @@ func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 	if v == nil {
 		return graphql.Null
 	}
+	ctx = graphql.WithBatchParents(ctx, "__Type", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]

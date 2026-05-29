@@ -90,8 +90,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			{{if $.Config.SubscriptionContextField}}
 			response.Context = ctx
 
-			{{end}}
-			var buf bytes.Buffer
+			{{end}}var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 			response.Data = buf.Bytes()
 			if atomic.LoadInt32(&ec.Deferred) > 0 {

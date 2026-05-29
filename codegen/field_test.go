@@ -358,7 +358,13 @@ func TestField_ShortBatchResolverDeclaration_FederationRequires(t *testing.T) {
 		FieldDefinition: &ast2.FieldDefinition{Name: "size"},
 		Object: &Object{
 			Definition: &ast2.Definition{Name: "Product"},
-			Type:       types.NewPointer(types.NewNamed(types.NewTypeName(0, nil, "Product", nil), types.NewStruct(nil, nil), nil)),
+			Type: types.NewPointer(
+				types.NewNamed(
+					types.NewTypeName(0, nil, "Product", nil),
+					types.NewStruct(nil, nil),
+					nil,
+				),
+			),
 		},
 		TypeReference: &config.TypeReference{GO: types.Typ[types.Int]},
 		Args: []*FieldArgument{

@@ -906,7 +906,10 @@ func (f *Field) CallArgs() string {
 	return strings.Join(args, ", ")
 }
 
-func (f *Field) fieldArgExpression(arg *FieldArgument, federationRequiresReplacement string) string {
+func (f *Field) fieldArgExpression(
+	arg *FieldArgument,
+	federationRequiresReplacement string,
+) string {
 	if arg.Name == federationRequiresArgName && federationRequiresReplacement != "" {
 		return federationRequiresReplacement
 	}
@@ -982,7 +985,7 @@ func (f *Field) callArgExpressions(federationRequiresReplacement string) []strin
 // BatchCallArgs returns a comma-separated list of resolver call arguments for batch resolvers.
 // When federationRequiresReplacement is non-empty it is used instead of fc.Args for
 // _federationRequires (per-parent requires built for batch resolvers).
-func (f *Field) BatchCallArgs(parentVar string, federationRequiresReplacement string) string {
+func (f *Field) BatchCallArgs(parentVar, federationRequiresReplacement string) string {
 	args := make([]string, 0, len(f.Args)+2)
 	args = append(args, "ctx")
 	if parentVar != "" {

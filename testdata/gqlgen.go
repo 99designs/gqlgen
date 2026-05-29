@@ -34,6 +34,7 @@ func main() {
 		fmt.Fprintln(os.Stderr, "failed to load config", err.Error())
 		os.Exit(2)
 	}
+
 	var options []api.Option
 	if *stub != "" {
 		options = append(options, api.AddPlugin(stubgen.New(*stub, "Stub")))

@@ -21,7 +21,7 @@ func TestSubscriptions(t *testing.T) {
 
 	resolvers := &Stub{}
 
-	resolvers.SubscriptionResolver.InitPayload = func(ctx context.Context) (<-chan string, error) {
+	resolvers.SubscriptionResolver.InitPayload = func(ctx context.Context) (strings <-chan string, e error) {
 		payload := transport.GetInitPayload(ctx)
 		channel := make(chan string, len(payload)+1)
 
@@ -58,8 +58,8 @@ func TestSubscriptions(t *testing.T) {
 		go func() {
 			for {
 				select {
-				case e := <-errorTick:
-					res <- e
+				case t := <-errorTick:
+					res <- t
 				case <-ctx.Done():
 					close(res)
 					return
@@ -75,8 +75,8 @@ func TestSubscriptions(t *testing.T) {
 		go func() {
 			for {
 				select {
-				case v := <-tick:
-					res <- v
+				case t := <-tick:
+					res <- t
 				case <-ctx.Done():
 					close(res)
 					return

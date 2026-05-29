@@ -149,15 +149,15 @@ func TestDirectives(t *testing.T) {
 		return res, nil
 	}
 
-	resolvers.SubscriptionResolver.DirectiveArg = func(ctx context.Context, arg string) (<-chan *string, error) {
+	resolvers.SubscriptionResolver.DirectiveArg = func(ctx context.Context, arg string) (strings <-chan *string, e error) {
 		return okchan()
 	}
 
-	resolvers.SubscriptionResolver.DirectiveNullableArg = func(ctx context.Context, arg *int, arg2 *int, arg3 *string) (<-chan *string, error) {
+	resolvers.SubscriptionResolver.DirectiveNullableArg = func(ctx context.Context, arg *int, arg2 *int, arg3 *string) (strings <-chan *string, e error) {
 		return okchan()
 	}
 
-	resolvers.SubscriptionResolver.DirectiveDouble = func(ctx context.Context) (<-chan *string, error) {
+	resolvers.SubscriptionResolver.DirectiveDouble = func(ctx context.Context) (strings <-chan *string, e error) {
 		return okchan()
 	}
 

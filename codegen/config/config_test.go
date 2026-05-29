@@ -227,8 +227,10 @@ models:
 		require.True(t, *cfg.Models["User"].Fields["posts"].Batch)
 	})
 
-	t.Run("batch defaults to resolver.batch.enabled when omitted in models yaml", func(t *testing.T) {
-		cfg, err := ReadConfig(strings.NewReader(`
+	t.Run(
+		"batch defaults to resolver.batch.enabled when omitted in models yaml",
+		func(t *testing.T) {
+			cfg, err := ReadConfig(strings.NewReader(`
 schema: schema.graphql
 resolver:
   batch:
@@ -241,10 +243,10 @@ models:
       posts:
         resolver: true
 `))
-		require.NoError(t, err)
-		require.NotNil(t, cfg.Models["User"].Fields["posts"].Batch)
-		require.True(t, *cfg.Models["User"].Fields["posts"].Batch)
-	})
+			require.NoError(t, err)
+			require.NotNil(t, cfg.Models["User"].Fields["posts"].Batch)
+			require.True(t, *cfg.Models["User"].Fields["posts"].Batch)
+		})
 }
 
 func TestConfigCheck(t *testing.T) {

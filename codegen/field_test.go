@@ -149,17 +149,15 @@ func TestField_Batch(t *testing.T) {
 
 func TestField_BatchRootFieldUnsupported(t *testing.T) {
 	cfg := &config.Config{
+		Resolver: config.ResolverConfig{
+			Batch: config.ResolverBatchConfig{Enabled: true},
+		},
 		Exec: config.ExecConfig{
 			Layout:   config.ExecLayoutSingleFile,
 			Filename: "generated.go",
 			Package:  "generated",
 		},
 		Models: config.TypeMap{
-			"Query": {
-				Fields: map[string]config.TypeMapField{
-					"version": {Batch: true},
-				},
-			},
 			"Boolean": {
 				Model: config.StringList{"github.com/99designs/gqlgen/graphql.Boolean"},
 			},

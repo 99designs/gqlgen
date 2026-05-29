@@ -11,15 +11,40 @@ import (
 )
 
 type ResolverConfig struct {
-	Filename            string         `yaml:"filename,omitempty"`
-	FilenameTemplate    string         `yaml:"filename_template,omitempty"`
-	Package             string         `yaml:"package,omitempty"`
-	Type                string         `yaml:"type,omitempty"`
-	Layout              ResolverLayout `yaml:"layout,omitempty"`
-	DirName             string         `yaml:"dir"`
-	OmitTemplateComment bool           `yaml:"omit_template_comment,omitempty"`
-	ResolverTemplate    string         `yaml:"resolver_template,omitempty"`
-	PreserveResolver    bool           `yaml:"preserve_resolver,omitempty"`
+	Filename            string              `yaml:"filename,omitempty"`
+	FilenameTemplate    string              `yaml:"filename_template,omitempty"`
+	Package             string              `yaml:"package,omitempty"`
+	Type                string              `yaml:"type,omitempty"`
+	Layout              ResolverLayout      `yaml:"layout,omitempty"`
+	DirName             string              `yaml:"dir"`
+	Batch               ResolverBatchConfig `yaml:"batch,omitempty"`
+	OmitTemplateComment bool                `yaml:"omit_template_comment,omitempty"`
+	ResolverTemplate    string              `yaml:"resolver_template,omitempty"`
+	PreserveResolver    bool                `yaml:"preserve_resolver,omitempty"`
+}
+
+// ResolverBatchConfig enables batch resolver generation for all fields as if they
+// had @goField(batch: true). Individual fields can opt out with @goField(batch: false).
+type ResolverBatchConfig struct {
+	Enabled bool
+}
+
+func (b *ResolverBatchConfig) UnmarshalYAML(unmarshal func(any) error) error {
+	var enabled bool
+	if err := unmarshal(&enabled); err == nil {
+		b.Enabled = enabled
+		return nil
+	}
+
+	var long struct {
+		Enabled bool `yaml:"enabled"`
+	}
+	if err := unmarshal(&long); err != nil {
+		return err
+	}
+
+	b.Enabled = long.Enabled
+	return nil
 }
 
 type ResolverLayout string

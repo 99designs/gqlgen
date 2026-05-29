@@ -425,22 +425,22 @@ func TestBatchDirectiveConfig(t *testing.T) {
 	userFields := cfg.Models["User"].Fields
 
 	// YAML-configured fields
-	require.True(t, userFields["nullableBatch"].Batch)
-	require.True(t, userFields["nullableBatchWithArg"].Batch)
-	require.True(t, userFields["nonNullableBatch"].Batch)
+	require.True(t, *userFields["nullableBatch"].Batch)
+	require.True(t, *userFields["nullableBatchWithArg"].Batch)
+	require.True(t, *userFields["nonNullableBatch"].Batch)
 
-	require.False(t, userFields["nullableNonBatch"].Batch)
-	require.False(t, userFields["nullableNonBatchWithArg"].Batch)
-	require.False(t, userFields["nonNullableNonBatch"].Batch)
+	require.False(t, *userFields["nullableNonBatch"].Batch)
+	require.False(t, *userFields["nullableNonBatchWithArg"].Batch)
+	require.False(t, *userFields["nonNullableNonBatch"].Batch)
 
 	// Directive-configured fields
-	require.True(t, userFields["directiveNullableBatch"].Batch)
-	require.True(t, userFields["directiveNullableBatchWithArg"].Batch)
-	require.True(t, userFields["directiveNonNullableBatch"].Batch)
+	require.True(t, *userFields["directiveNullableBatch"].Batch)
+	require.True(t, *userFields["directiveNullableBatchWithArg"].Batch)
+	require.True(t, *userFields["directiveNonNullableBatch"].Batch)
 
-	require.False(t, userFields["directiveNullableNonBatch"].Batch)
-	require.False(t, userFields["directiveNullableNonBatchWithArg"].Batch)
-	require.False(t, userFields["directiveNonNullableNonBatch"].Batch)
+	require.Nil(t, userFields["directiveNullableNonBatch"].Batch)
+	require.Nil(t, userFields["directiveNullableNonBatchWithArg"].Batch)
+	require.Nil(t, userFields["directiveNonNullableNonBatch"].Batch)
 }
 
 func TestBatchResolver_BatchErrors_ListPerIndex_AddsMultipleErrors(t *testing.T) {

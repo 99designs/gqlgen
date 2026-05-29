@@ -83,21 +83,22 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 	}
 
 	// Set Batch flag from config (independent of resolver setting)
+	f.Batch = b.Config.Resolver.Batch.Enabled
 	if fieldCfg, ok := b.Config.Models[obj.Name]; ok {
-		if fieldEntry, ok := fieldCfg.Fields[field.Name]; ok {
-			f.Batch = fieldEntry.Batch
-			if f.Batch {
-				if f.Object.Root {
-					return nil, fmt.Errorf(
-						"batch resolver is not supported for root field %s.%s",
-						obj.Name,
-						field.Name,
-					)
-				}
-				// batch resolvers are always user-provided
-				f.IsResolver = true
-			}
+		if fieldEntry, ok := fieldCfg.Fields[field.Name]; ok && fieldEntry.Batch != nil {
+			f.Batch = *fieldEntry.Batch
 		}
+	}
+	if f.Batch {
+		if f.Object.Root {
+			return nil, fmt.Errorf(
+				"batch resolver is not supported for root field %s.%s",
+				obj.Name,
+				field.Name,
+			)
+		}
+		// batch resolvers are always user-provided
+		f.IsResolver = true
 	}
 
 	if f.IsResolver && b.Config.ResolversAlwaysReturnPointers && !f.TypeReference.IsPtr() &&

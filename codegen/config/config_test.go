@@ -186,12 +186,14 @@ models:
         resolver: false
 `))
 		require.NoError(t, err)
-		require.True(t, cfg.Models["User"].Fields["posts"].Batch)
+		require.NotNil(t, cfg.Models["User"].Fields["posts"].Batch)
+		require.True(t, *cfg.Models["User"].Fields["posts"].Batch)
 		require.True(t, cfg.Models["User"].Fields["posts"].Resolver)
-		require.False(t, cfg.Models["User"].Fields["name"].Batch)
+		require.NotNil(t, cfg.Models["User"].Fields["name"].Batch)
+		require.False(t, *cfg.Models["User"].Fields["name"].Batch)
 	})
 
-	t.Run("batch flag defaults to false when not specified", func(t *testing.T) {
+	t.Run("batch flag defaults to resolver.batch when not specified", func(t *testing.T) {
 		cfg, err := ReadConfig(strings.NewReader(`
 schema: schema.graphql
 exec:
@@ -203,7 +205,45 @@ models:
         resolver: true
 `))
 		require.NoError(t, err)
-		require.False(t, cfg.Models["User"].Fields["posts"].Batch)
+		require.NotNil(t, cfg.Models["User"].Fields["posts"].Batch)
+		require.False(t, *cfg.Models["User"].Fields["posts"].Batch)
+	})
+
+	t.Run("batch defaults to resolver.batch when omitted in models yaml", func(t *testing.T) {
+		cfg, err := ReadConfig(strings.NewReader(`
+schema: schema.graphql
+resolver:
+  batch: true
+exec:
+  filename: generated.go
+models:
+  User:
+    fields:
+      posts:
+        resolver: true
+`))
+		require.NoError(t, err)
+		require.NotNil(t, cfg.Models["User"].Fields["posts"].Batch)
+		require.True(t, *cfg.Models["User"].Fields["posts"].Batch)
+	})
+
+	t.Run("batch defaults to resolver.batch.enabled when omitted in models yaml", func(t *testing.T) {
+		cfg, err := ReadConfig(strings.NewReader(`
+schema: schema.graphql
+resolver:
+  batch:
+    enabled: true
+exec:
+  filename: generated.go
+models:
+  User:
+    fields:
+      posts:
+        resolver: true
+`))
+		require.NoError(t, err)
+		require.NotNil(t, cfg.Models["User"].Fields["posts"].Batch)
+		require.True(t, *cfg.Models["User"].Fields["posts"].Batch)
 	})
 }
 

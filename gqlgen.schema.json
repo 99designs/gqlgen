@@ -107,6 +107,18 @@
         "omit_template_comment": { "type": "boolean" },
         "resolver_template": { "type": "string" },
         "preserve_resolver": { "type": "boolean" },
+        "batch": {
+          "description": "Enable batch resolver generation for all fields as if they had @goField(batch: true). Individual fields can opt out with @goField(batch: false).",
+          "oneOf": [
+            { "type": "boolean" },
+            {
+              "type": "object",
+              "properties": {
+                "enabled": { "type": "boolean", "default": false }
+              }
+            }
+          ]
+        },
         "type": {
           "type": "string",
           "description": "The name of the resolver struct type",

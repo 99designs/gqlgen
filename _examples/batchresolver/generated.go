@@ -907,7 +907,6 @@ func (ec *executionContext) resolveBatch_Cat_batchProp(ctx context.Context, fiel
 			}
 		}
 	}
-
 	results, err := resolver.BatchProp(ctx, []*Cat{obj})
 	return graphql.ResolveBatchSingleResult[string](
 		ctx,
@@ -988,7 +987,6 @@ func (ec *executionContext) resolveBatch_Dog_batchProp(ctx context.Context, fiel
 			}
 		}
 	}
-
 	results, err := resolver.BatchProp(ctx, []*Dog{obj})
 	return graphql.ResolveBatchSingleResult[string](
 		ctx,
@@ -1069,7 +1067,6 @@ func (ec *executionContext) resolveBatch_DomesticCat_batchProp(ctx context.Conte
 			}
 		}
 	}
-
 	results, err := resolver.BatchProp(ctx, []*DomesticCat{obj})
 	return graphql.ResolveBatchSingleResult[string](
 		ctx,
@@ -1150,7 +1147,6 @@ func (ec *executionContext) resolveBatch_DomesticCat_batchName(ctx context.Conte
 			}
 		}
 	}
-
 	results, err := resolver.BatchName(ctx, []*DomesticCat{obj})
 	return graphql.ResolveBatchSingleResult[string](
 		ctx,
@@ -1254,7 +1250,6 @@ func (ec *executionContext) resolveBatch_Pig_batchProp(ctx context.Context, fiel
 			}
 		}
 	}
-
 	results, err := resolver.BatchProp(ctx, []*Pig{obj})
 	return graphql.ResolveBatchSingleResult[string](
 		ctx,
@@ -1344,7 +1339,6 @@ func (ec *executionContext) resolveBatch_Profile_coverBatch(ctx context.Context,
 			}
 		}
 	}
-
 	results, err := resolver.CoverBatch(ctx, []*Profile{obj})
 	return graphql.ResolveBatchSingleResult[*Image](
 		ctx,
@@ -1725,7 +1719,6 @@ func (ec *executionContext) resolveBatch_User_nullableBatch(ctx context.Context,
 			}
 		}
 	}
-
 	results, err := resolver.NullableBatch(ctx, []*User{obj})
 	return graphql.ResolveBatchSingleResult[*Profile](
 		ctx,
@@ -1836,7 +1829,6 @@ func (ec *executionContext) resolveBatch_User_nullableBatchWithArg(ctx context.C
 			}
 		}
 	}
-
 	results, err := resolver.NullableBatchWithArg(ctx, []*User{obj}, fc.Args["offset"].(int))
 	return graphql.ResolveBatchSingleResult[*Profile](
 		ctx,
@@ -1947,7 +1939,6 @@ func (ec *executionContext) resolveBatch_User_nonNullableBatch(ctx context.Conte
 			}
 		}
 	}
-
 	results, err := resolver.NonNullableBatch(ctx, []*User{obj})
 	return graphql.ResolveBatchSingleResult[*Profile](
 		ctx,
@@ -2046,7 +2037,6 @@ func (ec *executionContext) resolveBatch_User_directiveNullableBatch(ctx context
 			}
 		}
 	}
-
 	results, err := resolver.DirectiveNullableBatch(ctx, []*User{obj})
 	return graphql.ResolveBatchSingleResult[*Profile](
 		ctx,
@@ -2157,7 +2147,6 @@ func (ec *executionContext) resolveBatch_User_directiveNullableBatchWithArg(ctx 
 			}
 		}
 	}
-
 	results, err := resolver.DirectiveNullableBatchWithArg(ctx, []*User{obj}, fc.Args["offset"].(int))
 	return graphql.ResolveBatchSingleResult[*Profile](
 		ctx,
@@ -2268,7 +2257,6 @@ func (ec *executionContext) resolveBatch_User_directiveNonNullableBatch(ctx cont
 			}
 		}
 	}
-
 	results, err := resolver.DirectiveNonNullableBatch(ctx, []*User{obj})
 	return graphql.ResolveBatchSingleResult[*Profile](
 		ctx,
@@ -2367,7 +2355,6 @@ func (ec *executionContext) resolveBatch_User_profileBatch(ctx context.Context, 
 			}
 		}
 	}
-
 	results, err := resolver.ProfileBatch(ctx, []*User{obj})
 	return graphql.ResolveBatchSingleResult[*Profile](
 		ctx,
@@ -2466,7 +2453,6 @@ func (ec *executionContext) resolveBatch_User_profileConnectionBatch(ctx context
 			}
 		}
 	}
-
 	results, err := resolver.ProfileConnectionBatch(ctx, []*User{obj})
 	return graphql.ResolveBatchSingleResult[*ProfilesConnection](
 		ctx,

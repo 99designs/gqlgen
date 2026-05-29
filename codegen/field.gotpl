@@ -139,8 +139,7 @@ func (ec *executionContext) resolveBatch_{{$object.Name}}_{{$field.Name}}(ctx co
 			}
 		}
 	}
-
-	{{- if $field.HasFederationRequiresArg }}
+{{- if $field.HasFederationRequiresArg }}
 	federationRequires, err := graphql.FederationRequiresForBatch(ctx, 1, nil)
 	if err != nil {
 		return nil, err

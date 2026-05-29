@@ -12,10 +12,7 @@ import (
 )
 
 // Size is the batch resolver for the size field.
-func (r *multiPlanetRequiresNestedResolver) Size(
-	ctx context.Context,
-	objs []*generated.MultiPlanetRequiresNested,
-) ([]int, error) {
+func (r *multiPlanetRequiresNestedResolver) Size(ctx context.Context, objs []*generated.MultiPlanetRequiresNested) ([]int, error) {
 	results := make([]int, len(objs))
 	for i, obj := range objs {
 		results[i] = len(obj.World.Foo)

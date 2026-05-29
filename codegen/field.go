@@ -756,12 +756,18 @@ func (f *Field) ShortResolverDeclaration(subscriptionContextField ...bool) strin
 
 // ShortResolverSignature is identical to ShortResolverDeclaration,
 // but respects previous naming (return) conventions, if any.
-func (f *Field) ShortResolverSignature(ft *goast.FuncType, subscriptionContextField ...bool) string {
+func (f *Field) ShortResolverSignature(
+	ft *goast.FuncType,
+	subscriptionContextField ...bool,
+) string {
 	useCtxField := len(subscriptionContextField) > 0 && subscriptionContextField[0]
 	return f.shortResolverSignatureImpl(ft, useCtxField)
 }
 
-func (f *Field) shortResolverSignatureImpl(ft *goast.FuncType, subscriptionContextField bool) string {
+func (f *Field) shortResolverSignatureImpl(
+	ft *goast.FuncType,
+	subscriptionContextField bool,
+) string {
 	if f.Object.Kind == ast.InputObject {
 		return fmt.Sprintf("(ctx context.Context, obj %s, data %s) error",
 			templates.CurrentImports.LookupType(f.Object.Reference()),

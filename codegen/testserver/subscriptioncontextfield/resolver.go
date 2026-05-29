@@ -36,7 +36,9 @@ func (r *queryResolver) GetEntity(ctx context.Context, id string) (Entity, error
 }
 
 // UserCreated is the resolver for the userCreated field.
-func (r *subscriptionResolver) UserCreated(ctx context.Context) (<-chan graphql.SubscriptionField[*User], error) {
+func (r *subscriptionResolver) UserCreated(
+	ctx context.Context,
+) (<-chan graphql.SubscriptionField[*User], error) {
 	panic("not implemented")
 }
 
@@ -49,6 +51,14 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 // Subscription returns SubscriptionResolver implementation.
 func (r *Resolver) Subscription() SubscriptionResolver { return &subscriptionResolver{r} }
 
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
-type subscriptionResolver struct{ *Resolver }
+type mutationResolver struct {
+	*Resolver
+}
+
+type queryResolver struct {
+	*Resolver
+}
+
+type subscriptionResolver struct {
+	*Resolver
+}

@@ -130,7 +130,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 					return nil
 				}
 			}
-			response.Context = ctx
 
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)

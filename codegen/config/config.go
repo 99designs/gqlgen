@@ -202,7 +202,6 @@ func LoadConfigFromDefaultLocations() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	err = os.Chdir(filepath.Dir(cfgFile))
 	if err != nil {
 		return nil, fmt.Errorf("unable to enter config dir: %w", err)
@@ -242,7 +241,6 @@ func ReadConfig(cfgFile io.Reader) (cfg *Config, err error) {
 	if err := dec.Decode(config); err != nil {
 		return nil, fmt.Errorf("unable to parse config: %w", err)
 	}
-
 	if err := CompleteConfig(config); err != nil {
 		return nil, err
 	}

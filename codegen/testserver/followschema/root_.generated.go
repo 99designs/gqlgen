@@ -2251,7 +2251,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 					return nil
 				}
 			}
-			response.Context = ctx
 
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
@@ -2277,8 +2276,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			data.MarshalGQL(&buf)
 
 			return &graphql.Response{
-				Context: ctx,
-				Data:    buf.Bytes(),
+				Data: buf.Bytes(),
 			}
 		}
 	case ast.Subscription:
@@ -2297,7 +2295,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			data.MarshalGQL(&buf)
 
 			return &graphql.Response{
-
 				Data: buf.Bytes(),
 			}
 		}

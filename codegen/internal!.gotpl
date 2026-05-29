@@ -87,8 +87,10 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 					return nil
 				}
 			}
+			{{if $.Config.SubscriptionContextField}}
 			response.Context = ctx
 
+			{{end}}
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
 			response.Data = buf.Bytes()
@@ -117,7 +119,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			data.MarshalGQL(&buf)
 
 			return &graphql.Response{
-				Context:    ctx,
+				{{- if $.Config.SubscriptionContextField}}
+				Context: ctx,
+				{{- end}}
 				Data:       buf.Bytes(),
 			}
 		}
@@ -147,7 +151,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			}{{end}}
 
 			return &graphql.Response{
-				{{if $.Config.SubscriptionContextField}}Context:    respCtx,{{end}}
+				{{- if $.Config.SubscriptionContextField}}
+				Context: respCtx,
+				{{- end}}
 				Data:       buf.Bytes(),
 			}
 		}

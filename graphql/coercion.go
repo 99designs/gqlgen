@@ -6,53 +6,41 @@ import (
 
 // CoerceList applies coercion from a single value to a list.
 func CoerceList(v any) []any {
-	var vSlice []any
 	if v == nil {
-		return vSlice
+		return nil
 	}
 
 	switch v := v.(type) {
 	case []any:
 		// already a slice no coercion required
-		vSlice = v
+		return v
 	case []string:
-		if len(v) > 0 {
-			vSlice = []any{v[0]}
-		}
+		return toAnySlice(v)
 	case []json.Number:
-		if len(v) > 0 {
-			vSlice = []any{v[0]}
-		}
+		return toAnySlice(v)
 	case []bool:
-		if len(v) > 0 {
-			vSlice = []any{v[0]}
-		}
+		return toAnySlice(v)
 	case []map[string]any:
-		if len(v) > 0 {
-			vSlice = []any{v[0]}
-		}
+		return toAnySlice(v)
 	case []float64:
-		if len(v) > 0 {
-			vSlice = []any{v[0]}
-		}
+		return toAnySlice(v)
 	case []float32:
-		if len(v) > 0 {
-			vSlice = []any{v[0]}
-		}
+		return toAnySlice(v)
 	case []int:
-		if len(v) > 0 {
-			vSlice = []any{v[0]}
-		}
+		return toAnySlice(v)
 	case []int32:
-		if len(v) > 0 {
-			vSlice = []any{v[0]}
-		}
+		return toAnySlice(v)
 	case []int64:
-		if len(v) > 0 {
-			vSlice = []any{v[0]}
-		}
+		return toAnySlice(v)
 	default:
-		vSlice = []any{v}
+		return []any{v}
 	}
-	return vSlice
+}
+
+func toAnySlice[T any](in []T) []any {
+	out := make([]any, len(in))
+	for i, v := range in {
+		out[i] = v
+	}
+	return out
 }

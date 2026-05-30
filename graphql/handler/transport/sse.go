@@ -20,6 +20,8 @@ import (
 type (
 	SSE struct {
 		KeepAlivePingInterval time.Duration
+		// MinEventInterval optionally paces SSE event frames for high-throughput streams.
+		MinEventInterval time.Duration
 	}
 
 	sseConnection struct {
@@ -99,8 +101,21 @@ func (t SSE) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 	c.ctx = ctx
 
 	w.Header().Set("Content-Type", "text/event-stream")
-	fmt.Fprint(w, ":\n\n")
-	c.flush()
+	c.writeAndFlush(w, func(w io.Writer) {
+		fmt.Fprint(w, ":\n\n")
+	})
+
+	lastEventSent := time.Time{}
+	eventCtx := ctx
+	writeEvent := func(ctx context.Context, write func(io.Writer)) bool {
+		if !waitForMinEventInterval(ctx, lastEventSent, t.MinEventInterval) {
+			return false
+		}
+
+		c.writeAndFlush(w, write)
+		lastEventSent = time.Now()
+		return true
+	}
 
 	if t.KeepAlivePingInterval > 0 {
 		c.mu.Lock()
@@ -112,22 +127,57 @@ func (t SSE) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecut
 
 	if opErr != nil {
 		resp := exec.DispatchError(ctx, opErr)
-		writeJsonWithSSE(w, resp)
+		if !writeEvent(ctx, func(w io.Writer) {
+			writeJsonWithSSE(w, resp)
+		}) {
+			return
+		}
 	} else {
-		responses, ctx := exec.DispatchOperation(ctx, rc)
+		responses, dispatchCtx := exec.DispatchOperation(ctx, rc)
+		eventCtx = dispatchCtx
 		for {
-			response := responses(ctx)
+			response := responses(dispatchCtx)
 			if response == nil {
 				break
 			}
-			writeJsonWithSSE(w, response)
-			c.flush()
+			if !writeEvent(dispatchCtx, func(w io.Writer) {
+				writeJsonWithSSE(w, response)
+			}) {
+				return
+			}
 
 			c.resetTicker(t.KeepAlivePingInterval)
 		}
 	}
 
-	fmt.Fprint(w, "event: complete\n\n")
+	writeEvent(eventCtx, func(w io.Writer) {
+		fmt.Fprint(w, "event: complete\n\n")
+	})
+}
+
+func waitForMinEventInterval(
+	ctx context.Context,
+	lastEventSent time.Time,
+	minInterval time.Duration,
+) bool {
+	if minInterval <= 0 || lastEventSent.IsZero() {
+		return true
+	}
+
+	wait := time.Until(lastEventSent.Add(minInterval))
+	if wait <= 0 {
+		return true
+	}
+
+	timer := time.NewTimer(wait)
+	defer timer.Stop()
+
+	select {
+	case <-ctx.Done():
+		return false
+	case <-timer.C:
+		return true
+	}
 }
 
 func (c *sseConnection) resetTicker(interval time.Duration) {
@@ -145,14 +195,22 @@ func (c *sseConnection) keepAlive(w io.Writer) {
 			c.keepAliveTicker.Stop()
 			return
 		case <-c.keepAliveTicker.C:
-			fmt.Fprintf(w, ": ping\n\n")
-			c.flush()
+			c.writeAndFlush(w, func(w io.Writer) {
+				fmt.Fprint(w, ": ping\n\n")
+			})
 		}
 	}
 }
 
 func (c *sseConnection) flush() {
 	c.mu.Lock()
+	c.f.Flush()
+	c.mu.Unlock()
+}
+
+func (c *sseConnection) writeAndFlush(w io.Writer, write func(io.Writer)) {
+	c.mu.Lock()
+	write(w)
 	c.f.Flush()
 	c.mu.Unlock()
 }

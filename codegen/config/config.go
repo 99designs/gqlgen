@@ -330,6 +330,8 @@ func CompleteConfig(config *Config) error {
 
 	config.GoInitialisms.setInitialisms()
 
+	config.resolveModelBatchDefaults()
+
 	return nil
 }
 
@@ -503,7 +505,7 @@ func (c *Config) injectGoFieldDirectives(schemaType *ast.Definition) error {
 		if arg := fd.Arguments.ForName(DirArgBatch); arg != nil {
 			if k, err := arg.Value.Value(nil); err == nil {
 				if val, ok := k.(bool); ok {
-					typeMapFieldEntry.Batch = val
+					typeMapFieldEntry.Batch = &val
 				}
 			}
 		}
@@ -536,6 +538,20 @@ func (c *Config) injectGoFieldDirectives(schemaType *ast.Definition) error {
 	}
 
 	return nil
+}
+
+func (c *Config) resolveModelBatchDefaults() {
+	for typeName, entry := range c.Models {
+		for fieldName, field := range entry.Fields {
+			if field.Batch != nil {
+				continue
+			}
+			batch := c.Resolver.Batch.Enabled
+			field.Batch = &batch
+			entry.Fields[fieldName] = field
+		}
+		c.Models[typeName] = entry
+	}
 }
 
 func (c *Config) injectGoExtraFieldDirectives(schemaType *ast.Definition) error {
@@ -674,7 +690,7 @@ type TypeMapField struct {
 	// that accepts multiple parent objects and returns ([]T, error) for all of them
 	// in a single call, reducing N+1 query problems. For partial failures, return
 	// a graphql.BatchErrors implementation as the error.
-	Batch bool `yaml:"batch,omitempty"`
+	Batch *bool `yaml:"batch,omitempty"`
 	// ForceGenerate forces the field to be generated in the model struct
 	// even when OmitResolverFields is enabled and the field has forceResolver: true.
 	ForceGenerate bool `yaml:"forceGenerate"`

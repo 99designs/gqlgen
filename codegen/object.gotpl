@@ -3,7 +3,7 @@
 var {{ $object.Name|lcFirst}}Implementors = {{$object.Implementors}}
 
 {{- if .Stream }}
-func {{$.FuncReceiver}}_{{$object.Name}}(ctx context.Context, {{$.ECFuncParam}}sel ast.SelectionSet) func(ctx context.Context) graphql.Marshaler {
+func {{$.FuncReceiver}}_{{$object.Name}}(ctx context.Context, {{$.ECFuncParam}}sel ast.SelectionSet) func(ctx context.Context) {{if $.Config.SubscriptionContextField}}(context.Context, graphql.Marshaler){{else}}graphql.Marshaler{{end}} {
 	fields := graphql.CollectFields(ec.OperationContext, sel, {{$object.Name|lcFirst}}Implementors)
 	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
 		Object: {{$object.Name|quote}},
@@ -105,7 +105,7 @@ func {{$.FuncReceiver}}_{{$object.Name}}(ctx context.Context, {{$.ECFuncParam}}s
 						return {{$.ECDot}}_{{$object.Name}}_{{$field.Name}}(ctx, {{$.ECArg}}field)
 					})
 				{{- else -}}
-					out.Values[i] = {{$.ECDot}}_{{$object.Name}}_{{$field.Name}}(ctx, {{$.ECArg}}field, obj)
+			{{ if and (eq $field.Name "subscription") $.Config.SubscriptionContextField}} _, {{- end}}out.Values[i] = {{$.ECDot}}_{{$object.Name}}_{{$field.Name}}(ctx, {{$.ECArg}}field, obj)
 				{{- end -}}
 
 				{{- if $field.TypeReference.GQL.NonNull }}

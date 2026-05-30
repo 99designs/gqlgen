@@ -1,6 +1,6 @@
 {{- range $object := .Objects }}{{- range $field := $object.Fields }}
 
-func {{$.FuncReceiver}}_{{$object.Name}}_{{$field.Name}}(ctx context.Context, {{$.ECFuncParam}}field graphql.CollectedField{{ if not $object.Root }}, obj {{$object.Reference | ref}}{{end}}) (ret {{ if $object.Stream }}func(ctx context.Context){{ end }}graphql.Marshaler) {
+func {{$.FuncReceiver}}_{{$object.Name}}_{{$field.Name}}(ctx context.Context, {{$.ECFuncParam}}field graphql.CollectedField{{ if not $object.Root }}, obj {{$object.Reference | ref}}{{end}}) ({{- if and (eq $field.Name "subscription") $.Config.SubscriptionContextField }} retCtx context.Context, {{- end}}ret {{ if $object.Stream }}func(ctx context.Context) {{ if and (not $field.TypeReference.IsRoot) $.Config.SubscriptionContextField }}(context.Context, {{ end }} {{ end }}graphql.Marshaler{{ if $object.Stream }}{{ if and (not $field.TypeReference.IsRoot) $.Config.SubscriptionContextField }}) {{ end }}{{ end }}) {
 	{{- $null := "graphql.Null" }}
 	{{- if $object.Stream }}
 		{{- $null = "nil" }}
@@ -9,7 +9,7 @@ func {{$.FuncReceiver}}_{{$object.Name}}_{{$field.Name}}(ctx context.Context, {{
 	{{- if $field.TypeReference.IsRoot }}
 		fc, err := {{$.ECDot}}{{ $field.FieldContextFunc }}(ctx, {{$.ECArg}}field)
 		if err != nil {
-			return {{ $null }}
+			return {{- if and (eq $field.Name "subscription") $.Config.SubscriptionContextField }}  ctx,{{- end}} {{ $null }}
 		}
 		ctx = graphql.WithFieldContext(ctx, fc)
 		{{- if not $.Config.OmitPanicHandler }}
@@ -29,7 +29,7 @@ func {{$.FuncReceiver}}_{{$object.Name}}_{{$field.Name}}(ctx context.Context, {{
 		fc.Result = res
 		return {{$.ECDot}}{{ $field.TypeReference.MarshalFunc }}(ctx, {{$.ECArg}}field.Selections, res)
 	{{- else}}
-		return graphql.ResolveField{{- if $object.Stream }}Stream{{- end }}(
+		return graphql.{{if $object.Stream}}{{if $.Config.SubscriptionContextField}}ResolveFieldStreamWithContext{{else}}ResolveFieldStream{{end}}{{else}}ResolveField{{end}}(
 			ctx,
 			ec.OperationContext,
 			field,

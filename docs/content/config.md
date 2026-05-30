@@ -142,6 +142,13 @@ call_argument_directives_with_null: true
 # instead of generating receiver methods of the execution context.
 # use_function_syntax_for_execution_context: true
 
+# Optional: set to true to enable subscription context propagation.
+# When enabled, subscription resolvers return (<-chan graphql.SubscriptionField[T], error)
+# instead of (<-chan T, error), allowing each subscription event to carry its own context.
+# This enables per-event tracing and metadata propagation through graphql.Response.Context.
+# Default: false (disabled for backward compatibility)
+# subscription_context_field: false
+
 # Optional: set build tags that will be used to load packages
 # go_build_tags:
 #  - private

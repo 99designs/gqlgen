@@ -781,13 +781,25 @@ func formatGoType(goType string) string {
 	return goType
 }
 
-func (f *Field) ShortResolverDeclaration() string {
-	return f.ShortResolverSignature(nil)
+func (f *Field) ShortResolverDeclaration(subscriptionContextField ...bool) string {
+	useCtxField := len(subscriptionContextField) > 0 && subscriptionContextField[0]
+	return f.shortResolverSignatureImpl(nil, useCtxField)
 }
 
 // ShortResolverSignature is identical to ShortResolverDeclaration,
 // but respects previous naming (return) conventions, if any.
-func (f *Field) ShortResolverSignature(ft *goast.FuncType) string {
+func (f *Field) ShortResolverSignature(
+	ft *goast.FuncType,
+	subscriptionContextField ...bool,
+) string {
+	useCtxField := len(subscriptionContextField) > 0 && subscriptionContextField[0]
+	return f.shortResolverSignatureImpl(ft, useCtxField)
+}
+
+func (f *Field) shortResolverSignatureImpl(
+	ft *goast.FuncType,
+	subscriptionContextField bool,
+) string {
 	if f.Object.Kind == ast.InputObject {
 		return fmt.Sprintf("(ctx context.Context, obj %s, data %s) error",
 			templates.CurrentImports.LookupType(f.Object.Reference()),
@@ -834,7 +846,11 @@ func (f *Field) ShortResolverSignature(ft *goast.FuncType) string {
 
 	result := templates.CurrentImports.LookupType(f.TypeReference.GO)
 	if f.Object.Stream {
-		result = "<-chan " + result
+		if subscriptionContextField {
+			result = "<-chan graphql.SubscriptionField[" + result + "]"
+		} else {
+			result = "<-chan " + result
+		}
 	}
 	// Named return.
 	var namedV, namedE string

@@ -77,6 +77,49 @@ func ResolveFieldStream[T any](
 	)
 }
 
+func ResolveFieldStreamWithContext[T any](
+	ctx context.Context,
+	oc *OperationContext,
+	field CollectedField,
+	initializeFieldContext func(ctx context.Context, field CollectedField) (*FieldContext, error),
+	fieldResolver func(context.Context) (any, error),
+	middlewareChain func(ctx context.Context, next Resolver) Resolver,
+	marshal func(ctx context.Context, sel ast.SelectionSet, v T) Marshaler,
+	recoverFromPanic bool,
+	nonNull bool,
+) func(context.Context) (context.Context, Marshaler) {
+	return resolveField(
+		ctx,
+		oc,
+		field,
+		initializeFieldContext,
+		fieldResolver,
+		middlewareChain,
+		recoverFromPanic,
+		nonNull,
+		nil,
+		func(ctx context.Context, res <-chan SubscriptionField[T]) func(context.Context) (context.Context, Marshaler) {
+			return func(ctx context.Context) (context.Context, Marshaler) {
+				select {
+				case v, ok := <-res:
+					if !ok {
+						return ctx, nil
+					}
+					return v.GetContext(), WriterFunc(func(w io.Writer) {
+						w.Write([]byte{'{'})
+						MarshalString(field.Alias).MarshalGQL(w)
+						w.Write([]byte{':'})
+						marshal(ctx, field.Selections, v.GetField()).MarshalGQL(w)
+						w.Write([]byte{'}'})
+					})
+				case <-ctx.Done():
+					return ctx, nil
+				}
+			}
+		},
+	)
+}
+
 func resolveField[T, R any](
 	ctx context.Context,
 	oc *OperationContext,

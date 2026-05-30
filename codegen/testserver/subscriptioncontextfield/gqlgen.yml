@@ -1,0 +1,17 @@
+schema:
+  - "*.graphql"
+skip_validation: true
+subscription_context_field: true
+exec:
+  filename: generated.go
+  package: subscriptioncontextfield
+model:
+  filename: models-gen.go
+  package: subscriptioncontextfield
+resolver:
+  filename: resolver.go
+  package: subscriptioncontextfield
+  type: Resolver
+
+autobind:
+  - "github.com/99designs/gqlgen/codegen/testserver/subscriptioncontextfield"

@@ -499,8 +499,7 @@ func (ec *executionContext) unmarshalOMapNestedMapSliceInput2ᚕmapᚄ(ctx conte
 	if v == nil {
 		return nil, nil
 	}
-	var vSlice []any
-	vSlice = graphql.CoerceList(v)
+	vSlice := graphql.CoerceList(v)
 	var err error
 	res := make([]map[string]any, len(vSlice))
 	for i := range vSlice {

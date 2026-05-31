@@ -2,6 +2,7 @@ package transport_test
 
 import (
 	"bufio"
+	"context"
 	"io"
 	"net/http"
 	"net/http/httptest"
@@ -12,7 +13,9 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlparser/v2/gqlerror"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler/testserver"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
@@ -236,4 +239,66 @@ func TestSSE(t *testing.T) {
 
 		wg.Wait()
 	})
+
+	t.Run("min event interval paces rapid events", func(t *testing.T) {
+		interval := 10 * time.Millisecond
+		responses := []*graphql.Response{
+			{Data: []byte(`{"name":"test1"}`)},
+			{Data: []byte(`{"name":"test2"}`)},
+			{Data: []byte(`{"name":"test3"}`)},
+		}
+
+		req := createHTTPTestRequest(`{"query":"subscription { name }"}`)
+		w := httptest.NewRecorder()
+
+		start := time.Now()
+		transport.SSE{MinEventInterval: interval}.Do(
+			w,
+			req,
+			&sseGraphExecutor{responses: responses},
+		)
+		elapsed := time.Since(start)
+
+		assert.GreaterOrEqual(t, elapsed, interval*time.Duration(len(responses)))
+		assert.Equal(t, 200, w.Code, "Request return wrong status -> %d", w.Code)
+		assert.Equal(t, "text/event-stream", w.Header().Get("Content-Type"))
+
+		body := w.Body.String()
+		assert.Equal(t, len(responses), strings.Count(body, "event: next\n"))
+		assert.Contains(t, body, `data: {"data":{"name":"test1"}}`)
+		assert.Contains(t, body, `data: {"data":{"name":"test2"}}`)
+		assert.Contains(t, body, `data: {"data":{"name":"test3"}}`)
+		assert.Contains(t, body, "event: complete\n")
+	})
+}
+
+type sseGraphExecutor struct {
+	responses []*graphql.Response
+}
+
+func (e *sseGraphExecutor) CreateOperationContext(
+	context.Context,
+	*graphql.RawParams,
+) (*graphql.OperationContext, gqlerror.List) {
+	return &graphql.OperationContext{}, nil
+}
+
+func (e *sseGraphExecutor) DispatchOperation(
+	ctx context.Context,
+	_ *graphql.OperationContext,
+) (graphql.ResponseHandler, context.Context) {
+	index := 0
+	return func(context.Context) *graphql.Response {
+		if index >= len(e.responses) {
+			return nil
+		}
+
+		resp := e.responses[index]
+		index++
+		return resp
+	}, ctx
+}
+
+func (e *sseGraphExecutor) DispatchError(_ context.Context, errs gqlerror.List) *graphql.Response {
+	return &graphql.Response{Errors: errs}
 }

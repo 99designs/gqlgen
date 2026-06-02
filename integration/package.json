@@ -11,7 +11,7 @@
         "@apollo/client": "^4.2.0",
         "@graphql-codegen/cli": "^7.0.0",
         "@graphql-codegen/client-preset": "^5.2.4",
-        "@graphql-codegen/introspection": "^6.0.0",
+        "@graphql-codegen/introspection": "^6.0.1",
         "@graphql-codegen/schema-ast": "^6.0.0",
         "graphql": "^16.14.0",
         "graphql-sse": "^2.6.0",

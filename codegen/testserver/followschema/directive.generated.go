@@ -613,6 +613,9 @@ func (ec *executionContext) _ObjectDirectives(ctx context.Context, sel ast.Selec
 			}
 		case "nullableText":
 			out.Values[i] = ec._ObjectDirectives_nullableText(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "order":
 			out.Values[i] = ec._ObjectDirectives_order(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -654,6 +657,9 @@ func (ec *executionContext) _ObjectDirectivesWithCustomGoModel(ctx context.Conte
 			out.Values[i] = graphql.MarshalString("ObjectDirectivesWithCustomGoModel")
 		case "nullableText":
 			out.Values[i] = ec._ObjectDirectivesWithCustomGoModel_nullableText(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

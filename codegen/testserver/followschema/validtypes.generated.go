@@ -699,6 +699,9 @@ func (ec *executionContext) _Content_Post(ctx context.Context, sel ast.Selection
 			out.Values[i] = graphql.MarshalString("Content_Post")
 		case "foo":
 			out.Values[i] = ec._Content_Post_foo(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -735,6 +738,9 @@ func (ec *executionContext) _Content_User(ctx context.Context, sel ast.Selection
 			out.Values[i] = graphql.MarshalString("Content_User")
 		case "foo":
 			out.Values[i] = ec._Content_User_foo(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

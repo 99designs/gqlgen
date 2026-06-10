@@ -73,6 +73,9 @@ func (ec *executionContext) _EmbeddedDefaultScalar(ctx context.Context, sel ast.
 			out.Values[i] = graphql.MarshalString("EmbeddedDefaultScalar")
 		case "value":
 			out.Values[i] = ec._EmbeddedDefaultScalar_value(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

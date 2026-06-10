@@ -98,8 +98,14 @@ func (ec *executionContext) _PtrToAnyContainer(ctx context.Context, sel ast.Sele
 			out.Values[i] = graphql.MarshalString("PtrToAnyContainer")
 		case "ptrToAny":
 			out.Values[i] = ec._PtrToAnyContainer_ptrToAny(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		case "binding":
 			out.Values[i] = ec._PtrToAnyContainer_binding(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

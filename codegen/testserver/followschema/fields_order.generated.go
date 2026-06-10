@@ -116,6 +116,9 @@ func (ec *executionContext) _FieldsOrderPayload(ctx context.Context, sel ast.Sel
 			out.Values[i] = graphql.MarshalString("FieldsOrderPayload")
 		case "firstFieldValue":
 			out.Values[i] = ec._FieldsOrderPayload_firstFieldValue(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}

@@ -128,9 +128,23 @@ func NewScalarFieldContext(
 // occurs as if the field were declared non-null (!) in the schema.
 //
 // This is intended for use by FieldInterceptors that need runtime
-// required-field semantics (e.g., a @priority(value: Required) directive).
+// required-field semantics (e.g., a @priority(value: REQUIRED) directive).
 // It must be called before the resolver returns, typically inside an
 // AroundFields middleware or FieldInterceptor.
+//
+// Trade-offs: altering null-propagation semantics at runtime makes the
+// response shape depend on server logic rather than the schema. A field
+// declared as nullable (String) can behave like a non-null field (String!)
+// for a given request. This behavior cannot be discovered via introspection
+// and cannot be validated statically by client tooling (GraphQL IDEs, type
+// generators), so the schema is no longer the single source of truth for the
+// client-server contract. Prefer triggering it from an executable directive
+// that the client explicitly includes in the query (like @skip/@include), so
+// the stricter behavior is an explicit opt-in rather than hidden server logic.
+// Use only when you control both client and server, and when the benefit
+// (e.g., stricter data integrity for critical fields) outweighs the loss of
+// schema-time guarantees. See the "Dynamically requiring fields" recipe in the
+// documentation for the recommended pattern.
 func MarkNonNull(ctx context.Context) {
 	if fc := GetFieldContext(ctx); fc != nil {
 		fc.NonNull = true

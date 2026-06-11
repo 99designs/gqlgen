@@ -226,7 +226,7 @@ directive @goField(
 directive @goTag(
 	key: String!
 	value: String
-) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+) repeatable on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 
 directive @goExtraField(
 	name: String

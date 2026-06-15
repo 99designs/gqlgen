@@ -56,9 +56,9 @@ To that end, you expressly enable the addition of the `,omitzero` json field tag
 
 ### Examples
 
-enable_model_json_omitempty_tag default is false.
+enable_model_json_omitzero_tag default is false.
 
-With `enable_model_json_omitempty_tag: false`:
+With `enable_model_json_omitzero_tag: false`:
 
 ```go
 type OmitEmptyJSONTagTest struct {

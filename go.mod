@@ -18,8 +18,8 @@ require (
 	github.com/urfave/cli/v3 v3.9.0
 	github.com/vektah/gqlparser/v2 v2.5.35
 	golang.org/x/net v0.55.0
-	golang.org/x/sync v0.20.0
-	golang.org/x/text v0.37.0
+	golang.org/x/sync v0.21.0
+	golang.org/x/text v0.38.0
 	golang.org/x/tools v0.45.0
 	google.golang.org/protobuf v1.36.11
 )

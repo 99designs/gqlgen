@@ -80,16 +80,35 @@ func collectFields(
 			}
 
 			shouldDefer, label := deferrable(sel.Directives, reqCtx.Variables)
-			for _, childField := range collectFields(reqCtx, sel.SelectionSet, satisfies, visited, shouldDefer) {
+			childFields := collectFields(
+				reqCtx,
+				sel.SelectionSet,
+				satisfies,
+				visited,
+				shouldDefer || parentIsDeferredFragment,
+			)
+			for _, childField := range childFields {
+				var isChildField bool
 				f := getOrCreateAndAppendField(
 					&groupedFields, childField.Name, childField.Alias, childField.ObjectDefinition,
-					func() CollectedField { return childField })
-				f.Selections = append(f.Selections, childField.Selections...)
+					func() CollectedField {
+						isChildField = true
+						return childField
+					})
+
+				if !isChildField {
+					f.Selections = append(f.Selections, childField.Selections...)
+					f.Deferrables = slices.Grow(f.Deferrables, len(childField.Deferrables)+1)
+					f.Deferrables = append(f.Deferrables, childField.Deferrables...)
+					f.IsNonDeferrable = f.IsNonDeferrable || childField.IsNonDeferrable
+				}
+
 				if shouldDefer {
 					f.Deferrable = &Deferrable{
 						Label: label,
 					}
 					f.Deferrables = append(f.Deferrables, f.Deferrable)
+
 				}
 			}
 
@@ -113,13 +132,34 @@ func collectFields(
 			}
 
 			shouldDefer, label := deferrable(sel.Directives, reqCtx.Variables)
-			for _, childField := range collectFields(reqCtx, fragment.SelectionSet, satisfies, visited, shouldDefer) {
+
+			childFields := collectFields(
+				reqCtx,
+				fragment.SelectionSet,
+				satisfies,
+				visited,
+				shouldDefer || parentIsDeferredFragment,
+			)
+			for _, childField := range childFields {
+				var isChildField bool
 				f := getOrCreateAndAppendField(&groupedFields,
 					childField.Name, childField.Alias, childField.ObjectDefinition,
-					func() CollectedField { return childField })
-				f.Selections = append(f.Selections, childField.Selections...)
+					func() CollectedField {
+						isChildField = true
+						return childField
+					})
+
+				if !isChildField {
+					f.Selections = append(f.Selections, childField.Selections...)
+					f.Deferrables = slices.Grow(f.Deferrables, len(childField.Deferrables)+1)
+					f.Deferrables = append(f.Deferrables, childField.Deferrables...)
+					f.IsNonDeferrable = f.IsNonDeferrable || childField.IsNonDeferrable
+				}
+
 				if shouldDefer {
-					f.Deferrable = &Deferrable{Label: label}
+					f.Deferrable = &Deferrable{
+						Label: label,
+					}
 					f.Deferrables = append(f.Deferrables, f.Deferrable)
 				}
 			}

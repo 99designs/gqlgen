@@ -1,6 +1,7 @@
 package graphql
 
 import (
+	"context"
 	"errors"
 	"sync/atomic"
 
@@ -42,21 +43,30 @@ func (ec *ExecutionContextState[R, D, C]) Schema() *ast.Schema {
 }
 
 func (ec *ExecutionContextState[R, D, C]) ProcessDeferredGroup(dg DeferredGroup) {
-	atomic.AddInt32(&ec.PendingDeferred, 1)
+	if len(dg.Defers) == 0 {
+		return
+	}
+
+	atomic.AddInt32(&ec.PendingDeferred, int32(len(dg.Defers)))
+	ctx := WithFreshResponseContext(dg.Context)
+	for label, view := range dg.Defers {
+		view.SetOnComplete(func(ctx context.Context) {
+			ds := DeferredResult{
+				Path:   dg.Path,
+				Label:  label,
+				Result: view,
+				Errors: GetErrors(ctx),
+			}
+			// null fields should bubble up
+			if dg.FieldSet.Invalids > 0 {
+				ds.Result = Null
+			}
+			ec.DeferredResults <- ds
+		})
+	}
+
 	go func() {
-		ctx := WithFreshResponseContext(dg.Context)
 		dg.FieldSet.Dispatch(ctx)
-		ds := DeferredResult{
-			Path:   dg.Path,
-			Label:  dg.Label,
-			Result: dg.FieldSet,
-			Errors: GetErrors(ctx),
-		}
-		// null fields should bubble up
-		if dg.FieldSet.Invalids > 0 {
-			ds.Result = Null
-		}
-		ec.DeferredResults <- ds
 	}()
 }
 

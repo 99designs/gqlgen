@@ -11,10 +11,14 @@ type Deferrable struct {
 	Label string
 }
 
+type DeferredFragment struct {
+	Label string
+}
+
 type DeferredGroup struct {
 	Path     ast.Path
-	Label    string
 	FieldSet *FieldSet
+	Defers   map[string]*FieldSetView
 	Context  context.Context
 }
 

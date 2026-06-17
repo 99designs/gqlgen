@@ -147,13 +147,17 @@ func TestExecutionContextState_ProcessDeferredGroup_IncrementsPendingAndPropagat
 	fieldSet.Concurrently(0, func(ctx context.Context) Marshaler {
 		return MarshalString("ok")
 	})
+	view := fieldSet.NewView()
+	view.AddIndices(0)
 
 	path := ast.Path{ast.PathName("query")}
 	label := "group-1"
 
 	ec.ProcessDeferredGroup(DeferredGroup{
+		Defers: map[string]*FieldSetView{
+			label: view,
+		},
 		Path:     path,
-		Label:    label,
 		FieldSet: fieldSet,
 		Context:  ctx,
 	})
@@ -163,7 +167,7 @@ func TestExecutionContextState_ProcessDeferredGroup_IncrementsPendingAndPropagat
 	result := receiveDeferredResult(t, deferredResults)
 	assert.Equal(t, path, result.Path)
 	assert.Equal(t, label, result.Label)
-	assert.Same(t, fieldSet, result.Result)
+	assert.Same(t, view, result.Result)
 	assert.Nil(t, result.Errors)
 }
 
@@ -187,8 +191,10 @@ func TestExecutionContextState_ProcessDeferredGroup_NullsOnInvalidAndIsolatesErr
 	})
 
 	ec.ProcessDeferredGroup(DeferredGroup{
-		Path:     ast.Path{ast.PathName("query")},
-		Label:    "group-2",
+		Path: ast.Path{ast.PathName("query")},
+		Defers: map[string]*FieldSetView{
+			"group-2": fieldSet.NewView().AddIndices(0),
+		},
 		FieldSet: fieldSet,
 		Context:  ctx,
 	})

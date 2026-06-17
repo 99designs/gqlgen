@@ -36,7 +36,7 @@ func CollectFields(
 		return cached
 	}
 
-	result := collectFields(reqCtx, selSet, satisfies, map[string]bool{})
+	result := collectFields(reqCtx, selSet, satisfies, map[string]bool{}, false)
 
 	return reqCtx.collectFieldsCache.Add(cacheKey, result)
 }
@@ -46,6 +46,7 @@ func collectFields(
 	selSet ast.SelectionSet,
 	satisfies []string,
 	visited map[string]bool,
+	parentIsDeferredFragment bool,
 ) []CollectedField {
 	groupedFields := make([]CollectedField, 0, len(selSet))
 
@@ -65,6 +66,9 @@ func collectFields(
 				},
 			)
 
+			if !parentIsDeferredFragment {
+				f.IsNonDeferrable = true
+			}
 			f.Selections = append(f.Selections, sel.SelectionSet...)
 
 		case *ast.InlineFragment:
@@ -76,7 +80,7 @@ func collectFields(
 			}
 
 			shouldDefer, label := deferrable(sel.Directives, reqCtx.Variables)
-			for _, childField := range collectFields(reqCtx, sel.SelectionSet, satisfies, visited) {
+			for _, childField := range collectFields(reqCtx, sel.SelectionSet, satisfies, visited, shouldDefer) {
 				f := getOrCreateAndAppendField(
 					&groupedFields, childField.Name, childField.Alias, childField.ObjectDefinition,
 					func() CollectedField { return childField })
@@ -85,6 +89,7 @@ func collectFields(
 					f.Deferrable = &Deferrable{
 						Label: label,
 					}
+					f.Deferrables = append(f.Deferrables, f.Deferrable)
 				}
 			}
 
@@ -108,13 +113,14 @@ func collectFields(
 			}
 
 			shouldDefer, label := deferrable(sel.Directives, reqCtx.Variables)
-			for _, childField := range collectFields(reqCtx, fragment.SelectionSet, satisfies, visited) {
+			for _, childField := range collectFields(reqCtx, fragment.SelectionSet, satisfies, visited, shouldDefer) {
 				f := getOrCreateAndAppendField(&groupedFields,
 					childField.Name, childField.Alias, childField.ObjectDefinition,
 					func() CollectedField { return childField })
 				f.Selections = append(f.Selections, childField.Selections...)
 				if shouldDefer {
 					f.Deferrable = &Deferrable{Label: label}
+					f.Deferrables = append(f.Deferrables, f.Deferrable)
 				}
 			}
 
@@ -130,7 +136,27 @@ type CollectedField struct {
 	*ast.Field
 
 	Selections ast.SelectionSet
-	Deferrable *Deferrable
+
+	// IsNonDeferrable reports whether the field cannot be deferred,
+	// regardless of what [Deferrables] reports. This is the case when the
+	// same field is selected in a query from both within a deferred fragment,
+	// and outside of one.
+	//
+	// Example - account cannot be deferred in this example:
+	//	query {
+	//		... @defer(label: "foo") {
+	//			account {
+	//				id
+	//			}
+	//		}
+	//
+	//		account {
+	//			id
+	//		}
+	//	}
+	IsNonDeferrable bool
+	Deferrable      *Deferrable
+	Deferrables     []*Deferrable
 }
 
 func doesFragmentConditionMatch(typeCondition string, satisfies []string) bool {

@@ -2,6 +2,7 @@ package graphql
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"iter"
 	"slices"
@@ -45,6 +46,12 @@ type FieldSetView struct {
 	onComplete     func(ctx context.Context)
 }
 
+func (f *FieldSetView) String() string {
+	f.pendingMu.Lock()
+	defer f.pendingMu.Unlock()
+	return fmt.Sprintf("view=%+v, pending=%+v, addr=%p", f.indices, f.pendingResults, f)
+}
+
 // SetOnComplete sets a callback to be invoked when all the
 // fields contained within the view have resolved.
 //
@@ -70,7 +77,7 @@ func (f *FieldSetView) MarshalGQL(writer io.Writer) {
 
 func (f *FieldSetView) allFieldValues() iter.Seq2[*CollectedField, Marshaler] {
 	return func(yield func(*CollectedField, Marshaler) bool) {
-		for i := range f.indices {
+		for _, i := range f.indices {
 			field := &f.fieldSet.fields[i]
 			value, ok := f.fieldSet.takeValue(i)
 			if !ok {

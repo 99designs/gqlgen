@@ -2621,8 +2621,8 @@ type DeferModel implements DeferModelInterface {
 	values: [String!]! @goField(forceResolver: true)
 }
 interface DeferModelInterface {
-	id: ID!
-	name: String!
+	otherResolvedValue: String!
+	values: [String!]!
 }
 input DirectiveInput @goModel(model: "map[string]interface{}") {
 	oldField: String @deprecated(reason: "Use newField instead")

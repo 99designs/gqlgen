@@ -24,8 +24,8 @@ type ContentChild interface {
 
 type DeferModelInterface interface {
 	IsDeferModelInterface()
-	GetID() string
-	GetName() string
+	GetOtherResolvedValue() string
+	GetValues() []string
 }
 
 type Mammalian interface {
@@ -107,9 +107,18 @@ type DeferModel struct {
 	Values             []string `json:"values"`
 }
 
-func (DeferModel) IsDeferModelInterface() {}
-func (this DeferModel) GetID() string     { return this.ID }
-func (this DeferModel) GetName() string   { return this.Name }
+func (DeferModel) IsDeferModelInterface()             {}
+func (this DeferModel) GetOtherResolvedValue() string { return this.OtherResolvedValue }
+func (this DeferModel) GetValues() []string {
+	if this.Values == nil {
+		return nil
+	}
+	interfaceSlice := make([]string, 0, len(this.Values))
+	for _, concrete := range this.Values {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
+}
 
 type Dog struct {
 	Species  string `json:"species"`

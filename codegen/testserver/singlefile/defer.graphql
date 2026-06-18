@@ -11,6 +11,6 @@ type DeferModel implements DeferModelInterface {
 }
 
 interface DeferModelInterface {
-    id: ID!
-    name: String!
+    otherResolvedValue: String!
+    values: [String!]!
 }

@@ -476,6 +476,125 @@ fragment DeferFragment on DeferModel {
 				},
 			},
 		},
+		{
+			name: "defer overlapping selection sets, across concrete and interface type",
+			query: `query testDefer {
+	deferSingle {
+		id
+		... on DeferModel @defer(label: "otherResolvedValueAndName") {
+			name
+			otherResolvedValue
+		}
+		... on DeferModelInterface @defer(label: "otherResolvedValueAndValues") {
+			otherResolvedValue
+			values
+		}
+	}
+}`,
+			expectedInitialResponse: response[deferSingleData]{
+				Data: deferSingleData{
+					DeferSingle: deferModel{
+						ID:   "1",
+						Name: "Defer test 1",
+					},
+				},
+				HasNext: true,
+			},
+			expectedDeferredResponses: []deferredData{
+				{
+					Data: deferModel{
+						OtherResolvedValue: "otherResolvedValue",
+					},
+					Label:   "otherResolvedValueAndName",
+					Path:    []any{"deferSingle"},
+					HasNext: true,
+				},
+				{
+					Data: deferModel{
+						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
+					},
+					Label: "otherResolvedValueAndValues",
+					Path:  []any{"deferSingle"},
+				},
+			},
+		},
+		{
+			name: "field selected in both defer and non-defer context is not deferred",
+			query: `query testDefer {
+	deferSingle {
+		id
+		values
+		... @defer {
+			otherResolvedValue
+			values
+		}
+	}
+}`,
+			expectedInitialResponse: response[deferSingleData]{
+				Data: deferSingleData{
+					DeferSingle: deferModel{
+						ID: "1",
+						Values: []string{
+							"test defer 1",
+							"test defer 2",
+							"test defer 3",
+						},
+					},
+				},
+				HasNext: true,
+			},
+			expectedDeferredResponses: []deferredData{
+				{
+					Data: deferModel{
+						OtherResolvedValue: "otherResolvedValue",
+					},
+					Path:    []any{"deferSingle"},
+					HasNext: false,
+				},
+			},
+		},
+		{
+			name: "nested deferred fragments work",
+			query: `query testDefer {
+	deferSingle {
+		id
+		...ParentFragment @defer(label: "parent")
+	}
+}
+
+fragment ParentFragment on DeferModel {
+	...ChildFragment @defer(label: "child")
+}
+
+fragment ChildFragment on DeferModel {
+	otherResolvedValue
+}
+`,
+			expectedInitialResponse: response[deferSingleData]{
+				Data: deferSingleData{
+					DeferSingle: deferModel{
+						ID: "1",
+					},
+				},
+				HasNext: true,
+			},
+			expectedDeferredResponses: []deferredData{
+				{
+					Data: deferModel{
+						OtherResolvedValue: "otherResolvedValue",
+					},
+					Label:   "child",
+					Path:    []any{"deferSingle"},
+					HasNext: true,
+				},
+				{
+					Data:    deferModel{},
+					Label:   "parent",
+					Path:    []any{"deferSingle"},
+					HasNext: false,
+				},
+			},
+		},
 	}
 
 	for _, tc := range cases {

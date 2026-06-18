@@ -3,8 +3,13 @@ extend type Query {
     deferMultiple: [DeferModel!]
 }
 
-type DeferModel {
+type DeferModel implements DeferModelInterface {
     id: ID!
     name: String!
     values: [String!]! @goField(forceResolver: true)
+}
+
+interface DeferModelInterface {
+    id: ID!
+    name: String!
 }

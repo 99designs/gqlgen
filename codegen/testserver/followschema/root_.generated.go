@@ -2430,10 +2430,14 @@ type DefaultParametersMirror {
  This doesnt have an implementation in the typemap, so it should act like a string 
 """
 scalar DefaultScalarImplementation
-type DeferModel {
+type DeferModel implements DeferModelInterface {
 	id: ID!
 	name: String!
 	values: [String!]! @goField(forceResolver: true)
+}
+interface DeferModelInterface {
+	id: ID!
+	name: String!
 }
 input DirectiveInput @goModel(model: "map[string]interface{}") {
 	oldField: String @deprecated(reason: "Use newField instead")

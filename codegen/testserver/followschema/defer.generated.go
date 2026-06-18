@@ -5,6 +5,7 @@ package followschema
 import (
 	"context"
 	"errors"
+	"fmt"
 	"math"
 	"strconv"
 	"sync/atomic"
@@ -110,11 +111,31 @@ func (ec *executionContext) fieldContext_DeferModel_values(_ context.Context, fi
 
 // region    ************************** interface.gotpl ***************************
 
+func (ec *executionContext) _DeferModelInterface(ctx context.Context, sel ast.SelectionSet, obj DeferModelInterface) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case DeferModel:
+		return ec._DeferModel(ctx, sel, &obj)
+	case *DeferModel:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._DeferModel(ctx, sel, obj)
+	default:
+		if typedObj, ok := obj.(graphql.Marshaler); ok {
+			return typedObj
+		} else {
+			panic(fmt.Errorf("unexpected type %T; non-generated variants of DeferModelInterface must implement graphql.Marshaler", obj))
+		}
+	}
+}
+
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
 
-var deferModelImplementors = []string{"DeferModel"}
+var deferModelImplementors = []string{"DeferModel", "DeferModelInterface"}
 
 func (ec *executionContext) _DeferModel(ctx context.Context, sel ast.SelectionSet, obj *DeferModel) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, deferModelImplementors)

@@ -22,6 +22,12 @@ type ContentChild interface {
 	IsContentChild()
 }
 
+type DeferModelInterface interface {
+	IsDeferModelInterface()
+	GetID() string
+	GetName() string
+}
+
 type Mammalian interface {
 	IsAnimal()
 	IsMammalian()
@@ -99,6 +105,10 @@ type DeferModel struct {
 	Name   string   `json:"name"`
 	Values []string `json:"values"`
 }
+
+func (DeferModel) IsDeferModelInterface() {}
+func (this DeferModel) GetID() string     { return this.ID }
+func (this DeferModel) GetName() string   { return this.Name }
 
 type Dog struct {
 	Species  string `json:"species"`

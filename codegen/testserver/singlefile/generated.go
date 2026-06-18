@@ -2606,10 +2606,14 @@ type DefaultParametersMirror {
  This doesnt have an implementation in the typemap, so it should act like a string 
 """
 scalar DefaultScalarImplementation
-type DeferModel {
+type DeferModel implements DeferModelInterface {
 	id: ID!
 	name: String!
 	values: [String!]! @goField(forceResolver: true)
+}
+interface DeferModelInterface {
+	id: ID!
+	name: String!
 }
 input DirectiveInput @goModel(model: "map[string]interface{}") {
 	oldField: String @deprecated(reason: "Use newField instead")
@@ -15927,6 +15931,26 @@ func (ec *executionContext) _Content_Child(ctx context.Context, sel ast.Selectio
 	}
 }
 
+func (ec *executionContext) _DeferModelInterface(ctx context.Context, sel ast.SelectionSet, obj DeferModelInterface) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case DeferModel:
+		return ec._DeferModel(ctx, sel, &obj)
+	case *DeferModel:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._DeferModel(ctx, sel, obj)
+	default:
+		if typedObj, ok := obj.(graphql.Marshaler); ok {
+			return typedObj
+		} else {
+			panic(fmt.Errorf("unexpected type %T; non-generated variants of DeferModelInterface must implement graphql.Marshaler", obj))
+		}
+	}
+}
+
 func (ec *executionContext) _Mammalian(ctx context.Context, sel ast.SelectionSet, obj Mammalian) graphql.Marshaler {
 	switch obj := (obj).(type) {
 	case nil:
@@ -16725,7 +16749,7 @@ func (ec *executionContext) _DefaultParametersMirror(ctx context.Context, sel as
 	return out
 }
 
-var deferModelImplementors = []string{"DeferModel"}
+var deferModelImplementors = []string{"DeferModel", "DeferModelInterface"}
 
 func (ec *executionContext) _DeferModel(ctx context.Context, sel ast.SelectionSet, obj *DeferModel) graphql.Marshaler {
 	fields := graphql.CollectFields(ec.OperationContext, sel, deferModelImplementors)

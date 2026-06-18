@@ -25,7 +25,7 @@ func (m *FieldSet) NewView() *FieldSetView {
 
 		view.pendingMu.Lock()
 		defer view.pendingMu.Unlock()
-		if len(view.pendingResults) == 0 { // may have changed since we checked
+		if len(view.pendingResults) == 0 { // may have changed since last check
 			return
 		}
 
@@ -77,13 +77,13 @@ func (f *FieldSetView) MarshalGQL(writer io.Writer) {
 
 func (f *FieldSetView) allFieldValues() iter.Seq2[*CollectedField, Marshaler] {
 	return func(yield func(*CollectedField, Marshaler) bool) {
-		for _, i := range f.indices {
-			field := &f.fieldSet.fields[i]
-			value, ok := f.fieldSet.takeValue(i)
-			if !ok {
+		values := f.fieldSet.takeValues(f.indices)
+		for i, value := range values {
+			if value == nil {
 				continue
 			}
 
+			field := &f.fieldSet.fields[f.indices[i]]
 			if !yield(field, value) {
 				return
 			}
@@ -112,17 +112,23 @@ func NewFieldSet(fields []CollectedField) *FieldSet {
 	}
 }
 
-// takeValue takes the value at index i out of the [FieldSet.Values] slice
-// and returns it, leaving a nil value in its place. The bool reflects whether a value was found at the specified index.
-func (m *FieldSet) takeValue(i int) (Marshaler, bool) {
+// takeValues takes the values at the specified indices out of the [FieldSet.Values] slice,
+// returning them in the same order as they were specified. If a [Marshaler] was previously
+// taken at the specified index, the returned slice will hold a nil value at that index.
+func (m *FieldSet) takeValues(indices []int) []Marshaler {
+	result := make([]Marshaler, len(indices))
 	m.takeValueMu.Lock()
 	defer m.takeValueMu.Unlock()
-	if i >= len(m.Values) {
-		return nil, false
+	for i, valueI := range indices {
+		if valueI >= len(m.Values) {
+			continue
+		}
+		result[i] = m.Values[valueI]
+		m.Values[valueI] = nil
+
 	}
-	v := m.Values[i]
-	m.Values[i] = nil
-	return v, v != nil
+
+	return result
 }
 
 func (m *FieldSet) AddField(field CollectedField) {

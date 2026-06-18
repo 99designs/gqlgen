@@ -55,7 +55,6 @@ func TestDefer(t *testing.T) {
 	}
 
 	resolvers.DeferModelResolver.Values = func(ctx context.Context, obj *DeferModel) ([]string, error) {
-		// time.Sleep(time.Duration(rand.Intn(100)) * time.Millisecond)
 		time.Sleep(time.Second)
 		return []string{
 			"test defer 1",
@@ -64,31 +63,41 @@ func TestDefer(t *testing.T) {
 		}, nil
 	}
 
-	type deferModel struct {
-		Id     string
-		Name   string
-		Values []string
-	}
+	type (
+		deferModel struct {
+			ID     string
+			Name   string
+			Values []string
+		}
 
-	type response[T any] struct {
-		Data       T
-		Label      string          `json:"label"`
-		Path       []any           `json:"path"`
-		HasNext    bool            `json:"hasNext"`
-		Errors     json.RawMessage `json:"errors"`
-		Extensions map[string]any  `json:"extensions"`
-	}
+		response[T any] struct {
+			Data       T
+			Label      string          `json:"label"`
+			Path       []any           `json:"path"`
+			HasNext    bool            `json:"hasNext"`
+			Errors     json.RawMessage `json:"errors"`
+			Extensions map[string]any  `json:"extensions"`
+		}
 
-	type deferredData response[struct {
-		Values []string `json:"values"`
-	}]
+		deferSingleData struct {
+			DeferSingle deferModel
+		}
+		deferMultipleData struct {
+			DeferMultiple []deferModel
+		}
 
-	type incrementalDeferredResponse struct {
-		Incremental []deferredData  `json:"incremental"`
-		HasNext     bool            `json:"hasNext"`
-		Errors      json.RawMessage `json:"errors"`
-		Extensions  map[string]any  `json:"extensions"`
-	}
+		deferredDataValues struct {
+			Values []string `json:"values"`
+		}
+		deferredData response[deferredDataValues]
+
+		incrementalDeferredResponse struct {
+			Incremental []deferredData  `json:"incremental"`
+			HasNext     bool            `json:"hasNext"`
+			Errors      json.RawMessage `json:"errors"`
+			Extensions  map[string]any  `json:"extensions"`
+		}
+	)
 
 	pathStringer := func(path []any) string {
 		var kb strings.Builder
@@ -129,14 +138,10 @@ func TestDefer(t *testing.T) {
 		}
 	}
 }`,
-			expectedInitialResponse: response[struct {
-				DeferSingle deferModel
-			}]{
-				Data: struct {
-					DeferSingle deferModel
-				}{
+			expectedInitialResponse: response[deferSingleData]{
+				Data: deferSingleData{
 					DeferSingle: deferModel{
-						Id:     "1",
+						ID:     "1",
 						Name:   "Defer test 1",
 						Values: nil,
 					},
@@ -145,9 +150,7 @@ func TestDefer(t *testing.T) {
 			},
 			expectedDeferredResponses: []deferredData{
 				{
-					Data: struct {
-						Values []string `json:"values"`
-					}{
+					Data: deferredDataValues{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Path: []any{"deferSingle"},
@@ -165,14 +168,10 @@ func TestDefer(t *testing.T) {
 		}
 	}
 }`,
-			expectedInitialResponse: response[struct {
-				DeferSingle deferModel
-			}]{
-				Data: struct {
-					DeferSingle deferModel
-				}{
+			expectedInitialResponse: response[deferSingleData]{
+				Data: deferSingleData{
 					DeferSingle: deferModel{
-						Id:     "1",
+						ID:     "1",
 						Name:   "Defer test 1",
 						Values: nil,
 					},
@@ -181,9 +180,7 @@ func TestDefer(t *testing.T) {
 			},
 			expectedDeferredResponses: []deferredData{
 				{
-					Data: struct {
-						Values []string `json:"values"`
-					}{
+					Data: deferredDataValues{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Path: []any{"deferSingle"},
@@ -204,14 +201,10 @@ fragment DeferFragment on DeferModel {
 	values
 }
 `,
-			expectedInitialResponse: response[struct {
-				DeferSingle deferModel
-			}]{
-				Data: struct {
-					DeferSingle deferModel
-				}{
+			expectedInitialResponse: response[deferSingleData]{
+				Data: deferSingleData{
 					DeferSingle: deferModel{
-						Id:     "1",
+						ID:     "1",
 						Name:   "Defer test 1",
 						Values: nil,
 					},
@@ -220,9 +213,7 @@ fragment DeferFragment on DeferModel {
 			},
 			expectedDeferredResponses: []deferredData{
 				{
-					Data: struct {
-						Values []string `json:"values"`
-					}{
+					Data: deferredDataValues{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Path: []any{"deferSingle"},
@@ -240,14 +231,10 @@ fragment DeferFragment on DeferModel {
 		}
 	}
 }`,
-			expectedInitialResponse: response[struct {
-				DeferSingle deferModel
-			}]{
-				Data: struct {
-					DeferSingle deferModel
-				}{
+			expectedInitialResponse: response[deferSingleData]{
+				Data: deferSingleData{
 					DeferSingle: deferModel{
-						Id:     "1",
+						ID:     "1",
 						Name:   "Defer test 1",
 						Values: nil,
 					},
@@ -256,9 +243,7 @@ fragment DeferFragment on DeferModel {
 			},
 			expectedDeferredResponses: []deferredData{
 				{
-					Data: struct {
-						Values []string `json:"values"`
-					}{
+					Data: deferredDataValues{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Label: "test label",
@@ -280,14 +265,10 @@ fragment DeferFragment on DeferModel {
 	values
 }
 `,
-			expectedInitialResponse: response[struct {
-				DeferSingle deferModel
-			}]{
-				Data: struct {
-					DeferSingle deferModel
-				}{
+			expectedInitialResponse: response[deferSingleData]{
+				Data: deferSingleData{
 					DeferSingle: deferModel{
-						Id:     "1",
+						ID:     "1",
 						Name:   "Defer test 1",
 						Values: nil,
 					},
@@ -296,9 +277,7 @@ fragment DeferFragment on DeferModel {
 			},
 			expectedDeferredResponses: []deferredData{
 				{
-					Data: struct {
-						Values []string `json:"values"`
-					}{
+					Data: deferredDataValues{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Label: "test label",
@@ -317,14 +296,10 @@ fragment DeferFragment on DeferModel {
 		}
 	}
 }`,
-			expectedInitialResponse: response[struct {
-				DeferSingle deferModel
-			}]{
-				Data: struct {
-					DeferSingle deferModel
-				}{
+			expectedInitialResponse: response[deferSingleData]{
+				Data: deferSingleData{
 					DeferSingle: deferModel{
-						Id:     "1",
+						ID:     "1",
 						Name:   "Defer test 1",
 						Values: nil,
 					},
@@ -333,9 +308,7 @@ fragment DeferFragment on DeferModel {
 			},
 			expectedDeferredResponses: []deferredData{
 				{
-					Data: struct {
-						Values []string `json:"values"`
-					}{
+					Data: deferredDataValues{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Label: "test label",
@@ -354,14 +327,10 @@ fragment DeferFragment on DeferModel {
 		}
 	}
 }`,
-			expectedInitialResponse: response[struct {
-				DeferSingle deferModel
-			}]{
-				Data: struct {
-					DeferSingle deferModel
-				}{
+			expectedInitialResponse: response[deferSingleData]{
+				Data: deferSingleData{
 					DeferSingle: deferModel{
-						Id:     "1",
+						ID:     "1",
 						Name:   "Defer test 1",
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
@@ -379,25 +348,21 @@ fragment DeferFragment on DeferModel {
 		}
 	}
 }`,
-			expectedInitialResponse: response[struct {
-				DeferMultiple []deferModel
-			}]{
-				Data: struct {
-					DeferMultiple []deferModel
-				}{
+			expectedInitialResponse: response[deferMultipleData]{
+				Data: deferMultipleData{
 					DeferMultiple: []deferModel{
 						{
-							Id:     "1",
+							ID:     "1",
 							Name:   "Defer test 1",
 							Values: nil,
 						},
 						{
-							Id:     "2",
+							ID:     "2",
 							Name:   "Defer test 2",
 							Values: nil,
 						},
 						{
-							Id:     "3",
+							ID:     "3",
 							Name:   "Defer test 3",
 							Values: nil,
 						},
@@ -407,27 +372,21 @@ fragment DeferFragment on DeferModel {
 			},
 			expectedDeferredResponses: []deferredData{
 				{
-					Data: struct {
-						Values []string `json:"values"`
-					}{
+					Data: deferredDataValues{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Label: "test label",
 					Path:  []any{"deferMultiple", float64(0)},
 				},
 				{
-					Data: struct {
-						Values []string `json:"values"`
-					}{
+					Data: deferredDataValues{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Label: "test label",
 					Path:  []any{"deferMultiple", float64(1)},
 				},
 				{
-					Data: struct {
-						Values []string `json:"values"`
-					}{
+					Data: deferredDataValues{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Label: "test label",
@@ -451,25 +410,21 @@ fragment DeferFragment on DeferModel {
 		}
 	}
 }`,
-			expectedInitialResponse: response[struct {
-				DeferMultiple []deferModel
-			}]{
-				Data: struct {
-					DeferMultiple []deferModel
-				}{
+			expectedInitialResponse: response[deferMultipleData]{
+				Data: deferMultipleData{
 					DeferMultiple: []deferModel{
 						{
-							Id:     "1",
+							ID:     "1",
 							Name:   "Defer test 1",
 							Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 						},
 						{
-							Id:     "2",
+							ID:     "2",
 							Name:   "Defer test 2",
 							Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 						},
 						{
-							Id:     "3",
+							ID:     "3",
 							Name:   "Defer test 3",
 							Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 						},

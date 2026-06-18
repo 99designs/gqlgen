@@ -1,15 +1,14 @@
 package singlefile
 
 import (
-	"cmp"
 	"context"
 	"encoding/json"
-	"math/rand"
 	"reflect"
 	"slices"
 	"strconv"
 	"strings"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"github.com/stretchr/testify/assert"
@@ -21,6 +20,8 @@ import (
 )
 
 func TestDefer(t *testing.T) {
+	t.Parallel()
+
 	resolvers := &Stub{}
 
 	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
@@ -54,7 +55,8 @@ func TestDefer(t *testing.T) {
 	}
 
 	resolvers.DeferModelResolver.Values = func(ctx context.Context, obj *DeferModel) ([]string, error) {
-		time.Sleep(time.Duration(rand.Intn(100)) * time.Millisecond)
+		// time.Sleep(time.Duration(rand.Intn(100)) * time.Millisecond)
+		time.Sleep(time.Second)
 		return []string{
 			"test defer 1",
 			"test defer 2",
@@ -107,12 +109,15 @@ func TestDefer(t *testing.T) {
 		return kb.String()
 	}
 
-	cases := []struct {
+	type testCase struct {
 		name                      string
 		query                     string
 		expectedInitialResponse   any
 		expectedDeferredResponses []deferredData
-	}{
+		assertResponses           func(t *testing.T, tc *testCase, actual []deferredData)
+	}
+
+	cases := []testCase{
 		{
 			name: "defer single",
 			query: `query testDefer {
@@ -429,6 +434,11 @@ fragment DeferFragment on DeferModel {
 					Path:  []any{"deferMultiple", float64(2)},
 				},
 			},
+			assertResponses: func(t *testing.T, tc *testCase, actual []deferredData) {
+				slices.SortFunc(actual, func(a, b deferredData) int {
+					return strings.Compare(pathStringer(a.Path), pathStringer(b.Path))
+				})
+			},
 		},
 		{
 			name: "defer multiple when if arg is false",
@@ -468,94 +478,105 @@ fragment DeferFragment on DeferModel {
 			},
 		},
 	}
+
 	for _, tc := range cases {
 		t.Run(tc.name+"/over SSE", func(t *testing.T) {
-			resT := reflect.TypeOf(tc.expectedInitialResponse)
-			resE := reflect.New(resT).Elem()
-			resp := resE.Interface()
+			synctest.Test(t, func(t *testing.T) {
+				resT := reflect.TypeOf(tc.expectedInitialResponse)
+				resE := reflect.New(resT).Elem()
+				resp := resE.Interface()
 
-			read := c.SSE(context.Background(), tc.query)
-			require.NoError(t, read.Next(&resp))
-			assert.Equal(t, tc.expectedInitialResponse, resp)
+				read := c.SSE(context.Background(), tc.query)
+				synctest.Wait()
+				require.NoError(t, read.Next(&resp))
+				assert.Equal(t, tc.expectedInitialResponse, resp, "expected initial response to match")
 
-			// If there are no deferred responses, we can stop here.
-			if !resE.FieldByName("HasNext").Bool() && len(tc.expectedDeferredResponses) == 0 {
-				return
-			}
-
-			deferredResponses := make([]deferredData, 0)
-			for {
-				var valueResp deferredData
-				require.NoError(t, read.Next(&valueResp))
-
-				if !valueResp.HasNext {
-					deferredResponses = append(deferredResponses, valueResp)
-					break
+				// If there are no deferred responses, we can stop here.
+				if !resE.FieldByName("HasNext").Bool() && len(tc.expectedDeferredResponses) == 0 {
+					return
 				}
 
-				// Remove HasNext from comparison: we don't know the order they will be
-				// delivered in, and so this can't be known in the setup. But if HasNext
-				// does not work right we will either error out or get too few
-				// responses, so it's still checked.
-				valueResp.HasNext = false
-				deferredResponses = append(deferredResponses, valueResp)
-			}
-			require.NoError(t, read.Close())
+				deferredResponses := make([]deferredData, 0)
+				for {
+					var valueResp deferredData
+					synctest.Wait()
+					require.NoError(t, read.Next(&valueResp))
 
-			slices.SortFunc(deferredResponses, func(a, b deferredData) int {
-				return cmp.Compare(pathStringer(a.Path), pathStringer(b.Path))
+					if !valueResp.HasNext {
+						deferredResponses = append(deferredResponses, valueResp)
+						break
+					}
+
+					// Remove HasNext from comparison: we don't know the order they will be
+					// delivered in, and so this can't be known in the setup. But if HasNext
+					// does not work right we will either error out or get too few
+					// responses, so it's still checked.
+					valueResp.HasNext = false
+					deferredResponses = append(deferredResponses, valueResp)
+				}
+				require.NoError(t, read.Close(), "expected to close reader")
+
+				if tc.assertResponses != nil {
+					tc.assertResponses(t, &tc, deferredResponses)
+				} else {
+					assert.Equal(t, tc.expectedDeferredResponses, deferredResponses, "expected deferred responses to match")
+				}
 			})
-			assert.Equal(t, tc.expectedDeferredResponses, deferredResponses)
 		})
 
 		t.Run(tc.name+"/over multipart HTTP", func(t *testing.T) {
-			resT := reflect.TypeOf(tc.expectedInitialResponse)
-			resE := reflect.New(resT).Elem()
-			resp := resE.Interface()
+			synctest.Test(t, func(t *testing.T) {
+				resT := reflect.TypeOf(tc.expectedInitialResponse)
+				resE := reflect.New(resT).Elem()
+				resp := resE.Interface()
 
-			read := c.IncrementalHTTP(context.Background(), tc.query)
-			require.NoError(t, read.Next(&resp))
-			assert.Equal(t, tc.expectedInitialResponse, resp)
+				read := c.IncrementalHTTP(context.Background(), tc.query)
 
-			// If there are no deferred responses, we can stop here.
-			if !reflect.ValueOf(resp).FieldByName("HasNext").Bool() &&
-				len(tc.expectedDeferredResponses) == 0 {
-				return
-			}
+				synctest.Wait()
+				require.NoError(t, read.Next(&resp))
+				assert.Equal(t, tc.expectedInitialResponse, resp)
 
-			deferredIncrementalData := make([]deferredData, 0)
-			for {
-				var valueResp incrementalDeferredResponse
-				require.NoError(t, read.Next(&valueResp))
-				assert.Empty(t, valueResp.Errors)
-				assert.Empty(t, valueResp.Extensions)
-
-				// Extract the incremental data from the response.
-				//
-				// FIXME: currently the HasNext field does not describe the state of the
-				// delivery as bounded by the associated path, but rather the state of
-				// the operation as a whole. This makes it impossible to determine it
-				// from the response, so we can not define it ahead of time.
-				//
-				// It is also questionable that the incremental data objects should
-				// include hasNext, so for now we remove them from assertion. Once we
-				// align on the spec we must update this test, as the status of the
-				// path-bounded delivery should be determinative and can be asserted.
-				for _, incr := range valueResp.Incremental {
-					incr.HasNext = false
-					deferredIncrementalData = append(deferredIncrementalData, incr)
+				// If there are no deferred responses, we can stop here.
+				if !reflect.ValueOf(resp).FieldByName("HasNext").Bool() &&
+					len(tc.expectedDeferredResponses) == 0 {
+					return
 				}
 
-				if !valueResp.HasNext {
-					break
-				}
-			}
-			require.NoError(t, read.Close())
+				deferredIncrementalData := make([]deferredData, 0)
+				for {
+					var valueResp incrementalDeferredResponse
+					synctest.Wait()
+					require.NoError(t, read.Next(&valueResp))
+					assert.Empty(t, valueResp.Errors)
+					assert.Empty(t, valueResp.Extensions)
 
-			slices.SortFunc(deferredIncrementalData, func(a, b deferredData) int {
-				return cmp.Compare(pathStringer(a.Path), pathStringer(b.Path))
+					// Extract the incremental data from the response.
+					//
+					// FIXME: currently the HasNext field does not describe the state of the
+					// delivery as bounded by the associated path, but rather the state of
+					// the operation as a whole. This makes it impossible to determine it
+					// from the response, so we can not define it ahead of time.
+					//
+					// It is also questionable that the incremental data objects should
+					// include hasNext, so for now we remove them from assertion. Once we
+					// align on the spec we must update this test, as the status of the
+					// path-bounded delivery should be determinative and can be asserted.
+					for _, incr := range valueResp.Incremental {
+						incr.HasNext = false
+						deferredIncrementalData = append(deferredIncrementalData, incr)
+					}
+
+					if !valueResp.HasNext {
+						break
+					}
+				}
+				require.NoError(t, read.Close())
+				if tc.assertResponses != nil {
+					tc.assertResponses(t, &tc, deferredIncrementalData)
+				} else {
+					assert.Equal(t, tc.expectedDeferredResponses, deferredIncrementalData, "expected deferred responses to match")
+				}
 			})
-			assert.Equal(t, tc.expectedDeferredResponses, deferredIncrementalData)
 		})
 	}
 }

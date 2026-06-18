@@ -44,7 +44,6 @@ func (p *Client) SSE(ctx context.Context, query string, options ...Option) *SSE 
 	r.Header.Set("Cache-Control", "no-cache")
 	r.Header.Set("Connection", "keep-alive")
 
-	srv := httptest.NewServer(p.h)
 	w := httptest.NewRecorder()
 	p.h.ServeHTTP(w, r)
 
@@ -59,7 +58,6 @@ func (p *Client) SSE(ctx context.Context, query string, options ...Option) *SSE 
 
 	return &SSE{
 		Close: func() error {
-			srv.Close()
 			return nil
 		},
 		Next: func(response any) error {

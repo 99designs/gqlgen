@@ -54,8 +54,12 @@ func TestDefer(t *testing.T) {
 		}, nil
 	}
 
-	resolvers.DeferModelResolver.Values = func(ctx context.Context, obj *DeferModel) ([]string, error) {
+	resolvers.DeferModelResolver.OtherResolvedValue = func(ctx context.Context, obj *DeferModel) (string, error) {
 		time.Sleep(time.Second)
+		return "otherResolvedValue", nil
+	}
+	resolvers.DeferModelResolver.Values = func(ctx context.Context, obj *DeferModel) ([]string, error) {
+		time.Sleep(time.Second * 4)
 		return []string{
 			"test defer 1",
 			"test defer 2",
@@ -65,9 +69,10 @@ func TestDefer(t *testing.T) {
 
 	type (
 		deferModel struct {
-			ID     string
-			Name   string
-			Values []string
+			ID                 string
+			Name               string
+			Values             []string
+			OtherResolvedValue string
 		}
 
 		response[T any] struct {
@@ -86,10 +91,7 @@ func TestDefer(t *testing.T) {
 			DeferMultiple []deferModel
 		}
 
-		deferredDataValues struct {
-			Values []string `json:"values"`
-		}
-		deferredData response[deferredDataValues]
+		deferredData response[deferModel]
 
 		incrementalDeferredResponse struct {
 			Incremental []deferredData  `json:"incremental"`
@@ -150,7 +152,7 @@ func TestDefer(t *testing.T) {
 			},
 			expectedDeferredResponses: []deferredData{
 				{
-					Data: deferredDataValues{
+					Data: deferModel{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Path: []any{"deferSingle"},
@@ -180,7 +182,7 @@ func TestDefer(t *testing.T) {
 			},
 			expectedDeferredResponses: []deferredData{
 				{
-					Data: deferredDataValues{
+					Data: deferModel{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Path: []any{"deferSingle"},
@@ -213,7 +215,7 @@ fragment DeferFragment on DeferModel {
 			},
 			expectedDeferredResponses: []deferredData{
 				{
-					Data: deferredDataValues{
+					Data: deferModel{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Path: []any{"deferSingle"},
@@ -243,7 +245,7 @@ fragment DeferFragment on DeferModel {
 			},
 			expectedDeferredResponses: []deferredData{
 				{
-					Data: deferredDataValues{
+					Data: deferModel{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Label: "test label",
@@ -277,7 +279,7 @@ fragment DeferFragment on DeferModel {
 			},
 			expectedDeferredResponses: []deferredData{
 				{
-					Data: deferredDataValues{
+					Data: deferModel{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Label: "test label",
@@ -308,7 +310,7 @@ fragment DeferFragment on DeferModel {
 			},
 			expectedDeferredResponses: []deferredData{
 				{
-					Data: deferredDataValues{
+					Data: deferModel{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Label: "test label",
@@ -372,21 +374,21 @@ fragment DeferFragment on DeferModel {
 			},
 			expectedDeferredResponses: []deferredData{
 				{
-					Data: deferredDataValues{
+					Data: deferModel{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Label: "test label",
 					Path:  []any{"deferMultiple", float64(0)},
 				},
 				{
-					Data: deferredDataValues{
+					Data: deferModel{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Label: "test label",
 					Path:  []any{"deferMultiple", float64(1)},
 				},
 				{
-					Data: deferredDataValues{
+					Data: deferModel{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Label: "test label",
@@ -432,6 +434,48 @@ fragment DeferFragment on DeferModel {
 				},
 			},
 		},
+		{
+			name: "defer overlapping selection sets, separate defer fragments",
+			query: `query testDefer {
+	deferSingle {
+		id
+		... @defer(label: "otherResolvedValueAndName") {
+			name
+			otherResolvedValue
+		}
+		... @defer(label: "otherResolvedValueAndValues") {
+			otherResolvedValue
+			values
+		}
+	}
+}`,
+			expectedInitialResponse: response[deferSingleData]{
+				Data: deferSingleData{
+					DeferSingle: deferModel{
+						ID:   "1",
+						Name: "Defer test 1",
+					},
+				},
+				HasNext: true,
+			},
+			expectedDeferredResponses: []deferredData{
+				{
+					Data: deferModel{
+						OtherResolvedValue: "otherResolvedValue",
+					},
+					Label:   "otherResolvedValueAndName",
+					Path:    []any{"deferSingle"},
+					HasNext: true,
+				},
+				{
+					Data: deferModel{
+						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
+					},
+					Label: "otherResolvedValueAndValues",
+					Path:  []any{"deferSingle"},
+				},
+			},
+		},
 	}
 
 	for _, tc := range cases {
@@ -456,18 +500,11 @@ fragment DeferFragment on DeferModel {
 					var valueResp deferredData
 					synctest.Wait()
 					require.NoError(t, read.Next(&valueResp))
-
+					deferredResponses = append(deferredResponses, valueResp)
 					if !valueResp.HasNext {
-						deferredResponses = append(deferredResponses, valueResp)
 						break
 					}
 
-					// Remove HasNext from comparison: we don't know the order they will be
-					// delivered in, and so this can't be known in the setup. But if HasNext
-					// does not work right we will either error out or get too few
-					// responses, so it's still checked.
-					valueResp.HasNext = false
-					deferredResponses = append(deferredResponses, valueResp)
 				}
 				require.NoError(t, read.Close(), "expected to close reader")
 
@@ -516,10 +553,7 @@ fragment DeferFragment on DeferModel {
 					// include hasNext, so for now we remove them from assertion. Once we
 					// align on the spec we must update this test, as the status of the
 					// path-bounded delivery should be determinative and can be asserted.
-					for _, incr := range valueResp.Incremental {
-						incr.HasNext = false
-						deferredIncrementalData = append(deferredIncrementalData, incr)
-					}
+					deferredIncrementalData = append(deferredIncrementalData, valueResp.Incremental...)
 
 					if !valueResp.HasNext {
 						break

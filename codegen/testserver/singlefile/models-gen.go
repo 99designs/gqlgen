@@ -101,9 +101,10 @@ type DefaultParametersMirror struct {
 }
 
 type DeferModel struct {
-	ID     string   `json:"id"`
-	Name   string   `json:"name"`
-	Values []string `json:"values"`
+	ID                 string   `json:"id"`
+	Name               string   `json:"name"`
+	OtherResolvedValue string   `json:"otherResolvedValue"`
+	Values             []string `json:"values"`
 }
 
 func (DeferModel) IsDeferModelInterface() {}

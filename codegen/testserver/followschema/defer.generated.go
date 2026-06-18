@@ -17,6 +17,7 @@ import (
 // region    ************************** generated!.gotpl **************************
 
 type DeferModelResolver interface {
+	OtherResolvedValue(ctx context.Context, obj *DeferModel) (string, error)
 	Values(ctx context.Context, obj *DeferModel) ([]string, error)
 }
 
@@ -76,6 +77,31 @@ func (ec *executionContext) _DeferModel_name(ctx context.Context, field graphql.
 }
 func (ec *executionContext) fieldContext_DeferModel_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("DeferModel", field, false, false, errors.New("field of type String does not have child fields"))
+}
+
+func (ec *executionContext) _DeferModel_otherResolvedValue(ctx context.Context, field graphql.CollectedField, obj *DeferModel) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_DeferModel_otherResolvedValue(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.DeferModel().OtherResolvedValue(ctx, obj)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			return ec._fieldMiddleware(ctx, obj, next)
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_DeferModel_otherResolvedValue(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("DeferModel", field, true, true, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _DeferModel_values(ctx context.Context, field graphql.CollectedField, obj *DeferModel) (ret graphql.Marshaler) {
@@ -157,6 +183,44 @@ func (ec *executionContext) _DeferModel(ctx context.Context, sel ast.SelectionSe
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
+		case "otherResolvedValue":
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._DeferModel_otherResolvedValue(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
+			}
+
+			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+				deferredFieldSet.AddField(field)
+				fieldIndex := len(deferredFieldSet.Values) - 1
+				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, deferredFieldSet)
+				})
+
+				for _, deferrable := range field.Deferrables {
+					view, ok := deferLabelToView[deferrable.Label]
+					if !ok {
+						view = deferredFieldSet.NewView()
+						deferLabelToView[deferrable.Label] = view
+					}
+					view.AddIndices(fieldIndex)
+				}
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "values":
 			field := field
 

@@ -6,6 +6,7 @@ extend type Query {
 type DeferModel implements DeferModelInterface {
     id: ID!
     name: String!
+    otherResolvedValue: String! @goField(forceResolver: true)
     values: [String!]! @goField(forceResolver: true)
 }
 

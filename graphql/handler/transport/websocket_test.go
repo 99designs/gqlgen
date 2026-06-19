@@ -160,7 +160,7 @@ func TestWebsocket(t *testing.T) {
 			require.NotEqual(t, completeMsg, msg.Type)
 			require.NotEqual(t, "test_1", msg.ID)
 		} else {
-			assert.True(t, isTimeoutError(err), "expected timeout error, got %v", err)
+			require.ErrorIs(t, err, context.DeadlineExceeded)
 		}
 	})
 }
@@ -1172,22 +1172,6 @@ func readOp(c *testWebsocketClient) operationMessage {
 		panic(err)
 	}
 	return msg
-}
-
-func isTimeoutError(err error) bool {
-	if err == nil {
-		return false
-	}
-	if errors.Is(err, context.DeadlineExceeded) {
-		return true
-	}
-	type timeout interface{ Timeout() bool }
-	var t timeout
-	if errors.As(err, &t) && t.Timeout() {
-		return true
-	}
-	return strings.Contains(err.Error(), "timeout") ||
-		strings.Contains(err.Error(), "deadline exceeded")
 }
 
 func TestWebsocketWithPayloadReadLimit(t *testing.T) {

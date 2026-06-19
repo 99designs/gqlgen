@@ -65,19 +65,16 @@ func (c *coderWebsocketConn) Close() error {
 	c.clearReadDeadlineTimer()
 
 	c.mu.Lock()
-	closeHandshakeCh := c.closeHandshakeCh
+	handshakeInProgress := c.closeHandshakeCh != nil
 	c.mu.Unlock()
 
-	if closeHandshakeCh == nil {
-		return c.conn.CloseNow()
-	}
-
-	select {
-	case <-closeHandshakeCh:
-		return nil
-	default:
+	// If WriteClose already started the close handshake in a goroutine, that
+	// goroutine owns the underlying connection close. Calling CloseNow here
+	// would race and could skip writing the close frame.
+	if handshakeInProgress {
 		return nil
 	}
+	return c.conn.CloseNow()
 }
 
 func (c *coderWebsocketConn) NextReader() (int, io.Reader, error) {

@@ -12,7 +12,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/gorilla/websocket"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -26,14 +25,9 @@ type (
 	// it must use graphql.OneShot to ensure the transport doesn't infinitely loop
 	// on a continuous stream of errors.
 	Websocket struct {
-		// Upgrader configures the legacy Gorilla websocket upgrader.
-		//
-		// Deprecated: Please use the Implementation field instead.
-		Upgrader websocket.Upgrader
-
 		// Implementation accepts HTTP requests as websocket connections. If nil,
-		// gqlgen uses a Gorilla-backed implementation built from Upgrader for
-		// backwards compatibility.
+		// gqlgen uses a CoderWebsocketImplementation with zero-valued accept
+		// options.
 		Implementation WebsocketImplementation
 
 		InitFunc              WebsocketInitFunc
@@ -178,7 +172,7 @@ func (t Websocket) websocketImplementation() WebsocketImplementation {
 		return t.Implementation
 	}
 
-	return gorillaWebsocketImplementation{Upgrader: t.Upgrader}
+	return CoderWebsocketImplementation{}
 }
 
 func (c *wsConnection) handlePossibleError(err error, isReadError bool) {

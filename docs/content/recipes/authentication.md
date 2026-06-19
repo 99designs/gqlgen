@@ -132,12 +132,12 @@ import (
 	"os"
 	"time"
 
+	coderws "github.com/coder/websocket"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
 	"github.com/go-chi/chi"
-	"github.com/gorilla/websocket"
 	"github.com/gqlgen/_examples/websocket-initfunc/server/graph"
 	"github.com/gqlgen/_examples/websocket-initfunc/server/graph/generated"
 	"github.com/rs/cors"
@@ -150,7 +150,7 @@ func webSocketInit(ctx context.Context, initPayload transport.InitPayload) (cont
 	if !ok || token == "" {
 		// When authentication fails, you can set a custom close code and reason
 		// BEFORE returning the error. Make sure to return the modified context.
-		ctx = transport.WithWebsocketCloseCode(ctx, websocket.ClosePolicyViolation) // 1008
+		ctx = transport.WithWebsocketCloseCode(ctx, int(coderws.StatusPolicyViolation)) // 1008
 		ctx = transport.AppendCloseReason(ctx, "missing or invalid authToken")
 		return ctx, nil, errors.New("authToken not found in transport payload")
 	}
@@ -185,9 +185,9 @@ func main() {
 	srv := handler.New(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 	srv.AddTransport(transport.Websocket{
 		KeepAlivePingInterval: 10 * time.Second,
-		Upgrader: websocket.Upgrader{
-			CheckOrigin: func(r *http.Request) bool {
-				return true
+		Implementation: transport.CoderWebsocketImplementation{
+			AcceptOptions: coderws.AcceptOptions{
+				InsecureSkipVerify: true,
 			},
 		},
 		InitFunc: transport.WebsocketInitFunc(webSocketInit),

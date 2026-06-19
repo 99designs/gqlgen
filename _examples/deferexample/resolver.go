@@ -1,3 +1,4 @@
+//go:generate go run ../../testdata/gqlgen.go
 package deferexample
 
 import "sync"

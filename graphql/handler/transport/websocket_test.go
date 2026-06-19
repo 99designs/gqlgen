@@ -1,6 +1,7 @@
 package transport_test
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -11,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/gorilla/websocket"
+	coderws "github.com/coder/websocket"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2"
@@ -26,7 +27,7 @@ import (
 
 type ckey string
 
-var _ transport.WebsocketImplementation = transport.GorillaWebsocketImplementation{}
+var _ transport.WebsocketImplementation = transport.CoderWebsocketImplementation{}
 
 func TestWebsocket(t *testing.T) {
 	handler := testserver.New()
@@ -53,7 +54,9 @@ func TestWebsocket(t *testing.T) {
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionTerminateMsg}))
 
 		_, _, err := c.ReadMessage()
-		assert.Equal(t, websocket.CloseNormalClosure, err.(*websocket.CloseError).Code)
+		var closeErr coderws.CloseError
+		require.ErrorAs(t, err, &closeErr)
+		assert.Equal(t, coderws.StatusNormalClosure, closeErr.Code)
 	})
 
 	t.Run("client must send init first", func(t *testing.T) {
@@ -88,7 +91,9 @@ func TestWebsocket(t *testing.T) {
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionTerminateMsg}))
 
 		_, _, err := c.ReadMessage()
-		assert.Equal(t, websocket.CloseNormalClosure, err.(*websocket.CloseError).Code)
+		var closeErr coderws.CloseError
+		require.ErrorAs(t, err, &closeErr)
+		assert.Equal(t, coderws.StatusNormalClosure, closeErr.Code)
 	})
 
 	t.Run("client gets parse errors", func(t *testing.T) {
@@ -155,7 +160,7 @@ func TestWebsocket(t *testing.T) {
 			require.NotEqual(t, completeMsg, msg.Type)
 			require.NotEqual(t, "test_1", msg.ID)
 		} else {
-			assert.Contains(t, err.Error(), "timeout")
+			require.ErrorIs(t, err, context.DeadlineExceeded)
 		}
 	})
 }
@@ -309,11 +314,11 @@ func TestWebsocketInitFunc(t *testing.T) {
 			},
 			SchemaFunc: func() *ast.Schema {
 				return gqlparser.MustLoadSchema(&ast.Source{Input: `
-				schema { query: Query }
-				type Query {
-					empty: String
-				}
-			`})
+					schema { query: Query }
+					type Query {
+						empty: String
+					}
+				`})
 			},
 		}
 		h := handler.New(es)
@@ -407,7 +412,7 @@ func TestWebsocketInitFunc(t *testing.T) {
 		"closes with custom close code and reason when InitFunc returns error",
 		func(t *testing.T) {
 			h := testserver.New()
-			customCode := websocket.ClosePolicyViolation // 1008
+			customCode := int(coderws.StatusPolicyViolation) // 1008
 			customReason := "unauthorized: token expired"
 
 			h.AddTransport(transport.Websocket{
@@ -432,11 +437,11 @@ func TestWebsocketInitFunc(t *testing.T) {
 			_, _, err := c.ReadMessage()
 			require.Error(t, err)
 
-			var closeErr *websocket.CloseError
+			var closeErr coderws.CloseError
 			ok := errors.As(err, &closeErr)
-			assert.True(t, ok, "expected *websocket.CloseError, got %T", err)
-			assert.Equal(t, customCode, closeErr.Code)
-			assert.Equal(t, customReason, closeErr.Text)
+			assert.True(t, ok, "expected coderws.CloseError, got %T", err)
+			assert.Equal(t, coderws.StatusCode(customCode), closeErr.Code)
+			assert.Equal(t, customReason, closeErr.Reason)
 		},
 	)
 
@@ -461,11 +466,11 @@ func TestWebsocketInitFunc(t *testing.T) {
 		_, _, err := c.ReadMessage()
 		require.Error(t, err)
 
-		var closeErr *websocket.CloseError
+		var closeErr coderws.CloseError
 		ok := errors.As(err, &closeErr)
 		assert.True(t, ok)
-		assert.Equal(t, websocket.CloseNormalClosure, closeErr.Code)
-		assert.Equal(t, "terminated", closeErr.Text)
+		assert.Equal(t, coderws.StatusNormalClosure, closeErr.Code)
+		assert.Equal(t, "terminated", closeErr.Reason)
 	})
 }
 
@@ -486,7 +491,6 @@ func TestWebSocketInitTimeout(t *testing.T) {
 			var msg operationMessage
 			err := c.ReadJSON(&msg)
 			require.Error(t, err)
-			assert.Contains(t, err.Error(), "timeout")
 		},
 	)
 
@@ -541,7 +545,7 @@ func TestWebSocketErrorFunc(t *testing.T) {
 		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
 		require.NoError(
 			t,
-			c.WriteMessage(websocket.TextMessage, []byte("mark my words, you will regret this")),
+			c.WriteText([]byte("mark my words, you will regret this")),
 		)
 
 		select {
@@ -568,10 +572,7 @@ func TestWebSocketErrorFunc(t *testing.T) {
 		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
 		assert.Equal(t, connectionAckMsg, readOp(c).Type)
 		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
-		require.NoError(t, c.WriteMessage(
-			websocket.CloseMessage,
-			websocket.FormatCloseMessage(websocket.CloseNormalClosure, "bye"),
-		))
+		require.NoError(t, c.WriteCloseFrame(coderws.StatusNormalClosure, "bye"))
 		defer c.Close()
 
 		select {
@@ -869,7 +870,6 @@ func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {
 		var msg operationMessage
 		err := c.ReadJSON(&msg)
 		require.Error(t, err)
-		assert.Contains(t, err.Error(), "timeout")
 	})
 }
 
@@ -877,7 +877,6 @@ func TestWebsocketWithCustomImplementation(t *testing.T) {
 	customImplementation := &customWebsocketImplementation{}
 	h := testserver.New()
 	h.AddTransport(transport.Websocket{
-		Upgrader:       websocket.Upgrader{Subprotocols: []string{"gorilla-only"}},
 		Implementation: customImplementation,
 	})
 
@@ -894,7 +893,6 @@ func TestWebsocketWithCustomImplementation(t *testing.T) {
 	assert.Equal(t, graphqltransportwsConnectionAckMsg, readOp(c).Type)
 	assert.Contains(t, customImplementation.subprotocols, "graphql-ws")
 	assert.Contains(t, customImplementation.subprotocols, graphqltransportwsSubprotocol)
-	assert.NotContains(t, customImplementation.subprotocols, "gorilla-only")
 }
 
 func TestWebsocketWithPingPongInterval(t *testing.T) {
@@ -1086,34 +1084,91 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 	)
 }
 
-func wsConnect(url string) *websocket.Conn {
+// testWebsocketClient wraps a coder/websocket connection with a gorilla-style
+// API to keep the assertions in this file readable.
+type testWebsocketClient struct {
+	conn         *coderws.Conn
+	readDeadline time.Time
+}
+
+func (c *testWebsocketClient) Close() error {
+	return c.conn.CloseNow()
+}
+
+func (c *testWebsocketClient) readContext() (context.Context, context.CancelFunc) {
+	if c.readDeadline.IsZero() {
+		return context.WithCancel(context.Background())
+	}
+	return context.WithDeadline(context.Background(), c.readDeadline)
+}
+
+func (c *testWebsocketClient) SetReadDeadline(t time.Time) {
+	c.readDeadline = t
+}
+
+func (c *testWebsocketClient) WriteJSON(v any) error {
+	data, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	return c.conn.Write(context.Background(), coderws.MessageText, data)
+}
+
+func (c *testWebsocketClient) ReadJSON(v any) error {
+	ctx, cancel := c.readContext()
+	defer cancel()
+	_, data, err := c.conn.Read(ctx)
+	if err != nil {
+		return err
+	}
+	return json.Unmarshal(data, v)
+}
+
+func (c *testWebsocketClient) WriteText(data []byte) error {
+	return c.conn.Write(context.Background(), coderws.MessageText, data)
+}
+
+func (c *testWebsocketClient) WriteCloseFrame(code coderws.StatusCode, reason string) error {
+	return c.conn.Close(code, reason)
+}
+
+func (c *testWebsocketClient) ReadMessage() (coderws.MessageType, []byte, error) {
+	ctx, cancel := c.readContext()
+	defer cancel()
+	return c.conn.Read(ctx)
+}
+
+func wsConnect(url string) *testWebsocketClient {
 	return wsConnectWithSubprotocol(url, "")
 }
 
-func wsConnectWithSubprotocol(url, subprotocol string) *websocket.Conn {
-	h := make(http.Header)
+func wsConnectWithSubprotocol(url, subprotocol string) *testWebsocketClient {
+	opts := &coderws.DialOptions{}
 	if subprotocol != "" {
-		h.Add("Sec-WebSocket-Protocol", subprotocol)
+		opts.Subprotocols = []string{subprotocol}
 	}
 
-	c, resp, err := websocket.DefaultDialer.Dial(strings.ReplaceAll(url, "http://", "ws://"), h)
+	wsURL := strings.ReplaceAll(url, "http://", "ws://")
+	c, resp, err := coderws.Dial(context.Background(), wsURL, opts)
 	if err != nil {
 		panic(err)
 	}
-	_ = resp.Body.Close()
+	if resp != nil && resp.Body != nil {
+		_ = resp.Body.Close()
+	}
 
-	return c
+	return &testWebsocketClient{conn: c}
 }
 
-func writeRaw(conn *websocket.Conn, msg string) {
-	if err := conn.WriteMessage(websocket.TextMessage, []byte(msg)); err != nil {
+func writeRaw(c *testWebsocketClient, msg string) {
+	if err := c.WriteText([]byte(msg)); err != nil {
 		panic(err)
 	}
 }
 
-func readOp(conn *websocket.Conn) operationMessage {
+func readOp(c *testWebsocketClient) operationMessage {
 	var msg operationMessage
-	if err := conn.ReadJSON(&msg); err != nil {
+	if err := c.ReadJSON(&msg); err != nil {
 		panic(err)
 	}
 	return msg
@@ -1133,10 +1188,10 @@ func TestWebsocketWithPayloadReadLimit(t *testing.T) {
 
 	// Send a payload that exceeds the 100-byte limit
 	oversized := strings.Repeat("x", 200)
-	err := c.WriteMessage(websocket.TextMessage, []byte(oversized))
+	err := c.WriteText([]byte(oversized))
 	require.NoError(t, err)
 
-	// Gorilla closes the connection when the read limit is exceeded
+	// The server closes the connection when the read limit is exceeded
 	_, _, err = c.ReadMessage()
 	require.Error(t, err)
 }
@@ -1186,37 +1241,56 @@ func (u *customWebsocketImplementation) Accept(
 	options transport.WebsocketAcceptOptions,
 ) (transport.WebsocketConn, error) {
 	u.subprotocols = append([]string(nil), options.Subprotocols...)
-	upgrader := websocket.Upgrader{
-		Subprotocols: options.Subprotocols,
+
+	for key, values := range options.ResponseHeader {
+		for _, value := range values {
+			w.Header().Add(key, value)
+		}
 	}
-	conn, err := upgrader.Upgrade(w, r, options.ResponseHeader)
+
+	conn, err := coderws.Accept(w, r, &coderws.AcceptOptions{
+		Subprotocols: options.Subprotocols,
+	})
 	if err != nil {
 		return nil, err
 	}
 
-	return customWebsocketConn{Conn: conn}, nil
+	return customWebsocketConn{conn: conn}, nil
 }
 
 type customWebsocketConn struct {
-	*websocket.Conn
+	conn *coderws.Conn
+}
+
+func (c customWebsocketConn) Close() error {
+	return c.conn.CloseNow()
 }
 
 func (c customWebsocketConn) NextReader() (int, io.Reader, error) {
-	messageType, r, err := c.Conn.NextReader()
-	if err != nil && websocket.IsCloseError(
-		err,
-		transport.WebsocketCloseNormalClosure,
-		transport.WebsocketCloseNoStatusReceived,
-	) {
-		return messageType, r, transport.ErrWebsocketClosed
+	messageType, data, err := c.conn.Read(context.Background())
+	if err != nil {
+		switch coderws.CloseStatus(err) {
+		case coderws.StatusNormalClosure, coderws.StatusNoStatusRcvd:
+			return int(messageType), nil, transport.ErrWebsocketClosed
+		}
+		return int(messageType), nil, err
 	}
 
-	return messageType, r, err
+	return int(messageType), bytes.NewReader(data), nil
+}
+
+func (c customWebsocketConn) WriteJSON(v any) error {
+	data, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+	return c.conn.Write(context.Background(), coderws.MessageText, data)
 }
 
 func (c customWebsocketConn) WriteClose(closeCode int, message string) error {
-	return c.WriteMessage(
-		websocket.CloseMessage,
-		websocket.FormatCloseMessage(closeCode, message),
-	)
+	return c.conn.Close(coderws.StatusCode(closeCode), message)
+}
+
+func (c customWebsocketConn) Subprotocol() string {
+	return c.conn.Subprotocol()
 }

@@ -142,9 +142,10 @@ type ComplexityRoot struct {
 	}
 
 	DeferModel struct {
-		ID     func(childComplexity int) int
-		Name   func(childComplexity int) int
-		Values func(childComplexity int) int
+		ID                 func(childComplexity int) int
+		Name               func(childComplexity int) int
+		OtherResolvedValue func(childComplexity int) int
+		Values             func(childComplexity int) int
 	}
 
 	Dog struct {
@@ -716,6 +717,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.DeferModel.Name(childComplexity), true
+	case "DeferModel.otherResolvedValue":
+		if e.ComplexityRoot.DeferModel.OtherResolvedValue == nil {
+			break
+		}
+
+		return e.ComplexityRoot.DeferModel.OtherResolvedValue(childComplexity), true
 	case "DeferModel.values":
 		if e.ComplexityRoot.DeferModel.Values == nil {
 			break
@@ -2430,10 +2437,15 @@ type DefaultParametersMirror {
  This doesnt have an implementation in the typemap, so it should act like a string 
 """
 scalar DefaultScalarImplementation
-type DeferModel {
+type DeferModel implements DeferModelInterface {
 	id: ID!
 	name: String!
+	otherResolvedValue: String! @goField(forceResolver: true)
 	values: [String!]! @goField(forceResolver: true)
+}
+interface DeferModelInterface {
+	otherResolvedValue: String!
+	values: [String!]!
 }
 input DirectiveInput @goModel(model: "map[string]interface{}") {
 	oldField: String @deprecated(reason: "Use newField instead")
@@ -2988,6 +3000,8 @@ func (ec *executionContext) childFields_DeferModel(ctx context.Context, field gr
 		return ec.fieldContext_DeferModel_id(ctx, field)
 	case "name":
 		return ec.fieldContext_DeferModel_name(ctx, field)
+	case "otherResolvedValue":
+		return ec.fieldContext_DeferModel_otherResolvedValue(ctx, field)
 	case "values":
 		return ec.fieldContext_DeferModel_values(ctx, field)
 	}

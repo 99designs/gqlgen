@@ -4,7 +4,7 @@ go 1.25.0
 
 require (
 	github.com/99designs/gqlgen v0.17.89
-	github.com/coder/websocket v1.8.14
+	github.com/coder/websocket v1.8.15
 	github.com/go-chi/chi/v5 v5.2.5
 	github.com/rs/cors v1.11.1
 	github.com/vektah/gqlparser/v2 v2.5.35

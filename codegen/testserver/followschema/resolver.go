@@ -17,6 +17,11 @@ func (r *backedByInterfaceResolver) ID(ctx context.Context, obj BackedByInterfac
 	panic("not implemented")
 }
 
+// OtherResolvedValue is the resolver for the otherResolvedValue field.
+func (r *deferModelResolver) OtherResolvedValue(ctx context.Context, obj *DeferModel) (string, error) {
+	panic("not implemented")
+}
+
 // Values is the resolver for the values field.
 func (r *deferModelResolver) Values(ctx context.Context, obj *DeferModel) ([]string, error) {
 	panic("not implemented")

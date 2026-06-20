@@ -15,7 +15,8 @@ type Stub struct {
 		ID func(ctx context.Context, obj BackedByInterface) (string, error)
 	}
 	DeferModelResolver struct {
-		Values func(ctx context.Context, obj *DeferModel) ([]string, error)
+		OtherResolvedValue func(ctx context.Context, obj *DeferModel) (string, error)
+		Values             func(ctx context.Context, obj *DeferModel) ([]string, error)
 	}
 	ErrorsResolver struct {
 		A func(ctx context.Context, obj *Errors) (*Error, error)
@@ -229,6 +230,9 @@ func (r *stubBackedByInterface) ID(ctx context.Context, obj BackedByInterface) (
 
 type stubDeferModel struct{ *Stub }
 
+func (r *stubDeferModel) OtherResolvedValue(ctx context.Context, obj *DeferModel) (string, error) {
+	return r.DeferModelResolver.OtherResolvedValue(ctx, obj)
+}
 func (r *stubDeferModel) Values(ctx context.Context, obj *DeferModel) ([]string, error) {
 	return r.DeferModelResolver.Values(ctx, obj)
 }

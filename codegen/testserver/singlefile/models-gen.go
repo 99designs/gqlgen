@@ -22,6 +22,12 @@ type ContentChild interface {
 	IsContentChild()
 }
 
+type DeferModelInterface interface {
+	IsDeferModelInterface()
+	GetOtherResolvedValue() string
+	GetValues() []string
+}
+
 type Mammalian interface {
 	IsAnimal()
 	IsMammalian()
@@ -95,9 +101,23 @@ type DefaultParametersMirror struct {
 }
 
 type DeferModel struct {
-	ID     string   `json:"id"`
-	Name   string   `json:"name"`
-	Values []string `json:"values"`
+	ID                 string   `json:"id"`
+	Name               string   `json:"name"`
+	OtherResolvedValue string   `json:"otherResolvedValue"`
+	Values             []string `json:"values"`
+}
+
+func (DeferModel) IsDeferModelInterface()             {}
+func (this DeferModel) GetOtherResolvedValue() string { return this.OtherResolvedValue }
+func (this DeferModel) GetValues() []string {
+	if this.Values == nil {
+		return nil
+	}
+	interfaceSlice := make([]string, 0, len(this.Values))
+	for _, concrete := range this.Values {
+		interfaceSlice = append(interfaceSlice, concrete)
+	}
+	return interfaceSlice
 }
 
 type Dog struct {

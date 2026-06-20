@@ -104,11 +104,9 @@ func collectFields(
 				}
 
 				if shouldDefer {
-					f.Deferrable = &Deferrable{
+					f.Deferrables = append(f.Deferrables, &Deferrable{
 						Label: label,
-					}
-					f.Deferrables = append(f.Deferrables, f.Deferrable)
-
+					})
 				}
 			}
 
@@ -157,10 +155,9 @@ func collectFields(
 				}
 
 				if shouldDefer {
-					f.Deferrable = &Deferrable{
+					f.Deferrables = append(f.Deferrables, &Deferrable{
 						Label: label,
-					}
-					f.Deferrables = append(f.Deferrables, f.Deferrable)
+					})
 				}
 			}
 
@@ -195,8 +192,16 @@ type CollectedField struct {
 	//		}
 	//	}
 	IsNonDeferrable bool
-	Deferrable      *Deferrable
 	Deferrables     []*Deferrable
+}
+
+// IsDeferred reports whether this field's resolution should be deferred
+// (collected into a [FieldSetView] keyed by every label in [Deferrables])
+// rather than emitted in the initial response. A field is deferred when it
+// appears inside at least one @defer fragment and is not also selected
+// outside of one — the [IsNonDeferrable] flag overrides Deferrables.
+func (f CollectedField) IsDeferred() bool {
+	return len(f.Deferrables) > 0 && !f.IsNonDeferrable
 }
 
 func doesFragmentConditionMatch(typeCondition string, satisfies []string) bool {

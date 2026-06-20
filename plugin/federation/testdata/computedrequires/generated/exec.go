@@ -5764,7 +5764,7 @@ func (ec *executionContext) _MultiHelloMultipleRequires(ctx context.Context, sel
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -5845,7 +5845,7 @@ func (ec *executionContext) _MultiHelloRequires(ctx context.Context, sel ast.Sel
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -5969,7 +5969,7 @@ func (ec *executionContext) _MultiPlanetRequiresNested(ctx context.Context, sel 
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -6007,7 +6007,7 @@ func (ec *executionContext) _MultiPlanetRequiresNested(ctx context.Context, sel 
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -6088,7 +6088,7 @@ func (ec *executionContext) _Person(ctx context.Context, sel ast.SelectionSet, o
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -6174,7 +6174,7 @@ func (ec *executionContext) _PlanetMultipleRequires(ctx context.Context, sel ast
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -6255,7 +6255,7 @@ func (ec *executionContext) _PlanetRequires(ctx context.Context, sel ast.Selecti
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -6346,7 +6346,7 @@ func (ec *executionContext) _PlanetRequiresNested(ctx context.Context, sel ast.S
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -6384,7 +6384,7 @@ func (ec *executionContext) _PlanetRequiresNested(ctx context.Context, sel ast.S
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {

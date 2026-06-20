@@ -1834,7 +1834,7 @@ func (ec *executionContext) _TodoContext(ctx context.Context, sel ast.SelectionS
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {

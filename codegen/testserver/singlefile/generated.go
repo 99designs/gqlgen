@@ -16345,7 +16345,7 @@ func (ec *executionContext) _BackedByInterface(ctx context.Context, sel ast.Sele
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -16823,7 +16823,7 @@ func (ec *executionContext) _DeferModel(ctx context.Context, sel ast.SelectionSe
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -16861,7 +16861,7 @@ func (ec *executionContext) _DeferModel(ctx context.Context, sel ast.SelectionSe
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -17228,7 +17228,7 @@ func (ec *executionContext) _Errors(ctx context.Context, sel ast.SelectionSet, o
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -17266,7 +17266,7 @@ func (ec *executionContext) _Errors(ctx context.Context, sel ast.SelectionSet, o
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -17304,7 +17304,7 @@ func (ec *executionContext) _Errors(ctx context.Context, sel ast.SelectionSet, o
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -17342,7 +17342,7 @@ func (ec *executionContext) _Errors(ctx context.Context, sel ast.SelectionSet, o
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -17380,7 +17380,7 @@ func (ec *executionContext) _Errors(ctx context.Context, sel ast.SelectionSet, o
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -17489,7 +17489,7 @@ func (ec *executionContext) _ForcedResolver(ctx context.Context, sel ast.Selecti
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -17927,7 +17927,7 @@ func (ec *executionContext) _ModelMethods(ctx context.Context, sel ast.Selection
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -17970,7 +17970,7 @@ func (ec *executionContext) _ModelMethods(ctx context.Context, sel ast.Selection
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -18258,7 +18258,7 @@ func (ec *executionContext) _OverlappingFields(ctx context.Context, sel ast.Sele
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -18339,7 +18339,7 @@ func (ec *executionContext) _Panics(ctx context.Context, sel ast.SelectionSet, o
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -18377,7 +18377,7 @@ func (ec *executionContext) _Panics(ctx context.Context, sel ast.SelectionSet, o
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -18415,7 +18415,7 @@ func (ec *executionContext) _Panics(ctx context.Context, sel ast.SelectionSet, o
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -18491,7 +18491,7 @@ func (ec *executionContext) _Pet(ctx context.Context, sel ast.SelectionSet, obj 
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -18562,7 +18562,7 @@ func (ec *executionContext) _Primitive(ctx context.Context, sel ast.SelectionSet
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -18638,7 +18638,7 @@ func (ec *executionContext) _PrimitiveString(ctx context.Context, sel ast.Select
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -18681,7 +18681,7 @@ func (ec *executionContext) _PrimitiveString(ctx context.Context, sel ast.Select
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -21080,7 +21080,7 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -21128,7 +21128,7 @@ func (ec *executionContext) _User(ctx context.Context, sel ast.SelectionSet, obj
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -21328,7 +21328,7 @@ func (ec *executionContext) _VariadicModel(ctx context.Context, sel ast.Selectio
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -21399,7 +21399,7 @@ func (ec *executionContext) _WrappedMap(ctx context.Context, sel ast.SelectionSe
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
@@ -21470,7 +21470,7 @@ func (ec *executionContext) _WrappedSlice(ctx context.Context, sel ast.Selection
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {

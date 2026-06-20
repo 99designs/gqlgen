@@ -52,6 +52,7 @@ type coderWebsocketConn struct {
 
 	mu                sync.Mutex
 	readDeadlineTimer *time.Timer
+	closeHandshakeCh  chan struct{}
 }
 
 var (
@@ -62,6 +63,17 @@ var (
 
 func (c *coderWebsocketConn) Close() error {
 	c.clearReadDeadlineTimer()
+
+	c.mu.Lock()
+	handshakeInProgress := c.closeHandshakeCh != nil
+	c.mu.Unlock()
+
+	// If WriteClose already started the close handshake in a goroutine, that
+	// goroutine owns the underlying connection close. Calling CloseNow here
+	// would race and could skip writing the close frame.
+	if handshakeInProgress {
+		return nil
+	}
 	return c.conn.CloseNow()
 }
 
@@ -88,7 +100,25 @@ func (c *coderWebsocketConn) WriteJSON(v any) error {
 
 func (c *coderWebsocketConn) WriteClose(closeCode int, message string) error {
 	c.clearReadDeadlineTimer()
-	return c.conn.Close(coderws.StatusCode(closeCode), message)
+
+	// coder/websocket's Close performs a synchronous close handshake that can
+	// block for up to 5 seconds waiting for the peer to send its own close
+	// frame. Run it in the background so the transport doesn't stall its
+	// teardown sequence (including CloseFunc) on a slow or absent peer.
+	c.mu.Lock()
+	if c.closeHandshakeCh != nil {
+		c.mu.Unlock()
+		return nil
+	}
+	done := make(chan struct{})
+	c.closeHandshakeCh = done
+	c.mu.Unlock()
+
+	go func() {
+		defer close(done)
+		_ = c.conn.Close(coderws.StatusCode(closeCode), message)
+	}()
+	return nil
 }
 
 func (c *coderWebsocketConn) Subprotocol() string {

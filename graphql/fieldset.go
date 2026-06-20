@@ -2,35 +2,27 @@ package graphql
 
 import (
 	"context"
-	"fmt"
 	"io"
 	"iter"
 	"slices"
 	"sync"
+	"sync/atomic"
 )
 
+// NewView creates a new view that observes a subset of m's fields. Callers
+// must invoke NewView and AddIndices before m's first Dispatch: NewView
+// appends to m.onResult without a lock and Dispatch iterates that slice from
+// resolver goroutines, so adding a view concurrently with dispatch is a data
+// race. Generated code respects this by constructing all views in a single
+// goroutine before ProcessDeferredGroup spawns the dispatch goroutine.
 func (m *FieldSet) NewView() *FieldSetView {
-	view := &FieldSetView{
-		fieldSet:       m,
-		pendingResults: make(map[int]struct{}),
-	}
+	view := &FieldSetView{fieldSet: m}
 
 	m.onResult = append(m.onResult, func(ctx context.Context, fieldIndex int) {
-		view.pendingMu.RLock()
-		pendingCount := len(view.pendingResults)
-		view.pendingMu.RUnlock()
-		if pendingCount == 0 {
+		if !slices.Contains(view.indices, fieldIndex) {
 			return
 		}
-
-		view.pendingMu.Lock()
-		defer view.pendingMu.Unlock()
-		if len(view.pendingResults) == 0 { // may have changed since last check
-			return
-		}
-
-		delete(view.pendingResults, fieldIndex)
-		if len(view.pendingResults) == 0 && view.onComplete != nil {
+		if view.pending.Add(-1) == 0 && view.onComplete != nil {
 			view.onComplete(ctx)
 		}
 	})
@@ -39,17 +31,10 @@ func (m *FieldSet) NewView() *FieldSetView {
 }
 
 type FieldSetView struct {
-	indices        []int
-	pendingResults map[int]struct{}
-	pendingMu      sync.RWMutex
-	fieldSet       *FieldSet
-	onComplete     func(ctx context.Context)
-}
-
-func (f *FieldSetView) String() string {
-	f.pendingMu.Lock()
-	defer f.pendingMu.Unlock()
-	return fmt.Sprintf("view=%+v, pending=%+v, addr=%p", f.indices, f.pendingResults, f)
+	indices    []int
+	pending    atomic.Int32
+	fieldSet   *FieldSet
+	onComplete func(ctx context.Context)
 }
 
 // SetOnComplete sets a callback to be invoked when all the
@@ -57,33 +42,36 @@ func (f *FieldSetView) String() string {
 //
 // This method is NOT thread safe, and must not be invoked concurrently with any of its own methods,
 // nor with any of the parent [FieldSet]'s methods.
-func (f *FieldSetView) SetOnComplete(onComplete func(ctx context.Context)) {
-	f.onComplete = onComplete
+func (v *FieldSetView) SetOnComplete(onComplete func(ctx context.Context)) {
+	v.onComplete = onComplete
 }
 
-func (f *FieldSetView) AddIndices(i ...int) *FieldSetView {
-	f.indices = slices.Grow(f.indices, len(i))
-	for _, v := range i {
-		f.indices = append(f.indices, v)
-		f.pendingResults[v] = struct{}{}
-	}
-	return f
+func (v *FieldSetView) AddIndices(indices ...int) {
+	v.indices = append(v.indices, indices...)
+	v.pending.Add(int32(len(indices)))
 }
 
-// MarshalGQL should only be invoked after onFilled() has been invoked.
-func (f *FieldSetView) MarshalGQL(writer io.Writer) {
-	marshalFieldSet(writer, f.allFieldValues())
+// MarshalGQL writes the JSON object containing only the fields the view's
+// indices select. It must not be called before every index has been resolved —
+// in normal use that means waiting for the onComplete callback registered via
+// SetOnComplete.
+func (v *FieldSetView) MarshalGQL(writer io.Writer) {
+	marshalFieldSet(writer, v.consumeFieldValues())
 }
 
-func (f *FieldSetView) allFieldValues() iter.Seq2[*CollectedField, Marshaler] {
+// consumeFieldValues yields each (field, value) pair for the view's indices
+// and nils the corresponding entries on the underlying [FieldSet] via
+// [FieldSet.takeValues]. A second call from this view — or from any other
+// view sharing the same index — yields nothing for the consumed indices.
+func (v *FieldSetView) consumeFieldValues() iter.Seq2[*CollectedField, Marshaler] {
 	return func(yield func(*CollectedField, Marshaler) bool) {
-		values := f.fieldSet.takeValues(f.indices)
+		values := v.fieldSet.takeValues(v.indices)
 		for i, value := range values {
 			if value == nil {
 				continue
 			}
 
-			field := &f.fieldSet.fields[f.indices[i]]
+			field := &v.fieldSet.fields[v.indices[i]]
 			if !yield(field, value) {
 				return
 			}

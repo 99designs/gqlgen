@@ -5089,7 +5089,7 @@ func (ec *executionContext) _MultiPlanetRequiresNested(ctx context.Context, sel 
 				return res
 			}
 
-			if len(field.Deferrables) > 0 && !field.IsNonDeferrable {
+			if field.IsDeferred() {
 				deferredFieldSet.AddField(field)
 				fieldIndex := len(deferredFieldSet.Values) - 1
 				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {

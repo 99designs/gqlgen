@@ -27,7 +27,12 @@ func TestFieldSet_MarshalGQL(t *testing.T) {
 	})
 }
 
-func addConcurrentFieldAndReturnIndex(t *testing.T, fieldSet *FieldSet, field *ast.Field, resolver func(context.Context) Marshaler) int {
+func addConcurrentFieldAndReturnIndex(
+	t *testing.T,
+	fieldSet *FieldSet,
+	field *ast.Field,
+	resolver func(context.Context) Marshaler,
+) int {
 	t.Helper()
 	fieldSet.AddField(CollectedField{Field: field})
 	i := len(fieldSet.Values) - 1

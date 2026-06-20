@@ -607,7 +607,12 @@ fragment ChildFragment on DeferModel {
 				read := c.SSE(context.Background(), tc.query)
 				synctest.Wait()
 				require.NoError(t, read.Next(&resp))
-				assert.Equal(t, tc.expectedInitialResponse, resp, "expected initial response to match")
+				assert.Equal(
+					t,
+					tc.expectedInitialResponse,
+					resp,
+					"expected initial response to match",
+				)
 
 				// If there are no deferred responses, we can stop here.
 				if !resE.FieldByName("HasNext").Bool() && len(tc.expectedDeferredResponses) == 0 {
@@ -623,14 +628,18 @@ fragment ChildFragment on DeferModel {
 					if !valueResp.HasNext {
 						break
 					}
-
 				}
 				require.NoError(t, read.Close(), "expected to close reader")
 
 				if tc.assertResponses != nil {
 					tc.assertResponses(t, &tc, deferredResponses)
 				} else {
-					assert.Equal(t, tc.expectedDeferredResponses, deferredResponses, "expected deferred responses to match")
+					assert.Equal(
+						t,
+						tc.expectedDeferredResponses,
+						deferredResponses,
+						"expected deferred responses to match",
+					)
 				}
 			})
 		})
@@ -672,7 +681,9 @@ fragment ChildFragment on DeferModel {
 					// include hasNext, so for now we remove them from assertion. Once we
 					// align on the spec we must update this test, as the status of the
 					// path-bounded delivery should be determinative and can be asserted.
-					deferredIncrementalData = append(deferredIncrementalData, valueResp.Incremental...)
+					deferredIncrementalData = append(
+						deferredIncrementalData,
+						valueResp.Incremental...)
 
 					if !valueResp.HasNext {
 						break
@@ -682,7 +693,12 @@ fragment ChildFragment on DeferModel {
 				if tc.assertResponses != nil {
 					tc.assertResponses(t, &tc, deferredIncrementalData)
 				} else {
-					assert.Equal(t, tc.expectedDeferredResponses, deferredIncrementalData, "expected deferred responses to match")
+					assert.Equal(
+						t,
+						tc.expectedDeferredResponses,
+						deferredIncrementalData,
+						"expected deferred responses to match",
+					)
 				}
 			})
 		})

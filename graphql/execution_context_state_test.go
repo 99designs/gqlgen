@@ -190,11 +190,11 @@ func TestExecutionContextState_ProcessDeferredGroup_NullsOnInvalidAndIsolatesErr
 		return MarshalString("ignored")
 	})
 
+	view := fieldSet.NewView()
+	view.AddIndices(0)
 	ec.ProcessDeferredGroup(DeferredGroup{
-		Path: ast.Path{ast.PathName("query")},
-		Defers: map[string]*FieldSetView{
-			"group-2": fieldSet.NewView().AddIndices(0),
-		},
+		Path:     ast.Path{ast.PathName("query")},
+		Defers:   map[string]*FieldSetView{"group-2": view},
 		FieldSet: fieldSet,
 		Context:  ctx,
 	})

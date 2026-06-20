@@ -628,7 +628,6 @@ fragment ChildFragment on DeferModel {
 					if !valueResp.HasNext {
 						break
 					}
-
 				}
 				require.NoError(t, read.Close(), "expected to close reader")
 

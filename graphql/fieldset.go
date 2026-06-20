@@ -113,7 +113,6 @@ func (m *FieldSet) takeValues(indices []int) []Marshaler {
 		}
 		result[i] = m.Values[valueI]
 		m.Values[valueI] = nil
-
 	}
 
 	return result

@@ -6,15 +6,14 @@ import (
 	"time"
 
 	"github.com/coder/websocket"
-	"github.com/rs/zerolog/log"
-	"github.com/vektah/gqlparser/v2/ast"
-
 	"github.com/gqlgen/_examples/mini-habr-with-subscriptions/graph"
 	commentmutation "github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/handlers/comment_mutation"
 	commentquery "github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/handlers/comment_query"
 	postmutation "github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/handlers/post_mutation"
 	postquery "github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/handlers/post_query"
 	"github.com/gqlgen/_examples/mini-habr-with-subscriptions/internal/storage"
+	"github.com/rs/zerolog/log"
+	"github.com/vektah/gqlparser/v2/ast"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"

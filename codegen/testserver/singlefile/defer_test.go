@@ -1,15 +1,14 @@
 package singlefile
 
 import (
-	"cmp"
 	"context"
 	"encoding/json"
-	"math/rand"
 	"reflect"
 	"slices"
 	"strconv"
 	"strings"
 	"testing"
+	"testing/synctest"
 	"time"
 
 	"github.com/stretchr/testify/assert"
@@ -21,6 +20,8 @@ import (
 )
 
 func TestDefer(t *testing.T) {
+	t.Parallel()
+
 	resolvers := &Stub{}
 
 	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
@@ -53,8 +54,12 @@ func TestDefer(t *testing.T) {
 		}, nil
 	}
 
+	resolvers.DeferModelResolver.OtherResolvedValue = func(ctx context.Context, obj *DeferModel) (string, error) {
+		time.Sleep(time.Second)
+		return "otherResolvedValue", nil
+	}
 	resolvers.DeferModelResolver.Values = func(ctx context.Context, obj *DeferModel) ([]string, error) {
-		time.Sleep(time.Duration(rand.Intn(100)) * time.Millisecond)
+		time.Sleep(time.Second * 4)
 		return []string{
 			"test defer 1",
 			"test defer 2",
@@ -62,31 +67,39 @@ func TestDefer(t *testing.T) {
 		}, nil
 	}
 
-	type deferModel struct {
-		Id     string
-		Name   string
-		Values []string
-	}
+	type (
+		deferModel struct {
+			ID                 string
+			Name               string
+			Values             []string
+			OtherResolvedValue string
+		}
 
-	type response[T any] struct {
-		Data       T
-		Label      string          `json:"label"`
-		Path       []any           `json:"path"`
-		HasNext    bool            `json:"hasNext"`
-		Errors     json.RawMessage `json:"errors"`
-		Extensions map[string]any  `json:"extensions"`
-	}
+		response[T any] struct {
+			Data       T
+			Label      string          `json:"label"`
+			Path       []any           `json:"path"`
+			HasNext    bool            `json:"hasNext"`
+			Errors     json.RawMessage `json:"errors"`
+			Extensions map[string]any  `json:"extensions"`
+		}
 
-	type deferredData response[struct {
-		Values []string `json:"values"`
-	}]
+		deferSingleData struct {
+			DeferSingle deferModel
+		}
+		deferMultipleData struct {
+			DeferMultiple []deferModel
+		}
 
-	type incrementalDeferredResponse struct {
-		Incremental []deferredData  `json:"incremental"`
-		HasNext     bool            `json:"hasNext"`
-		Errors      json.RawMessage `json:"errors"`
-		Extensions  map[string]any  `json:"extensions"`
-	}
+		deferredData response[deferModel]
+
+		incrementalDeferredResponse struct {
+			Incremental []deferredData  `json:"incremental"`
+			HasNext     bool            `json:"hasNext"`
+			Errors      json.RawMessage `json:"errors"`
+			Extensions  map[string]any  `json:"extensions"`
+		}
+	)
 
 	pathStringer := func(path []any) string {
 		var kb strings.Builder
@@ -107,12 +120,15 @@ func TestDefer(t *testing.T) {
 		return kb.String()
 	}
 
-	cases := []struct {
+	type testCase struct {
 		name                      string
 		query                     string
 		expectedInitialResponse   any
 		expectedDeferredResponses []deferredData
-	}{
+		assertResponses           func(t *testing.T, tc *testCase, actual []deferredData)
+	}
+
+	cases := []testCase{
 		{
 			name: "defer single",
 			query: `query testDefer {
@@ -124,14 +140,10 @@ func TestDefer(t *testing.T) {
 		}
 	}
 }`,
-			expectedInitialResponse: response[struct {
-				DeferSingle deferModel
-			}]{
-				Data: struct {
-					DeferSingle deferModel
-				}{
+			expectedInitialResponse: response[deferSingleData]{
+				Data: deferSingleData{
 					DeferSingle: deferModel{
-						Id:     "1",
+						ID:     "1",
 						Name:   "Defer test 1",
 						Values: nil,
 					},
@@ -140,9 +152,7 @@ func TestDefer(t *testing.T) {
 			},
 			expectedDeferredResponses: []deferredData{
 				{
-					Data: struct {
-						Values []string `json:"values"`
-					}{
+					Data: deferModel{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Path: []any{"deferSingle"},
@@ -160,14 +170,10 @@ func TestDefer(t *testing.T) {
 		}
 	}
 }`,
-			expectedInitialResponse: response[struct {
-				DeferSingle deferModel
-			}]{
-				Data: struct {
-					DeferSingle deferModel
-				}{
+			expectedInitialResponse: response[deferSingleData]{
+				Data: deferSingleData{
 					DeferSingle: deferModel{
-						Id:     "1",
+						ID:     "1",
 						Name:   "Defer test 1",
 						Values: nil,
 					},
@@ -176,9 +182,7 @@ func TestDefer(t *testing.T) {
 			},
 			expectedDeferredResponses: []deferredData{
 				{
-					Data: struct {
-						Values []string `json:"values"`
-					}{
+					Data: deferModel{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Path: []any{"deferSingle"},
@@ -199,14 +203,10 @@ fragment DeferFragment on DeferModel {
 	values
 }
 `,
-			expectedInitialResponse: response[struct {
-				DeferSingle deferModel
-			}]{
-				Data: struct {
-					DeferSingle deferModel
-				}{
+			expectedInitialResponse: response[deferSingleData]{
+				Data: deferSingleData{
 					DeferSingle: deferModel{
-						Id:     "1",
+						ID:     "1",
 						Name:   "Defer test 1",
 						Values: nil,
 					},
@@ -215,9 +215,7 @@ fragment DeferFragment on DeferModel {
 			},
 			expectedDeferredResponses: []deferredData{
 				{
-					Data: struct {
-						Values []string `json:"values"`
-					}{
+					Data: deferModel{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Path: []any{"deferSingle"},
@@ -235,14 +233,10 @@ fragment DeferFragment on DeferModel {
 		}
 	}
 }`,
-			expectedInitialResponse: response[struct {
-				DeferSingle deferModel
-			}]{
-				Data: struct {
-					DeferSingle deferModel
-				}{
+			expectedInitialResponse: response[deferSingleData]{
+				Data: deferSingleData{
 					DeferSingle: deferModel{
-						Id:     "1",
+						ID:     "1",
 						Name:   "Defer test 1",
 						Values: nil,
 					},
@@ -251,9 +245,7 @@ fragment DeferFragment on DeferModel {
 			},
 			expectedDeferredResponses: []deferredData{
 				{
-					Data: struct {
-						Values []string `json:"values"`
-					}{
+					Data: deferModel{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Label: "test label",
@@ -275,14 +267,10 @@ fragment DeferFragment on DeferModel {
 	values
 }
 `,
-			expectedInitialResponse: response[struct {
-				DeferSingle deferModel
-			}]{
-				Data: struct {
-					DeferSingle deferModel
-				}{
+			expectedInitialResponse: response[deferSingleData]{
+				Data: deferSingleData{
 					DeferSingle: deferModel{
-						Id:     "1",
+						ID:     "1",
 						Name:   "Defer test 1",
 						Values: nil,
 					},
@@ -291,9 +279,7 @@ fragment DeferFragment on DeferModel {
 			},
 			expectedDeferredResponses: []deferredData{
 				{
-					Data: struct {
-						Values []string `json:"values"`
-					}{
+					Data: deferModel{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Label: "test label",
@@ -312,14 +298,10 @@ fragment DeferFragment on DeferModel {
 		}
 	}
 }`,
-			expectedInitialResponse: response[struct {
-				DeferSingle deferModel
-			}]{
-				Data: struct {
-					DeferSingle deferModel
-				}{
+			expectedInitialResponse: response[deferSingleData]{
+				Data: deferSingleData{
 					DeferSingle: deferModel{
-						Id:     "1",
+						ID:     "1",
 						Name:   "Defer test 1",
 						Values: nil,
 					},
@@ -328,9 +310,7 @@ fragment DeferFragment on DeferModel {
 			},
 			expectedDeferredResponses: []deferredData{
 				{
-					Data: struct {
-						Values []string `json:"values"`
-					}{
+					Data: deferModel{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Label: "test label",
@@ -349,14 +329,10 @@ fragment DeferFragment on DeferModel {
 		}
 	}
 }`,
-			expectedInitialResponse: response[struct {
-				DeferSingle deferModel
-			}]{
-				Data: struct {
-					DeferSingle deferModel
-				}{
+			expectedInitialResponse: response[deferSingleData]{
+				Data: deferSingleData{
 					DeferSingle: deferModel{
-						Id:     "1",
+						ID:     "1",
 						Name:   "Defer test 1",
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
@@ -374,25 +350,21 @@ fragment DeferFragment on DeferModel {
 		}
 	}
 }`,
-			expectedInitialResponse: response[struct {
-				DeferMultiple []deferModel
-			}]{
-				Data: struct {
-					DeferMultiple []deferModel
-				}{
+			expectedInitialResponse: response[deferMultipleData]{
+				Data: deferMultipleData{
 					DeferMultiple: []deferModel{
 						{
-							Id:     "1",
+							ID:     "1",
 							Name:   "Defer test 1",
 							Values: nil,
 						},
 						{
-							Id:     "2",
+							ID:     "2",
 							Name:   "Defer test 2",
 							Values: nil,
 						},
 						{
-							Id:     "3",
+							ID:     "3",
 							Name:   "Defer test 3",
 							Values: nil,
 						},
@@ -402,32 +374,31 @@ fragment DeferFragment on DeferModel {
 			},
 			expectedDeferredResponses: []deferredData{
 				{
-					Data: struct {
-						Values []string `json:"values"`
-					}{
+					Data: deferModel{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Label: "test label",
 					Path:  []any{"deferMultiple", float64(0)},
 				},
 				{
-					Data: struct {
-						Values []string `json:"values"`
-					}{
+					Data: deferModel{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Label: "test label",
 					Path:  []any{"deferMultiple", float64(1)},
 				},
 				{
-					Data: struct {
-						Values []string `json:"values"`
-					}{
+					Data: deferModel{
 						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 					},
 					Label: "test label",
 					Path:  []any{"deferMultiple", float64(2)},
 				},
+			},
+			assertResponses: func(t *testing.T, tc *testCase, actual []deferredData) {
+				slices.SortFunc(actual, func(a, b deferredData) int {
+					return strings.Compare(pathStringer(a.Path), pathStringer(b.Path))
+				})
 			},
 		},
 		{
@@ -441,25 +412,21 @@ fragment DeferFragment on DeferModel {
 		}
 	}
 }`,
-			expectedInitialResponse: response[struct {
-				DeferMultiple []deferModel
-			}]{
-				Data: struct {
-					DeferMultiple []deferModel
-				}{
+			expectedInitialResponse: response[deferMultipleData]{
+				Data: deferMultipleData{
 					DeferMultiple: []deferModel{
 						{
-							Id:     "1",
+							ID:     "1",
 							Name:   "Defer test 1",
 							Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 						},
 						{
-							Id:     "2",
+							ID:     "2",
 							Name:   "Defer test 2",
 							Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 						},
 						{
-							Id:     "3",
+							ID:     "3",
 							Name:   "Defer test 3",
 							Values: []string{"test defer 1", "test defer 2", "test defer 3"},
 						},
@@ -467,95 +434,273 @@ fragment DeferFragment on DeferModel {
 				},
 			},
 		},
+		{
+			name: "defer overlapping selection sets, separate defer fragments",
+			query: `query testDefer {
+	deferSingle {
+		id
+		... @defer(label: "otherResolvedValueAndName") {
+			name
+			otherResolvedValue
+		}
+		... @defer(label: "otherResolvedValueAndValues") {
+			otherResolvedValue
+			values
+		}
 	}
+}`,
+			expectedInitialResponse: response[deferSingleData]{
+				Data: deferSingleData{
+					DeferSingle: deferModel{
+						ID:   "1",
+						Name: "Defer test 1",
+					},
+				},
+				HasNext: true,
+			},
+			expectedDeferredResponses: []deferredData{
+				{
+					Data: deferModel{
+						OtherResolvedValue: "otherResolvedValue",
+					},
+					Label:   "otherResolvedValueAndName",
+					Path:    []any{"deferSingle"},
+					HasNext: true,
+				},
+				{
+					Data: deferModel{
+						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
+					},
+					Label: "otherResolvedValueAndValues",
+					Path:  []any{"deferSingle"},
+				},
+			},
+		},
+		{
+			name: "defer overlapping selection sets, across concrete and interface type",
+			query: `query testDefer {
+	deferSingle {
+		id
+		... on DeferModel @defer(label: "otherResolvedValueAndName") {
+			name
+			otherResolvedValue
+		}
+		... on DeferModelInterface @defer(label: "otherResolvedValueAndValues") {
+			otherResolvedValue
+			values
+		}
+	}
+}`,
+			expectedInitialResponse: response[deferSingleData]{
+				Data: deferSingleData{
+					DeferSingle: deferModel{
+						ID:   "1",
+						Name: "Defer test 1",
+					},
+				},
+				HasNext: true,
+			},
+			expectedDeferredResponses: []deferredData{
+				{
+					Data: deferModel{
+						OtherResolvedValue: "otherResolvedValue",
+					},
+					Label:   "otherResolvedValueAndName",
+					Path:    []any{"deferSingle"},
+					HasNext: true,
+				},
+				{
+					Data: deferModel{
+						Values: []string{"test defer 1", "test defer 2", "test defer 3"},
+					},
+					Label: "otherResolvedValueAndValues",
+					Path:  []any{"deferSingle"},
+				},
+			},
+		},
+		{
+			name: "field selected in both defer and non-defer context is not deferred",
+			query: `query testDefer {
+	deferSingle {
+		id
+		values
+		... @defer {
+			otherResolvedValue
+			values
+		}
+	}
+}`,
+			expectedInitialResponse: response[deferSingleData]{
+				Data: deferSingleData{
+					DeferSingle: deferModel{
+						ID: "1",
+						Values: []string{
+							"test defer 1",
+							"test defer 2",
+							"test defer 3",
+						},
+					},
+				},
+				HasNext: true,
+			},
+			expectedDeferredResponses: []deferredData{
+				{
+					Data: deferModel{
+						OtherResolvedValue: "otherResolvedValue",
+					},
+					Path:    []any{"deferSingle"},
+					HasNext: false,
+				},
+			},
+		},
+		{
+			name: "nested deferred fragments work",
+			query: `query testDefer {
+	deferSingle {
+		id
+		...ParentFragment @defer(label: "parent")
+	}
+}
+
+fragment ParentFragment on DeferModel {
+	...ChildFragment @defer(label: "child")
+}
+
+fragment ChildFragment on DeferModel {
+	otherResolvedValue
+}
+`,
+			expectedInitialResponse: response[deferSingleData]{
+				Data: deferSingleData{
+					DeferSingle: deferModel{
+						ID: "1",
+					},
+				},
+				HasNext: true,
+			},
+			expectedDeferredResponses: []deferredData{
+				{
+					Data: deferModel{
+						OtherResolvedValue: "otherResolvedValue",
+					},
+					Label:   "child",
+					Path:    []any{"deferSingle"},
+					HasNext: true,
+				},
+				{
+					Data:    deferModel{},
+					Label:   "parent",
+					Path:    []any{"deferSingle"},
+					HasNext: false,
+				},
+			},
+		},
+	}
+
 	for _, tc := range cases {
 		t.Run(tc.name+"/over SSE", func(t *testing.T) {
-			resT := reflect.TypeOf(tc.expectedInitialResponse)
-			resE := reflect.New(resT).Elem()
-			resp := resE.Interface()
+			synctest.Test(t, func(t *testing.T) {
+				resT := reflect.TypeOf(tc.expectedInitialResponse)
+				resE := reflect.New(resT).Elem()
+				resp := resE.Interface()
 
-			read := c.SSE(context.Background(), tc.query)
-			require.NoError(t, read.Next(&resp))
-			assert.Equal(t, tc.expectedInitialResponse, resp)
+				read := c.SSE(context.Background(), tc.query)
+				synctest.Wait()
+				require.NoError(t, read.Next(&resp))
+				assert.Equal(
+					t,
+					tc.expectedInitialResponse,
+					resp,
+					"expected initial response to match",
+				)
 
-			// If there are no deferred responses, we can stop here.
-			if !resE.FieldByName("HasNext").Bool() && len(tc.expectedDeferredResponses) == 0 {
-				return
-			}
-
-			deferredResponses := make([]deferredData, 0)
-			for {
-				var valueResp deferredData
-				require.NoError(t, read.Next(&valueResp))
-
-				if !valueResp.HasNext {
-					deferredResponses = append(deferredResponses, valueResp)
-					break
+				// If there are no deferred responses, we can stop here.
+				if !resE.FieldByName("HasNext").Bool() && len(tc.expectedDeferredResponses) == 0 {
+					return
 				}
 
-				// Remove HasNext from comparison: we don't know the order they will be
-				// delivered in, and so this can't be known in the setup. But if HasNext
-				// does not work right we will either error out or get too few
-				// responses, so it's still checked.
-				valueResp.HasNext = false
-				deferredResponses = append(deferredResponses, valueResp)
-			}
-			require.NoError(t, read.Close())
+				deferredResponses := make([]deferredData, 0)
+				for {
+					var valueResp deferredData
+					synctest.Wait()
+					require.NoError(t, read.Next(&valueResp))
+					deferredResponses = append(deferredResponses, valueResp)
+					if !valueResp.HasNext {
+						break
+					}
+				}
+				require.NoError(t, read.Close(), "expected to close reader")
 
-			slices.SortFunc(deferredResponses, func(a, b deferredData) int {
-				return cmp.Compare(pathStringer(a.Path), pathStringer(b.Path))
+				if tc.assertResponses != nil {
+					tc.assertResponses(t, &tc, deferredResponses)
+				} else {
+					assert.Equal(
+						t,
+						tc.expectedDeferredResponses,
+						deferredResponses,
+						"expected deferred responses to match",
+					)
+				}
 			})
-			assert.Equal(t, tc.expectedDeferredResponses, deferredResponses)
 		})
 
 		t.Run(tc.name+"/over multipart HTTP", func(t *testing.T) {
-			resT := reflect.TypeOf(tc.expectedInitialResponse)
-			resE := reflect.New(resT).Elem()
-			resp := resE.Interface()
+			synctest.Test(t, func(t *testing.T) {
+				resT := reflect.TypeOf(tc.expectedInitialResponse)
+				resE := reflect.New(resT).Elem()
+				resp := resE.Interface()
 
-			read := c.IncrementalHTTP(context.Background(), tc.query)
-			require.NoError(t, read.Next(&resp))
-			assert.Equal(t, tc.expectedInitialResponse, resp)
+				read := c.IncrementalHTTP(context.Background(), tc.query)
 
-			// If there are no deferred responses, we can stop here.
-			if !reflect.ValueOf(resp).FieldByName("HasNext").Bool() &&
-				len(tc.expectedDeferredResponses) == 0 {
-				return
-			}
+				synctest.Wait()
+				require.NoError(t, read.Next(&resp))
+				assert.Equal(t, tc.expectedInitialResponse, resp)
 
-			deferredIncrementalData := make([]deferredData, 0)
-			for {
-				var valueResp incrementalDeferredResponse
-				require.NoError(t, read.Next(&valueResp))
-				assert.Empty(t, valueResp.Errors)
-				assert.Empty(t, valueResp.Extensions)
-
-				// Extract the incremental data from the response.
-				//
-				// FIXME: currently the HasNext field does not describe the state of the
-				// delivery as bounded by the associated path, but rather the state of
-				// the operation as a whole. This makes it impossible to determine it
-				// from the response, so we can not define it ahead of time.
-				//
-				// It is also questionable that the incremental data objects should
-				// include hasNext, so for now we remove them from assertion. Once we
-				// align on the spec we must update this test, as the status of the
-				// path-bounded delivery should be determinative and can be asserted.
-				for _, incr := range valueResp.Incremental {
-					incr.HasNext = false
-					deferredIncrementalData = append(deferredIncrementalData, incr)
+				// If there are no deferred responses, we can stop here.
+				if !reflect.ValueOf(resp).FieldByName("HasNext").Bool() &&
+					len(tc.expectedDeferredResponses) == 0 {
+					return
 				}
 
-				if !valueResp.HasNext {
-					break
-				}
-			}
-			require.NoError(t, read.Close())
+				deferredIncrementalData := make([]deferredData, 0)
+				for {
+					var valueResp incrementalDeferredResponse
+					synctest.Wait()
+					require.NoError(t, read.Next(&valueResp))
+					assert.Empty(t, valueResp.Errors)
+					assert.Empty(t, valueResp.Extensions)
 
-			slices.SortFunc(deferredIncrementalData, func(a, b deferredData) int {
-				return cmp.Compare(pathStringer(a.Path), pathStringer(b.Path))
+					// Extract the incremental data from the response.
+					//
+					// FIXME: currently the HasNext field does not describe the state of the
+					// delivery as bounded by the associated path, but rather the state of
+					// the operation as a whole. This makes it impossible to determine it
+					// from the response, so we can not define it ahead of time.
+					//
+					// It is also questionable that the incremental data objects should
+					// include hasNext, so for now we remove them from assertion. Once we
+					// align on the spec we must update this test, as the status of the
+					// path-bounded delivery should be determinative and can be asserted.
+					deferredIncrementalData = append(
+						deferredIncrementalData,
+						valueResp.Incremental...)
+
+					if !valueResp.HasNext {
+						break
+					}
+				}
+				require.NoError(t, read.Close())
+				if tc.assertResponses != nil {
+					tc.assertResponses(t, &tc, deferredIncrementalData)
+				} else {
+					assert.Equal(
+						t,
+						tc.expectedDeferredResponses,
+						deferredIncrementalData,
+						"expected deferred responses to match",
+					)
+				}
 			})
-			assert.Equal(t, tc.expectedDeferredResponses, deferredIncrementalData)
 		})
 	}
 }

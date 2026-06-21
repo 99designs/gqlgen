@@ -344,10 +344,12 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 // User returns UserResolver implementation.
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
-type catResolver struct{ *Resolver }
-type dogResolver struct{ *Resolver }
-type domesticCatResolver struct{ *Resolver }
-type pigResolver struct{ *Resolver }
-type profileResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
-type userResolver struct{ *Resolver }
+type (
+	catResolver         struct{ *Resolver }
+	dogResolver         struct{ *Resolver }
+	domesticCatResolver struct{ *Resolver }
+	pigResolver         struct{ *Resolver }
+	profileResolver     struct{ *Resolver }
+	queryResolver       struct{ *Resolver }
+	userResolver        struct{ *Resolver }
+)

@@ -56,5 +56,7 @@ func (r *Resolver) Invoice() InvoiceResolver { return &invoiceResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
-type invoiceResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
+type (
+	invoiceResolver struct{ *Resolver }
+	queryResolver   struct{ *Resolver }
+)

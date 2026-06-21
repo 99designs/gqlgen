@@ -664,19 +664,21 @@ func (r *Resolver) WrappedMap() WrappedMapResolver { return &wrappedMapResolver{
 // WrappedSlice returns WrappedSliceResolver implementation.
 func (r *Resolver) WrappedSlice() WrappedSliceResolver { return &wrappedSliceResolver{r} }
 
-type backedByInterfaceResolver struct{ *Resolver }
-type deferModelResolver struct{ *Resolver }
-type errorsResolver struct{ *Resolver }
-type forcedResolverResolver struct{ *Resolver }
-type modelMethodsResolver struct{ *Resolver }
-type mutationResolver struct{ *Resolver }
-type overlappingFieldsResolver struct{ *Resolver }
-type panicsResolver struct{ *Resolver }
-type petResolver struct{ *Resolver }
-type primitiveResolver struct{ *Resolver }
-type primitiveStringResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
-type subscriptionResolver struct{ *Resolver }
-type userResolver struct{ *Resolver }
-type wrappedMapResolver struct{ *Resolver }
-type wrappedSliceResolver struct{ *Resolver }
+type (
+	backedByInterfaceResolver struct{ *Resolver }
+	deferModelResolver        struct{ *Resolver }
+	errorsResolver            struct{ *Resolver }
+	forcedResolverResolver    struct{ *Resolver }
+	modelMethodsResolver      struct{ *Resolver }
+	mutationResolver          struct{ *Resolver }
+	overlappingFieldsResolver struct{ *Resolver }
+	panicsResolver            struct{ *Resolver }
+	petResolver               struct{ *Resolver }
+	primitiveResolver         struct{ *Resolver }
+	primitiveStringResolver   struct{ *Resolver }
+	queryResolver             struct{ *Resolver }
+	subscriptionResolver      struct{ *Resolver }
+	userResolver              struct{ *Resolver }
+	wrappedMapResolver        struct{ *Resolver }
+	wrappedSliceResolver      struct{ *Resolver }
+)

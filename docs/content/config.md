@@ -236,7 +236,13 @@ directive @goExtraField(
 ) repeatable on OBJECT | INPUT_OBJECT
 
 directive @inlineArguments on ARGUMENT_DEFINITION
+
+directive @subscriptionContext on FIELD_DEFINITION
 ```
+
+`@subscriptionContext` opts a single subscription field into per-event context
+propagation. See [Per-event context for subscriptions](/reference/subscription-context/)
+for details.
 
 > Here be dragons
 >

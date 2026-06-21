@@ -1,0 +1,10 @@
+directive @subscriptionContext on FIELD_DEFINITION
+
+type Query {
+  noop: Boolean
+}
+
+type Subscription {
+  marked: String! @subscriptionContext
+  unmarked: String!
+}

@@ -1,0 +1,14 @@
+schema:
+  - "*.graphql"
+skip_validation: true
+exec:
+  filename: generated.go
+  package: subscriptionwithcontext
+model:
+  filename: models-gen.go
+  package: subscriptionwithcontext
+resolver:
+  filename: resolver.go
+  package: subscriptionwithcontext
+  type: Resolver
+omit_complexity: true

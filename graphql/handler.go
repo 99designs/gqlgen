@@ -19,6 +19,17 @@ type (
 	ResponseHandler    func(ctx context.Context) *Response
 	ResponseMiddleware func(ctx context.Context, next ResponseHandler) *Response
 
+	// ResponseHandlerWithContext is the per-iteration response handler returned by
+	// [ExecutableSchemaWithEventContext.ExecWithEventContext]. Each call yields one
+	// response and the context under which subsequent middleware — notably
+	// AroundResponses — should run for that response.
+	//
+	// For queries and mutations the returned context is the operation context
+	// unchanged. For subscriptions whose fields are marked with
+	// @subscriptionContext, it is the per-event context attached by the resolver
+	// via [Event].
+	ResponseHandlerWithContext func(ctx context.Context) (context.Context, *Response)
+
 	Resolver        func(ctx context.Context) (res any, err error)
 	FieldMiddleware func(ctx context.Context, next Resolver) (res any, err error)
 

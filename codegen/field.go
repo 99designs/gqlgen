@@ -562,6 +562,23 @@ func (f *Field) HasDirectives() bool {
 	return len(f.ImplDirectives()) > 0
 }
 
+// UsesSubscriptionContext reports whether this field is on the Subscription
+// root type and is annotated with @subscriptionContext. Codegen uses this to
+// emit a resolver returning <-chan graphql.Event[T] instead of <-chan T, and
+// to thread per-event context into the AroundResponses interceptor chain.
+// Returns false for non-subscription fields even if they carry the directive.
+func (f *Field) UsesSubscriptionContext() bool {
+	if !f.Object.Stream {
+		return false
+	}
+	for _, d := range f.FieldDefinition.Directives {
+		if d.Name == config.DirSubscriptionContext {
+			return true
+		}
+	}
+	return false
+}
+
 func (f *Field) DirectiveObjName() string {
 	if f.Object.Root {
 		return "nil"
@@ -834,7 +851,12 @@ func (f *Field) ShortResolverSignature(ft *goast.FuncType) string {
 
 	result := templates.CurrentImports.LookupType(f.TypeReference.GO)
 	if f.Object.Stream {
-		result = "<-chan " + result
+		if f.UsesSubscriptionContext() {
+			gqlPkg := templates.CurrentImports.Lookup("github.com/99designs/gqlgen/graphql")
+			result = fmt.Sprintf("<-chan %s.Event[%s]", gqlPkg, result)
+		} else {
+			result = "<-chan " + result
+		}
 	}
 	// Named return.
 	var namedV, namedE string

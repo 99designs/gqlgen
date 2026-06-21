@@ -79,6 +79,61 @@ func ResolveFieldStream[T any](
 	)
 }
 
+// ResolveFieldStreamWithEventContext is the streaming-field resolver used for
+// subscription fields marked with @subscriptionContext. Like
+// [ResolveFieldStream] it returns a function that yields one marshaler per
+// channel receive, but the channel element type is [Event][T] rather than T,
+// and the returned function emits both the per-event context (from
+// [Event].Context) and the marshaler. When [Event].Context is nil the input
+// context is passed through unchanged.
+func ResolveFieldStreamWithEventContext[T any](
+	ctx context.Context,
+	oc *OperationContext,
+	field CollectedField,
+	initializeFieldContext func(ctx context.Context, field CollectedField) (*FieldContext, error),
+	fieldResolver func(context.Context) (any, error),
+	middlewareChain func(ctx context.Context, next Resolver) Resolver,
+	marshal func(ctx context.Context, sel ast.SelectionSet, v T) Marshaler,
+	recoverFromPanic bool,
+	nonNull bool,
+) func(context.Context) (context.Context, Marshaler) {
+	return resolveField(
+		ctx,
+		oc,
+		field,
+		initializeFieldContext,
+		fieldResolver,
+		middlewareChain,
+		recoverFromPanic,
+		nonNull,
+		nil,
+		nil,
+		func(ctx context.Context, res <-chan Event[T]) func(context.Context) (context.Context, Marshaler) {
+			return func(ctx context.Context) (context.Context, Marshaler) {
+				select {
+				case ev, ok := <-res:
+					if !ok {
+						return ctx, nil
+					}
+					eventCtx := ev.Context
+					if eventCtx == nil {
+						eventCtx = ctx
+					}
+					return eventCtx, WriterFunc(func(w io.Writer) {
+						w.Write([]byte{'{'})
+						MarshalString(field.Alias).MarshalGQL(w)
+						w.Write([]byte{':'})
+						marshal(ctx, field.Selections, ev.Value).MarshalGQL(w)
+						w.Write([]byte{'}'})
+					})
+				case <-ctx.Done():
+					return ctx, nil
+				}
+			}
+		},
+	)
+}
+
 func resolveField[T, R any](
 	ctx context.Context,
 	oc *OperationContext,

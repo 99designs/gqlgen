@@ -3,11 +3,11 @@ module github.com/gqlgen/_examples/mini-habr-with-subscriptions
 go 1.25.0
 
 require (
-	github.com/99designs/gqlgen v0.17.89
+	github.com/99designs/gqlgen v0.17.92
 	github.com/coder/websocket v1.8.15
 	github.com/go-redis/cache/v9 v9.0.0
 	github.com/google/uuid v1.6.0
-	github.com/jackc/pgx/v5 v5.9.2
+	github.com/jackc/pgx/v5 v5.10.0
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/joho/godotenv v1.5.1
 	github.com/redis/go-redis/v9 v9.19.0

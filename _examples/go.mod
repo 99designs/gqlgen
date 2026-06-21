@@ -33,5 +33,3 @@ require (
 	golang.org/x/tools v0.46.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/gorilla/websocket => github.com/gorilla/websocket v1.5.0

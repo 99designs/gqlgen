@@ -80,10 +80,9 @@ the Go channel returned by the resolver. The initial handshake and the structure
 payloads are defined by one of two protocols: `graphql-ws` or `graphql-transport-ws`. Which
 one is used is negotiated by the client, defaulting to [`graphql-ws`][graphql-ws].
 
-For backwards compatibility, gqlgen still uses [`github.com/gorilla/websocket`][gorilla] by
-default. Gorilla is no longer maintained, so the Gorilla-backed default and `Upgrader`
-field are deprecated. Gorilla users should migrate to other maintained implementations
-such as github.com/coder/websocket.
+By default, gqlgen uses [`github.com/coder/websocket`][coder-websocket] to upgrade
+the HTTP connection. Use the `Implementation` field to plug in a different
+adapter or to configure accept options such as allowed origins and subprotocols:
 
 ```go
 import (
@@ -98,7 +97,7 @@ srv.AddTransport(transport.Websocket{
 	Implementation: transport.CoderWebsocketImplementation{
 		AcceptOptions: coderws.AcceptOptions{
 			OriginPatterns: []string{"https://ui.mysite.com"},
-			Subprotocols:  []string{"graphql-transport-ws", "graphql-ws"},
+			Subprotocols:   []string{"graphql-transport-ws", "graphql-ws"},
 		},
 	},
 })
@@ -120,22 +119,11 @@ srv.AddTransport(transport.Websocket{
 	// long since walked to the kitchen to make a sandwich instead.
 	KeepAlivePingInterval: 10 * time.Second,
 
-	// The Gorilla-specific Upgrader field remains supported for backwards
-	// compatibility. New applications should prefer Implementation with an
-	// adapter for their chosen websocket implementation.
-	//
 	// Among other options, you must check the origin of the request to prevent
 	// cross-site request forgery attacks.
-	Upgrader: websocket.Upgrader{
-		CheckOrigin: func(r *http.Request) bool {
-				// Allow exact match on host.
-				origin := r.Header.Get("Origin")
-				if origin == "" || origin == r.Header.Get("Host") {
-					return true
-				}
-
-				// Match on allow-listed origins.
-				return slices.Contains([]string{":3000", "https://ui.mysite.com"}, origin)
+	Implementation: transport.CoderWebsocketImplementation{
+		AcceptOptions: coderws.AcceptOptions{
+			OriginPatterns: []string{"localhost:3000", "ui.mysite.com"},
 		},
 	},
 })
@@ -165,12 +153,11 @@ srv.AddTransport(transport.Websocket{
 })
 ```
 
-When a client sends a message that exceeds the limit, the default Gorilla-backed adapter closes
+When a client sends a message that exceeds the limit, the default Coder-backed adapter closes
 the connection immediately without processing the payload. Custom websocket adapters should
 implement `transport.WebsocketReadLimiter` to preserve this behavior.
 
 [code]: https://github.com/99designs/gqlgen/blob/master/graphql/handler/transport/websocket.go
-[gorilla]: https://pkg.go.dev/github.com/gorilla/websocket
 [coder-websocket]: https://pkg.go.dev/github.com/coder/websocket
 [graphql-ws]: https://github.com/enisdenjo/graphql-ws/blob/master/PROTOCOL.md
 
@@ -344,10 +331,9 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"slices"
 	"time"
 
-	"github.com/gorilla/websocket"
+	coderws "github.com/coder/websocket"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
@@ -371,13 +357,9 @@ func main() {
 	srv.AddTransport(transport.SSE{})
 	srv.AddTransport(transport.Websocket{
 		KeepAlivePingInterval: 10 * time.Second,
-		Upgrader: websocket.Upgrader{
-			CheckOrigin: func(r *http.Request) bool {
-					origin := r.Header.Get("Origin")
-					if origin == "" || origin == r.Header.Get("Host") {
-						return true
-					}
-					return slices.Contains([]string{":3000", "https://ui.mysite.com"}, origin)
+		Implementation: transport.CoderWebsocketImplementation{
+			AcceptOptions: coderws.AcceptOptions{
+				OriginPatterns: []string{"localhost:3000", "ui.mysite.com"},
 			},
 		},
 	})

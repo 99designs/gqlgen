@@ -103,6 +103,26 @@ func (m *Plugin) Name() string {
 	return "modelgen"
 }
 
+// schemaTypesSorted returns schema.Types in a deterministic, name-sorted order.
+// Ranging over the map directly is iteration-order dependent, which makes
+// conflict-resolved Go model names unstable between runs: GraphQL types such as
+// FooBar and Foo_Bar both map to the Go name "FooBar", and whichever is visited
+// first keeps the unsuffixed name while the other becomes "FooBar0" (see
+// goModelName in codegen/templates).
+func schemaTypesSorted(schema *ast.Schema) []*ast.Definition {
+	names := make([]string, 0, len(schema.Types))
+	for name := range schema.Types {
+		names = append(names, name)
+	}
+	sort.Strings(names)
+
+	sorted := make([]*ast.Definition, 0, len(names))
+	for _, name := range names {
+		sorted = append(sorted, schema.Types[name])
+	}
+	return sorted
+}
+
 func (m *Plugin) MutateConfig(cfg *config.Config) error {
 	b := &ModelBuild{
 		PackageName: cfg.Model.Package,
@@ -129,7 +149,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		}
 	}
 
-	for _, schemaType := range cfg.Schema.Types {
+	for _, schemaType := range schemaTypesSorted(cfg.Schema) {
 		userDefined := cfg.Models.UserDefined(schemaType.Name)
 		switch schemaType.Kind {
 		case ast.Interface, ast.Union:
@@ -143,7 +163,7 @@ func (m *Plugin) MutateConfig(cfg *config.Config) error {
 		}
 	}
 
-	for _, schemaType := range cfg.Schema.Types {
+	for _, schemaType := range schemaTypesSorted(cfg.Schema) {
 		if cfg.Models.UserDefined(schemaType.Name) {
 			continue
 		}

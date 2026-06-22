@@ -327,16 +327,12 @@ func TestModelGenerationConflictingTypes(t *testing.T) {
 	generated, err := os.ReadFile("./out_conflicting_types/generated.go")
 	require.NoError(t, err)
 
-	// Depending on the order of the fields in the schema, the generated code will be different
-	withoutUnderscore := "FooBar0"
-	withUnderscore := "FooBar"
-	if strings.Contains(string(generated), `type FooBar struct {
-	WithoutUnderscore *bool`) {
-		withoutUnderscore = "FooBar"
-		withUnderscore = "FooBar0"
-	}
-	require.Contains(t, string(generated), "WantWithoutUnderscore *"+withoutUnderscore+" ")
-	require.Contains(t, string(generated), "WantWithUnderscore *"+withUnderscore+" ")
+	// Schema types are visited in sorted order, so the conflict between GraphQL
+	// FooBar and Foo_Bar (which both map to the Go name "FooBar") resolves
+	// deterministically: FooBar keeps the unsuffixed name and Foo_Bar becomes
+	// FooBar0.
+	require.Contains(t, string(generated), "WantWithoutUnderscore *FooBar ")
+	require.Contains(t, string(generated), "WantWithUnderscore *FooBar0 ")
 }
 
 func TestModelGenerationOmitRootModels(t *testing.T) {

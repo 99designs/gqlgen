@@ -107,24 +107,10 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			return &response
 		}
 	case ast.Subscription:
-		next := ec._Subscription(ctx, opCtx.Operation.SelectionSet)
-		var buf bytes.Buffer
-		return func(ctx context.Context) *graphql.Response {
-			buf.Reset()
-			// Exec discards the per-event ctx; the event-aware path is
-			// exposed via ExecWithEventContext and consumed by the executor
-			// when it detects ExecutableSchemaWithEventContext.
-			_, data := next(ctx)
-
-			if data == nil {
-				return nil
-			}
-			data.MarshalGQL(&buf)
-
-			return &graphql.Response{
-				Data: buf.Bytes(),
-			}
-		}
+		// Exec discards the per-event context; the event-aware path is exposed
+		// via ExecWithEventContext and used by the executor when it detects
+		// ExecutableSchemaWithEventContext.
+		return graphql.SubscriptionResponseHandler(ec._Subscription(ctx, opCtx.Operation.SelectionSet))
 
 	default:
 		return graphql.OneShot(graphql.ErrorResponse(ctx, "unsupported GraphQL operation"))
@@ -138,25 +124,10 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 func (e *executableSchema) ExecWithEventContext(ctx context.Context) graphql.ResponseHandlerWithContext {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap()
-	_ = inputUnmarshalMap
 
 	switch opCtx.Operation.Operation {
 	case ast.Subscription:
-		next := ec._Subscription(ctx, opCtx.Operation.SelectionSet)
-
-		var buf bytes.Buffer
-		return func(ctx context.Context) (context.Context, *graphql.Response) {
-			buf.Reset()
-			eventCtx, data := next(ctx)
-			if data == nil {
-				return ctx, nil
-			}
-			data.MarshalGQL(&buf)
-			return eventCtx, &graphql.Response{
-				Data: buf.Bytes(),
-			}
-		}
+		return graphql.SubscriptionEventResponseHandler(ec._Subscription(ctx, opCtx.Operation.SelectionSet))
 	default:
 		// Non-subscription operations fall through to Exec via the executor's
 		// default path; this method only handles ast.Subscription.
@@ -1700,13 +1671,7 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 	case "marked":
 		return ec._Subscription_marked(ctx, fields[0])
 	case "unmarked":
-		// Unmarked field on a subscription type that also has @subscriptionContext
-		// fields: adapt the plain handler to the event-context shape by passing
-		// through the input ctx.
-		plain := ec._Subscription_unmarked(ctx, fields[0])
-		return func(ctx context.Context) (context.Context, graphql.Marshaler) {
-			return ctx, plain(ctx)
-		}
+		return graphql.StreamWithoutEventContext(ec._Subscription_unmarked(ctx, fields[0]))
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}

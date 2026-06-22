@@ -305,6 +305,41 @@ type ResolverBuild struct {
 	OmitTemplateComment bool
 }
 
+// ResolverTypeDeclarations renders the unexported per-object resolver
+// implementation types — e.g. "queryResolver struct{ *Resolver }".
+//
+// When more than one type is declared they are emitted as a single grouped
+// "type ( ... )" block: gofumpt requires adjacent single-line type
+// declarations to be grouped, so producing the group (already column-aligned)
+// here keeps the generated file gofumpt-compliant without relying on a
+// gofmt/gofumpt pass over the codegen output. A lone type is emitted as a
+// single declaration, and the empty string is returned when there are no
+// resolver objects.
+func (b *ResolverBuild) ResolverTypeDeclarations() string {
+	if len(b.Objects) == 0 {
+		return ""
+	}
+
+	names := make([]string, len(b.Objects))
+	width := 0
+	for i, o := range b.Objects {
+		names[i] = templates.LcFirst(o.Name) + templates.UcFirst(b.ResolverType)
+		width = max(width, len(names[i]))
+	}
+
+	if len(names) == 1 {
+		return fmt.Sprintf("type %s struct{ *%s }", names[0], b.ResolverType)
+	}
+
+	var sb strings.Builder
+	sb.WriteString("type (\n")
+	for _, name := range names {
+		fmt.Fprintf(&sb, "\t%-*s struct{ *%s }\n", width, name, b.ResolverType)
+	}
+	sb.WriteString(")")
+	return sb.String()
+}
+
 type File struct {
 	name string
 	// These are separated because the type definition of the resolver object may live in a

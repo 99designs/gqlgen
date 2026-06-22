@@ -16,6 +16,48 @@ import (
 	"github.com/99designs/gqlgen/internal/code"
 )
 
+func TestField_StreamResolverShape(t *testing.T) {
+	newField := func(stream, marked bool) *Field {
+		var directives ast2.DirectiveList
+		if marked {
+			directives = ast2.DirectiveList{{Name: config.DirSubscriptionContext}}
+		}
+		return &Field{
+			FieldDefinition: &ast2.FieldDefinition{Directives: directives},
+			Object:          &Object{Stream: stream},
+		}
+	}
+
+	tests := map[string]struct {
+		field          *Field
+		wantReturnType string
+		wantResolveFn  string
+	}{
+		"non-stream field": {
+			field:          newField(false, false),
+			wantReturnType: "graphql.Marshaler",
+			wantResolveFn:  "ResolveField",
+		},
+		"stream field without @subscriptionContext": {
+			field:          newField(true, false),
+			wantReturnType: "func(ctx context.Context) graphql.Marshaler",
+			wantResolveFn:  "ResolveFieldStream",
+		},
+		"stream field with @subscriptionContext": {
+			field:          newField(true, true),
+			wantReturnType: "func(ctx context.Context) (context.Context, graphql.Marshaler)",
+			wantResolveFn:  "ResolveFieldStreamWithEventContext",
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			require.Equal(t, tt.wantReturnType, tt.field.MarshalerReturnType())
+			require.Equal(t, tt.wantResolveFn, tt.field.ResolveFieldFunc())
+		})
+	}
+}
+
 func TestFindField(t *testing.T) {
 	input := `
 package test

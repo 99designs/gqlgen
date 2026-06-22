@@ -21,13 +21,7 @@ func {{$.FuncReceiver}}_{{$object.Name}}(ctx context.Context, {{$.ECFuncParam}}s
 		{{- if $field.UsesSubscriptionContext }}
 		return {{$.ECDot}}_{{$object.Name}}_{{$field.Name}}(ctx, {{$.ECArg}}fields[0])
 		{{- else }}
-		// Unmarked field on a subscription type that also has @subscriptionContext
-		// fields: adapt the plain handler to the event-context shape by passing
-		// through the input ctx.
-		plain := {{$.ECDot}}_{{$object.Name}}_{{$field.Name}}(ctx, {{$.ECArg}}fields[0])
-		return func(ctx context.Context) (context.Context, graphql.Marshaler) {
-			return ctx, plain(ctx)
-		}
+		return graphql.StreamWithoutEventContext({{$.ECDot}}_{{$object.Name}}_{{$field.Name}}(ctx, {{$.ECArg}}fields[0]))
 		{{- end }}
 	{{- end }}
 	default:

@@ -45,17 +45,7 @@
 	func (r *{{$.ResolverType}}) {{ucFirst $object.Name}}() {{ $object.ResolverInterface | ref }} { return &{{lcFirst $object.Name}}{{ucFirst $.ResolverType}}{r} }
 {{ end }}
 
-{{ if gt (len .Objects) 1 -}}
-	type (
-	{{ range $object := .Objects -}}
-		{{lcFirst $object.Name}}{{ucFirst $.ResolverType}} struct { *{{$.ResolverType}} }
-	{{ end -}}
-	)
-{{ else -}}
-	{{ range $object := .Objects -}}
-		type {{lcFirst $object.Name}}{{ucFirst $.ResolverType}} struct { *{{$.ResolverType}} }
-	{{ end -}}
-{{ end }}
+{{ .ResolverTypeDeclarations }}
 
 {{ if (ne .RemainingSource "") }}
     // !!! WARNING !!!

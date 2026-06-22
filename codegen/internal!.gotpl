@@ -122,24 +122,10 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 
 	{{- if .SubscriptionRoot }} case ast.Subscription:
 		{{- if .SubscriptionRoot.HasSubscriptionContextField }}
-		next := {{$.ECDot}}_{{.SubscriptionRoot.Name}}(ctx, {{$.ECArg}}opCtx.Operation.SelectionSet)
-		var buf bytes.Buffer
-		return func(ctx context.Context) *graphql.Response {
-			buf.Reset()
-			// Exec discards the per-event ctx; the event-aware path is
-			// exposed via ExecWithEventContext and consumed by the executor
-			// when it detects ExecutableSchemaWithEventContext.
-			_, data := next(ctx)
-
-			if data == nil {
-				return nil
-			}
-			data.MarshalGQL(&buf)
-
-			return &graphql.Response{
-				Data:       buf.Bytes(),
-			}
-		}
+		// Exec discards the per-event context; the event-aware path is exposed
+		// via ExecWithEventContext and used by the executor when it detects
+		// ExecutableSchemaWithEventContext.
+		return graphql.SubscriptionResponseHandler({{$.ECDot}}_{{.SubscriptionRoot.Name}}(ctx, {{$.ECArg}}opCtx.Operation.SelectionSet))
 		{{- else }}
 		{{ if .AllDirectives.LocationDirectives "SUBSCRIPTION" -}}
 			next := {{$.ECDot}}_subscriptionMiddleware(ctx, {{$.ECArg}}opCtx.Operation, func(ctx context.Context) (any, error){
@@ -179,31 +165,10 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 func (e *executableSchema) ExecWithEventContext(ctx context.Context) graphql.ResponseHandlerWithContext {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		{{- range $input := .Inputs -}}
-			{{ if not $input.HasUnmarshal }}
-				{{$.ECDot}}unmarshalInput{{ $input.Name }},
-			{{- end }}
-		{{- end }}
-	)
-	_ = inputUnmarshalMap
 
 	switch opCtx.Operation.Operation {
 	case ast.Subscription:
-		next := {{$.ECDot}}_{{.SubscriptionRoot.Name}}(ctx, {{$.ECArg}}opCtx.Operation.SelectionSet)
-
-		var buf bytes.Buffer
-		return func(ctx context.Context) (context.Context, *graphql.Response) {
-			buf.Reset()
-			eventCtx, data := next(ctx)
-			if data == nil {
-				return ctx, nil
-			}
-			data.MarshalGQL(&buf)
-			return eventCtx, &graphql.Response{
-				Data: buf.Bytes(),
-			}
-		}
+		return graphql.SubscriptionEventResponseHandler({{$.ECDot}}_{{.SubscriptionRoot.Name}}(ctx, {{$.ECArg}}opCtx.Operation.SelectionSet))
 	default:
 		// Non-subscription operations fall through to Exec via the executor's
 		// default path; this method only handles ast.Subscription.

@@ -72,9 +72,14 @@ func TestCoderWebsocketImplementationEnforcesReadDeadline(t *testing.T) {
 	closeFuncCalled := make(chan bool, 1)
 	h := testserver.New()
 	h.AddTransport(transport.Websocket{
-		Implementation:   transport.CoderWebsocketImplementation{},
-		MissingPongOk:    false,
-		PingPongInterval: 5 * time.Millisecond,
+		Implementation: transport.CoderWebsocketImplementation{},
+		MissingPongOk:  false,
+		// The server pings every PingPongInterval and closes the connection at
+		// 2*PingPongInterval when no pong arrives. Keep the interval well above OS
+		// timer granularity/jitter (notably ~10-15ms on Windows) so the client
+		// reliably reads the ping below before the deadline-close races ahead and
+		// the read returns EOF. See the read-deadline logic in websocket.go.
+		PingPongInterval: 100 * time.Millisecond,
 		CloseFunc: func(_ context.Context, _ int) {
 			closeFuncCalled <- true
 		},
@@ -94,7 +99,7 @@ func TestCoderWebsocketImplementationEnforcesReadDeadline(t *testing.T) {
 	select {
 	case res := <-closeFuncCalled:
 		assert.True(t, res)
-	case <-time.NewTimer(30 * time.Millisecond).C:
+	case <-time.NewTimer(time.Second).C:
 		assert.Fail(t, "The close handler was not called in time")
 	}
 }

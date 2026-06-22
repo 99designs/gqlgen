@@ -22,6 +22,14 @@ Bug fixes are welcome and should come with appropriate test coverage.
 
 New features should be made against the `next` branch.
 
+### Coding Guidelines
+
+Before opening a pull request, please read [RULES.md](./RULES.md). It describes the coding
+practices we expect — error handling, context discipline, concurrency, testing, and how to
+work with generated code and the `_examples` module. If you use an AI coding assistant, point
+it at that file; PRs are reviewed against those standards regardless of how the code was
+produced. Attribute contributions to the people who directed the work, not to the tool — do not add AI-tool `Co-authored-by:` lines or "Generated with …" trailers to commits or PRs.
+
 ### License
 
 By contributing to gqlgen, you agree that your contributions will be licensed under its MIT license.

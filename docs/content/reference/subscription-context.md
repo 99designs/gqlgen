@@ -21,7 +21,7 @@ func (r *subscriptionResolver) MessageAdded(ctx context.Context, room string) (<
 
 `@subscriptionContext` is an opt-in schema directive that changes this for one field at a time. When a subscription field is annotated, the resolver returns `<-chan graphql.Event[T]` instead of `<-chan T`, and each `Event` carries its own context. The graphql executor threads that context into the `ctx` parameter that `AroundResponses` interceptors already receive — no new field on `graphql.Response`, no new interceptor signature.
 
-## Opting in
+## Per-field opt-in
 
 Add the directive to your schema and to the schema's directive declarations:
 
@@ -44,6 +44,42 @@ type SubscriptionResolver interface {
     PresenceChanged(ctx context.Context) (<-chan *Presence, error)
 }
 ```
+
+## Global opt-in
+
+To opt every subscription field into the same behavior without annotating each
+field, set `subscription_context_field: true` in `gqlgen.yml`:
+
+```yaml
+subscription_context_field: true
+```
+
+This is a project-wide shortcut over the same implementation used by
+`@subscriptionContext`. It does not introduce a second runtime API: generated
+subscription resolvers still return `<-chan graphql.Event[T]`, and the event
+context still flows through the `ctx` parameter received by `AroundResponses`
+interceptors.
+
+For example, with `subscription_context_field: true`, both fields below use
+the event-context-aware resolver shape, even without field annotations:
+
+```graphql
+type Subscription {
+  messageAdded(room: String!): Message!
+  presenceChanged: Presence!
+}
+```
+
+```go
+type SubscriptionResolver interface {
+    MessageAdded(ctx context.Context, room string) (<-chan graphql.Event[*Message], error)
+    PresenceChanged(ctx context.Context) (<-chan graphql.Event[*Presence], error)
+}
+```
+
+Use the directive when only some subscription fields need per-event context.
+Use the global config when all subscriptions in the schema should expose the
+same capability.
 
 ## Publishing events with context
 
@@ -95,7 +131,7 @@ srv.AroundResponses(func(ctx context.Context, next graphql.ResponseHandler) *gra
 })
 ```
 
-There is no `Response.Context` field to read. The per-event context flows through `ctx` — the parameter the interceptor already has.
+The per-event context flows through `ctx` — the parameter the interceptor already has.
 
 ## Resolution-time context contract
 
@@ -105,17 +141,16 @@ When a subscription field is marked, the resolver runs **before** the `AroundRes
 - Interceptor enrichment **does not** influence the field-resolver work for the current event (the work has already happened by the time the interceptor sees the response). Enrichment intended for resolvers belongs on `AroundFields` or `AroundRootFields`.
 - For unmarked subscriptions and for queries/mutations, the existing order is preserved: middleware wraps resolver work, so `next(ctx2)` does affect resolver context.
 
-## Default vs marked: comparison
+## Default vs enabled: comparison
 
-|                                        | Default `<-chan T`             | Marked `<-chan graphql.Event[T]`            |
-| -------------------------------------- | ------------------------------ | ------------------------------------------- |
-| Resolver return type                   | `<-chan T`                     | `<-chan graphql.Event[T]`                   |
-| AroundResponses ctx                    | Subscription request ctx       | Per-event ctx attached by the resolver      |
-| `graphql.Response.Context`             | absent                         | absent                                      |
-| Schema opt-in                          | none                           | `@subscriptionContext` on the field         |
-| Project-wide config                    | none                           | none                                        |
-| Generated code for unmarked fields     | byte-identical                 | byte-identical                              |
-| Per-event tracing / metadata           | not available                  | available                                   |
+|                                        | Default `<-chan T`             | Per-field `@subscriptionContext`            | Global `subscription_context_field: true` |
+| -------------------------------------- | ------------------------------ | ------------------------------------------- | ----------------------------------------- |
+| Resolver return type                   | `<-chan T`                     | `<-chan graphql.Event[T]`                   | `<-chan graphql.Event[T]` for every subscription |
+| AroundResponses ctx                    | Subscription request ctx       | Per-event ctx attached by the resolver      | Per-event ctx attached by the resolver |
+| Schema opt-in                          | none                           | `@subscriptionContext` on each field        | none required |
+| Project-wide config                    | none                           | none                                        | `subscription_context_field: true` |
+| Generated code for unmarked fields     | byte-identical                 | byte-identical                              | all subscription fields use the event-aware shape |
+| Per-event tracing / metadata           | not available                  | available for marked fields                 | available for all subscription fields |
 
 ## Known limitations
 

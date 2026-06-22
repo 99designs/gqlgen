@@ -360,6 +360,11 @@
       "type": "boolean",
       "default": false
     },
+    "subscription_context_field": {
+      "description": "Enable subscription context propagation for every subscription field. When enabled, subscription resolvers return (<-chan graphql.Event[T], error) instead of (<-chan T, error), matching the behavior of @subscriptionContext without annotating each field.",
+      "type": "boolean",
+      "default": false
+    },
     "go_build_tags": {
       "description": "Set build tags that will be used to load packages",
       "type": "array",

@@ -140,7 +140,8 @@ func (o *Object) HasDirectives() bool {
 }
 
 // HasSubscriptionContextField reports whether this object is a streaming
-// (subscription) root with at least one field annotated @subscriptionContext.
+// (subscription) root with at least one field annotated @subscriptionContext,
+// or the global subscription_context_field option is enabled.
 // Codegen uses this to decide whether to emit the event-context-aware
 // dispatcher and the optional ExecWithEventContext method on the
 // generated executableSchema. Returns false for non-streaming objects.

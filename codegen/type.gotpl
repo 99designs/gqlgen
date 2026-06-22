@@ -87,13 +87,16 @@
 	{{- end }}
 
 	{{ with $type.MarshalFunc }}
-		func {{$.FuncReceiver}}{{ . }}(ctx context.Context, {{$.ECFuncParam}}sel ast.SelectionSet, v {{ $type.GO | ref }}) graphql.Marshaler {
+		{{- /* eventCtx: the Subscription root marshaler returns a per-event context tuple when the
+		   subscription_context_field option is on. Computed once here; reused below. */ -}}
+		{{- $eventCtx := and (eq $type.Definition.Name "Subscription") $.Config.SubscriptionContextField -}}
+		func {{$.FuncReceiver}}{{ . }}(ctx context.Context, {{$.ECFuncParam}}sel ast.SelectionSet, v {{ $type.GO | ref }}) {{- if $eventCtx }}(context.Context, {{- end}}graphql.Marshaler{{- if $eventCtx }}){{- end}} {
 			{{- if or $type.IsPtrToSlice $type.IsPtrToIntf }}
 				return {{$.ECDot}}{{ $type.Elem.MarshalFunc }}(ctx, {{$.ECArg}}sel, *v)
 			{{- else if $type.IsSlice }}
 				{{- if not $type.GQL.NonNull }}
 					if v == nil {
-						return graphql.Null
+						return {{- if $eventCtx }} ctx,{{- end}} graphql.Null
 					}
 				{{- end }}
 				{{- if and $.HasBatchResolverFields (not $type.IsScalar) (eq $type.Elem.Definition.Kind "OBJECT") }}
@@ -149,14 +152,14 @@
 				{{ if $type.Elem.GQL.NonNull }}
 					for _, e := range ret {
 						if e == graphql.Null {
-							return graphql.Null
+							return {{- if $eventCtx }} ctx,{{- end}} graphql.Null
 						}
 					}
 				{{ end }}
 				return ret
 			{{- else if and $type.IsPtrToPtr (not $type.Unmarshaler) (not $type.IsMarshaler) }}
 				if v == nil {
-					return graphql.Null
+					return {{- if $eventCtx }} ctx,{{- end}} graphql.Null
 				}
 				return {{$.ECDot}}{{ $type.Elem.MarshalFunc }}(ctx, {{$.ECArg}}sel, *v)
 			{{- else }}
@@ -167,7 +170,7 @@
 								graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
 							}
 						{{- end }}
-						return graphql.Null
+						return {{- if $eventCtx }} ctx,{{- end}} graphql.Null
 					}
 				{{- end }}
 				{{- if $type.IsMarshaler }}

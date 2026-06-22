@@ -72,3 +72,21 @@ func SubscriptionResponseHandler(
 		return resp
 	}
 }
+
+// NullStream returns a subscription field handler that yields [Null]. Generated
+// subscription middleware uses it as the error/fallback result so the equivalent
+// null closure is not duplicated into every generated executor.
+func NullStream() func(context.Context) Marshaler {
+	return func(context.Context) Marshaler {
+		return Null
+	}
+}
+
+// NullEventStream is the per-event-context counterpart of [NullStream], used when
+// the subscription_context_field option is enabled: it yields the input context
+// alongside [Null].
+func NullEventStream() func(context.Context) (context.Context, Marshaler) {
+	return func(ctx context.Context) (context.Context, Marshaler) {
+		return ctx, Null
+	}
+}

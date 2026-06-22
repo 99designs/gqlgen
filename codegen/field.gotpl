@@ -9,7 +9,7 @@ func {{$.FuncReceiver}}_{{$object.Name}}_{{$field.Name}}(ctx context.Context, {{
 	{{- if $field.TypeReference.IsRoot }}
 		fc, err := {{$.ECDot}}{{ $field.FieldContextFunc }}(ctx, {{$.ECArg}}field)
 		if err != nil {
-			return {{ $null }}
+			return {{- if $field.UsesSubscriptionContext }} ctx,{{- end}} {{ $null }}
 		}
 		ctx = graphql.WithFieldContext(ctx, fc)
 		{{- if not $.Config.OmitPanicHandler }}

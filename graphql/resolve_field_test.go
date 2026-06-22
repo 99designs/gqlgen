@@ -182,7 +182,64 @@ func TestResolveFieldStream(t *testing.T) {
 			var sb strings.Builder
 			if result != nil {
 				for range 3 {
-					result(context.Background()).MarshalGQL(&sb)
+					m := result(context.Background())
+					if m != nil {
+						m.MarshalGQL(&sb)
+					}
+				}
+			}
+			assert.Equal(t, test.expected, sb.String())
+		},
+	)
+}
+
+func TestResolveFieldStreamWithEventContextResolveField(t *testing.T) {
+	resultChan := make(chan Event[string], 3)
+	resultChan <- Event[string]{Context: context.Background(), Value: "test one"}
+	resultChan <- Event[string]{Context: context.Background(), Value: "test two"}
+	resultChan <- Event[string]{Context: context.Background(), Value: "test three"}
+	close(resultChan)
+	tests := append(
+		[]ResolveFieldTest{
+			{
+				name:               "should resolve field",
+				fieldResolverValue: (<-chan Event[string])(resultChan),
+				marshalCalls:       []int{5, 6, 7},
+				expected:           `{"testField":"test one"}{"testField":"test two"}{"testField":"test three"}`,
+				expectedCalls:      7,
+			},
+			{
+				name:    "should fail when field resolver returns invalid type",
+				nonNull: true,
+				// the tests are using <-chan Event[string] so int should fail
+				fieldResolverValue: 123,
+				expected:           "null",
+				expectedErr:        "input: testField unexpected type int from middleware/directive chain, should be <-chan graphql.Event[string]\n",
+				expectedCalls:      4,
+			},
+		},
+		commonResolveFieldTests...,
+	)
+	for i, test := range tests {
+		// the stream tests output empty string where the non stream tests output null
+		if test.expected == "null" {
+			tests[i].expected = ""
+		}
+	}
+
+	testResolveField(
+		t,
+		tests,
+		ResolveFieldStreamWithEventContext,
+		true,
+		func(t *testing.T, test ResolveFieldTest, result func(ctx context.Context) (context.Context, Marshaler)) {
+			var sb strings.Builder
+			if result != nil {
+				for range 3 {
+					_, m := result(context.Background())
+					if m != nil {
+						m.MarshalGQL(&sb)
+					}
 				}
 			}
 			assert.Equal(t, test.expected, sb.String())

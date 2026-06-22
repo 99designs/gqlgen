@@ -41,6 +41,10 @@ type Field struct {
 	HasHaser         bool   // Whether a haser method is available (e.g., HasName())
 	HaserMethodName  string // Name of the haser method
 	Batch            bool   // Enable batch resolver for this field
+	// SubscriptionContextField mirrors the global subscription_context_field config
+	// option, resolved once at build time so UsesSubscriptionContext and the methods
+	// that depend on it stay nullary instead of threading the flag through the call chain.
+	SubscriptionContextField bool
 }
 
 func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, error) {
@@ -50,12 +54,13 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 	}
 
 	f := Field{
-		FieldDefinition: field,
-		Object:          obj,
-		Directives:      dirs,
-		GoFieldName:     templates.ToGo(field.Name),
-		GoFieldType:     GoFieldVariable,
-		GoReceiverName:  "obj",
+		FieldDefinition:          field,
+		Object:                   obj,
+		Directives:               dirs,
+		GoFieldName:              templates.ToGo(field.Name),
+		GoFieldType:              GoFieldVariable,
+		GoReceiverName:           "obj",
+		SubscriptionContextField: b.Config.SubscriptionContextField,
 	}
 
 	if field.DefaultValue != nil {
@@ -563,13 +568,17 @@ func (f *Field) HasDirectives() bool {
 }
 
 // UsesSubscriptionContext reports whether this field is on the Subscription
-// root type and is annotated with @subscriptionContext. Codegen uses this to
+// root type and is annotated with @subscriptionContext, or the global
+// subscription_context_field option is enabled. Codegen uses this to
 // emit a resolver returning <-chan graphql.Event[T] instead of <-chan T, and
 // to thread per-event context into the AroundResponses interceptor chain.
 // Returns false for non-subscription fields even if they carry the directive.
 func (f *Field) UsesSubscriptionContext() bool {
 	if !f.Object.Stream {
 		return false
+	}
+	if f.SubscriptionContextField {
+		return true
 	}
 	for _, d := range f.FieldDefinition.Directives {
 		if d.Name == config.DirSubscriptionContext {

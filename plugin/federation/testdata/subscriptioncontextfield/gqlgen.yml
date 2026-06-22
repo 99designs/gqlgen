@@ -1,0 +1,15 @@
+schema:
+  - "testdata/subscriptioncontextfield/schema.graphql"
+subscription_context_field: true
+exec:
+  filename: testdata/subscriptioncontextfield/generated/exec.go
+federation:
+  filename: testdata/subscriptioncontextfield/generated/federation.go
+model:
+  filename: testdata/subscriptioncontextfield/generated/model/models.go
+  package: model
+resolver:
+  filename: testdata/subscriptioncontextfield/resolver.go
+  layout: follow-schema
+  dir: testdata/subscriptioncontextfield
+  package: subscriptioncontextfield

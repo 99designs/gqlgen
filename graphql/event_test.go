@@ -8,6 +8,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestNullStream(t *testing.T) {
+	m := NullStream()(context.Background())
+	assert.Equal(t, Null, m, "NullStream yields the Null marshaler")
+}
+
+func TestNullEventStream(t *testing.T) {
+	inputCtx := context.WithValue(context.Background(), eventCtxKey("k"), "v")
+	gotCtx, m := NullEventStream()(inputCtx)
+	assert.Equal(t, inputCtx, gotCtx, "NullEventStream passes the input context through")
+	assert.Equal(t, Null, m, "NullEventStream yields the Null marshaler")
+}
+
 func TestStreamWithoutEventContext(t *testing.T) {
 	inputCtx := context.WithValue(context.Background(), eventCtxKey("k"), "v")
 

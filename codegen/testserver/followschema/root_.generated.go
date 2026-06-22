@@ -3584,9 +3584,7 @@ func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *as
 			args, err := ec.dir_subscriptionOnly_args(ctx, rawArgs)
 			if err != nil {
 				ec.Error(ctx, err)
-				return func(ctx context.Context) graphql.Marshaler {
-					return graphql.Null
-				}
+				return graphql.NullStream()
 			}
 			n := next
 			next = func(ctx context.Context) (any, error) {
@@ -3600,17 +3598,13 @@ func (ec *executionContext) _subscriptionMiddleware(ctx context.Context, obj *as
 	tmp, err := next(ctx)
 	if err != nil {
 		ec.Error(ctx, err)
-		return func(ctx context.Context) graphql.Marshaler {
-			return graphql.Null
-		}
+		return graphql.NullStream()
 	}
 	if data, ok := tmp.(func(ctx context.Context) graphql.Marshaler); ok {
 		return data
 	}
 	graphql.AddErrorf(ctx, `unexpected type %T from directive, should be graphql.Marshaler`, tmp)
-	return func(ctx context.Context) graphql.Marshaler {
-		return graphql.Null
-	}
+	return graphql.NullStream()
 }
 
 func (ec *executionContext) _fieldMiddleware(ctx context.Context, obj any, next graphql.Resolver) graphql.Resolver {

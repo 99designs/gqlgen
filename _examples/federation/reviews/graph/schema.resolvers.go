@@ -69,5 +69,7 @@ func (r *Resolver) Product() ProductResolver { return &productResolver{r} }
 // User returns UserResolver implementation.
 func (r *Resolver) User() UserResolver { return &userResolver{r} }
 
-type productResolver struct{ *Resolver }
-type userResolver struct{ *Resolver }
+type (
+	productResolver struct{ *Resolver }
+	userResolver    struct{ *Resolver }
+)

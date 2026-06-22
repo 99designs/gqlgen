@@ -125,11 +125,13 @@ func (r *Resolver) PlanetRequiresNested() explicitrequires.PlanetRequiresNestedR
 // Query returns explicitrequires.QueryResolver implementation.
 func (r *Resolver) Query() explicitrequires.QueryResolver { return &queryResolver{r} }
 
-type multiHelloMultipleRequiresResolver struct{ *Resolver }
-type multiHelloRequiresResolver struct{ *Resolver }
-type multiPlanetRequiresNestedResolver struct{ *Resolver }
-type personResolver struct{ *Resolver }
-type planetMultipleRequiresResolver struct{ *Resolver }
-type planetRequiresResolver struct{ *Resolver }
-type planetRequiresNestedResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
+type (
+	multiHelloMultipleRequiresResolver struct{ *Resolver }
+	multiHelloRequiresResolver         struct{ *Resolver }
+	multiPlanetRequiresNestedResolver  struct{ *Resolver }
+	personResolver                     struct{ *Resolver }
+	planetMultipleRequiresResolver     struct{ *Resolver }
+	planetRequiresResolver             struct{ *Resolver }
+	planetRequiresNestedResolver       struct{ *Resolver }
+	queryResolver                      struct{ *Resolver }
+)

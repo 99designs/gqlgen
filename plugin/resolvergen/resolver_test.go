@@ -7,11 +7,61 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlparser/v2/ast"
 	"golang.org/x/tools/go/packages"
 
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"
 )
+
+func TestResolverBuild_ResolverTypeDeclarations(t *testing.T) {
+	object := func(name string) *codegen.Object {
+		return &codegen.Object{Definition: &ast.Definition{Name: name}}
+	}
+
+	tests := map[string]struct {
+		objects      []*codegen.Object
+		resolverType string
+		want         string
+	}{
+		"no objects yields no declaration": {
+			objects:      nil,
+			resolverType: "Resolver",
+			want:         "",
+		},
+		"single object is a lone declaration": {
+			objects:      []*codegen.Object{object("Query")},
+			resolverType: "Resolver",
+			want:         "type queryResolver struct{ *Resolver }",
+		},
+		"multiple objects are grouped and column-aligned": {
+			objects:      []*codegen.Object{object("Query"), object("Subscription")},
+			resolverType: "Resolver",
+			want: "type (\n" +
+				"\tqueryResolver        struct{ *Resolver }\n" +
+				"\tsubscriptionResolver struct{ *Resolver }\n" +
+				")",
+		},
+		"alignment follows the custom resolver type name": {
+			objects:      []*codegen.Object{object("Query"), object("Mutation")},
+			resolverType: "rootResolver",
+			want: "type (\n" +
+				"\tqueryRootResolver    struct{ *rootResolver }\n" +
+				"\tmutationRootResolver struct{ *rootResolver }\n" +
+				")",
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			b := &ResolverBuild{
+				File:         &File{Objects: tt.objects},
+				ResolverType: tt.resolverType,
+			}
+			require.Equal(t, tt.want, b.ResolverTypeDeclarations())
+		})
+	}
+}
 
 func TestLayoutSingleFile(t *testing.T) {
 	_ = syscall.Unlink("testdata/singlefile/out/resolver.go")

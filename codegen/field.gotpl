@@ -1,6 +1,6 @@
 {{- range $object := .Objects }}{{- range $field := $object.Fields }}
 
-func {{$.FuncReceiver}}_{{$object.Name}}_{{$field.Name}}(ctx context.Context, {{$.ECFuncParam}}field graphql.CollectedField{{ if not $object.Root }}, obj {{$object.Reference | ref}}{{end}}) (ret {{ if $object.Stream }}func(ctx context.Context){{ end }}graphql.Marshaler) {
+func {{$.FuncReceiver}}_{{$object.Name}}_{{$field.Name}}(ctx context.Context, {{$.ECFuncParam}}field graphql.CollectedField{{ if not $object.Root }}, obj {{$object.Reference | ref}}{{end}}) (ret {{ $field.MarshalerReturnType }}) {
 	{{- $null := "graphql.Null" }}
 	{{- if $object.Stream }}
 		{{- $null = "nil" }}
@@ -29,7 +29,7 @@ func {{$.FuncReceiver}}_{{$object.Name}}_{{$field.Name}}(ctx context.Context, {{
 		fc.Result = res
 		return {{$.ECDot}}{{ $field.TypeReference.MarshalFunc }}(ctx, {{$.ECArg}}field.Selections, res)
 	{{- else}}
-		return graphql.ResolveField{{- if $object.Stream }}Stream{{- end }}(
+		return graphql.{{ $field.ResolveFieldFunc }}(
 			ctx,
 			ec.OperationContext,
 			field,

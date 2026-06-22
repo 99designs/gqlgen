@@ -139,6 +139,23 @@ func (o *Object) HasDirectives() bool {
 	return false
 }
 
+// HasSubscriptionContextField reports whether this object is a streaming
+// (subscription) root with at least one field annotated @subscriptionContext.
+// Codegen uses this to decide whether to emit the event-context-aware
+// dispatcher and the optional ExecWithEventContext method on the
+// generated executableSchema. Returns false for non-streaming objects.
+func (o *Object) HasSubscriptionContextField() bool {
+	if !o.Stream {
+		return false
+	}
+	for _, f := range o.Fields {
+		if f.UsesSubscriptionContext() {
+			return true
+		}
+	}
+	return false
+}
+
 // InputObjectDirectives returns directives that should be executed at the INPUT_OBJECT level.
 // This is used for input types to execute @directives placed on the input object itself,
 // after all fields have been unmarshaled.

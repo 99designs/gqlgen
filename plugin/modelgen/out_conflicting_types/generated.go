@@ -3,18 +3,18 @@
 package out_conflicting_types
 
 type Baz struct {
-	WantWithoutUnderscore *FooBar0 `json:"want_without_underscore" database:"Bazwant_without_underscore"`
+	WantWithoutUnderscore *FooBar `json:"want_without_underscore" database:"Bazwant_without_underscore"`
 }
 
 type Bees struct {
-	WantWithUnderscore *FooBar `json:"want_with_underscore" database:"Beeswant_with_underscore"`
-}
-
-type FooBar0 struct {
-	WithoutUnderscore *bool `json:"without_underscore,omitempty" database:"FooBarwithout_underscore"`
+	WantWithUnderscore *FooBar0 `json:"want_with_underscore" database:"Beeswant_with_underscore"`
 }
 
 type FooBar struct {
+	WithoutUnderscore *bool `json:"without_underscore,omitempty" database:"FooBarwithout_underscore"`
+}
+
+type FooBar0 struct {
 	WithUnderscore *bool `json:"with_underscore,omitempty" database:"Foo_Barwith_underscore"`
 }
 

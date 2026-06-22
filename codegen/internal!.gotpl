@@ -121,6 +121,12 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	{{ end }}
 
 	{{- if .SubscriptionRoot }} case ast.Subscription:
+		{{- if .SubscriptionRoot.HasSubscriptionContextField }}
+		// Exec discards the per-event context; the event-aware path is exposed
+		// via ExecWithEventContext and used by the executor when it detects
+		// ExecutableSchemaWithEventContext.
+		return graphql.SubscriptionResponseHandler({{$.ECDot}}_{{.SubscriptionRoot.Name}}(ctx, {{$.ECArg}}opCtx.Operation.SelectionSet))
+		{{- else }}
 		{{ if .AllDirectives.LocationDirectives "SUBSCRIPTION" -}}
 			next := {{$.ECDot}}_subscriptionMiddleware(ctx, {{$.ECArg}}opCtx.Operation, func(ctx context.Context) (any, error){
 				return {{$.ECDot}}_{{.SubscriptionRoot.Name}}(ctx, {{$.ECArg}}opCtx.Operation.SelectionSet),nil
@@ -143,11 +149,35 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				Data:       buf.Bytes(),
 			}
 		}
+		{{- end }}
 	{{ end }}
 	default:
 		return graphql.OneShot(graphql.ErrorResponse(ctx, "unsupported GraphQL operation"))
 	}
 }
+
+{{- if and .SubscriptionRoot .SubscriptionRoot.HasSubscriptionContextField }}
+
+// ExecWithEventContext is the per-event-context-aware response handler. The
+// graphql executor type-asserts the executable schema for this method when
+// at least one subscription field is annotated @subscriptionContext; absence
+// falls back to Exec.
+func (e *executableSchema) ExecWithEventContext(ctx context.Context) graphql.ResponseHandlerWithContext {
+	opCtx := graphql.GetOperationContext(ctx)
+	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
+
+	switch opCtx.Operation.Operation {
+	case ast.Subscription:
+		return graphql.SubscriptionEventResponseHandler({{$.ECDot}}_{{.SubscriptionRoot.Name}}(ctx, {{$.ECArg}}opCtx.Operation.SelectionSet))
+	default:
+		// Non-subscription operations fall through to Exec via the executor's
+		// default path; this method only handles ast.Subscription.
+		return func(ctx context.Context) (context.Context, *graphql.Response) {
+			return ctx, graphql.ErrorResponse(ctx, "ExecWithEventContext only handles subscriptions")
+		}
+	}
+}
+{{- end }}
 
 type executionContext struct {
 	*graphql.ExecutionContextState[ResolverRoot, DirectiveRoot, ComplexityRoot]

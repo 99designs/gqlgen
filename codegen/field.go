@@ -562,6 +562,52 @@ func (f *Field) HasDirectives() bool {
 	return len(f.ImplDirectives()) > 0
 }
 
+// UsesSubscriptionContext reports whether this field is on the Subscription
+// root type and is annotated with @subscriptionContext. Codegen uses this to
+// emit a resolver returning <-chan graphql.Event[T] instead of <-chan T, and
+// to thread per-event context into the AroundResponses interceptor chain.
+// Returns false for non-subscription fields even if they carry the directive.
+func (f *Field) UsesSubscriptionContext() bool {
+	if !f.Object.Stream {
+		return false
+	}
+	for _, d := range f.FieldDefinition.Directives {
+		if d.Name == config.DirSubscriptionContext {
+			return true
+		}
+	}
+	return false
+}
+
+// MarshalerReturnType returns the Go type that the generated field-exec
+// function for this field returns. A normal field returns a graphql.Marshaler
+// directly; a subscription stream field returns a func yielding one marshaler
+// per event; and a stream field annotated @subscriptionContext additionally
+// yields a per-event context (see [Field.UsesSubscriptionContext]).
+func (f *Field) MarshalerReturnType() string {
+	if !f.Object.Stream {
+		return "graphql.Marshaler"
+	}
+	if f.UsesSubscriptionContext() {
+		return "func(ctx context.Context) (context.Context, graphql.Marshaler)"
+	}
+	return "func(ctx context.Context) graphql.Marshaler"
+}
+
+// ResolveFieldFunc returns the name of the graphql runtime helper the generated
+// executor calls to resolve this field: ResolveField for normal fields,
+// ResolveFieldStream for subscription streams, and
+// ResolveFieldStreamWithEventContext for streams annotated @subscriptionContext.
+func (f *Field) ResolveFieldFunc() string {
+	if !f.Object.Stream {
+		return "ResolveField"
+	}
+	if f.UsesSubscriptionContext() {
+		return "ResolveFieldStreamWithEventContext"
+	}
+	return "ResolveFieldStream"
+}
+
 func (f *Field) DirectiveObjName() string {
 	if f.Object.Root {
 		return "nil"
@@ -834,7 +880,12 @@ func (f *Field) ShortResolverSignature(ft *goast.FuncType) string {
 
 	result := templates.CurrentImports.LookupType(f.TypeReference.GO)
 	if f.Object.Stream {
-		result = "<-chan " + result
+		if f.UsesSubscriptionContext() {
+			gqlPkg := templates.CurrentImports.Lookup("github.com/99designs/gqlgen/graphql")
+			result = fmt.Sprintf("<-chan %s.Event[%s]", gqlPkg, result)
+		} else {
+			result = "<-chan " + result
+		}
 	}
 	// Named return.
 	var namedV, namedE string

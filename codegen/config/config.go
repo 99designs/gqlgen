@@ -108,12 +108,13 @@ func (c *Config) GetPruneOptions() imports.PruneOptions {
 }
 
 const (
-	DirGoModel         = "goModel"
-	DirGoExtraField    = "goExtraField"
-	DirGoField         = "goField"
-	DirGoTag           = "goTag"
-	DirGoEnum          = "goEnum"
-	DirInlineArguments = "inlineArguments"
+	DirGoModel             = "goModel"
+	DirGoExtraField        = "goExtraField"
+	DirGoField             = "goField"
+	DirGoTag               = "goTag"
+	DirGoEnum              = "goEnum"
+	DirInlineArguments     = "inlineArguments"
+	DirSubscriptionContext = "subscriptionContext"
 
 	DirArgName                = "name"
 	DirArgModel               = "model"
@@ -399,6 +400,7 @@ func (c *Config) injectTypesFromSchema() error {
 		DirGoTag,
 		DirGoEnum,
 		DirInlineArguments,
+		DirSubscriptionContext,
 	} {
 		c.Directives[d] = DirectiveConfig{SkipRuntime: true}
 	}

@@ -22,6 +22,21 @@ type ExecutableSchema interface {
 	Exec(ctx context.Context) ResponseHandler
 }
 
+// ExecutableSchemaWithEventContext is the optional interface a generated
+// [ExecutableSchema] implements when at least one of its subscription fields
+// is annotated with the @subscriptionContext directive. The graphql executor
+// type-asserts for this interface; absence falls back to
+// [ExecutableSchema.Exec] with no behavior change.
+//
+// Implementations must guarantee that the returned [ResponseHandlerWithContext]
+// reports a context derived from the subscription's request context for every
+// iteration — never an unrelated background context — so request-scoped
+// values remain reachable.
+type ExecutableSchemaWithEventContext interface {
+	ExecutableSchema
+	ExecWithEventContext(ctx context.Context) ResponseHandlerWithContext
+}
+
 // CollectFields returns the set of fields from an ast.SelectionSet where all collected fields
 // satisfy at least one of the GraphQL types passed through satisfies. Providing an empty slice for
 // satisfies will collect all fields regardless of fragment type conditions.

@@ -45,9 +45,7 @@
 	func (r *{{$.ResolverType}}) {{ucFirst $object.Name}}() {{ $object.ResolverInterface | ref }} { return &{{lcFirst $object.Name}}{{ucFirst $.ResolverType}}{r} }
 {{ end }}
 
-{{ range $object := .Objects -}}
-	type {{lcFirst $object.Name}}{{ucFirst $.ResolverType}} struct { *{{$.ResolverType}} }
-{{ end }}
+{{ .ResolverTypeDeclarations }}
 
 {{ if (ne .RemainingSource "") }}
     // !!! WARNING !!!

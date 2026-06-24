@@ -357,6 +357,8 @@ func (c *Config) Init() error {
 		return err
 	}
 
+	c.applyGlobalBatchResolverDefaults()
+
 	c.Packages.LoadAll(c.packageList()...)
 
 	err = c.autobind()
@@ -543,18 +545,70 @@ func (c *Config) injectGoFieldDirectives(schemaType *ast.Definition) error {
 	return nil
 }
 
+// resolveModelBatchDefaults runs during config load (before schema injection) and
+// defaults yaml-configured fields to batch=false when global batch is disabled.
 func (c *Config) resolveModelBatchDefaults() {
+	if c.Resolver.Batch.Enabled {
+		return
+	}
 	for typeName, entry := range c.Models {
 		for fieldName, field := range entry.Fields {
 			if field.Batch != nil {
 				continue
 			}
-			batch := c.Resolver.Batch.Enabled
+			batch := false
 			field.Batch = &batch
 			entry.Fields[fieldName] = field
 		}
 		c.Models[typeName] = entry
 	}
+}
+
+// applyGlobalBatchResolverDefaults runs after schema injection and enables batch for
+// resolver fields that have no explicit batch setting when global batch is enabled.
+func (c *Config) applyGlobalBatchResolverDefaults() {
+	if !c.Resolver.Batch.Enabled {
+		return
+	}
+	for typeName, entry := range c.Models {
+		supportsBatch := true
+		if schemaType := c.Schema.Types[typeName]; schemaType != nil {
+			supportsBatch = c.TypeSupportsBatchResolver(typeName, schemaType)
+		}
+		for fieldName, field := range entry.Fields {
+			if field.Batch != nil {
+				continue
+			}
+			if !field.Resolver {
+				continue
+			}
+			batch := supportsBatch
+			field.Batch = &batch
+			entry.Fields[fieldName] = field
+		}
+		c.Models[typeName] = entry
+	}
+}
+
+// TypeSupportsBatchResolver reports whether batch resolvers may be enabled for fields
+// on the given type. Root types, input objects, and introspection types (__*) are always
+// excluded. When federation is enabled, federation _Service and Entity are also excluded.
+func (c *Config) TypeSupportsBatchResolver(typeName string, schemaType *ast.Definition) bool {
+	if c.IsRoot(schemaType) {
+		return false
+	}
+	if schemaType.Kind == ast.InputObject {
+		return false
+	}
+	if strings.HasPrefix(typeName, "__") {
+		return false
+	}
+	if c.Federation.IsDefined() {
+		if typeName == "_Service" || typeName == "Entity" {
+			return false
+		}
+	}
+	return true
 }
 
 func (c *Config) injectGoExtraFieldDirectives(schemaType *ast.Definition) error {

@@ -332,6 +332,8 @@ func CompleteConfig(config *Config) error {
 
 	config.GoInitialisms.setInitialisms()
 
+	config.resolveModelBatchDefaults()
+
 	return nil
 }
 
@@ -355,7 +357,7 @@ func (c *Config) Init() error {
 		return err
 	}
 
-	c.resolveModelBatchDefaults()
+	c.applyGlobalBatchResolverDefaults()
 
 	c.Packages.LoadAll(c.packageList()...)
 
@@ -543,7 +545,31 @@ func (c *Config) injectGoFieldDirectives(schemaType *ast.Definition) error {
 	return nil
 }
 
+// resolveModelBatchDefaults runs during config load (before schema injection) and
+// defaults yaml-configured fields to batch=false when global batch is disabled.
 func (c *Config) resolveModelBatchDefaults() {
+	if c.Resolver.Batch.Enabled {
+		return
+	}
+	for typeName, entry := range c.Models {
+		for fieldName, field := range entry.Fields {
+			if field.Batch != nil {
+				continue
+			}
+			batch := false
+			field.Batch = &batch
+			entry.Fields[fieldName] = field
+		}
+		c.Models[typeName] = entry
+	}
+}
+
+// applyGlobalBatchResolverDefaults runs after schema injection and enables batch for
+// resolver fields that have no explicit batch setting when global batch is enabled.
+func (c *Config) applyGlobalBatchResolverDefaults() {
+	if !c.Resolver.Batch.Enabled {
+		return
+	}
 	for typeName, entry := range c.Models {
 		supportsBatch := true
 		if schemaType := c.Schema.Types[typeName]; schemaType != nil {
@@ -553,7 +579,10 @@ func (c *Config) resolveModelBatchDefaults() {
 			if field.Batch != nil {
 				continue
 			}
-			batch := c.Resolver.Batch.Enabled && supportsBatch
+			if !field.Resolver {
+				continue
+			}
+			batch := supportsBatch
 			field.Batch = &batch
 			entry.Fields[fieldName] = field
 		}

@@ -183,6 +183,7 @@ func TestTypeMapFieldBatch(t *testing.T) {
 			`,
 		})
 		cfg.resolveModelBatchDefaults()
+		cfg.applyGlobalBatchResolverDefaults()
 	}
 
 	t.Run("batch flag is parsed from config", func(t *testing.T) {
@@ -308,6 +309,7 @@ models:
 			`,
 		})
 		cfg.resolveModelBatchDefaults()
+		cfg.applyGlobalBatchResolverDefaults()
 		require.NotNil(t, cfg.Models["Entity"].Fields["id"].Batch)
 		require.True(t, *cfg.Models["Entity"].Fields["id"].Batch)
 	})
@@ -337,6 +339,7 @@ models:
 			`,
 		})
 		cfg.resolveModelBatchDefaults()
+		cfg.applyGlobalBatchResolverDefaults()
 		require.NotNil(t, cfg.Models["Entity"].Fields["findUserByID"].Batch)
 		require.False(t, *cfg.Models["Entity"].Fields["findUserByID"].Batch)
 	})

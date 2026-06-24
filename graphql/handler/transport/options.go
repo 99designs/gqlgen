@@ -15,6 +15,10 @@ type Options struct {
 
 var _ graphql.Transport = Options{}
 
+func (o Options) String() string {
+	return "Options"
+}
+
 func (o Options) Supports(r *http.Request) bool {
 	return r.Method == http.MethodHead || r.Method == http.MethodOptions
 }

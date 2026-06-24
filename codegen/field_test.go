@@ -6,6 +6,7 @@ import (
 	"go/parser"
 	"go/token"
 	"go/types"
+	"maps"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -254,9 +255,7 @@ func TestField_BatchRootField(t *testing.T) {
 	t.Run("explicit batch on root field is rejected", func(t *testing.T) {
 		batchTrue := true
 		models := make(config.TypeMap)
-		for k, v := range baseModels {
-			models[k] = v
-		}
+		maps.Copy(models, baseModels)
 		models["Query"] = config.TypeMapEntry{
 			Fields: map[string]config.TypeMapField{
 				"version": {Batch: &batchTrue},

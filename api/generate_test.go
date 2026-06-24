@@ -40,6 +40,10 @@ func TestGenerate(t *testing.T) {
 			name:    "worker_limit",
 			workDir: filepath.Join(wd, "testdata", "workerlimit"),
 		},
+		{
+			name:    "batchresolver_global",
+			workDir: filepath.Join(wd, "testdata", "batchresolver_global"),
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

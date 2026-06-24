@@ -23,8 +23,11 @@ type ResolverConfig struct {
 	PreserveResolver    bool                `yaml:"preserve_resolver,omitempty"`
 }
 
-// ResolverBatchConfig enables batch resolver generation for all fields as if they
-// had @goField(batch: true). Individual fields can opt out with @goField(batch: false).
+// ResolverBatchConfig enables batch resolver generation for resolver fields as if they
+// had @goField(batch: true). Root types (Query, Mutation, Subscription), input objects,
+// and introspection types (__*) are always excluded. When federation is enabled, federation
+// _Service and Entity are also excluded. Global batch does not convert struct-bound fields
+// into resolvers. Individual fields can opt out with @goField(batch: false).
 type ResolverBatchConfig struct {
 	Enabled bool
 }

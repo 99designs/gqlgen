@@ -189,7 +189,117 @@ func TestField_Batch(t *testing.T) {
 	})
 }
 
-func TestField_BatchRootFieldUnsupported(t *testing.T) {
+func TestField_BatchRootField(t *testing.T) {
+	baseModels := config.TypeMap{
+		"Boolean": {
+			Model: config.StringList{"github.com/99designs/gqlgen/graphql.Boolean"},
+		},
+		"Float": {
+			Model: config.StringList{"github.com/99designs/gqlgen/graphql.Float"},
+		},
+		"ID": {
+			Model: config.StringList{"github.com/99designs/gqlgen/graphql.ID"},
+		},
+		"Int": {
+			Model: config.StringList{"github.com/99designs/gqlgen/graphql.Int"},
+		},
+		"String": {
+			Model: config.StringList{"github.com/99designs/gqlgen/graphql.String"},
+		},
+	}
+
+	buildQuery := func(t *testing.T, cfg *config.Config) *Object {
+		t.Helper()
+		b := builder{
+			Config: cfg,
+			Schema: cfg.Schema,
+		}
+		b.Binder = b.Config.NewBinder()
+		var err error
+		b.Directives, err = b.buildDirectives()
+		require.NoError(t, err)
+
+		obj, err := b.buildObject(cfg.Schema.Query)
+		require.NoError(t, err)
+		return obj
+	}
+
+	t.Run("global batch skips root fields", func(t *testing.T) {
+		cfg := &config.Config{
+			Resolver: config.ResolverConfig{
+				Batch: config.ResolverBatchConfig{Enabled: true},
+			},
+			Exec: config.ExecConfig{
+				Layout:   config.ExecLayoutSingleFile,
+				Filename: "generated.go",
+				Package:  "generated",
+			},
+			Models:     baseModels,
+			Directives: map[string]config.DirectiveConfig{},
+			Packages:   code.NewPackages(),
+		}
+		cfg.Schema = gqlparser.MustLoadSchema(&ast2.Source{
+			Name: "schema.graphql",
+			Input: `
+				schema { query: Query }
+				type Query { version: String }
+			`,
+		})
+
+		obj := buildQuery(t, cfg)
+		require.Len(t, obj.Fields, 1)
+		require.False(t, obj.Fields[0].Batch)
+	})
+
+	t.Run("explicit batch on root field is rejected", func(t *testing.T) {
+		batchTrue := true
+		models := make(config.TypeMap)
+		for k, v := range baseModels {
+			models[k] = v
+		}
+		models["Query"] = config.TypeMapEntry{
+			Fields: map[string]config.TypeMapField{
+				"version": {Batch: &batchTrue},
+			},
+		}
+
+		cfg := &config.Config{
+			Resolver: config.ResolverConfig{
+				Batch: config.ResolverBatchConfig{Enabled: true},
+			},
+			Exec: config.ExecConfig{
+				Layout:   config.ExecLayoutSingleFile,
+				Filename: "generated.go",
+				Package:  "generated",
+			},
+			Models:     models,
+			Directives: map[string]config.DirectiveConfig{},
+			Packages:   code.NewPackages(),
+		}
+		cfg.Schema = gqlparser.MustLoadSchema(&ast2.Source{
+			Name: "schema.graphql",
+			Input: `
+				schema { query: Query }
+				type Query { version: String }
+			`,
+		})
+
+		b := builder{
+			Config: cfg,
+			Schema: cfg.Schema,
+		}
+		b.Binder = b.Config.NewBinder()
+		var err error
+		b.Directives, err = b.buildDirectives()
+		require.NoError(t, err)
+
+		_, err = b.buildObject(cfg.Schema.Query)
+		require.Error(t, err)
+		require.Contains(t, err.Error(), "batch resolver is not supported for field Query.version")
+	})
+}
+
+func TestField_BatchGlobalWithQueryAndUser(t *testing.T) {
 	cfg := &config.Config{
 		Resolver: config.ResolverConfig{
 			Batch: config.ResolverBatchConfig{Enabled: true},
@@ -215,6 +325,15 @@ func TestField_BatchRootFieldUnsupported(t *testing.T) {
 			"String": {
 				Model: config.StringList{"github.com/99designs/gqlgen/graphql.String"},
 			},
+			"User": {
+				Model: config.StringList{"map[string]interface{}"},
+				Fields: map[string]config.TypeMapField{
+					"posts": {Resolver: true},
+				},
+			},
+			"Post": {
+				Model: config.StringList{"map[string]interface{}"},
+			},
 		},
 		Directives: map[string]config.DirectiveConfig{},
 		Packages:   code.NewPackages(),
@@ -223,7 +342,9 @@ func TestField_BatchRootFieldUnsupported(t *testing.T) {
 		Name: "schema.graphql",
 		Input: `
 			schema { query: Query }
-			type Query { version: String }
+			type Query { version: String users: [User!]! }
+			type User { id: ID! posts: [Post!]! }
+			type Post { id: ID! }
 		`,
 	})
 
@@ -236,9 +357,125 @@ func TestField_BatchRootFieldUnsupported(t *testing.T) {
 	b.Directives, err = b.buildDirectives()
 	require.NoError(t, err)
 
-	_, err = b.buildObject(cfg.Schema.Query)
-	require.Error(t, err)
-	require.Contains(t, err.Error(), "batch resolver is not supported for root field Query.version")
+	queryObj, err := b.buildObject(cfg.Schema.Query)
+	require.NoError(t, err)
+	require.False(t, fieldByName(queryObj.Fields, "version").Batch)
+	require.False(t, fieldByName(queryObj.Fields, "users").Batch)
+
+	userObj, err := b.buildObject(cfg.Schema.Types["User"])
+	require.NoError(t, err)
+	require.True(t, fieldByName(userObj.Fields, "posts").Batch)
+	require.False(t, fieldByName(userObj.Fields, "id").Batch)
+	require.False(t, fieldByName(userObj.Fields, "id").IsResolver)
+}
+
+func TestField_BatchEntityType(t *testing.T) {
+	baseModels := config.TypeMap{
+		"Boolean": {
+			Model: config.StringList{"github.com/99designs/gqlgen/graphql.Boolean"},
+		},
+		"Float": {
+			Model: config.StringList{"github.com/99designs/gqlgen/graphql.Float"},
+		},
+		"ID": {
+			Model: config.StringList{"github.com/99designs/gqlgen/graphql.ID"},
+		},
+		"Int": {
+			Model: config.StringList{"github.com/99designs/gqlgen/graphql.Int"},
+		},
+		"String": {
+			Model: config.StringList{"github.com/99designs/gqlgen/graphql.String"},
+		},
+		"Entity": {
+			Model: config.StringList{"map[string]interface{}"},
+			Fields: map[string]config.TypeMapField{
+				"id": {Resolver: true},
+			},
+		},
+	}
+
+	buildEntity := func(t *testing.T, cfg *config.Config) *Object {
+		t.Helper()
+		b := builder{
+			Config: cfg,
+			Schema: cfg.Schema,
+		}
+		b.Binder = b.Config.NewBinder()
+		var err error
+		b.Directives, err = b.buildDirectives()
+		require.NoError(t, err)
+
+		obj, err := b.buildObject(cfg.Schema.Types["Entity"])
+		require.NoError(t, err)
+		return obj
+	}
+
+	t.Run("global batch applies to Entity without federation", func(t *testing.T) {
+		cfg := &config.Config{
+			Resolver: config.ResolverConfig{
+				Batch: config.ResolverBatchConfig{Enabled: true},
+			},
+			Exec: config.ExecConfig{
+				Layout:   config.ExecLayoutSingleFile,
+				Filename: "generated.go",
+				Package:  "generated",
+			},
+			Models:     baseModels,
+			Directives: map[string]config.DirectiveConfig{},
+			Packages:   code.NewPackages(),
+		}
+		cfg.Schema = gqlparser.MustLoadSchema(&ast2.Source{
+			Name: "schema.graphql",
+			Input: `
+				schema { query: Query }
+				type Query { _: Boolean }
+				type Entity { id: ID! }
+			`,
+		})
+
+		obj := buildEntity(t, cfg)
+		require.True(t, fieldByName(obj.Fields, "id").Batch)
+	})
+
+	t.Run("global batch skips federation Entity", func(t *testing.T) {
+		cfg := &config.Config{
+			Resolver: config.ResolverConfig{
+				Batch: config.ResolverBatchConfig{Enabled: true},
+			},
+			Exec: config.ExecConfig{
+				Layout:   config.ExecLayoutSingleFile,
+				Filename: "generated.go",
+				Package:  "generated",
+			},
+			Federation: config.PackageConfig{
+				Filename: "graph/federation.go",
+				Package:  "graph",
+			},
+			Models:     baseModels,
+			Directives: map[string]config.DirectiveConfig{},
+			Packages:   code.NewPackages(),
+		}
+		cfg.Schema = gqlparser.MustLoadSchema(&ast2.Source{
+			Name: "schema.graphql",
+			Input: `
+				schema { query: Query }
+				type Query { _: Boolean }
+				type Entity { id: ID! }
+			`,
+		})
+
+		obj := buildEntity(t, cfg)
+		require.False(t, fieldByName(obj.Fields, "id").Batch)
+	})
+}
+
+func fieldByName(fields []*Field, name string) *Field {
+	for _, f := range fields {
+		if f.Name == name {
+			return f
+		}
+	}
+	return nil
 }
 
 func TestField_CallArgs(t *testing.T) {

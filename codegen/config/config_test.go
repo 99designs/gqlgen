@@ -171,6 +171,20 @@ func TestReferencedPackages(t *testing.T) {
 }
 
 func TestTypeMapFieldBatch(t *testing.T) {
+	applyBatchDefaults := func(t *testing.T, cfg *Config) {
+		t.Helper()
+		cfg.Schema = gqlparser.MustLoadSchema(&ast.Source{
+			Name: "schema.graphql",
+			Input: `
+				schema { query: Query }
+				type Query { _: Boolean }
+				type User { posts: [Post!]! name: String }
+				type Post { id: ID! }
+			`,
+		})
+		cfg.resolveModelBatchDefaults()
+	}
+
 	t.Run("batch flag is parsed from config", func(t *testing.T) {
 		cfg, err := ReadConfig(strings.NewReader(`
 schema: schema.graphql
@@ -186,6 +200,7 @@ models:
         resolver: false
 `))
 		require.NoError(t, err)
+		applyBatchDefaults(t, cfg)
 		require.NotNil(t, cfg.Models["User"].Fields["posts"].Batch)
 		require.True(t, *cfg.Models["User"].Fields["posts"].Batch)
 		require.True(t, cfg.Models["User"].Fields["posts"].Resolver)
@@ -205,6 +220,7 @@ models:
         resolver: true
 `))
 		require.NoError(t, err)
+		applyBatchDefaults(t, cfg)
 		require.NotNil(t, cfg.Models["User"].Fields["posts"].Batch)
 		require.False(t, *cfg.Models["User"].Fields["posts"].Batch)
 	})
@@ -223,6 +239,7 @@ models:
         resolver: true
 `))
 		require.NoError(t, err)
+		applyBatchDefaults(t, cfg)
 		require.NotNil(t, cfg.Models["User"].Fields["posts"].Batch)
 		require.True(t, *cfg.Models["User"].Fields["posts"].Batch)
 	})
@@ -244,9 +261,85 @@ models:
         resolver: true
 `))
 			require.NoError(t, err)
+			applyBatchDefaults(t, cfg)
 			require.NotNil(t, cfg.Models["User"].Fields["posts"].Batch)
 			require.True(t, *cfg.Models["User"].Fields["posts"].Batch)
 		})
+
+	t.Run("batch defaults skip root types", func(t *testing.T) {
+		cfg, err := ReadConfig(strings.NewReader(`
+schema: schema.graphql
+resolver:
+  batch: true
+exec:
+  filename: generated.go
+models:
+  Query:
+    fields:
+      version:
+        resolver: true
+`))
+		require.NoError(t, err)
+		applyBatchDefaults(t, cfg)
+		require.NotNil(t, cfg.Models["Query"].Fields["version"].Batch)
+		require.False(t, *cfg.Models["Query"].Fields["version"].Batch)
+	})
+
+	t.Run("batch defaults apply to Entity type without federation", func(t *testing.T) {
+		cfg, err := ReadConfig(strings.NewReader(`
+schema: schema.graphql
+resolver:
+  batch: true
+exec:
+  filename: generated.go
+models:
+  Entity:
+    fields:
+      id:
+        resolver: true
+`))
+		require.NoError(t, err)
+		cfg.Schema = gqlparser.MustLoadSchema(&ast.Source{
+			Name: "schema.graphql",
+			Input: `
+				schema { query: Query }
+				type Query { _: Boolean }
+				type Entity { id: ID! }
+			`,
+		})
+		cfg.resolveModelBatchDefaults()
+		require.NotNil(t, cfg.Models["Entity"].Fields["id"].Batch)
+		require.True(t, *cfg.Models["Entity"].Fields["id"].Batch)
+	})
+
+	t.Run("batch defaults skip federation Entity type when federation enabled", func(t *testing.T) {
+		cfg, err := ReadConfig(strings.NewReader(`
+schema: schema.graphql
+resolver:
+  batch: true
+exec:
+  filename: generated.go
+models:
+  Entity:
+    fields:
+      findUserByID:
+        resolver: true
+`))
+		require.NoError(t, err)
+		cfg.Federation = PackageConfig{Filename: "graph/federation.go", Package: "graph"}
+		cfg.Schema = gqlparser.MustLoadSchema(&ast.Source{
+			Name: "schema.graphql",
+			Input: `
+				schema { query: Query }
+				type Query { _: Boolean }
+				type Entity { findUserByID(id: ID!): User }
+				type User { id: ID! }
+			`,
+		})
+		cfg.resolveModelBatchDefaults()
+		require.NotNil(t, cfg.Models["Entity"].Fields["findUserByID"].Batch)
+		require.False(t, *cfg.Models["Entity"].Fields["findUserByID"].Batch)
+	})
 }
 
 func TestConfigCheck(t *testing.T) {

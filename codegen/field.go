@@ -87,17 +87,24 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 		log.Println(err.Error())
 	}
 
-	// Set Batch flag from config (independent of resolver setting)
-	f.Batch = b.Config.Resolver.Batch.Enabled
+	// Set Batch flag from config (independent of resolver setting).
+	// Global batch applies only to fields that already need a resolver; explicit
+	// per-field batch settings in models yaml or @goField(batch:) take priority.
+	explicitBatch := false
 	if fieldCfg, ok := b.Config.Models[obj.Name]; ok {
 		if fieldEntry, ok := fieldCfg.Fields[field.Name]; ok && fieldEntry.Batch != nil {
 			f.Batch = *fieldEntry.Batch
+			explicitBatch = true
 		}
 	}
+	supportsBatch := b.Config.TypeSupportsBatchResolver(obj.Name, obj.Definition)
+	if !explicitBatch && b.Config.Resolver.Batch.Enabled && supportsBatch && f.IsResolver {
+		f.Batch = true
+	}
 	if f.Batch {
-		if f.Object.Root {
+		if !supportsBatch {
 			return nil, fmt.Errorf(
-				"batch resolver is not supported for root field %s.%s",
+				"batch resolver is not supported for field %s.%s",
 				obj.Name,
 				field.Name,
 			)

@@ -147,6 +147,19 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 
 			f.Directives = append(filteredDirs, f.Directives...)
 		}
+
+		// Propagate parent OBJECT/INTERFACE directives down to each field
+		// so that `type Foo @auth { id: ID! }` enforces @auth on every
+		// field resolver of Foo. Input objects are excluded — their
+		// directives run at the input-object site (#2281). Only directives
+		// whose declaration permits FIELD_DEFINITION are eligible.
+		if obj.Kind == ast.Object || obj.Kind == ast.Interface {
+			for _, dir := range obj.Directives {
+				if dir.IsLocation(ast.LocationFieldDefinition) {
+					f.Directives = append(f.Directives, dir)
+				}
+			}
+		}
 	}()
 
 	f.Stream = obj.Stream

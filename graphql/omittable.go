@@ -75,6 +75,14 @@ func (o *Omittable[T]) UnmarshalJSON(bytes []byte) error {
 }
 
 func (o Omittable[T]) MarshalGQL(w io.Writer) {
+	_ = o.MarshalGQLContext(context.Background(), w)
+}
+
+func (o *Omittable[T]) UnmarshalGQL(v any) error {
+	return o.UnmarshalGQLContext(context.Background(), v)
+}
+
+func (o Omittable[T]) MarshalGQLContext(ctx context.Context, w io.Writer) error {
 	var value any = o.value
 	if !o.set {
 		var zero T
@@ -82,68 +90,39 @@ func (o Omittable[T]) MarshalGQL(w io.Writer) {
 	}
 
 	switch marshaler := value.(type) {
+	case ContextMarshaler:
+		if err := marshaler.MarshalGQLContext(ctx, w); err != nil {
+			return err
+		}
 	case Marshaler:
 		marshaler.MarshalGQL(w)
-	case ContextMarshaler:
-		_ = marshaler.MarshalGQLContext(context.Background(), w)
 	default:
-		b, _ := json.Marshal(value)
+		b, err := json.Marshal(value)
+		if err != nil {
+			return err
+		}
 		w.Write(b)
-	}
-}
-
-func (o *Omittable[T]) UnmarshalGQL(bytes []byte) error {
-	switch unmarshaler := any(o.value).(type) {
-	case Unmarshaler:
-		if err := unmarshaler.UnmarshalGQL(bytes); err != nil {
-			return err
-		}
-		o.set = true
-	case ContextUnmarshaler:
-		if err := unmarshaler.UnmarshalGQLContext(context.Background(), bytes); err != nil {
-			return err
-		}
-		o.set = true
-	default:
-		if err := json.Unmarshal(bytes, &o.value); err != nil {
-			return err
-		}
-		o.set = true
 	}
 	return nil
 }
 
-func (o Omittable[T]) MarshalGQLContext(ctx context.Context, w io.Writer) {
-	var value any = o.value
-	if !o.set {
-		var zero T
-		value = zero
-	}
-
-	switch marshaler := value.(type) {
-	case ContextMarshaler:
-		_ = marshaler.MarshalGQLContext(ctx, w)
-	case Marshaler:
-		marshaler.MarshalGQL(w)
-	default:
-		b, _ := json.Marshal(value)
-		w.Write(b)
-	}
-}
-
-func (o *Omittable[T]) UnmarshalGQLContext(ctx context.Context, bytes []byte) error {
+func (o *Omittable[T]) UnmarshalGQLContext(ctx context.Context, v any) error {
 	switch unmarshaler := any(o.value).(type) {
 	case ContextUnmarshaler:
-		if err := unmarshaler.UnmarshalGQLContext(ctx, bytes); err != nil {
+		if err := unmarshaler.UnmarshalGQLContext(ctx, v); err != nil {
 			return err
 		}
 		o.set = true
 	case Unmarshaler:
-		if err := unmarshaler.UnmarshalGQL(bytes); err != nil {
+		if err := unmarshaler.UnmarshalGQL(v); err != nil {
 			return err
 		}
 		o.set = true
 	default:
+		bytes, err := json.Marshal(v)
+		if err != nil {
+			return err
+		}
 		if err := json.Unmarshal(bytes, &o.value); err != nil {
 			return err
 		}

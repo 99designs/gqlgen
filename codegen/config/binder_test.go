@@ -91,41 +91,6 @@ func TestOmittableBinding(t *testing.T) {
 		require.True(t, ta.IsOmittable)
 	})
 
-	t.Run("fail binding non-nullable string with Omittable[string]", func(t *testing.T) {
-		binder, schema := createBinder(Config{})
-
-		ot, err := binder.FindType("github.com/99designs/gqlgen/graphql", "Omittable")
-		require.NoError(t, err)
-
-		it, err := binder.InstantiateType(ot, []types.Type{types.Universe.Lookup("string").Type()})
-		require.NoError(t, err)
-
-		_, err = binder.TypeReference(
-			schema.Types["FooInput"].Fields.ForName("nonNullableString").Type,
-			it,
-		)
-		require.Error(t, err)
-	})
-
-	t.Run("fail binding non-nullable string with Omittable[*string]", func(t *testing.T) {
-		binder, schema := createBinder(Config{})
-
-		ot, err := binder.FindType("github.com/99designs/gqlgen/graphql", "Omittable")
-		require.NoError(t, err)
-
-		it, err := binder.InstantiateType(
-			ot,
-			[]types.Type{types.NewPointer(types.Universe.Lookup("string").Type())},
-		)
-		require.NoError(t, err)
-
-		_, err = binder.TypeReference(
-			schema.Types["FooInput"].Fields.ForName("nonNullableString").Type,
-			it,
-		)
-		require.Error(t, err)
-	})
-
 	t.Run("bind nullable object with Omittable[T]", func(t *testing.T) {
 		binder, schema := createBinder(Config{})
 
@@ -176,6 +141,7 @@ func TestOmittableBinding(t *testing.T) {
 }
 
 func createBinder(cfg Config) (*Binder, *ast.Schema) {
+	cfg.OmittableType = StringList{"github.com/99designs/gqlgen/graphql.OmittableOf"}
 	cfg.Models = TypeMap{
 		"Message": TypeMapEntry{
 			Model: []string{

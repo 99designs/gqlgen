@@ -5,7 +5,7 @@ go 1.25.0
 replace github.com/99designs/gqlgen => ../
 
 require (
-	github.com/99designs/gqlgen v0.17.91
+	github.com/99designs/gqlgen v0.17.92
 	github.com/coder/websocket v1.8.15
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/goccy/go-yaml v1.19.2
@@ -16,6 +16,8 @@ require (
 	github.com/vektah/gqlparser/v2 v2.5.35
 	golang.org/x/sync v0.21.0
 )
+
+require github.com/urfave/cli/v3 v3.10.0 // indirect
 
 require (
 	github.com/agnivade/levenshtein v1.2.1 // indirect

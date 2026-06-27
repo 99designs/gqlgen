@@ -8,7 +8,8 @@ type Inner {
     d: String!
 }
 
-# Collision exercises the unhandled key-collision bug described in PLAN.md.
+# Collision attempts to exercise a key collision to demonstrate
+# disambiguation resolution
 #
 # The two key paths normalize to the SAME Go field name:
 #   - scalar  "id"      -> templates.ToGo("id")        == "ID"  (initialism)

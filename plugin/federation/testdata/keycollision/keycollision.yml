@@ -1,0 +1,15 @@
+schema:
+  - "testdata/keycollision/keycollision.graphqls"
+exec:
+  filename: testdata/keycollision/generated/exec.go
+federation:
+  version: 2
+  filename: testdata/keycollision/generated/federation.go
+model:
+  filename: testdata/keycollision/generated/model/models.go
+  package: model
+resolver:
+  filename: testdata/keycollision/resolver.go
+  layout: follow-schema
+  dir: testdata/keycollision
+  package: keycollision

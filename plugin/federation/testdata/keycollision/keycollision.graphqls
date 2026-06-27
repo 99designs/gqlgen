@@ -1,0 +1,23 @@
+extend schema
+  @link(url: "https://specs.apollo.dev/federation/v2.7",
+        import: ["@key"])
+
+directive @entityResolver(multi: Boolean) on OBJECT
+
+type Inner {
+    d: String!
+}
+
+# Collision exercises the unhandled key-collision bug described in PLAN.md.
+#
+# The two key paths normalize to the SAME Go field name:
+#   - scalar  "id"      -> templates.ToGo("id")        == "ID"  (initialism)
+#   - nested  "i { d }" -> ToGo("i") + ToGo("d")       == "ID"
+#
+# In multi mode this produces a synthetic input type with two "ID" fields.
+# buildEntityResolverInputDefinitionSDL does no collision detection, so the
+# duplicate is emitted verbatim. See federation_keycollision_test.go.
+type Collision @key(fields: "id i { d }") @entityResolver(multi: true) {
+    id: ID!
+    i: Inner!
+}

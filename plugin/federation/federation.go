@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"go/types"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/ast"
@@ -622,7 +623,32 @@ func buildKeyFields(
 		resolverFields = append(resolverFields, keyFields[i].Field.ToGo())
 	}
 
+	assignKeyFieldGoNames(keyFields)
+
 	return keyFields, resolverFields
+}
+
+// assignKeyFieldGoNames sets each key field's GoName to a Go identifier that is
+// unique within the resolver.
+//
+// Requires: keyFields are the key fields of a single resolver, in schema order.
+// Ensures:  every GoName equals Field.ToGo() when that name is unique among the
+// key fields; otherwise the second and later collisions get the smallest
+// integer suffix (>= 2) that makes them unique. Assignment is deterministic in
+// schema order and mutates only the GoName field. The names are idempotent under
+// ToGo, so they are valid as SDL field names, modelgen struct fields, and
+// template struct-literal keys alike.
+func assignKeyFieldGoNames(keyFields []*KeyField) {
+	used := make(map[string]bool, len(keyFields))
+	for _, keyField := range keyFields {
+		base := keyField.Field.ToGo()
+		name := base
+		for i := 2; used[name]; i++ {
+			name = base + strconv.Itoa(i)
+		}
+		used[name] = true
+		keyField.GoName = name
+	}
 }
 
 func buildRequires(schemaType *ast.Definition) []*Requires {
@@ -797,7 +823,7 @@ func buildEntityResolverInputDefinitionSDL(resolver *EntityResolver) string {
 	for _, keyField := range resolver.KeyFields {
 		fmt.Fprintf(&entityResolverInputDefinitionSb714,
 			"\t%s: %s\n",
-			keyField.Field.ToGo(),
+			keyField.GoName,
 			keyField.Definition.Type.String(),
 		)
 	}

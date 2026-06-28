@@ -89,6 +89,59 @@ func TestNew(t *testing.T) {
 	})
 }
 
+func TestAssignKeyFieldGoNames(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		fields [][]string
+		want   []string
+	}{
+		"no collision keeps plain names": {
+			fields: [][]string{{"id"}, {"name"}},
+			want:   []string{"ID", "Name"},
+		},
+		"flat vs nested collision is suffixed": {
+			fields: [][]string{{"id"}, {"i", "d"}},
+			want:   []string{"ID", "ID2"},
+		},
+		"three-way collision increments": {
+			fields: [][]string{{"id"}, {"i", "d"}, {"i", "d"}},
+			want:   []string{"ID", "ID2", "ID3"},
+		},
+		"collision after an unrelated field": {
+			fields: [][]string{{"name"}, {"id"}, {"i", "d"}},
+			want:   []string{"Name", "ID", "ID2"},
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			keyFields := make([]*KeyField, len(tc.fields))
+			for i, f := range tc.fields {
+				keyFields[i] = &KeyField{Field: fieldset.Field(f)}
+			}
+
+			assignKeyFieldGoNames(keyFields)
+
+			got := make([]string, len(keyFields))
+			seen := make(map[string]bool, len(keyFields))
+			for i, kf := range keyFields {
+				got[i] = kf.GoName
+				assert.False(
+					t,
+					seen[kf.GoName],
+					"names must be unique, got duplicate %q",
+					kf.GoName,
+				)
+				seen[kf.GoName] = true
+			}
+			assert.Equal(t, tc.want, got)
+		})
+	}
+}
+
 func TestWithEntities(t *testing.T) {
 	f, cfg := load(t, "testdata/allthethings/gqlgen.yml")
 

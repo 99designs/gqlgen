@@ -57,6 +57,13 @@ type KeyField struct {
 	Definition *ast.FieldDefinition
 	Field      fieldset.Field        // len > 1 for nested fields
 	Type       *config.TypeReference // The Go representation of that field type
+	// GoName is the field name this key takes in the generated multi-resolver
+	// input struct. It is normally Field.ToGo(), but is disambiguated with a
+	// numeric suffix when two key paths in the same resolver would otherwise
+	// produce the same Go name (e.g. "id" and "i { d }" both yield "ID").
+	// Using a single stored name keeps the SDL input field, the modelgen struct
+	// field, and the template's struct literal in agreement.
+	GoName string
 }
 
 // Requires represents an @requires clause

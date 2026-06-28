@@ -253,7 +253,7 @@ func (ec *executionContext) resolveManyEntities(
 
 						typedReps[i] = &{{.LookupInputType}} {
 							{{ range $i, $keyField := .KeyFields -}}
-								{{$keyField.Field.ToGo}}: id{{$i}},
+								{{$keyField.GoName}}: id{{$i}},
 							{{end}}
 							}
 						}

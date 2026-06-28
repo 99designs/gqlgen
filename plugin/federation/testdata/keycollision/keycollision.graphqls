@@ -16,8 +16,12 @@ type Inner {
 #   - nested  "i { d }" -> ToGo("i") + ToGo("d")       == "ID"
 #
 # In multi mode this produces a synthetic input type with two "ID" fields.
-# buildEntityResolverInputDefinitionSDL does no collision detection, so the
-# duplicate is emitted verbatim. See federation_keycollision_test.go.
+# We perform collision detection now, so these will be 
+# disambiguated to ID and ID2 on the generated
+# multi-resolver input type, 
+# so the schema loads cleanly instead of failing with
+# a duplicate-field error.
+# See federation_keycollision_test.go.
 type Collision @key(fields: "id i { d }") @entityResolver(multi: true) {
     id: ID!
     i: Inner!

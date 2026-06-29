@@ -446,3 +446,26 @@ func load(t *testing.T, name string) (*Federation, *config.Config) {
 	require.NoError(t, cfg.Init())
 	return f, cfg
 }
+
+func TestKeyFieldUndeclared(t *testing.T) {
+	// A @key that references an undeclared (here, nested) field must produce a
+	// clear validation error during InjectSourcesLate, not a nil pointer
+	// dereference panic. See the "id order { id }" key where "order" is not
+	// declared on TestEnt.
+	cfg, err := config.LoadConfig("testdata/keyfieldundeclared/keyfieldundeclared.yml")
+	require.NoError(t, err)
+	if cfg.Federation.Version == 0 {
+		cfg.Federation.Version = 1
+	}
+
+	f := &Federation{version: cfg.Federation.Version}
+	early, err := f.InjectSourcesEarly()
+	require.NoError(t, err)
+	cfg.Sources = append(cfg.Sources, early...)
+	require.NoError(t, cfg.LoadSchema())
+
+	_, err = f.InjectSourcesLate(cfg.Schema)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "TestEnt")
+	require.Contains(t, err.Error(), "order.id")
+}

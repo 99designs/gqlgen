@@ -205,7 +205,11 @@ func (f *Federation) InjectSourcesEarly() ([]*ast.Source, error) {
 // InjectSourcesLate creates a GraphQL Entity type with all
 // the fields that had the @key directive
 func (f *Federation) InjectSourcesLate(schema *ast.Schema) ([]*ast.Source, error) {
-	f.Entities = f.buildEntities(schema, f.version)
+	builtEntities, err := f.buildEntities(schema, f.version)
+	if err != nil {
+		return nil, err
+	}
+	f.Entities = builtEntities
 
 	entities := make([]string, 0)
 	resolvers := make([]string, 0)
@@ -451,10 +455,13 @@ func populateKeyFieldTypes(
 	}
 }
 
-func (f *Federation) buildEntities(schema *ast.Schema, version int) []*Entity {
+func (f *Federation) buildEntities(schema *ast.Schema, version int) ([]*Entity, error) {
 	entities := make([]*Entity, 0)
 	for _, schemaType := range schema.Types {
-		entity := f.buildEntity(schemaType, schema, version)
+		entity, err := f.buildEntity(schemaType, schema, version)
+		if err != nil {
+			return nil, err
+		}
 		if entity != nil {
 			entities = append(entities, entity)
 		}
@@ -465,17 +472,17 @@ func (f *Federation) buildEntities(schema *ast.Schema, version int) []*Entity {
 		return entities[i].Name < entities[j].Name
 	})
 
-	return entities
+	return entities, nil
 }
 
 func (f *Federation) buildEntity(
 	schemaType *ast.Definition,
 	schema *ast.Schema,
 	version int,
-) *Entity {
+) (*Entity, error) {
 	keys, ok := isFederatedEntity(schemaType)
 	if !ok {
-		return nil
+		return nil, nil
 	}
 
 	if (schemaType.Kind == ast.Interface) && (len(schema.GetPossibleTypes(schemaType)) == 0) {
@@ -483,7 +490,7 @@ func (f *Federation) buildEntity(
 			"@key directive found on unused \"interface %s\". Will be ignored.\n",
 			schemaType.Name,
 		)
-		return nil
+		return nil, nil
 	}
 
 	entity := &Entity{
@@ -513,16 +520,20 @@ func (f *Federation) buildEntity(
 	//       id: ID @external
 	//    }
 	if entity.allFieldsAreExternal(version) {
-		return entity
+		return entity, nil
 	}
 
-	entity.Resolvers = buildResolvers(schemaType, schema, keys, entity.Multi)
+	resolvers, err := buildResolvers(schemaType, schema, keys, entity.Multi)
+	if err != nil {
+		return nil, err
+	}
+	entity.Resolvers = resolvers
 	entity.Requires = buildRequires(schemaType)
 	if len(entity.Requires) > 0 {
 		f.usesRequires = true
 	}
 
-	return entity
+	return entity, nil
 }
 
 // isMultiEntity returns @entityResolver(multi) value, if directive is not defined,
@@ -547,17 +558,23 @@ func buildResolvers(
 	schema *ast.Schema,
 	keys []*ast.Directive,
 	multi bool,
-) []*EntityResolver {
+) ([]*EntityResolver, error) {
 	resolvers := make([]*EntityResolver, 0)
 	for _, dir := range keys {
 		if len(dir.Arguments) > 2 {
-			panic("More than two arguments provided for @key declaration.")
+			return nil, fmt.Errorf(
+				"federation: @key on %q: more than two arguments provided",
+				schemaType.Name,
+			)
 		}
-		keyFields, resolverFields := buildKeyFields(
+		keyFields, resolverFields, err := buildKeyFields(
 			schemaType,
 			schema,
 			dir,
 		)
+		if err != nil {
+			return nil, err
+		}
 
 		resolverFieldsToGo := schemaType.Name + "By" + strings.Join(resolverFields, "And")
 		var resolverName string
@@ -576,7 +593,7 @@ func buildResolvers(
 		})
 	}
 
-	return resolvers
+	return resolvers, nil
 }
 
 func extractFields(
@@ -602,10 +619,10 @@ func buildKeyFields(
 	schemaType *ast.Definition,
 	schema *ast.Schema,
 	dir *ast.Directive,
-) ([]*KeyField, []string) {
+) ([]*KeyField, []string, error) {
 	fieldsRaw, err := extractFields(dir)
 	if err != nil {
-		panic("More than one `fields` argument provided for declaration.")
+		return nil, nil, fmt.Errorf("federation: invalid @key on %q: %w", schemaType.Name, err)
 	}
 
 	keyFieldSet := fieldset.New(fieldsRaw, nil)
@@ -616,7 +633,11 @@ func buildKeyFields(
 		def := field.FieldDefinition(schemaType, schema)
 
 		if def == nil {
-			panic(fmt.Sprintf("no field for %v", field))
+			return nil, nil, fmt.Errorf(
+				"federation: @key on %q references field %q, which is not defined on the type",
+				schemaType.Name,
+				field.Join("."),
+			)
 		}
 
 		keyFields[i] = &KeyField{Definition: def, Field: field}
@@ -625,7 +646,7 @@ func buildKeyFields(
 
 	assignKeyFieldGoNames(keyFields)
 
-	return keyFields, resolverFields
+	return keyFields, resolverFields, nil
 }
 
 // assignKeyFieldGoNames sets each key field's GoName to a Go identifier that is

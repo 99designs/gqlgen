@@ -124,3 +124,36 @@ func TestToGoPrivate(t *testing.T) {
 	require.Equal(t, "fooBar", Field{"foo", "bar"}.ToGoPrivate())
 	require.Equal(t, "barID", Field{"bar", "id"}.ToGoPrivate())
 }
+
+func TestFieldDefinitionMissingField(t *testing.T) {
+	inner := &ast.Definition{
+		Kind:   ast.Object,
+		Name:   "I",
+		Fields: ast.FieldList{{Name: "d", Type: ast.NamedType("ID", nil)}},
+	}
+	testEnt := &ast.Definition{
+		Kind: ast.Object,
+		Name: "TestEnt",
+		Fields: ast.FieldList{
+			{Name: "id", Type: ast.NamedType("ID", nil)},
+			{Name: "i", Type: ast.NamedType("I", nil)},
+		},
+	}
+	schema := &ast.Schema{Types: map[string]*ast.Definition{"TestEnt": testEnt, "I": inner}}
+
+	// A missing segment must return nil (the "not found" contract) rather than
+	// panicking with a nil pointer dereference. The caller turns nil into a
+	// clear validation error.
+	cases := map[string]Field{
+		"missing first segment":        {"order", "id"},  // "order" is not on TestEnt
+		"missing intermediate segment": {"i", "missing"}, // "i" exists; "missing" is not on I
+	}
+	for name, f := range cases {
+		t.Run(name, func(t *testing.T) {
+			require.Nil(t, f.FieldDefinition(testEnt, schema))
+		})
+	}
+
+	// A valid nested path still resolves.
+	require.NotNil(t, Field{"i", "d"}.FieldDefinition(testEnt, schema))
+}

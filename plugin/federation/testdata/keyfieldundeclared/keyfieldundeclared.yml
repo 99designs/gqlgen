@@ -1,0 +1,7 @@
+schema:
+  - "testdata/keyfieldundeclared/keyfieldundeclared.graphqls"
+exec:
+  filename: testdata/keyfieldundeclared/generated/exec.go
+federation:
+  version: 2
+  filename: testdata/keyfieldundeclared/generated/federation.go

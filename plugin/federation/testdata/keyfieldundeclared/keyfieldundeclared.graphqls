@@ -1,0 +1,10 @@
+extend schema
+  @link(url: "https://specs.apollo.dev/federation/v2.7",
+        import: ["@key"])
+
+# TestEnt's @key references the nested path "order { id }", but "order" is not
+# declared on the type. The federation plugin must surface this as a clear
+# validation error during InjectSourcesLate, not a nil pointer dereference.
+type TestEnt @key(fields: "id order { id }") {
+    id: ID!
+}

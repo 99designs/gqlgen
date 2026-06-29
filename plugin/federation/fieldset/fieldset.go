@@ -54,6 +54,12 @@ func (f Field) FieldDefinition(
 	def := objType.Fields.ForName(f[0])
 
 	for _, part := range f[1:] {
+		// A missing first or intermediate segment leaves def nil; return nil
+		// (the "field not found" contract) rather than dereferencing it below.
+		// The caller turns this into an actionable error.
+		if def == nil {
+			return nil
+		}
 		if objType.Kind != ast.Object {
 			panic(fmt.Sprintf(`invalid sub-field reference "%s" in %v: `, objType.Name, f))
 		}

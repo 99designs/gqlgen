@@ -3,7 +3,7 @@ module github.com/gqlgen/_examples/mini-habr-with-subscriptions
 go 1.25.0
 
 require (
-	github.com/99designs/gqlgen v0.17.92
+	github.com/99designs/gqlgen v0.17.93
 	github.com/coder/websocket v1.8.15
 	github.com/go-redis/cache/v9 v9.0.0
 	github.com/google/uuid v1.6.0
@@ -28,7 +28,7 @@ require (
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.22 // indirect
 	github.com/sosodev/duration v1.4.0 // indirect
-	github.com/urfave/cli/v3 v3.9.0 // indirect
+	github.com/urfave/cli/v3 v3.10.1 // indirect
 	github.com/vmihailenco/go-tinylfu v0.2.2 // indirect
 	github.com/vmihailenco/msgpack/v5 v5.4.1 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
@@ -37,7 +37,7 @@ require (
 	golang.org/x/sync v0.21.0 // indirect
 	golang.org/x/sys v0.46.0 // indirect
 	golang.org/x/text v0.38.0 // indirect
-	golang.org/x/tools v0.46.0 // indirect
+	golang.org/x/tools v0.47.0 // indirect
 )
 
 replace github.com/99designs/gqlgen => ../../

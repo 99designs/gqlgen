@@ -16,6 +16,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/tools/go/packages"
 
 	"github.com/99designs/gqlgen/codegen/config"
 	"github.com/99designs/gqlgen/graphql"
@@ -125,11 +126,7 @@ func TestModelGeneration(t *testing.T) {
 	})
 
 	t.Run("implemented interfaces", func(t *testing.T) {
-		pkg, err := parseAst("out")
-		require.NoError(t, err)
-
-		path := filepath.Join("out", "generated.go")
-		generated := pkg.Files[path]
+		generated := parseGeneratedFile(t, "out")
 
 		type field struct {
 			typ  string
@@ -239,11 +236,7 @@ func TestModelGeneration(t *testing.T) {
 	})
 
 	t.Run("implemented interfaces type CDImplemented", func(t *testing.T) {
-		pkg, err := parseAst("out")
-		require.NoError(t, err)
-
-		path := filepath.Join("out", "generated.go")
-		generated := pkg.Files[path]
+		generated := parseGeneratedFile(t, "out")
 
 		wantMethods := []string{
 			"IsA",
@@ -626,15 +619,27 @@ func mutateHook(b *ModelBuild) *ModelBuild {
 	return b
 }
 
-func parseAst(path string) (*ast.Package, error) {
-	// test setup to parse the types
-	fset := token.NewFileSet()
-	// help wanted to golang.org/x/tools/go/packages
-	pkgs, err := parser.ParseDir(fset, path, nil, parser.AllErrors)
-	if err != nil {
-		return nil, err
+// parseGeneratedFile loads the built fixture package in dir (relative to this
+// package) and returns the AST of its generated.go. It uses go/packages because
+// go/parser.ParseDir is deprecated (it ignores build tags).
+func parseGeneratedFile(t *testing.T, dir string) *ast.File {
+	t.Helper()
+
+	cfg := &packages.Config{Mode: packages.NeedFiles | packages.NeedSyntax}
+	pkgs, err := packages.Load(cfg, "github.com/99designs/gqlgen/plugin/modelgen/"+dir)
+	require.NoError(t, err)
+	require.Len(t, pkgs, 1)
+
+	pkg := pkgs[0]
+	require.Empty(t, pkg.Errors)
+
+	for _, f := range pkg.Syntax {
+		if filepath.Base(pkg.Fset.Position(f.Pos()).Filename) == "generated.go" {
+			return f
+		}
 	}
-	return pkgs["out"], nil
+	t.Fatalf("generated.go not found in package %q", dir)
+	return nil
 }
 
 func goBuild(t *testing.T, path string) error {

@@ -1646,8 +1646,7 @@ func marshalN__DirectiveLocation2string(ctx context.Context, ec *executionContex
 }
 
 func unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, ec *executionContext, v any) ([]string, error) {
-	var vSlice []any
-	vSlice = graphql.CoerceList(v)
+	vSlice := graphql.CoerceList(v)
 	var err error
 	res := make([]string, len(vSlice))
 	for i := range vSlice {

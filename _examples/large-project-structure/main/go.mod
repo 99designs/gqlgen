@@ -6,7 +6,7 @@ require (
 	github.com/99designs/gqlgen v0.17.93
 	github.com/99designs/gqlgen/_examples/large-project-structure/integration v0.0.0-00010101000000-000000000000
 	github.com/99designs/gqlgen/_examples/large-project-structure/shared v0.0.0
-	github.com/vektah/gqlparser/v2 v2.5.35
+	github.com/vektah/gqlparser/v2 v2.5.36
 )
 
 replace github.com/99designs/gqlgen/_examples/large-project-structure/shared => ../shared

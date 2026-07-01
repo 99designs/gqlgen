@@ -3441,8 +3441,7 @@ func marshalNString2string(ctx context.Context, ec *executionContext, sel ast.Se
 }
 
 func unmarshalNString2ᚕstringᚄ(ctx context.Context, ec *executionContext, v any) ([]string, error) {
-	var vSlice []any
-	vSlice = graphql.CoerceList(v)
+	vSlice := graphql.CoerceList(v)
 	var err error
 	res := make([]string, len(vSlice))
 	for i := range vSlice {
@@ -3537,8 +3536,7 @@ func marshalN__DirectiveLocation2string(ctx context.Context, ec *executionContex
 }
 
 func unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, ec *executionContext, v any) ([]string, error) {
-	var vSlice []any
-	vSlice = graphql.CoerceList(v)
+	vSlice := graphql.CoerceList(v)
 	var err error
 	res := make([]string, len(vSlice))
 	for i := range vSlice {
@@ -3718,8 +3716,7 @@ func unmarshalORole2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserver�
 	if v == nil {
 		return nil, nil
 	}
-	var vSlice []any
-	vSlice = graphql.CoerceList(v)
+	vSlice := graphql.CoerceList(v)
 	var err error
 	res := make([]RoleModel, len(vSlice))
 	for i := range vSlice {
@@ -3787,8 +3784,7 @@ func unmarshalOString2ᚕstringᚄ(ctx context.Context, ec *executionContext, v 
 	if v == nil {
 		return nil, nil
 	}
-	var vSlice []any
-	vSlice = graphql.CoerceList(v)
+	vSlice := graphql.CoerceList(v)
 	var err error
 	res := make([]string, len(vSlice))
 	for i := range vSlice {

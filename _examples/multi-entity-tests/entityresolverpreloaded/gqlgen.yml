@@ -1,0 +1,51 @@
+# Where are all the schema files located? globs are supported eg  src/**/*.graphqls
+schema:
+  - graph/*.graphqls
+
+# Where should the generated server code go?
+exec:
+  package: graph
+  layout: single-file # Only other option is "follow-schema," ie multi-file.
+  filename: graph/generated.go
+
+# Uncomment to enable federation
+federation:
+  filename: graph/federation.go
+  package: graph
+  version: 2
+  options:
+    # preloaded_requires populates each entity's scalar @requires fields onto the
+    # batch resolver's input representation *before* it runs, so a multi resolver
+    # sees every entity's @requires data in one scope.
+    preloaded_requires: true
+    # entity_resolver_multi makes every entity resolver a batch (FindMany) call;
+    # preloaded requires multi.
+    entity_resolver_multi: true
+
+# Where should any generated models go?
+model:
+  filename: graph/model/models_gen.go
+  package: model
+
+# Where should the resolver implementations go?
+resolver:
+  package: graph
+  layout: follow-schema # Only other option is "single-file."
+  dir: graph
+  filename_template: "{name}.resolvers.go"
+
+# This section declares type mapping between the GraphQL and go type systems
+models:
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.ID
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int32
+  Int64:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64

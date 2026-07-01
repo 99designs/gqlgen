@@ -3,6 +3,8 @@ package fedruntime
 import (
 	"errors"
 	"fmt"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 // Service is the service object that the
@@ -10,6 +12,26 @@ import (
 // query
 type Service struct {
 	SDL string `json:"sdl"`
+}
+
+// SplitEntityBatchErrors separates the error returned by a multi entity
+// resolver into per-index errors and a single fatal error.
+//
+// If the resolver returns a graphql.BatchErrors (e.g. graphql.BatchErrorList),
+// the per-index slice is returned and fatal is nil: each non-nil element
+// corresponds to the entity at that index, so the generated runtime can report
+// it against _entities[index] while still placing the entities that succeeded.
+// Any other non-nil error is treated as fatal for the whole batch group,
+// preserving the original all-or-nothing behavior. A nil error yields (nil, nil).
+func SplitEntityBatchErrors(err error) (perIndex []error, fatal error) {
+	if err == nil {
+		return nil, nil
+	}
+	var batchErrs graphql.BatchErrors
+	if errors.As(err, &batchErrs) {
+		return batchErrs.Errors(), nil
+	}
+	return nil, err
 }
 
 // Everything with a @key implements this

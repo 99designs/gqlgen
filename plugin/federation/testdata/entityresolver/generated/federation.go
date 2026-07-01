@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
 	"github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/generated/model"
 )
@@ -417,11 +418,16 @@ func (ec *executionContext) resolveManyEntities(
 			}
 
 			entities, err := ec.Resolvers.Entity().FindManyMultiHelloByNames(ctx, typedReps)
+			entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
 			if err != nil {
 				return err
 			}
 
 			for i, entity := range entities {
+				if i < len(entityErrs) && entityErrs[i] != nil {
+					ec.Error(graphql.WithPathContext(ctx, graphql.NewPathWithIndex(reps[i].index)), entityErrs[i])
+					continue
+				}
 				list[reps[i].index] = entity
 			}
 			return nil
@@ -452,11 +458,16 @@ func (ec *executionContext) resolveManyEntities(
 			}
 
 			entities, err := ec.Resolvers.Entity().FindManyMultiHelloMultipleRequiresByNames(ctx, typedReps)
+			entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
 			if err != nil {
 				return err
 			}
 
 			for i, entity := range entities {
+				if i < len(entityErrs) && entityErrs[i] != nil {
+					ec.Error(graphql.WithPathContext(ctx, graphql.NewPathWithIndex(reps[i].index)), entityErrs[i])
+					continue
+				}
 				entity.Key1, err = ec.unmarshalNString2string(ctx, reps[i].entity["key1"])
 				if err != nil {
 					return err
@@ -495,11 +506,16 @@ func (ec *executionContext) resolveManyEntities(
 			}
 
 			entities, err := ec.Resolvers.Entity().FindManyMultiHelloRequiresByNames(ctx, typedReps)
+			entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
 			if err != nil {
 				return err
 			}
 
 			for i, entity := range entities {
+				if i < len(entityErrs) && entityErrs[i] != nil {
+					ec.Error(graphql.WithPathContext(ctx, graphql.NewPathWithIndex(reps[i].index)), entityErrs[i])
+					continue
+				}
 				entity.Key1, err = ec.unmarshalNString2string(ctx, reps[i].entity["key1"])
 				if err != nil {
 					return err
@@ -534,11 +550,16 @@ func (ec *executionContext) resolveManyEntities(
 			}
 
 			entities, err := ec.Resolvers.Entity().FindManyMultiHelloWithErrorByNames(ctx, typedReps)
+			entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
 			if err != nil {
 				return err
 			}
 
 			for i, entity := range entities {
+				if i < len(entityErrs) && entityErrs[i] != nil {
+					ec.Error(graphql.WithPathContext(ctx, graphql.NewPathWithIndex(reps[i].index)), entityErrs[i])
+					continue
+				}
 				list[reps[i].index] = entity
 			}
 			return nil
@@ -569,11 +590,16 @@ func (ec *executionContext) resolveManyEntities(
 			}
 
 			entities, err := ec.Resolvers.Entity().FindManyMultiPlanetRequiresNestedByNames(ctx, typedReps)
+			entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
 			if err != nil {
 				return err
 			}
 
 			for i, entity := range entities {
+				if i < len(entityErrs) && entityErrs[i] != nil {
+					ec.Error(graphql.WithPathContext(ctx, graphql.NewPathWithIndex(reps[i].index)), entityErrs[i])
+					continue
+				}
 				entity.World.Foo, err = ec.unmarshalNString2string(ctx, reps[i].entity["world"].(map[string]any)["foo"])
 				if err != nil {
 					return err

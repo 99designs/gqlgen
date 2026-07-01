@@ -1,0 +1,16 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+# presentation subgraph
+type Product @key(fields: "id") {
+  id: ID!
+  variations: [Variation!]! @external
+  display: Variation! @requires(fields: "variations {price imageUrl id}")
+}
+
+type Variation {
+  id: ID!
+  imageUrl: String!
+  price: Float!
+}

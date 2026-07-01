@@ -10,6 +10,7 @@ import (
 	"sync"
 
 	"github.com/99designs/gqlgen/_examples/federation/reviews/graph/model"
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
 )
 
@@ -223,11 +224,16 @@ func (ec *executionContext) resolveManyEntities(
 			}
 
 			entities, err := ec.Resolvers.Entity().FindManyProductByManufacturerIDAndIDs(ctx, typedReps)
+			entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
 			if err != nil {
 				return err
 			}
 
 			for i, entity := range entities {
+				if i < len(entityErrs) && entityErrs[i] != nil {
+					ec.Error(graphql.WithPathContext(ctx, graphql.NewPathWithIndex(reps[i].index)), entityErrs[i])
+					continue
+				}
 
 				list[reps[i].index] = entity
 			}

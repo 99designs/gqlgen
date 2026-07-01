@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
 )
 
@@ -431,11 +432,16 @@ func (ec *executionContext) resolveManyEntities(
 			}
 
 			entities, err := ec.Resolvers.Entity().FindManyMultiHelloByNames(ctx, typedReps)
+			entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
 			if err != nil {
 				return err
 			}
 
 			for i, entity := range entities {
+				if i < len(entityErrs) && entityErrs[i] != nil {
+					ec.Error(graphql.WithPathContext(ctx, graphql.NewPathWithIndex(reps[i].index)), entityErrs[i])
+					continue
+				}
 				list[reps[i].index] = entity
 			}
 			return nil
@@ -466,11 +472,16 @@ func (ec *executionContext) resolveManyEntities(
 			}
 
 			entities, err := ec.Resolvers.Entity().FindManyMultiHelloMultipleRequiresByNames(ctx, typedReps)
+			entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
 			if err != nil {
 				return err
 			}
 
 			for i, entity := range entities {
+				if i < len(entityErrs) && entityErrs[i] != nil {
+					ec.Error(graphql.WithPathContext(ctx, graphql.NewPathWithIndex(reps[i].index)), entityErrs[i])
+					continue
+				}
 				err = ec.PopulateMultiHelloMultipleRequiresRequires(ctx, entity, reps[i].entity)
 				if err != nil {
 					return fmt.Errorf(`populating requires for Entity "MultiHelloMultipleRequires": %w`, err)
@@ -506,11 +517,16 @@ func (ec *executionContext) resolveManyEntities(
 			}
 
 			entities, err := ec.Resolvers.Entity().FindManyMultiHelloRequiresByNames(ctx, typedReps)
+			entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
 			if err != nil {
 				return err
 			}
 
 			for i, entity := range entities {
+				if i < len(entityErrs) && entityErrs[i] != nil {
+					ec.Error(graphql.WithPathContext(ctx, graphql.NewPathWithIndex(reps[i].index)), entityErrs[i])
+					continue
+				}
 				err = ec.PopulateMultiHelloRequiresRequires(ctx, entity, reps[i].entity)
 				if err != nil {
 					return fmt.Errorf(`populating requires for Entity "MultiHelloRequires": %w`, err)
@@ -546,11 +562,16 @@ func (ec *executionContext) resolveManyEntities(
 			}
 
 			entities, err := ec.Resolvers.Entity().FindManyMultiHelloWithErrorByNames(ctx, typedReps)
+			entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
 			if err != nil {
 				return err
 			}
 
 			for i, entity := range entities {
+				if i < len(entityErrs) && entityErrs[i] != nil {
+					ec.Error(graphql.WithPathContext(ctx, graphql.NewPathWithIndex(reps[i].index)), entityErrs[i])
+					continue
+				}
 				list[reps[i].index] = entity
 			}
 			return nil
@@ -581,11 +602,16 @@ func (ec *executionContext) resolveManyEntities(
 			}
 
 			entities, err := ec.Resolvers.Entity().FindManyMultiPlanetRequiresNestedByNames(ctx, typedReps)
+			entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
 			if err != nil {
 				return err
 			}
 
 			for i, entity := range entities {
+				if i < len(entityErrs) && entityErrs[i] != nil {
+					ec.Error(graphql.WithPathContext(ctx, graphql.NewPathWithIndex(reps[i].index)), entityErrs[i])
+					continue
+				}
 				err = ec.PopulateMultiPlanetRequiresNestedRequires(ctx, entity, reps[i].entity)
 				if err != nil {
 					return fmt.Errorf(`populating requires for Entity "MultiPlanetRequiresNested": %w`, err)

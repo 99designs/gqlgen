@@ -1,0 +1,16 @@
+schema:
+  - "testdata/entityresolverpreloaded/schema.graphql"
+exec:
+  filename: testdata/entityresolverpreloaded/generated/exec.go
+federation:
+  filename: testdata/entityresolverpreloaded/generated/federation.go
+  options:
+    preloaded_requires: true
+model:
+  filename: testdata/entityresolverpreloaded/generated/model/models.go
+  package: model
+resolver:
+  filename: testdata/entityresolverpreloaded/resolver.go
+  layout: follow-schema
+  dir: testdata/entityresolverpreloaded
+  package: entityresolverpreloaded

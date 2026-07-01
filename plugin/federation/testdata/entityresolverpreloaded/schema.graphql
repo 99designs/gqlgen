@@ -1,0 +1,21 @@
+directive @entityResolver(multi: Boolean) on OBJECT
+
+# Adapted from _examples/multi-entity-tests/README.md to the form
+# preloaded_requires supports: scalar @requires.
+#
+# The presentation subgraph chooses how to display each product. The choice
+# depends on `category` (owned by another subgraph, arriving via @requires) and
+# is naturally batched — think one ML-inference call scoring every product at
+# once. preloaded hands FindManyProductByIDs every product's category
+# in a single scope, so the batched computation can run once instead of N times.
+#
+# (The README's `@requires(fields: "variations { price imageUrl id }")` requires
+# object leaves; gqlgen can only unmarshal scalar leaves of a representation, and
+# this feature supports flat scalar @requires, so the example is recast with a
+# scalar requirement.)
+
+type Product @key(fields: "id") @entityResolver(multi: true) {
+    id: ID! @external
+    category: String! @external
+    display: String! @requires(fields: "category")
+}

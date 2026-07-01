@@ -9,6 +9,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
 	"github.com/99designs/gqlgen/plugin/federation/testdata/allthethings/model"
 )
@@ -333,11 +334,16 @@ func (ec *executionContext) resolveManyEntities(
 			}
 
 			entities, err := ec.Resolvers.Entity().FindManyMultiHelloMultiKeyByNames(ctx, typedReps)
+			entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
 			if err != nil {
 				return err
 			}
 
 			for i, entity := range entities {
+				if i < len(entityErrs) && entityErrs[i] != nil {
+					ec.Error(graphql.WithPathContext(ctx, graphql.NewPathWithIndex(reps[i].index)), entityErrs[i])
+					continue
+				}
 				list[reps[i].index] = entity
 			}
 			return nil
@@ -357,11 +363,16 @@ func (ec *executionContext) resolveManyEntities(
 			}
 
 			entities, err := ec.Resolvers.Entity().FindManyMultiHelloMultiKeyByKey2s(ctx, typedReps)
+			entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
 			if err != nil {
 				return err
 			}
 
 			for i, entity := range entities {
+				if i < len(entityErrs) && entityErrs[i] != nil {
+					ec.Error(graphql.WithPathContext(ctx, graphql.NewPathWithIndex(reps[i].index)), entityErrs[i])
+					continue
+				}
 				list[reps[i].index] = entity
 			}
 			return nil

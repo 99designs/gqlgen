@@ -1,0 +1,18 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+directive @goField(batch: Boolean) on FIELD_DEFINITION
+
+# presentation subgraph
+type Product @key(fields: "id") {
+  id: ID!
+  variations: [Variation!]! @external
+  display: Variation! @requires(fields: "variations {price imageUrl id}") @goField(batch: true)
+}
+
+type Variation {
+  id: ID!
+  imageUrl: String!
+  price: Float!
+}

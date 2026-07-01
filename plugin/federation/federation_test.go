@@ -7,6 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"github.com/vektah/gqlparser/v2/ast"
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/99designs/gqlgen/codegen"
@@ -88,6 +89,52 @@ func TestNew(t *testing.T) {
 		require.Error(t, err)
 		assert.Nil(t, plugin)
 	})
+
+	t.Run("success_preloaded", func(t *testing.T) {
+		cfg := &config.Config{
+			Federation: config.PackageConfig{
+				Version: 2,
+				Options: map[string]bool{
+					"preloaded_requires": true,
+				},
+			},
+		}
+		plugin, err := New(1, cfg)
+		require.NoError(t, err)
+		require.NotNil(t, plugin)
+		assert.True(t, plugin.PackageOptions.PreloadedRequires)
+	})
+
+	t.Run("error_preloaded_with_explicit_requires", func(t *testing.T) {
+		cfg := &config.Config{
+			Federation: config.PackageConfig{
+				Version: 2,
+				Options: map[string]bool{
+					"preloaded_requires": true,
+					"explicit_requires":  true,
+				},
+			},
+		}
+		plugin, err := New(1, cfg)
+		require.Error(t, err)
+		assert.Nil(t, plugin)
+	})
+
+	t.Run("error_preloaded_with_computed_requires", func(t *testing.T) {
+		cfg := &config.Config{
+			Federation: config.PackageConfig{
+				Version: 2,
+				Options: map[string]bool{
+					"preloaded_requires": true,
+					"computed_requires":  true,
+				},
+			},
+			CallArgumentDirectivesWithNull: true,
+		}
+		plugin, err := New(1, cfg)
+		require.Error(t, err)
+		assert.Nil(t, plugin)
+	})
 }
 
 func TestAssignKeyFieldGoNames(t *testing.T) {
@@ -138,6 +185,86 @@ func TestAssignKeyFieldGoNames(t *testing.T) {
 				)
 				seen[kf.GoName] = true
 			}
+			assert.Equal(t, tc.want, got)
+		})
+	}
+}
+
+func TestResolveRequiresStrategy(t *testing.T) {
+	t.Parallel()
+
+	entityResolverDef := func(args ...*ast.Argument) *ast.Definition {
+		return &ast.Definition{
+			Name: "T",
+			Directives: ast.DirectiveList{
+				{Name: dirNameEntityResolver, Arguments: ast.ArgumentList(args)},
+			},
+		}
+	}
+	requiresArg := func(v string) *ast.Argument {
+		return &ast.Argument{
+			Name:  "requires",
+			Value: &ast.Value{Raw: v, Kind: ast.StringValue},
+		}
+	}
+
+	cases := map[string]struct {
+		def         *ast.Definition
+		multi       bool
+		pkg         PackageOptions
+		want        RequiresStrategy
+		wantErr     bool
+		errContains string
+	}{
+		"no directive falls back to default": {
+			def:  &ast.Definition{Name: "T"},
+			want: RequiresDefault,
+		},
+		"no directive falls back to package computed": {
+			def:  &ast.Definition{Name: "T"},
+			pkg:  PackageOptions{ComputedRequires: true},
+			want: RequiresComputed,
+		},
+		"directive overrides package default": {
+			def:  entityResolverDef(requiresArg("explicit")),
+			pkg:  PackageOptions{ComputedRequires: true},
+			want: RequiresExplicit,
+		},
+		"directive computed is rejected, pointing at the package option": {
+			def:         entityResolverDef(requiresArg("computed")),
+			wantErr:     true,
+			errContains: optionComputedRequires,
+		},
+		"directive preloaded on multi": {
+			def:   entityResolverDef(requiresArg("preloaded")),
+			multi: true,
+			want:  RequiresPreloaded,
+		},
+		"preloaded without multi is an error": {
+			def:     entityResolverDef(requiresArg("preloaded")),
+			multi:   false,
+			wantErr: true,
+		},
+		"unknown strategy is an error": {
+			def:     entityResolverDef(requiresArg("bogus")),
+			wantErr: true,
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			f := &Federation{PackageOptions: tc.pkg}
+			got, err := f.resolveRequiresStrategy(tc.def, tc.multi)
+			if tc.wantErr {
+				require.Error(t, err)
+				if tc.errContains != "" {
+					assert.Contains(t, err.Error(), tc.errContains)
+				}
+				return
+			}
+			require.NoError(t, err)
 			assert.Equal(t, tc.want, got)
 		})
 	}

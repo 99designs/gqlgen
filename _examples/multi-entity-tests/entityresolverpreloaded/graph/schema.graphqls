@@ -1,0 +1,16 @@
+# GraphQL schema example
+#
+# https://gqlgen.com/getting-started/
+
+# presentation subgraph
+#
+# preloaded_requires supports flat scalar/enum @requires, so this recasts the
+# README's `@requires(fields: "variations { price imageUrl id }")` (object
+# leaves, which gqlgen cannot unmarshal from a representation) as a scalar
+# `category` requirement. The point is unchanged: the batch resolver sees every
+# product's @requires data in one scope.
+type Product @key(fields: "id") {
+  id: ID!
+  category: String! @external
+  display: String! @requires(fields: "category")
+}

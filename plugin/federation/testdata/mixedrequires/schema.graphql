@@ -1,0 +1,26 @@
+directive @entityResolver(multi: Boolean, requires: String) on OBJECT
+
+# This subgraph mixes two @requires strategies in a single package:
+#   - Planet  -> computed  (field-resolver delivery, the package default via
+#                           computed_requires; not directive-selectable)
+#   - Product -> preloaded (scalar, populated onto the batch input, selected
+#                           per entity with @entityResolver(requires:) to
+#                           override the package default)
+
+type Query {
+    test: String
+}
+
+type Planet @key(fields: "name") {
+    name: String! @external
+    diameter: Int! @external
+    size: Int! @requires(fields: "diameter")
+}
+
+type Product
+    @key(fields: "id")
+    @entityResolver(multi: true, requires: "preloaded") {
+    id: ID! @external
+    category: String! @external
+    display: String! @requires(fields: "category")
+}

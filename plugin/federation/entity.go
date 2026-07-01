@@ -12,6 +12,52 @@ import (
 	"github.com/99designs/gqlgen/plugin/federation/fieldset"
 )
 
+// RequiresStrategy selects how an entity's @requires fields are delivered to its
+// resolver. Three strategies target the entity resolver and form a single axis —
+// WHERE @requires data is handed over, relative to the resolver call — and are
+// selected per entity via @entityResolver(requires: "…"), falling back to the
+// package-level default:
+//
+//   - RequiresDefault ("default"): unmarshaled onto the returned entity AFTER the
+//     resolver runs (output, after).
+//   - RequiresExplicit ("explicit"): handed to a user-implemented
+//     Populate<Entity>Requires hook as the raw representation map, AFTER the
+//     resolver runs (output, after — user-owned). This is the only strategy that
+//     surfaces the raw representation to user code.
+//   - RequiresPreloaded ("preloaded"): unmarshaled onto the resolver's INPUT
+//     representation BEFORE the resolver runs, so a multi resolver sees every
+//     entity's @requires data in one scope (input, before). Multi entities only.
+//
+// RequiresComputed ("computed") is the outlier: it does not touch the entity
+// resolver at all. It routes @requires to standalone field resolvers via a
+// federationRequires argument (Federation 2 only), so it is off the axis the
+// directive selects on — it is therefore NOT a @entityResolver(requires:) value
+// and is selected only by the computed_requires package option. It shares this
+// type because all four are mutually exclusive per entity. Computed is currently
+// entity-level all-or-nothing (every @requires field on the entity); the planned
+// home for per-field control is a federation-owned field directive (@goComputed
+// on FIELD_DEFINITION), which will close that gap.
+//
+// The strategies are mutually exclusive: each entity resolves to exactly one.
+type RequiresStrategy string
+
+const (
+	// RequiresDefault unmarshals @requires onto the returned entity after the
+	// resolver runs.
+	RequiresDefault RequiresStrategy = "default"
+	// RequiresExplicit delegates @requires population to a user-implemented
+	// Populate<Entity>Requires function, called after the resolver.
+	RequiresExplicit RequiresStrategy = "explicit"
+	// RequiresComputed delivers @requires to standalone field resolvers
+	// (Federation 2 only). Selected by the computed_requires package option,
+	// not by @entityResolver(requires:).
+	RequiresComputed RequiresStrategy = "computed"
+	// RequiresPreloaded unmarshals @requires onto the resolver's input
+	// representation before the resolver runs, so a multi resolver sees every
+	// entity's @requires data at once. Multi entities only.
+	RequiresPreloaded RequiresStrategy = "preloaded"
+)
+
 // Entity represents a federated type
 // that was declared in the GQL schema.
 type Entity struct {
@@ -20,11 +66,30 @@ type Entity struct {
 	Resolvers []*EntityResolver
 	Requires  []*Requires
 	Multi     bool
-	Type      types.Type
+	// RequiresStrategy is how this entity's @requires fields are delivered to
+	// the resolver. Resolved per entity in buildEntity.
+	RequiresStrategy RequiresStrategy
+	Type             types.Type
 	// ImplDirectives are the resolved non-federation OBJECT-level directives
 	// with full type information, populated in GenerateCode for use in the
 	// federation template to wrap entity resolver calls.
 	ImplDirectives []*codegen.Directive
+}
+
+// IsDefaultRequires reports whether @requires uses the default (post-resolver
+// unmarshal) strategy.
+func (e *Entity) IsDefaultRequires() bool { return e.RequiresStrategy == RequiresDefault }
+
+// IsExplicitRequires reports whether @requires uses a user Populate function.
+func (e *Entity) IsExplicitRequires() bool { return e.RequiresStrategy == RequiresExplicit }
+
+// IsComputedRequires reports whether @requires is resolved by field resolvers.
+func (e *Entity) IsComputedRequires() bool { return e.RequiresStrategy == RequiresComputed }
+
+// IsPreloaded reports whether @requires is populated onto the resolver input
+// representation before the resolver runs.
+func (e *Entity) IsPreloaded() bool {
+	return e.RequiresStrategy == RequiresPreloaded
 }
 
 type EntityResolver struct {

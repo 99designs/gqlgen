@@ -211,6 +211,39 @@ should return
 
 `@requires` enables you to [define computed fields](https://www.apollographql.com/docs/federation/federated-schemas/federated-directives/#requires). In order for this to work, you need to be able to reference the values injected by the selection set inside the `fields` property of `@requires`.
 
+gqlgen offers several mutually-exclusive strategies for delivering `@requires`
+data to your code. They all answer the same question — *how does the required
+data reach the resolver?* — so each entity uses **exactly one**:
+
+| Strategy | Package option | `requires:` value | How `@requires` data is delivered |
+| --- | --- | --- | --- |
+| Default | _(none)_ | `"default"` | Unmarshaled onto the returned entity, after the resolver runs. |
+| Explicit | `explicit_requires` | `"explicit"` | A `Populate<Entity>Requires` function you implement, called on the returned entity after the resolver. Supports nested/array fields. |
+| Computed | `computed_requires` | _(package option only)_ | Delivered to standalone field resolvers via a `federationRequires` argument (Federation 2 only). |
+| Preloaded | `preloaded_requires` | `"preloaded"` | Unmarshaled onto the resolver's *input* representation, before the resolver runs, so a multi resolver sees every entity's `@requires` data at once. Flat scalar/enum fields only; requires `multi`. |
+
+The package option sets the **default** for the whole subgraph. The `requires:`
+argument on `@entityResolver` overrides that default **per entity**, choosing
+among `default`, `explicit`, and `preloaded`. (`computed` is not a `requires:`
+value — it describes field-resolver delivery rather than how data reaches the
+entity resolver, so it is selected only by the `computed_requires` package
+option.) Because `@entityResolver` is your own directive, add the
+`requires: String` argument to its definition. With no `requires:` argument, an
+entity falls back to the package default.
+
+To mix strategies in one subgraph — for example `computed` for an entity with an
+object-typed `@requires` and `preloaded` for another with a scalar `@requires` —
+make `computed` the package default and override the scalar entity to
+`preloaded`:
+
+```graphql
+directive @entityResolver(multi: Boolean, requires: String) on OBJECT
+
+# with computed_requires: true, computed is the package default
+type Planet  @key(fields: "name")                                                     { ... }
+type Product @key(fields: "id")   @entityResolver(multi: true, requires: "preloaded") { ... }
+```
+
 In order to do this, you need to enable the `federation.options.computed_requires` flag. You also
 need to enable `call_argument_directives_with_null`.
 
@@ -343,6 +376,16 @@ federation:
     entity_resolver_multi: true
 ```
 
+> **Roadmap — the default will change.** A future major version plans to make
+> `multi` the **default** (single-entity resolution becomes "multi with N = 1")
+> and to change the single-entity resolver signature so it takes the same input
+> struct as the multi resolver — `FindProductByID(ctx, rep *model.ProductByIDsInput)`
+> instead of positional key arguments (`FindProductByID(ctx, id string)`). To be
+> unaffected when the default flips, **declare `multi:` explicitly** on your
+> entities now (`multi: true` to opt into batching, `multi: false` to keep
+> single-entity resolution); entities that already state their choice see no
+> change. See `_examples/multi-entity-tests/PLAN.md` for the sequencing.
+
 ### Schema Example
 
 ```graphql
@@ -380,3 +423,93 @@ func (r *entityResolver) FindUserByIDs(ctx context.Context, reps []*entity.UserB
 ```
 
 When configured, the federation plugin creates an entity resolver that accepts a list of representations, improving performance by reducing the number of individual resolver calls.
+
+> **Resolver contract.** Return a newly-allocated slice of the same length and
+> order as the input — `out[i]` must correspond to `reps[i]` (the runtime places
+> results by position). Treat the input representations as read-only; don't
+> retain or mutate them.
+
+### Preloaded: @requires data in one scope
+
+By default a multi entity resolver receives only the entity's `@key` fields (in
+a generated `…ByKeysInput` struct). Any `@requires` fields are unmarshaled onto
+each returned entity *after* the resolver runs, one entity at a time. That is a
+problem when the work you do with `@requires` data is naturally batched — for
+example, one machine-learning inference call that scores every entity at once —
+because the resolver never sees all entities' `@requires` data together.
+
+Enable `federation.options.preloaded_requires` to change the
+multi resolver so each input element carries both the `@key` fields **and** the
+entity's `@requires` fields, populated *before* the resolver is called:
+
+```yml
+federation:
+  filename: graph/federation.go
+  package: graph
+  options:
+    preloaded_requires: true
+```
+
+With the option set, the input struct gains the `@requires` fields, so the whole
+batch's `@requires` data is available in a single call:
+
+```go
+// reps[i].Category is a @requires field, populated before this call.
+func (r *entityResolver) FindManyProductByIDs(
+	ctx context.Context,
+	reps []*model.ProductByIDsInput,
+) ([]*model.Product, error) {
+	// All products' @requires data is visible here at once — score the batch
+	// in a single pass instead of once per product.
+	return scoreBatch(ctx, reps)
+}
+```
+
+Notes and limitations:
+
+- Only **flat scalar and enum** `@requires` fields are supported. gqlgen can
+  only reconstruct scalar leaves of a representation, so a `@requires` naming an
+  object or list field, or a nested path such as `@requires(fields: "world { foo }")`,
+  is rejected at generation time. Require the scalar leaves instead
+  (`@requires(fields: "world { foo }")` → require `foo`).
+- It cannot be combined with `explicit_requires` or `computed_requires`: those
+  strategies own `@requires` handling in incompatible ways, so the generator
+  rejects the combination rather than silently dropping data.
+
+### Per-entity errors in a batch
+
+A multi entity resolver normally returns `([]*T, error)`; a non-nil error fails
+the **whole** batch group. To fail only specific entities while the rest still
+resolve, return a `graphql.BatchErrorList` — a slice the same length as the
+batch, with a non-nil entry for each entity that failed and `nil` for the ones
+that succeeded:
+
+```go
+func (r *entityResolver) FindManyProductByIDs(
+	ctx context.Context,
+	reps []*model.ProductByIDsInput,
+) ([]*model.Product, error) {
+	out := make([]*model.Product, len(reps))
+	errs := make([]error, len(reps))
+	var failed bool
+	for i, rep := range reps {
+		p, err := r.load(ctx, rep)
+		if err != nil {
+			errs[i] = err // this entity fails…
+			failed = true
+			continue
+		}
+		out[i] = p // …this one succeeds
+	}
+	if failed {
+		return out, graphql.BatchErrorList(errs)
+	}
+	return out, nil
+}
+```
+
+The generated runtime nulls each failed entity, reports its error against the
+`_entities[index]` response path, and still returns the entities that
+succeeded. Returning any other (non-`BatchErrors`) error preserves the original
+all-or-nothing behavior for the group. This works for every multi entity
+resolver, with or without `preloaded_requires`.

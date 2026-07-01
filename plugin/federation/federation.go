@@ -49,6 +49,15 @@ type PackageOptions struct {
 	// This can be overriding by @entityResolver(multi: Boolean) directive.
 	// false by default.
 	EntityResolverMulti bool
+	// PreloadedRequires sets "preloaded" as the package-level default @requires
+	// strategy; individual entities may override it via
+	// @entityResolver(requires: "…"). Under preloaded, the generated multi
+	// resolver input (<Entity>By<Keys>sInput) carries the entity's @requires
+	// fields, unmarshaled before the resolver runs, so a multi resolver sees
+	// every entity's @requires data in one scope — enabling a naturally-batched
+	// computation (e.g. one ML-inference call across the whole batch). Multi
+	// entities only. false by default.
+	PreloadedRequires bool
 }
 
 // New returns a federation plugin that injects
@@ -68,18 +77,22 @@ func New(version int, cfg *config.Config) (*Federation, error) {
 	}, nil
 }
 
+// federation.options keys, recognized in buildPackageOptions and referenced in
+// user-facing errors, so their spelling has a single source of truth.
+const (
+	optionExplicitRequires    = "explicit_requires"
+	optionComputedRequires    = "computed_requires"
+	optionEntityResolverMulti = "entity_resolver_multi"
+	optionPreloadedRequires   = "preloaded_requires"
+)
+
 func buildPackageOptions(cfg *config.Config) (PackageOptions, error) {
 	packageOptions := cfg.Federation.Options
 
-	const (
-		optionExplicitRequires    = "explicit_requires"
-		optionComputedRequires    = "computed_requires"
-		optionEntityResolverMulti = "entity_resolver_multi"
-	)
-
 	var explicitRequires,
 		computedRequires,
-		entityResolverMulti bool
+		entityResolverMulti,
+		preloadedRequires bool
 
 	for k, v := range packageOptions {
 		switch k {
@@ -89,6 +102,8 @@ func buildPackageOptions(cfg *config.Config) (PackageOptions, error) {
 			computedRequires = v
 		case optionEntityResolverMulti:
 			entityResolverMulti = v
+		case optionPreloadedRequires:
+			preloadedRequires = v
 		default:
 			return PackageOptions{}, fmt.Errorf("unknown package option: %s", k)
 		}
@@ -102,22 +117,41 @@ func buildPackageOptions(cfg *config.Config) (PackageOptions, error) {
 		)
 	}
 
-	if computedRequires {
-		if cfg.Federation.Version != 2 {
-			return PackageOptions{}, fmt.Errorf(
-				"when using federation.options.%s you must be using Federation 2",
-				optionComputedRequires,
-			)
-		}
+	// The preloaded strategy delivers @requires data on the representation passed
+	// *into* the batch resolver, so it owns @requires handling itself. The other
+	// two @requires strategies are therefore incompatible with it:
+	//   - computed_requires resolves @requires as separate field resolvers, so
+	//     they would never be present on the representation; and
+	//   - explicit_requires generates a Populate<Entity>Requires stub that
+	//     writes @requires onto the *returned* entity, which preloaded
+	//     never calls — silently ignoring the user's populator.
+	// Reject both combinations rather than generate something that looks wired
+	// up but drops the @requires data.
+	if preloadedRequires && computedRequires {
+		return PackageOptions{}, fmt.Errorf(
+			"%s cannot be combined with %s: computed requires are resolved as separate field resolvers, so they are not available on the representation passed to the batch resolver",
+			optionPreloadedRequires,
+			optionComputedRequires,
+		)
+	}
+	if preloadedRequires && explicitRequires {
+		return PackageOptions{}, fmt.Errorf(
+			"%s cannot be combined with %s: preloaded populates @requires on the representation passed to the batch resolver, so the Populate<Entity>Requires stub would never run",
+			optionPreloadedRequires,
+			optionExplicitRequires,
+		)
+	}
 
-		// We rely on injecting a null argument with a directives for fields with @requires, so we
-		// need to ensure
-		// our directive is always called.
-		if !cfg.CallArgumentDirectivesWithNull {
-			return PackageOptions{}, fmt.Errorf(
-				"when using federation.options.%s, call_argument_directives_with_null must be set to true",
-				optionComputedRequires,
-			)
+	// The same prerequisites are re-checked per entity in MutateConfig (computed
+	// can also be selected by the @entityResolver(requires:) directive without
+	// the package option); failing here too keeps New() validating the package
+	// option up front.
+	if computedRequires {
+		if err := computedRequiresPrerequisiteError(
+			cfg.Federation.Version,
+			cfg.CallArgumentDirectivesWithNull,
+		); err != nil {
+			return PackageOptions{}, err
 		}
 	}
 
@@ -128,6 +162,7 @@ func buildPackageOptions(cfg *config.Config) (PackageOptions, error) {
 		ExplicitRequires:    explicitRequires,
 		ComputedRequires:    computedRequires,
 		EntityResolverMulti: entityResolverMulti,
+		PreloadedRequires:   preloadedRequires,
 	}, nil
 }
 
@@ -168,7 +203,14 @@ func (f *Federation) MutateConfig(cfg *config.Config) error {
 		cfg.Directives["composeDirective"] = config.DirectiveConfig{SkipRuntime: true}
 	}
 
-	if f.usesRequires && f.PackageOptions.ComputedRequires {
+	if f.usesRequires && f.anyEntityWithStrategy(RequiresComputed) {
+		if err := computedRequiresPrerequisiteError(
+			f.version,
+			cfg.CallArgumentDirectivesWithNull,
+		); err != nil {
+			return err
+		}
+
 		cfg.Schema.Directives[dirPopulateFromRepresentations.Name] = dirPopulateFromRepresentations
 		cfg.Directives[dirPopulateFromRepresentations.Name] = config.DirectiveConfig{
 			Implementation: &populateFromRepresentationsImplementation,
@@ -181,7 +223,140 @@ func (f *Federation) MutateConfig(cfg *config.Config) error {
 		f.mutateSchemaForRequires(cfg.Schema, cfg)
 	}
 
+	if f.anyEntityWithStrategy(RequiresPreloaded) {
+		if err := f.injectPreloadedRequiresFields(cfg); err != nil {
+			return err
+		}
+	}
+
 	return nil
+}
+
+// anyEntityWithStrategy reports whether any built entity that has @requires
+// fields resolves to the given strategy.
+func (f *Federation) anyEntityWithStrategy(strategy RequiresStrategy) bool {
+	for _, e := range f.Entities {
+		if len(e.Requires) > 0 && e.RequiresStrategy == strategy {
+			return true
+		}
+	}
+	return false
+}
+
+// computedRequiresPrerequisiteError returns a non-nil error when the computed
+// @requires strategy is used without its prerequisites: Federation 2 and
+// call_argument_directives_with_null (it relies on injecting a null directive
+// argument that must always be called).
+func computedRequiresPrerequisiteError(version int, callArgumentDirectivesWithNull bool) error {
+	if version != 2 {
+		return errors.New("when using computed @requires you must be using Federation 2")
+	}
+	if !callArgumentDirectivesWithNull {
+		return errors.New(
+			"when using computed @requires, call_argument_directives_with_null must be set to true",
+		)
+	}
+	return nil
+}
+
+// injectPreloadedRequiresFields augments each multi entity's generated
+// representation input type with that entity's @requires fields, as modelgen
+// ExtraFields. modelgen runs after the federation plugin in the MutateConfig
+// phase, so the fields land on the generated struct; the result is a resolver
+// signature of findManyX(ctx, []*<Entity>By<Keys>sInput) where the input now
+// carries both @key and @requires fields. The federation template then
+// populates them before calling the resolver, giving the batch resolver a
+// single scope with every entity's @requires data.
+//
+// Two restrictions are enforced here rather than left to fail in generated
+// code:
+//
+//   - Flat (single-segment) @requires only. A nested @requires such as
+//     "world { foo }" would require allocating intermediate objects on the
+//     representation before assigning the leaf.
+//   - Scalar/enum @requires only. Output object types (e.g. a required
+//     `variations: [Variation!]!`) have no unmarshaler — gqlgen can only
+//     unmarshal scalar leaves of a representation — so a required object field
+//     cannot be reconstructed onto the representation. This is a pre-existing
+//     gqlgen limitation, not specific to preloaded; the README case
+//     study works around it by requiring the scalar leaves (`variations { price
+//     imageUrl id }`), which is the nested form excluded above.
+func (f *Federation) injectPreloadedRequiresFields(cfg *config.Config) error {
+	binder := cfg.NewBinder()
+	for _, entity := range f.Entities {
+		if !entity.IsPreloaded() || len(entity.Requires) == 0 {
+			continue
+		}
+		for _, req := range entity.Requires {
+			fieldDef, err := preloadedRequiresField(cfg, entity, req)
+			if err != nil {
+				return err
+			}
+			ref, err := binder.TypeReference(fieldDef.Type, nil)
+			if err != nil {
+				return fmt.Errorf(
+					"resolving Go type for @requires field %q on entity %q: %w",
+					req.Field[0],
+					entity.Def.Name,
+					err,
+				)
+			}
+			goType := types.TypeString(ref.GO, func(p *types.Package) string {
+				if p == nil {
+					return ""
+				}
+				return p.Path()
+			})
+			for _, resolver := range entity.Resolvers {
+				model := cfg.Models[resolver.InputTypeName]
+				if model.ExtraFields == nil {
+					model.ExtraFields = make(map[string]config.ModelExtraField)
+				}
+				model.ExtraFields[req.Field.ToGo()] = config.ModelExtraField{Type: goType}
+				cfg.Models[resolver.InputTypeName] = model
+			}
+		}
+	}
+	return nil
+}
+
+// preloadedRequiresField validates that a single @requires entry is
+// supported under preloaded and returns its field definition.
+func preloadedRequiresField(
+	cfg *config.Config,
+	entity *Entity,
+	req *Requires,
+) (*ast.FieldDefinition, error) {
+	if len(req.Field) != 1 {
+		return nil, fmt.Errorf(
+			"preloaded_requires does not support nested @requires field %q on entity %q; only flat @requires fields are supported",
+			req.Field.Join("."),
+			entity.Def.Name,
+		)
+	}
+	fieldDef := entity.Def.Fields.ForName(req.Field[0])
+	if fieldDef == nil {
+		return nil, fmt.Errorf(
+			"@requires field %q not found on entity %q",
+			req.Field[0],
+			entity.Def.Name,
+		)
+	}
+	baseName := fieldDef.Type
+	for baseName.Elem != nil {
+		baseName = baseName.Elem
+	}
+	if def := cfg.Schema.Types[baseName.NamedType]; def != nil &&
+		def.Kind != ast.Scalar && def.Kind != ast.Enum {
+		return nil, fmt.Errorf(
+			"preloaded_requires does not support @requires field %q on entity %q: only scalar and enum fields can be reconstructed onto the representation, not %s %q",
+			req.Field[0],
+			entity.Def.Name,
+			def.Kind,
+			baseName.NamedType,
+		)
+	}
+	return fieldDef, nil
 }
 
 func (f *Federation) InjectSourcesEarly() ([]*ast.Source, error) {
@@ -212,12 +387,12 @@ func (f *Federation) InjectSourcesLate(schema *ast.Schema) ([]*ast.Source, error
 	}
 	f.Entities = builtEntities
 
-	entities := make([]string, 0)
+	entityNames := make([]string, 0)
 	resolvers := make([]string, 0)
 	entityResolverInputDefinitions := make([]string, 0)
 	for _, e := range f.Entities {
 		if e.Def.Kind != ast.Interface {
-			entities = append(entities, e.Name)
+			entityNames = append(entityNames, e.Name)
 		} else if len(schema.GetPossibleTypes(e.Def)) == 0 {
 			fmt.Println(
 				"skipping @key field on interface " + e.Def.Name + " as no types implement it",
@@ -237,9 +412,9 @@ func (f *Federation) InjectSourcesLate(schema *ast.Schema) ([]*ast.Source, error
 	}
 
 	var blocks []string
-	if len(entities) > 0 {
+	if len(entityNames) > 0 {
 		entitiesSDL := `# a union of all types that use the @key directive
-union _Entity = ` + strings.Join(entities, " | ")
+union _Entity = ` + strings.Join(entityNames, " | ")
 		blocks = append(blocks, entitiesSDL)
 	}
 
@@ -378,10 +553,16 @@ func (f *Federation) GenerateCode(data *codegen.Data) error {
 		}
 	}
 
-	if f.PackageOptions.ExplicitRequires && len(requiresEntities) > 0 {
+	explicitRequiresEntities := make(map[string]*Entity, len(requiresEntities))
+	for name, e := range requiresEntities {
+		if e.IsExplicitRequires() {
+			explicitRequiresEntities[name] = e
+		}
+	}
+	if len(explicitRequiresEntities) > 0 {
 		err := f.generateExplicitRequires(
 			data,
-			requiresEntities,
+			explicitRequiresEntities,
 			requiresImports,
 		)
 		if err != nil {
@@ -494,12 +675,19 @@ func (f *Federation) buildEntity(
 		return nil, nil
 	}
 
+	multi := f.isMultiEntity(schemaType)
+	requiresStrategy, err := f.resolveRequiresStrategy(schemaType, multi)
+	if err != nil {
+		return nil, err
+	}
+
 	entity := &Entity{
-		Name:      schemaType.Name,
-		Def:       schemaType,
-		Resolvers: nil,
-		Requires:  nil,
-		Multi:     f.isMultiEntity(schemaType),
+		Name:             schemaType.Name,
+		Def:              schemaType,
+		Resolvers:        nil,
+		Requires:         nil,
+		Multi:            multi,
+		RequiresStrategy: requiresStrategy,
 	}
 
 	// If our schema has a field with a type defined in
@@ -535,6 +723,100 @@ func (f *Federation) buildEntity(
 	}
 
 	return entity, nil
+}
+
+// defaultRequiresStrategy is the package-level @requires strategy an entity
+// uses when it does not select one via @entityResolver(requires: "…").
+func (o PackageOptions) defaultRequiresStrategy() RequiresStrategy {
+	switch {
+	case o.ComputedRequires:
+		return RequiresComputed
+	case o.ExplicitRequires:
+		return RequiresExplicit
+	case o.PreloadedRequires:
+		return RequiresPreloaded
+	default:
+		return RequiresDefault
+	}
+}
+
+// resolveRequiresStrategy returns the @requires strategy for an entity: the
+// @entityResolver(requires: "…") argument if present, otherwise the package
+// default. It mirrors isMultiEntity.
+//
+// Requires: multi is the already-resolved @entityResolver(multi) value.
+// Ensures:  the returned strategy is one of the four RequiresStrategy values;
+// an unknown directive value, or preloaded on a non-multi entity, is a
+// (clear, actionable) error rather than a silent fallback.
+func (f *Federation) resolveRequiresStrategy(
+	schemaType *ast.Definition,
+	multi bool,
+) (RequiresStrategy, error) {
+	strategy := f.PackageOptions.defaultRequiresStrategy()
+
+	if dir := schemaType.Directives.ForName(dirNameEntityResolver); dir != nil {
+		if dirArg := dir.Arguments.ForName("requires"); dirArg != nil {
+			dirVal, err := dirArg.Value.Value(nil)
+			if err != nil {
+				return "", fmt.Errorf(
+					"entity %q: reading @entityResolver(requires:): %w",
+					schemaType.Name, err,
+				)
+			}
+			parsed, ok := parseRequiresStrategy(dirVal)
+			if !ok {
+				// computed is deliberately not a directive value: it does not
+				// describe how @requires reaches the entity resolver (it routes
+				// fields to standalone field resolvers instead), so it does not
+				// share the axis the directive selects on. Point users at the
+				// package option that does select it rather than a bare
+				// "unknown value". See RequiresStrategy in entity.go.
+				if dirVal == string(RequiresComputed) {
+					return "", fmt.Errorf(
+						"entity %q: @entityResolver(requires: %q) is not supported; select the computed strategy with the %q package option instead",
+						schemaType.Name,
+						RequiresComputed,
+						optionComputedRequires,
+					)
+				}
+				return "", fmt.Errorf(
+					"entity %q: unknown @entityResolver(requires: %v); valid values are %q, %q, %q",
+					schemaType.Name,
+					dirVal,
+					RequiresDefault,
+					RequiresExplicit,
+					RequiresPreloaded,
+				)
+			}
+			strategy = parsed
+		}
+	}
+
+	if strategy == RequiresPreloaded && !multi {
+		return "", fmt.Errorf(
+			"entity %q: @entityResolver(requires: %q) requires multi: true",
+			schemaType.Name, RequiresPreloaded,
+		)
+	}
+
+	return strategy, nil
+}
+
+// parseRequiresStrategy converts a directive argument value to a
+// RequiresStrategy, reporting whether it was a recognized value. Only the
+// strategies that describe how @requires reaches the entity resolver are
+// directive-selectable; RequiresComputed is intentionally excluded (it is
+// selected by the computed_requires package option — see RequiresStrategy).
+func parseRequiresStrategy(v any) (RequiresStrategy, bool) {
+	s, ok := v.(string)
+	if !ok {
+		return "", false
+	}
+	switch RequiresStrategy(s) {
+	case RequiresDefault, RequiresExplicit, RequiresPreloaded:
+		return RequiresStrategy(s), true
+	}
+	return "", false
 }
 
 // isMultiEntity returns @entityResolver(multi) value, if directive is not defined,
@@ -873,7 +1155,20 @@ func (f *Federation) mutateSchemaForRequires(
 	schema *ast.Schema,
 	cfg *config.Config,
 ) {
+	// Only entities that resolve @requires via the computed strategy get their
+	// @requires fields turned into field resolvers; other strategies handle
+	// @requires elsewhere (on the entity output or the resolver input).
+	computed := make(map[string]bool)
+	for _, e := range f.Entities {
+		if e.IsComputedRequires() {
+			computed[e.Name] = true
+		}
+	}
+
 	for _, schemaType := range schema.Types {
+		if !computed[schemaType.Name] {
+			continue
+		}
 		for _, field := range schemaType.Fields {
 			if dir := field.Directives.ForName(dirNameRequires); dir != nil {
 				// ensure we always generate a resolver for any @requires field

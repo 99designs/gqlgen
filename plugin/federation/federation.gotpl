@@ -4,8 +4,8 @@
 {{ reserveImport "strings"  }}
 {{ reserveImport "sync"  }}
 
+{{ reserveImport "github.com/99designs/gqlgen/graphql" }}
 {{ reserveImport "github.com/99designs/gqlgen/plugin/federation/fedruntime" }}
-{{ $options := .PackageOptions }}
 {{ $usePointers := .UsePointers }}
 
 {{ $useFunctionSyntaxForExecutionContext := .UseFunctionSyntaxForExecutionContext }}
@@ -184,9 +184,9 @@ func (ec *executionContext) resolveEntity(
 						if err != nil {
 							return nil, fmt.Errorf(`resolving Entity "{{$entity.Def.Name}}": %w`, err)
 						}
-						{{- if $options.ComputedRequires }}
+						{{- if $entity.IsComputedRequires }}
 							{{/* We don't do anything in this case, computed requires are handled by standard resolvers */}}
-						{{- else if and $options.ExplicitRequires $entity.Requires }}
+						{{- else if and $entity.IsExplicitRequires $entity.Requires }}
 							err = ec.Populate{{$entity.Def.Name}}Requires(ctx, {{- if (not $usePointers) -}}&{{- end -}}entity, rep)
 							if err != nil {
 								return nil, fmt.Errorf(`populating requires for Entity "{{$entity.Def.Name}}": %w`, err)
@@ -237,6 +237,63 @@ func (ec *executionContext) resolveManyEntities(
 					switch resolverName {
 					{{ range $i, $resolver := .Resolvers }}
 					case "{{.ResolverName}}":
+					{{- if $entity.IsPreloaded }}
+					{{- /*
+						preloaded: build each representation with its @key
+						AND @requires fields populated, then hand the whole batch to
+						the resolver. This is the single scope in which every entity's
+						@requires data is visible at once. @requires are not patched
+						after the call — the resolver owns them.
+					*/}}
+					typedReps := make([]*{{.LookupInputType}}, len(reps))
+
+						for i, rep := range reps {
+							{{ range $i, $keyField := .KeyFields -}}
+							{{ if $useFunctionSyntaxForExecutionContext -}}
+							id{{$i}}, err := {{.Type.UnmarshalFunc}}(ctx, ec, rep.entity["{{.Field.Join `"].(map[string]any)["`}}"])
+							{{- else -}}
+							id{{$i}}, err := ec.{{.Type.UnmarshalFunc}}(ctx, rep.entity["{{.Field.Join `"].(map[string]any)["`}}"])
+							{{- end }}
+								if err != nil {
+									return errors.New(fmt.Sprintf("Field %s undefined in schema.", "{{.Definition.Name}}"))
+								}
+							{{end}}
+
+						representation := &{{.LookupInputType}} {
+							{{ range $i, $keyField := .KeyFields -}}
+								{{$keyField.GoName}}: id{{$i}},
+							{{end}}
+							}
+
+							{{- range $entity.Requires }}
+								{{ if $useFunctionSyntaxForExecutionContext -}}
+									representation.{{.Field.JoinGo `.`}}, err = {{.Type.UnmarshalFunc}}(ctx, ec, rep.entity["{{.Field.Join `"].(map[string]any)["`}}"])
+									{{- else -}}
+									representation.{{.Field.JoinGo `.`}}, err = ec.{{.Type.UnmarshalFunc}}(ctx, rep.entity["{{.Field.Join `"].(map[string]any)["`}}"])
+								{{- end }}
+								if err != nil {
+									return err
+								}
+							{{- end}}
+
+						typedReps[i] = representation
+						}
+
+					entities, err := ec.Resolvers.Entity().{{.ResolverName | go}}(ctx, typedReps)
+						entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
+						if err != nil {
+							return err
+						}
+
+						for i, entity := range entities {
+							if i < len(entityErrs) && entityErrs[i] != nil {
+								ec.Error(graphql.WithPathContext(ctx, graphql.NewPathWithIndex(reps[i].index)), entityErrs[i])
+								continue
+							}
+							list[reps[i].index] = entity
+						}
+						return nil
+					{{- else }}
 					typedReps := make([]*{{.LookupInputType}}, len(reps))
 
 						for i, rep := range reps {
@@ -259,21 +316,26 @@ func (ec *executionContext) resolveManyEntities(
 						}
 
 					entities, err := ec.Resolvers.Entity().{{.ResolverName | go}}(ctx, typedReps)
+						entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
 						if err != nil {
 							return err
 						}
 
 						for i, entity := range entities {
-							{{- if and $.PackageOptions.ExplicitRequires (index $.RequiresEntities $entity.Def.Name) }}
+							if i < len(entityErrs) && entityErrs[i] != nil {
+								ec.Error(graphql.WithPathContext(ctx, graphql.NewPathWithIndex(reps[i].index)), entityErrs[i])
+								continue
+							}
+							{{- if and $entity.IsExplicitRequires (index $.RequiresEntities $entity.Def.Name) }}
 								err = ec.Populate{{$entity.Def.Name}}Requires(ctx, {{- if not $usePointers -}}&{{- end -}}entity, reps[i].entity)
 								if err != nil {
 									return fmt.Errorf(`populating requires for Entity "{{$entity.Def.Name}}": %w`, err)
 								}
 							{{- end }}
 							{{- range $entity.Requires }}
-								{{- if $options.ComputedRequires }}
+								{{- if $entity.IsComputedRequires }}
 									{{/* We don't do anything in this case, computed requires are handled by standard resolvers */}}
-								{{- else if $.PackageOptions.ExplicitRequires }}
+								{{- else if $entity.IsExplicitRequires }}
 									{{/* already handled above */}}
 								{{- else }}
 									{{ if $useFunctionSyntaxForExecutionContext -}}
@@ -289,6 +351,7 @@ func (ec *executionContext) resolveManyEntities(
 						list[reps[i].index] = entity
 						}
 						return nil
+					{{- end }}
 					{{ end }}
 					default:
                     	return fmt.Errorf("unknown resolver: %s", resolverName)

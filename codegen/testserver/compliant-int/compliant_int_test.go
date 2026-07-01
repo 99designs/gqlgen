@@ -9,14 +9,13 @@ import (
 	"fmt"
 	"go/ast"
 	"go/format"
-	"go/parser"
 	"go/token"
-	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"golang.org/x/tools/go/packages"
 
 	"github.com/99designs/gqlgen/client"
 	gencompliant "github.com/99designs/gqlgen/codegen/testserver/compliant-int/generated-compliant-strict"
@@ -25,6 +24,11 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
+
+// genImportBase is the import-path prefix of the generated fixture packages
+// inspected by TestCodegen. Their directory names (generated-default,
+// generated-compliant-strict) differ from their package name (generated).
+const genImportBase = "github.com/99designs/gqlgen/codegen/testserver/compliant-int/"
 
 func TestCodegen(t *testing.T) {
 	cases := []struct {
@@ -64,26 +68,27 @@ func TestCodegen(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			path, err := filepath.Abs(tc.pkgPath)
+			cfg := &packages.Config{
+				Mode: packages.NeedName | packages.NeedFiles | packages.NeedSyntax,
+			}
+			loaded, err := packages.Load(cfg, genImportBase+tc.pkgPath)
 			require.NoError(t, err)
+			require.Len(t, loaded, 1)
 
-			//nolint:staticcheck // SA1019 help wanted to golang.org/x/tools/go/packages
-			pkgs, err := parser.ParseDir(token.NewFileSet(), path, nil, parser.AllErrors)
-			require.NoError(t, err)
-
-			pkg, ok := pkgs["generated"]
-			require.True(t, ok, fmt.Sprintf("invalid package found at %v", tc.pkgPath))
+			pkg := loaded[0]
+			require.Empty(t, pkg.Errors)
+			require.Equal(t, "generated", pkg.Name, "unexpected package at %v", tc.pkgPath)
 
 			modelsMap := make(map[string][]string)
 			signatureMap := make(map[string]string)
-			ast.Inspect(pkg, func(node ast.Node) bool {
+			inspect := func(node ast.Node) bool {
 				switch node := node.(type) {
 				case *ast.FuncDecl:
 					if slices.Contains(
 						[]string{"EchoIntToInt", "EchoInt64ToInt64"},
 						node.Name.Name,
 					) {
-						signatureMap[node.Name.Name] = printNode(t, node.Type)
+						signatureMap[node.Name.Name] = printNode(t, pkg.Fset, node.Type)
 					}
 				case *ast.TypeSpec:
 					s, ok := node.Type.(*ast.StructType)
@@ -96,7 +101,10 @@ func TestCodegen(t *testing.T) {
 					) {
 						var fields []string
 						for _, field := range s.Fields.List {
-							fields = append(fields, join(field.Names)+" "+printNode(t, field.Type))
+							fields = append(
+								fields,
+								join(field.Names)+" "+printNode(t, pkg.Fset, field.Type),
+							)
 						}
 						modelsMap[node.Name.Name] = fields
 					}
@@ -104,7 +112,10 @@ func TestCodegen(t *testing.T) {
 				default:
 				}
 				return true
-			})
+			}
+			for _, file := range pkg.Syntax {
+				ast.Inspect(file, inspect)
+			}
 
 			t.Run("resolver signature", func(t *testing.T) {
 				require.Equal(t, tc.signature, signatureMap)
@@ -176,11 +187,11 @@ func TestIntegration(t *testing.T) {
 	}
 }
 
-func printNode(t *testing.T, node any) string {
+func printNode(t *testing.T, fset *token.FileSet, node any) string {
 	t.Helper()
 
 	buf := &bytes.Buffer{}
-	err := format.Node(buf, token.NewFileSet(), node)
+	err := format.Node(buf, fset, node)
 	require.NoError(t, err)
 
 	return buf.String()

@@ -11,9 +11,9 @@ the sibling directories.
   `computed`. The first three describe how `@requires` reaches the entity
   resolver and are selectable **per entity** via `@entityResolver(requires: "…")`,
   with package options as the default. `computed` is the outlier — it routes
-  `@requires` to standalone field resolvers, so it is selected only by the
-  `computed_requires` package option, not the directive (a per-field
-  `@goComputed` is the planned home for it).
+  `@requires` to standalone field resolvers, so it is selected by the
+  `computed_requires` package option (all fields) or, per field, by `@goComputed`
+  — not by the `@entityResolver(requires:)` directive.
 - **`preloaded`** — a strategy that hands a batch resolver every
   entity's `@requires` data in a single scope, so a naturally-batched
   computation (e.g. one ML-inference call across the whole batch) can run once.
@@ -76,14 +76,29 @@ ______________________________________________________________________
 | Preloaded | `"preloaded"`             | Unmarshaled onto the resolver's **input** representation, before the resolver runs.                  |
 | Computed  | _(package option only)_   | Delivered to standalone field resolvers via a `federationRequires` argument (Federation 2 only).     |
 
-The four are mutually exclusive: each entity resolves to exactly one. The first
-three share one design decision (how `@requires` reaches the entity resolver), so
-combining two would mean two mechanisms fighting over the same fields — the
-generator rejects incompatible combinations rather than emit something that
-silently drops data. `computed` is off that axis (it routes fields to standalone
-field resolvers), which is why it is selected by the `computed_requires` package
-option rather than the directive; per-field selection is deferred to a
-`@goComputed` field directive (see *Deferred*).
+The three entity-resolver strategies are mutually exclusive: each entity resolves
+to exactly one. They share one design decision (how `@requires` reaches the entity
+resolver), so combining two would mean two mechanisms fighting over the same
+fields — the generator rejects incompatible combinations rather than emit
+something that silently drops data. `computed` is off that axis (it routes fields
+to standalone field resolvers), which is why it is selected by the
+`computed_requires` package option (all fields) or `@goComputed` (per field),
+rather than the `@entityResolver(requires:)` directive.
+
+### Per-field `computed` (`@goComputed`)
+
+`computed_requires` computes every `@requires` field on its entities; `@goComputed`
+on a single field computes just that one, leaving the entity's other `@requires`
+fields to its strategy. This is what lets a `preloaded` entity keep its scalar
+`@requires` on the batch input while an object-typed `@requires` on the same
+entity — which `preloaded` cannot reconstruct — is delivered to a standalone field
+resolver via `federationRequires`. The per-field flag is resolved once
+(`requiresFieldIsComputed`) and read by both the schema mutation (which forces the
+field resolver) and the template (which skips the field everywhere the entity
+resolver would otherwise handle it). `@goComputed` requires Federation 2 +
+`call_argument_directives_with_null`, applies only to `@requires` fields, and
+cannot combine with the `explicit` strategy; the worked fixture is
+`plugin/federation/testdata/gocomputed`.
 
 ### `preloaded`
 
@@ -111,10 +126,11 @@ read model) and output (`<Entity>`, the write model) stay distinct types.
 
 **Limitation — flat scalar/enum `@requires` only.** gqlgen can only reconstruct
 scalar leaves of a representation; output object types have no unmarshaler. So a
-`@requires` naming an object or list field, or a nested path such as
-`@requires(fields: "world { foo }")`, is rejected at generation time. Entities
-that need object-typed `@requires` use the `computed` strategy instead (see
-*Per-entity selection*).
+`preloaded` `@requires` naming an object or list field, or a nested path such as
+`@requires(fields: "world { foo }")`, is rejected at generation time. Mark such a
+field `@goComputed` to route just that field to a standalone field resolver
+(delivered via `federationRequires`) while the entity's scalar `@requires` stay
+preloaded on the input — both on the same entity (see *Per-field `computed`*).
 
 ______________________________________________________________________
 
@@ -243,10 +259,6 @@ ______________________________________________________________________
   type, letting both single- and batch-preferring users reach their final
   signature in one migration. Neither step affects non-federation users.
 - **Object/nested `@requires` for `preloaded`**, which needs gqlgen to
-  gain representation-level unmarshalers for composite types. Until then,
-  `computed` covers those entities.
-- **Per-field `computed` via a `@goComputed` field directive**, replacing the
-  entity-level all-or-nothing `computed_requires`. It would let one entity
-  compute an object-typed `@requires` field while preloading its scalar
-  `@requires` fields onto the batch input, and make `@goComputed` the single
-  directive-surface way to select computed.
+  gain representation-level unmarshalers for composite types. Until then, mark
+  such a field `@goComputed` (see *Per-field `computed`*) to route it to a field
+  resolver while the entity's scalar `@requires` stay preloaded.

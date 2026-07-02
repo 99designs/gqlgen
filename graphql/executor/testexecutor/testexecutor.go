@@ -46,6 +46,10 @@ func New() *TestExecutor {
     type Query {
       name: String!
       find(id: Int!): String!
+      user: User!
+    }
+    type User {
+      id: ID!
     }
     type Mutation {
       name: String!

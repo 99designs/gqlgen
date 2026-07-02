@@ -241,6 +241,15 @@ func TestExecutorDisableSuggestion(t *testing.T) {
 			"input:1:2: Cannot query field \"nam\" on type \"Query\".\n",
 			resp.Errors.Error(),
 		)
+
+		resp = query(exec, "", "{ user }")
+		assert.Empty(t, string(resp.Data))
+		assert.Len(t, resp.Errors, 1)
+		assert.Equal(
+			t,
+			"input:1:3: Field \"user\" of type \"User!\" must have a selection of subfields.\n",
+			resp.Errors.Error(),
+		)
 	})
 }
 

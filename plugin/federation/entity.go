@@ -31,14 +31,16 @@ import (
 // RequiresComputed ("computed") is the outlier: it does not touch the entity
 // resolver at all. It routes @requires to standalone field resolvers via a
 // federationRequires argument (Federation 2 only), so it is off the axis the
-// directive selects on — it is therefore NOT a @entityResolver(requires:) value
-// and is selected only by the computed_requires package option. It shares this
-// type because all four are mutually exclusive per entity. Computed is currently
-// entity-level all-or-nothing (every @requires field on the entity); the planned
-// home for per-field control is a federation-owned field directive (@goComputed
-// on FIELD_DEFINITION), which will close that gap.
+// directive selects on — it is therefore NOT a @entityResolver(requires:) value.
+// It is selected either per package (computed_requires, computing every @requires
+// field on its entities) or per field (@goComputed on FIELD_DEFINITION), which
+// lets one entity compute some @requires fields while delivering the rest through
+// the entity resolver. The per-field flag lives on Requires.Computed. It shares
+// this type because the entity-resolver strategies are mutually exclusive per
+// entity.
 //
-// The strategies are mutually exclusive: each entity resolves to exactly one.
+// The entity-resolver strategies (default/explicit/preloaded) are mutually
+// exclusive: each entity resolves to exactly one.
 type RequiresStrategy string
 
 const (
@@ -82,9 +84,6 @@ func (e *Entity) IsDefaultRequires() bool { return e.RequiresStrategy == Require
 
 // IsExplicitRequires reports whether @requires uses a user Populate function.
 func (e *Entity) IsExplicitRequires() bool { return e.RequiresStrategy == RequiresExplicit }
-
-// IsComputedRequires reports whether @requires is resolved by field resolvers.
-func (e *Entity) IsComputedRequires() bool { return e.RequiresStrategy == RequiresComputed }
 
 // IsPreloaded reports whether @requires is populated onto the resolver input
 // representation before the resolver runs.
@@ -136,6 +135,12 @@ type Requires struct {
 	Name  string                // the name of the field
 	Field fieldset.Field        // source Field, len > 1 for nested fields
 	Type  *config.TypeReference // The Go representation of that field type
+	// Computed reports whether this @requires field is delivered via a standalone
+	// field resolver (the computed strategy) rather than through the entity
+	// resolver. It is true when the field carries @goComputed, or when the whole
+	// entity resolves to RequiresComputed (the computed_requires package option,
+	// which computes every @requires field). Set in buildRequires.
+	Computed bool
 }
 
 func (e *Entity) allFieldsAreExternal(federationVersion int) bool {

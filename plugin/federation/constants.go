@@ -21,6 +21,11 @@ const dirNameRequires = "requires"
 // The @entityResolver directive allows users to specify entity resolvers as batch lookups
 const dirNameEntityResolver = "entityResolver"
 
+// The @goComputed directive marks a single @requires field to be delivered via a
+// standalone field resolver (the computed strategy) instead of through the entity
+// resolver, so one entity can mix computed and non-computed @requires fields.
+const dirNameGoComputed = "goComputed"
+
 const dirNamePopulateFromRepresentations = "populateFromRepresentations"
 
 var populateFromRepresentationsImplementation = `func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error) {
@@ -66,6 +71,7 @@ const federationVersion1Schema = `
 	directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
 	directive @extends on OBJECT | INTERFACE
 	directive @external on FIELD_DEFINITION
+	directive @goComputed on FIELD_DEFINITION
 	scalar _Any
 	scalar _FieldSet
 `
@@ -105,6 +111,7 @@ const federationVersion2Schema = `
 	  | SCALAR
 	  | ENUM
 	directive @shareable repeatable on FIELD_DEFINITION | OBJECT
+	directive @goComputed on FIELD_DEFINITION
 	directive @tag(name: String!) repeatable on
 	  | ARGUMENT_DEFINITION
 	  | ENUM

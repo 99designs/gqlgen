@@ -1,0 +1,24 @@
+directive @entityResolver(multi: Boolean, requires: String) on OBJECT
+
+# Product uses the preloaded strategy (preloaded_requires package option). Its
+# scalar @requires (category) is populated onto the batch resolver's input, while
+# its object-typed @requires (info) is marked @computedRequires and delivered to a
+# standalone field resolver instead. This is the per-field mix preloaded alone
+# cannot express: object/nested @requires cannot be reconstructed onto the input,
+# so @computedRequires routes just that field to a resolver while the scalar stays
+# preloaded — both on one entity, resolved in one _entities request.
+type Query {
+    test: String
+}
+
+type Product @key(fields: "id") @entityResolver(multi: true) {
+    id: ID! @external
+    category: String! @external
+    info: Info! @external
+    display: String! @requires(fields: "category")
+    summary: String! @requires(fields: "info { label }") @computedRequires
+}
+
+type Info {
+    label: String!
+}

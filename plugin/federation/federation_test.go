@@ -190,6 +190,63 @@ func TestAssignKeyFieldGoNames(t *testing.T) {
 	}
 }
 
+func TestValidateComputedFields(t *testing.T) {
+	t.Parallel()
+
+	field := func(name string, dirs ...string) *ast.FieldDefinition {
+		fd := &ast.FieldDefinition{Name: name}
+		for _, d := range dirs {
+			fd.Directives = append(fd.Directives, &ast.Directive{Name: d})
+		}
+		return fd
+	}
+	def := func(fields ...*ast.FieldDefinition) *ast.Definition {
+		return &ast.Definition{Name: "T", Fields: fields}
+	}
+
+	cases := map[string]struct {
+		def         *ast.Definition
+		strategy    RequiresStrategy
+		wantErr     bool
+		errContains string
+	}{
+		"no @computedRequires is fine": {
+			def:      def(field("a", dirNameRequires)),
+			strategy: RequiresDefault,
+		},
+		"@computedRequires on a @requires field is fine": {
+			def:      def(field("a", dirNameRequires, dirNameComputedRequires)),
+			strategy: RequiresDefault,
+		},
+		"@computedRequires without @requires is rejected": {
+			def:         def(field("a", dirNameComputedRequires)),
+			strategy:    RequiresDefault,
+			wantErr:     true,
+			errContains: "only applies to @requires fields",
+		},
+		"@computedRequires with the explicit strategy is rejected": {
+			def:         def(field("a", dirNameRequires, dirNameComputedRequires)),
+			strategy:    RequiresExplicit,
+			wantErr:     true,
+			errContains: "cannot be combined with the explicit",
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			err := validateComputedFields(tc.def, tc.strategy)
+			if tc.wantErr {
+				require.Error(t, err)
+				assert.Contains(t, err.Error(), tc.errContains)
+				return
+			}
+			require.NoError(t, err)
+		})
+	}
+}
+
 func TestResolveRequiresStrategy(t *testing.T) {
 	t.Parallel()
 

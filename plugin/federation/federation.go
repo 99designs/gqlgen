@@ -188,6 +188,7 @@ func (f *Federation) MutateConfig(cfg *config.Config) error {
 	cfg.Directives[dirNameKey] = config.DirectiveConfig{SkipRuntime: true}
 	cfg.Directives["extends"] = config.DirectiveConfig{SkipRuntime: true}
 	cfg.Directives[dirNameEntityResolver] = config.DirectiveConfig{SkipRuntime: true}
+	cfg.Directives[dirNameComputedRequires] = config.DirectiveConfig{SkipRuntime: true}
 
 	// Federation 2 specific directives
 	if f.version == 2 {
@@ -203,7 +204,7 @@ func (f *Federation) MutateConfig(cfg *config.Config) error {
 		cfg.Directives["composeDirective"] = config.DirectiveConfig{SkipRuntime: true}
 	}
 
-	if f.usesRequires && f.anyEntityWithStrategy(RequiresComputed) {
+	if f.anyComputedRequiresField() {
 		if err := computedRequiresPrerequisiteError(
 			f.version,
 			cfg.CallArgumentDirectivesWithNull,
@@ -220,7 +221,7 @@ func (f *Federation) MutateConfig(cfg *config.Config) error {
 		cfg.Directives[dirEntityReference.Name] = config.DirectiveConfig{SkipRuntime: true}
 
 		f.addMapType(cfg)
-		f.mutateSchemaForRequires(cfg.Schema, cfg)
+		f.mutateSchemaForRequires(cfg)
 	}
 
 	if f.anyEntityWithStrategy(RequiresPreloaded) {
@@ -238,6 +239,21 @@ func (f *Federation) anyEntityWithStrategy(strategy RequiresStrategy) bool {
 	for _, e := range f.Entities {
 		if len(e.Requires) > 0 && e.RequiresStrategy == strategy {
 			return true
+		}
+	}
+	return false
+}
+
+// anyComputedRequiresField reports whether any @requires field on any built
+// entity is computed (via @computedRequires or the computed_requires package option).
+// The computed strategy is per field, so its schema mutation and prerequisites
+// are gated on this rather than on a whole-entity strategy.
+func (f *Federation) anyComputedRequiresField() bool {
+	for _, e := range f.Entities {
+		for _, req := range e.Requires {
+			if req.Computed {
+				return true
+			}
 		}
 	}
 	return false
@@ -288,6 +304,12 @@ func (f *Federation) injectPreloadedRequiresFields(cfg *config.Config) error {
 			continue
 		}
 		for _, req := range entity.Requires {
+			// Computed @requires fields are delivered by a field resolver, not
+			// populated onto the resolver input, so they are not ExtraFields and
+			// are exempt from the scalar-only restriction below.
+			if req.Computed {
+				continue
+			}
 			fieldDef, err := preloadedRequiresField(cfg, entity, req)
 			if err != nil {
 				return err
@@ -680,6 +702,9 @@ func (f *Federation) buildEntity(
 	if err != nil {
 		return nil, err
 	}
+	if err := validateComputedFields(schemaType, requiresStrategy); err != nil {
+		return nil, err
+	}
 
 	entity := &Entity{
 		Name:             schemaType.Name,
@@ -717,7 +742,7 @@ func (f *Federation) buildEntity(
 		return nil, err
 	}
 	entity.Resolvers = resolvers
-	entity.Requires = buildRequires(schemaType)
+	entity.Requires = buildRequires(schemaType, entity.RequiresStrategy)
 	if len(entity.Requires) > 0 {
 		f.usesRequires = true
 	}
@@ -960,13 +985,55 @@ func assignKeyFieldGoNames(keyFields []*KeyField) {
 	}
 }
 
-func buildRequires(schemaType *ast.Definition) []*Requires {
+// validateComputedFields rejects unusable @computedRequires placements up front:
+// it is only meaningful on a @requires field, and it cannot be combined with the
+// explicit strategy, whose Populate<Entity>Requires hook already owns every
+// @requires field on the entity.
+func validateComputedFields(schemaType *ast.Definition, strategy RequiresStrategy) error {
+	for _, field := range schemaType.Fields {
+		if field.Directives.ForName(dirNameComputedRequires) == nil {
+			continue
+		}
+		if field.Directives.ForName(dirNameRequires) == nil {
+			return fmt.Errorf(
+				"entity %q field %q: @computedRequires only applies to @requires fields",
+				schemaType.Name, field.Name,
+			)
+		}
+		if strategy == RequiresExplicit {
+			return fmt.Errorf(
+				"entity %q field %q: @computedRequires cannot be combined with the explicit @requires strategy; the Populate%sRequires hook already handles every @requires field",
+				schemaType.Name,
+				field.Name,
+				schemaType.Name,
+			)
+		}
+	}
+	return nil
+}
+
+// requiresFieldIsComputed reports whether a field carrying @requires is resolved
+// via a standalone field resolver (the computed strategy) rather than through the
+// entity resolver: the entity resolves to RequiresComputed (the computed_requires
+// package option), or the field is marked @computedRequires. It is the single
+// source of truth for the per-field computed decision, read by both buildRequires
+// and mutateSchemaForRequires.
+func requiresFieldIsComputed(strategy RequiresStrategy, field *ast.FieldDefinition) bool {
+	return strategy == RequiresComputed ||
+		field.Directives.ForName(dirNameComputedRequires) != nil
+}
+
+// buildRequires collects an entity's @requires fields. Each entry's Computed
+// flag records whether the field is delivered via a standalone field resolver
+// rather than the entity resolver (see requiresFieldIsComputed).
+func buildRequires(schemaType *ast.Definition, strategy RequiresStrategy) []*Requires {
 	requires := make([]*Requires, 0)
 	for _, f := range schemaType.Fields {
 		dir := f.Directives.ForName(dirNameRequires)
 		if dir == nil {
 			continue
 		}
+		computed := requiresFieldIsComputed(strategy, f)
 
 		fieldsRaw, err := extractFields(dir)
 		if err != nil {
@@ -975,8 +1042,9 @@ func buildRequires(schemaType *ast.Definition) []*Requires {
 		requiresFieldSet := fieldset.New(fieldsRaw, nil)
 		for _, field := range requiresFieldSet {
 			requires = append(requires, &Requires{
-				Name:  field.ToGoPrivate(),
-				Field: field,
+				Name:     field.ToGoPrivate(),
+				Field:    field,
+				Computed: computed,
 			})
 		}
 	}
@@ -1151,48 +1219,54 @@ func (f *Federation) addMapType(cfg *config.Config) {
 	}
 }
 
-func (f *Federation) mutateSchemaForRequires(
-	schema *ast.Schema,
-	cfg *config.Config,
-) {
-	// Only entities that resolve @requires via the computed strategy get their
-	// @requires fields turned into field resolvers; other strategies handle
-	// @requires elsewhere (on the entity output or the resolver input).
-	computed := make(map[string]bool)
+// mutateSchemaForRequires turns each computed @requires field into a standalone
+// field resolver: it forces a resolver for the field and injects the
+// _federationRequires argument (carrying the representation via
+// @populateFromRepresentations). The decision is per field — a single entity can
+// have some computed @requires fields (handled here) and others delivered through
+// the entity resolver (handled in the federation template).
+//
+// It iterates cfg.Schema (not entity.Def): the schema is re-parsed after
+// InjectSourcesLate, so entity.Def holds stale field pointers whose mutations
+// codegen never sees. The resolved per-entity strategy is looked up by name.
+func (f *Federation) mutateSchemaForRequires(cfg *config.Config) {
+	strategyByType := make(map[string]RequiresStrategy, len(f.Entities))
 	for _, e := range f.Entities {
-		if e.IsComputedRequires() {
-			computed[e.Name] = true
-		}
+		strategyByType[e.Def.Name] = e.RequiresStrategy
 	}
 
-	for _, schemaType := range schema.Types {
-		if !computed[schemaType.Name] {
+	for typeName, schemaType := range cfg.Schema.Types {
+		strategy, ok := strategyByType[typeName]
+		if !ok {
 			continue
 		}
 		for _, field := range schemaType.Fields {
-			if dir := field.Directives.ForName(dirNameRequires); dir != nil {
-				// ensure we always generate a resolver for any @requires field
-				model := cfg.Models[schemaType.Name]
-				fieldConfig := model.Fields[field.Name]
-				fieldConfig.Resolver = true
-				if model.Fields == nil {
-					model.Fields = make(map[string]config.TypeMapField)
-				}
-				model.Fields[field.Name] = fieldConfig
-				cfg.Models[schemaType.Name] = model
-
-				requiresArgument := &ast.ArgumentDefinition{
-					Name: fieldArgRequires,
-					Type: ast.NamedType(mapTypeName, nil),
-					Directives: ast.DirectiveList{
-						{
-							Name:       dirNamePopulateFromRepresentations,
-							Definition: dirPopulateFromRepresentations,
-						},
-					},
-				}
-				field.Arguments = append(field.Arguments, requiresArgument)
+			if field.Directives.ForName(dirNameRequires) == nil {
+				continue
 			}
+			if !requiresFieldIsComputed(strategy, field) {
+				continue
+			}
+
+			model := cfg.Models[typeName]
+			if model.Fields == nil {
+				model.Fields = make(map[string]config.TypeMapField)
+			}
+			fieldConfig := model.Fields[field.Name]
+			fieldConfig.Resolver = true
+			model.Fields[field.Name] = fieldConfig
+			cfg.Models[typeName] = model
+
+			field.Arguments = append(field.Arguments, &ast.ArgumentDefinition{
+				Name: fieldArgRequires,
+				Type: ast.NamedType(mapTypeName, nil),
+				Directives: ast.DirectiveList{
+					{
+						Name:       dirNamePopulateFromRepresentations,
+						Definition: dirPopulateFromRepresentations,
+					},
+				},
+			})
 		}
 	}
 }

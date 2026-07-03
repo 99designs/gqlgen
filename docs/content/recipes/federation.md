@@ -219,22 +219,46 @@ data reach the resolver?* — so each entity uses **exactly one**:
 | --- | --- | --- | --- |
 | Default | _(none)_ | `"default"` | Unmarshaled onto the returned entity, after the resolver runs. |
 | Explicit | `explicit_requires` | `"explicit"` | A `Populate<Entity>Requires` function you implement, called on the returned entity after the resolver. Supports nested/array fields. |
-| Computed | `computed_requires` | _(package option only)_ | Delivered to standalone field resolvers via a `federationRequires` argument (Federation 2 only). |
+| Computed | `computed_requires` | `@computedRequires` (per field) | Delivered to standalone field resolvers via a `federationRequires` argument (Federation 2 only). |
 | Preloaded | `preloaded_requires` | `"preloaded"` | Unmarshaled onto the resolver's *input* representation, before the resolver runs, so a multi resolver sees every entity's `@requires` data at once. Flat scalar/enum fields only; requires `multi`. |
 
 The package option sets the **default** for the whole subgraph. The `requires:`
 argument on `@entityResolver` overrides that default **per entity**, choosing
 among `default`, `explicit`, and `preloaded`. (`computed` is not a `requires:`
 value — it describes field-resolver delivery rather than how data reaches the
-entity resolver, so it is selected only by the `computed_requires` package
-option.) Because `@entityResolver` is your own directive, add the
-`requires: String` argument to its definition. With no `requires:` argument, an
-entity falls back to the package default.
+entity resolver, so it is selected by the `computed_requires` package option or,
+per field, by `@computedRequires`.) Because `@entityResolver` is your own directive, add
+the `requires: String` argument to its definition. With no `requires:` argument,
+an entity falls back to the package default.
 
-To mix strategies in one subgraph — for example `computed` for an entity with an
-object-typed `@requires` and `preloaded` for another with a scalar `@requires` —
-make `computed` the package default and override the scalar entity to
-`preloaded`:
+#### Computing individual `@requires` fields with `@computedRequires`
+
+`computed_requires` computes **every** `@requires` field on its entities. To
+compute just **one** field, annotate it with `@computedRequires` (a gqlgen-provided
+directive; no declaration needed). That field is delivered to a standalone field
+resolver, while the entity's other `@requires` fields follow its strategy. This
+is what lets a `preloaded` entity keep its scalar `@requires` on the batch input
+*and* handle an object-typed `@requires` — which `preloaded` cannot reconstruct —
+on the same entity:
+
+```graphql
+type Product @key(fields: "id") @entityResolver(multi: true) {
+  id: ID! @external
+  category: String! @external
+  info: Info! @external
+  display: String! @requires(fields: "category")            # preloaded onto the input
+  summary: String! @requires(fields: "info { label }") @computedRequires  # computed field resolver
+}
+```
+
+`@computedRequires` requires Federation 2 and `call_argument_directives_with_null`. It
+only applies to `@requires` fields, and cannot be combined with the `explicit`
+strategy (whose `Populate<Entity>Requires` hook already owns every `@requires`
+field). See `_examples/multi-entity-tests` for a worked subgraph.
+
+To mix whole-entity strategies instead — for example `computed` for an
+object-typed entity and `preloaded` for a scalar one — make `computed` the
+package default and override the scalar entity to `preloaded`:
 
 ```graphql
 directive @entityResolver(multi: Boolean, requires: String) on OBJECT

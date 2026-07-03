@@ -221,15 +221,20 @@ type Inner {
     d: String!
 }
 
-# Collision exercises the unhandled key-collision bug described in PLAN.md.
+# Collision attempts to exercise a key collision to demonstrate
+# disambiguation resolution
 #
 # The two key paths normalize to the SAME Go field name:
 #   - scalar  "id"      -> templates.ToGo("id")        == "ID"  (initialism)
 #   - nested  "i { d }" -> ToGo("i") + ToGo("d")       == "ID"
 #
 # In multi mode this produces a synthetic input type with two "ID" fields.
-# buildEntityResolverInputDefinitionSDL does no collision detection, so the
-# duplicate is emitted verbatim. See federation_keycollision_test.go.
+# We perform collision detection now, so these will be 
+# disambiguated to ID and ID2 on the generated
+# multi-resolver input type, 
+# so the schema loads cleanly instead of failing with
+# a duplicate-field error.
+# See federation_keycollision_test.go.
 type Collision @key(fields: "id i { d }") @entityResolver(multi: true) {
     id: ID!
     i: Inner!
@@ -270,6 +275,7 @@ type Collision @key(fields: "id i { d }") @entityResolver(multi: true) {
 	  | SCALAR
 	  | ENUM
 	directive @shareable repeatable on FIELD_DEFINITION | OBJECT
+	directive @computedRequires on FIELD_DEFINITION
 	directive @tag(name: String!) repeatable on
 	  | ARGUMENT_DEFINITION
 	  | ENUM
@@ -2671,8 +2677,7 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 }
 
 func (ec *executionContext) unmarshalNCollisionByIDAndIDsInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋkeycollisionᚋgeneratedᚋmodelᚐCollisionByIDAndIDsInput(ctx context.Context, v any) ([]*model.CollisionByIDAndIDsInput, error) {
-	var vSlice []any
-	vSlice = graphql.CoerceList(v)
+	vSlice := graphql.CoerceList(v)
 	var err error
 	res := make([]*model.CollisionByIDAndIDsInput, len(vSlice))
 	for i := range vSlice {
@@ -2766,8 +2771,7 @@ func (ec *executionContext) marshalN_Any2map(ctx context.Context, sel ast.Select
 }
 
 func (ec *executionContext) unmarshalN_Any2ᚕmapᚄ(ctx context.Context, v any) ([]map[string]any, error) {
-	var vSlice []any
-	vSlice = graphql.CoerceList(v)
+	vSlice := graphql.CoerceList(v)
 	var err error
 	res := make([]map[string]any, len(vSlice))
 	for i := range vSlice {
@@ -2846,8 +2850,7 @@ func (ec *executionContext) marshalN__DirectiveLocation2string(ctx context.Conte
 }
 
 func (ec *executionContext) unmarshalN__DirectiveLocation2ᚕstringᚄ(ctx context.Context, v any) ([]string, error) {
-	var vSlice []any
-	vSlice = graphql.CoerceList(v)
+	vSlice := graphql.CoerceList(v)
 	var err error
 	res := make([]string, len(vSlice))
 	for i := range vSlice {
@@ -2967,8 +2970,7 @@ func (ec *executionContext) marshalNfederation__Policy2string(ctx context.Contex
 }
 
 func (ec *executionContext) unmarshalNfederation__Policy2ᚕstringᚄ(ctx context.Context, v any) ([]string, error) {
-	var vSlice []any
-	vSlice = graphql.CoerceList(v)
+	vSlice := graphql.CoerceList(v)
 	var err error
 	res := make([]string, len(vSlice))
 	for i := range vSlice {
@@ -2997,8 +2999,7 @@ func (ec *executionContext) marshalNfederation__Policy2ᚕstringᚄ(ctx context.
 }
 
 func (ec *executionContext) unmarshalNfederation__Policy2ᚕᚕstringᚄ(ctx context.Context, v any) ([][]string, error) {
-	var vSlice []any
-	vSlice = graphql.CoerceList(v)
+	vSlice := graphql.CoerceList(v)
 	var err error
 	res := make([][]string, len(vSlice))
 	for i := range vSlice {
@@ -3043,8 +3044,7 @@ func (ec *executionContext) marshalNfederation__Scope2string(ctx context.Context
 }
 
 func (ec *executionContext) unmarshalNfederation__Scope2ᚕstringᚄ(ctx context.Context, v any) ([]string, error) {
-	var vSlice []any
-	vSlice = graphql.CoerceList(v)
+	vSlice := graphql.CoerceList(v)
 	var err error
 	res := make([]string, len(vSlice))
 	for i := range vSlice {
@@ -3073,8 +3073,7 @@ func (ec *executionContext) marshalNfederation__Scope2ᚕstringᚄ(ctx context.C
 }
 
 func (ec *executionContext) unmarshalNfederation__Scope2ᚕᚕstringᚄ(ctx context.Context, v any) ([][]string, error) {
-	var vSlice []any
-	vSlice = graphql.CoerceList(v)
+	vSlice := graphql.CoerceList(v)
 	var err error
 	res := make([][]string, len(vSlice))
 	for i := range vSlice {
@@ -3176,8 +3175,7 @@ func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v
 	if v == nil {
 		return nil, nil
 	}
-	var vSlice []any
-	vSlice = graphql.CoerceList(v)
+	vSlice := graphql.CoerceList(v)
 	var err error
 	res := make([]string, len(vSlice))
 	for i := range vSlice {

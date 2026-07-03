@@ -235,6 +235,7 @@ type Product @key(fields: "id") @entityResolver(multi: true) {
 	directive @provides(fields: _FieldSet!) on FIELD_DEFINITION
 	directive @extends on OBJECT | INTERFACE
 	directive @external on FIELD_DEFINITION
+	directive @computedRequires on FIELD_DEFINITION
 	scalar _Any
 	scalar _FieldSet
 `, BuiltIn: true},

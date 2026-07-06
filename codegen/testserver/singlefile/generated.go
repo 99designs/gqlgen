@@ -23038,6 +23038,9 @@ func (ec *executionContext) unmarshalOAny2ᚖinterface(ctx context.Context, v an
 }
 
 func (ec *executionContext) marshalOAny2ᚖinterface(ctx context.Context, sel ast.SelectionSet, v *any) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
 	return ec.marshalOAny2interface(ctx, sel, *v)
 }
 
@@ -23819,6 +23822,9 @@ func (ec *executionContext) unmarshalOString2ᚖᚕstringᚄ(ctx context.Context
 }
 
 func (ec *executionContext) marshalOString2ᚖᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v *[]string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
 	return ec.marshalOString2ᚕstringᚄ(ctx, sel, *v)
 }
 

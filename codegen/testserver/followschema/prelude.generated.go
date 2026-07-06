@@ -2154,6 +2154,9 @@ func (ec *executionContext) unmarshalOString2ᚖᚕstringᚄ(ctx context.Context
 }
 
 func (ec *executionContext) marshalOString2ᚖᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v *[]string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
 	return ec.marshalOString2ᚕstringᚄ(ctx, sel, *v)
 }
 

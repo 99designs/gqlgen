@@ -739,7 +739,33 @@ func write(filename string, b []byte, packages *code.Packages, opts imports.Prun
 		return nil
 	}
 
-	return os.WriteFile(filename, formatted, 0o644)
+	// Write atomically: write to a temp file in the SAME directory, then os.Rename it into place on
+	// success. os.Rename is atomic on the same filesystem, so a reader (or a build) never observes a
+	// half-written file, and an interruption/panic/OOM between formatting and the rename leaves the
+	// PRE-EXISTING file intact instead of an empty or absent one. This also removes the need for the
+	// upfront syscall.Unlink of the output in api/generate.go (the unlink was deleting the file before
+	// generation began, so any interruption during generation left it absent — see issue #2345/#3505).
+	dir := filepath.Dir(filename)
+	tmp, err := os.CreateTemp(dir, filepath.Base(filename)+".*.tmp")
+	if err != nil {
+		return fmt.Errorf("failed to create temp file: %w", err)
+	}
+	tmpName := tmp.Name()
+	cleanup := func() { _ = os.Remove(tmpName) }
+	if _, err := tmp.Write(formatted); err != nil {
+		_ = tmp.Close()
+		cleanup()
+		return fmt.Errorf("failed to write temp file: %w", err)
+	}
+	if err := tmp.Close(); err != nil {
+		cleanup()
+		return fmt.Errorf("failed to close temp file: %w", err)
+	}
+	if err := os.Rename(tmpName, filename); err != nil {
+		cleanup()
+		return fmt.Errorf("failed to rename temp file: %w", err)
+	}
+	return nil
 }
 
 var pkgReplacer = strings.NewReplacer(

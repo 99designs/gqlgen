@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	"syscall"
 
 	"golang.org/x/tools/imports"
 
@@ -55,11 +54,6 @@ func generate(
 	incrementalOpts *codegen.IncrementalOptions,
 	option ...Option,
 ) error {
-	_ = syscall.Unlink(cfg.Exec.Filename)
-	if cfg.Model.IsDefined() {
-		_ = syscall.Unlink(cfg.Model.Filename)
-	}
-
 	plugins := []plugin.Plugin{}
 	if cfg.Model.IsDefined() {
 		plugins = append(plugins, modelgen.New())

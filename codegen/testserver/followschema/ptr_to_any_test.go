@@ -39,3 +39,30 @@ func TestPtrToAny(t *testing.T) {
 		require.Equal(t, &a, resp.PtrToAnyContainer.Binding)
 	})
 }
+
+func TestPtrToAny_Null(t *testing.T) {
+	resolvers := &Stub{}
+
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv.AddTransport(transport.POST{})
+	srv.SetRecoverFunc(nil)
+	c := client.New(srv)
+
+	resolvers.QueryResolver.PtrToAnyContainer = func(ctx context.Context) (wrappedStruct *PtrToAnyContainer, e error) {
+		return &PtrToAnyContainer{PtrToAny: nil}, nil
+	}
+
+	t.Run("nil pointer to any should return null without panic", func(t *testing.T) {
+		var resp struct {
+			PtrToAnyContainer struct {
+				Binding *any
+			}
+		}
+
+		require.NotPanics(t, func() {
+			err := c.Post(`query { ptrToAnyContainer { binding }}`, &resp)
+			require.NoError(t, err)
+			require.Nil(t, resp.PtrToAnyContainer.Binding)
+		})
+	})
+}

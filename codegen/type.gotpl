@@ -91,6 +91,9 @@
 		{{- $eventCtx := and (eq $type.Definition.Name "Subscription") $.Config.SubscriptionContextField -}}
 		func {{$.FuncReceiver}}{{ . }}(ctx context.Context, {{$.ECFuncParam}}sel ast.SelectionSet, v {{ $type.GO | ref }}) {{- if $eventCtx }}(context.Context, {{- end}}graphql.Marshaler{{- if $eventCtx }}){{- end}} {
 			{{- if or $type.IsPtrToSlice $type.IsPtrToIntf }}
+				if v == nil {
+					return {{- if $eventCtx }} ctx,{{- end}} graphql.Null
+				}
 				return {{$.ECDot}}{{ $type.Elem.MarshalFunc }}(ctx, {{$.ECArg}}sel, *v)
 			{{- else if $type.IsSlice }}
 				{{- if not $type.GQL.NonNull }}

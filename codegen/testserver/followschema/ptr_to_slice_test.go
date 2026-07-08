@@ -38,3 +38,30 @@ func TestPtrToSlice(t *testing.T) {
 		require.Equal(t, []string{"hello"}, resp.PtrToSliceContainer.PtrToSlice)
 	})
 }
+
+func TestPtrToSlice_Null(t *testing.T) {
+	resolvers := &Stub{}
+
+	srv := handler.New(NewExecutableSchema(Config{Resolvers: resolvers}))
+	srv.AddTransport(transport.POST{})
+	srv.SetRecoverFunc(nil)
+	c := client.New(srv)
+
+	resolvers.QueryResolver.PtrToSliceContainer = func(ctx context.Context) (wrappedStruct *PtrToSliceContainer, e error) {
+		return &PtrToSliceContainer{PtrToSlice: nil}, nil
+	}
+
+	t.Run("nil pointer to slice should return null without panic", func(t *testing.T) {
+		var resp struct {
+			PtrToSliceContainer struct {
+				PtrToSlice []string
+			}
+		}
+
+		require.NotPanics(t, func() {
+			err := c.Post(`query { ptrToSliceContainer { ptrToSlice }}`, &resp)
+			require.NoError(t, err)
+			require.Nil(t, resp.PtrToSliceContainer.PtrToSlice)
+		})
+	})
+}

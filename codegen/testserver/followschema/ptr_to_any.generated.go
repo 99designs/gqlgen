@@ -173,6 +173,9 @@ func (ec *executionContext) unmarshalOAny2ᚖinterface(ctx context.Context, v an
 }
 
 func (ec *executionContext) marshalOAny2ᚖinterface(ctx context.Context, sel ast.SelectionSet, v *any) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
 	return ec.marshalOAny2interface(ctx, sel, *v)
 }
 

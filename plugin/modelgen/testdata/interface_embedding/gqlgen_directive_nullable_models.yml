@@ -1,0 +1,5 @@
+schema:
+  - "testdata/interface_embedding/schema_directive_nullable.graphql"
+
+model:
+  filename: out_directive_nullable_models/generated_directive_nullable_models.go

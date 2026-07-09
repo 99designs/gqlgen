@@ -65,6 +65,25 @@ func TestModelGenerationDirectiveEmbedding(t *testing.T) {
 			},
 		},
 		{
+			name:          "nullable field embedding generates valid promoted getters",
+			configPath:    "testdata/interface_embedding/gqlgen_directive_nullable_models.yml",
+			outputDir:     "./out_directive_nullable_models/",
+			generatedFile: "./out_directive_nullable_models/generated_directive_nullable_models.go",
+			expectedBases: []string{"BaseNode", "BaseResource"},
+			structChecks: []structCheck{
+				{"BaseResource", []string{"BaseNode", "Name", "Size"}, nil},
+				{"Document", []string{"BaseResource"}, nil},
+			},
+			additionalChecks: func(t *testing.T, generated string) {
+				t.Helper()
+				// Promoted nullable fields are already pointers, so the getter must
+				// return the field directly, not its address (which would be **string).
+				require.Contains(t, generated, "func (this Document) GetName() *string")
+				require.Contains(t, generated, "{ return this.Name }")
+				require.NotContains(t, generated, "return &this.Name")
+			},
+		},
+		{
 			name:            "binded package type embedding",
 			configPath:      "testdata/interface_embedding/gqlgen_directive_binding_models.yml",
 			outputDir:       "./out_directive_binding_models/",

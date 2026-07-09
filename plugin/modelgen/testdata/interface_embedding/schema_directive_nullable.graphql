@@ -1,0 +1,18 @@
+directive @goEmbedInterface on INTERFACE
+
+interface Node @goEmbedInterface {
+    id: ID!
+}
+
+interface Resource implements Node @goEmbedInterface {
+    id: ID!
+    name: String
+    size: Float
+}
+
+type Document implements Resource & Node {
+    id: ID!
+    name: String
+    size: Float
+    format: String
+}

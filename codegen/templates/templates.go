@@ -739,13 +739,30 @@ func write(filename string, b []byte, packages *code.Packages, opts imports.Prun
 		return nil
 	}
 
-	// Write atomically: write to a temp file in the SAME directory, then os.Rename it into place on
-	// success. os.Rename is atomic on the same filesystem, so a reader (or a build) never observes a
-	// half-written file, and an interruption/panic/OOM between formatting and the rename leaves the
-	// PRE-EXISTING file intact instead of an empty or absent one. This also removes the need for the
-	// upfront syscall.Unlink of the output in api/generate.go (the unlink was deleting the file before
-	// generation began, so any interruption during generation left it absent — see issue #2345/#3505).
+	// Write atomically: render to a temp file in the SAME directory as the
+	// destination, fsync it, then os.Rename it into place on success. os.Rename is
+	// atomic on the same filesystem, so a reader (or a build) never observes a
+	// half-written file, and an interruption/panic/OOM between formatting and the
+	// rename leaves the PRE-EXISTING file intact instead of an empty or absent
+	// one. This also removes the need for the upfront syscall.Unlink of the output
+	// in api/generate.go (the unlink deleted the file before generation began, so
+	// any interruption during generation left it absent — see issue #2345/#3505).
+	//
+	// This is the standard write-temp-then-rename pattern used by
+	// google/renameio, natefinch/atomic, tailscale/atomicfile and moby/sys:
+	//   - the temp lives next to the destination so the rename is same-filesystem;
+	//   - the temp is fsync'd before the rename so a crash can't expose a
+	//     zero-length file even though the rename itself succeeded (without fsync
+	//     the directory entry can be durable before the data is, per ext4's Ts'o);
+	//   - the temp's permissions are set to match the existing destination file
+	//     (preserving any user/repo mode and avoiding spurious mode churn across
+	//     regens), defaulting to 0o644 for a brand-new file — the same mode
+	//     os.WriteFile used here before this change.
 	dir := filepath.Dir(filename)
+	perm := os.FileMode(0o644)
+	if fi, err := os.Stat(filename); err == nil && fi.Mode().IsRegular() {
+		perm = fi.Mode().Perm()
+	}
 	tmp, err := os.CreateTemp(dir, filepath.Base(filename)+".*.tmp")
 	if err != nil {
 		return fmt.Errorf("failed to create temp file: %w", err)
@@ -756,6 +773,18 @@ func write(filename string, b []byte, packages *code.Packages, opts imports.Prun
 		_ = tmp.Close()
 		cleanup()
 		return fmt.Errorf("failed to write temp file: %w", err)
+	}
+	// Set permissions before fsync so the mode change is flushed with the data.
+	// Chmod sets the exact bits (umask is not applied), like the references.
+	if err := tmp.Chmod(perm); err != nil {
+		_ = tmp.Close()
+		cleanup()
+		return fmt.Errorf("failed to set temp file permissions: %w", err)
+	}
+	if err := tmp.Sync(); err != nil {
+		_ = tmp.Close()
+		cleanup()
+		return fmt.Errorf("failed to sync temp file: %w", err)
 	}
 	if err := tmp.Close(); err != nil {
 		cleanup()

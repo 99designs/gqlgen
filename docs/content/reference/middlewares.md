@@ -85,6 +85,31 @@ If you return an error without executing `next()`, you **must** wrap it in
 `graphql.OneShot`. Failing to do so will cause streaming transports to loop
 infinitely and spam the client with the same error!
 
+### Example: Setting the Worker Limit Per Request
+
+The `worker_limit` in `gqlgen.yml` is only a codegen-time default for how many
+goroutines gqlgen uses when marshaling slices concurrently. You can override it
+per request from an operation middleware by calling `SetWorkerLimit` on the
+operation context (`0` means unlimited):
+
+```go
+srv.AroundOperations(func(ctx context.Context, next graphql.OperationHandler) graphql.ResponseHandler {
+	oc := graphql.GetOperationContext(ctx)
+
+	// Throttle lower-priority requests to a small pool of workers; everything
+	// else falls back to the server-wide default / codegen worker_limit.
+	if oc.Headers.Get("X-Priority") == "low" {
+		oc.SetWorkerLimit(2)
+	}
+
+	return next(ctx)
+})
+```
+
+`SetWorkerLimit` assigns a fresh value on this request's operation context only,
+so it never affects other in-flight requests. Precedence is
+**per-request override > server-wide `srv.SetWorkerLimit` > codegen `worker_limit`**.
+
 ## Root Field Middleware (`AroundRootFields`)
 
 Root field middleware is similar to field middleware, but it only runs for the
@@ -138,3 +163,48 @@ srv.Use(extension.FixedComplexityLimit(50))
 To create your own, implement `graphql.HandlerExtension` and the
 specific interceptor interfaces (e.g., `graphql.OperationInterceptor`,
 `graphql.FieldInterceptor`) you need.
+
+### Example: A Worker Limit Extension
+
+Extensions that implement `graphql.OperationContextMutator` receive the
+`*graphql.OperationContext` directly, which makes them a clean place to set the
+concurrent-slice worker limit per request. This overrides both the codegen
+`worker_limit` and any server-wide `srv.SetWorkerLimit` default:
+
+```go
+package main
+
+import (
+	"context"
+
+	"github.com/99designs/gqlgen/graphql"
+	"github.com/vektah/gqlparser/v2/gqlerror"
+)
+
+// WorkerLimitByOperation caps concurrency for specific, known-expensive
+// operations while leaving everything else on the default.
+type WorkerLimitByOperation struct{}
+
+// Assert we implement the interfaces we rely on.
+var _ interface {
+	graphql.HandlerExtension
+	graphql.OperationContextMutator
+} = WorkerLimitByOperation{}
+
+func (WorkerLimitByOperation) ExtensionName() string { return "WorkerLimitByOperation" }
+
+func (WorkerLimitByOperation) Validate(graphql.ExecutableSchema) error { return nil }
+
+func (WorkerLimitByOperation) MutateOperationContext(ctx context.Context, oc *graphql.OperationContext) *gqlerror.Error {
+	if oc.OperationName == "ExpensiveReport" {
+		oc.SetWorkerLimit(4) // 0 would mean unlimited
+	}
+	return nil
+}
+```
+
+Register it on the server with `srv.Use`:
+
+```go
+srv.Use(WorkerLimitByOperation{})
+```

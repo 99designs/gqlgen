@@ -59,6 +59,32 @@ func TestGetOperationContext(t *testing.T) {
 	})
 }
 
+func TestEffectiveWorkerLimit(t *testing.T) {
+	const codegenDefault = int64(1000)
+
+	t.Run("falls back to codegen default when unset", func(t *testing.T) {
+		opCtx := &OperationContext{}
+		require.Equal(t, codegenDefault, opCtx.EffectiveWorkerLimit(codegenDefault))
+	})
+
+	t.Run("nil receiver falls back to codegen default", func(t *testing.T) {
+		var opCtx *OperationContext
+		require.Equal(t, codegenDefault, opCtx.EffectiveWorkerLimit(codegenDefault))
+	})
+
+	t.Run("override takes precedence over codegen default", func(t *testing.T) {
+		opCtx := &OperationContext{}
+		opCtx.SetWorkerLimit(4)
+		require.Equal(t, int64(4), opCtx.EffectiveWorkerLimit(codegenDefault))
+	})
+
+	t.Run("override of 0 means unlimited and still wins", func(t *testing.T) {
+		opCtx := &OperationContext{}
+		opCtx.SetWorkerLimit(0)
+		require.Equal(t, int64(0), opCtx.EffectiveWorkerLimit(codegenDefault))
+	})
+}
+
 func TestCollectFields(t *testing.T) {
 	getNames := func(collected []CollectedField) []string {
 		names := make([]string, 0, len(collected))

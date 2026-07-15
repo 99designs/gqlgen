@@ -28,6 +28,10 @@ exec:
   # filename_template: "{name}.generated.go"
 
   # Optional: Maximum number of goroutines in concurrency to use per child resolvers(default: unlimited)
+  # This is the codegen-time default; it can be overridden at runtime, either
+  # server-wide with server.SetWorkerLimit(n) or per request from an extension /
+  # middleware with graphql.GetOperationContext(ctx).SetWorkerLimit(n). A value
+  # of 0 means unlimited. Precedence: per-request > server-wide > worker_limit.
   # worker_limit: 1000
 
 # Comment or remove this section to skip Apollo Federation support

@@ -29,7 +29,32 @@ type OperationContext struct {
 
 	Stats Stats
 
+	// WorkerLimit overrides the codegen-time exec.worker_limit for this
+	// operation when marshaling slices concurrently. A nil value means "not
+	// overridden", so the codegen default is used. A value of 0 means unlimited
+	// concurrency. It can be set at server startup via Server.SetWorkerLimit or
+	// per request from an extension/middleware via SetWorkerLimit.
+	WorkerLimit *int64
+
 	collectFieldsCache collectFieldsCacheStore
+}
+
+// EffectiveWorkerLimit returns the worker limit to use when marshaling slices
+// concurrently for the current operation. It falls back to codegenDefault (the
+// value baked in at codegen from exec.worker_limit) when no runtime override
+// was set. Generated code calls this at every concurrent-slice marshal site.
+func (c *OperationContext) EffectiveWorkerLimit(codegenDefault int64) int64 {
+	if c != nil && c.WorkerLimit != nil {
+		return *c.WorkerLimit
+	}
+	return codegenDefault
+}
+
+// SetWorkerLimit sets a per-operation override for the concurrent-slice worker
+// limit. A value of 0 means unlimited concurrency. Call this from an extension
+// or middleware (e.g. AroundOperations) to vary the limit per request.
+func (c *OperationContext) SetWorkerLimit(limit int64) {
+	c.WorkerLimit = &limit
 }
 
 func (c *OperationContext) Validate(ctx context.Context) error {

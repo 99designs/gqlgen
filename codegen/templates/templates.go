@@ -18,6 +18,7 @@ import (
 	"strings"
 	"sync"
 	"text/template"
+	"time"
 	"unicode"
 
 	"github.com/99designs/gqlgen/internal/code"
@@ -790,11 +791,39 @@ func write(filename string, b []byte, packages *code.Packages, opts imports.Prun
 		cleanup()
 		return fmt.Errorf("failed to close temp file: %w", err)
 	}
-	if err := os.Rename(tmpName, filename); err != nil {
+	if err := renameWithRetry(tmpName, filename); err != nil {
 		cleanup()
 		return fmt.Errorf("failed to rename temp file: %w", err)
 	}
 	return nil
+}
+
+// renameWithRetry wraps os.Rename with a few short retries on Windows, where
+// MoveFileEx (which os.Rename uses to replace an existing file) can fail
+// TRANSIENTLY with "Access is denied" — e.g. a virus scanner or search
+// indexer briefly holding an open handle on the destination right after it
+// was read (the unchanged-content check above just opened it), or a
+// still-settling antivirus scan of the freshly-written temp file. This is a
+// well-known Windows quirk other atomic-rename implementations work around
+// (see natefinch/atomic and tailscale/atomicfile, which retry/use
+// ReplaceFile for the same reason); a handful of short, bounded retries
+// resolves it without materially slowing down the common (non-Windows,
+// non-contended) case, where the first attempt always succeeds.
+func renameWithRetry(oldpath, newpath string) error {
+	if runtime.GOOS != "windows" {
+		return os.Rename(oldpath, newpath)
+	}
+	var err error
+	for i := range 5 {
+		if err = os.Rename(oldpath, newpath); err == nil {
+			return nil
+		}
+		if !errors.Is(err, os.ErrPermission) {
+			return err
+		}
+		time.Sleep(time.Duration(i+1) * 10 * time.Millisecond)
+	}
+	return err
 }
 
 var pkgReplacer = strings.NewReplacer(

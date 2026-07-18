@@ -741,7 +741,7 @@ func write(filename string, b []byte, packages *code.Packages, opts imports.Prun
 	}
 
 	// Write atomically: render to a temp file in the SAME directory as the
-	// destination, fsync it, then os.Rename it into place on success. os.Rename is
+	// destination, fsync it, then rename it into place on success. Rename is
 	// atomic on the same filesystem, so a reader (or a build) never observes a
 	// half-written file, and an interruption/panic/OOM between formatting and the
 	// rename leaves the PRE-EXISTING file intact instead of an empty or absent
@@ -750,20 +750,24 @@ func write(filename string, b []byte, packages *code.Packages, opts imports.Prun
 	// any interruption during generation left it absent — see issue #2345/#3505).
 	//
 	// This is the standard write-temp-then-rename pattern used by
-	// google/renameio, natefinch/atomic, tailscale/atomicfile and moby/sys:
+	// google/renameio, natefinch/atomic, tailscale/atomicfile and moby/sys (see
+	// https://github.com/99designs/gqlgen/pull/4262#issuecomment-5011193760 for
+	// the tailscale/atomicfile reference this follows most closely):
 	//   - the temp lives next to the destination so the rename is same-filesystem;
 	//   - the temp is fsync'd before the rename so a crash can't expose a
 	//     zero-length file even though the rename itself succeeded (without fsync
 	//     the directory entry can be durable before the data is, per ext4's Ts'o);
-	//   - the temp's permissions are set to match the existing destination file
-	//     (preserving any user/repo mode and avoiding spurious mode churn across
-	//     regens), defaulting to 0o644 for a brand-new file — the same mode
-	//     os.WriteFile used here before this change.
+	//   - on non-Windows, the temp's permissions are set to match the existing
+	//     destination file (preserving any user/repo mode and avoiding spurious
+	//     mode churn across regens), defaulting to 0o644 for a brand-new file —
+	//     the same mode os.WriteFile used here before this change. On Windows the
+	//     permission bits are SKIPPED entirely (not attempted, not defaulted) —
+	//     matching tailscale/atomicfile's own "perm argument is ignored on
+	//     Windows" contract: Windows has no POSIX owner/group/other mode, only a
+	//     coarse read-only attribute, so os.FileMode there doesn't mean the same
+	//     thing and forcing a POSIX bit pattern onto it is a category error, not
+	//     a portability nicety.
 	dir := filepath.Dir(filename)
-	perm := os.FileMode(0o644)
-	if fi, err := os.Stat(filename); err == nil && fi.Mode().IsRegular() {
-		perm = fi.Mode().Perm()
-	}
 	tmp, err := os.CreateTemp(dir, filepath.Base(filename)+".*.tmp")
 	if err != nil {
 		return fmt.Errorf("failed to create temp file: %w", err)
@@ -775,12 +779,19 @@ func write(filename string, b []byte, packages *code.Packages, opts imports.Prun
 		cleanup()
 		return fmt.Errorf("failed to write temp file: %w", err)
 	}
-	// Set permissions before fsync so the mode change is flushed with the data.
-	// Chmod sets the exact bits (umask is not applied), like the references.
-	if err := tmp.Chmod(perm); err != nil {
-		_ = tmp.Close()
-		cleanup()
-		return fmt.Errorf("failed to set temp file permissions: %w", err)
+	if runtime.GOOS != "windows" {
+		perm := os.FileMode(0o644)
+		if fi, err := os.Stat(filename); err == nil && fi.Mode().IsRegular() {
+			perm = fi.Mode().Perm()
+		}
+		// Set permissions before fsync so the mode change is flushed with the
+		// data. Chmod sets the exact bits (umask is not applied), like the
+		// references.
+		if err := tmp.Chmod(perm); err != nil {
+			_ = tmp.Close()
+			cleanup()
+			return fmt.Errorf("failed to set temp file permissions: %w", err)
+		}
 	}
 	if err := tmp.Sync(); err != nil {
 		_ = tmp.Close()
@@ -798,17 +809,17 @@ func write(filename string, b []byte, packages *code.Packages, opts imports.Prun
 	return nil
 }
 
-// renameWithRetry wraps os.Rename with a few short retries on Windows, where
-// MoveFileEx (which os.Rename uses to replace an existing file) can fail
-// TRANSIENTLY with "Access is denied" — e.g. a virus scanner or search
-// indexer briefly holding an open handle on the destination right after it
-// was read (the unchanged-content check above just opened it), or a
-// still-settling antivirus scan of the freshly-written temp file. This is a
-// well-known Windows quirk other atomic-rename implementations work around
-// (see natefinch/atomic and tailscale/atomicfile, which retry/use
-// ReplaceFile for the same reason); a handful of short, bounded retries
-// resolves it without materially slowing down the common (non-Windows,
-// non-contended) case, where the first attempt always succeeds.
+// renameWithRetry wraps os.Rename with a few short retries on Windows. Go's
+// os.Rename on Windows already calls MoveFileEx with MOVEFILE_REPLACE_EXISTING
+// — the same underlying API natefinch/atomic's ReplaceFile wraps — so it is
+// not a weaker primitive; what it doesn't do is retry. MoveFileEx can fail
+// TRANSIENTLY with "Access is denied" when something else (a virus scanner, a
+// search indexer) briefly holds an open handle on the destination right after
+// it was read (the unchanged-content check above just opened it) or on the
+// freshly-written temp file. This is a well-known Windows quirk; a handful of
+// short, bounded retries resolves it without materially slowing down the
+// common (non-Windows, non-contended) case, where the first attempt always
+// succeeds.
 func renameWithRetry(oldpath, newpath string) error {
 	if runtime.GOOS != "windows" {
 		return os.Rename(oldpath, newpath)

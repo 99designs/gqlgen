@@ -737,6 +737,8 @@ func write(filename string, b []byte, packages *code.Packages, opts imports.Prun
 	// Skip write if content is unchanged - preserves mtime for Go build cache
 	existing, readErr := os.ReadFile(filename)
 	if readErr == nil && bytes.Equal(existing, formatted) {
+		// The on-disk file IS the current output — later loads must see it.
+		unmask(packages, filename)
 		return nil
 	}
 
@@ -806,7 +808,20 @@ func write(filename string, b []byte, packages *code.Packages, opts imports.Prun
 		cleanup()
 		return fmt.Errorf("failed to rename temp file: %w", err)
 	}
+	// The new contents are on disk — remove any loader mask api.Generate placed
+	// over this output (see maskGeneratedOutput), so later loads in this same
+	// run (e.g. the exec build reloading the model package after modelgen wrote
+	// it) see the just-generated types instead of the empty stub.
+	unmask(packages, filename)
 	return nil
+}
+
+// unmask lifts api.Generate's loader mask (maskGeneratedOutput) for a just-
+// written (or confirmed-current) output file — from here on, disk is truth.
+func unmask(packages *code.Packages, filename string) {
+	if abs, err := filepath.Abs(filename); err == nil {
+		packages.UnmaskFile(abs)
+	}
 }
 
 // renameWithRetry wraps os.Rename with a few short retries on Windows. Go's

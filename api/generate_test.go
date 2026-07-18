@@ -298,7 +298,9 @@ func TestGenerateAtomicWritePreservesOutputOnFailure(t *testing.T) {
 	// Pre-create the exec output with known content — the "previously generated" file that must
 	// survive a failed regen.
 	execPath := cfg.Exec.Filename
-	preExisting := []byte("// the previously-generated file — must survive a failed regen\npackage graph\n")
+	preExisting := []byte(
+		"// the previously-generated file — must survive a failed regen\npackage graph\n",
+	)
 	require.NoError(t, os.MkdirAll(filepath.Dir(execPath), 0o755))
 	require.NoError(t, os.WriteFile(execPath, preExisting, 0o644))
 
@@ -310,6 +312,10 @@ func TestGenerateAtomicWritePreservesOutputOnFailure(t *testing.T) {
 
 	// The pre-existing file must be INTACT — not absent, not truncated, not empty.
 	got, readErr := os.ReadFile(execPath)
-	require.NoError(t, readErr, "exec output must be PRESENT after a failed regen (was deleted under the old unlink-first behavior)")
+	require.NoError(
+		t,
+		readErr,
+		"exec output must be PRESENT after a failed regen (was deleted under the old unlink-first behavior)",
+	)
 	require.Equal(t, preExisting, got, "exec output must be UNCHANGED after a failed regen")
 }

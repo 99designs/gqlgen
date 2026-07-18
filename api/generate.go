@@ -2,8 +2,9 @@ package api
 
 import (
 	"fmt"
-	"golang.org/x/tools/imports"
 	"regexp"
+
+	"golang.org/x/tools/imports"
 
 	"github.com/99designs/gqlgen/codegen"
 	"github.com/99designs/gqlgen/codegen/config"

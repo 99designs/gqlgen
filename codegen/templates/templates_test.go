@@ -404,8 +404,16 @@ func TestTemplateOverride(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer f.Close()
-	err = Render(Options{Template: "hello", Filename: f.Name(), Packages: code.NewPackages()})
+	name := f.Name()
+	// Close BEFORE Render: write()'s atomic rename replaces this file, and on
+	// Windows a rename/replace over a file with an open handle fails with
+	// "Access is denied" (mandatory file locking) even from the SAME process
+	// — unlike POSIX, where os.Rename over an open file is fine. Only the
+	// name is needed from here on.
+	if err := f.Close(); err != nil {
+		t.Fatal(err)
+	}
+	err = Render(Options{Template: "hello", Filename: name, Packages: code.NewPackages()})
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -422,14 +430,21 @@ func TestRenderFS(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer f.Close()
-	err = Render(Options{TemplateFS: templateFS, Filename: f.Name(), Packages: code.NewPackages()})
+	name := f.Name()
+	// Close BEFORE Render — see the comment in TestTemplateOverride: write()'s
+	// atomic rename can't replace a file this process still has open on
+	// Windows. Only the name is needed from here on (the content is read back
+	// fresh via os.ReadFile below, not through this handle).
+	if err := f.Close(); err != nil {
+		t.Fatal(err)
+	}
+	err = Render(Options{TemplateFS: templateFS, Filename: name, Packages: code.NewPackages()})
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	expectedString := "package \n\nimport (\n)\nthis is my test package"
-	actualContents, _ := os.ReadFile(f.Name())
+	actualContents, _ := os.ReadFile(name)
 	actualContentsStr := string(actualContents)
 
 	// don't look at last character since it's \n on Linux and \r\n on Windows

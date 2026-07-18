@@ -272,3 +272,50 @@ func TestPerformanceOptionsIndividually(t *testing.T) {
 		})
 	}
 }
+
+// TestGenerateAtomicWritePreservesOutputOnFailure reproduces issue #2345/#3505: when generation
+// FAILS mid-run (after the output file would have been deleted, before it's rewritten), the
+// PRE-EXISTING generated file must SURVIVE intact — not be left absent. Before the atomic-write
+// fix, api/generate.go unlinked the exec + model outputs at the very start of Generate, so a
+// failure anywhere in the long schema-load/plugin/render chain left the file ABSENT (invisible
+// to `go build` until the next regen, and the root of the recovery-desyncs-sibling-golden class).
+// Now the write is atomic (write-to-temp + os.Rename), and the upfront unlink is gone, so a
+// mid-generation failure leaves the prior file untouched.
+func TestGenerateAtomicWritePreservesOutputOnFailure(t *testing.T) {
+	wd, err := os.Getwd()
+	require.NoError(t, err)
+
+	workDir := filepath.Join(wd, "testdata", "default")
+	t.Cleanup(func() {
+		cleanup(workDir)
+		t.Chdir(wd)
+	})
+	t.Chdir(workDir)
+
+	cfg, err := config.LoadConfigFromDefaultLocations()
+	require.NoError(t, err)
+
+	// Pre-create the exec output with known content — the "previously generated" file that must
+	// survive a failed regen.
+	execPath := cfg.Exec.Filename
+	preExisting := []byte(
+		"// the previously-generated file — must survive a failed regen\npackage graph\n",
+	)
+	require.NoError(t, os.MkdirAll(filepath.Dir(execPath), 0o755))
+	require.NoError(t, os.WriteFile(execPath, preExisting, 0o644))
+
+	// Run Generate with an erroring schema mutator: it fails AFTER schema load but BEFORE the
+	// exec file is rewritten — the exact window where the old upfront-unlink left the file absent.
+	err = Generate(cfg, AddPlugin(&testSchemaMutator{name: "error-mutator", shouldError: true}))
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "deliberate schema mutation error")
+
+	// The pre-existing file must be INTACT — not absent, not truncated, not empty.
+	got, readErr := os.ReadFile(execPath)
+	require.NoError(
+		t,
+		readErr,
+		"exec output must be PRESENT after a failed regen (was deleted under the old unlink-first behavior)",
+	)
+	require.Equal(t, preExisting, got, "exec output must be UNCHANGED after a failed regen")
+}

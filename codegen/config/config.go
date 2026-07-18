@@ -78,6 +78,13 @@ type Config struct {
 	Sources          []*ast.Source  `yaml:"-"`
 	Packages         *code.Packages `yaml:"-"`
 	Schema           *ast.Schema    `yaml:"-"`
+
+	// packagesOverlay is the loader overlay shared by every Packages instance
+	// this Config creates (LoadSchema recreates c.Packages, so the overlay must
+	// outlive any single instance). Entries mask gqlgen's own stale generated
+	// outputs from autobind during a generation run — see MaskGeneratedFile and
+	// api.Generate. Keyed by absolute file path.
+	packagesOverlay map[string][]byte
 }
 
 // boolOrFalse returns the value of a *bool pointer, or false if nil.
@@ -337,12 +344,29 @@ func CompleteConfig(config *Config) error {
 	return nil
 }
 
+// MaskGeneratedFile registers a loader overlay masking absPath with the given
+// stub contents for every Packages instance this Config creates — including
+// the one LoadSchema recreates — so gqlgen's own stale outputs can be hidden
+// from autobind for the whole generation run (see api.Generate). Held on the
+// Config (not just the current Packages) because LoadSchema rebuilds
+// c.Packages, which would otherwise silently drop masks set before it.
+func (c *Config) MaskGeneratedFile(absPath, contents string) {
+	if c.packagesOverlay == nil {
+		c.packagesOverlay = map[string][]byte{}
+	}
+	c.packagesOverlay[absPath] = []byte(contents)
+	if c.Packages != nil {
+		c.Packages.MaskFile(absPath, contents)
+	}
+}
+
 func (c *Config) Init() error {
 	if c.Packages == nil {
 		c.Packages = code.NewPackages(
 			code.WithBuildTags(c.GoBuildTags...),
 			code.PackagePrefixToCache("github.com/99designs/gqlgen/graphql"),
 			code.WithPreloadNames(templatePackageNames...),
+			code.WithOverlay(c.packagesOverlay),
 		)
 	}
 
@@ -1160,6 +1184,7 @@ func (c *Config) LoadSchema() error {
 			code.WithBuildTags(c.GoBuildTags...),
 			code.PackagePrefixToCache("github.com/99designs/gqlgen/graphql"),
 			code.WithPreloadNames(templatePackageNames...),
+			code.WithOverlay(c.packagesOverlay),
 		)
 	}
 

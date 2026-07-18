@@ -2,8 +2,11 @@ package api
 
 import (
 	"fmt"
+	"go/parser"
+	"go/token"
+	"os"
+	"path/filepath"
 	"regexp"
-	"syscall"
 
 	"golang.org/x/tools/imports"
 
@@ -24,6 +27,32 @@ var (
 		`v(\d+).(\d+)$`,
 	) // regex to grab the version number from a url
 )
+
+// maskGeneratedOutput hides an existing generated output file from the type
+// loader for the duration of this generation run (see the comment at the top
+// of generate). The mask is a package-clause-only stub — NOT empty bytes,
+// which would be a Go parse error and break loading the rest of the package —
+// so the package name is read from the real file's own package clause. A
+// missing/unparseable file needs no mask (there is nothing stale to bind to;
+// generation will (re)create it), matching how the old unlink was a no-op on
+// a missing file.
+func maskGeneratedOutput(cfg *config.Config, filename string) {
+	if filename == "" {
+		return
+	}
+	abs, err := filepath.Abs(filename)
+	if err != nil {
+		return
+	}
+	if _, err := os.Stat(abs); err != nil {
+		return // nothing on disk — nothing stale to mask
+	}
+	f, err := parser.ParseFile(token.NewFileSet(), abs, nil, parser.PackageClauseOnly)
+	if err != nil || f.Name == nil {
+		return // can't determine the package — leave it visible rather than corrupt the load
+	}
+	cfg.MaskGeneratedFile(abs, "package "+f.Name.Name+"\n")
+}
 
 // Generate generates GraphQL code based on the provided config.
 func Generate(cfg *config.Config, option ...Option) error {
@@ -53,9 +82,22 @@ func generate(
 	incrementalOpts *codegen.IncrementalOptions,
 	option ...Option,
 ) error {
-	_ = syscall.Unlink(cfg.Exec.Filename)
+	// MASK gqlgen's own previous outputs from the type loader, WITHOUT deleting
+	// them from disk. If a stale generated model file is visible while the
+	// schema loads, autobind finds the previously-generated types in it and
+	// binds them as if they were user-written models — so modelgen skips
+	// (re)generating them, the freshly-written model file comes out (near-)empty,
+	// and the exec build then fails with "unable to find type" (every testserver
+	// config that autobinds its own model package hits this). Before this
+	// change, api.Generate handled that by syscall.Unlink-ing the outputs up
+	// front — but a deleted-then-interrupted generation left the user with NO
+	// generated file at all (#2345, #3505). An overlay gives the loader the
+	// same "these files don't exist yet" view with no destructive disk write:
+	// the real files stay intact until the atomic rename replaces them, and
+	// templates.write unmasks each file once its new contents are on disk.
+	maskGeneratedOutput(cfg, cfg.Exec.Filename)
 	if cfg.Model.IsDefined() {
-		_ = syscall.Unlink(cfg.Model.Filename)
+		maskGeneratedOutput(cfg, cfg.Model.Filename)
 	}
 
 	plugins := []plugin.Plugin{}

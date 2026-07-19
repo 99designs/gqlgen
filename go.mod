@@ -10,7 +10,7 @@ require (
 	github.com/hashicorp/golang-lru/v2 v2.0.7
 	github.com/logrusorgru/aurora/v4 v4.0.0
 	github.com/matryer/moq v0.6.0
-	github.com/mattn/go-colorable v0.1.14
+	github.com/mattn/go-colorable v0.1.15
 	github.com/mattn/go-isatty v0.0.21
 	github.com/sosodev/duration v1.4.0
 	github.com/stretchr/testify v1.11.1

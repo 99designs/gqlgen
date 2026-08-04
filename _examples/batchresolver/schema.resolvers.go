@@ -82,6 +82,17 @@ func (r *profileResolver) CoverNonBatch(ctx context.Context, obj *Profile) (*Ima
 	return resolveImage(r.Resolver, idx)
 }
 
+// Node is the batch resolver for the node field.
+func (r *profileEdgeResolver) Node(ctx context.Context, objs []*ProfileEdge) ([]*Profile, error) {
+	r.profileEdgeNodeBatchCalls.Add(1)
+	r.profileEdgeNodeBatchSize.Store(int32(len(objs)))
+	results := make([]*Profile, len(objs))
+	for i, edge := range objs {
+		results[i] = edge.Node
+	}
+	return results, nil
+}
+
 // Users is the resolver for the users field.
 func (r *queryResolver) Users(ctx context.Context) ([]*User, error) {
 	if r.users == nil {
@@ -302,7 +313,7 @@ func (r *userResolver) ProfileConnectionBatch(ctx context.Context, objs []*User)
 			profile = r.profiles[idx]
 		}
 		results[i] = &ProfilesConnection{
-			Edges:      []*ProfileEdge{{Node: profile, Cursor: fmt.Sprintf("cursor-%d", idx)}},
+			Edges:      []ProfileEdge{{Node: profile, Cursor: fmt.Sprintf("cursor-%d", idx)}},
 			TotalCount: 1,
 		}
 	}
@@ -312,13 +323,20 @@ func (r *userResolver) ProfileConnectionBatch(ctx context.Context, objs []*User)
 // ProfileConnectionNonBatch is the resolver for the profileConnectionNonBatch field.
 func (r *userResolver) ProfileConnectionNonBatch(ctx context.Context, obj *User) (*ProfilesConnection, error) {
 	r.profileConnectionNonBatchCalls.Add(1)
+	if r.connectionProfiles != nil {
+		edges := make([]ProfileEdge, len(r.connectionProfiles))
+		for i, profile := range r.connectionProfiles {
+			edges[i] = ProfileEdge{Node: profile, Cursor: fmt.Sprintf("cursor-%d", i)}
+		}
+		return &ProfilesConnection{Edges: edges, TotalCount: len(edges)}, nil
+	}
 	idx := r.userIndex(obj)
 	var profile *Profile
 	if idx >= 0 && idx < len(r.profiles) {
 		profile = r.profiles[idx]
 	}
 	return &ProfilesConnection{
-		Edges:      []*ProfileEdge{{Node: profile, Cursor: fmt.Sprintf("cursor-%d", idx)}},
+		Edges:      []ProfileEdge{{Node: profile, Cursor: fmt.Sprintf("cursor-%d", idx)}},
 		TotalCount: 1,
 	}, nil
 }
@@ -338,6 +356,9 @@ func (r *Resolver) Pig() PigResolver { return &pigResolver{r} }
 // Profile returns ProfileResolver implementation.
 func (r *Resolver) Profile() ProfileResolver { return &profileResolver{r} }
 
+// ProfileEdge returns ProfileEdgeResolver implementation.
+func (r *Resolver) ProfileEdge() ProfileEdgeResolver { return &profileEdgeResolver{r} }
+
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
@@ -350,6 +371,7 @@ type (
 	domesticCatResolver struct{ *Resolver }
 	pigResolver         struct{ *Resolver }
 	profileResolver     struct{ *Resolver }
+	profileEdgeResolver struct{ *Resolver }
 	queryResolver       struct{ *Resolver }
 	userResolver        struct{ *Resolver }
 )

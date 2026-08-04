@@ -33,6 +33,7 @@ type ResolverRoot interface {
 	DomesticCat() DomesticCatResolver
 	Pig() PigResolver
 	Profile() ProfileResolver
+	ProfileEdge() ProfileEdgeResolver
 	Query() QueryResolver
 	User() UserResolver
 }
@@ -130,6 +131,9 @@ type PigResolver interface {
 type ProfileResolver interface {
 	CoverBatch(ctx context.Context, objs []*Profile) ([]*Image, error)
 	CoverNonBatch(ctx context.Context, obj *Profile) (*Image, error)
+}
+type ProfileEdgeResolver interface {
+	Node(ctx context.Context, objs []*ProfileEdge) ([]*Profile, error)
 }
 type QueryResolver interface {
 	Users(ctx context.Context) ([]*User, error)
@@ -1389,7 +1393,7 @@ func (ec *executionContext) _ProfileEdge_node(ctx context.Context, field graphql
 			return ec.fieldContext_ProfileEdge_node(ctx, field)
 		},
 		func(ctx context.Context) (any, error) {
-			return obj.Node, nil
+			return ec.resolveBatch_ProfileEdge_node(ctx, field, obj)
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *Profile) graphql.Marshaler {
@@ -1403,13 +1407,47 @@ func (ec *executionContext) fieldContext_ProfileEdge_node(_ context.Context, fie
 	fc = &graphql.FieldContext{
 		Object:     "ProfileEdge",
 		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
+		IsMethod:   true,
+		IsResolver: true,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return ec.childFields_Profile(ctx, field)
 		},
 	}
 	return fc, nil
+}
+func (ec *executionContext) resolveBatch_ProfileEdge_node(ctx context.Context, field graphql.CollectedField, obj *ProfileEdge) (any, error) {
+	resolver := ec.Resolvers.ProfileEdge()
+	group := graphql.GetBatchParentGroup(ctx, "ProfileEdge")
+	if group != nil {
+		parents, ok := group.Parents.([]*ProfileEdge)
+		if ok {
+			idx, ok := graphql.BatchParentIndex(ctx)
+			if ok {
+				key := field.Alias
+				if key == "" {
+					key = field.Name
+				}
+				result := group.GetFieldResult(key, func() (any, error) {
+					return resolver.Node(ctx, parents)
+				})
+				return graphql.ResolveBatchGroupResult[*Profile](
+					ctx,
+					idx,
+					len(parents),
+					result,
+					"ProfileEdge.node",
+					group.IndexMap,
+				)
+			}
+		}
+	}
+	results, err := resolver.Node(ctx, []*ProfileEdge{obj})
+	return graphql.ResolveBatchSingleResult[*Profile](
+		ctx,
+		results,
+		err,
+		"ProfileEdge.node",
+	)
 }
 
 func (ec *executionContext) _ProfileEdge_cursor(ctx context.Context, field graphql.CollectedField, obj *ProfileEdge) (ret graphql.Marshaler) {
@@ -1447,8 +1485,8 @@ func (ec *executionContext) _ProfilesConnection_edges(ctx context.Context, field
 			return obj.Edges, nil
 		},
 		nil,
-		func(ctx context.Context, selections ast.SelectionSet, v []*ProfileEdge) graphql.Marshaler {
-			return ec.marshalNProfileEdge2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfileEdgeᚄ(ctx, selections, v)
+		func(ctx context.Context, selections ast.SelectionSet, v []ProfileEdge) graphql.Marshaler {
+			return ec.marshalNProfileEdge2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfileEdgeᚄ(ctx, selections, v)
 		},
 		true,
 		true,
@@ -4134,14 +4172,47 @@ func (ec *executionContext) _ProfileEdge(ctx context.Context, sel ast.SelectionS
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ProfileEdge")
 		case "node":
-			out.Values[i] = ec._ProfileEdge_node(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
+			field := field
+
+			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._ProfileEdge_node(ctx, field, obj)
+				if res == graphql.Null {
+					atomic.AddUint32(&fs.Invalids, 1)
+				}
+				return res
 			}
+
+			if field.IsDeferred() {
+				deferredFieldSet.AddField(field)
+				fieldIndex := len(deferredFieldSet.Values) - 1
+				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
+					return innerFunc(ctx, deferredFieldSet)
+				})
+
+				for _, deferrable := range field.Deferrables {
+					view, ok := deferLabelToView[deferrable.Label]
+					if !ok {
+						view = deferredFieldSet.NewView()
+						deferLabelToView[deferrable.Label] = view
+					}
+					view.AddIndices(fieldIndex)
+				}
+
+				// don't run the out.Concurrently() call below
+				out.Values[i] = graphql.Null
+				continue
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "cursor":
 			out.Values[i] = ec._ProfileEdge_cursor(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
-				out.Invalids++
+				atomic.AddUint32(&out.Invalids, 1)
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -5542,12 +5613,20 @@ func (ec *executionContext) marshalNProfile2ᚖgithubᚗcomᚋ99designsᚋgqlgen
 	return ec._Profile(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNProfileEdge2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfileEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []*ProfileEdge) graphql.Marshaler {
-	ctx = graphql.WithBatchParents(ctx, "ProfileEdge", v, nil)
+func (ec *executionContext) marshalNProfileEdge2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfileEdge(ctx context.Context, sel ast.SelectionSet, v ProfileEdge) graphql.Marshaler {
+	return ec._ProfileEdge(ctx, sel, &v)
+}
+
+func (ec *executionContext) marshalNProfileEdge2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfileEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []ProfileEdge) graphql.Marshaler {
+	batchParents := make([]*ProfileEdge, len(v))
+	for i := range v {
+		batchParents[i] = &v[i]
+	}
+	ctx = graphql.WithBatchParents(ctx, "ProfileEdge", batchParents, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
-		return ec.marshalNProfileEdge2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfileEdge(ctx, sel, v[i])
+		return ec.marshalNProfileEdge2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfileEdge(ctx, sel, v[i])
 	})
 
 	for _, e := range ret {
@@ -5557,16 +5636,6 @@ func (ec *executionContext) marshalNProfileEdge2ᚕᚖgithubᚗcomᚋ99designs�
 	}
 
 	return ret
-}
-
-func (ec *executionContext) marshalNProfileEdge2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfileEdge(ctx context.Context, sel ast.SelectionSet, v *ProfileEdge) graphql.Marshaler {
-	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
-		return graphql.Null
-	}
-	return ec._ProfileEdge(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) (string, error) {
@@ -5617,7 +5686,11 @@ func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlge
 }
 
 func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Directive) graphql.Marshaler {
-	ctx = graphql.WithBatchParents(ctx, "__Directive", v, nil)
+	batchParents := make([]*introspection.Directive, len(v))
+	for i := range v {
+		batchParents[i] = &v[i]
+	}
+	ctx = graphql.WithBatchParents(ctx, "__Directive", batchParents, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -5692,7 +5765,11 @@ func (ec *executionContext) marshalN__InputValue2githubᚗcomᚋ99designsᚋgqlg
 }
 
 func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
-	ctx = graphql.WithBatchParents(ctx, "__InputValue", v, nil)
+	batchParents := make([]*introspection.InputValue, len(v))
+	for i := range v {
+		batchParents[i] = &v[i]
+	}
+	ctx = graphql.WithBatchParents(ctx, "__InputValue", batchParents, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -5713,7 +5790,11 @@ func (ec *executionContext) marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋg
 }
 
 func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
-	ctx = graphql.WithBatchParents(ctx, "__Type", v, nil)
+	batchParents := make([]*introspection.Type, len(v))
+	for i := range v {
+		batchParents[i] = &v[i]
+	}
+	ctx = graphql.WithBatchParents(ctx, "__Type", batchParents, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -5828,7 +5909,11 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 	if v == nil {
 		return graphql.Null
 	}
-	ctx = graphql.WithBatchParents(ctx, "__EnumValue", v, nil)
+	batchParents := make([]*introspection.EnumValue, len(v))
+	for i := range v {
+		batchParents[i] = &v[i]
+	}
+	ctx = graphql.WithBatchParents(ctx, "__EnumValue", batchParents, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -5848,7 +5933,11 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 	if v == nil {
 		return graphql.Null
 	}
-	ctx = graphql.WithBatchParents(ctx, "__Field", v, nil)
+	batchParents := make([]*introspection.Field, len(v))
+	for i := range v {
+		batchParents[i] = &v[i]
+	}
+	ctx = graphql.WithBatchParents(ctx, "__Field", batchParents, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -5868,7 +5957,11 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 	if v == nil {
 		return graphql.Null
 	}
-	ctx = graphql.WithBatchParents(ctx, "__InputValue", v, nil)
+	batchParents := make([]*introspection.InputValue, len(v))
+	for i := range v {
+		batchParents[i] = &v[i]
+	}
+	ctx = graphql.WithBatchParents(ctx, "__InputValue", batchParents, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -5895,7 +5988,11 @@ func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 	if v == nil {
 		return graphql.Null
 	}
-	ctx = graphql.WithBatchParents(ctx, "__Type", v, nil)
+	batchParents := make([]*introspection.Type, len(v))
+	for i := range v {
+		batchParents[i] = &v[i]
+	}
+	ctx = graphql.WithBatchParents(ctx, "__Type", batchParents, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]

@@ -102,7 +102,15 @@
 					}
 				{{- end }}
 				{{- if and $.HasBatchResolverFields (not $type.IsScalar) (eq $type.Elem.Definition.Kind "OBJECT") }}
+				{{- if $type.Elem.IsNilable }}
 				ctx = graphql.WithBatchParents(ctx, {{ $type.Elem.Definition.Name | quote }}, v, nil)
+				{{- else }}
+				batchParents := make([]*{{ $type.Elem.GO | ref }}, len(v))
+				for i := range v {
+					batchParents[i] = &v[i]
+				}
+				ctx = graphql.WithBatchParents(ctx, {{ $type.Elem.Definition.Name | quote }}, batchParents, nil)
+				{{- end }}
 				{{- end }}
 				{{- if and $.HasBatchResolverFields (not $type.IsScalar) (or (eq $type.Elem.Definition.Kind "INTERFACE") (eq $type.Elem.Definition.Kind "UNION")) }}
 				{{- $iface := index $.Interfaces $type.Elem.Definition.Name }}

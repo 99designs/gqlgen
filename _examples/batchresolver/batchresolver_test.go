@@ -581,6 +581,30 @@ func TestBatchResolver_Nested_CallCount(t *testing.T) {
 	)
 }
 
+func TestBatchResolver_ValueSliceParents_CallCount(t *testing.T) {
+	resolver := &Resolver{
+		users:              []*User{{}},
+		connectionProfiles: []*Profile{{ID: "p1"}, {ID: "p2"}, {ID: "p3"}},
+	}
+	c := newTestClient(resolver)
+
+	var resp struct {
+		Users []struct {
+			Connection struct {
+				Edges []struct {
+					Node struct {
+						ID string `json:"id"`
+					} `json:"node"`
+				} `json:"edges"`
+			} `json:"connection"`
+		} `json:"users"`
+	}
+	require.NoError(t, c.Post(`query { users { connection: profileConnectionNonBatch { edges { node { id } } } } }`, &resp))
+	require.Len(t, resp.Users[0].Connection.Edges, 3)
+	require.Equal(t, int32(1), resolver.profileEdgeNodeBatchCalls.Load())
+	require.Equal(t, int32(3), resolver.profileEdgeNodeBatchSize.Load())
+}
+
 func TestBatchResolver_Nested_Connection_CallCount(t *testing.T) {
 	const n = 10
 	users := make([]*User, n)

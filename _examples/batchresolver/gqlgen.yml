@@ -49,3 +49,7 @@ models:
           batch: true
       coverNonBatch:
           resolver: true
+  ProfilesConnection:
+    fields:
+      edges:
+        type: "[]github.com/99designs/gqlgen/_examples/batchresolver.ProfileEdge"

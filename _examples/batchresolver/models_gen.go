@@ -72,8 +72,8 @@ type ProfileEdge struct {
 }
 
 type ProfilesConnection struct {
-	Edges      []*ProfileEdge `json:"edges"`
-	TotalCount int            `json:"totalCount"`
+	Edges      []ProfileEdge `json:"edges"`
+	TotalCount int           `json:"totalCount"`
 }
 
 type Query struct {

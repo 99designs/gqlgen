@@ -7638,7 +7638,11 @@ func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlge
 }
 
 func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Directive) graphql.Marshaler {
-	ctx = graphql.WithBatchParents(ctx, "__Directive", v, nil)
+	batchParents := make([]*introspection.Directive, len(v))
+	for i := range v {
+		batchParents[i] = &v[i]
+	}
+	ctx = graphql.WithBatchParents(ctx, "__Directive", batchParents, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -7713,7 +7717,11 @@ func (ec *executionContext) marshalN__InputValue2githubᚗcomᚋ99designsᚋgqlg
 }
 
 func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
-	ctx = graphql.WithBatchParents(ctx, "__InputValue", v, nil)
+	batchParents := make([]*introspection.InputValue, len(v))
+	for i := range v {
+		batchParents[i] = &v[i]
+	}
+	ctx = graphql.WithBatchParents(ctx, "__InputValue", batchParents, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -7734,7 +7742,11 @@ func (ec *executionContext) marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋg
 }
 
 func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
-	ctx = graphql.WithBatchParents(ctx, "__Type", v, nil)
+	batchParents := make([]*introspection.Type, len(v))
+	for i := range v {
+		batchParents[i] = &v[i]
+	}
+	ctx = graphql.WithBatchParents(ctx, "__Type", batchParents, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -8255,7 +8267,11 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 	if v == nil {
 		return graphql.Null
 	}
-	ctx = graphql.WithBatchParents(ctx, "__EnumValue", v, nil)
+	batchParents := make([]*introspection.EnumValue, len(v))
+	for i := range v {
+		batchParents[i] = &v[i]
+	}
+	ctx = graphql.WithBatchParents(ctx, "__EnumValue", batchParents, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -8275,7 +8291,11 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 	if v == nil {
 		return graphql.Null
 	}
-	ctx = graphql.WithBatchParents(ctx, "__Field", v, nil)
+	batchParents := make([]*introspection.Field, len(v))
+	for i := range v {
+		batchParents[i] = &v[i]
+	}
+	ctx = graphql.WithBatchParents(ctx, "__Field", batchParents, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -8295,7 +8315,11 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 	if v == nil {
 		return graphql.Null
 	}
-	ctx = graphql.WithBatchParents(ctx, "__InputValue", v, nil)
+	batchParents := make([]*introspection.InputValue, len(v))
+	for i := range v {
+		batchParents[i] = &v[i]
+	}
+	ctx = graphql.WithBatchParents(ctx, "__InputValue", batchParents, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -8322,7 +8346,11 @@ func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 	if v == nil {
 		return graphql.Null
 	}
-	ctx = graphql.WithBatchParents(ctx, "__Type", v, nil)
+	batchParents := make([]*introspection.Type, len(v))
+	for i := range v {
+		batchParents[i] = &v[i]
+	}
+	ctx = graphql.WithBatchParents(ctx, "__Type", batchParents, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]

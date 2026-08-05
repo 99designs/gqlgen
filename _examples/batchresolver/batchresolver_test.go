@@ -599,7 +599,10 @@ func TestBatchResolver_ValueSliceParents_CallCount(t *testing.T) {
 			} `json:"connection"`
 		} `json:"users"`
 	}
-	require.NoError(t, c.Post(`query { users { connection: profileConnectionNonBatch { edges { node { id } } } } }`, &resp))
+	require.NoError(t, c.Post(
+		`query { users { connection: profileConnectionNonBatch { edges { node { id } } } } }`,
+		&resp,
+	))
 	require.Len(t, resp.Users[0].Connection.Edges, 3)
 	require.Equal(t, int32(1), resolver.profileEdgeNodeBatchCalls.Load())
 	require.Equal(t, int32(3), resolver.profileEdgeNodeBatchSize.Load())

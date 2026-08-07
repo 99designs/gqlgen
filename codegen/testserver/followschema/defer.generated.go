@@ -298,7 +298,7 @@ func (ec *executionContext) marshalODeferModel2ᚕᚖgithubᚗcomᚋ99designsᚋ
 	if v == nil {
 		return graphql.Null
 	}
-	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), ec.EffectiveWorkerLimit(0), false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
 		return ec.marshalNDeferModel2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐDeferModel(ctx, sel, v[i])

@@ -611,7 +611,7 @@ func (ec *executionContext) marshalOError2ᚕᚖgithubᚗcomᚋ99designsᚋgqlge
 	if v == nil {
 		return graphql.Null
 	}
-	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), ec.EffectiveWorkerLimit(0), false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
 		return ec.marshalOError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError(ctx, sel, v[i])
@@ -624,7 +624,7 @@ func (ec *executionContext) marshalOError2ᚕᚖgithubᚗcomᚋ99designsᚋgqlge
 	if v == nil {
 		return graphql.Null
 	}
-	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), ec.EffectiveWorkerLimit(0), false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
 		return ec.marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError(ctx, sel, v[i])

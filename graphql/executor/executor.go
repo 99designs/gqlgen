@@ -27,6 +27,7 @@ type Executor struct {
 
 	parserTokenLimit  int
 	disableSuggestion bool
+	workerLimit       *int64
 	defaultRulesFn    func() *rules.Rules
 }
 
@@ -60,6 +61,7 @@ func (e *Executor) CreateOperationContext(
 		RecoverFunc:            e.recoverFunc,
 		ResolverMiddleware:     e.ext.fieldMiddleware,
 		RootResolverMiddleware: e.ext.rootFieldMiddleware,
+		WorkerLimit:            e.workerLimit,
 		Stats: graphql.Stats{
 			Read:           params.ReadTime,
 			OperationStart: graphql.GetStartTime(ctx),
@@ -243,6 +245,14 @@ func (e *Executor) SetParserTokenLimit(limit int) {
 
 func (e *Executor) SetDisableSuggestion(value bool) {
 	e.disableSuggestion = value
+}
+
+// SetWorkerLimit sets a server-wide default for the number of goroutines used
+// when marshaling slices concurrently, overriding the codegen-time
+// exec.worker_limit. A value of 0 means unlimited concurrency. Per-operation
+// overrides (via OperationContext.SetWorkerLimit) take precedence over this.
+func (e *Executor) SetWorkerLimit(limit int64) {
+	e.workerLimit = &limit
 }
 
 // parseQuery decodes the incoming query and validates it, pulling from cache if present.

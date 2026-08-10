@@ -140,7 +140,7 @@
 				{{- end }}
 				{{- end }}
 				{{- if not $type.IsScalar }}
-					ret := graphql.MarshalSliceConcurrently(ctx, len(v), {{ $.Config.Exec.WorkerLimit }}, {{ $.Config.OmitPanicHandler }}, func(ctx context.Context, i int) graphql.Marshaler {
+					ret := graphql.MarshalSliceConcurrently(ctx, len(v), ec.EffectiveWorkerLimit({{ $.Config.Exec.WorkerLimit }}), {{ $.Config.OmitPanicHandler }}, func(ctx context.Context, i int) graphql.Marshaler {
 						fc := graphql.GetFieldContext(ctx)
 						fc.Result = &v[i]
 						return {{$.ECDot}}{{ $type.Elem.MarshalFunc }}(ctx, {{$.ECArg}}sel, v[i])

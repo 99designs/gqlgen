@@ -99,6 +99,13 @@ func (s *Server) SetDisableSuggestion(value bool) {
 	s.exec.SetDisableSuggestion(value)
 }
 
+// SetWorkerLimit sets a server-wide default for the number of goroutines used
+// when marshaling slices concurrently, overriding the codegen-time
+// exec.worker_limit. A value of 0 means unlimited concurrency.
+func (s *Server) SetWorkerLimit(limit int64) {
+	s.exec.SetWorkerLimit(limit)
+}
+
 // Use adds the given extension middleware to the server. Extensions are run in
 // order from first to last added.
 func (s *Server) Use(extension graphql.HandlerExtension) {

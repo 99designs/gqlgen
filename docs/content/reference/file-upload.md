@@ -10,18 +10,27 @@ It implements the following spec [https://github.com/jaydenseric/graphql-multipa
 that defines an interoperable multipart form field structure for GraphQL requests, used by
 various file upload client implementations.
 
-To use it you need to add the Upload scalar in your schema, and it will automatically add the
-marshalling behaviour to Go types.
+To use it you need to add the Upload scalar in your schema in order for gqlgen to automatically add the
+marshalling behaviour to Go types, and add the [`MultipartForm`](../../../graphql/handler/transport/http_form_multipart.go) transport to the Graph server.
 
 # Configuration
 
-There are two specific options that can be configured for uploading files:
+Example:
 
-- uploadMaxSize \
-  This option specifies the maximum number of bytes used to parse a request body as multipart/form-data.
-- uploadMaxMemory \
-  This option specifies the maximum number of bytes used to parse a request body as
-  multipart/form-data in memory, with the remainder stored on disk in temporary files.
+```go
+c := Config{ Resolvers: &resolvers{} }
+srv := handler.New(generated.NewExecutableSchema(c))
+
+// Add the multipart form transport
+srv.AddTransport(transport.MultipartForm{})
+```
+
+There are two options particularly relevant for uploading files:
+
+- `MaxUploadSize` \
+  MaxUploadSize sets the maximum number of bytes used to parse a request body as multipart/form-data.
+- `MaxMemory` \
+  MaxMemory defines the maximum number of bytes used to parse a request body as multipart/form-data in memory, with the remainder stored on disk in temporary files.
 
 # Examples
 
@@ -139,7 +148,7 @@ That invokes the following operation:
 }
 ```
 
-See the [_examples/fileupload](https://github.com/99designs/gqlgen/tree/master/_examples/fileupload) package for more examples.
+See the [\_examples/fileupload](https://github.com/99designs/gqlgen/tree/master/_examples/fileupload) package for more examples.
 
 # Usage with Apollo
 
@@ -151,7 +160,7 @@ import { createUploadLink } from "apollo-upload-client";
 
 const client = new ApolloClient({
 	cache: new InMemoryCache(),
-	link: createUploadLink({ uri: "/graphql" })
+	link: createUploadLink({ uri: "/graphql" }),
 });
 ```
 

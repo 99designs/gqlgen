@@ -887,29 +887,18 @@ func (ec *executionContext) fieldContext_Cat_batchProp(_ context.Context, field 
 }
 func (ec *executionContext) resolveBatch_Cat_batchProp(ctx context.Context, field graphql.CollectedField, obj *Cat) (any, error) {
 	resolver := ec.Resolvers.Cat()
-	group := graphql.GetBatchParentGroup(ctx, "Cat")
-	if group != nil {
-		parents, ok := group.Parents.([]*Cat)
-		if ok {
-			idx, ok := graphql.BatchParentIndex(ctx)
-			if ok {
-				key := field.Alias
-				if key == "" {
-					key = field.Name
-				}
-				result := group.GetFieldResult(key, func() (any, error) {
-					return resolver.BatchProp(ctx, parents)
-				})
-				return graphql.ResolveBatchGroupResult[string](
-					ctx,
-					idx,
-					len(parents),
-					result,
-					"Cat.batchProp",
-					group.IndexMap,
-				)
-			}
-		}
+	if batch, ok := graphql.BatchParentsFor[*Cat](ctx, "Cat"); ok {
+		result := batch.FieldResult(field, func() (any, error) {
+			return resolver.BatchProp(ctx, batch.Parents)
+		})
+		return graphql.ResolveBatchGroupResult[string](
+			ctx,
+			batch.Index,
+			len(batch.Parents),
+			result,
+			"Cat.batchProp",
+			batch.IndexMap,
+		)
 	}
 	results, err := resolver.BatchProp(ctx, []*Cat{obj})
 	return graphql.ResolveBatchSingleResult[string](
@@ -967,29 +956,18 @@ func (ec *executionContext) fieldContext_Dog_batchProp(_ context.Context, field 
 }
 func (ec *executionContext) resolveBatch_Dog_batchProp(ctx context.Context, field graphql.CollectedField, obj *Dog) (any, error) {
 	resolver := ec.Resolvers.Dog()
-	group := graphql.GetBatchParentGroup(ctx, "Dog")
-	if group != nil {
-		parents, ok := group.Parents.([]*Dog)
-		if ok {
-			idx, ok := graphql.BatchParentIndex(ctx)
-			if ok {
-				key := field.Alias
-				if key == "" {
-					key = field.Name
-				}
-				result := group.GetFieldResult(key, func() (any, error) {
-					return resolver.BatchProp(ctx, parents)
-				})
-				return graphql.ResolveBatchGroupResult[string](
-					ctx,
-					idx,
-					len(parents),
-					result,
-					"Dog.batchProp",
-					group.IndexMap,
-				)
-			}
-		}
+	if batch, ok := graphql.BatchParentsFor[*Dog](ctx, "Dog"); ok {
+		result := batch.FieldResult(field, func() (any, error) {
+			return resolver.BatchProp(ctx, batch.Parents)
+		})
+		return graphql.ResolveBatchGroupResult[string](
+			ctx,
+			batch.Index,
+			len(batch.Parents),
+			result,
+			"Dog.batchProp",
+			batch.IndexMap,
+		)
 	}
 	results, err := resolver.BatchProp(ctx, []*Dog{obj})
 	return graphql.ResolveBatchSingleResult[string](
@@ -1047,29 +1025,18 @@ func (ec *executionContext) fieldContext_DomesticCat_batchProp(_ context.Context
 }
 func (ec *executionContext) resolveBatch_DomesticCat_batchProp(ctx context.Context, field graphql.CollectedField, obj *DomesticCat) (any, error) {
 	resolver := ec.Resolvers.DomesticCat()
-	group := graphql.GetBatchParentGroup(ctx, "DomesticCat")
-	if group != nil {
-		parents, ok := group.Parents.([]*DomesticCat)
-		if ok {
-			idx, ok := graphql.BatchParentIndex(ctx)
-			if ok {
-				key := field.Alias
-				if key == "" {
-					key = field.Name
-				}
-				result := group.GetFieldResult(key, func() (any, error) {
-					return resolver.BatchProp(ctx, parents)
-				})
-				return graphql.ResolveBatchGroupResult[string](
-					ctx,
-					idx,
-					len(parents),
-					result,
-					"DomesticCat.batchProp",
-					group.IndexMap,
-				)
-			}
-		}
+	if batch, ok := graphql.BatchParentsFor[*DomesticCat](ctx, "DomesticCat"); ok {
+		result := batch.FieldResult(field, func() (any, error) {
+			return resolver.BatchProp(ctx, batch.Parents)
+		})
+		return graphql.ResolveBatchGroupResult[string](
+			ctx,
+			batch.Index,
+			len(batch.Parents),
+			result,
+			"DomesticCat.batchProp",
+			batch.IndexMap,
+		)
 	}
 	results, err := resolver.BatchProp(ctx, []*DomesticCat{obj})
 	return graphql.ResolveBatchSingleResult[string](
@@ -1127,29 +1094,18 @@ func (ec *executionContext) fieldContext_DomesticCat_batchName(_ context.Context
 }
 func (ec *executionContext) resolveBatch_DomesticCat_batchName(ctx context.Context, field graphql.CollectedField, obj *DomesticCat) (any, error) {
 	resolver := ec.Resolvers.DomesticCat()
-	group := graphql.GetBatchParentGroup(ctx, "DomesticCat")
-	if group != nil {
-		parents, ok := group.Parents.([]*DomesticCat)
-		if ok {
-			idx, ok := graphql.BatchParentIndex(ctx)
-			if ok {
-				key := field.Alias
-				if key == "" {
-					key = field.Name
-				}
-				result := group.GetFieldResult(key, func() (any, error) {
-					return resolver.BatchName(ctx, parents)
-				})
-				return graphql.ResolveBatchGroupResult[string](
-					ctx,
-					idx,
-					len(parents),
-					result,
-					"DomesticCat.batchName",
-					group.IndexMap,
-				)
-			}
-		}
+	if batch, ok := graphql.BatchParentsFor[*DomesticCat](ctx, "DomesticCat"); ok {
+		result := batch.FieldResult(field, func() (any, error) {
+			return resolver.BatchName(ctx, batch.Parents)
+		})
+		return graphql.ResolveBatchGroupResult[string](
+			ctx,
+			batch.Index,
+			len(batch.Parents),
+			result,
+			"DomesticCat.batchName",
+			batch.IndexMap,
+		)
 	}
 	results, err := resolver.BatchName(ctx, []*DomesticCat{obj})
 	return graphql.ResolveBatchSingleResult[string](
@@ -1230,29 +1186,18 @@ func (ec *executionContext) fieldContext_Pig_batchProp(_ context.Context, field 
 }
 func (ec *executionContext) resolveBatch_Pig_batchProp(ctx context.Context, field graphql.CollectedField, obj *Pig) (any, error) {
 	resolver := ec.Resolvers.Pig()
-	group := graphql.GetBatchParentGroup(ctx, "Pig")
-	if group != nil {
-		parents, ok := group.Parents.([]*Pig)
-		if ok {
-			idx, ok := graphql.BatchParentIndex(ctx)
-			if ok {
-				key := field.Alias
-				if key == "" {
-					key = field.Name
-				}
-				result := group.GetFieldResult(key, func() (any, error) {
-					return resolver.BatchProp(ctx, parents)
-				})
-				return graphql.ResolveBatchGroupResult[string](
-					ctx,
-					idx,
-					len(parents),
-					result,
-					"Pig.batchProp",
-					group.IndexMap,
-				)
-			}
-		}
+	if batch, ok := graphql.BatchParentsFor[*Pig](ctx, "Pig"); ok {
+		result := batch.FieldResult(field, func() (any, error) {
+			return resolver.BatchProp(ctx, batch.Parents)
+		})
+		return graphql.ResolveBatchGroupResult[string](
+			ctx,
+			batch.Index,
+			len(batch.Parents),
+			result,
+			"Pig.batchProp",
+			batch.IndexMap,
+		)
 	}
 	results, err := resolver.BatchProp(ctx, []*Pig{obj})
 	return graphql.ResolveBatchSingleResult[string](
@@ -1319,29 +1264,18 @@ func (ec *executionContext) fieldContext_Profile_coverBatch(_ context.Context, f
 }
 func (ec *executionContext) resolveBatch_Profile_coverBatch(ctx context.Context, field graphql.CollectedField, obj *Profile) (any, error) {
 	resolver := ec.Resolvers.Profile()
-	group := graphql.GetBatchParentGroup(ctx, "Profile")
-	if group != nil {
-		parents, ok := group.Parents.([]*Profile)
-		if ok {
-			idx, ok := graphql.BatchParentIndex(ctx)
-			if ok {
-				key := field.Alias
-				if key == "" {
-					key = field.Name
-				}
-				result := group.GetFieldResult(key, func() (any, error) {
-					return resolver.CoverBatch(ctx, parents)
-				})
-				return graphql.ResolveBatchGroupResult[*Image](
-					ctx,
-					idx,
-					len(parents),
-					result,
-					"Profile.coverBatch",
-					group.IndexMap,
-				)
-			}
-		}
+	if batch, ok := graphql.BatchParentsFor[*Profile](ctx, "Profile"); ok {
+		result := batch.FieldResult(field, func() (any, error) {
+			return resolver.CoverBatch(ctx, batch.Parents)
+		})
+		return graphql.ResolveBatchGroupResult[*Image](
+			ctx,
+			batch.Index,
+			len(batch.Parents),
+			result,
+			"Profile.coverBatch",
+			batch.IndexMap,
+		)
 	}
 	results, err := resolver.CoverBatch(ctx, []*Profile{obj})
 	return graphql.ResolveBatchSingleResult[*Image](
@@ -1417,29 +1351,18 @@ func (ec *executionContext) fieldContext_ProfileEdge_node(_ context.Context, fie
 }
 func (ec *executionContext) resolveBatch_ProfileEdge_node(ctx context.Context, field graphql.CollectedField, obj *ProfileEdge) (any, error) {
 	resolver := ec.Resolvers.ProfileEdge()
-	group := graphql.GetBatchParentGroup(ctx, "ProfileEdge")
-	if group != nil {
-		parents, ok := group.Parents.([]*ProfileEdge)
-		if ok {
-			idx, ok := graphql.BatchParentIndex(ctx)
-			if ok {
-				key := field.Alias
-				if key == "" {
-					key = field.Name
-				}
-				result := group.GetFieldResult(key, func() (any, error) {
-					return resolver.Node(ctx, parents)
-				})
-				return graphql.ResolveBatchGroupResult[*Profile](
-					ctx,
-					idx,
-					len(parents),
-					result,
-					"ProfileEdge.node",
-					group.IndexMap,
-				)
-			}
-		}
+	if batch, ok := graphql.BatchParentsFor[*ProfileEdge](ctx, "ProfileEdge"); ok {
+		result := batch.FieldResult(field, func() (any, error) {
+			return resolver.Node(ctx, batch.Parents)
+		})
+		return graphql.ResolveBatchGroupResult[*Profile](
+			ctx,
+			batch.Index,
+			len(batch.Parents),
+			result,
+			"ProfileEdge.node",
+			batch.IndexMap,
+		)
 	}
 	results, err := resolver.Node(ctx, []*ProfileEdge{obj})
 	return graphql.ResolveBatchSingleResult[*Profile](
@@ -1733,29 +1656,18 @@ func (ec *executionContext) fieldContext_User_nullableBatch(_ context.Context, f
 }
 func (ec *executionContext) resolveBatch_User_nullableBatch(ctx context.Context, field graphql.CollectedField, obj *User) (any, error) {
 	resolver := ec.Resolvers.User()
-	group := graphql.GetBatchParentGroup(ctx, "User")
-	if group != nil {
-		parents, ok := group.Parents.([]*User)
-		if ok {
-			idx, ok := graphql.BatchParentIndex(ctx)
-			if ok {
-				key := field.Alias
-				if key == "" {
-					key = field.Name
-				}
-				result := group.GetFieldResult(key, func() (any, error) {
-					return resolver.NullableBatch(ctx, parents)
-				})
-				return graphql.ResolveBatchGroupResult[*Profile](
-					ctx,
-					idx,
-					len(parents),
-					result,
-					"User.nullableBatch",
-					group.IndexMap,
-				)
-			}
-		}
+	if batch, ok := graphql.BatchParentsFor[*User](ctx, "User"); ok {
+		result := batch.FieldResult(field, func() (any, error) {
+			return resolver.NullableBatch(ctx, batch.Parents)
+		})
+		return graphql.ResolveBatchGroupResult[*Profile](
+			ctx,
+			batch.Index,
+			len(batch.Parents),
+			result,
+			"User.nullableBatch",
+			batch.IndexMap,
+		)
 	}
 	results, err := resolver.NullableBatch(ctx, []*User{obj})
 	return graphql.ResolveBatchSingleResult[*Profile](
@@ -1843,29 +1755,18 @@ func (ec *executionContext) fieldContext_User_nullableBatchWithArg(ctx context.C
 func (ec *executionContext) resolveBatch_User_nullableBatchWithArg(ctx context.Context, field graphql.CollectedField, obj *User) (any, error) {
 	resolver := ec.Resolvers.User()
 	fc := graphql.GetFieldContext(ctx)
-	group := graphql.GetBatchParentGroup(ctx, "User")
-	if group != nil {
-		parents, ok := group.Parents.([]*User)
-		if ok {
-			idx, ok := graphql.BatchParentIndex(ctx)
-			if ok {
-				key := field.Alias
-				if key == "" {
-					key = field.Name
-				}
-				result := group.GetFieldResult(key, func() (any, error) {
-					return resolver.NullableBatchWithArg(ctx, parents, fc.Args["offset"].(int))
-				})
-				return graphql.ResolveBatchGroupResult[*Profile](
-					ctx,
-					idx,
-					len(parents),
-					result,
-					"User.nullableBatchWithArg",
-					group.IndexMap,
-				)
-			}
-		}
+	if batch, ok := graphql.BatchParentsFor[*User](ctx, "User"); ok {
+		result := batch.FieldResult(field, func() (any, error) {
+			return resolver.NullableBatchWithArg(ctx, batch.Parents, fc.Args["offset"].(int))
+		})
+		return graphql.ResolveBatchGroupResult[*Profile](
+			ctx,
+			batch.Index,
+			len(batch.Parents),
+			result,
+			"User.nullableBatchWithArg",
+			batch.IndexMap,
+		)
 	}
 	results, err := resolver.NullableBatchWithArg(ctx, []*User{obj}, fc.Args["offset"].(int))
 	return graphql.ResolveBatchSingleResult[*Profile](
@@ -1953,29 +1854,18 @@ func (ec *executionContext) fieldContext_User_nonNullableBatch(_ context.Context
 }
 func (ec *executionContext) resolveBatch_User_nonNullableBatch(ctx context.Context, field graphql.CollectedField, obj *User) (any, error) {
 	resolver := ec.Resolvers.User()
-	group := graphql.GetBatchParentGroup(ctx, "User")
-	if group != nil {
-		parents, ok := group.Parents.([]*User)
-		if ok {
-			idx, ok := graphql.BatchParentIndex(ctx)
-			if ok {
-				key := field.Alias
-				if key == "" {
-					key = field.Name
-				}
-				result := group.GetFieldResult(key, func() (any, error) {
-					return resolver.NonNullableBatch(ctx, parents)
-				})
-				return graphql.ResolveBatchGroupResult[*Profile](
-					ctx,
-					idx,
-					len(parents),
-					result,
-					"User.nonNullableBatch",
-					group.IndexMap,
-				)
-			}
-		}
+	if batch, ok := graphql.BatchParentsFor[*User](ctx, "User"); ok {
+		result := batch.FieldResult(field, func() (any, error) {
+			return resolver.NonNullableBatch(ctx, batch.Parents)
+		})
+		return graphql.ResolveBatchGroupResult[*Profile](
+			ctx,
+			batch.Index,
+			len(batch.Parents),
+			result,
+			"User.nonNullableBatch",
+			batch.IndexMap,
+		)
 	}
 	results, err := resolver.NonNullableBatch(ctx, []*User{obj})
 	return graphql.ResolveBatchSingleResult[*Profile](
@@ -2051,29 +1941,18 @@ func (ec *executionContext) fieldContext_User_directiveNullableBatch(_ context.C
 }
 func (ec *executionContext) resolveBatch_User_directiveNullableBatch(ctx context.Context, field graphql.CollectedField, obj *User) (any, error) {
 	resolver := ec.Resolvers.User()
-	group := graphql.GetBatchParentGroup(ctx, "User")
-	if group != nil {
-		parents, ok := group.Parents.([]*User)
-		if ok {
-			idx, ok := graphql.BatchParentIndex(ctx)
-			if ok {
-				key := field.Alias
-				if key == "" {
-					key = field.Name
-				}
-				result := group.GetFieldResult(key, func() (any, error) {
-					return resolver.DirectiveNullableBatch(ctx, parents)
-				})
-				return graphql.ResolveBatchGroupResult[*Profile](
-					ctx,
-					idx,
-					len(parents),
-					result,
-					"User.directiveNullableBatch",
-					group.IndexMap,
-				)
-			}
-		}
+	if batch, ok := graphql.BatchParentsFor[*User](ctx, "User"); ok {
+		result := batch.FieldResult(field, func() (any, error) {
+			return resolver.DirectiveNullableBatch(ctx, batch.Parents)
+		})
+		return graphql.ResolveBatchGroupResult[*Profile](
+			ctx,
+			batch.Index,
+			len(batch.Parents),
+			result,
+			"User.directiveNullableBatch",
+			batch.IndexMap,
+		)
 	}
 	results, err := resolver.DirectiveNullableBatch(ctx, []*User{obj})
 	return graphql.ResolveBatchSingleResult[*Profile](
@@ -2161,29 +2040,18 @@ func (ec *executionContext) fieldContext_User_directiveNullableBatchWithArg(ctx 
 func (ec *executionContext) resolveBatch_User_directiveNullableBatchWithArg(ctx context.Context, field graphql.CollectedField, obj *User) (any, error) {
 	resolver := ec.Resolvers.User()
 	fc := graphql.GetFieldContext(ctx)
-	group := graphql.GetBatchParentGroup(ctx, "User")
-	if group != nil {
-		parents, ok := group.Parents.([]*User)
-		if ok {
-			idx, ok := graphql.BatchParentIndex(ctx)
-			if ok {
-				key := field.Alias
-				if key == "" {
-					key = field.Name
-				}
-				result := group.GetFieldResult(key, func() (any, error) {
-					return resolver.DirectiveNullableBatchWithArg(ctx, parents, fc.Args["offset"].(int))
-				})
-				return graphql.ResolveBatchGroupResult[*Profile](
-					ctx,
-					idx,
-					len(parents),
-					result,
-					"User.directiveNullableBatchWithArg",
-					group.IndexMap,
-				)
-			}
-		}
+	if batch, ok := graphql.BatchParentsFor[*User](ctx, "User"); ok {
+		result := batch.FieldResult(field, func() (any, error) {
+			return resolver.DirectiveNullableBatchWithArg(ctx, batch.Parents, fc.Args["offset"].(int))
+		})
+		return graphql.ResolveBatchGroupResult[*Profile](
+			ctx,
+			batch.Index,
+			len(batch.Parents),
+			result,
+			"User.directiveNullableBatchWithArg",
+			batch.IndexMap,
+		)
 	}
 	results, err := resolver.DirectiveNullableBatchWithArg(ctx, []*User{obj}, fc.Args["offset"].(int))
 	return graphql.ResolveBatchSingleResult[*Profile](
@@ -2271,29 +2139,18 @@ func (ec *executionContext) fieldContext_User_directiveNonNullableBatch(_ contex
 }
 func (ec *executionContext) resolveBatch_User_directiveNonNullableBatch(ctx context.Context, field graphql.CollectedField, obj *User) (any, error) {
 	resolver := ec.Resolvers.User()
-	group := graphql.GetBatchParentGroup(ctx, "User")
-	if group != nil {
-		parents, ok := group.Parents.([]*User)
-		if ok {
-			idx, ok := graphql.BatchParentIndex(ctx)
-			if ok {
-				key := field.Alias
-				if key == "" {
-					key = field.Name
-				}
-				result := group.GetFieldResult(key, func() (any, error) {
-					return resolver.DirectiveNonNullableBatch(ctx, parents)
-				})
-				return graphql.ResolveBatchGroupResult[*Profile](
-					ctx,
-					idx,
-					len(parents),
-					result,
-					"User.directiveNonNullableBatch",
-					group.IndexMap,
-				)
-			}
-		}
+	if batch, ok := graphql.BatchParentsFor[*User](ctx, "User"); ok {
+		result := batch.FieldResult(field, func() (any, error) {
+			return resolver.DirectiveNonNullableBatch(ctx, batch.Parents)
+		})
+		return graphql.ResolveBatchGroupResult[*Profile](
+			ctx,
+			batch.Index,
+			len(batch.Parents),
+			result,
+			"User.directiveNonNullableBatch",
+			batch.IndexMap,
+		)
 	}
 	results, err := resolver.DirectiveNonNullableBatch(ctx, []*User{obj})
 	return graphql.ResolveBatchSingleResult[*Profile](
@@ -2369,29 +2226,18 @@ func (ec *executionContext) fieldContext_User_profileBatch(_ context.Context, fi
 }
 func (ec *executionContext) resolveBatch_User_profileBatch(ctx context.Context, field graphql.CollectedField, obj *User) (any, error) {
 	resolver := ec.Resolvers.User()
-	group := graphql.GetBatchParentGroup(ctx, "User")
-	if group != nil {
-		parents, ok := group.Parents.([]*User)
-		if ok {
-			idx, ok := graphql.BatchParentIndex(ctx)
-			if ok {
-				key := field.Alias
-				if key == "" {
-					key = field.Name
-				}
-				result := group.GetFieldResult(key, func() (any, error) {
-					return resolver.ProfileBatch(ctx, parents)
-				})
-				return graphql.ResolveBatchGroupResult[*Profile](
-					ctx,
-					idx,
-					len(parents),
-					result,
-					"User.profileBatch",
-					group.IndexMap,
-				)
-			}
-		}
+	if batch, ok := graphql.BatchParentsFor[*User](ctx, "User"); ok {
+		result := batch.FieldResult(field, func() (any, error) {
+			return resolver.ProfileBatch(ctx, batch.Parents)
+		})
+		return graphql.ResolveBatchGroupResult[*Profile](
+			ctx,
+			batch.Index,
+			len(batch.Parents),
+			result,
+			"User.profileBatch",
+			batch.IndexMap,
+		)
 	}
 	results, err := resolver.ProfileBatch(ctx, []*User{obj})
 	return graphql.ResolveBatchSingleResult[*Profile](
@@ -2467,29 +2313,18 @@ func (ec *executionContext) fieldContext_User_profileConnectionBatch(_ context.C
 }
 func (ec *executionContext) resolveBatch_User_profileConnectionBatch(ctx context.Context, field graphql.CollectedField, obj *User) (any, error) {
 	resolver := ec.Resolvers.User()
-	group := graphql.GetBatchParentGroup(ctx, "User")
-	if group != nil {
-		parents, ok := group.Parents.([]*User)
-		if ok {
-			idx, ok := graphql.BatchParentIndex(ctx)
-			if ok {
-				key := field.Alias
-				if key == "" {
-					key = field.Name
-				}
-				result := group.GetFieldResult(key, func() (any, error) {
-					return resolver.ProfileConnectionBatch(ctx, parents)
-				})
-				return graphql.ResolveBatchGroupResult[*ProfilesConnection](
-					ctx,
-					idx,
-					len(parents),
-					result,
-					"User.profileConnectionBatch",
-					group.IndexMap,
-				)
-			}
-		}
+	if batch, ok := graphql.BatchParentsFor[*User](ctx, "User"); ok {
+		result := batch.FieldResult(field, func() (any, error) {
+			return resolver.ProfileConnectionBatch(ctx, batch.Parents)
+		})
+		return graphql.ResolveBatchGroupResult[*ProfilesConnection](
+			ctx,
+			batch.Index,
+			len(batch.Parents),
+			result,
+			"User.profileConnectionBatch",
+			batch.IndexMap,
+		)
 	}
 	results, err := resolver.ProfileConnectionBatch(ctx, []*User{obj})
 	return graphql.ResolveBatchSingleResult[*ProfilesConnection](
@@ -5618,11 +5453,7 @@ func (ec *executionContext) marshalNProfileEdge2githubᚗcomᚋ99designsᚋgqlge
 }
 
 func (ec *executionContext) marshalNProfileEdge2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfileEdgeᚄ(ctx context.Context, sel ast.SelectionSet, v []ProfileEdge) graphql.Marshaler {
-	batchParents := make([]*ProfileEdge, len(v))
-	for i := range v {
-		batchParents[i] = &v[i]
-	}
-	ctx = graphql.WithBatchParents(ctx, "ProfileEdge", batchParents, nil)
+	ctx = graphql.WithBatchParentValues(ctx, "ProfileEdge", v)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -5686,11 +5517,6 @@ func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlge
 }
 
 func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Directive) graphql.Marshaler {
-	batchParents := make([]*introspection.Directive, len(v))
-	for i := range v {
-		batchParents[i] = &v[i]
-	}
-	ctx = graphql.WithBatchParents(ctx, "__Directive", batchParents, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -5765,11 +5591,6 @@ func (ec *executionContext) marshalN__InputValue2githubᚗcomᚋ99designsᚋgqlg
 }
 
 func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
-	batchParents := make([]*introspection.InputValue, len(v))
-	for i := range v {
-		batchParents[i] = &v[i]
-	}
-	ctx = graphql.WithBatchParents(ctx, "__InputValue", batchParents, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -5790,11 +5611,6 @@ func (ec *executionContext) marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋg
 }
 
 func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
-	batchParents := make([]*introspection.Type, len(v))
-	for i := range v {
-		batchParents[i] = &v[i]
-	}
-	ctx = graphql.WithBatchParents(ctx, "__Type", batchParents, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -5909,11 +5725,6 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 	if v == nil {
 		return graphql.Null
 	}
-	batchParents := make([]*introspection.EnumValue, len(v))
-	for i := range v {
-		batchParents[i] = &v[i]
-	}
-	ctx = graphql.WithBatchParents(ctx, "__EnumValue", batchParents, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -5933,11 +5744,6 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 	if v == nil {
 		return graphql.Null
 	}
-	batchParents := make([]*introspection.Field, len(v))
-	for i := range v {
-		batchParents[i] = &v[i]
-	}
-	ctx = graphql.WithBatchParents(ctx, "__Field", batchParents, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -5957,11 +5763,6 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 	if v == nil {
 		return graphql.Null
 	}
-	batchParents := make([]*introspection.InputValue, len(v))
-	for i := range v {
-		batchParents[i] = &v[i]
-	}
-	ctx = graphql.WithBatchParents(ctx, "__InputValue", batchParents, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -5988,11 +5789,6 @@ func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 	if v == nil {
 		return graphql.Null
 	}
-	batchParents := make([]*introspection.Type, len(v))
-	for i := range v {
-		batchParents[i] = &v[i]
-	}
-	ctx = graphql.WithBatchParents(ctx, "__Type", batchParents, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]

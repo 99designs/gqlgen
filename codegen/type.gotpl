@@ -101,22 +101,25 @@
 						return {{- if $eventCtx }} ctx,{{- end}} graphql.Null
 					}
 				{{- end }}
-				{{- if and $.HasBatchResolverFields (not $type.IsScalar) (eq $type.Elem.Definition.Kind "OBJECT") }}
+				{{- /* $type.Elem.Definition follows through list wrappers, so a nested list such as
+				   [[Thing!]!]! reports the element kind of Thing. Only the innermost list holds
+				   parents of that type; registering an outer list would store a [][]T under
+				   Thing's name. */ -}}
+				{{- if and (not $type.Elem.IsSlice) ($.HasBatchFields $type.Elem.Definition.Name) }}
 				{{- if $type.Elem.IsNilable }}
 				ctx = graphql.WithBatchParents(ctx, {{ $type.Elem.Definition.Name | quote }}, v, nil)
 				{{- else }}
-				batchParents := make([]*{{ $type.Elem.GO | ref }}, len(v))
-				for i := range v {
-					batchParents[i] = &v[i]
-				}
-				ctx = graphql.WithBatchParents(ctx, {{ $type.Elem.Definition.Name | quote }}, batchParents, nil)
+				ctx = graphql.WithBatchParentValues(ctx, {{ $type.Elem.Definition.Name | quote }}, v)
 				{{- end }}
 				{{- end }}
-				{{- if and $.HasBatchResolverFields (not $type.IsScalar) (or (eq $type.Elem.Definition.Kind "INTERFACE") (eq $type.Elem.Definition.Kind "UNION")) }}
-				{{- $iface := index $.Interfaces $type.Elem.Definition.Name }}
-				{{- if $iface }}
+				{{- /* BatchImplementors is already filtered to the concrete types that resolve a
+				   field through a batch resolver, so a non-empty result guarantees the type
+				   switch below has at least one case. */ -}}
+				{{- if not $type.Elem.IsSlice }}
+				{{- $batchImpls := $.BatchImplementors $type.Elem.Definition.Name }}
+				{{- if $batchImpls }}
 				{
-					{{- range $impl := $iface.Implementors }}
+					{{- range $impl := $batchImpls }}
 					{{- if $impl.CanBeNil }}
 					var batchItems{{ $impl.Name }} []{{ $impl.Type | ref }}
 					batchIdxMap{{ $impl.Name }} := map[int]int{}
@@ -124,7 +127,7 @@
 					{{- end }}
 					for i, item := range v {
 						switch concrete := item.(type) {
-						{{- range $impl := $iface.Implementors }}
+						{{- range $impl := $batchImpls }}
 						case {{ $impl.Type | ref }}:
 							batchIdxMap{{ $impl.Name }}[i] = len(batchItems{{ $impl.Name }})
 							{{- if $impl.CanBeNil }}
@@ -137,7 +140,7 @@
 						{{- end }}
 						}
 					}
-					{{- range $impl := $iface.Implementors }}
+					{{- range $impl := $batchImpls }}
 					{{- if $impl.CanBeNil }}
 					if len(batchItems{{ $impl.Name }}) > 0 {
 						ctx = graphql.WithBatchParents(ctx, {{ $impl.Name | quote }}, batchItems{{ $impl.Name }}, batchIdxMap{{ $impl.Name }})

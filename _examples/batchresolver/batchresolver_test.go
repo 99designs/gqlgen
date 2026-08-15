@@ -606,6 +606,15 @@ func TestBatchResolver_ValueSliceParents_CallCount(t *testing.T) {
 	require.Len(t, resp.Users[0].Connection.Edges, 3)
 	require.Equal(t, int32(1), resolver.profileEdgeNodeBatchCalls.Load())
 	require.Equal(t, int32(3), resolver.profileEdgeNodeBatchSize.Load())
+
+	// The call count alone only proves the parents were batched. Each edge must also
+	// receive its own node: a batch that resolves in the wrong order, or that hands
+	// every parent the same result, still batches correctly.
+	ids := make([]string, len(resp.Users[0].Connection.Edges))
+	for i, edge := range resp.Users[0].Connection.Edges {
+		ids[i] = edge.Node.ID
+	}
+	require.Equal(t, []string{"p1", "p2", "p3"}, ids)
 }
 
 func TestBatchResolver_Nested_Connection_CallCount(t *testing.T) {

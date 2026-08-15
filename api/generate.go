@@ -2,7 +2,10 @@ package api
 
 import (
 	"fmt"
+	"path"
+	"path/filepath"
 	"regexp"
+	"strings"
 	"syscall"
 
 	"golang.org/x/tools/imports"
@@ -207,12 +210,12 @@ func generate(
 }
 
 func validate(cfg *config.Config) error {
-	roots := []string{withSubpackages(cfg.Exec.ImportPath())}
+	roots := []string{buildPattern(cfg.Exec.Dir())}
 	if cfg.Model.IsDefined() {
-		roots = append(roots, withSubpackages(cfg.Model.ImportPath()))
+		roots = append(roots, buildPattern(cfg.Model.Dir()))
 	}
 	if cfg.Resolver.IsDefined() {
-		roots = append(roots, withSubpackages(cfg.Resolver.ImportPath()))
+		roots = append(roots, buildPattern(cfg.Resolver.Dir()))
 	}
 
 	// Use go build for validation instead of packages.Load with NeedTypes.
@@ -229,7 +232,21 @@ func validate(cfg *config.Config) error {
 // Used by go build, go test, etc. (e.g., "go build ./...")
 const subpackagesWildcard = "/..."
 
-// withSubpackages appends the Go wildcard pattern to include all subpackages.
-func withSubpackages(importPath string) string {
-	return importPath + subpackagesWildcard
+// buildPattern returns a go build pattern matching dir and every package beneath it.
+//
+// The pattern is expressed as a file path rather than an import path on purpose. When
+// expanding "..." in an import path the go command skips directories named testdata, so
+// an import path pattern silently matches no packages for output written beneath one and
+// validation then succeeds having compiled nothing.
+func buildPattern(dir string) string {
+	pattern := filepath.ToSlash(dir)
+	if pattern == "" {
+		pattern = "."
+	}
+	// "./" is what marks the pattern as a file path; paths that are already relative to
+	// the current or parent directory, or absolute, are unambiguous without it.
+	if !strings.HasPrefix(pattern, ".") && !path.IsAbs(pattern) {
+		pattern = "./" + pattern
+	}
+	return pattern + subpackagesWildcard
 }

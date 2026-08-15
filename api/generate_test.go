@@ -35,11 +35,10 @@ func TestGenerate(t *testing.T) {
 		name    string
 		workDir string
 		// wantExec maps a snippet to the exact number of times it must appear in the
-		// generated exec file.
-		//
-		// These carry the whole weight of the test: Generate's own validation runs
-		// "go build <importpath>/...", and the ... wildcard skips testdata directories,
-		// so it matches no packages and silently passes for every fixture here.
+		// generated exec file. Generate compiles its own output (see
+		// TestGenerateValidatesOutput), so these only pin down details that would
+		// compile either way — in particular that a type registers its batch parents
+		// exactly once, not once per enclosing list.
 		wantExec map[string]int
 		// execFile overrides which generated file wantExec is checked against, relative
 		// to workDir. Needed for follow-schema, which has no single exec filename.
@@ -143,6 +142,32 @@ func TestGenerate(t *testing.T) {
 			}
 		})
 	}
+}
+
+// TestGenerateValidatesOutput pins the fact that Generate compiles what it generates.
+//
+// The fixture's package contains a file that deliberately does not compile. Validation
+// once built an import-path pattern, whose "..." wildcard skips testdata directories, so
+// it matched no packages and reported success without compiling anything — leaving every
+// fixture in this directory unchecked. If that regresses, this test fails.
+func TestGenerateValidatesOutput(t *testing.T) {
+	wd, err := os.Getwd()
+	require.NoError(t, err)
+
+	workDir := filepath.Join(wd, "testdata", "validation_catches_errors")
+	t.Cleanup(func() {
+		cleanup(workDir)
+		t.Chdir(wd)
+	})
+	t.Chdir(workDir)
+
+	cfg, err := config.LoadConfigFromDefaultLocations()
+	require.NoError(t, err, "failed to load config")
+
+	err = Generate(cfg)
+	require.Error(t, err, "generation should fail when the generated package does not compile")
+	require.Contains(t, err.Error(), "validation failed")
+	require.Contains(t, err.Error(), "ThisTypeDoesNotExist")
 }
 
 type testSchemaMutator struct {
@@ -354,6 +379,29 @@ func TestPerformanceOptionsIndividually(t *testing.T) {
 			content, err := os.ReadFile(modelsPath)
 			require.NoError(t, err, "failed to read generated models file")
 			require.Contains(t, string(content), "package model")
+		})
+	}
+}
+
+func TestBuildPattern(t *testing.T) {
+	cases := map[string]struct {
+		dir  string
+		want string
+	}{
+		// The "./" prefix is what makes go treat this as a file path. Without it,
+		// "graph/..." is an import path, whose wildcard skips testdata directories.
+		"relative dir":   {dir: "graph", want: "./graph/..."},
+		"nested dir":     {dir: filepath.Join("internal", "graph"), want: "./internal/graph/..."},
+		"current dir":    {dir: ".", want: "./..."},
+		"empty dir":      {dir: "", want: "./..."},
+		"already dotted": {dir: "./graph", want: "./graph/..."},
+		"parent dir":     {dir: filepath.Join("..", "other"), want: "../other/..."},
+		"absolute dir":   {dir: "/tmp/graph", want: "/tmp/graph/..."},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			require.Equal(t, tc.want, buildPattern(tc.dir))
 		})
 	}
 }

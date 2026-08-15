@@ -83,6 +83,26 @@ func WithBatchParents(
 	return context.WithValue(ctx, batchContextKey{}, &BatchParentState{groups: groups})
 }
 
+// WithBatchParentValues adds a batch parent group for a slice of values, taking the
+// address of each element so that batch resolvers always receive a []*T.
+//
+// Generated marshalers hold parents as []*T when the model is nilable and as []T
+// otherwise; batch resolvers only ever accept the pointer form. This bridges the two.
+//
+// The returned group aliases v: parents[i] is &v[i], not a copy. Callers must not
+// mutate or grow v while the returned context is in use.
+//
+// Parents recovered from an interface or union slice are grouped by concrete type and
+// need an index map; those callers build the pointer slice themselves and use
+// [WithBatchParents] directly.
+func WithBatchParentValues[T any](ctx context.Context, typeName string, v []T) context.Context {
+	parents := make([]*T, len(v))
+	for i := range v {
+		parents[i] = &v[i]
+	}
+	return WithBatchParents(ctx, typeName, parents, nil)
+}
+
 // GetBatchParentGroup retrieves the batch parent group for a given type name from context.
 func GetBatchParentGroup(ctx context.Context, typeName string) *BatchParentGroup {
 	state, _ := ctx.Value(batchContextKey{}).(*BatchParentState)
@@ -108,6 +128,55 @@ func (g *BatchParentGroup) GetFieldResult(
 	})
 	<-result.done
 	return result
+}
+
+// BatchParents is the batch context for one field resolution: the sibling parents being
+// resolved together, and the position within them of the parent this call is for.
+type BatchParents[P any] struct {
+	Parents  []P
+	Index    ast.PathIndex
+	IndexMap map[int]int
+
+	group *BatchParentGroup
+}
+
+// BatchParentsFor returns the batch context registered for typeName.
+//
+// ok is false whenever the field is not being resolved as part of a batch: no group was
+// registered, the group holds a different Go type, or the path carries no parent index.
+// The caller must then resolve the single parent it was handed.
+func BatchParentsFor[P any](ctx context.Context, typeName string) (BatchParents[P], bool) {
+	group := GetBatchParentGroup(ctx, typeName)
+	if group == nil {
+		return BatchParents[P]{}, false
+	}
+	parents, ok := group.Parents.([]P)
+	if !ok {
+		return BatchParents[P]{}, false
+	}
+	idx, ok := BatchParentIndex(ctx)
+	if !ok {
+		return BatchParents[P]{}, false
+	}
+	return BatchParents[P]{
+		Parents:  parents,
+		Index:    idx,
+		IndexMap: group.IndexMap,
+		group:    group,
+	}, true
+}
+
+// FieldResult resolves the field once for the whole group, memoized on the field's
+// response key so that every sibling parent shares a single resolver call.
+func (b BatchParents[P]) FieldResult(
+	field CollectedField,
+	resolve func() (any, error),
+) *BatchFieldResult {
+	key := field.Alias
+	if key == "" {
+		key = field.Name
+	}
+	return b.group.GetFieldResult(key, resolve)
 }
 
 // BatchParentIndex returns the index of the current parent in the batch from the path.

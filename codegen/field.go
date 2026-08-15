@@ -97,16 +97,18 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 			explicitBatch = true
 		}
 	}
-	supportsBatch := b.Config.TypeSupportsBatchResolver(obj.Name, obj.Definition)
+	unsupportedBatchReason := b.Config.BatchResolverUnsupportedReason(obj.Name, obj.Definition)
+	supportsBatch := unsupportedBatchReason == ""
 	if !explicitBatch && b.Config.Resolver.Batch.Enabled && supportsBatch && f.IsResolver {
 		f.Batch = true
 	}
 	if f.Batch {
 		if !supportsBatch {
 			return nil, fmt.Errorf(
-				"batch resolver is not supported for field %s.%s",
+				"batch resolver is not supported for field %s.%s: %s",
 				obj.Name,
 				field.Name,
+				unsupportedBatchReason,
 			)
 		}
 		// batch resolvers are always user-provided

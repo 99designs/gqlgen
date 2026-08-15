@@ -650,3 +650,56 @@ func TestPerformanceOptions(t *testing.T) {
 		require.True(t, opts.UseBufferPooling)
 	})
 }
+
+func TestBatchResolverUnsupportedReason(t *testing.T) {
+	queryDef := &ast.Definition{Kind: ast.Object, Name: "Query"}
+	cfg := &Config{
+		Schema: &ast.Schema{Query: queryDef},
+	}
+	cfg.Federation.Filename = "graph/federation.go"
+
+	cases := map[string]struct {
+		typeName   string
+		schemaType *ast.Definition
+		wantReason string
+	}{
+		"ordinary object": {
+			typeName:   "User",
+			schemaType: &ast.Definition{Kind: ast.Object, Name: "User"},
+		},
+		"root type": {
+			typeName:   "Query",
+			schemaType: queryDef,
+			wantReason: "sibling parents",
+		},
+		"input object": {
+			typeName:   "UserInput",
+			schemaType: &ast.Definition{Kind: ast.InputObject, Name: "UserInput"},
+			wantReason: "arguments rather than resolved",
+		},
+		"introspection type": {
+			typeName:   "__Directive",
+			schemaType: &ast.Definition{Kind: ast.Object, Name: "__Directive"},
+			wantReason: "introspection types are resolved by gqlgen itself",
+		},
+		"federation service": {
+			typeName:   "_Service",
+			schemaType: &ast.Definition{Kind: ast.Object, Name: "_Service"},
+			wantReason: "federation built-in types",
+		},
+	}
+
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			reason := cfg.BatchResolverUnsupportedReason(tc.typeName, tc.schemaType)
+			if tc.wantReason == "" {
+				assert.Empty(t, reason)
+				assert.True(t, cfg.TypeSupportsBatchResolver(tc.typeName, tc.schemaType))
+				return
+			}
+			assert.Contains(t, reason, tc.wantReason)
+			// The bool and the reason are one decision; they must never disagree.
+			assert.False(t, cfg.TypeSupportsBatchResolver(tc.typeName, tc.schemaType))
+		})
+	}
+}

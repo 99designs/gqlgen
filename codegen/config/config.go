@@ -590,25 +590,33 @@ func (c *Config) applyGlobalBatchResolverDefaults() {
 	}
 }
 
+// BatchResolverUnsupportedReason explains why batch resolvers may not be enabled for
+// fields on the given type, or returns "" if they may.
+//
+// A batch resolver groups sibling parent objects and hands them to user code, so it only
+// makes sense for types that have sibling parents and that the user resolves themselves.
+func (c *Config) BatchResolverUnsupportedReason(
+	typeName string,
+	schemaType *ast.Definition,
+) string {
+	switch {
+	case c.IsRoot(schemaType):
+		return "root types are resolved once per operation, so there are no sibling parents to batch"
+	case schemaType.Kind == ast.InputObject:
+		return "input objects are arguments rather than resolved output types"
+	case strings.HasPrefix(typeName, "__"):
+		return "introspection types are resolved by gqlgen itself, not by user resolvers"
+	case c.Federation.IsDefined() && (typeName == "_Service" || typeName == "Entity"):
+		return "federation built-in types are resolved by gqlgen itself, not by user resolvers"
+	}
+	return ""
+}
+
 // TypeSupportsBatchResolver reports whether batch resolvers may be enabled for fields
-// on the given type. Root types, input objects, and introspection types (__*) are always
-// excluded. When federation is enabled, federation _Service and Entity are also excluded.
+// on the given type. See [Config.BatchResolverUnsupportedReason] for why a type may not
+// support them.
 func (c *Config) TypeSupportsBatchResolver(typeName string, schemaType *ast.Definition) bool {
-	if c.IsRoot(schemaType) {
-		return false
-	}
-	if schemaType.Kind == ast.InputObject {
-		return false
-	}
-	if strings.HasPrefix(typeName, "__") {
-		return false
-	}
-	if c.Federation.IsDefined() {
-		if typeName == "_Service" || typeName == "Entity" {
-			return false
-		}
-	}
-	return true
+	return c.BatchResolverUnsupportedReason(typeName, schemaType) == ""
 }
 
 func (c *Config) injectGoExtraFieldDirectives(schemaType *ast.Definition) error {

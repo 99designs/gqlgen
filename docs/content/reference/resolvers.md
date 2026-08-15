@@ -225,3 +225,51 @@ models:
 ## Binding Priority
 If a ```struct_tags``` config exists, then struct tag binding has the highest priority over all other types of binding.
 In all other cases, the first Go struct field found that matches the graphQL type field will be the field that is bound.
+
+## Batch resolvers
+
+A field marked with `@goField(batch: true)` — or every resolver field, when
+`resolver.batch` is enabled — receives all of its sibling parent objects in
+one call instead of being called once per parent:
+
+```go
+// Instead of:
+//   Node(ctx context.Context, obj *ProfileEdge) (*Profile, error)
+func (r *profileEdgeResolver) Node(
+	ctx context.Context, objs []*ProfileEdge,
+) ([]*Profile, error)
+```
+
+Return one result per parent, in the same order as `objs`. gqlgen matches
+results to parents by index.
+
+Batch resolvers are only available on types that gqlgen does not resolve
+itself. Root types, input objects, introspection types (`__*`) and the
+federation `_Service`/`Entity` types are excluded; asking for a batch resolver
+on one is a code generation error that names the reason.
+
+### Do not retain or mutate the parents
+
+`objs` always arrives as `[]*T`, but where those pointers come from depends on
+how the parent list is modelled in Go:
+
+- For a `[]*T` field, they are the pointers your own resolver returned.
+- For a `[]T` field — which is what
+  [`omit_slice_element_pointers`](/config) produces, and what an explicit
+  `type: "[]pkg.T"` mapping produces — gqlgen takes the address of each slice
+  element. Those pointers alias the caller's backing array.
+
+In the second case the slice is being marshaled concurrently while your
+resolver runs, so:
+
+- **Do not mutate `objs[i]`.** Writing through the pointer races with the
+  marshaler reading the same element, and the write is visible to whatever
+  produced the slice.
+- **Do not retain `objs` beyond the call.** The backing array belongs to the
+  parent resolver, not to you.
+- **Do not use pointer identity to correlate parents.** For a value slice, the
+  pointer handed to a batch resolver is not the same pointer the equivalent
+  non-batch resolver would receive — the non-batch path takes the address of a
+  copy. Correlate by index, or by a key on the parent.
+
+Treat `objs` as read-only input and return a freshly allocated result slice.

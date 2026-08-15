@@ -18,17 +18,15 @@ func (s *Schema) Description() *string {
 }
 
 func (s *Schema) Types() []Type {
-	typeIndex := map[string]Type{}
-	typeNames := make([]string, 0, len(s.schema.Types))
+	defs := make([]*ast.Definition, 0, len(s.schema.Types))
 	for _, typ := range s.schema.Types {
-		typeNames = append(typeNames, typ.Name)
-		typeIndex[typ.Name] = *WrapTypeFromDef(s.schema, typ)
+		defs = append(defs, typ)
 	}
-	sort.Strings(typeNames)
+	sort.Slice(defs, func(i, j int) bool { return defs[i].Name < defs[j].Name })
 
-	types := make([]Type, len(typeNames))
-	for i, t := range typeNames {
-		types[i] = typeIndex[t]
+	types := make([]Type, len(defs))
+	for i, def := range defs {
+		types[i] = *WrapTypeFromDef(s.schema, def)
 	}
 	return types
 }
@@ -46,20 +44,16 @@ func (s *Schema) SubscriptionType() *Type {
 }
 
 func (s *Schema) Directives() []Directive {
-	dIndex := map[string]Directive{}
-	dNames := make([]string, 0, len(s.schema.Directives))
-
+	defs := make([]*ast.DirectiveDefinition, 0, len(s.schema.Directives))
 	for _, d := range s.schema.Directives {
-		dNames = append(dNames, d.Name)
-		dIndex[d.Name] = s.directiveFromDef(d)
+		defs = append(defs, d)
 	}
-	sort.Strings(dNames)
+	sort.Slice(defs, func(i, j int) bool { return defs[i].Name < defs[j].Name })
 
-	res := make([]Directive, len(dNames))
-	for i, d := range dNames {
-		res[i] = dIndex[d]
+	res := make([]Directive, len(defs))
+	for i, d := range defs {
+		res[i] = s.directiveFromDef(d)
 	}
-
 	return res
 }
 

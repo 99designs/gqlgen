@@ -397,6 +397,14 @@ func TestBuildPattern(t *testing.T) {
 		"already dotted": {dir: "./graph", want: "./graph/..."},
 		"parent dir":     {dir: filepath.Join("..", "other"), want: "../other/..."},
 		"absolute dir":   {dir: "/tmp/graph", want: "/tmp/graph/..."},
+		// PackageConfig.Dir runs through filepath.Abs and ToSlash, so on Windows it
+		// arrives rooted at a drive letter. Prefixing "./" there produces "./D:/..."
+		// which the go command rejects, so these must hold on every OS, not just
+		// where filepath.IsAbs happens to understand the shape.
+		"windows drive":       {dir: "D:/a/gqlgen/graph", want: "D:/a/gqlgen/graph/..."},
+		"windows drive lower": {dir: "c:/proj/graph", want: "c:/proj/graph/..."},
+		"windows unc":         {dir: "//server/share/graph", want: "//server/share/graph/..."},
+		"colon not a drive":   {dir: "we:rd/graph", want: "./we:rd/graph/..."},
 	}
 
 	for name, tc := range cases {

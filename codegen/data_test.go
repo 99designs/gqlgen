@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2/ast"
 
 	"github.com/99designs/gqlgen/codegen/config"
@@ -176,4 +177,84 @@ func TestImplDirectivesContext_ErrReturn(t *testing.T) {
 		`return it, graphql.ErrorOnPath(ctx, errors.New("directive foo is not implemented"))`,
 		wrapped.ErrReturn(`errors.New("directive foo is not implemented")`),
 	)
+}
+
+func batchTestObject(name string, root bool, batchFields ...string) *Object {
+	obj := &Object{
+		Definition: &ast.Definition{Name: name},
+		Root:       root,
+	}
+	for _, f := range batchFields {
+		obj.Fields = append(obj.Fields, &Field{
+			FieldDefinition: &ast.FieldDefinition{Name: f},
+			Batch:           true,
+		})
+	}
+	return obj
+}
+
+func TestData_HasBatchFields(t *testing.T) {
+	d := Data{
+		Objects: Objects{
+			batchTestObject("Query", true, "users"),
+			batchTestObject("User", false, "posts"),
+			batchTestObject("Post", false),
+		},
+	}
+	// Plain field, no batch resolver.
+	d.Objects[2].Fields = append(d.Objects[2].Fields, &Field{
+		FieldDefinition: &ast.FieldDefinition{Name: "title"},
+	})
+
+	cases := map[string]struct {
+		typeName string
+		want     bool
+	}{
+		"type with a batch field":    {typeName: "User", want: true},
+		"type with only plain field": {typeName: "Post", want: false},
+		"root type is never batched": {typeName: "Query", want: false},
+		"unknown type":               {typeName: "Missing", want: false},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			assert.Equal(t, tc.want, d.HasBatchFields(tc.typeName))
+		})
+	}
+
+	// A root-only batch field must not make the schema look batched, otherwise every
+	// marshaler in the schema registers parents nothing will ever read.
+	rootOnly := Data{Objects: Objects{batchTestObject("Query", true, "users")}}
+	assert.False(t, rootOnly.HasBatchResolverFields())
+	assert.True(t, d.HasBatchResolverFields())
+}
+
+func TestData_BatchImplementors(t *testing.T) {
+	d := Data{
+		Objects: Objects{
+			batchTestObject("Dog", false, "name"),
+			batchTestObject("Cat", false),
+		},
+		Interfaces: map[string]*Interface{
+			"Animal": {
+				Definition: &ast.Definition{Name: "Animal"},
+				Implementors: []InterfaceImplementor{
+					{Definition: &ast.Definition{Name: "Dog"}},
+					{Definition: &ast.Definition{Name: "Cat"}},
+				},
+			},
+			"Empty": {
+				Definition:   &ast.Definition{Name: "Empty"},
+				Implementors: []InterfaceImplementor{{Definition: &ast.Definition{Name: "Cat"}}},
+			},
+		},
+	}
+
+	got := d.BatchImplementors("Animal")
+	require.Len(t, got, 1)
+	assert.Equal(t, "Dog", got[0].Name)
+
+	// No implementor needs grouping, so the marshaler must emit nothing at all: an
+	// empty type switch would not compile.
+	assert.Empty(t, d.BatchImplementors("Empty"))
+	assert.Empty(t, d.BatchImplementors("NotAnInterface"))
 }

@@ -64,7 +64,7 @@ func (t *Type) Fields(includeDeprecated bool) []Field {
 	if t.def == nil || (t.def.Kind != ast.Object && t.def.Kind != ast.Interface) {
 		return []Field{}
 	}
-	fields := []Field{}
+	fields := make([]Field, 0, len(t.def.Fields))
 	for _, f := range t.def.Fields {
 		if strings.HasPrefix(f.Name, "__") {
 			continue
@@ -74,7 +74,7 @@ func (t *Type) Fields(includeDeprecated bool) []Field {
 			continue
 		}
 
-		var args []InputValue
+		args := make([]InputValue, 0, len(f.Arguments))
 		for _, arg := range f.Arguments {
 			args = append(args, InputValue{
 				Type:         WrapTypeFromType(t.schema, arg.Type),
@@ -101,7 +101,7 @@ func (t *Type) InputFields() []InputValue {
 		return []InputValue{}
 	}
 
-	res := []InputValue{}
+	res := make([]InputValue, 0, len(t.def.Fields))
 	for _, f := range t.def.Fields {
 		res = append(res, InputValue{
 			Name:         f.Name,
@@ -127,7 +127,7 @@ func (t *Type) Interfaces() []Type {
 		return []Type{}
 	}
 
-	res := []Type{}
+	res := make([]Type, 0, len(t.def.Interfaces))
 	for _, intf := range t.def.Interfaces {
 		res = append(res, *WrapTypeFromDef(t.schema, t.schema.Types[intf]))
 	}
@@ -140,8 +140,9 @@ func (t *Type) PossibleTypes() []Type {
 		return []Type{}
 	}
 
-	res := []Type{}
-	for _, pt := range t.schema.GetPossibleTypes(t.def) {
+	possible := t.schema.GetPossibleTypes(t.def)
+	res := make([]Type, 0, len(possible))
+	for _, pt := range possible {
 		res = append(res, *WrapTypeFromDef(t.schema, pt))
 	}
 	return res
@@ -152,7 +153,7 @@ func (t *Type) EnumValues(includeDeprecated bool) []EnumValue {
 		return []EnumValue{}
 	}
 
-	res := []EnumValue{}
+	res := make([]EnumValue, 0, len(t.def.EnumValues))
 	for _, val := range t.def.EnumValues {
 		if !includeDeprecated && val.Directives.ForName("deprecated") != nil {
 			continue

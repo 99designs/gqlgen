@@ -2,7 +2,9 @@ package api
 
 import (
 	"fmt"
+	"path/filepath"
 	"regexp"
+	"strings"
 	"syscall"
 
 	"golang.org/x/tools/imports"
@@ -207,12 +209,12 @@ func generate(
 }
 
 func validate(cfg *config.Config) error {
-	roots := []string{withSubpackages(cfg.Exec.ImportPath())}
+	roots := []string{buildPattern(cfg.Exec.Dir())}
 	if cfg.Model.IsDefined() {
-		roots = append(roots, withSubpackages(cfg.Model.ImportPath()))
+		roots = append(roots, buildPattern(cfg.Model.Dir()))
 	}
 	if cfg.Resolver.IsDefined() {
-		roots = append(roots, withSubpackages(cfg.Resolver.ImportPath()))
+		roots = append(roots, buildPattern(cfg.Resolver.Dir()))
 	}
 
 	// Use go build for validation instead of packages.Load with NeedTypes.
@@ -229,7 +231,43 @@ func validate(cfg *config.Config) error {
 // Used by go build, go test, etc. (e.g., "go build ./...")
 const subpackagesWildcard = "/..."
 
-// withSubpackages appends the Go wildcard pattern to include all subpackages.
-func withSubpackages(importPath string) string {
-	return importPath + subpackagesWildcard
+// buildPattern returns a go build pattern matching dir and every package beneath it.
+//
+// The pattern is expressed as a file path rather than an import path on purpose. When
+// expanding "..." in an import path the go command skips directories named testdata, so
+// an import path pattern silently matches no packages for output written beneath one and
+// validation then succeeds having compiled nothing.
+//
+// PackageConfig.Dir is normally absolute and slash separated already, because the config
+// runs filenames through filepath.Abs and ToSlash when it loads them.
+func buildPattern(dir string) string {
+	pattern := filepath.ToSlash(dir)
+	if pattern == "" {
+		pattern = "."
+	}
+	// "./" is what marks the pattern as a file path; paths that are already relative to
+	// the current or parent directory, or rooted, are unambiguous without it.
+	if !strings.HasPrefix(pattern, ".") && !isRootedSlashPath(pattern) {
+		pattern = "./" + pattern
+	}
+	return pattern + subpackagesWildcard
+}
+
+// isRootedSlashPath reports whether the slash separated path p is absolute.
+//
+// It recognises Windows drive letters and UNC paths on every OS rather than deferring to
+// filepath.IsAbs, which only understands the host's own convention. A Windows path
+// therefore has to be classified correctly when the tests run on Linux or macOS,
+// otherwise "D:/x" gains a "./" prefix and the go command rejects "./D:/x/...".
+func isRootedSlashPath(p string) bool {
+	// A POSIX root, and also a UNC share once ToSlash has rewritten the separators.
+	if strings.HasPrefix(p, "/") {
+		return true
+	}
+	// A drive letter, such as "D:/a/b".
+	if len(p) < 2 || p[1] != ':' {
+		return false
+	}
+	c := p[0]
+	return 'a' <= c && c <= 'z' || 'A' <= c && c <= 'Z'
 }

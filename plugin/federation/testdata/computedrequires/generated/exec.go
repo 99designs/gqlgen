@@ -2756,33 +2756,22 @@ func (ec *executionContext) fieldContext_MultiPlanetRequiresNested_size(ctx cont
 }
 func (ec *executionContext) resolveBatch_MultiPlanetRequiresNested_size(ctx context.Context, field graphql.CollectedField, obj *model.MultiPlanetRequiresNested) (any, error) {
 	resolver := ec.Resolvers.MultiPlanetRequiresNested()
-	group := graphql.GetBatchParentGroup(ctx, "MultiPlanetRequiresNested")
-	if group != nil {
-		parents, ok := group.Parents.([]*model.MultiPlanetRequiresNested)
-		if ok {
-			idx, ok := graphql.BatchParentIndex(ctx)
-			if ok {
-				key := field.Alias
-				if key == "" {
-					key = field.Name
-				}
-				result := group.GetFieldResult(key, func() (any, error) {
-					federationRequires, err := graphql.FederationRequiresForBatch(ctx, len(parents), group.IndexMap)
-					if err != nil {
-						return nil, err
-					}
-					return resolver.Size(ctx, parents, federationRequires)
-				})
-				return graphql.ResolveBatchGroupResult[int](
-					ctx,
-					idx,
-					len(parents),
-					result,
-					"MultiPlanetRequiresNested.size",
-					group.IndexMap,
-				)
+	if batch, ok := graphql.BatchParentsFor[*model.MultiPlanetRequiresNested](ctx, "MultiPlanetRequiresNested"); ok {
+		result := batch.FieldResult(field, func() (any, error) {
+			federationRequires, err := graphql.FederationRequiresForBatch(ctx, len(batch.Parents), batch.IndexMap)
+			if err != nil {
+				return nil, err
 			}
-		}
+			return resolver.Size(ctx, batch.Parents, federationRequires)
+		})
+		return graphql.ResolveBatchGroupResult[int](
+			ctx,
+			batch.Index,
+			len(batch.Parents),
+			result,
+			"MultiPlanetRequiresNested.size",
+			batch.IndexMap,
+		)
 	}
 	federationRequires, err := graphql.FederationRequiresForBatch(ctx, 1, nil)
 	if err != nil {
@@ -7450,174 +7439,20 @@ func (ec *executionContext) marshalN_Any2ᚕmapᚄ(ctx context.Context, sel ast.
 
 func (ec *executionContext) marshalN_Entity2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋfedruntimeᚐEntity(ctx context.Context, sel ast.SelectionSet, v []fedruntime.Entity) graphql.Marshaler {
 	{
-		var batchItemsWorldWithMultipleKeys []*model.WorldWithMultipleKeys
-		batchIdxMapWorldWithMultipleKeys := map[int]int{}
-		var batchItemsWorldName []*model.WorldName
-		batchIdxMapWorldName := map[int]int{}
-		var batchItemsWorld []*model.World
-		batchIdxMapWorld := map[int]int{}
-		var batchItemsPlanetRequiresNested []*model.PlanetRequiresNested
-		batchIdxMapPlanetRequiresNested := map[int]int{}
-		var batchItemsPlanetRequires []*model.PlanetRequires
-		batchIdxMapPlanetRequires := map[int]int{}
-		var batchItemsPlanetMultipleRequires []*model.PlanetMultipleRequires
-		batchIdxMapPlanetMultipleRequires := map[int]int{}
-		var batchItemsPerson []*model.Person
-		batchIdxMapPerson := map[int]int{}
 		var batchItemsMultiPlanetRequiresNested []*model.MultiPlanetRequiresNested
 		batchIdxMapMultiPlanetRequiresNested := map[int]int{}
-		var batchItemsMultiHelloWithError []*model.MultiHelloWithError
-		batchIdxMapMultiHelloWithError := map[int]int{}
-		var batchItemsMultiHelloRequires []*model.MultiHelloRequires
-		batchIdxMapMultiHelloRequires := map[int]int{}
-		var batchItemsMultiHelloMultipleRequires []*model.MultiHelloMultipleRequires
-		batchIdxMapMultiHelloMultipleRequires := map[int]int{}
-		var batchItemsMultiHello []*model.MultiHello
-		batchIdxMapMultiHello := map[int]int{}
-		var batchItemsHelloWithErrors []*model.HelloWithErrors
-		batchIdxMapHelloWithErrors := map[int]int{}
-		var batchItemsHelloMultiSingleKeys []*model.HelloMultiSingleKeys
-		batchIdxMapHelloMultiSingleKeys := map[int]int{}
-		var batchItemsHello []*model.Hello
-		batchIdxMapHello := map[int]int{}
 		for i, item := range v {
 			switch concrete := item.(type) {
-			case model.WorldWithMultipleKeys:
-				batchIdxMapWorldWithMultipleKeys[i] = len(batchItemsWorldWithMultipleKeys)
-				batchItemsWorldWithMultipleKeys = append(batchItemsWorldWithMultipleKeys, &concrete)
-			case *model.WorldWithMultipleKeys:
-				batchIdxMapWorldWithMultipleKeys[i] = len(batchItemsWorldWithMultipleKeys)
-				batchItemsWorldWithMultipleKeys = append(batchItemsWorldWithMultipleKeys, concrete)
-			case model.WorldName:
-				batchIdxMapWorldName[i] = len(batchItemsWorldName)
-				batchItemsWorldName = append(batchItemsWorldName, &concrete)
-			case *model.WorldName:
-				batchIdxMapWorldName[i] = len(batchItemsWorldName)
-				batchItemsWorldName = append(batchItemsWorldName, concrete)
-			case model.World:
-				batchIdxMapWorld[i] = len(batchItemsWorld)
-				batchItemsWorld = append(batchItemsWorld, &concrete)
-			case *model.World:
-				batchIdxMapWorld[i] = len(batchItemsWorld)
-				batchItemsWorld = append(batchItemsWorld, concrete)
-			case model.PlanetRequiresNested:
-				batchIdxMapPlanetRequiresNested[i] = len(batchItemsPlanetRequiresNested)
-				batchItemsPlanetRequiresNested = append(batchItemsPlanetRequiresNested, &concrete)
-			case *model.PlanetRequiresNested:
-				batchIdxMapPlanetRequiresNested[i] = len(batchItemsPlanetRequiresNested)
-				batchItemsPlanetRequiresNested = append(batchItemsPlanetRequiresNested, concrete)
-			case model.PlanetRequires:
-				batchIdxMapPlanetRequires[i] = len(batchItemsPlanetRequires)
-				batchItemsPlanetRequires = append(batchItemsPlanetRequires, &concrete)
-			case *model.PlanetRequires:
-				batchIdxMapPlanetRequires[i] = len(batchItemsPlanetRequires)
-				batchItemsPlanetRequires = append(batchItemsPlanetRequires, concrete)
-			case model.PlanetMultipleRequires:
-				batchIdxMapPlanetMultipleRequires[i] = len(batchItemsPlanetMultipleRequires)
-				batchItemsPlanetMultipleRequires = append(batchItemsPlanetMultipleRequires, &concrete)
-			case *model.PlanetMultipleRequires:
-				batchIdxMapPlanetMultipleRequires[i] = len(batchItemsPlanetMultipleRequires)
-				batchItemsPlanetMultipleRequires = append(batchItemsPlanetMultipleRequires, concrete)
-			case model.Person:
-				batchIdxMapPerson[i] = len(batchItemsPerson)
-				batchItemsPerson = append(batchItemsPerson, &concrete)
-			case *model.Person:
-				batchIdxMapPerson[i] = len(batchItemsPerson)
-				batchItemsPerson = append(batchItemsPerson, concrete)
 			case model.MultiPlanetRequiresNested:
 				batchIdxMapMultiPlanetRequiresNested[i] = len(batchItemsMultiPlanetRequiresNested)
 				batchItemsMultiPlanetRequiresNested = append(batchItemsMultiPlanetRequiresNested, &concrete)
 			case *model.MultiPlanetRequiresNested:
 				batchIdxMapMultiPlanetRequiresNested[i] = len(batchItemsMultiPlanetRequiresNested)
 				batchItemsMultiPlanetRequiresNested = append(batchItemsMultiPlanetRequiresNested, concrete)
-			case model.MultiHelloWithError:
-				batchIdxMapMultiHelloWithError[i] = len(batchItemsMultiHelloWithError)
-				batchItemsMultiHelloWithError = append(batchItemsMultiHelloWithError, &concrete)
-			case *model.MultiHelloWithError:
-				batchIdxMapMultiHelloWithError[i] = len(batchItemsMultiHelloWithError)
-				batchItemsMultiHelloWithError = append(batchItemsMultiHelloWithError, concrete)
-			case model.MultiHelloRequires:
-				batchIdxMapMultiHelloRequires[i] = len(batchItemsMultiHelloRequires)
-				batchItemsMultiHelloRequires = append(batchItemsMultiHelloRequires, &concrete)
-			case *model.MultiHelloRequires:
-				batchIdxMapMultiHelloRequires[i] = len(batchItemsMultiHelloRequires)
-				batchItemsMultiHelloRequires = append(batchItemsMultiHelloRequires, concrete)
-			case model.MultiHelloMultipleRequires:
-				batchIdxMapMultiHelloMultipleRequires[i] = len(batchItemsMultiHelloMultipleRequires)
-				batchItemsMultiHelloMultipleRequires = append(batchItemsMultiHelloMultipleRequires, &concrete)
-			case *model.MultiHelloMultipleRequires:
-				batchIdxMapMultiHelloMultipleRequires[i] = len(batchItemsMultiHelloMultipleRequires)
-				batchItemsMultiHelloMultipleRequires = append(batchItemsMultiHelloMultipleRequires, concrete)
-			case model.MultiHello:
-				batchIdxMapMultiHello[i] = len(batchItemsMultiHello)
-				batchItemsMultiHello = append(batchItemsMultiHello, &concrete)
-			case *model.MultiHello:
-				batchIdxMapMultiHello[i] = len(batchItemsMultiHello)
-				batchItemsMultiHello = append(batchItemsMultiHello, concrete)
-			case model.HelloWithErrors:
-				batchIdxMapHelloWithErrors[i] = len(batchItemsHelloWithErrors)
-				batchItemsHelloWithErrors = append(batchItemsHelloWithErrors, &concrete)
-			case *model.HelloWithErrors:
-				batchIdxMapHelloWithErrors[i] = len(batchItemsHelloWithErrors)
-				batchItemsHelloWithErrors = append(batchItemsHelloWithErrors, concrete)
-			case model.HelloMultiSingleKeys:
-				batchIdxMapHelloMultiSingleKeys[i] = len(batchItemsHelloMultiSingleKeys)
-				batchItemsHelloMultiSingleKeys = append(batchItemsHelloMultiSingleKeys, &concrete)
-			case *model.HelloMultiSingleKeys:
-				batchIdxMapHelloMultiSingleKeys[i] = len(batchItemsHelloMultiSingleKeys)
-				batchItemsHelloMultiSingleKeys = append(batchItemsHelloMultiSingleKeys, concrete)
-			case model.Hello:
-				batchIdxMapHello[i] = len(batchItemsHello)
-				batchItemsHello = append(batchItemsHello, &concrete)
-			case *model.Hello:
-				batchIdxMapHello[i] = len(batchItemsHello)
-				batchItemsHello = append(batchItemsHello, concrete)
 			}
-		}
-		if len(batchItemsWorldWithMultipleKeys) > 0 {
-			ctx = graphql.WithBatchParents(ctx, "WorldWithMultipleKeys", batchItemsWorldWithMultipleKeys, batchIdxMapWorldWithMultipleKeys)
-		}
-		if len(batchItemsWorldName) > 0 {
-			ctx = graphql.WithBatchParents(ctx, "WorldName", batchItemsWorldName, batchIdxMapWorldName)
-		}
-		if len(batchItemsWorld) > 0 {
-			ctx = graphql.WithBatchParents(ctx, "World", batchItemsWorld, batchIdxMapWorld)
-		}
-		if len(batchItemsPlanetRequiresNested) > 0 {
-			ctx = graphql.WithBatchParents(ctx, "PlanetRequiresNested", batchItemsPlanetRequiresNested, batchIdxMapPlanetRequiresNested)
-		}
-		if len(batchItemsPlanetRequires) > 0 {
-			ctx = graphql.WithBatchParents(ctx, "PlanetRequires", batchItemsPlanetRequires, batchIdxMapPlanetRequires)
-		}
-		if len(batchItemsPlanetMultipleRequires) > 0 {
-			ctx = graphql.WithBatchParents(ctx, "PlanetMultipleRequires", batchItemsPlanetMultipleRequires, batchIdxMapPlanetMultipleRequires)
-		}
-		if len(batchItemsPerson) > 0 {
-			ctx = graphql.WithBatchParents(ctx, "Person", batchItemsPerson, batchIdxMapPerson)
 		}
 		if len(batchItemsMultiPlanetRequiresNested) > 0 {
 			ctx = graphql.WithBatchParents(ctx, "MultiPlanetRequiresNested", batchItemsMultiPlanetRequiresNested, batchIdxMapMultiPlanetRequiresNested)
-		}
-		if len(batchItemsMultiHelloWithError) > 0 {
-			ctx = graphql.WithBatchParents(ctx, "MultiHelloWithError", batchItemsMultiHelloWithError, batchIdxMapMultiHelloWithError)
-		}
-		if len(batchItemsMultiHelloRequires) > 0 {
-			ctx = graphql.WithBatchParents(ctx, "MultiHelloRequires", batchItemsMultiHelloRequires, batchIdxMapMultiHelloRequires)
-		}
-		if len(batchItemsMultiHelloMultipleRequires) > 0 {
-			ctx = graphql.WithBatchParents(ctx, "MultiHelloMultipleRequires", batchItemsMultiHelloMultipleRequires, batchIdxMapMultiHelloMultipleRequires)
-		}
-		if len(batchItemsMultiHello) > 0 {
-			ctx = graphql.WithBatchParents(ctx, "MultiHello", batchItemsMultiHello, batchIdxMapMultiHello)
-		}
-		if len(batchItemsHelloWithErrors) > 0 {
-			ctx = graphql.WithBatchParents(ctx, "HelloWithErrors", batchItemsHelloWithErrors, batchIdxMapHelloWithErrors)
-		}
-		if len(batchItemsHelloMultiSingleKeys) > 0 {
-			ctx = graphql.WithBatchParents(ctx, "HelloMultiSingleKeys", batchItemsHelloMultiSingleKeys, batchIdxMapHelloMultiSingleKeys)
-		}
-		if len(batchItemsHello) > 0 {
-			ctx = graphql.WithBatchParents(ctx, "Hello", batchItemsHello, batchIdxMapHello)
 		}
 	}
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
@@ -7638,7 +7473,6 @@ func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlge
 }
 
 func (ec *executionContext) marshalN__Directive2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirectiveᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Directive) graphql.Marshaler {
-	ctx = graphql.WithBatchParents(ctx, "__Directive", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -7713,7 +7547,6 @@ func (ec *executionContext) marshalN__InputValue2githubᚗcomᚋ99designsᚋgqlg
 }
 
 func (ec *executionContext) marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐInputValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
-	ctx = graphql.WithBatchParents(ctx, "__InputValue", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -7734,7 +7567,6 @@ func (ec *executionContext) marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋg
 }
 
 func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {
-	ctx = graphql.WithBatchParents(ctx, "__Type", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -8000,7 +7832,6 @@ func (ec *executionContext) marshalOMultiHello2ᚕᚖgithubᚗcomᚋ99designsᚋ
 	if v == nil {
 		return graphql.Null
 	}
-	ctx = graphql.WithBatchParents(ctx, "MultiHello", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -8029,7 +7860,6 @@ func (ec *executionContext) marshalOMultiHelloMultipleRequires2ᚕᚖgithubᚗco
 	if v == nil {
 		return graphql.Null
 	}
-	ctx = graphql.WithBatchParents(ctx, "MultiHelloMultipleRequires", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -8058,7 +7888,6 @@ func (ec *executionContext) marshalOMultiHelloRequires2ᚕᚖgithubᚗcomᚋ99de
 	if v == nil {
 		return graphql.Null
 	}
-	ctx = graphql.WithBatchParents(ctx, "MultiHelloRequires", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -8087,7 +7916,6 @@ func (ec *executionContext) marshalOMultiHelloWithError2ᚕᚖgithubᚗcomᚋ99d
 	if v == nil {
 		return graphql.Null
 	}
-	ctx = graphql.WithBatchParents(ctx, "MultiHelloWithError", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -8210,7 +8038,6 @@ func (ec *executionContext) marshalOWorld2ᚕᚖgithubᚗcomᚋ99designsᚋgqlge
 	if v == nil {
 		return graphql.Null
 	}
-	ctx = graphql.WithBatchParents(ctx, "World", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -8255,7 +8082,6 @@ func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgq
 	if v == nil {
 		return graphql.Null
 	}
-	ctx = graphql.WithBatchParents(ctx, "__EnumValue", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -8275,7 +8101,6 @@ func (ec *executionContext) marshalO__Field2ᚕgithubᚗcomᚋ99designsᚋgqlgen
 	if v == nil {
 		return graphql.Null
 	}
-	ctx = graphql.WithBatchParents(ctx, "__Field", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -8295,7 +8120,6 @@ func (ec *executionContext) marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋg
 	if v == nil {
 		return graphql.Null
 	}
-	ctx = graphql.WithBatchParents(ctx, "__InputValue", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]
@@ -8322,7 +8146,6 @@ func (ec *executionContext) marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 	if v == nil {
 		return graphql.Null
 	}
-	ctx = graphql.WithBatchParents(ctx, "__Type", v, nil)
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
 		fc.Result = &v[i]

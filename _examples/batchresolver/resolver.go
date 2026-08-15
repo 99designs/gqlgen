@@ -11,6 +11,7 @@ type Resolver struct {
 	users                   []*User
 	profiles                []*Profile
 	images                  []*Image
+	connectionProfiles      []*Profile
 	profileErrIdx           int
 	profileErrWithValueIdxs map[int]struct{}
 	profileErrListIdxs      map[int]struct{}
@@ -41,6 +42,8 @@ type Resolver struct {
 	pigBatchPropCalls         atomic.Int32
 	domesticCatBatchPropCalls atomic.Int32
 	domesticCatBatchNameCalls atomic.Int32
+	profileEdgeNodeBatchCalls atomic.Int32
+	profileEdgeNodeBatchSize  atomic.Int32
 }
 
 func (r *Resolver) userIndex(obj *User) int {

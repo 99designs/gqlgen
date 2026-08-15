@@ -1,0 +1,24 @@
+# Nested lists of a type that also has a batch resolver somewhere in the schema.
+#
+# ast.Type.Name() follows through list wrappers, so the element of [[Thing!]!]! reports
+# Thing's kind. Only the innermost list may register batch parents: an outer list would
+# store a [][]Thing under "Thing", and for the interface case would emit a type switch on
+# a slice, which does not compile.
+type Query {
+  matrix: [[Thing!]!]!
+  animals: [[Animal!]!]!
+}
+
+type Thing {
+  id: ID!
+  extra: String!
+}
+
+interface Animal {
+  name: String!
+}
+
+type Dog implements Animal {
+  name: String!
+  tag: String!
+}

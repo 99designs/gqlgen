@@ -137,6 +137,11 @@ func addBuild(filename string, p *ast.Position, data *Data, builds *map[string]*
 		MutationRoot:     data.MutationRoot,
 		SubscriptionRoot: data.SubscriptionRoot,
 		AllDirectives:    data.AllDirectives,
+		// Per-schema builds hold only the objects declared in their own file, so the
+		// batch-field set has to come from the whole schema. Without this, an interface
+		// whose implementors are spread across files would only register batch parents
+		// for the implementors that happen to share the interface's file.
+		allBatchFieldTypes: data.batchFieldTypes(),
 	}
 }
 

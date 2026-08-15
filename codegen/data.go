@@ -37,6 +37,15 @@ type Data struct {
 	SubscriptionRoot *Object
 	AugmentedSources []AugmentedSource
 	Plugins          []any
+
+	// allBatchFieldTypes is the schema-wide result of collectBatchFieldTypes. Like
+	// AllDirectives it is set when a schema is split into one Data instance per schema
+	// file, because each instance then holds only the objects declared in its own file
+	// and cannot see whether a type declared elsewhere has batch fields.
+	allBatchFieldTypes map[string]bool
+
+	// cachedBatchFieldTypes is populated on first use by batchFieldTypes.
+	cachedBatchFieldTypes map[string]bool
 }
 
 func (d *Data) HasEmbeddableSources() bool {
@@ -49,18 +58,71 @@ func (d *Data) HasEmbeddableSources() bool {
 	return hasEmbeddableSources
 }
 
-func (d *Data) HasBatchResolverFields() bool {
-	for _, obj := range d.Objects {
+// collectBatchFieldTypes returns the names of the objects that resolve at least one field
+// through a batch resolver.
+//
+// Root objects are excluded: a batch resolver groups sibling parents, and the root has no
+// parent to group — ShortBatchResolverDeclaration returns "" for root fields.
+func collectBatchFieldTypes(objects Objects) map[string]bool {
+	names := make(map[string]bool)
+	for _, obj := range objects {
 		if obj.Root {
 			continue
 		}
 		for _, field := range obj.Fields {
 			if field.IsBatch() {
-				return true
+				names[obj.Name] = true
+				break
 			}
 		}
 	}
-	return false
+	return names
+}
+
+// batchFieldTypes returns the set of type names that have batch resolver fields, computing
+// it on first use. Plugins may add fields to Data after it is built, so the set is derived
+// when a template first asks for it rather than during BuildData.
+//
+// The cache is not synchronised; it relies on a Data being rendered by one goroutine.
+func (d *Data) batchFieldTypes() map[string]bool {
+	if d.allBatchFieldTypes != nil {
+		return d.allBatchFieldTypes
+	}
+	if d.cachedBatchFieldTypes == nil {
+		d.cachedBatchFieldTypes = collectBatchFieldTypes(d.Objects)
+	}
+	return d.cachedBatchFieldTypes
+}
+
+// HasBatchFields reports whether the named type resolves any field through a batch
+// resolver, and so needs batch parents registered when it is marshaled as a list.
+func (d *Data) HasBatchFields(typeName string) bool {
+	return d.batchFieldTypes()[typeName]
+}
+
+// HasBatchResolverFields reports whether any type in the schema uses a batch resolver.
+func (d *Data) HasBatchResolverFields() bool {
+	return len(d.batchFieldTypes()) > 0
+}
+
+// BatchImplementors returns the implementors of the named interface or union whose concrete
+// type has batch fields, in declaration order.
+//
+// Batch parents are grouped by concrete type, so only implementors that resolve a field
+// through a batch resolver need collecting. An empty result means the list needs no
+// grouping at all.
+func (d *Data) BatchImplementors(name string) []InterfaceImplementor {
+	iface := d.Interfaces[name]
+	if iface == nil {
+		return nil
+	}
+	var impls []InterfaceImplementor
+	for _, impl := range iface.Implementors {
+		if d.HasBatchFields(impl.Name) {
+			impls = append(impls, impl)
+		}
+	}
+	return impls
 }
 
 // ChildFieldType represents a unique object type referenced as a return type

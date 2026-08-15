@@ -581,6 +581,42 @@ func TestBatchResolver_Nested_CallCount(t *testing.T) {
 	)
 }
 
+func TestBatchResolver_ValueSliceParents_CallCount(t *testing.T) {
+	resolver := &Resolver{
+		users:              []*User{{}},
+		connectionProfiles: []*Profile{{ID: "p1"}, {ID: "p2"}, {ID: "p3"}},
+	}
+	c := newTestClient(resolver)
+
+	var resp struct {
+		Users []struct {
+			Connection struct {
+				Edges []struct {
+					Node struct {
+						ID string `json:"id"`
+					} `json:"node"`
+				} `json:"edges"`
+			} `json:"connection"`
+		} `json:"users"`
+	}
+	require.NoError(t, c.Post(
+		`query { users { connection: profileConnectionNonBatch { edges { node { id } } } } }`,
+		&resp,
+	))
+	require.Len(t, resp.Users[0].Connection.Edges, 3)
+	require.Equal(t, int32(1), resolver.profileEdgeNodeBatchCalls.Load())
+	require.Equal(t, int32(3), resolver.profileEdgeNodeBatchSize.Load())
+
+	// The call count alone only proves the parents were batched. Each edge must also
+	// receive its own node: a batch that resolves in the wrong order, or that hands
+	// every parent the same result, still batches correctly.
+	ids := make([]string, len(resp.Users[0].Connection.Edges))
+	for i, edge := range resp.Users[0].Connection.Edges {
+		ids[i] = edge.Node.ID
+	}
+	require.Equal(t, []string{"p1", "p2", "p3"}, ids)
+}
+
 func TestBatchResolver_Nested_Connection_CallCount(t *testing.T) {
 	const n = 10
 	users := make([]*User, n)

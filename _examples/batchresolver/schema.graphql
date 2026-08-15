@@ -81,6 +81,6 @@ type ProfilesConnection {
 }
 
 type ProfileEdge {
-    node: Profile!
+    node: Profile! @goField(batch: true)
     cursor: ID!
 }

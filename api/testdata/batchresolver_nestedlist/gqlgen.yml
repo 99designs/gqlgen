@@ -1,0 +1,29 @@
+schema:
+  - graph/*.graphqls
+
+exec:
+  filename: graph/generated.go
+  package: graph
+
+model:
+  filename: graph/model/models_gen.go
+  package: model
+
+resolver:
+  layout: follow-schema
+  dir: graph
+  package: graph
+
+models:
+  Thing:
+    fields:
+      extra:
+        resolver: true
+        batch: true
+  # Dog needs a batch field of its own, otherwise the interface branch is skipped for
+  # want of any batch implementor and this fixture stops covering the nested-list guard.
+  Dog:
+    fields:
+      tag:
+        resolver: true
+        batch: true

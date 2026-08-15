@@ -1,0 +1,20 @@
+type Query {
+  users: [User!]!
+}
+
+type User {
+  id: ID!
+  posts: [Post!]!
+}
+
+# Post.author is the batch resolver under test. With omit_slice_element_pointers,
+# User.posts marshals a []model.Post, so the batch parents must be normalised to
+# []*model.Post before the resolver can recover them.
+type Post {
+  id: ID!
+  author: Author!
+}
+
+type Author {
+  id: ID!
+}

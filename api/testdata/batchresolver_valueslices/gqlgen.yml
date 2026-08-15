@@ -1,0 +1,26 @@
+schema:
+  - graph/*.graphqls
+
+exec:
+  filename: graph/generated.go
+  package: graph
+
+model:
+  filename: graph/model/models_gen.go
+  package: model
+
+resolver:
+  layout: follow-schema
+  dir: graph
+  package: graph
+
+# Makes every object list a value slice ([]model.Post rather than []*model.Post),
+# which is the mainstream way a batch resolver ends up with value-slice parents.
+omit_slice_element_pointers: true
+
+models:
+  Post:
+    fields:
+      author:
+        resolver: true
+        batch: true

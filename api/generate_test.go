@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -19,6 +20,12 @@ func cleanup(workDir string) {
 	_ = os.Remove(filepath.Join(workDir, "graph", "federation.go"))
 	_ = os.Remove(filepath.Join(workDir, "graph", "schema.resolvers.go"))
 	_ = os.Remove(filepath.Join(workDir, "graph", "model", "models_gen.go"))
+	// follow-schema layout emits one exec file per schema file instead of a single one.
+	// Deliberately narrow: a *.resolvers.go glob would delete committed fixture files.
+	matches, _ := filepath.Glob(filepath.Join(workDir, "graph", "*.generated.go"))
+	for _, f := range matches {
+		_ = os.Remove(f)
+	}
 }
 
 func TestGenerate(t *testing.T) {
@@ -27,6 +34,16 @@ func TestGenerate(t *testing.T) {
 	tests := []struct {
 		name    string
 		workDir string
+		// wantExec maps a snippet to the exact number of times it must appear in the
+		// generated exec file.
+		//
+		// These carry the whole weight of the test: Generate's own validation runs
+		// "go build <importpath>/...", and the ... wildcard skips testdata directories,
+		// so it matches no packages and silently passes for every fixture here.
+		wantExec map[string]int
+		// execFile overrides which generated file wantExec is checked against, relative
+		// to workDir. Needed for follow-schema, which has no single exec filename.
+		execFile string
 	}{
 		{
 			name:    "default",
@@ -41,8 +58,62 @@ func TestGenerate(t *testing.T) {
 			workDir: filepath.Join(wd, "testdata", "workerlimit"),
 		},
 		{
+			// resolver.batch applies to every eligible type, so both schema types must
+			// still register parents. Guards against the per-type filter over-filtering.
 			name:    "batchresolver_global",
 			workDir: filepath.Join(wd, "testdata", "batchresolver_global"),
+			wantExec: map[string]int{
+				// User.posts is the schema's only batch resolver, so User is the only
+				// type that needs parents registered.
+				`graphql.WithBatchParents(ctx, "User", v, nil)`: 1,
+				// Post is marshaled as a list but resolves nothing through a batch
+				// resolver, so it must not register.
+				`graphql.WithBatchParents(ctx, "Post", v, nil)`: 0,
+				// TypeSupportsBatchResolver rejects any type prefixed "__", so even a
+				// global resolver.batch leaves introspection unbatched. Registering
+				// parents for it was always dead work.
+				`graphql.WithBatchParentValues(ctx, "__Directive", v)`: 0,
+			},
+		},
+		{
+			// omit_slice_element_pointers makes User.posts a []model.Post, so the
+			// batch parents for Post must be normalised to []*model.Post. Without
+			// that, the generated type assertion fails at runtime and every parent
+			// silently falls back to a single-parent resolver call.
+			name:    "batchresolver_value_slices",
+			workDir: filepath.Join(wd, "testdata", "batchresolver_valueslices"),
+			wantExec: map[string]int{
+				`graphql.WithBatchParentValues(ctx, "Post", v)`: 1,
+				// Only types that actually have a batch field register parents. The
+				// introspection types never do unless resolver.batch is set globally,
+				// so they must not pay for Post's batch resolver.
+				`graphql.WithBatchParentValues(ctx, "__Directive", v)`: 0,
+				`graphql.WithBatchParentValues(ctx, "__Type", v)`:      0,
+			},
+		},
+		{
+			// Cat is declared in a different schema file from the Animal interface, so
+			// under follow-schema the Data instance rendering Animal's marshaler holds
+			// only Dog. Both implementors must still be collected: dropping Cat is
+			// silent, turning its batch resolver back into an N+1.
+			name:     "batchresolver_follow_schema",
+			workDir:  filepath.Join(wd, "testdata", "batchresolver_followschema"),
+			execFile: filepath.Join("graph", "a_animal.generated.go"),
+			wantExec: map[string]int{
+				`graphql.WithBatchParents(ctx, "Dog", batchItemsDog, batchIdxMapDog)`: 1,
+				`graphql.WithBatchParents(ctx, "Cat", batchItemsCat, batchIdxMapCat)`: 1,
+			},
+		},
+		{
+			// Only the innermost list registers batch parents. Before the guard on
+			// nested lists this failed to compile for the interface case, and
+			// registered a [][]Thing under "Thing" for the object case.
+			name:    "batchresolver_nested_list",
+			workDir: filepath.Join(wd, "testdata", "batchresolver_nestedlist"),
+			wantExec: map[string]int{
+				`graphql.WithBatchParents(ctx, "Thing", v, nil)`:                      1,
+				`graphql.WithBatchParents(ctx, "Dog", batchItemsDog, batchIdxMapDog)`: 1,
+			},
 		},
 	}
 	for _, tt := range tests {
@@ -56,6 +127,20 @@ func TestGenerate(t *testing.T) {
 			require.NoError(t, err, "failed to load config")
 			err = Generate(cfg)
 			require.NoError(t, err, "failed to generate code")
+
+			if tt.wantExec == nil {
+				return
+			}
+			execPath := cfg.Exec.Filename
+			if tt.execFile != "" {
+				execPath = tt.execFile
+			}
+			exec, err := os.ReadFile(execPath)
+			require.NoError(t, err, "failed to read generated exec file")
+			for snippet, want := range tt.wantExec {
+				require.Equal(t, want, strings.Count(string(exec), snippet),
+					"unexpected number of occurrences of %s", snippet)
+			}
 		})
 	}
 }

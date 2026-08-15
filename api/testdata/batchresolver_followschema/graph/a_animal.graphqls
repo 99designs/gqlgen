@@ -1,0 +1,12 @@
+type Query {
+  animals: [Animal!]!
+}
+
+interface Animal {
+  id: ID!
+}
+
+type Dog implements Animal {
+  id: ID!
+  batchProp: String!
+}

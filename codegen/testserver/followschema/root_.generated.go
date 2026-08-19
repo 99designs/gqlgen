@@ -3510,6 +3510,29 @@ func (ec *executionContext) childFields___Type(ctx context.Context, field graphq
 	return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 }
 
+// errChildFields_* holds the "no child fields" error for each leaf
+// (scalar/enum) type, built once and shared by every fieldContext_* function
+// for that type via graphql.NewScalarFieldContext, instead of allocating a
+// new error value on every field resolution.
+var errChildFields_Any = errors.New("field of type Any does not have child fields")
+var errChildFields_Boolean = errors.New("field of type Boolean does not have child fields")
+var errChildFields_Bytes = errors.New("field of type Bytes does not have child fields")
+var errChildFields_CustomScalar = errors.New("field of type CustomScalar does not have child fields")
+var errChildFields_DefaultScalarImplementation = errors.New("field of type DefaultScalarImplementation does not have child fields")
+var errChildFields_Float = errors.New("field of type Float does not have child fields")
+var errChildFields_ID = errors.New("field of type ID does not have child fields")
+var errChildFields_Int = errors.New("field of type Int does not have child fields")
+var errChildFields_MarshalPanic = errors.New("field of type MarshalPanic does not have child fields")
+var errChildFields_ShapeUnion = errors.New("field of type ShapeUnion does not have child fields")
+var errChildFields_String = errors.New("field of type String does not have child fields")
+var errChildFields_StringFromContextFunction = errors.New("field of type StringFromContextFunction does not have child fields")
+var errChildFields_StringFromContextInterface = errors.New("field of type StringFromContextInterface does not have child fields")
+var errChildFields_TestUnion = errors.New("field of type TestUnion does not have child fields")
+var errChildFields_Time = errors.New("field of type Time does not have child fields")
+var errChildFields_WrappedScalar = errors.New("field of type WrappedScalar does not have child fields")
+var errChildFields___DirectiveLocation = errors.New("field of type __DirectiveLocation does not have child fields")
+var errChildFields___TypeKind = errors.New("field of type __TypeKind does not have child fields")
+
 func (ec *executionContext) _queryMiddleware(ctx context.Context, obj *ast.OperationDefinition, next func(ctx context.Context) (any, error)) graphql.Marshaler {
 
 	for _, d := range obj.Directives {

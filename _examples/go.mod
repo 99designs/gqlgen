@@ -11,7 +11,7 @@ require (
 	github.com/goccy/go-yaml v1.19.2
 	github.com/google/uuid v1.6.0
 	github.com/rs/cors v1.11.1
-	github.com/stretchr/testify v1.11.1
+	github.com/stretchr/testify v1.12.0
 	github.com/vektah/dataloaden v0.3.0
 	github.com/vektah/gqlparser/v2 v2.5.36
 	golang.org/x/sync v0.22.0
@@ -19,13 +19,11 @@ require (
 
 require (
 	github.com/agnivade/levenshtein v1.2.1 // indirect
-	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/logrusorgru/aurora/v4 v4.0.0 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.21 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
-	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/sosodev/duration v1.4.0 // indirect
 	golang.org/x/mod v0.38.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect

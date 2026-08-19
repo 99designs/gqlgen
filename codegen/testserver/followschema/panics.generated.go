@@ -79,7 +79,7 @@ func (ec *executionContext) _Panics_fieldScalarMarshal(ctx context.Context, fiel
 	)
 }
 func (ec *executionContext) fieldContext_Panics_fieldScalarMarshal(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Panics", field, true, true, errors.New("field of type MarshalPanic does not have child fields"))
+	return graphql.NewScalarFieldContext("Panics", field, true, true, errChildFields_MarshalPanic)
 }
 
 func (ec *executionContext) _Panics_fieldFuncMarshal(ctx context.Context, field graphql.CollectedField, obj *Panics) (ret graphql.Marshaler) {

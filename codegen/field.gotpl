@@ -63,7 +63,7 @@ func {{$.FuncReceiver}}_{{$object.Name}}_{{$field.Name}}(ctx context.Context, {{
 {{- /* Scalar/enum fields without args: use graphql.NewScalarFieldContext (saves ~8 lines per field) */ -}}
 {{- if and (not $field.Args) (not $field.TypeReference.Definition.Fields) }}
 func {{$.FuncReceiver}}{{ $field.FieldContextFunc }}(_ context.Context, {{$.ECFuncParam}}field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext({{quote $field.Object.Name}}, field, {{or $field.IsMethod $field.IsResolver}}, {{ $field.IsResolver }}, errors.New("field of type {{ $field.TypeReference.Definition.Name }} does not have child fields"))
+	return graphql.NewScalarFieldContext({{quote $field.Object.Name}}, field, {{or $field.IsMethod $field.IsResolver}}, {{ $field.IsResolver }}, errChildFields_{{ $field.TypeReference.Definition.Name }})
 }
 {{- else }}
 func {{$.FuncReceiver}}{{ $field.FieldContextFunc }}({{ if not $field.Args }}_{{ else }}ctx{{ end }} context.Context, {{$.ECFuncParam}}field graphql.CollectedField) (fc *graphql.FieldContext, err error) {

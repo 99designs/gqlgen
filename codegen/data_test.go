@@ -130,6 +130,50 @@ func TestUniqueChildFieldTypes_Empty(t *testing.T) {
 	assert.Empty(t, d.UniqueChildFieldTypes())
 }
 
+func TestUniqueScalarChildFieldErrors(t *testing.T) {
+	stringDef := &ast.Definition{Kind: ast.Scalar, Name: "String"}
+	boolDef := &ast.Definition{Kind: ast.Scalar, Name: "Boolean"}
+	userDef := &ast.Definition{
+		Kind:   ast.Object,
+		Name:   "User",
+		Fields: ast.FieldList{{Name: "id"}},
+	}
+
+	d := Data{
+		Objects: Objects{
+			{
+				Fields: []*Field{
+					{TypeReference: &config.TypeReference{Definition: stringDef}},
+					// duplicate, should be deduped
+					{TypeReference: &config.TypeReference{Definition: stringDef}},
+					{TypeReference: &config.TypeReference{Definition: boolDef}},
+					// has fields (an object type), should be excluded
+					{TypeReference: &config.TypeReference{Definition: userDef}},
+					// has args, should be excluded even though the return type is scalar
+					{
+						Args:          []*FieldArgument{{}},
+						TypeReference: &config.TypeReference{Definition: stringDef},
+					},
+					// nil ref, should be skipped
+					{TypeReference: nil},
+				},
+			},
+		},
+	}
+
+	result := d.UniqueScalarChildFieldErrors()
+
+	// Should be sorted alphabetically: Boolean, String
+	assert.Len(t, result, 2)
+	assert.Equal(t, "Boolean", result[0].TypeName)
+	assert.Equal(t, "String", result[1].TypeName)
+}
+
+func TestUniqueScalarChildFieldErrors_Empty(t *testing.T) {
+	d := Data{}
+	assert.Empty(t, d.UniqueScalarChildFieldErrors())
+}
+
 func TestDataECHelpers(t *testing.T) {
 	receiver := &Data{Config: &config.Config{UseFunctionSyntaxForExecutionContext: false}}
 	assert.Equal(t, "(ec *executionContext) ", receiver.FuncReceiver())

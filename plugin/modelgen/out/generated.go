@@ -3,7 +3,6 @@
 package out
 
 import (
-	"bytes"
 	"fmt"
 	"io"
 	"strconv"
@@ -11,6 +10,8 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/plugin/modelgen/internal/extrafields"
 )
+
+// Add any new functions or any additional code/template functionality here
 
 type A interface {
 	IsA()
@@ -300,20 +301,6 @@ func (e EnumWithDescription) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
-func (e *EnumWithDescription) UnmarshalJSON(b []byte) error {
-	s, err := strconv.Unquote(string(b))
-	if err != nil {
-		return err
-	}
-	return e.UnmarshalGQL(s)
-}
-
-func (e EnumWithDescription) MarshalJSON() ([]byte, error) {
-	var buf bytes.Buffer
-	e.MarshalGQL(&buf)
-	return buf.Bytes(), nil
-}
-
 type MissingEnum string
 
 const (
@@ -353,18 +340,4 @@ func (e *MissingEnum) UnmarshalGQL(v any) error {
 
 func (e MissingEnum) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
-}
-
-func (e *MissingEnum) UnmarshalJSON(b []byte) error {
-	s, err := strconv.Unquote(string(b))
-	if err != nil {
-		return err
-	}
-	return e.UnmarshalGQL(s)
-}
-
-func (e MissingEnum) MarshalJSON() ([]byte, error) {
-	var buf bytes.Buffer
-	e.MarshalGQL(&buf)
-	return buf.Bytes(), nil
 }

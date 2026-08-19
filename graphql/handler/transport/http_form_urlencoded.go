@@ -21,6 +21,10 @@ type UrlEncodedForm struct {
 
 var _ graphql.Transport = UrlEncodedForm{}
 
+func (h UrlEncodedForm) String() string {
+	return "UrlEncodedForm"
+}
+
 func (h UrlEncodedForm) Supports(r *http.Request) bool {
 	if r.Header.Get("Upgrade") != "" {
 		return false

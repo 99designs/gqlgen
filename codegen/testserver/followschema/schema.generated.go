@@ -1348,7 +1348,7 @@ func (ec *executionContext) _Autobind_int(ctx context.Context, field graphql.Col
 	)
 }
 func (ec *executionContext) fieldContext_Autobind_int(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Autobind", field, false, false, errors.New("field of type Int does not have child fields"))
+	return graphql.NewScalarFieldContext("Autobind", field, false, false, errChildFields_Int)
 }
 
 func (ec *executionContext) _Autobind_int32(ctx context.Context, field graphql.CollectedField, obj *Autobind) (ret graphql.Marshaler) {
@@ -1373,7 +1373,7 @@ func (ec *executionContext) _Autobind_int32(ctx context.Context, field graphql.C
 	)
 }
 func (ec *executionContext) fieldContext_Autobind_int32(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Autobind", field, false, false, errors.New("field of type Int does not have child fields"))
+	return graphql.NewScalarFieldContext("Autobind", field, false, false, errChildFields_Int)
 }
 
 func (ec *executionContext) _Autobind_int64(ctx context.Context, field graphql.CollectedField, obj *Autobind) (ret graphql.Marshaler) {
@@ -1398,7 +1398,7 @@ func (ec *executionContext) _Autobind_int64(ctx context.Context, field graphql.C
 	)
 }
 func (ec *executionContext) fieldContext_Autobind_int64(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Autobind", field, false, false, errors.New("field of type Int does not have child fields"))
+	return graphql.NewScalarFieldContext("Autobind", field, false, false, errChildFields_Int)
 }
 
 func (ec *executionContext) _Autobind_idStr(ctx context.Context, field graphql.CollectedField, obj *Autobind) (ret graphql.Marshaler) {
@@ -1423,7 +1423,7 @@ func (ec *executionContext) _Autobind_idStr(ctx context.Context, field graphql.C
 	)
 }
 func (ec *executionContext) fieldContext_Autobind_idStr(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Autobind", field, false, false, errors.New("field of type ID does not have child fields"))
+	return graphql.NewScalarFieldContext("Autobind", field, false, false, errChildFields_ID)
 }
 
 func (ec *executionContext) _Autobind_idInt(ctx context.Context, field graphql.CollectedField, obj *Autobind) (ret graphql.Marshaler) {
@@ -1448,7 +1448,7 @@ func (ec *executionContext) _Autobind_idInt(ctx context.Context, field graphql.C
 	)
 }
 func (ec *executionContext) fieldContext_Autobind_idInt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Autobind", field, false, false, errors.New("field of type ID does not have child fields"))
+	return graphql.NewScalarFieldContext("Autobind", field, false, false, errChildFields_ID)
 }
 
 func (ec *executionContext) _EmbeddedPointer_ID(ctx context.Context, field graphql.CollectedField, obj *EmbeddedPointerModel) (ret graphql.Marshaler) {
@@ -1473,7 +1473,7 @@ func (ec *executionContext) _EmbeddedPointer_ID(ctx context.Context, field graph
 	)
 }
 func (ec *executionContext) fieldContext_EmbeddedPointer_ID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("EmbeddedPointer", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("EmbeddedPointer", field, false, false, errChildFields_String)
 }
 
 func (ec *executionContext) _EmbeddedPointer_Title(ctx context.Context, field graphql.CollectedField, obj *EmbeddedPointerModel) (ret graphql.Marshaler) {
@@ -1498,7 +1498,7 @@ func (ec *executionContext) _EmbeddedPointer_Title(ctx context.Context, field gr
 	)
 }
 func (ec *executionContext) fieldContext_EmbeddedPointer_Title(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("EmbeddedPointer", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("EmbeddedPointer", field, false, false, errChildFields_String)
 }
 
 func (ec *executionContext) _ForcedResolver_field(ctx context.Context, field graphql.CollectedField, obj *ForcedResolver) (ret graphql.Marshaler) {
@@ -1557,7 +1557,7 @@ func (ec *executionContext) _InnerObject_id(ctx context.Context, field graphql.C
 	)
 }
 func (ec *executionContext) fieldContext_InnerObject_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("InnerObject", field, false, false, errors.New("field of type Int does not have child fields"))
+	return graphql.NewScalarFieldContext("InnerObject", field, false, false, errChildFields_Int)
 }
 
 func (ec *executionContext) _InvalidIdentifier_id(ctx context.Context, field graphql.CollectedField, obj *invalid_packagename.InvalidIdentifier) (ret graphql.Marshaler) {
@@ -1582,7 +1582,7 @@ func (ec *executionContext) _InvalidIdentifier_id(ctx context.Context, field gra
 	)
 }
 func (ec *executionContext) fieldContext_InvalidIdentifier_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("InvalidIdentifier", field, false, false, errors.New("field of type Int does not have child fields"))
+	return graphql.NewScalarFieldContext("InvalidIdentifier", field, false, false, errChildFields_Int)
 }
 
 func (ec *executionContext) _It_id(ctx context.Context, field graphql.CollectedField, obj *introspection1.It) (ret graphql.Marshaler) {
@@ -1607,7 +1607,7 @@ func (ec *executionContext) _It_id(ctx context.Context, field graphql.CollectedF
 	)
 }
 func (ec *executionContext) fieldContext_It_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("It", field, false, false, errors.New("field of type ID does not have child fields"))
+	return graphql.NewScalarFieldContext("It", field, false, false, errChildFields_ID)
 }
 
 func (ec *executionContext) _ModelMethods_resolverField(ctx context.Context, field graphql.CollectedField, obj *ModelMethods) (ret graphql.Marshaler) {
@@ -1632,7 +1632,7 @@ func (ec *executionContext) _ModelMethods_resolverField(ctx context.Context, fie
 	)
 }
 func (ec *executionContext) fieldContext_ModelMethods_resolverField(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("ModelMethods", field, true, true, errors.New("field of type Boolean does not have child fields"))
+	return graphql.NewScalarFieldContext("ModelMethods", field, true, true, errChildFields_Boolean)
 }
 
 func (ec *executionContext) _ModelMethods_noContext(ctx context.Context, field graphql.CollectedField, obj *ModelMethods) (ret graphql.Marshaler) {
@@ -1657,7 +1657,7 @@ func (ec *executionContext) _ModelMethods_noContext(ctx context.Context, field g
 	)
 }
 func (ec *executionContext) fieldContext_ModelMethods_noContext(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("ModelMethods", field, true, false, errors.New("field of type Boolean does not have child fields"))
+	return graphql.NewScalarFieldContext("ModelMethods", field, true, false, errChildFields_Boolean)
 }
 
 func (ec *executionContext) _ModelMethods_withContext(ctx context.Context, field graphql.CollectedField, obj *ModelMethods) (ret graphql.Marshaler) {
@@ -1682,7 +1682,7 @@ func (ec *executionContext) _ModelMethods_withContext(ctx context.Context, field
 	)
 }
 func (ec *executionContext) fieldContext_ModelMethods_withContext(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("ModelMethods", field, true, false, errors.New("field of type Boolean does not have child fields"))
+	return graphql.NewScalarFieldContext("ModelMethods", field, true, false, errChildFields_Boolean)
 }
 
 func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphql.CollectedField, obj *OuterObject) (ret graphql.Marshaler) {
@@ -1741,7 +1741,7 @@ func (ec *executionContext) _Pet_id(ctx context.Context, field graphql.Collected
 	)
 }
 func (ec *executionContext) fieldContext_Pet_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Pet", field, false, false, errors.New("field of type Int does not have child fields"))
+	return graphql.NewScalarFieldContext("Pet", field, false, false, errChildFields_Int)
 }
 
 func (ec *executionContext) _Pet_friends(ctx context.Context, field graphql.CollectedField, obj *Pet) (ret graphql.Marshaler) {
@@ -2316,7 +2316,7 @@ func (ec *executionContext) _Query_shapeUnion(ctx context.Context, field graphql
 	)
 }
 func (ec *executionContext) fieldContext_Query_shapeUnion(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, errors.New("field of type ShapeUnion does not have child fields"))
+	return graphql.NewScalarFieldContext("Query", field, true, true, errChildFields_ShapeUnion)
 }
 
 func (ec *executionContext) _Query_autobind(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2375,7 +2375,7 @@ func (ec *executionContext) _Query_deprecatedField(ctx context.Context, field gr
 	)
 }
 func (ec *executionContext) fieldContext_Query_deprecatedField(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Query", field, true, true, errChildFields_String)
 }
 
 func (ec *executionContext) _Query_fieldWithDeprecatedArg(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3149,7 +3149,7 @@ func (ec *executionContext) _Query_directiveField(ctx context.Context, field gra
 	)
 }
 func (ec *executionContext) fieldContext_Query_directiveField(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Query", field, true, true, errChildFields_String)
 }
 
 func (ec *executionContext) _Query_directiveDouble(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3192,7 +3192,7 @@ func (ec *executionContext) _Query_directiveDouble(ctx context.Context, field gr
 	)
 }
 func (ec *executionContext) fieldContext_Query_directiveDouble(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Query", field, true, true, errChildFields_String)
 }
 
 func (ec *executionContext) _Query_directiveUnimplemented(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3228,7 +3228,7 @@ func (ec *executionContext) _Query_directiveUnimplemented(ctx context.Context, f
 	)
 }
 func (ec *executionContext) fieldContext_Query_directiveUnimplemented(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Query", field, true, true, errChildFields_String)
 }
 
 func (ec *executionContext) _Query_embeddedCase1(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4374,7 +4374,7 @@ func (ec *executionContext) _Query_valid(ctx context.Context, field graphql.Coll
 	)
 }
 func (ec *executionContext) fieldContext_Query_valid(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Query", field, true, true, errChildFields_String)
 }
 
 func (ec *executionContext) _Query_invalid(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4399,7 +4399,7 @@ func (ec *executionContext) _Query_invalid(ctx context.Context, field graphql.Co
 	)
 }
 func (ec *executionContext) fieldContext_Query_invalid(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Query", field, true, true, errChildFields_String)
 }
 
 func (ec *executionContext) _Query_panics(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4594,7 +4594,7 @@ func (ec *executionContext) _Query_infinity(ctx context.Context, field graphql.C
 	)
 }
 func (ec *executionContext) fieldContext_Query_infinity(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, errors.New("field of type Float does not have child fields"))
+	return graphql.NewScalarFieldContext("Query", field, true, true, errChildFields_Float)
 }
 
 func (ec *executionContext) _Query_stringFromContextInterface(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4619,7 +4619,7 @@ func (ec *executionContext) _Query_stringFromContextInterface(ctx context.Contex
 	)
 }
 func (ec *executionContext) fieldContext_Query_stringFromContextInterface(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, errors.New("field of type StringFromContextInterface does not have child fields"))
+	return graphql.NewScalarFieldContext("Query", field, true, true, errChildFields_StringFromContextInterface)
 }
 
 func (ec *executionContext) _Query_stringFromContextFunction(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4644,7 +4644,7 @@ func (ec *executionContext) _Query_stringFromContextFunction(ctx context.Context
 	)
 }
 func (ec *executionContext) fieldContext_Query_stringFromContextFunction(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, errors.New("field of type StringFromContextFunction does not have child fields"))
+	return graphql.NewScalarFieldContext("Query", field, true, true, errChildFields_StringFromContextFunction)
 }
 
 func (ec *executionContext) _Query_defaultScalar(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4783,7 +4783,7 @@ func (ec *executionContext) _Query_scalarSlice(ctx context.Context, field graphq
 	)
 }
 func (ec *executionContext) fieldContext_Query_scalarSlice(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, errors.New("field of type Bytes does not have child fields"))
+	return graphql.NewScalarFieldContext("Query", field, true, true, errChildFields_Bytes)
 }
 
 func (ec *executionContext) _Query_fallback(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4854,7 +4854,7 @@ func (ec *executionContext) _Query_optionalUnion(ctx context.Context, field grap
 	)
 }
 func (ec *executionContext) fieldContext_Query_optionalUnion(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, errors.New("field of type TestUnion does not have child fields"))
+	return graphql.NewScalarFieldContext("Query", field, true, true, errChildFields_TestUnion)
 }
 
 func (ec *executionContext) _Query_vOkCaseValue(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -5049,7 +5049,7 @@ func (ec *executionContext) _Query_wrappedScalar(ctx context.Context, field grap
 	)
 }
 func (ec *executionContext) fieldContext_Query_wrappedScalar(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, errors.New("field of type WrappedScalar does not have child fields"))
+	return graphql.NewScalarFieldContext("Query", field, true, true, errChildFields_WrappedScalar)
 }
 
 func (ec *executionContext) _Query_wrappedMap(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -5222,7 +5222,7 @@ func (ec *executionContext) _Subscription_updated(ctx context.Context, field gra
 	)
 }
 func (ec *executionContext) fieldContext_Subscription_updated(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Subscription", field, true, true, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Subscription", field, true, true, errChildFields_String)
 }
 
 func (ec *executionContext) _Subscription_initPayload(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
@@ -5247,7 +5247,7 @@ func (ec *executionContext) _Subscription_initPayload(ctx context.Context, field
 	)
 }
 func (ec *executionContext) fieldContext_Subscription_initPayload(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Subscription", field, true, true, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Subscription", field, true, true, errChildFields_String)
 }
 
 func (ec *executionContext) _Subscription_directiveArg(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
@@ -5382,7 +5382,7 @@ func (ec *executionContext) _Subscription_directiveDouble(ctx context.Context, f
 	)
 }
 func (ec *executionContext) fieldContext_Subscription_directiveDouble(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Subscription", field, true, true, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Subscription", field, true, true, errChildFields_String)
 }
 
 func (ec *executionContext) _Subscription_directiveUnimplemented(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
@@ -5418,7 +5418,7 @@ func (ec *executionContext) _Subscription_directiveUnimplemented(ctx context.Con
 	)
 }
 func (ec *executionContext) fieldContext_Subscription_directiveUnimplemented(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Subscription", field, true, true, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("Subscription", field, true, true, errChildFields_String)
 }
 
 func (ec *executionContext) _Subscription_issue896b(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
@@ -5511,7 +5511,7 @@ func (ec *executionContext) _User_id(ctx context.Context, field graphql.Collecte
 	)
 }
 func (ec *executionContext) fieldContext_User_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("User", field, false, false, errors.New("field of type Int does not have child fields"))
+	return graphql.NewScalarFieldContext("User", field, false, false, errChildFields_Int)
 }
 
 func (ec *executionContext) _User_friends(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -5570,7 +5570,7 @@ func (ec *executionContext) _User_created(ctx context.Context, field graphql.Col
 	)
 }
 func (ec *executionContext) fieldContext_User_created(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("User", field, false, false, errors.New("field of type Time does not have child fields"))
+	return graphql.NewScalarFieldContext("User", field, false, false, errChildFields_Time)
 }
 
 func (ec *executionContext) _User_updated(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
@@ -5595,7 +5595,7 @@ func (ec *executionContext) _User_updated(ctx context.Context, field graphql.Col
 	)
 }
 func (ec *executionContext) fieldContext_User_updated(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("User", field, false, false, errors.New("field of type Time does not have child fields"))
+	return graphql.NewScalarFieldContext("User", field, false, false, errChildFields_Time)
 }
 
 func (ec *executionContext) _User_pets(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {

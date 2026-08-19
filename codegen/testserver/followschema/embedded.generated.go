@@ -4,7 +4,6 @@ package followschema
 
 import (
 	"context"
-	"errors"
 	"math"
 	"strconv"
 	"sync/atomic"
@@ -45,7 +44,7 @@ func (ec *executionContext) _EmbeddedCase1_exportedEmbeddedPointerExportedMethod
 	)
 }
 func (ec *executionContext) fieldContext_EmbeddedCase1_exportedEmbeddedPointerExportedMethod(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("EmbeddedCase1", field, true, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("EmbeddedCase1", field, true, false, errChildFields_String)
 }
 
 func (ec *executionContext) _EmbeddedCase2_unexportedEmbeddedPointerExportedMethod(ctx context.Context, field graphql.CollectedField, obj *EmbeddedCase2) (ret graphql.Marshaler) {
@@ -70,7 +69,7 @@ func (ec *executionContext) _EmbeddedCase2_unexportedEmbeddedPointerExportedMeth
 	)
 }
 func (ec *executionContext) fieldContext_EmbeddedCase2_unexportedEmbeddedPointerExportedMethod(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("EmbeddedCase2", field, true, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("EmbeddedCase2", field, true, false, errChildFields_String)
 }
 
 func (ec *executionContext) _EmbeddedCase3_unexportedEmbeddedInterfaceExportedMethod(ctx context.Context, field graphql.CollectedField, obj *EmbeddedCase3) (ret graphql.Marshaler) {
@@ -95,7 +94,7 @@ func (ec *executionContext) _EmbeddedCase3_unexportedEmbeddedInterfaceExportedMe
 	)
 }
 func (ec *executionContext) fieldContext_EmbeddedCase3_unexportedEmbeddedInterfaceExportedMethod(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("EmbeddedCase3", field, true, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("EmbeddedCase3", field, true, false, errChildFields_String)
 }
 
 // endregion **************************** field.gotpl *****************************

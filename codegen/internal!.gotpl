@@ -235,4 +235,12 @@ func {{$.FuncReceiver}}childFields_{{ $ct.TypeName }}(ctx context.Context, {{$.E
 }
 {{- end }}
 
+// errChildFields_* holds the "no child fields" error for each leaf
+// (scalar/enum) type, built once and shared by every fieldContext_* function
+// for that type via graphql.NewScalarFieldContext, instead of allocating a
+// new error value on every field resolution.
+{{- range $e := .UniqueScalarChildFieldErrors }}
+var errChildFields_{{ $e.TypeName }} = errors.New("field of type {{ $e.TypeName }} does not have child fields")
+{{- end }}
+
 {{ template "globalMiddleware" . }}

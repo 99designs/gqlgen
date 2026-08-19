@@ -4,7 +4,6 @@ package followschema
 
 import (
 	"context"
-	"errors"
 	"math"
 	"strconv"
 	"sync/atomic"
@@ -49,7 +48,7 @@ func (ec *executionContext) _OverlappingFields_oneFoo(ctx context.Context, field
 	)
 }
 func (ec *executionContext) fieldContext_OverlappingFields_oneFoo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("OverlappingFields", field, false, false, errors.New("field of type Int does not have child fields"))
+	return graphql.NewScalarFieldContext("OverlappingFields", field, false, false, errChildFields_Int)
 }
 
 func (ec *executionContext) _OverlappingFields_twoFoo(ctx context.Context, field graphql.CollectedField, obj *OverlappingFields) (ret graphql.Marshaler) {
@@ -74,7 +73,7 @@ func (ec *executionContext) _OverlappingFields_twoFoo(ctx context.Context, field
 	)
 }
 func (ec *executionContext) fieldContext_OverlappingFields_twoFoo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("OverlappingFields", field, false, false, errors.New("field of type Int does not have child fields"))
+	return graphql.NewScalarFieldContext("OverlappingFields", field, false, false, errChildFields_Int)
 }
 
 func (ec *executionContext) _OverlappingFields_oldFoo(ctx context.Context, field graphql.CollectedField, obj *OverlappingFields) (ret graphql.Marshaler) {
@@ -99,7 +98,7 @@ func (ec *executionContext) _OverlappingFields_oldFoo(ctx context.Context, field
 	)
 }
 func (ec *executionContext) fieldContext_OverlappingFields_oldFoo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("OverlappingFields", field, true, true, errors.New("field of type Int does not have child fields"))
+	return graphql.NewScalarFieldContext("OverlappingFields", field, true, true, errChildFields_Int)
 }
 
 func (ec *executionContext) _OverlappingFields_newFoo(ctx context.Context, field graphql.CollectedField, obj *OverlappingFields) (ret graphql.Marshaler) {
@@ -124,7 +123,7 @@ func (ec *executionContext) _OverlappingFields_newFoo(ctx context.Context, field
 	)
 }
 func (ec *executionContext) fieldContext_OverlappingFields_newFoo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("OverlappingFields", field, false, false, errors.New("field of type Int does not have child fields"))
+	return graphql.NewScalarFieldContext("OverlappingFields", field, false, false, errChildFields_Int)
 }
 
 func (ec *executionContext) _OverlappingFields_new_foo(ctx context.Context, field graphql.CollectedField, obj *OverlappingFields) (ret graphql.Marshaler) {
@@ -149,7 +148,7 @@ func (ec *executionContext) _OverlappingFields_new_foo(ctx context.Context, fiel
 	)
 }
 func (ec *executionContext) fieldContext_OverlappingFields_new_foo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("OverlappingFields", field, false, false, errors.New("field of type Int does not have child fields"))
+	return graphql.NewScalarFieldContext("OverlappingFields", field, false, false, errChildFields_Int)
 }
 
 // endregion **************************** field.gotpl *****************************

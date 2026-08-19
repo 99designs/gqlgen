@@ -5,6 +5,7 @@ package generated
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"sync/atomic"
 
@@ -446,3 +447,13 @@ func (ec *executionContext) childFields___Type(ctx context.Context, field graphq
 	}
 	return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 }
+
+// errChildFields_* holds the "no child fields" error for each leaf
+// (scalar/enum) type, built once and shared by every fieldContext_* function
+// for that type via graphql.NewScalarFieldContext, instead of allocating a
+// new error value on every field resolution.
+var errChildFields_Boolean = errors.New("field of type Boolean does not have child fields")
+var errChildFields_Int = errors.New("field of type Int does not have child fields")
+var errChildFields_String = errors.New("field of type String does not have child fields")
+var errChildFields___DirectiveLocation = errors.New("field of type __DirectiveLocation does not have child fields")
+var errChildFields___TypeKind = errors.New("field of type __TypeKind does not have child fields")

@@ -4,7 +4,6 @@ package followschema
 
 import (
 	"context"
-	"errors"
 	"math"
 	"strconv"
 	"sync/atomic"
@@ -45,7 +44,7 @@ func (ec *executionContext) _PtrToAnyContainer_ptrToAny(ctx context.Context, fie
 	)
 }
 func (ec *executionContext) fieldContext_PtrToAnyContainer_ptrToAny(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("PtrToAnyContainer", field, false, false, errors.New("field of type Any does not have child fields"))
+	return graphql.NewScalarFieldContext("PtrToAnyContainer", field, false, false, errChildFields_Any)
 }
 
 func (ec *executionContext) _PtrToAnyContainer_binding(ctx context.Context, field graphql.CollectedField, obj *PtrToAnyContainer) (ret graphql.Marshaler) {
@@ -70,7 +69,7 @@ func (ec *executionContext) _PtrToAnyContainer_binding(ctx context.Context, fiel
 	)
 }
 func (ec *executionContext) fieldContext_PtrToAnyContainer_binding(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("PtrToAnyContainer", field, true, false, errors.New("field of type Any does not have child fields"))
+	return graphql.NewScalarFieldContext("PtrToAnyContainer", field, true, false, errChildFields_Any)
 }
 
 // endregion **************************** field.gotpl *****************************

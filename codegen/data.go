@@ -165,6 +165,47 @@ func (d *Data) UniqueChildFieldTypes() []*ChildFieldType {
 	return result
 }
 
+// ScalarChildFieldError represents a unique leaf (scalar or enum) type that
+// appears as the return type of an argument-less field. Used to generate one
+// shared "no child fields" error value per type, instead of allocating a new
+// error on every resolution of every field of that type.
+type ScalarChildFieldError struct {
+	TypeName string
+}
+
+// UniqueScalarChildFieldErrors collects all unique scalar/enum type names
+// returned by argument-less fields — the same fields for which field.gotpl
+// emits a graphql.NewScalarFieldContext call. Each type name appears once,
+// enabling a single shared error value instead of an errors.New call on
+// every field resolution.
+func (d *Data) UniqueScalarChildFieldErrors() []*ScalarChildFieldError {
+	seen := map[string]bool{}
+	var result []*ScalarChildFieldError
+	for _, obj := range d.Objects {
+		for _, field := range obj.Fields {
+			if len(field.Args) > 0 {
+				continue
+			}
+			if field.TypeReference == nil || field.TypeReference.Definition == nil {
+				continue
+			}
+			def := field.TypeReference.Definition
+			if len(def.Fields) > 0 {
+				continue
+			}
+			if seen[def.Name] {
+				continue
+			}
+			seen[def.Name] = true
+			result = append(result, &ScalarChildFieldError{TypeName: def.Name})
+		}
+	}
+	sort.Slice(result, func(i, j int) bool {
+		return result[i].TypeName < result[j].TypeName
+	})
+	return result
+}
+
 // AugmentedSource contains extra information about graphql schema files which is not known directly
 // from the Config.Sources data
 type AugmentedSource struct {

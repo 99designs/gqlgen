@@ -3380,10 +3380,6 @@ func marshalNID2string(ctx context.Context, ec *executionContext, sel ast.Select
 	return res
 }
 
-func marshalNMutationResponse2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐMutationResponse(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v MutationResponse) graphql.Marshaler {
-	return _MutationResponse(ctx, ec, sel, &v)
-}
-
 func marshalNMutationResponse2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐMutationResponse(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v *MutationResponse) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -3467,10 +3463,6 @@ func marshalNString2ᚕstringᚄ(ctx context.Context, ec *executionContext, sel 
 	}
 
 	return ret
-}
-
-func marshalNUser2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐUser(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v User) graphql.Marshaler {
-	return _User(ctx, ec, sel, &v)
 }
 
 func marshalNUser2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋusefunctionsyntaxforexecutioncontextᚐUserᚄ(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v []*User) graphql.Marshaler {

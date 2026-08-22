@@ -175,6 +175,52 @@ func TestOmittableBinding(t *testing.T) {
 	})
 }
 
+func TestPointerTo(t *testing.T) {
+	const (
+		messageType    = "github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat.Message"
+		messagePtrType = "*" + messageType
+	)
+
+	countRefs := func(binder *Binder, goType string) int {
+		count := 0
+		for _, ref := range binder.References {
+			if ref.GO.String() == goType {
+				count++
+			}
+		}
+		return count
+	}
+
+	t.Run("replaces the reference it was derived from", func(t *testing.T) {
+		binder, schema := createBinder(Config{})
+
+		value, err := binder.TypeReference(schema.Query.Fields.ForName("messages").Type.Elem, nil)
+		require.NoError(t, err)
+		require.Equal(t, messageType, value.GO.String())
+		require.Equal(t, 1, countRefs(binder, messageType))
+
+		ptr := binder.PointerTo(value)
+		require.Equal(t, messagePtrType, ptr.GO.String())
+		require.Equal(t, 1, countRefs(binder, messagePtrType))
+		require.Zero(t, countRefs(binder, messageType))
+	})
+
+	t.Run("keeps references registered by other callers", func(t *testing.T) {
+		binder, schema := createBinder(Config{})
+		messageAst := schema.Query.Fields.ForName("messages").Type.Elem
+
+		resolverField, err := binder.TypeReference(messageAst, nil)
+		require.NoError(t, err)
+		_, err = binder.TypeReference(messageAst, nil)
+		require.NoError(t, err)
+		require.Equal(t, 2, countRefs(binder, messageType))
+
+		binder.PointerTo(resolverField)
+		require.Equal(t, 1, countRefs(binder, messageType))
+		require.Equal(t, 1, countRefs(binder, messagePtrType))
+	})
+}
+
 func createBinder(cfg Config) (*Binder, *ast.Schema) {
 	cfg.Models = TypeMap{
 		"Message": TypeMapEntry{

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"go/token"
 	"go/types"
+	"slices"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/ast"
@@ -187,9 +188,18 @@ func indexDefs(pkg *packages.Package) map[string]types.Object {
 	return res
 }
 
+// PointerTo registers and returns a reference to the pointer type of ref.
+//
+// ref is unregistered in the process: callers replace it with the returned
+// reference, so keeping it would make buildTypes emit a marshaler for the value
+// type that nothing calls. Other uses of the same type are unaffected — every
+// TypeReference call registers its own reference.
 func (b *Binder) PointerTo(ref *TypeReference) *TypeReference {
 	newRef := *ref
 	newRef.GO = types.NewPointer(ref.GO)
+	if i := slices.Index(b.References, ref); i >= 0 {
+		b.References = slices.Delete(b.References, i, i+1)
+	}
 	b.References = append(b.References, &newRef)
 	return &newRef
 }

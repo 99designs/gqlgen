@@ -2606,10 +2606,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNFile2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfileuploadᚋmodelᚐFile(ctx context.Context, sel ast.SelectionSet, v model.File) graphql.Marshaler {
-	return ec._File(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNFile2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfileuploadᚋmodelᚐFileᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.File) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)

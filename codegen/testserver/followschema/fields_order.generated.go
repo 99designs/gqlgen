@@ -150,10 +150,6 @@ func (ec *executionContext) unmarshalNFieldsOrderInput2githubᚗcomᚋ99designs�
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNFieldsOrderPayload2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐFieldsOrderPayload(ctx context.Context, sel ast.SelectionSet, v FieldsOrderPayload) graphql.Marshaler {
-	return ec._FieldsOrderPayload(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNFieldsOrderPayload2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐFieldsOrderPayload(ctx context.Context, sel ast.SelectionSet, v *FieldsOrderPayload) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {

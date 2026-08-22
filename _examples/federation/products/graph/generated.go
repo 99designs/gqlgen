@@ -2950,10 +2950,6 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNManufacturer2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋproductsᚋgraphᚋmodelᚐManufacturer(ctx context.Context, sel ast.SelectionSet, v model.Manufacturer) graphql.Marshaler {
-	return ec._Manufacturer(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNManufacturer2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋproductsᚋgraphᚋmodelᚐManufacturer(ctx context.Context, sel ast.SelectionSet, v *model.Manufacturer) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -2962,10 +2958,6 @@ func (ec *executionContext) marshalNManufacturer2ᚖgithubᚗcomᚋ99designsᚋg
 		return graphql.Null
 	}
 	return ec._Manufacturer(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNProduct2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋproductsᚋgraphᚋmodelᚐProduct(ctx context.Context, sel ast.SelectionSet, v model.Product) graphql.Marshaler {
-	return ec._Product(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNProduct2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋproductsᚋgraphᚋmodelᚐProduct(ctx context.Context, sel ast.SelectionSet, v *model.Product) graphql.Marshaler {

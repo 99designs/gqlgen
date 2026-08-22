@@ -2981,10 +2981,6 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	return res
 }
 
-func (ec *executionContext) marshalNPlanet2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋmixedrequiresᚋgeneratedᚋmodelᚐPlanet(ctx context.Context, sel ast.SelectionSet, v model.Planet) graphql.Marshaler {
-	return ec._Planet(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNPlanet2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋmixedrequiresᚋgeneratedᚋmodelᚐPlanet(ctx context.Context, sel ast.SelectionSet, v *model.Planet) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {

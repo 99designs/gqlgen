@@ -292,7 +292,7 @@ func (e *EnumWithDescription) UnmarshalGQL(v any) error {
 }
 
 func (e EnumWithDescription) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *EnumWithDescription) UnmarshalJSON(b []byte) error {
@@ -347,7 +347,7 @@ func (e *MissingEnum) UnmarshalGQL(v any) error {
 }
 
 func (e MissingEnum) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *MissingEnum) UnmarshalJSON(b []byte) error {

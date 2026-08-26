@@ -88,7 +88,7 @@ func (e *Episode) UnmarshalGQL(v any) error {
 }
 
 func (e Episode) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *Episode) UnmarshalJSON(b []byte) error {
@@ -143,7 +143,7 @@ func (e *LengthUnit) UnmarshalGQL(v any) error {
 }
 
 func (e LengthUnit) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *LengthUnit) UnmarshalJSON(b []byte) error {

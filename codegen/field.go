@@ -388,7 +388,7 @@ func (b *builder) findBindStructTagTarget(in types.Type, name string) (types.Obj
 }
 
 func (b *builder) findBindMethodTarget(in types.Type, name string) (types.Object, error) {
-	switch t := in.(type) {
+	switch t := types.Unalias(in).(type) {
 	case *types.Named:
 		if _, ok := t.Underlying().(*types.Interface); ok {
 			return b.findBindMethodTarget(t.Underlying(), name)
@@ -426,7 +426,7 @@ func (b *builder) findBindMethoderTarget(
 }
 
 func (b *builder) findBindFieldTarget(in types.Type, name string) (types.Object, error) {
-	switch t := in.(type) {
+	switch t := types.Unalias(in).(type) {
 	case *types.Named:
 		return b.findBindFieldTarget(t.Underlying(), name)
 	case *types.Struct:
@@ -454,7 +454,7 @@ func (b *builder) findBindEmbedsTarget(
 	name string,
 	autoBindGetterHaser bool,
 ) (types.Object, error) {
-	switch t := in.(type) {
+	switch t := types.Unalias(in).(type) {
 	case *types.Named:
 		return b.findBindEmbedsTarget(t.Underlying(), name, autoBindGetterHaser)
 	case *types.Struct:
@@ -528,7 +528,7 @@ func (b *builder) findBindInterfaceEmbedsTarget(
 func (b *builder) findBindHaserMethod(in types.Type, name string) (types.Object, error) {
 	haserName := "Has" + name
 
-	switch t := in.(type) {
+	switch t := types.Unalias(in).(type) {
 	case *types.Named:
 		if _, ok := t.Underlying().(*types.Interface); ok {
 			return b.findBindHaserMethod(t.Underlying(), name)
@@ -990,7 +990,7 @@ func (f *Field) fieldArgExpression(
 		arg.TypeReference.GO,
 	) + ")"
 
-	if iface, ok := arg.TypeReference.GO.(*types.Interface); ok && iface.Empty() {
+	if iface, ok := types.Unalias(arg.TypeReference.GO).(*types.Interface); ok && iface.Empty() {
 		tmp = fmt.Sprintf(`
 				func () any {
 					if fc.Args["%s"] == nil {

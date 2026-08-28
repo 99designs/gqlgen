@@ -32,18 +32,31 @@ func (m Model) HasName() bool {
 
 	tests := []struct {
 		Name                string
+		Model               types.Type
 		Field               string
 		AutoBindGetterHaser bool
 		Expected            string // Expected method/field name
 	}{
 		{
 			Name:                "Autobind enabled, should find GetName",
+			Model:               model,
 			Field:               "name",
 			AutoBindGetterHaser: true,
 			Expected:            "GetName",
 		},
 		{
 			Name:                "Autobind disabled, should find Name field",
+			Model:               model,
+			Field:               "name",
+			AutoBindGetterHaser: false,
+			Expected:            "Name",
+		},
+		{
+			Name: "Binding on an alias of the Model",
+			Model: types.NewAlias(
+				types.NewTypeName(0, nil, "AliasModel", nil),
+				model,
+			),
 			Field:               "name",
 			AutoBindGetterHaser: false,
 			Expected:            "Name",
@@ -53,7 +66,7 @@ func (m Model) HasName() bool {
 	for _, tt := range tests {
 		t.Run(tt.Name, func(t *testing.T) {
 			b := builder{Config: &config.Config{}}
-			target, err := b.findBindTarget(model, tt.Field, tt.AutoBindGetterHaser)
+			target, err := b.findBindTarget(tt.Model, tt.Field, tt.AutoBindGetterHaser)
 			require.NoError(t, err)
 			require.NotNil(t, target)
 			require.Equal(t, tt.Expected, target.Name())

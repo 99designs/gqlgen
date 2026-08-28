@@ -564,7 +564,7 @@ func (b *Binder) CopyModifiersFromAst(t *ast.Type, base types.Type) types.Type {
 	}
 
 	var isInterface bool
-	if named, ok := base.(*types.Named); ok {
+	if named, ok := types.Unalias(base).(*types.Named); ok {
 		_, isInterface = named.Underlying().(*types.Interface)
 	}
 

@@ -118,6 +118,9 @@ func (s *Imports) Lookup(path string) string {
 }
 
 func (s *Imports) LookupType(t types.Type) string {
+	if iface, ok := types.Unalias(t).(*types.Interface); ok && iface.Empty() {
+		return "any"
+	}
 	return types.TypeString(t, func(i *types.Package) string {
 		return s.Lookup(i.Path())
 	})

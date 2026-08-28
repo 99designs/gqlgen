@@ -22,6 +22,8 @@ type Imports struct {
 	packages *code.Packages
 }
 
+var AnyType = types.Universe.Lookup("any").Type()
+
 func (i *Import) String() string {
 	if strings.HasSuffix(i.Path, i.Alias) && i.Alias == i.Name {
 		return strconv.Quote(i.Path)
@@ -119,7 +121,7 @@ func (s *Imports) Lookup(path string) string {
 
 func (s *Imports) LookupType(t types.Type) string {
 	if iface, ok := types.Unalias(t).(*types.Interface); ok && iface.Empty() {
-		return "any"
+		t = AnyType
 	}
 	return types.TypeString(t, func(i *types.Package) string {
 		return s.Lookup(i.Path())

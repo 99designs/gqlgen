@@ -71,7 +71,7 @@ func (e *DateFilterOp) UnmarshalGQL(v any) error {
 }
 
 func (e DateFilterOp) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *DateFilterOp) UnmarshalJSON(b []byte) error {
@@ -126,7 +126,7 @@ func (e *ErrorType) UnmarshalGQL(v any) error {
 }
 
 func (e ErrorType) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *ErrorType) UnmarshalJSON(b []byte) error {

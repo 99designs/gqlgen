@@ -178,7 +178,7 @@ func (e *Tier) UnmarshalGQL(v any) error {
 }
 
 func (e Tier) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 type Prefs struct {

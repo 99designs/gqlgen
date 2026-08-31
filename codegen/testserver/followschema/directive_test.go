@@ -275,7 +275,7 @@ func TestDirectives(t *testing.T) {
 				call := directiveCall{}
 				typedObj, err := next(ctx)
 				if typedObj != nil {
-					call.TypeName = (reflect.TypeOf(typedObj).String())
+					call.TypeName = reflect.TypeOf(typedObj).String()
 					call.Value = typedObj
 				}
 				callStore.addCall("Directive3", call)

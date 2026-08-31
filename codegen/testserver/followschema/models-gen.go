@@ -363,7 +363,7 @@ func (e *EnumTest) UnmarshalGQL(v any) error {
 }
 
 func (e EnumTest) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *EnumTest) UnmarshalJSON(b []byte) error {
@@ -418,7 +418,7 @@ func (e *Status) UnmarshalGQL(v any) error {
 }
 
 func (e Status) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *Status) UnmarshalJSON(b []byte) error {

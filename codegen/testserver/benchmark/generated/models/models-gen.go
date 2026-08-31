@@ -79,7 +79,7 @@ func (e *OrderDirection) UnmarshalGQL(v any) error {
 }
 
 func (e OrderDirection) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *OrderDirection) UnmarshalJSON(b []byte) error {
@@ -136,7 +136,7 @@ func (e *UserOrderField) UnmarshalGQL(v any) error {
 }
 
 func (e UserOrderField) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 func (e *UserOrderField) UnmarshalJSON(b []byte) error {

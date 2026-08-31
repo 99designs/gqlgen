@@ -322,7 +322,7 @@ func (e *EnumWithDescription) UnmarshalGQL(v any) error {
 }
 
 func (e EnumWithDescription) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 type ExistingEnum string
@@ -363,7 +363,7 @@ func (e *ExistingEnum) UnmarshalGQL(v any) error {
 }
 
 func (e ExistingEnum) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
 type MissingEnum string
@@ -404,5 +404,5 @@ func (e *MissingEnum) UnmarshalGQL(v any) error {
 }
 
 func (e MissingEnum) MarshalGQL(w io.Writer) {
-	fmt.Fprint(w, strconv.Quote(e.String()))
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
 }

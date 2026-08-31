@@ -61,7 +61,7 @@ func TestMaps(t *testing.T) {
 		require.Equal(t, "42", resp.MapStringInterface["c"])
 		require.NotNil(t, resp.MapStringInterface["nested"])
 		require.IsType(t, map[string]any{}, resp.MapStringInterface["nested"])
-		require.Equal(t, "17", (resp.MapStringInterface["nested"].(map[string]any))["value"])
+		require.Equal(t, "17", resp.MapStringInterface["nested"].(map[string]any)["value"])
 	})
 
 	t.Run("nested", func(t *testing.T) {
@@ -78,7 +78,7 @@ func TestMaps(t *testing.T) {
 		require.Equal(t, "42", resp.MapNestedStringInterface["c"])
 		require.NotNil(t, resp.MapNestedStringInterface["nested"])
 		require.IsType(t, map[string]any{}, resp.MapNestedStringInterface["nested"])
-		require.Equal(t, "31", (resp.MapNestedStringInterface["nested"].(map[string]any))["value"])
+		require.Equal(t, "31", resp.MapNestedStringInterface["nested"].(map[string]any)["value"])
 	})
 
 	t.Run("nested nil", func(t *testing.T) {

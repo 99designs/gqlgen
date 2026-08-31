@@ -10,9 +10,8 @@ import (
 
 	"github.com/coder/websocket"
 	"github.com/go-chi/chi/v5"
-	"github.com/rs/cors"
-
 	"github.com/gqlgen/_examples/websocket-initfunc/server/graph"
+	"github.com/rs/cors"
 
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"

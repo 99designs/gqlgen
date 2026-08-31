@@ -21,8 +21,8 @@ jobs:
       pull-requests: write
     strategy:
       matrix:
-        go: ["1.26", "1.25"]
-        node: [22]
+        go: ["1.26", "1.27"]
+        node: [24]
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
       with:
@@ -44,8 +44,8 @@ jobs:
       pull-requests: write
     strategy:
       matrix:
-        go: ["1.26", "1.25"]
-        node: [22]
+        go: ["1.26", "1.27"]
+        node: [24]
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
       with:
@@ -67,7 +67,7 @@ jobs:
       pull-requests: write
     strategy:
       matrix:
-        go: ["1.26", "1.25"]
+        go: ["1.26", "1.27"]
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v5
       with:

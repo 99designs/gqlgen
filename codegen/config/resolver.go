@@ -21,6 +21,15 @@ type ResolverConfig struct {
 	OmitTemplateComment bool                `yaml:"omit_template_comment,omitempty"`
 	ResolverTemplate    string              `yaml:"resolver_template,omitempty"`
 	PreserveResolver    bool                `yaml:"preserve_resolver,omitempty"`
+
+	// OmitResolverEmbedding declares the per-object resolver types with a named
+	// "r" field instead of embedding the root resolver, which speeds up
+	// compilation on large schemas.
+	//
+	// Enabling this is a source-breaking change for a project's own resolver
+	// bodies: dependencies are reached as "r.r.myService" rather than
+	// "r.myService".
+	OmitResolverEmbedding bool `yaml:"omit_resolver_embedding,omitempty"`
 }
 
 // ResolverBatchConfig enables batch resolver generation for resolver fields as if they

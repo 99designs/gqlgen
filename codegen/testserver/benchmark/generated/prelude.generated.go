@@ -4,7 +4,6 @@ package generated
 
 import (
 	"context"
-	"errors"
 	"math"
 	"strconv"
 	"sync/atomic"
@@ -122,7 +121,7 @@ func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql
 	)
 }
 func (ec *executionContext) fieldContext___Directive_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("__Directive", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("__Directive", field, false, false, errChildFields_String)
 }
 
 func (ec *executionContext) ___Directive_description(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -145,7 +144,7 @@ func (ec *executionContext) ___Directive_description(ctx context.Context, field 
 	)
 }
 func (ec *executionContext) fieldContext___Directive_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("__Directive", field, true, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("__Directive", field, true, false, errChildFields_String)
 }
 
 func (ec *executionContext) ___Directive_isRepeatable(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -168,7 +167,7 @@ func (ec *executionContext) ___Directive_isRepeatable(ctx context.Context, field
 	)
 }
 func (ec *executionContext) fieldContext___Directive_isRepeatable(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("__Directive", field, false, false, errors.New("field of type Boolean does not have child fields"))
+	return graphql.NewScalarFieldContext("__Directive", field, false, false, errChildFields_Boolean)
 }
 
 func (ec *executionContext) ___Directive_locations(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -191,7 +190,7 @@ func (ec *executionContext) ___Directive_locations(ctx context.Context, field gr
 	)
 }
 func (ec *executionContext) fieldContext___Directive_locations(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("__Directive", field, false, false, errors.New("field of type __DirectiveLocation does not have child fields"))
+	return graphql.NewScalarFieldContext("__Directive", field, false, false, errChildFields___DirectiveLocation)
 }
 
 func (ec *executionContext) ___Directive_args(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -257,7 +256,7 @@ func (ec *executionContext) ___EnumValue_name(ctx context.Context, field graphql
 	)
 }
 func (ec *executionContext) fieldContext___EnumValue_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("__EnumValue", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("__EnumValue", field, false, false, errChildFields_String)
 }
 
 func (ec *executionContext) ___EnumValue_description(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) (ret graphql.Marshaler) {
@@ -280,7 +279,7 @@ func (ec *executionContext) ___EnumValue_description(ctx context.Context, field 
 	)
 }
 func (ec *executionContext) fieldContext___EnumValue_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("__EnumValue", field, true, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("__EnumValue", field, true, false, errChildFields_String)
 }
 
 func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) (ret graphql.Marshaler) {
@@ -303,7 +302,7 @@ func (ec *executionContext) ___EnumValue_isDeprecated(ctx context.Context, field
 	)
 }
 func (ec *executionContext) fieldContext___EnumValue_isDeprecated(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("__EnumValue", field, true, false, errors.New("field of type Boolean does not have child fields"))
+	return graphql.NewScalarFieldContext("__EnumValue", field, true, false, errChildFields_Boolean)
 }
 
 func (ec *executionContext) ___EnumValue_deprecationReason(ctx context.Context, field graphql.CollectedField, obj *introspection.EnumValue) (ret graphql.Marshaler) {
@@ -326,7 +325,7 @@ func (ec *executionContext) ___EnumValue_deprecationReason(ctx context.Context, 
 	)
 }
 func (ec *executionContext) fieldContext___EnumValue_deprecationReason(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("__EnumValue", field, true, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("__EnumValue", field, true, false, errChildFields_String)
 }
 
 func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) (ret graphql.Marshaler) {
@@ -349,7 +348,7 @@ func (ec *executionContext) ___Field_name(ctx context.Context, field graphql.Col
 	)
 }
 func (ec *executionContext) fieldContext___Field_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("__Field", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("__Field", field, false, false, errChildFields_String)
 }
 
 func (ec *executionContext) ___Field_description(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) (ret graphql.Marshaler) {
@@ -372,7 +371,7 @@ func (ec *executionContext) ___Field_description(ctx context.Context, field grap
 	)
 }
 func (ec *executionContext) fieldContext___Field_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("__Field", field, true, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("__Field", field, true, false, errChildFields_String)
 }
 
 func (ec *executionContext) ___Field_args(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) (ret graphql.Marshaler) {
@@ -470,7 +469,7 @@ func (ec *executionContext) ___Field_isDeprecated(ctx context.Context, field gra
 	)
 }
 func (ec *executionContext) fieldContext___Field_isDeprecated(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("__Field", field, true, false, errors.New("field of type Boolean does not have child fields"))
+	return graphql.NewScalarFieldContext("__Field", field, true, false, errChildFields_Boolean)
 }
 
 func (ec *executionContext) ___Field_deprecationReason(ctx context.Context, field graphql.CollectedField, obj *introspection.Field) (ret graphql.Marshaler) {
@@ -493,7 +492,7 @@ func (ec *executionContext) ___Field_deprecationReason(ctx context.Context, fiel
 	)
 }
 func (ec *executionContext) fieldContext___Field_deprecationReason(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("__Field", field, true, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("__Field", field, true, false, errChildFields_String)
 }
 
 func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) (ret graphql.Marshaler) {
@@ -516,7 +515,7 @@ func (ec *executionContext) ___InputValue_name(ctx context.Context, field graphq
 	)
 }
 func (ec *executionContext) fieldContext___InputValue_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("__InputValue", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("__InputValue", field, false, false, errChildFields_String)
 }
 
 func (ec *executionContext) ___InputValue_description(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) (ret graphql.Marshaler) {
@@ -539,7 +538,7 @@ func (ec *executionContext) ___InputValue_description(ctx context.Context, field
 	)
 }
 func (ec *executionContext) fieldContext___InputValue_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("__InputValue", field, true, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("__InputValue", field, true, false, errChildFields_String)
 }
 
 func (ec *executionContext) ___InputValue_type(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) (ret graphql.Marshaler) {
@@ -594,7 +593,7 @@ func (ec *executionContext) ___InputValue_defaultValue(ctx context.Context, fiel
 	)
 }
 func (ec *executionContext) fieldContext___InputValue_defaultValue(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("__InputValue", field, false, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("__InputValue", field, false, false, errChildFields_String)
 }
 
 func (ec *executionContext) ___InputValue_isDeprecated(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) (ret graphql.Marshaler) {
@@ -617,7 +616,7 @@ func (ec *executionContext) ___InputValue_isDeprecated(ctx context.Context, fiel
 	)
 }
 func (ec *executionContext) fieldContext___InputValue_isDeprecated(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("__InputValue", field, true, false, errors.New("field of type Boolean does not have child fields"))
+	return graphql.NewScalarFieldContext("__InputValue", field, true, false, errChildFields_Boolean)
 }
 
 func (ec *executionContext) ___InputValue_deprecationReason(ctx context.Context, field graphql.CollectedField, obj *introspection.InputValue) (ret graphql.Marshaler) {
@@ -640,7 +639,7 @@ func (ec *executionContext) ___InputValue_deprecationReason(ctx context.Context,
 	)
 }
 func (ec *executionContext) fieldContext___InputValue_deprecationReason(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("__InputValue", field, true, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("__InputValue", field, true, false, errChildFields_String)
 }
 
 func (ec *executionContext) ___Schema_description(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) (ret graphql.Marshaler) {
@@ -663,7 +662,7 @@ func (ec *executionContext) ___Schema_description(ctx context.Context, field gra
 	)
 }
 func (ec *executionContext) fieldContext___Schema_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("__Schema", field, true, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("__Schema", field, true, false, errChildFields_String)
 }
 
 func (ec *executionContext) ___Schema_types(ctx context.Context, field graphql.CollectedField, obj *introspection.Schema) (ret graphql.Marshaler) {
@@ -846,7 +845,7 @@ func (ec *executionContext) ___Type_kind(ctx context.Context, field graphql.Coll
 	)
 }
 func (ec *executionContext) fieldContext___Type_kind(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("__Type", field, true, false, errors.New("field of type __TypeKind does not have child fields"))
+	return graphql.NewScalarFieldContext("__Type", field, true, false, errChildFields___TypeKind)
 }
 
 func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
@@ -869,7 +868,7 @@ func (ec *executionContext) ___Type_name(ctx context.Context, field graphql.Coll
 	)
 }
 func (ec *executionContext) fieldContext___Type_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("__Type", field, true, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("__Type", field, true, false, errChildFields_String)
 }
 
 func (ec *executionContext) ___Type_description(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
@@ -892,7 +891,7 @@ func (ec *executionContext) ___Type_description(ctx context.Context, field graph
 	)
 }
 func (ec *executionContext) fieldContext___Type_description(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("__Type", field, true, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("__Type", field, true, false, errChildFields_String)
 }
 
 func (ec *executionContext) ___Type_specifiedByURL(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
@@ -915,7 +914,7 @@ func (ec *executionContext) ___Type_specifiedByURL(ctx context.Context, field gr
 	)
 }
 func (ec *executionContext) fieldContext___Type_specifiedByURL(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("__Type", field, true, false, errors.New("field of type String does not have child fields"))
+	return graphql.NewScalarFieldContext("__Type", field, true, false, errChildFields_String)
 }
 
 func (ec *executionContext) ___Type_fields(ctx context.Context, field graphql.CollectedField, obj *introspection.Type) (ret graphql.Marshaler) {
@@ -1154,7 +1153,7 @@ func (ec *executionContext) ___Type_isOneOf(ctx context.Context, field graphql.C
 	)
 }
 func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("__Type", field, true, false, errors.New("field of type Boolean does not have child fields"))
+	return graphql.NewScalarFieldContext("__Type", field, true, false, errChildFields_Boolean)
 }
 
 // endregion **************************** field.gotpl *****************************

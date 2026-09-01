@@ -4,7 +4,6 @@ package followschema
 
 import (
 	"context"
-	"errors"
 	"math"
 	"strconv"
 	"sync/atomic"
@@ -45,7 +44,7 @@ func (ec *executionContext) _EmbeddedDefaultScalar_value(ctx context.Context, fi
 	)
 }
 func (ec *executionContext) fieldContext_EmbeddedDefaultScalar_value(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("EmbeddedDefaultScalar", field, false, false, errors.New("field of type DefaultScalarImplementation does not have child fields"))
+	return graphql.NewScalarFieldContext("EmbeddedDefaultScalar", field, false, false, errChildFields_DefaultScalarImplementation)
 }
 
 // endregion **************************** field.gotpl *****************************

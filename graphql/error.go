@@ -13,8 +13,7 @@ func DefaultErrorPresenter(ctx context.Context, err error) *gqlerror.Error {
 	if err == nil {
 		return nil
 	}
-	var gqlErr *gqlerror.Error
-	if errors.As(err, &gqlErr) {
+	if gqlErr, ok := errors.AsType[*gqlerror.Error](err); ok {
 		return gqlErr
 	}
 	return gqlerror.WrapPath(GetPath(ctx), err)
@@ -24,8 +23,7 @@ func ErrorOnPath(ctx context.Context, err error) error {
 	if err == nil {
 		return nil
 	}
-	var gqlErr *gqlerror.Error
-	if errors.As(err, &gqlErr) {
+	if gqlErr, ok := errors.AsType[*gqlerror.Error](err); ok {
 		if gqlErr.Path == nil {
 			gqlErr.Path = GetPath(ctx)
 		}
@@ -55,8 +53,7 @@ func AddFieldLocationToError(ctx context.Context, err error) error {
 
 	loc := gqlerror.Location{Line: pos.Line, Column: pos.Column}
 
-	var gqlErr *gqlerror.Error
-	if errors.As(err, &gqlErr) {
+	if gqlErr, ok := errors.AsType[*gqlerror.Error](err); ok {
 		if gqlErr.Locations == nil {
 			gqlErr.Locations = []gqlerror.Location{loc}
 		}

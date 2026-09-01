@@ -227,8 +227,7 @@ func AddBatchError(ctx context.Context, index int, err error) {
 		}
 		return
 	}
-	var gqlErr *gqlerror.Error
-	if errors.As(err, &gqlErr) {
+	if gqlErr, ok := errors.AsType[*gqlerror.Error](err); ok {
 		if gqlErr.Path == nil {
 			cloned := *gqlErr
 			cloned.Path = path

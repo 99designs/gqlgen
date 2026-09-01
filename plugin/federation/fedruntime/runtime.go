@@ -27,8 +27,7 @@ func SplitEntityBatchErrors(err error) (perIndex []error, fatal error) {
 	if err == nil {
 		return nil, nil
 	}
-	var batchErrs graphql.BatchErrors
-	if errors.As(err, &batchErrs) {
+	if batchErrs, ok := errors.AsType[graphql.BatchErrors](err); ok {
 		return batchErrs.Errors(), nil
 	}
 	return nil, err

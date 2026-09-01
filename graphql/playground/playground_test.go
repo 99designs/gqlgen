@@ -114,6 +114,24 @@ func TestWithGraphiqlUiHeaders(t *testing.T) {
 	})
 }
 
+func TestWithGraphiqlPersistStateInURL(t *testing.T) {
+	t.Run("should enable URL state persistence", func(t *testing.T) {
+		config := &GraphiqlConfig{}
+
+		WithGraphiqlPersistStateInURL(true)(config)
+
+		assert.True(t, config.PersistStateInURL)
+	})
+
+	t.Run("should disable URL state persistence", func(t *testing.T) {
+		config := &GraphiqlConfig{}
+
+		WithGraphiqlPersistStateInURL(false)(config)
+
+		assert.False(t, config.PersistStateInURL)
+	})
+}
+
 func TestWithGraphiqlVersion(t *testing.T) {
 	t.Run("should set graphiql version", func(t *testing.T) {
 		config := &GraphiqlConfig{}
@@ -235,6 +253,57 @@ func TestHandler_WithOptions(t *testing.T) {
 				assert.True(
 					t,
 					strings.Contains(body, `const uiHeaders = {"X-Custom-Header":"value"};`),
+				)
+			},
+		},
+		{
+			name: "WithGraphiqlPersistStateInURL",
+			options: []GraphiqlConfigOption{
+				WithGraphiqlPersistStateInURL(true),
+			},
+			assert: func(t *testing.T, body string) {
+				assert.True(
+					t,
+					strings.Contains(
+						body,
+						`new URLSearchParams(window.location.search)`,
+					),
+				)
+
+				assert.True(
+					t,
+					strings.Contains(
+						body,
+						`function onEditQuery(query)`,
+					),
+				)
+
+				assert.True(
+					t,
+					strings.Contains(
+						body,
+						`history.replaceState`,
+					),
+				)
+
+				assert.True(
+					t,
+					strings.Contains(body, `query: parameters.query`),
+				)
+
+				assert.True(
+					t,
+					strings.Contains(body, `variables: parameters.variables`),
+				)
+
+				assert.True(
+					t,
+					strings.Contains(body, `onEditQuery: onEditQuery`),
+				)
+
+				assert.True(
+					t,
+					strings.Contains(body, `onEditVariables: onEditVariables`),
 				)
 			},
 		},

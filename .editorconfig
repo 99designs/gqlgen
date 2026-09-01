@@ -11,6 +11,9 @@ indent_size = 4
 
 [*.{go,gotpl}]
 indent_style = tab
+indent_size = 8
+[Dockerfile]
+indent_size = 4
 
 # Ignore yaml https://learn.microsoft.com/en-us/visualstudio/code-quality/use-roslyn-analyzers?view=vs-2022
 [*.{yaml,yml,yml.j2,yaml.j2}]
@@ -24,5 +27,14 @@ generated_code = true
 
 # These often end up with go code inside, so lets keep tabs
 [*.{html,md}]
-indent_size = 2
+indent_size = 4
 indent_style = tab
+
+[*.{sql,graphql}]
+generated_code = true
+# charset = unset
+# end_of_line = unset
+# insert_final_newline = unset
+# trim_trailing_whitespace = unset
+# indent_style = unset
+# indent_size = unset

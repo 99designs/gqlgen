@@ -1,0 +1,44 @@
+[tools]
+go = "latest"
+golangci-lint = "latest"
+goreleaser = "latest"
+"github:gotestyourself/gotestsum" = "latest"
+# supply-chain tooling: syft generates the SBOM, cosign signs the checksum.
+syft = "latest"
+cosign = "latest"
+
+[env]
+LOG_LEVEL = "debug"
+
+[tasks.sbom]
+description = "Build the source tarball + SBOM locally (goreleaser snapshot; signing skipped)"
+run = "goreleaser release --snapshot --clean --skip=sign"
+
+[tasks.check]
+description = "Validate the goreleaser configuration"
+run = "goreleaser check"
+
+[tasks.test]
+description = "Run all go tests using gotestsum"
+run = "gotestsum ./..."
+
+[tasks."test:watch"]
+description = "Run all go tests in watch mode"
+run = "gotestsum --watch -- -v ./..."
+
+[tasks.coverage]
+description = "Run tests with race detection and coverage"
+run = "go test -race -coverprofile=coverage.out -covermode=atomic ./... -v -cover"
+
+[tasks.tidy]
+description = "Run go mod tidy"
+run = "go mod tidy"
+
+[tasks.lint]
+description = "Run golangci-lint"
+run = "golangci-lint run ./..."
+
+[tasks.fmt]
+description = "Run golangci-lint fmt"
+run = "golangci-lint fmt"
+

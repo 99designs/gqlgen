@@ -1,26 +1,66 @@
 #!/bin/bash
+set -euo pipefail
 
-set -eu
-
-if ! [ $# -eq 1 ] ; then
-    echo "usage: ./bin/release [version]"
+# Tag and publish a new release from master.
+#
+# Aborts unless ALL of these hold:
+#   - exactly one version argument, starting with "v"
+#   - the current branch is master
+#   - the working tree is clean (no staged, unstaged, or untracked changes)
+#   - local master is identical to origin/master (nothing unpushed, not behind,
+#     not diverged)
+#   - the tag does not already exist
+ORG="99designs"
+REPO="gqlgen"
+if [ $# -ne 1 ]; then
+    echo "usage: ./bin/release vX.Y.Z" >&2
     exit 1
 fi
 
 VERSION=$1
 
-if ! git diff-index --quiet HEAD -- ; then
-    echo "uncommitted changes on HEAD, aborting"
+if [[ ${VERSION} != v* ]]; then
+    echo "version must start with v (got: ${VERSION})" >&2
     exit 1
 fi
 
-if [[ ${VERSION:0:1} != "v" ]] ; then
-    echo "version strings must start with v"
+# Must be on master.
+branch=$(git branch --show-current)
+if [ "${branch}" != "master" ]; then
+    echo "must be on master to release (on: ${branch:-detached HEAD})" >&2
     exit 1
 fi
 
-git fetch origin
-git checkout origin/master
+# Working tree must be clean: modifications, staged changes, or untracked files
+# all count as dirty.
+if [ -n "$(git status --porcelain)" ]; then
+    echo "working tree is dirty, aborting" >&2
+    exit 1
+fi
+
+# Refuse to overwrite an existing tag.
+if git rev-parse -q --verify "refs/tags/${VERSION}" >/dev/null; then
+    echo "tag ${VERSION} already exists, aborting" >&2
+    exit 1
+fi
+
+# Local master must be exactly in sync with the remote.
+git fetch --quiet origin master
+local_sha=$(git rev-parse HEAD)
+remote_sha=$(git rev-parse origin/master)
+base_sha=$(git merge-base HEAD origin/master)
+if [ "${local_sha}" != "${remote_sha}" ]; then
+    if [ "${local_sha}" = "${base_sha}" ]; then
+        echo "local master is behind origin/master; pull first" >&2
+    elif [ "${remote_sha}" = "${base_sha}" ]; then
+        echo "local master has unpushed commits; push first" >&2
+    else
+        echo "local master and origin/master have diverged; reconcile first" >&2
+    fi
+    exit 1
+fi
+
+# All preconditions met: Re-generate, and update graphql/version.go, commit, push
 
 cat > graphql/version.go <<EOF
 package graphql
@@ -30,9 +70,15 @@ EOF
 go generate ./...
 git add .
 
-git commit -m "release $VERSION"
-git tag $VERSION
-git push origin $VERSION
+git commit -s -S -m "pre-release $VERSION"
+git push origin
+
+# All preparation done: tag the current commit and push only the tag.
+git tag -s "${VERSION}" -m "${VERSION}"
+git push origin "${VERSION}"
+
+
+# Post-Release version.go update
 git push origin HEAD:master
 
 cat > graphql/version.go <<EOF
@@ -47,5 +93,9 @@ git push origin HEAD:master
 git checkout master
 git pull
 
+echo "Tagged ${VERSION}. Now update release notes:"
+echo "  https://github.com/${ORG}/${REPO}/releases/tag/${VERSION}"
 
-echo "Now go write some release notes! https://github.com/99designs/gqlgen/releases"
+# Prime the Go module proxy so `go get` sees the new version promptly.
+curl -sS "https://proxy.golang.org/github.com/${ORG}/${REPO}/@v/${VERSION}.info"
+echo

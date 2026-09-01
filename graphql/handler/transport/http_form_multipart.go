@@ -29,6 +29,10 @@ type MultipartForm struct {
 
 var _ graphql.Transport = MultipartForm{}
 
+func (f MultipartForm) String() string {
+	return "MultipartForm"
+}
+
 func (f MultipartForm) Supports(r *http.Request) bool {
 	if r.Header.Get("Upgrade") != "" {
 		return false

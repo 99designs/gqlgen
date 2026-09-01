@@ -3314,10 +3314,6 @@ func (ec *executionContext) unmarshalNDateFilter2githubᚗcomᚋ99designsᚋgqlg
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
-func (ec *executionContext) marshalNElement2githubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋserverᚋmodelsᚑgoᚐElement(ctx context.Context, sel ast.SelectionSet, v models.Element) graphql.Marshaler {
-	return ec._Element(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNElement2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋintegrationᚋserverᚋmodelsᚑgoᚐElement(ctx context.Context, sel ast.SelectionSet, v *models.Element) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {

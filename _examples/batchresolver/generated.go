@@ -5434,10 +5434,6 @@ func (ec *executionContext) marshalNPet2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋ_
 	return ret
 }
 
-func (ec *executionContext) marshalNProfile2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfile(ctx context.Context, sel ast.SelectionSet, v Profile) graphql.Marshaler {
-	return ec._Profile(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNProfile2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋbatchresolverᚐProfile(ctx context.Context, sel ast.SelectionSet, v *Profile) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {

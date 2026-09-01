@@ -2930,10 +2930,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNEmailHost2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋaccountsᚋgraphᚋmodelᚐEmailHost(ctx context.Context, sel ast.SelectionSet, v model.EmailHost) graphql.Marshaler {
-	return ec._EmailHost(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNEmailHost2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋaccountsᚋgraphᚋmodelᚐEmailHost(ctx context.Context, sel ast.SelectionSet, v *model.EmailHost) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -2990,10 +2986,6 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) marshalNUser2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋaccountsᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v model.User) graphql.Marshaler {
-	return ec._User(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋfederationᚋaccountsᚋgraphᚋmodelᚐUser(ctx context.Context, sel ast.SelectionSet, v *model.User) graphql.Marshaler {

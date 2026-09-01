@@ -103,6 +103,7 @@ nextArg:
 				if err != nil {
 					return nil, err
 				}
+				b.Binder.RemoveRef(oldArg.TypeReference)
 				oldArg.TypeReference = tr
 
 				newArgs = append(newArgs, oldArg)

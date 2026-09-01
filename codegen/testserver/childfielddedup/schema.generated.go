@@ -2162,10 +2162,6 @@ func marshalNAuthor2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserver�
 	return _Author(ctx, ec, sel, v)
 }
 
-func marshalNUser2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋchildfielddedupᚐUser(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v User) graphql.Marshaler {
-	return _User(ctx, ec, sel, &v)
-}
-
 func marshalNUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋchildfielddedupᚐUser(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v *User) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {

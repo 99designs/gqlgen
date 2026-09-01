@@ -1,0 +1,13 @@
+schema:
+  - "testdata/argbinding/schema.graphql"
+
+exec:
+  filename: testdata/argbinding/generated/exec.go
+model:
+  filename: testdata/argbinding/generated/models_gen.go
+resolver:
+  filename: testdata/argbinding/generated/resolver.go
+
+models:
+  Obj:
+    model: github.com/99designs/gqlgen/codegen/testdata/argbinding/model.Obj

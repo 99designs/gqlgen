@@ -5107,10 +5107,6 @@ func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.S
 	return graphql.WrapContextMarshaler(ctx, res)
 }
 
-func (ec *executionContext) marshalNFriendsConnection2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐFriendsConnection(ctx context.Context, sel ast.SelectionSet, v models.FriendsConnection) graphql.Marshaler {
-	return ec._FriendsConnection(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNFriendsConnection2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋstarwarsᚋmodelsᚐFriendsConnection(ctx context.Context, sel ast.SelectionSet, v *models.FriendsConnection) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {

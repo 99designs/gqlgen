@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/token"
 	"go/types"
+	"slices"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -172,6 +173,87 @@ func TestOmittableBinding(t *testing.T) {
 		require.NoError(t, err)
 
 		require.True(t, ta.IsOmittable)
+	})
+}
+
+func TestPointerTo(t *testing.T) {
+	binder, schema := createBinder(Config{})
+
+	value, err := binder.TypeReference(schema.Query.Fields.ForName("messages").Type.Elem, nil)
+	require.NoError(t, err)
+
+	ptr := binder.PointerTo(value)
+	require.Equal(t, "*"+value.GO.String(), ptr.GO.String())
+	// PointerTo is used by external plugins that need a pointer reference
+	// alongside the value one, so it must leave ref registered.
+	require.True(t, slices.Contains(binder.References, value))
+	require.True(t, slices.Contains(binder.References, ptr))
+}
+
+func TestRemoveRef(t *testing.T) {
+	binder, schema := createBinder(Config{})
+	messageAst := schema.Query.Fields.ForName("messages").Type.Elem
+
+	first, err := binder.TypeReference(messageAst, nil)
+	require.NoError(t, err)
+	second, err := binder.TypeReference(messageAst, nil)
+	require.NoError(t, err)
+
+	binder.RemoveRef(first)
+	require.False(t, slices.Contains(binder.References, first))
+	// Every TypeReference call registers its own reference, so unregistering
+	// one leaves the others alone.
+	require.True(t, slices.Contains(binder.References, second))
+
+	// Unregistering an unknown reference is a no-op.
+	before := len(binder.References)
+	binder.RemoveRef(first)
+	require.Len(t, binder.References, before)
+}
+
+func TestReplaceWithPointer(t *testing.T) {
+	const (
+		messageType    = "github.com/99designs/gqlgen/codegen/config/testdata/autobinding/chat.Message"
+		messagePtrType = "*" + messageType
+	)
+
+	countRefs := func(binder *Binder, goType string) int {
+		count := 0
+		for _, ref := range binder.References {
+			if ref.GO.String() == goType {
+				count++
+			}
+		}
+		return count
+	}
+
+	t.Run("replaces the reference it was derived from", func(t *testing.T) {
+		binder, schema := createBinder(Config{})
+
+		value, err := binder.TypeReference(schema.Query.Fields.ForName("messages").Type.Elem, nil)
+		require.NoError(t, err)
+		require.Equal(t, messageType, value.GO.String())
+		require.Equal(t, 1, countRefs(binder, messageType))
+
+		ptr := binder.ReplaceWithPointer(value)
+		require.Equal(t, messagePtrType, ptr.GO.String())
+		require.Equal(t, 1, countRefs(binder, messagePtrType))
+		require.Zero(t, countRefs(binder, messageType))
+	})
+
+	t.Run("keeps references registered by other callers", func(t *testing.T) {
+		binder, schema := createBinder(Config{})
+		messageAst := schema.Query.Fields.ForName("messages").Type.Elem
+
+		resolverField, err := binder.TypeReference(messageAst, nil)
+		require.NoError(t, err)
+		_, err = binder.TypeReference(messageAst, nil)
+		require.NoError(t, err)
+		require.Equal(t, 2, countRefs(binder, messageType))
+
+		binder.ReplaceWithPointer(resolverField)
+		require.Equal(t, 1, countRefs(binder, messageType))
+		require.Equal(t, 1, countRefs(binder, messagePtrType))
 	})
 }
 

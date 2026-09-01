@@ -3790,10 +3790,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
-func (ec *executionContext) marshalNComment2githubᚗcomᚋgqlgenᚋ_examplesᚋminiᚑhabrᚑwithᚑsubscriptionsᚋgraphᚋmodelᚐComment(ctx context.Context, sel ast.SelectionSet, v model.Comment) graphql.Marshaler {
-	return ec._Comment(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNComment2ᚖgithubᚗcomᚋgqlgenᚋ_examplesᚋminiᚑhabrᚑwithᚑsubscriptionsᚋgraphᚋmodelᚐComment(ctx context.Context, sel ast.SelectionSet, v *model.Comment) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -3864,10 +3860,6 @@ func (ec *executionContext) marshalNPageInfo2ᚖgithubᚗcomᚋgqlgenᚋ_example
 		return graphql.Null
 	}
 	return ec._PageInfo(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNPost2githubᚗcomᚋgqlgenᚋ_examplesᚋminiᚑhabrᚑwithᚑsubscriptionsᚋgraphᚋmodelᚐPost(ctx context.Context, sel ast.SelectionSet, v model.Post) graphql.Marshaler {
-	return ec._Post(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNPost2ᚕᚖgithubᚗcomᚋgqlgenᚋ_examplesᚋminiᚑhabrᚑwithᚑsubscriptionsᚋgraphᚋmodelᚐPostᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Post) graphql.Marshaler {

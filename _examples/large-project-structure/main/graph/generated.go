@@ -3357,10 +3357,6 @@ func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) marshalNIndicator2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋlargeᚑprojectᚑstructureᚋmainᚋgraphᚋmodelᚐIndicator(ctx context.Context, sel ast.SelectionSet, v model.Indicator) graphql.Marshaler {
-	return ec._Indicator(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNIndicator2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋlargeᚑprojectᚑstructureᚋmainᚋgraphᚋmodelᚐIndicator(ctx context.Context, sel ast.SelectionSet, v *model.Indicator) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -3397,10 +3393,6 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNTest2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋlargeᚑprojectᚑstructureᚋmainᚋgraphᚋmodelᚐTest(ctx context.Context, sel ast.SelectionSet, v model.Test) graphql.Marshaler {
-	return ec._Test(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNTest2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋlargeᚑprojectᚑstructureᚋmainᚋgraphᚋmodelᚐTest(ctx context.Context, sel ast.SelectionSet, v *model.Test) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -3409,10 +3401,6 @@ func (ec *executionContext) marshalNTest2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ
 		return graphql.Null
 	}
 	return ec._Test(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNTodo2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋlargeᚑprojectᚑstructureᚋmainᚋgraphᚋmodelᚐTodo(ctx context.Context, sel ast.SelectionSet, v model.Todo) graphql.Marshaler {
-	return ec._Todo(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNTodo2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋlargeᚑprojectᚑstructureᚋmainᚋgraphᚋmodelᚐTodoᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Todo) graphql.Marshaler {

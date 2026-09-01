@@ -3401,10 +3401,6 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNBasic2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentitydirectivesᚋgeneratedᚐBasic(ctx context.Context, sel ast.SelectionSet, v Basic) graphql.Marshaler {
-	return ec._Basic(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNBasic2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentitydirectivesᚋgeneratedᚐBasic(ctx context.Context, sel ast.SelectionSet, v *Basic) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -3447,10 +3443,6 @@ func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.S
 	return graphql.WrapContextMarshaler(ctx, res)
 }
 
-func (ec *executionContext) marshalNPerson2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentitydirectivesᚋgeneratedᚐPerson(ctx context.Context, sel ast.SelectionSet, v Person) graphql.Marshaler {
-	return ec._Person(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNPerson2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentitydirectivesᚋgeneratedᚐPerson(ctx context.Context, sel ast.SelectionSet, v *Person) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -3459,10 +3451,6 @@ func (ec *executionContext) marshalNPerson2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 		return graphql.Null
 	}
 	return ec._Person(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNProduct2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentitydirectivesᚋgeneratedᚐProduct(ctx context.Context, sel ast.SelectionSet, v Product) graphql.Marshaler {
-	return ec._Product(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNProduct2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentitydirectivesᚋgeneratedᚐProduct(ctx context.Context, sel ast.SelectionSet, v *Product) graphql.Marshaler {

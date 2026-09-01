@@ -2975,10 +2975,6 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNVariation2entityresolvermultiᚋgraphᚋmodelᚐVariation(ctx context.Context, sel ast.SelectionSet, v model.Variation) graphql.Marshaler {
-	return ec._Variation(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNVariation2ᚕᚖentityresolvermultiᚋgraphᚋmodelᚐVariationᚄ(ctx context.Context, sel ast.SelectionSet, v []*model.Variation) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)

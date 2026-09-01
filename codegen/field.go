@@ -117,7 +117,7 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 
 	if f.IsResolver && b.Config.ResolversAlwaysReturnPointers && !f.TypeReference.IsPtr() &&
 		f.TypeReference.IsStruct() {
-		f.TypeReference = b.Binder.PointerTo(f.TypeReference)
+		f.TypeReference = b.Binder.ReplaceWithPointer(f.TypeReference)
 	}
 
 	return &f, nil

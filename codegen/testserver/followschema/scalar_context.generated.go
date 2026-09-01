@@ -51,16 +51,6 @@ func (ec *executionContext) marshalNStringFromContextFunction2string(ctx context
 	return graphql.WrapContextMarshaler(ctx, res)
 }
 
-func (ec *executionContext) unmarshalNStringFromContextInterface2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐStringFromContextInterface(ctx context.Context, v any) (StringFromContextInterface, error) {
-	var res StringFromContextInterface
-	err := res.UnmarshalGQLContext(ctx, v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNStringFromContextInterface2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐStringFromContextInterface(ctx context.Context, sel ast.SelectionSet, v StringFromContextInterface) graphql.Marshaler {
-	return graphql.WrapContextMarshaler(ctx, v)
-}
-
 func (ec *executionContext) unmarshalNStringFromContextInterface2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐStringFromContextInterface(ctx context.Context, v any) (*StringFromContextInterface, error) {
 	var res = new(StringFromContextInterface)
 	err := res.UnmarshalGQLContext(ctx, v)

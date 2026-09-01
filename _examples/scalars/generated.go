@@ -2978,16 +2978,6 @@ func (ec *executionContext) marshalNID2githubᚗcomᚋ99designsᚋgqlgenᚋ_exam
 	return res
 }
 
-func (ec *executionContext) unmarshalNPoint2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐPoint(ctx context.Context, v any) (model.Point, error) {
-	var res model.Point
-	err := res.UnmarshalGQL(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNPoint2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐPoint(ctx context.Context, sel ast.SelectionSet, v model.Point) graphql.Marshaler {
-	return v
-}
-
 func (ec *executionContext) unmarshalNPoint2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋscalarsᚋmodelᚐPoint(ctx context.Context, v any) (*model.Point, error) {
 	var res = new(model.Point)
 	err := res.UnmarshalGQL(v)

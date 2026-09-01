@@ -2682,10 +2682,6 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNWorld2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityinterfacesᚋgeneratedᚐWorld(ctx context.Context, sel ast.SelectionSet, v World) graphql.Marshaler {
-	return ec._World(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNWorld2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityinterfacesᚋgeneratedᚐWorld(ctx context.Context, sel ast.SelectionSet, v *World) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {

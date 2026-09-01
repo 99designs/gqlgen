@@ -54,8 +54,7 @@ func main() {
 	})
 
 	srv.SetErrorPresenter(func(ctx context.Context, e error) *gqlerror.Error {
-		var ie *server.CustomError
-		if errors.As(e, &ie) {
+		if ie, ok := errors.AsType[*server.CustomError](e); ok {
 			return &gqlerror.Error{
 				Message: ie.UserMessage,
 				Path:    graphql.GetPath(ctx),

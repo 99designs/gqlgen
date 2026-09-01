@@ -85,8 +85,7 @@ func checkStructFieldsInSchema(
 		return
 	}
 
-	for i := range structType.NumField() {
-		field := structType.Field(i)
+	for field := range structType.Fields() {
 		yamlName := extractYAMLTagName(field)
 		if yamlName == "" {
 			continue
@@ -128,8 +127,7 @@ func TestConfigFieldsPresentInSchemaJSON(t *testing.T) {
 	}
 
 	configType := reflect.TypeFor[Config]()
-	for i := range configType.NumField() {
-		field := configType.Field(i)
+	for field := range configType.Fields() {
 		yamlName := extractYAMLTagName(field)
 		if yamlName == "" || deprecated[yamlName] {
 			continue

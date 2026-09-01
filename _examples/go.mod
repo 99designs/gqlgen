@@ -27,7 +27,7 @@ require (
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/sosodev/duration v1.4.0 // indirect
-	golang.org/x/mod v0.39.0 // indirect
+	golang.org/x/mod v0.40.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	golang.org/x/text v0.41.0
 	golang.org/x/tools v0.49.0 // indirect

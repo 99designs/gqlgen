@@ -1,18 +1,13 @@
 package graph
 
 import (
+	"batchfieldexplicit/graph/model"
 	"context"
 	"encoding/json"
-
-	"batchfieldexplicit/graph/model"
 )
 
 // PopulateProductRequires is the requires populator for the Product entity.
-func (ec *executionContext) PopulateProductRequires(
-	ctx context.Context,
-	entity *model.Product,
-	reps map[string]any,
-) error {
+func (ec *executionContext) PopulateProductRequires(ctx context.Context, entity *model.Product, reps map[string]any) error {
 	b, _ := json.Marshal(reps)
 	println(string(b))
 	json.Unmarshal(b, entity)

@@ -1,12 +1,12 @@
 module github.com/99designs/gqlgen/_examples/large-project-structure/main
 
-go 1.25.0
+go 1.26
 
 require (
-	github.com/99designs/gqlgen v0.17.93
+	github.com/99designs/gqlgen v0.17.94
 	github.com/99designs/gqlgen/_examples/large-project-structure/integration v0.0.0-00010101000000-000000000000
 	github.com/99designs/gqlgen/_examples/large-project-structure/shared v0.0.0
-	github.com/vektah/gqlparser/v2 v2.5.36
+	github.com/vektah/gqlparser/v2 v2.5.37
 )
 
 replace github.com/99designs/gqlgen/_examples/large-project-structure/shared => ../shared
@@ -23,9 +23,9 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/hashicorp/golang-lru/v2 v2.0.7 // indirect
 	github.com/sosodev/duration v1.4.0 // indirect
-	github.com/urfave/cli/v3 v3.10.1 // indirect
-	golang.org/x/mod v0.38.0 // indirect
+	github.com/urfave/cli/v3 v3.11.0 // indirect
+	golang.org/x/mod v0.39.0 // indirect
 	golang.org/x/sync v0.22.0 // indirect
-	golang.org/x/text v0.40.0 // indirect
-	golang.org/x/tools v0.48.0 // indirect
+	golang.org/x/text v0.41.0 // indirect
+	golang.org/x/tools v0.49.0 // indirect
 )

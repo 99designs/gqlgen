@@ -64,6 +64,10 @@ resolver:
   # resolver_template: [your/path/resolver.gotpl]
   # Optional: turn on to avoid rewriting existing resolver(s) when generating
   # preserve_resolver: false
+  # Optional: turn on to hold the root resolver in a named "r" field instead of embedding it.
+  # Speeds up compilation on large schemas. Turning this on is source-breaking for existing
+  # resolver bodies: dependencies are reached as r.r.myService instead of r.myService.
+  # omit_resolver_embedding: false
 
 # Optional: turn on use ` + "`" + `gqlgen:"fieldName"` + "`" + ` tags in your models
 # struct_tag: json
@@ -140,7 +144,7 @@ call_argument_directives_with_null: true
 
 # This enables gql server to use function syntax for execution context
 # instead of generating receiver methods of the execution context.
-# use_function_syntax_for_execution_context: true
+# use_function_syntax_for_execution_context: false
 
 # Optional: set to true to enable subscription context propagation.
 # When enabled, all subscription resolvers return (<-chan graphql.Event[T], error)

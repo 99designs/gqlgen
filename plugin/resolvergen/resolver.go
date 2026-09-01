@@ -111,11 +111,12 @@ func (m *Plugin) generateSingleFile(data *codegen.Data) error {
 	}
 
 	resolverBuild := &ResolverBuild{
-		File:                &file,
-		PackageName:         data.Config.Resolver.Package,
-		ResolverType:        data.Config.Resolver.Type,
-		HasRoot:             true,
-		OmitTemplateComment: data.Config.Resolver.OmitTemplateComment,
+		File:                  &file,
+		PackageName:           data.Config.Resolver.Package,
+		ResolverType:          data.Config.Resolver.Type,
+		HasRoot:               true,
+		OmitTemplateComment:   data.Config.Resolver.OmitTemplateComment,
+		OmitResolverEmbedding: data.Config.Resolver.OmitResolverEmbedding,
 	}
 
 	newResolverTemplate := resolverTemplate
@@ -242,10 +243,11 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 			continue
 		}
 		resolverBuild := &ResolverBuild{
-			File:                file,
-			PackageName:         data.Config.Resolver.Package,
-			ResolverType:        data.Config.Resolver.Type,
-			OmitTemplateComment: data.Config.Resolver.OmitTemplateComment,
+			File:                  file,
+			PackageName:           data.Config.Resolver.Package,
+			ResolverType:          data.Config.Resolver.Type,
+			OmitTemplateComment:   data.Config.Resolver.OmitTemplateComment,
+			OmitResolverEmbedding: data.Config.Resolver.OmitResolverEmbedding,
 		}
 
 		var fileNotice strings.Builder
@@ -299,14 +301,17 @@ func (m *Plugin) generatePerSchema(data *codegen.Data) error {
 
 type ResolverBuild struct {
 	*File
-	HasRoot             bool
-	PackageName         string
-	ResolverType        string
-	OmitTemplateComment bool
+	HasRoot               bool
+	PackageName           string
+	ResolverType          string
+	OmitTemplateComment   bool
+	OmitResolverEmbedding bool
 }
 
 // ResolverTypeDeclarations renders the unexported per-object resolver
-// implementation types — e.g. "queryResolver struct{ *Resolver }".
+// implementation types — e.g. "queryResolver struct{ *Resolver }", or
+// "queryResolver struct{ r *Resolver }" when the root resolver is held in a
+// named field rather than embedded.
 //
 // When more than one type is declared they are emitted as a single grouped
 // "type ( ... )" block: gofumpt requires adjacent single-line type
@@ -328,16 +333,26 @@ func (b *ResolverBuild) ResolverTypeDeclarations() string {
 	}
 
 	if len(names) == 1 {
-		return fmt.Sprintf("type %s struct{ *%s }", names[0], b.ResolverType)
+		return fmt.Sprintf("type %s %s", names[0], b.resolverStructType())
 	}
 
 	var sb strings.Builder
 	sb.WriteString("type (\n")
 	for _, name := range names {
-		fmt.Fprintf(&sb, "\t%-*s struct{ *%s }\n", width, name, b.ResolverType)
+		fmt.Fprintf(&sb, "\t%-*s %s\n", width, name, b.resolverStructType())
 	}
 	sb.WriteString(")")
 	return sb.String()
+}
+
+// resolverStructType renders the struct body shared by every per-object
+// resolver type: the root resolver embedded, or held in a named "r" field when
+// Resolver.OmitResolverEmbedding is set.
+func (b *ResolverBuild) resolverStructType() string {
+	if b.OmitResolverEmbedding {
+		return fmt.Sprintf("struct{ r *%s }", b.ResolverType)
+	}
+	return fmt.Sprintf("struct{ *%s }", b.ResolverType)
 }
 
 type File struct {

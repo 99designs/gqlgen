@@ -107,6 +107,11 @@
         "omit_template_comment": { "type": "boolean" },
         "resolver_template": { "type": "string" },
         "preserve_resolver": { "type": "boolean" },
+        "omit_resolver_embedding": {
+          "description": "Declare the per-object resolver types with a named \"r\" field instead of embedding the root resolver. Speeds up compilation on large schemas. Source-breaking for existing resolver bodies: dependencies become r.r.myService instead of r.myService.",
+          "type": "boolean",
+          "default": false
+        },
         "batch": {
           "description": "Enable batch resolver generation for resolver fields on object types as if they had @goField(batch: true). Query, Mutation, Subscription, input objects, and introspection types (__*) are always excluded. When federation is enabled, federation _Service and Entity are also excluded. Global batch does not convert struct-bound fields into resolvers. Individual fields can opt out with @goField(batch: false).",
           "oneOf": [

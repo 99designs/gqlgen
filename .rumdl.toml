@@ -1,0 +1,101 @@
+# rumdl configuration file
+
+# Inherit settings from another config file (relative to this file's directory)
+# extends = "../base.rumdl.toml"
+
+# Global configuration options
+[global]
+# List of rules to disable (uncomment and modify as needed)
+disable = ["MD013", "MD033", "MD024"]
+
+flavor = "gfm" # GitHub Flavored Markdown with security-sensitive HTML warnings and extended autolinks
+
+# List of rules to enable exclusively (replaces defaults; only these rules will run)
+# enable = ["MD001", "MD003", "MD004"]
+
+# Additional rules to enable on top of defaults (additive, does not replace)
+# Use this to activate opt-in rules like MD060, MD063, MD072, MD073, MD074
+extend-enable = ["MD060", "MD063", "MD073"]
+
+# Additional rules to disable on top of the disable list (additive)
+# extend-disable = ["MD041"]
+
+# List of file/directory patterns to include for linting (if provided, only these will be linted)
+# include = [
+#    "docs/*.md",
+#    "src/**/*.md",
+#    "README.md"
+# ]
+
+# List of file/directory patterns to exclude from linting
+exclude = [
+    # Common directories to exclude
+    ".git",
+    ".github",
+    "node_modules",
+    "vendor",
+    "dist",
+    "build",
+
+    # Specific files or patterns
+    "CHANGELOG.md",
+    "LICENSE.md",
+]
+
+# Respect .gitignore files when scanning directories (default: true)
+respect-gitignore = true
+
+# Markdown flavor/dialect (uncomment to enable)
+# Options: standard (default), gfm, commonmark, mkdocs, mdx, pandoc, quarto, obsidian, kramdown, azure_devops
+# flavor = "mkdocs"
+
+# Rule-specific configurations (uncomment and modify as needed)
+
+[MD003]
+style = "atx"  # mdformat always converts setext headings to ATX
+
+[MD004]
+style = "dash"  # mdformat normalizes all unordered list markers (* + -) to -
+
+[MD029]
+style = "ordered"  # matches mdformat --number (sequential numbering)
+
+# [MD007]
+# indent = 4  # Unordered list indentation
+
+# [MD013]
+# line-length = 100  # Line length
+# code-blocks = false  # Exclude code blocks from line length check
+# tables = false  # Exclude tables from line length check
+# headings = true  # Include headings in line length check
+
+[MD046]
+style = "fenced"  # mdformat converts indented code blocks to fenced
+
+[MD035]
+style = "______________________________________________________________________"  # matches mdformat's canonical thematic break rendering (70 underscores)
+
+[MD048]
+style = "backtick"  # mdformat defaults to backtick fences (tildes only as fallback)
+
+# [MD044]
+# names = ["rumdl", "Markdown", "GitHub"]  # Proper names that should be capitalized correctly
+# code-blocks = false  # Check code blocks for proper names (default: false, skips code blocks)
+
+[MD010]
+code-blocks = false  # Go code in fenced blocks uses tab indentation; gofmt keeps them
+
+[MD060]
+enabled = true              # Default: opt-in for conservative adoption
+style = "aligned"            # Options: "aligned", "aligned-no-space", "compact", "tight", "any"
+max-width = 0                # Default: inherit from MD013's line-length
+column-align = "auto"        # Options: "auto", "left", "center", "right"
+column-align-header = "auto" # Override alignment for header row only
+column-align-body = "auto"   # Override alignment for body rows only
+loose-last-column = false    # Cap last column at header width when true
+aligned-delimiter = true    # Pad delimiter dashes to header widths under compact/tight
+
+[MD063]
+enabled = true
+style = "title-case"
+preserve-cased-words = true

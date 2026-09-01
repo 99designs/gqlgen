@@ -1,0 +1,141 @@
+# .mdformat.toml — mdformat configuration file
+# Read automatically by the mdformat-config plugin on every invocation when
+# this file is present at or above the directory being formatted.
+#
+# Corresponds to:
+#   mdformat --wrap keep --number
+#
+# With this file present the command line simplifies to:
+#   find . -type d -name node_modules -prune -o -name '*.md' -type f -print0 \
+#     | xargs -0 -n1 -P4 mdformat
+#
+# For check mode, --check still must be passed on the command line; it is a
+# run-mode switch (not a formatting option) and has no .mdformat.toml equivalent:
+#   find . -type d -name node_modules -prune -o -name '*.md' -type f -print0 \
+#     | xargs -0 -n1 -P4 mdformat --check
+
+# ── Paragraph wrapping ────────────────────────────────────────────────────────
+#
+# "keep" — preserve existing line breaks; never reflow paragraph text (default)
+# "no"   — collapse paragraph text to a single long line
+# N      — reflow to at most N characters per line (integer ≥ 2)
+#
+# "keep" is the default but is set explicitly here to make the project's intent
+# clear and to prevent a future mdformat default change from silently reflowing
+# all prose.
+wrap = "keep"
+
+# ── Ordered list numbering ────────────────────────────────────────────────────
+#
+# false — normalize all ordered list items to "1." regardless of source (default)
+# true  — apply consecutive numbering: 1. 2. 3. … (corresponds to --number)
+#
+# Must be true for the .rumdl.toml [MD029] style = "ordered" setting to stay
+# consistent: rumdl enforces sequential numbering and mdformat must produce it.
+number = true
+
+# ── Line endings ──────────────────────────────────────────────────────────────
+#
+# "lf"   — Unix line endings \n (default)
+# "crlf" — Windows line endings \r\n
+# "keep" — preserve each file's existing line ending type
+end_of_line = "lf"
+
+# ── HTML equivalence validation ───────────────────────────────────────────────
+#
+# true  — abort if formatting changes the rendered HTML of the document (default)
+# false — skip the check; required when a plugin intentionally alters rendered
+#         output. Corresponds to --no-validate on the command line.
+#
+# mdformat-toc sets CHANGES_AST = True, which causes mdformat to bypass HTML
+# equivalence validation entirely for any file the toc plugin touches. For
+# files not processed by toc, the other installed plugins (gfm, shfmt, gofmt,
+# config) do preserve rendered output, so validation is safe to leave enabled.
+validate = true
+
+# ── File exclusions (Python 3.13+) ────────────────────────────────────────────
+#
+# List of Unix-style glob patterns relative to the directory containing this
+# file. Files matching any pattern are skipped without formatting or error.
+# Equivalent to passing --exclude PATTERN multiple times on the command line.
+#
+# The project's format and check commands use `find -prune` to exclude
+# node_modules before handing paths to mdformat, so this list is empty.
+# Add patterns here when running `mdformat .` or `mdformat --check .` directly
+# against the directory tree without the find wrapper.
+#
+# Note: on Python < 3.13, the presence of this key in the TOML file causes
+# mdformat to print an error and exit 1 — even when set to an empty list.
+# Comment it out if you need to support Python < 3.13.
+# exclude = []
+
+# ── Extension plugins ─────────────────────────────────────────────────────────
+#
+# Key absent — all installed extension plugins are enabled (default); matches
+#              the invocation which omits --extensions.
+# List       — only the listed extensions are active AND required; mdformat
+#              exits 1 if a listed extension is not installed. Use this to turn
+#              a missing plugin from a silent no-op into a hard error.
+#
+# Installed extensions in this environment:
+#   "gfm"           — mdformat-gfm 1.0.0 (GFM: strikethrough, task lists, autolinks)
+#   "tables"        — mdformat-gfm 1.0.0 (padded/compact table rendering; built-in since 1.0.0,
+#                    replacing the deprecated and archived mdformat-tables package — do NOT
+#                    install mdformat-tables separately, it will conflict with mdformat-gfm 1.0.0)
+#   "front_matters" — mdformat-front-matters 2.0.0 (preserves YAML/TOML/JSON frontmatter blocks;
+#                    without this plugin, a leading --- block is mangled into a thematic break
+#                    and a heading; do NOT install mdformat-frontmatter (no trailing s, by butler54)
+#                    — it requires mdformat < 0.8.0 and is incompatible with mdformat 1.0.0)
+#   "toc"           — mdformat-toc 0.5.0 (TOC between <!-- mdformat-toc start/end --> markers;
+#                    0.5.0+ also inserts <a name="{slug}"></a> anchors after heading text by
+#                    default; use --no-anchors in the marker to suppress)
+#
+# Uncomment to pin explicitly and fail fast on a missing plugin.
+# Note: mdformat-gfm registers BOTH "gfm" and "tables" — both must be listed.
+# Note: mdformat-front-matters registers as "front_matters" (underscore, not hyphen):
+# extensions = ["gfm", "tables", "front_matters", "toc"]
+
+# ── Code formatter plugins ────────────────────────────────────────────────────
+#
+# Key absent — all installed code formatter plugins are enabled (default);
+#              matches the invocation which omits --codeformatters.
+# List       — only the listed language formatters are active AND required;
+#              mdformat exits 1 if a listed language is not available.
+#
+# Installed code formatters in this environment:
+#   "bash", "sh"             — mdformat-shfmt  (shells out to shfmt)
+#   "json", "toml", "yaml"   — mdformat-config (taplo for TOML, ruamel.yaml for YAML,
+#                                               json stdlib for JSON)
+#   "go"                     — mdformat-gofmt  (shells out to gofmt)
+#
+# Formatters that raise an exception (e.g. gofmt cannot parse an incomplete
+# snippet) emit a Warning: line on stderr and leave the block unchanged; they
+# do not cause --check to exit 1. Only "Error: File is not formatted" causes
+# a non-zero exit.
+#
+# Uncomment to pin explicitly and fail fast on a missing formatter:
+# codeformatters = ["bash", "sh", "json", "toml", "yaml", "go"]
+
+# ── Plugin-specific configuration ─────────────────────────────────────────────
+#
+# Plugin options are nested under [plugin.<plugin-id>] sub-tables and passed
+# into each plugin's mdit.options["mdformat"]["plugin"]["<plugin-id>"] namespace.
+#
+# mdformat-gfm 1.0.0 exposes one TOML-configurable option via [plugin.tables]:
+#
+#   compact_tables (bool, default false)
+#     false — pad all table cells to align column widths (default)
+#     true  — omit padding; each cell contains only its content
+#
+# The --compact-tables CLI flag is the command-line equivalent.
+# This project uses padded tables (the default) to match the rumdl MD060
+# aligned style, so compact_tables is left false here.
+#
+# Other installed plugins have no TOML-configurable options:
+#   mdformat-toc    — slug style is set per-file in the marker comment, not globally
+#   mdformat-shfmt  — shfmt flags are not exposed
+#   mdformat-config — taplo/ruamel.yaml defaults are used
+#   mdformat-gofmt  — gofmt has no configurable flags
+
+[plugin.tables]
+compact_tables = false  # true = no cell padding; false = columns aligned to widest cell

@@ -1,0 +1,7 @@
+type Query {
+  obj: Obj!
+}
+
+type Obj {
+  field(id: Int!): String!
+}

@@ -28,6 +28,10 @@ type POST struct {
 
 var _ graphql.Transport = POST{}
 
+func (h POST) String() string {
+	return "POST"
+}
+
 func (h POST) Supports(r *http.Request) bool {
 	if r.Header.Get("Upgrade") != "" {
 		return false

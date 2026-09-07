@@ -13,7 +13,7 @@
     "dependencies": {
         "@apollo/gateway": "^2.11.2",
         "@apollo/server": "^5.0.0",
-        "graphql": "^16.11.0",
+        "graphql": "^17.0.2",
         "rxjs": "^7.8.2"
     },
     "devDependencies": {

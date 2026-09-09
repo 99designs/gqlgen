@@ -250,11 +250,22 @@ directive @goExtraField(
 directive @inlineArguments on ARGUMENT_DEFINITION
 
 directive @subscriptionContext on FIELD_DEFINITION
+
+directive @disableConcurrency on FIELD_DEFINITION | OBJECT
 ```
 
 `@subscriptionContext` opts a single subscription field into per-event context
 propagation. See [Per-event context for subscriptions](/reference/subscription-context/)
 for details.
+
+`@disableConcurrency` resolves a field inline on the parent goroutine instead of
+in its own goroutine, even when the field is bound to a method that takes a
+`context.Context`. By default any field bound to a context-taking method (or a
+resolver) is dispatched concurrently; this is worth it for fields that do real
+I/O, but for a field whose method needs `ctx` only to read an already-memoized or
+loader-backed value the goroutine is pure overhead. Annotating the field (or the
+whole object) keeps `ctx` available while skipping the goroutine. It has no effect
+on context-free fields, which already resolve inline.
 
 > Here be dragons
 >

@@ -4,6 +4,7 @@ package subdir
 
 import (
 	"context"
+	"errors"
 	"math"
 	"strconv"
 	"sync/atomic"
@@ -43,7 +44,7 @@ func (ec *executionContext) __Service_sdl(ctx context.Context, field graphql.Col
 	)
 }
 func (ec *executionContext) fieldContext__Service_sdl(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("_Service", field, false, false, errChildFields_String)
+	return graphql.NewScalarFieldContext("_Service", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 // endregion **************************** field.gotpl *****************************

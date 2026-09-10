@@ -4,6 +4,7 @@ package followschema
 
 import (
 	"context"
+	"errors"
 	"math"
 	"strconv"
 	"sync/atomic"
@@ -52,7 +53,7 @@ func (ec *executionContext) _Error_id(ctx context.Context, field graphql.Collect
 	)
 }
 func (ec *executionContext) fieldContext_Error_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Error", field, false, false, errChildFields_ID)
+	return graphql.NewScalarFieldContext("Error", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
 func (ec *executionContext) _Error_errorOnNonRequiredField(ctx context.Context, field graphql.CollectedField, obj *Error) (ret graphql.Marshaler) {
@@ -77,7 +78,7 @@ func (ec *executionContext) _Error_errorOnNonRequiredField(ctx context.Context, 
 	)
 }
 func (ec *executionContext) fieldContext_Error_errorOnNonRequiredField(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Error", field, true, false, errChildFields_String)
+	return graphql.NewScalarFieldContext("Error", field, true, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _Error_errorOnRequiredField(ctx context.Context, field graphql.CollectedField, obj *Error) (ret graphql.Marshaler) {
@@ -102,7 +103,7 @@ func (ec *executionContext) _Error_errorOnRequiredField(ctx context.Context, fie
 	)
 }
 func (ec *executionContext) fieldContext_Error_errorOnRequiredField(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Error", field, true, false, errChildFields_String)
+	return graphql.NewScalarFieldContext("Error", field, true, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _Error_nilOnRequiredField(ctx context.Context, field graphql.CollectedField, obj *Error) (ret graphql.Marshaler) {
@@ -127,7 +128,7 @@ func (ec *executionContext) _Error_nilOnRequiredField(ctx context.Context, field
 	)
 }
 func (ec *executionContext) fieldContext_Error_nilOnRequiredField(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Error", field, true, false, errChildFields_String)
+	return graphql.NewScalarFieldContext("Error", field, true, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _Errors_a(ctx context.Context, field graphql.CollectedField, obj *Errors) (ret graphql.Marshaler) {

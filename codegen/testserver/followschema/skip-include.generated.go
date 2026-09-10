@@ -4,6 +4,7 @@ package followschema
 
 import (
 	"context"
+	"errors"
 	"math"
 	"strconv"
 	"sync/atomic"
@@ -44,7 +45,7 @@ func (ec *executionContext) _SkipIncludeTestType_a(ctx context.Context, field gr
 	)
 }
 func (ec *executionContext) fieldContext_SkipIncludeTestType_a(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("SkipIncludeTestType", field, false, false, errChildFields_String)
+	return graphql.NewScalarFieldContext("SkipIncludeTestType", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _SkipIncludeTestType_b(ctx context.Context, field graphql.CollectedField, obj *SkipIncludeTestType) (ret graphql.Marshaler) {
@@ -69,7 +70,7 @@ func (ec *executionContext) _SkipIncludeTestType_b(ctx context.Context, field gr
 	)
 }
 func (ec *executionContext) fieldContext_SkipIncludeTestType_b(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("SkipIncludeTestType", field, false, false, errChildFields_String)
+	return graphql.NewScalarFieldContext("SkipIncludeTestType", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 // endregion **************************** field.gotpl *****************************

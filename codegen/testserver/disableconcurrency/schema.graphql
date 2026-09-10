@@ -1,0 +1,22 @@
+directive @disableConcurrency on FIELD_DEFINITION | OBJECT
+
+type Query {
+    methods: Methods!
+    inlineObject: InlineObject!
+}
+
+type Methods {
+    # Bound to a context-taking model method: concurrent (own goroutine) by default.
+    withContext: Boolean!
+    # Same context-taking method, but @disableConcurrency resolves it inline.
+    withContextInline: Boolean! @disableConcurrency
+    # Context-free model method: already inline, directive is a no-op here.
+    noContext: Boolean!
+}
+
+# Object-level @disableConcurrency resolves every field inline, even the
+# context-taking ones.
+type InlineObject @disableConcurrency {
+    a: Boolean!
+    b: Boolean!
+}

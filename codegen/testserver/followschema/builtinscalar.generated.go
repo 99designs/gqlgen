@@ -4,6 +4,7 @@ package followschema
 
 import (
 	"context"
+	"errors"
 	"math"
 	"strconv"
 	"sync/atomic"
@@ -44,7 +45,7 @@ func (ec *executionContext) _Map_id(ctx context.Context, field graphql.Collected
 	)
 }
 func (ec *executionContext) fieldContext_Map_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Map", field, false, false, errChildFields_ID)
+	return graphql.NewScalarFieldContext("Map", field, false, false, errors.New("field of type ID does not have child fields"))
 }
 
 // endregion **************************** field.gotpl *****************************

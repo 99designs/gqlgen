@@ -4,6 +4,7 @@ package followschema
 
 import (
 	"context"
+	"errors"
 	"math"
 	"strconv"
 	"sync/atomic"
@@ -44,7 +45,7 @@ func (ec *executionContext) _CheckIssue896_id(ctx context.Context, field graphql
 	)
 }
 func (ec *executionContext) fieldContext_CheckIssue896_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("CheckIssue896", field, false, false, errChildFields_Int)
+	return graphql.NewScalarFieldContext("CheckIssue896", field, false, false, errors.New("field of type Int does not have child fields"))
 }
 
 // endregion **************************** field.gotpl *****************************

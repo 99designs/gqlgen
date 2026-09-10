@@ -4,6 +4,7 @@ package followschema
 
 import (
 	"context"
+	"errors"
 	"math"
 	"strconv"
 	"sync/atomic"
@@ -44,7 +45,7 @@ func (ec *executionContext) _PtrToPtrInner_key(ctx context.Context, field graphq
 	)
 }
 func (ec *executionContext) fieldContext_PtrToPtrInner_key(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("PtrToPtrInner", field, false, false, errChildFields_String)
+	return graphql.NewScalarFieldContext("PtrToPtrInner", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _PtrToPtrInner_value(ctx context.Context, field graphql.CollectedField, obj *PtrToPtrInner) (ret graphql.Marshaler) {
@@ -69,7 +70,7 @@ func (ec *executionContext) _PtrToPtrInner_value(ctx context.Context, field grap
 	)
 }
 func (ec *executionContext) fieldContext_PtrToPtrInner_value(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("PtrToPtrInner", field, false, false, errChildFields_String)
+	return graphql.NewScalarFieldContext("PtrToPtrInner", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _PtrToPtrOuter_name(ctx context.Context, field graphql.CollectedField, obj *PtrToPtrOuter) (ret graphql.Marshaler) {
@@ -94,7 +95,7 @@ func (ec *executionContext) _PtrToPtrOuter_name(ctx context.Context, field graph
 	)
 }
 func (ec *executionContext) fieldContext_PtrToPtrOuter_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("PtrToPtrOuter", field, false, false, errChildFields_String)
+	return graphql.NewScalarFieldContext("PtrToPtrOuter", field, false, false, errors.New("field of type String does not have child fields"))
 }
 
 func (ec *executionContext) _PtrToPtrOuter_inner(ctx context.Context, field graphql.CollectedField, obj *PtrToPtrOuter) (ret graphql.Marshaler) {

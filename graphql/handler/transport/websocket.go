@@ -468,6 +468,12 @@ func (c *wsConnection) subscribe(start time.Time, msg *message) {
 
 	ctx, cancel := context.WithCancel(ctx)
 	c.mu.Lock()
+	if _, exists := c.active[msg.id]; exists {
+		c.mu.Unlock()
+		cancel()
+		close(msg.data, websocket.CloseMessage)
+		return
+	}
 	c.active[msg.id] = cancel
 	c.mu.Unlock()
 

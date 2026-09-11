@@ -8,6 +8,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"reflect"
 	"strconv"
 	"sync/atomic"
 
@@ -21,7 +22,9 @@ import (
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
+	e := &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
+	e.InputUnmarshalers = e.buildInputUnmarshalers()
+	return e
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
@@ -142,13 +145,21 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	return 0, false
 }
 
-func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
-	opCtx := graphql.GetOperationContext(ctx)
-	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+// buildInputUnmarshalers builds the schema's static input-type unmarshaler map.
+// It depends only on the resolvers, not per-request state, so it is built with a
+// nil op context (mirroring Complexity) and cached on the schema at construction.
+func (e *executableSchema) buildInputUnmarshalers() map[reflect.Type]reflect.Value {
+	ec := newExecutionContext(nil, e, nil)
+	return graphql.BuildUnmarshalerMap(
 		ec.unmarshalInputInput,
 		ec.unmarshalInputInput64,
 	)
+}
+
+func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
+	opCtx := graphql.GetOperationContext(ctx)
+	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
+	inputUnmarshalMap := e.InputUnmarshalers
 	first := true
 
 	switch opCtx.Operation.Operation {

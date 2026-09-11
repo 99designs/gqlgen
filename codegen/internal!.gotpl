@@ -48,16 +48,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	return 0, false
 }
 
-func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
-	opCtx := graphql.GetOperationContext(ctx)
-	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+// buildInputUnmarshalers builds the schema's static input-type unmarshaler map.
+// It depends only on the resolvers, not per-request state, so it is built with a
+// nil op context (mirroring Complexity) and cached on the schema at construction.
+func (e *executableSchema) buildInputUnmarshalers() map[reflect.Type]reflect.Value {
+	{{- $needsEC := false }}
+	{{- range $input := .Inputs }}{{ if not $input.HasUnmarshal }}{{ $needsEC = true }}{{ end }}{{ end }}
+	{{- if and (not .Config.UseFunctionSyntaxForExecutionContext) $needsEC }}
+	ec := newExecutionContext(nil, e, nil)
+	{{- end }}
+	return graphql.BuildUnmarshalerMap(
 		{{- range $input := .Inputs -}}
 			{{ if not $input.HasUnmarshal }}
 				{{$.ECDot}}unmarshalInput{{ $input.Name }},
 			{{- end }}
 		{{- end }}
 	)
+}
+
+func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
+	opCtx := graphql.GetOperationContext(ctx)
+	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
+	inputUnmarshalMap := e.InputUnmarshalers
 	first := true
 
 	switch opCtx.Operation.Operation {

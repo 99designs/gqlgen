@@ -6,6 +6,7 @@
 {{ reserveImport "time"  }}
 {{ reserveImport "sync"  }}
 {{ reserveImport "sync/atomic" }}
+{{ reserveImport "reflect"  }}
 {{ reserveImport "bytes"  }}
 {{ reserveImport "errors"  }}
 {{ reserveImport "embed"  }}
@@ -17,7 +18,9 @@
 
 // NewExecutableSchema creates an ExecutableSchema from the ResolverRoot interface.
 func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
-	return &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
+	e := &executableSchema{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity}
+	e.InputUnmarshalers = e.buildInputUnmarshalers()
+	return e
 }
 
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]

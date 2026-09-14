@@ -2,6 +2,7 @@ package graphql
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/vektah/gqlparser/v2/ast"
@@ -105,12 +106,15 @@ func WithFieldContext(ctx context.Context, rc *FieldContext) context.Context {
 }
 
 // NewScalarFieldContext creates a FieldContext for scalar or enum fields that
-// have no child fields. The returned Child callback always returns (nil, childErr).
+// have no child fields. The returned Child callback always returns an error
+// naming typeName, built lazily on the (essentially never taken, for a
+// well-formed query) path where a client illegally selects sub-fields on a
+// scalar/enum.
 func NewScalarFieldContext(
 	objectName string,
 	field CollectedField,
 	isMethod, isResolver bool,
-	childErr error,
+	typeName string,
 ) (*FieldContext, error) {
 	return &FieldContext{
 		Object:     objectName,
@@ -118,7 +122,7 @@ func NewScalarFieldContext(
 		IsMethod:   isMethod,
 		IsResolver: isResolver,
 		Child: func(ctx context.Context, field CollectedField) (*FieldContext, error) {
-			return nil, childErr
+			return nil, errors.New("field of type " + typeName + " does not have child fields")
 		},
 	}, nil
 }

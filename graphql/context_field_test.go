@@ -22,14 +22,14 @@ func TestNewScalarFieldContext(t *testing.T) {
 	}
 	wantErr := errors.New("field of type String does not have child fields")
 
-	fc, err := NewScalarFieldContext("User", field, true, false, wantErr)
+	fc, err := NewScalarFieldContext("User", field, true, false, "String")
 	require.NoError(t, err)
 	require.Equal(t, "User", fc.Object)
 	require.Equal(t, field, fc.Field)
 	require.True(t, fc.IsMethod)
 	require.False(t, fc.IsResolver)
 
-	// Child callback must always return the provided error.
+	// Child callback must always return an error naming the given type.
 	childFC, childErr := fc.Child(context.Background(), CollectedField{})
 	require.Nil(t, childFC)
 	require.Equal(t, wantErr, childErr)

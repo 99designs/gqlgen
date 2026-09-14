@@ -105,11 +105,11 @@ func WithFieldContext(ctx context.Context, rc *FieldContext) context.Context {
 	return context.WithValue(ctx, resolverCtx, rc)
 }
 
-// NewScalarFieldContext creates a FieldContext for scalar or enum fields that
-// have no child fields. The returned Child callback always returns an error
-// naming typeName, built lazily on the (essentially never taken, for a
-// well-formed query) path where a client illegally selects sub-fields on a
-// scalar/enum.
+// NewScalarFieldContext creates a FieldContext for scalar or enum fields, which
+// have no child fields. The returned Child callback always fails, naming
+// typeName. It builds that error per call rather than up front because
+// validation rejects sub-selections on a scalar, so no well-formed query
+// reaches it.
 func NewScalarFieldContext(
 	objectName string,
 	field CollectedField,

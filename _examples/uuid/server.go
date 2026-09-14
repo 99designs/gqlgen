@@ -1,3 +1,5 @@
+//go:generate go run ../../testdata/gqlgen.go
+
 package main
 
 import (

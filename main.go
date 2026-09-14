@@ -1,6 +1,7 @@
 package main
 
 //go:generate sh -c "cd _examples && go generate ./..."
+//go:generate sh -c "./_examples/generate-nested.sh"
 
 import (
 	"bytes"

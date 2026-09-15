@@ -471,7 +471,8 @@ func (c *wsConnection) subscribe(start time.Time, msg *message) {
 	if _, exists := c.active[msg.id]; exists {
 		c.mu.Unlock()
 		cancel()
-		close(msg.data, websocket.CloseMessage)
+		c.sendError(msg.id, &gqlerror.Error{Message: fmt.Sprintf("subscription id %s is already active", msg.id)})
+		c.complete(msg.id)
 		return
 	}
 	c.active[msg.id] = cancel

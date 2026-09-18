@@ -2812,6 +2812,18 @@ func (ec *executionContext) unmarshalInputNewComment(ctx context.Context, obj an
 	return it, nil
 }
 
+// UnmarshalNewComment unmarshals raw into the NewComment input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalNewComment(ctx context.Context, raw any) (model.NewComment, error) {
+	var out model.NewComment
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "NewComment", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputNewPost(ctx context.Context, obj any) (model.NewPost, error) {
 	var it model.NewPost
 	if obj == nil {
@@ -2861,6 +2873,18 @@ func (ec *executionContext) unmarshalInputNewPost(ctx context.Context, obj any) 
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalNewPost unmarshals raw into the NewPost input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalNewPost(ctx context.Context, raw any) (model.NewPost, error) {
+	var out model.NewPost
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "NewPost", raw, &out)
+	return out, err
 }
 
 // endregion **************************** input.gotpl *****************************

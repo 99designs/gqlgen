@@ -1874,6 +1874,18 @@ func (ec *executionContext) unmarshalInputNewTodo(ctx context.Context, obj any) 
 	return it, nil
 }
 
+// UnmarshalNewTodo unmarshals raw into the NewTodo input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalNewTodo(ctx context.Context, raw any) (NewTodo, error) {
+	var out NewTodo
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "NewTodo", raw, &out)
+	return out, err
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************

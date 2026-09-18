@@ -48,6 +48,7 @@ type Config struct {
 	OmitResolverFields                   bool                       `yaml:"omit_resolver_fields,omitempty"`
 	OmitPanicHandler                     bool                       `yaml:"omit_panic_handler,omitempty"`
 	OmitEnumJSONMarshalers               bool                       `yaml:"omit_enum_json_marshalers,omitempty"`
+	OmitTypedInputUnmarshalers           bool                       `yaml:"omit_typed_input_unmarshalers,omitempty"`
 	UseFunctionSyntaxForExecutionContext bool                       `yaml:"use_function_syntax_for_execution_context,omitempty"`
 	SubscriptionContextField             bool                       `yaml:"subscription_context_field,omitempty"`
 	// If this is set to true, argument directives that

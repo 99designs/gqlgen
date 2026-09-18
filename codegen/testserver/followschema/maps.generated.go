@@ -227,6 +227,18 @@ func (ec *executionContext) unmarshalInputMapNestedInput(ctx context.Context, ob
 	return it, nil
 }
 
+// UnmarshalMapNestedInput unmarshals raw into the MapNestedInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalMapNestedInput(ctx context.Context, raw any) (MapNested, error) {
+	var out MapNested
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "MapNestedInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputMapNestedMapSliceInput(ctx context.Context, obj any) (map[string]any, error) {
 	var it map[string]any
 	if obj == nil {
@@ -263,6 +275,18 @@ func (ec *executionContext) unmarshalInputMapNestedMapSliceInput(ctx context.Con
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalMapNestedMapSliceInput unmarshals raw into the MapNestedMapSliceInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalMapNestedMapSliceInput(ctx context.Context, raw any) (map[string]any, error) {
+	var out map[string]any
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "MapNestedMapSliceInput", raw, &out)
+	return out, err
 }
 
 func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Context, obj any) (map[string]any, error) {
@@ -317,6 +341,18 @@ func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Co
 	return it, nil
 }
 
+// UnmarshalMapStringInterfaceInput unmarshals raw into the MapStringInterfaceInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalMapStringInterfaceInput(ctx context.Context, raw any) (map[string]any, error) {
+	var out map[string]any
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "MapStringInterfaceInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputNestedMapInput(ctx context.Context, obj any) (NestedMapInput, error) {
 	var it NestedMapInput
 	if obj == nil {
@@ -345,6 +381,18 @@ func (ec *executionContext) unmarshalInputNestedMapInput(ctx context.Context, ob
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalNestedMapInput unmarshals raw into the NestedMapInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalNestedMapInput(ctx context.Context, raw any) (NestedMapInput, error) {
+	var out NestedMapInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "NestedMapInput", raw, &out)
+	return out, err
 }
 
 // endregion **************************** input.gotpl *****************************

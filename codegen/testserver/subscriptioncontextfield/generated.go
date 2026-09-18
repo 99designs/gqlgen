@@ -2509,6 +2509,18 @@ func (ec *executionContext) unmarshalInputCreateUserInput(ctx context.Context, o
 	return it, nil
 }
 
+// UnmarshalCreateUserInput unmarshals raw into the CreateUserInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalCreateUserInput(ctx context.Context, raw any) (CreateUserInput, error) {
+	var out CreateUserInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "CreateUserInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputUserFilter(ctx context.Context, obj any) (UserFilter, error) {
 	var it UserFilter
 	if obj == nil {
@@ -2569,6 +2581,18 @@ func (ec *executionContext) unmarshalInputUserFilter(ctx context.Context, obj an
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalUserFilter unmarshals raw into the UserFilter input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalUserFilter(ctx context.Context, raw any) (UserFilter, error) {
+	var out UserFilter
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "UserFilter", raw, &out)
+	return out, err
 }
 
 // endregion **************************** input.gotpl *****************************

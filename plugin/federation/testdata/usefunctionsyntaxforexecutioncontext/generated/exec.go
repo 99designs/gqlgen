@@ -4151,6 +4151,18 @@ func unmarshalInputMultiHelloByNamesInput(ctx context.Context, ec *executionCont
 	return it, nil
 }
 
+// UnmarshalMultiHelloByNamesInput unmarshals raw into the MultiHelloByNamesInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalMultiHelloByNamesInput(ctx context.Context, raw any) (model.MultiHelloByNamesInput, error) {
+	var out model.MultiHelloByNamesInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "MultiHelloByNamesInput", raw, &out)
+	return out, err
+}
+
 func unmarshalInputMultiHelloMultipleRequiresByNamesInput(ctx context.Context, ec *executionContext, obj any) (model.MultiHelloMultipleRequiresByNamesInput, error) {
 	var it model.MultiHelloMultipleRequiresByNamesInput
 	if obj == nil {
@@ -4179,6 +4191,18 @@ func unmarshalInputMultiHelloMultipleRequiresByNamesInput(ctx context.Context, e
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalMultiHelloMultipleRequiresByNamesInput unmarshals raw into the MultiHelloMultipleRequiresByNamesInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalMultiHelloMultipleRequiresByNamesInput(ctx context.Context, raw any) (model.MultiHelloMultipleRequiresByNamesInput, error) {
+	var out model.MultiHelloMultipleRequiresByNamesInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "MultiHelloMultipleRequiresByNamesInput", raw, &out)
+	return out, err
 }
 
 func unmarshalInputMultiHelloRequiresByNamesInput(ctx context.Context, ec *executionContext, obj any) (model.MultiHelloRequiresByNamesInput, error) {
@@ -4211,6 +4235,18 @@ func unmarshalInputMultiHelloRequiresByNamesInput(ctx context.Context, ec *execu
 	return it, nil
 }
 
+// UnmarshalMultiHelloRequiresByNamesInput unmarshals raw into the MultiHelloRequiresByNamesInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalMultiHelloRequiresByNamesInput(ctx context.Context, raw any) (model.MultiHelloRequiresByNamesInput, error) {
+	var out model.MultiHelloRequiresByNamesInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "MultiHelloRequiresByNamesInput", raw, &out)
+	return out, err
+}
+
 func unmarshalInputMultiHelloWithErrorByNamesInput(ctx context.Context, ec *executionContext, obj any) (model.MultiHelloWithErrorByNamesInput, error) {
 	var it model.MultiHelloWithErrorByNamesInput
 	if obj == nil {
@@ -4241,6 +4277,18 @@ func unmarshalInputMultiHelloWithErrorByNamesInput(ctx context.Context, ec *exec
 	return it, nil
 }
 
+// UnmarshalMultiHelloWithErrorByNamesInput unmarshals raw into the MultiHelloWithErrorByNamesInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalMultiHelloWithErrorByNamesInput(ctx context.Context, raw any) (model.MultiHelloWithErrorByNamesInput, error) {
+	var out model.MultiHelloWithErrorByNamesInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "MultiHelloWithErrorByNamesInput", raw, &out)
+	return out, err
+}
+
 func unmarshalInputMultiPlanetRequiresNestedByNamesInput(ctx context.Context, ec *executionContext, obj any) (model.MultiPlanetRequiresNestedByNamesInput, error) {
 	var it model.MultiPlanetRequiresNestedByNamesInput
 	if obj == nil {
@@ -4269,6 +4317,18 @@ func unmarshalInputMultiPlanetRequiresNestedByNamesInput(ctx context.Context, ec
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalMultiPlanetRequiresNestedByNamesInput unmarshals raw into the MultiPlanetRequiresNestedByNamesInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalMultiPlanetRequiresNestedByNamesInput(ctx context.Context, raw any) (model.MultiPlanetRequiresNestedByNamesInput, error) {
+	var out model.MultiPlanetRequiresNestedByNamesInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "MultiPlanetRequiresNestedByNamesInput", raw, &out)
+	return out, err
 }
 
 // endregion **************************** input.gotpl *****************************

@@ -60,6 +60,18 @@ func (ec *executionContext) unmarshalInputDirectiveInput(ctx context.Context, ob
 	return it, nil
 }
 
+// UnmarshalDirectiveInput unmarshals raw into the DirectiveInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalDirectiveInput(ctx context.Context, raw any) (map[string]any, error) {
+	var out map[string]any
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "DirectiveInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputRequiredFilters(ctx context.Context, obj any) (map[string]any, error) {
 	var it map[string]any
 	if obj == nil {
@@ -96,6 +108,18 @@ func (ec *executionContext) unmarshalInputRequiredFilters(ctx context.Context, o
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalRequiredFilters unmarshals raw into the RequiredFilters input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalRequiredFilters(ctx context.Context, raw any) (map[string]any, error) {
+	var out map[string]any
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "RequiredFilters", raw, &out)
+	return out, err
 }
 
 func (ec *executionContext) unmarshalInputSearchFilters(ctx context.Context, obj any) (map[string]any, error) {
@@ -141,6 +165,18 @@ func (ec *executionContext) unmarshalInputSearchFilters(ctx context.Context, obj
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalSearchFilters unmarshals raw into the SearchFilters input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalSearchFilters(ctx context.Context, raw any) (map[string]any, error) {
+	var out map[string]any
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "SearchFilters", raw, &out)
+	return out, err
 }
 
 func (ec *executionContext) unmarshalInputSearchWithDefaults(ctx context.Context, obj any) (map[string]any, error) {
@@ -198,6 +234,18 @@ func (ec *executionContext) unmarshalInputSearchWithDefaults(ctx context.Context
 	return it, nil
 }
 
+// UnmarshalSearchWithDefaults unmarshals raw into the SearchWithDefaults input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalSearchWithDefaults(ctx context.Context, raw any) (map[string]any, error) {
+	var out map[string]any
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "SearchWithDefaults", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputUpdateProductInput(ctx context.Context, obj any) (map[string]any, error) {
 	var it map[string]any
 	if obj == nil {
@@ -241,6 +289,18 @@ func (ec *executionContext) unmarshalInputUpdateProductInput(ctx context.Context
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalUpdateProductInput unmarshals raw into the UpdateProductInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalUpdateProductInput(ctx context.Context, raw any) (map[string]any, error) {
+	var out map[string]any
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "UpdateProductInput", raw, &out)
+	return out, err
 }
 
 // endregion **************************** input.gotpl *****************************

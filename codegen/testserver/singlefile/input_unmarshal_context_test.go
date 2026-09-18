@@ -151,3 +151,45 @@ func TestUnmarshalNamedInputFromContextConcurrentRequests(t *testing.T) {
 		assert.True(t, *in.FalsyBoolean)
 	}
 }
+
+// The generated Unmarshal<Input> helpers are the intended entry point: the caller names
+// the input once, in the function it calls, and gets its Go type back. Two inputs that
+// share map[string]any stay distinct because each helper names its own.
+func TestGeneratedTypedUnmarshalers(t *testing.T) {
+	var (
+		defaultInput  DefaultInput
+		changes       map[string]any
+		searchFilters map[string]any
+	)
+
+	err := unmarshalFromResolver(t, func(ctx context.Context) error {
+		var err error
+		if defaultInput, err = UnmarshalDefaultInput(
+			ctx, map[string]any{"falsyBoolean": true},
+		); err != nil {
+			return err
+		}
+		if changes, err = UnmarshalChanges(ctx, map[string]any{"a": 1}); err != nil {
+			return err
+		}
+		searchFilters, err = UnmarshalSearchFilters(ctx, map[string]any{"category": "books"})
+		return err
+	})
+
+	require.NoError(t, err)
+	require.NotNil(t, defaultInput.FalsyBoolean)
+	assert.True(t, *defaultInput.FalsyBoolean)
+	assert.Contains(t, changes, "a")
+	assert.NotContains(t, changes, "category")
+	assert.Contains(t, searchFilters, "category")
+	assert.NotContains(t, searchFilters, "a")
+}
+
+// Outside a request there is no index to resolve against, so the helper reports that
+// rather than panicking.
+func TestGeneratedTypedUnmarshalerWithoutRequest(t *testing.T) {
+	got, err := UnmarshalDefaultInput(context.Background(), map[string]any{})
+
+	require.EqualError(t, err, "graphql: the input context is empty")
+	assert.Equal(t, DefaultInput{}, got)
+}

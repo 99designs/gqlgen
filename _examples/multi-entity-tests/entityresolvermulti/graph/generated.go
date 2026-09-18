@@ -2134,6 +2134,18 @@ func (ec *executionContext) unmarshalInputProductByIDsInput(ctx context.Context,
 	return it, nil
 }
 
+// UnmarshalProductByIDsInput unmarshals raw into the ProductByIDsInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalProductByIDsInput(ctx context.Context, raw any) (model.ProductByIDsInput, error) {
+	var out model.ProductByIDsInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "ProductByIDsInput", raw, &out)
+	return out, err
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************

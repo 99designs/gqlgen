@@ -2388,6 +2388,18 @@ func (ec *executionContext) unmarshalInputCustomInput(ctx context.Context, obj a
 	return it, nil
 }
 
+// UnmarshalCustomInput unmarshals raw into the CustomInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalCustomInput(ctx context.Context, raw any) (model.CustomInput, error) {
+	var out model.CustomInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "CustomInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputIndicatorInput(ctx context.Context, obj any) (model.IndicatorInput, error) {
 	var it model.IndicatorInput
 	if obj == nil {
@@ -2432,6 +2444,18 @@ func (ec *executionContext) unmarshalInputIndicatorInput(ctx context.Context, ob
 	return it, nil
 }
 
+// UnmarshalIndicatorInput unmarshals raw into the IndicatorInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalIndicatorInput(ctx context.Context, raw any) (model.IndicatorInput, error) {
+	var out model.IndicatorInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "IndicatorInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputNewTodo(ctx context.Context, obj any) (model.NewTodo, error) {
 	var it model.NewTodo
 	if obj == nil {
@@ -2467,6 +2491,18 @@ func (ec *executionContext) unmarshalInputNewTodo(ctx context.Context, obj any) 
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalNewTodo unmarshals raw into the NewTodo input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalNewTodo(ctx context.Context, raw any) (model.NewTodo, error) {
+	var out model.NewTodo
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "NewTodo", raw, &out)
+	return out, err
 }
 
 // endregion **************************** input.gotpl *****************************

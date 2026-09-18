@@ -2197,6 +2197,18 @@ func (ec *executionContext) unmarshalInputSearchArgs(ctx context.Context, obj an
 	return it, nil
 }
 
+// UnmarshalSearchArgs unmarshals raw into the SearchArgs input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalSearchArgs(ctx context.Context, raw any) (model.SearchArgs, error) {
+	var out model.SearchArgs
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "SearchArgs", raw, &out)
+	return out, err
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************

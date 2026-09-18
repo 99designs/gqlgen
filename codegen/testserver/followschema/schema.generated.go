@@ -5686,6 +5686,18 @@ func (ec *executionContext) unmarshalInputChanges(ctx context.Context, obj any) 
 	return it, nil
 }
 
+// UnmarshalChanges unmarshals raw into the Changes input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalChanges(ctx context.Context, raw any) (map[string]any, error) {
+	var out map[string]any
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "Changes", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputInnerInput(ctx context.Context, obj any) (InnerInput, error) {
 	var it InnerInput
 	if obj == nil {
@@ -5714,6 +5726,18 @@ func (ec *executionContext) unmarshalInputInnerInput(ctx context.Context, obj an
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalInnerInput unmarshals raw into the InnerInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalInnerInput(ctx context.Context, raw any) (InnerInput, error) {
+	var out InnerInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "InnerInput", raw, &out)
+	return out, err
 }
 
 func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, obj any) (OmittableInput, error) {
@@ -5795,6 +5819,18 @@ func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, ob
 	return it, nil
 }
 
+// UnmarshalOmittableInput unmarshals raw into the OmittableInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalOmittableInput(ctx context.Context, raw any) (OmittableInput, error) {
+	var out OmittableInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "OmittableInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputOuterInput(ctx context.Context, obj any) (OuterInput, error) {
 	var it OuterInput
 	if obj == nil {
@@ -5825,6 +5861,18 @@ func (ec *executionContext) unmarshalInputOuterInput(ctx context.Context, obj an
 	return it, nil
 }
 
+// UnmarshalOuterInput unmarshals raw into the OuterInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalOuterInput(ctx context.Context, raw any) (OuterInput, error) {
+	var out OuterInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "OuterInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputRecursiveInputSlice(ctx context.Context, obj any) (RecursiveInputSlice, error) {
 	var it RecursiveInputSlice
 	if obj == nil {
@@ -5853,6 +5901,18 @@ func (ec *executionContext) unmarshalInputRecursiveInputSlice(ctx context.Contex
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalRecursiveInputSlice unmarshals raw into the RecursiveInputSlice input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalRecursiveInputSlice(ctx context.Context, raw any) (RecursiveInputSlice, error) {
+	var out RecursiveInputSlice
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "RecursiveInputSlice", raw, &out)
+	return out, err
 }
 
 // endregion **************************** input.gotpl *****************************

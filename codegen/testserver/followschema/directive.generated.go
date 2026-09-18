@@ -353,6 +353,18 @@ func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, o
 	return it, nil
 }
 
+// UnmarshalInnerDirectives unmarshals raw into the InnerDirectives input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalInnerDirectives(ctx context.Context, raw any) (InnerDirectives, error) {
+	var out InnerDirectives
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "InnerDirectives", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, obj any) (InputDirectives, error) {
 	var it InputDirectives
 	if obj == nil {
@@ -505,6 +517,18 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 	return it, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from INPUT_OBJECT directive, should be InputDirectives`, tmp))
 }
 
+// UnmarshalInputDirectives unmarshals raw into the InputDirectives input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalInputDirectives(ctx context.Context, raw any) (InputDirectives, error) {
+	var out InputDirectives
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "InputDirectives", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputInputDirectivesWithArgs(ctx context.Context, obj any) (InputDirectivesWithArgs, error) {
 	var it InputDirectivesWithArgs
 	if obj == nil {
@@ -557,6 +581,18 @@ func (ec *executionContext) unmarshalInputInputDirectivesWithArgs(ctx context.Co
 	return it, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from INPUT_OBJECT directive, should be InputDirectivesWithArgs`, tmp))
 }
 
+// UnmarshalInputDirectivesWithArgs unmarshals raw into the InputDirectivesWithArgs input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalInputDirectivesWithArgs(ctx context.Context, raw any) (InputDirectivesWithArgs, error) {
+	var out InputDirectivesWithArgs
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "InputDirectivesWithArgs", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputOuterWrapperInput(ctx context.Context, obj any) (OuterWrapperInput, error) {
 	var it OuterWrapperInput
 	if obj == nil {
@@ -585,6 +621,18 @@ func (ec *executionContext) unmarshalInputOuterWrapperInput(ctx context.Context,
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalOuterWrapperInput unmarshals raw into the OuterWrapperInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalOuterWrapperInput(ctx context.Context, raw any) (OuterWrapperInput, error) {
+	var out OuterWrapperInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "OuterWrapperInput", raw, &out)
+	return out, err
 }
 
 // endregion **************************** input.gotpl *****************************

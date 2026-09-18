@@ -206,6 +206,18 @@ func (ec *executionContext) unmarshalInputUpdatePtrToPtrInner(ctx context.Contex
 	return it, nil
 }
 
+// UnmarshalUpdatePtrToPtrInner unmarshals raw into the UpdatePtrToPtrInner input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalUpdatePtrToPtrInner(ctx context.Context, raw any) (UpdatePtrToPtrInner, error) {
+	var out UpdatePtrToPtrInner
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "UpdatePtrToPtrInner", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputUpdatePtrToPtrOuter(ctx context.Context, obj any) (UpdatePtrToPtrOuter, error) {
 	var it UpdatePtrToPtrOuter
 	if obj == nil {
@@ -248,6 +260,18 @@ func (ec *executionContext) unmarshalInputUpdatePtrToPtrOuter(ctx context.Contex
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalUpdatePtrToPtrOuter unmarshals raw into the UpdatePtrToPtrOuter input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalUpdatePtrToPtrOuter(ctx context.Context, raw any) (UpdatePtrToPtrOuter, error) {
+	var out UpdatePtrToPtrOuter
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "UpdatePtrToPtrOuter", raw, &out)
+	return out, err
 }
 
 // endregion **************************** input.gotpl *****************************

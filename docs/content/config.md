@@ -135,6 +135,12 @@ resolver:
 # Optional: set to skip generation of JSON Marshalers and Unmarshalers for enums
 # omit_enum_json_marshalers: false
 
+# Optional: set to skip generation of the typed Unmarshal<Input> helpers. They give
+# resolvers a compile-time-checked way to unmarshal an input object, at the cost of one
+# exported name per input object in the exec package. When omitted,
+# graphql.UnmarshalNamedInputFromContext still resolves every input by name.
+# omit_typed_input_unmarshalers: false
+
 # Optional: if this is set to true, argument directives that
 # decorate a field with a null value will still be called.
 #

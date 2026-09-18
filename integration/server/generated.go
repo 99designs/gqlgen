@@ -2326,6 +2326,18 @@ func (ec *executionContext) unmarshalInputDateFilter(ctx context.Context, obj an
 	return it, nil
 }
 
+// UnmarshalDateFilter unmarshals raw into the DateFilter input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalDateFilter(ctx context.Context, raw any) (models.DateFilter, error) {
+	var out models.DateFilter
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "DateFilter", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputListCoercion(ctx context.Context, obj any) (models.ListCoercion, error) {
 	var it models.ListCoercion
 	if obj == nil {
@@ -2375,6 +2387,18 @@ func (ec *executionContext) unmarshalInputListCoercion(ctx context.Context, obj 
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalListCoercion unmarshals raw into the ListCoercion input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalListCoercion(ctx context.Context, raw any) (models.ListCoercion, error) {
+	var out models.ListCoercion
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "ListCoercion", raw, &out)
+	return out, err
 }
 
 // endregion **************************** input.gotpl *****************************

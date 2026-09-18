@@ -1961,6 +1961,18 @@ func (ec *executionContext) unmarshalInputCollisionByIDAndIDsInput(ctx context.C
 	return it, nil
 }
 
+// UnmarshalCollisionByIDAndIDsInput unmarshals raw into the CollisionByIDAndIDsInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalCollisionByIDAndIDsInput(ctx context.Context, raw any) (model.CollisionByIDAndIDsInput, error) {
+	var out model.CollisionByIDAndIDsInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "CollisionByIDAndIDsInput", raw, &out)
+	return out, err
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************

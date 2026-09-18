@@ -3654,6 +3654,18 @@ func (ec *executionContext) unmarshalInputReviewInput(ctx context.Context, obj a
 	return it, nil
 }
 
+// UnmarshalReviewInput unmarshals raw into the ReviewInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalReviewInput(ctx context.Context, raw any) (models.Review, error) {
+	var out models.Review
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "ReviewInput", raw, &out)
+	return out, err
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************

@@ -1,9 +1,10 @@
 package graphql
 
 // This file holds the input-unmarshaling API that predates
-// InputUnmarshalerIndex. It is kept so that code written against the shipped
-// surface keeps compiling, and is intended to be deleted whole once the
-// deprecation window closes. Nothing generated calls into it.
+// InputUnmarshalerIndex: the three symbols released in v0.17.5 in April 2022.
+// They are kept so that code written against them keeps compiling, and are
+// intended to be deleted whole once the deprecation window closes. Nothing
+// generated calls into them.
 
 import (
 	"context"
@@ -12,16 +13,9 @@ import (
 	"reflect"
 	"slices"
 	"strings"
-	"sync"
 )
 
 const unmarshalInputCtx key = "unmarshal_input_context"
-
-// UnmarshalerMap maps each input type to the generated function that unmarshals it.
-//
-// Deprecated: entries carry no GraphQL name, so two input objects that unmarshal to the
-// same Go type cannot be told apart. Use [InputUnmarshalerIndex] instead.
-type UnmarshalerMap = map[reflect.Type]reflect.Value
 
 // BuildUnmarshalerMap returns a map of unmarshal functions of the ExecutableContext
 // to use with the WithUnmarshalerMap function.
@@ -31,8 +25,8 @@ type UnmarshalerMap = map[reflect.Type]reflect.Value
 //
 // Deprecated: use [NewInputUnmarshalerIndex], which keys by GraphQL input name and so
 // can represent two inputs that share a Go type.
-func BuildUnmarshalerMap(unmarshaler ...any) UnmarshalerMap {
-	maps := make(UnmarshalerMap)
+func BuildUnmarshalerMap(unmarshaler ...any) map[reflect.Type]reflect.Value {
+	maps := make(map[reflect.Type]reflect.Value)
 	for _, v := range unmarshaler {
 		ft := reflect.TypeOf(v)
 		if ft.Kind() == reflect.Func && ft.NumIn() == 2 && ft.NumOut() == 2 {
@@ -47,23 +41,13 @@ func BuildUnmarshalerMap(unmarshaler ...any) UnmarshalerMap {
 // functions.
 //
 // Deprecated: use [WithInputUnmarshalerIndex].
-func WithUnmarshalerMap(ctx context.Context, maps UnmarshalerMap) context.Context {
+func WithUnmarshalerMap(ctx context.Context, maps map[reflect.Type]reflect.Value) context.Context {
 	// maps is already built, so there is nothing left to defer.
-	return context.WithValue(ctx, unmarshalInputCtx, func() UnmarshalerMap { return maps })
-}
-
-// WithLazyUnmarshalerMap returns a new context that builds its map from input types to
-// unmarshaler functions on first use instead of up front.
-//
-// build is called at most once per returned context; concurrent callers share the one
-// result. A nil build installs nothing, leaving ctx as it was.
-//
-// Deprecated: use [WithLazyInputUnmarshalerIndex].
-func WithLazyUnmarshalerMap(ctx context.Context, build func() UnmarshalerMap) context.Context {
-	if build == nil {
-		return ctx
-	}
-	return context.WithValue(ctx, unmarshalInputCtx, sync.OnceValue(build))
+	return context.WithValue(
+		ctx,
+		unmarshalInputCtx,
+		func() map[reflect.Type]reflect.Value { return maps },
+	)
 }
 
 // UnmarshalInputFromContext allows unmarshaling input object from a context.
@@ -87,8 +71,8 @@ func UnmarshalInputFromContext(ctx context.Context, raw, v any) error {
 		return unmarshalByGoType(ctx, idx, target, raw, v)
 	}
 
-	var m UnmarshalerMap
-	if build, _ := ctx.Value(unmarshalInputCtx).(func() UnmarshalerMap); build != nil {
+	var m map[reflect.Type]reflect.Value
+	if build, _ := ctx.Value(unmarshalInputCtx).(func() map[reflect.Type]reflect.Value); build != nil {
 		m = build()
 	}
 	if m == nil {

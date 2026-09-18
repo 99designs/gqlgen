@@ -9,9 +9,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-// UnmarshalerMap must stay an alias, not become a defined type. Passing a plain map as an
-// argument would keep compiling either way, but these two spellings only stay
-// interchangeable while the types are identical.
+// These signatures shipped in v0.17.5 and must not drift while the functions exist, so
+// pin them where the compiler will notice.
 var (
 	_ func(context.Context, map[reflect.Type]reflect.Value) context.Context = WithUnmarshalerMap
 	_ func(...any) map[reflect.Type]reflect.Value                           = BuildUnmarshalerMap
@@ -74,21 +73,8 @@ func TestUnmarshalInputFromContextErrors(t *testing.T) {
 			wantErr: "graphql: the input context is empty",
 		},
 		{
-			name: "nil build function",
-			ctx: func() context.Context {
-				return WithLazyUnmarshalerMap(context.Background(), nil)
-			},
-			target:  &inputTestObject{},
-			wantErr: "graphql: the input context is empty",
-		},
-		{
-			name: "build function returns nil map",
-			ctx: func() context.Context {
-				return WithLazyUnmarshalerMap(
-					context.Background(),
-					func() UnmarshalerMap { return nil },
-				)
-			},
+			name:    "nil map in context",
+			ctx:     func() context.Context { return WithUnmarshalerMap(context.Background(), nil) },
 			target:  &inputTestObject{},
 			wantErr: "graphql: the input context is empty",
 		},
@@ -119,21 +105,6 @@ func TestUnmarshalInputFromContextErrors(t *testing.T) {
 			require.EqualError(t, err, tt.wantErr)
 		})
 	}
-}
-
-func TestWithLazyUnmarshalerMapBuildsOnceOnFirstUse(t *testing.T) {
-	var builds int
-	ctx := WithLazyUnmarshalerMap(context.Background(), func() UnmarshalerMap {
-		builds++
-		return BuildUnmarshalerMap(unmarshalInputTestObject)
-	})
-	assert.Zero(t, builds, "the map was built before it was needed")
-
-	for range 3 {
-		var got inputTestObject
-		require.NoError(t, UnmarshalInputFromContext(ctx, map[string]any{"name": "bob"}, &got))
-	}
-	assert.Equal(t, 1, builds)
 }
 
 // An unmarshaler that still takes its execution context explicitly cannot be invoked with

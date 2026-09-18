@@ -142,13 +142,13 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
-	inputUnmarshalMap := func() graphql.UnmarshalerMap {
-		return graphql.BuildUnmarshalerMap(
-			ec.unmarshalInputMultiHelloByNamesInput,
-			ec.unmarshalInputMultiHelloMultipleRequiresByNamesInput,
-			ec.unmarshalInputMultiHelloRequiresByNamesInput,
-			ec.unmarshalInputMultiHelloWithErrorByNamesInput,
-			ec.unmarshalInputMultiPlanetRequiresNestedByNamesInput,
+	inputUnmarshalers := func() *graphql.InputUnmarshalerIndex {
+		return graphql.NewInputUnmarshalerIndex(
+			graphql.NewInputUnmarshaler("MultiHelloByNamesInput", ec.unmarshalInputMultiHelloByNamesInput),
+			graphql.NewInputUnmarshaler("MultiHelloMultipleRequiresByNamesInput", ec.unmarshalInputMultiHelloMultipleRequiresByNamesInput),
+			graphql.NewInputUnmarshaler("MultiHelloRequiresByNamesInput", ec.unmarshalInputMultiHelloRequiresByNamesInput),
+			graphql.NewInputUnmarshaler("MultiHelloWithErrorByNamesInput", ec.unmarshalInputMultiHelloWithErrorByNamesInput),
+			graphql.NewInputUnmarshaler("MultiPlanetRequiresNestedByNamesInput", ec.unmarshalInputMultiPlanetRequiresNestedByNamesInput),
 		)
 	}
 	first := true
@@ -160,7 +160,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			var data graphql.Marshaler
 			if first {
 				first = false
-				ctx = graphql.WithLazyUnmarshalerMap(ctx, inputUnmarshalMap)
+				ctx = graphql.WithLazyInputUnmarshalerIndex(ctx, inputUnmarshalers)
 				data = ec._Query(ctx, opCtx.Operation.SelectionSet)
 			} else {
 				if atomic.LoadInt32(&ec.PendingDeferred) > 0 {

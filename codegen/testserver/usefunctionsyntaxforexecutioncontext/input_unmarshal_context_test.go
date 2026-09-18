@@ -13,7 +13,7 @@ import (
 )
 
 // use_function_syntax_for_execution_context generates unmarshalers as free functions
-// taking *executionContext, which the unmarshaler map cannot invoke directly. Without
+// taking *executionContext, which the index cannot invoke directly. Without
 // graphql.BindUnmarshaler this call panicked with "reflect: Call with too few input
 // arguments", which the resolver recovery turned into an opaque internal error.
 func TestUnmarshalInputFromContextWithFunctionSyntax(t *testing.T) {
@@ -26,7 +26,9 @@ func TestUnmarshalInputFromContextWithFunctionSyntax(t *testing.T) {
 	resolvers := &Stub{}
 	resolvers.QueryResolver.ListUsers = func(ctx context.Context, filter *UserFilter) ([]*User, error) {
 		called = true
-		gotErr = graphql.UnmarshalInputFromContext(ctx, map[string]any{"name": "bob"}, &got)
+		gotErr = graphql.UnmarshalNamedInputFromContext(
+			ctx, "CreateUserInput", map[string]any{"name": "bob"}, &got,
+		)
 		return nil, nil
 	}
 

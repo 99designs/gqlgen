@@ -2380,36 +2380,36 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
-	inputUnmarshalMap := func() graphql.UnmarshalerMap {
-		return graphql.BuildUnmarshalerMap(
-			ec.unmarshalInputChanges,
-			ec.unmarshalInputDefaultInput,
-			ec.unmarshalInputDirectiveInput,
-			ec.unmarshalInputFieldsOrderInput,
-			ec.unmarshalInputInnerDirectives,
-			ec.unmarshalInputInnerInput,
-			ec.unmarshalInputInputDirectives,
-			ec.unmarshalInputInputDirectivesWithArgs,
-			ec.unmarshalInputInputWithEnumValue,
-			ec.unmarshalInputIssue4053Input1,
-			ec.unmarshalInputIssue4053Input2,
-			ec.unmarshalInputMapNestedInput,
-			ec.unmarshalInputMapNestedMapSliceInput,
-			ec.unmarshalInputMapStringInterfaceInput,
-			ec.unmarshalInputNestedInput,
-			ec.unmarshalInputNestedMapInput,
-			ec.unmarshalInputOmittableInput,
-			ec.unmarshalInputOuterInput,
-			ec.unmarshalInputOuterWrapperInput,
-			ec.unmarshalInputRecursiveInputSlice,
-			ec.unmarshalInputRequiredFilters,
-			ec.unmarshalInputSearchFilters,
-			ec.unmarshalInputSearchWithDefaults,
-			ec.unmarshalInputSpecialInput,
-			ec.unmarshalInputUpdateProductInput,
-			ec.unmarshalInputUpdatePtrToPtrInner,
-			ec.unmarshalInputUpdatePtrToPtrOuter,
-			ec.unmarshalInputValidInput,
+	inputUnmarshalers := func() *graphql.InputUnmarshalerIndex {
+		return graphql.NewInputUnmarshalerIndex(
+			graphql.NewInputUnmarshaler("Changes", ec.unmarshalInputChanges),
+			graphql.NewInputUnmarshaler("DefaultInput", ec.unmarshalInputDefaultInput),
+			graphql.NewInputUnmarshaler("DirectiveInput", ec.unmarshalInputDirectiveInput),
+			graphql.NewInputUnmarshaler("FieldsOrderInput", ec.unmarshalInputFieldsOrderInput),
+			graphql.NewInputUnmarshaler("InnerDirectives", ec.unmarshalInputInnerDirectives),
+			graphql.NewInputUnmarshaler("InnerInput", ec.unmarshalInputInnerInput),
+			graphql.NewInputUnmarshaler("InputDirectives", ec.unmarshalInputInputDirectives),
+			graphql.NewInputUnmarshaler("InputDirectivesWithArgs", ec.unmarshalInputInputDirectivesWithArgs),
+			graphql.NewInputUnmarshaler("InputWithEnumValue", ec.unmarshalInputInputWithEnumValue),
+			graphql.NewInputUnmarshaler("Issue4053Input1", ec.unmarshalInputIssue4053Input1),
+			graphql.NewInputUnmarshaler("Issue4053Input2", ec.unmarshalInputIssue4053Input2),
+			graphql.NewInputUnmarshaler("MapNestedInput", ec.unmarshalInputMapNestedInput),
+			graphql.NewInputUnmarshaler("MapNestedMapSliceInput", ec.unmarshalInputMapNestedMapSliceInput),
+			graphql.NewInputUnmarshaler("MapStringInterfaceInput", ec.unmarshalInputMapStringInterfaceInput),
+			graphql.NewInputUnmarshaler("NestedInput", ec.unmarshalInputNestedInput),
+			graphql.NewInputUnmarshaler("NestedMapInput", ec.unmarshalInputNestedMapInput),
+			graphql.NewInputUnmarshaler("OmittableInput", ec.unmarshalInputOmittableInput),
+			graphql.NewInputUnmarshaler("OuterInput", ec.unmarshalInputOuterInput),
+			graphql.NewInputUnmarshaler("OuterWrapperInput", ec.unmarshalInputOuterWrapperInput),
+			graphql.NewInputUnmarshaler("RecursiveInputSlice", ec.unmarshalInputRecursiveInputSlice),
+			graphql.NewInputUnmarshaler("RequiredFilters", ec.unmarshalInputRequiredFilters),
+			graphql.NewInputUnmarshaler("SearchFilters", ec.unmarshalInputSearchFilters),
+			graphql.NewInputUnmarshaler("SearchWithDefaults", ec.unmarshalInputSearchWithDefaults),
+			graphql.NewInputUnmarshaler("SpecialInput", ec.unmarshalInputSpecialInput),
+			graphql.NewInputUnmarshaler("UpdateProductInput", ec.unmarshalInputUpdateProductInput),
+			graphql.NewInputUnmarshaler("UpdatePtrToPtrInner", ec.unmarshalInputUpdatePtrToPtrInner),
+			graphql.NewInputUnmarshaler("UpdatePtrToPtrOuter", ec.unmarshalInputUpdatePtrToPtrOuter),
+			graphql.NewInputUnmarshaler("ValidInput", ec.unmarshalInputValidInput),
 		)
 	}
 	first := true
@@ -2421,7 +2421,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			var data graphql.Marshaler
 			if first {
 				first = false
-				ctx = graphql.WithLazyUnmarshalerMap(ctx, inputUnmarshalMap)
+				ctx = graphql.WithLazyInputUnmarshalerIndex(ctx, inputUnmarshalers)
 				data = ec._queryMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (any, error) {
 					return ec._Query(ctx, opCtx.Operation.SelectionSet), nil
 				})
@@ -2453,7 +2453,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				return nil
 			}
 			first = false
-			ctx = graphql.WithLazyUnmarshalerMap(ctx, inputUnmarshalMap)
+			ctx = graphql.WithLazyInputUnmarshalerIndex(ctx, inputUnmarshalers)
 			data := ec._mutationMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (any, error) {
 				return ec._Mutation(ctx, opCtx.Operation.SelectionSet), nil
 			})

@@ -51,14 +51,14 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
-	inputUnmarshalMap := func() graphql.UnmarshalerMap {
-		return graphql.BuildUnmarshalerMap(
+	inputUnmarshalers := func() *graphql.InputUnmarshalerIndex {
+		return graphql.NewInputUnmarshalerIndex(
 		{{- range $input := .Inputs -}}
 			{{ if not $input.HasUnmarshal }}
 				{{- if $.Config.UseFunctionSyntaxForExecutionContext }}
-				graphql.BindUnmarshaler(ec, unmarshalInput{{ $input.Name }}),
+				graphql.NewInputUnmarshaler({{ $input.Name | quote }}, graphql.BindUnmarshaler(ec, unmarshalInput{{ $input.Name }})),
 				{{- else }}
-				ec.unmarshalInput{{ $input.Name }},
+				graphql.NewInputUnmarshaler({{ $input.Name | quote }}, ec.unmarshalInput{{ $input.Name }}),
 				{{- end }}
 			{{- end }}
 		{{- end }}
@@ -73,7 +73,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			var data graphql.Marshaler
 			if first {
 				first = false
-				ctx = graphql.WithLazyUnmarshalerMap(ctx, inputUnmarshalMap)
+				ctx = graphql.WithLazyInputUnmarshalerIndex(ctx, inputUnmarshalers)
 				{{ if .AllDirectives.LocationDirectives "QUERY" -}}
 					data = {{$.ECDot}}_queryMiddleware(ctx, {{$.ECArg}}opCtx.Operation, func(ctx context.Context) (any, error){
 						return {{$.ECDot}}_{{.QueryRoot.Name}}(ctx, {{$.ECArg}}opCtx.Operation.SelectionSet), nil
@@ -109,7 +109,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 		return func(ctx context.Context) *graphql.Response {
 			if !first { return nil }
 			first = false
-			ctx = graphql.WithLazyUnmarshalerMap(ctx, inputUnmarshalMap)
+			ctx = graphql.WithLazyInputUnmarshalerIndex(ctx, inputUnmarshalers)
 			{{ if .AllDirectives.LocationDirectives "MUTATION" -}}
 				data := {{$.ECDot}}_mutationMiddleware(ctx, {{$.ECArg}}opCtx.Operation, func(ctx context.Context) (any, error){
 					return {{$.ECDot}}_{{.MutationRoot.Name}}(ctx, {{$.ECArg}}opCtx.Operation.SelectionSet), nil

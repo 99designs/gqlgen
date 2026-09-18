@@ -161,9 +161,11 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		ec.unmarshalInputTodoInput,
-	)
+	inputUnmarshalMap := func() graphql.UnmarshalerMap {
+		return graphql.BuildUnmarshalerMap(
+			ec.unmarshalInputTodoInput,
+		)
+	}
 	first := true
 
 	switch opCtx.Operation.Operation {
@@ -173,7 +175,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			var data graphql.Marshaler
 			if first {
 				first = false
-				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
+				ctx = graphql.WithLazyUnmarshalerMap(ctx, inputUnmarshalMap)
 				data = ec._queryMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (any, error) {
 					return ec._MyQuery(ctx, opCtx.Operation.SelectionSet), nil
 				})
@@ -205,7 +207,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				return nil
 			}
 			first = false
-			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
+			ctx = graphql.WithLazyUnmarshalerMap(ctx, inputUnmarshalMap)
 			data := ec._mutationMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (any, error) {
 				return ec._MyMutation(ctx, opCtx.Operation.SelectionSet), nil
 			})

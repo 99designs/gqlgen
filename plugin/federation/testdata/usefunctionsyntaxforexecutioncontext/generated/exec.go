@@ -596,13 +596,15 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		unmarshalInputMultiHelloByNamesInput,
-		unmarshalInputMultiHelloMultipleRequiresByNamesInput,
-		unmarshalInputMultiHelloRequiresByNamesInput,
-		unmarshalInputMultiHelloWithErrorByNamesInput,
-		unmarshalInputMultiPlanetRequiresNestedByNamesInput,
-	)
+	inputUnmarshalMap := func() graphql.UnmarshalerMap {
+		return graphql.BuildUnmarshalerMap(
+			graphql.BindUnmarshaler(ec, unmarshalInputMultiHelloByNamesInput),
+			graphql.BindUnmarshaler(ec, unmarshalInputMultiHelloMultipleRequiresByNamesInput),
+			graphql.BindUnmarshaler(ec, unmarshalInputMultiHelloRequiresByNamesInput),
+			graphql.BindUnmarshaler(ec, unmarshalInputMultiHelloWithErrorByNamesInput),
+			graphql.BindUnmarshaler(ec, unmarshalInputMultiPlanetRequiresNestedByNamesInput),
+		)
+	}
 	first := true
 
 	switch opCtx.Operation.Operation {
@@ -612,7 +614,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			var data graphql.Marshaler
 			if first {
 				first = false
-				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
+				ctx = graphql.WithLazyUnmarshalerMap(ctx, inputUnmarshalMap)
 				data = _Query(ctx, ec, opCtx.Operation.SelectionSet)
 			} else {
 				if atomic.LoadInt32(&ec.PendingDeferred) > 0 {

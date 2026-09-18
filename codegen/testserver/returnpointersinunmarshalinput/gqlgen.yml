@@ -1,0 +1,17 @@
+schema:
+  - "*.graphql"
+skip_validation: true
+return_pointers_in_unmarshalinput: true
+exec:
+  layout: follow-schema
+  dir: .
+  package: returnpointersinunmarshalinput
+model:
+  filename: models-gen.go
+  package: returnpointersinunmarshalinput
+resolver:
+  layout: follow-schema
+  dir: .
+  package: returnpointersinunmarshalinput
+  type: Resolver
+omit_complexity: true

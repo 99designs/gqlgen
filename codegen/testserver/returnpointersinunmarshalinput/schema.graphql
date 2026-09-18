@@ -1,0 +1,13 @@
+type Query {
+  search(filters: SearchFilters!): String!
+  legacy(filters: LegacyFilters!): String!
+}
+
+input SearchFilters {
+  name: String
+  limit: Int
+}
+
+input LegacyFilters {
+  name: String
+}

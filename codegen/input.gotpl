@@ -7,7 +7,7 @@
 	func {{$.FuncReceiver}}unmarshalInput{{ .Name }}(ctx context.Context, {{$.ECFuncParam}}obj any) ({{ if .PointersInUnmarshalInput }}*{{ end }}{{.Type | ref}}, error) {
 		var it {{.Type | ref}}
 		if obj == nil {
-			return it, nil
+			return {{$it}}, nil
 		}
 
 		asMap := map[string]any{}

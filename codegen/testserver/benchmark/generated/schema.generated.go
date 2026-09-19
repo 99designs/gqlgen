@@ -560,6 +560,18 @@ func (ec *executionContext) unmarshalInputUserOrderBy(ctx context.Context, obj a
 	return it, nil
 }
 
+// UnmarshalUserOrderBy unmarshals raw into the UserOrderBy input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalUserOrderBy(ctx context.Context, raw any) (models.UserOrderBy, error) {
+	var out models.UserOrderBy
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "UserOrderBy", raw, &out)
+	return out, err
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************

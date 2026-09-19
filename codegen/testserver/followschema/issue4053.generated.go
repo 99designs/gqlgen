@@ -52,6 +52,18 @@ func (ec *executionContext) unmarshalInputIssue4053Input1(ctx context.Context, o
 	return it, nil
 }
 
+// UnmarshalIssue4053Input1 unmarshals raw into the Issue4053Input1 input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalIssue4053Input1(ctx context.Context, raw any) (Issue4053Input1, error) {
+	var out Issue4053Input1
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "Issue4053Input1", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputIssue4053Input2(ctx context.Context, obj any) (Issue4053Input2, error) {
 	var it Issue4053Input2
 	if obj == nil {
@@ -91,6 +103,18 @@ func (ec *executionContext) unmarshalInputIssue4053Input2(ctx context.Context, o
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalIssue4053Input2 unmarshals raw into the Issue4053Input2 input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalIssue4053Input2(ctx context.Context, raw any) (Issue4053Input2, error) {
+	var out Issue4053Input2
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "Issue4053Input2", raw, &out)
+	return out, err
 }
 
 // endregion **************************** input.gotpl *****************************

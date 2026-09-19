@@ -53,6 +53,18 @@ func (ec *executionContext) unmarshalInputNestedInput(ctx context.Context, obj a
 	return it, nil
 }
 
+// UnmarshalNestedInput unmarshals raw into the NestedInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalNestedInput(ctx context.Context, raw any) (NestedInput, error) {
+	var out NestedInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "NestedInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputSpecialInput(ctx context.Context, obj any) (SpecialInput, error) {
 	var it SpecialInput
 	if obj == nil {
@@ -81,6 +93,18 @@ func (ec *executionContext) unmarshalInputSpecialInput(ctx context.Context, obj 
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalSpecialInput unmarshals raw into the SpecialInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalSpecialInput(ctx context.Context, raw any) (SpecialInput, error) {
+	var out SpecialInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "SpecialInput", raw, &out)
+	return out, err
 }
 
 // endregion **************************** input.gotpl *****************************

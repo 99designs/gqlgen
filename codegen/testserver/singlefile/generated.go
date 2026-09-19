@@ -2380,36 +2380,38 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		ec.unmarshalInputChanges,
-		ec.unmarshalInputDefaultInput,
-		ec.unmarshalInputDirectiveInput,
-		ec.unmarshalInputFieldsOrderInput,
-		ec.unmarshalInputInnerDirectives,
-		ec.unmarshalInputInnerInput,
-		ec.unmarshalInputInputDirectives,
-		ec.unmarshalInputInputDirectivesWithArgs,
-		ec.unmarshalInputInputWithEnumValue,
-		ec.unmarshalInputIssue4053Input1,
-		ec.unmarshalInputIssue4053Input2,
-		ec.unmarshalInputMapNestedInput,
-		ec.unmarshalInputMapNestedMapSliceInput,
-		ec.unmarshalInputMapStringInterfaceInput,
-		ec.unmarshalInputNestedInput,
-		ec.unmarshalInputNestedMapInput,
-		ec.unmarshalInputOmittableInput,
-		ec.unmarshalInputOuterInput,
-		ec.unmarshalInputOuterWrapperInput,
-		ec.unmarshalInputRecursiveInputSlice,
-		ec.unmarshalInputRequiredFilters,
-		ec.unmarshalInputSearchFilters,
-		ec.unmarshalInputSearchWithDefaults,
-		ec.unmarshalInputSpecialInput,
-		ec.unmarshalInputUpdateProductInput,
-		ec.unmarshalInputUpdatePtrToPtrInner,
-		ec.unmarshalInputUpdatePtrToPtrOuter,
-		ec.unmarshalInputValidInput,
-	)
+	inputUnmarshalers := func() *graphql.InputUnmarshalerIndex {
+		return graphql.NewInputUnmarshalerIndex(
+			graphql.NewInputUnmarshaler("Changes", ec.unmarshalInputChanges),
+			graphql.NewInputUnmarshaler("DefaultInput", ec.unmarshalInputDefaultInput),
+			graphql.NewInputUnmarshaler("DirectiveInput", ec.unmarshalInputDirectiveInput),
+			graphql.NewInputUnmarshaler("FieldsOrderInput", ec.unmarshalInputFieldsOrderInput),
+			graphql.NewInputUnmarshaler("InnerDirectives", ec.unmarshalInputInnerDirectives),
+			graphql.NewInputUnmarshaler("InnerInput", ec.unmarshalInputInnerInput),
+			graphql.NewInputUnmarshaler("InputDirectives", ec.unmarshalInputInputDirectives),
+			graphql.NewInputUnmarshaler("InputDirectivesWithArgs", ec.unmarshalInputInputDirectivesWithArgs),
+			graphql.NewInputUnmarshaler("InputWithEnumValue", ec.unmarshalInputInputWithEnumValue),
+			graphql.NewInputUnmarshaler("Issue4053Input1", ec.unmarshalInputIssue4053Input1),
+			graphql.NewInputUnmarshaler("Issue4053Input2", ec.unmarshalInputIssue4053Input2),
+			graphql.NewInputUnmarshaler("MapNestedInput", ec.unmarshalInputMapNestedInput),
+			graphql.NewInputUnmarshaler("MapNestedMapSliceInput", ec.unmarshalInputMapNestedMapSliceInput),
+			graphql.NewInputUnmarshaler("MapStringInterfaceInput", ec.unmarshalInputMapStringInterfaceInput),
+			graphql.NewInputUnmarshaler("NestedInput", ec.unmarshalInputNestedInput),
+			graphql.NewInputUnmarshaler("NestedMapInput", ec.unmarshalInputNestedMapInput),
+			graphql.NewInputUnmarshaler("OmittableInput", ec.unmarshalInputOmittableInput),
+			graphql.NewInputUnmarshaler("OuterInput", ec.unmarshalInputOuterInput),
+			graphql.NewInputUnmarshaler("OuterWrapperInput", ec.unmarshalInputOuterWrapperInput),
+			graphql.NewInputUnmarshaler("RecursiveInputSlice", ec.unmarshalInputRecursiveInputSlice),
+			graphql.NewInputUnmarshaler("RequiredFilters", ec.unmarshalInputRequiredFilters),
+			graphql.NewInputUnmarshaler("SearchFilters", ec.unmarshalInputSearchFilters),
+			graphql.NewInputUnmarshaler("SearchWithDefaults", ec.unmarshalInputSearchWithDefaults),
+			graphql.NewInputUnmarshaler("SpecialInput", ec.unmarshalInputSpecialInput),
+			graphql.NewInputUnmarshaler("UpdateProductInput", ec.unmarshalInputUpdateProductInput),
+			graphql.NewInputUnmarshaler("UpdatePtrToPtrInner", ec.unmarshalInputUpdatePtrToPtrInner),
+			graphql.NewInputUnmarshaler("UpdatePtrToPtrOuter", ec.unmarshalInputUpdatePtrToPtrOuter),
+			graphql.NewInputUnmarshaler("ValidInput", ec.unmarshalInputValidInput),
+		)
+	}
 	first := true
 
 	switch opCtx.Operation.Operation {
@@ -2419,7 +2421,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			var data graphql.Marshaler
 			if first {
 				first = false
-				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
+				ctx = graphql.WithLazyInputUnmarshalerIndex(ctx, inputUnmarshalers)
 				data = ec._queryMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (any, error) {
 					return ec._Query(ctx, opCtx.Operation.SelectionSet), nil
 				})
@@ -2451,7 +2453,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				return nil
 			}
 			first = false
-			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
+			ctx = graphql.WithLazyInputUnmarshalerIndex(ctx, inputUnmarshalers)
 			data := ec._mutationMiddleware(ctx, opCtx.Operation, func(ctx context.Context) (any, error) {
 				return ec._Mutation(ctx, opCtx.Operation.SelectionSet), nil
 			})
@@ -14532,6 +14534,18 @@ func (ec *executionContext) unmarshalInputChanges(ctx context.Context, obj any) 
 	return it, nil
 }
 
+// UnmarshalChanges unmarshals raw into the Changes input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalChanges(ctx context.Context, raw any) (map[string]any, error) {
+	var out map[string]any
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "Changes", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputDefaultInput(ctx context.Context, obj any) (DefaultInput, error) {
 	var it DefaultInput
 	if obj == nil {
@@ -14576,6 +14590,18 @@ func (ec *executionContext) unmarshalInputDefaultInput(ctx context.Context, obj 
 	return it, nil
 }
 
+// UnmarshalDefaultInput unmarshals raw into the DefaultInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalDefaultInput(ctx context.Context, raw any) (DefaultInput, error) {
+	var out DefaultInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "DefaultInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputDirectiveInput(ctx context.Context, obj any) (map[string]any, error) {
 	var it map[string]any
 	if obj == nil {
@@ -14612,6 +14638,18 @@ func (ec *executionContext) unmarshalInputDirectiveInput(ctx context.Context, ob
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalDirectiveInput unmarshals raw into the DirectiveInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalDirectiveInput(ctx context.Context, raw any) (map[string]any, error) {
+	var out map[string]any
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "DirectiveInput", raw, &out)
+	return out, err
 }
 
 func (ec *executionContext) unmarshalInputFieldsOrderInput(ctx context.Context, obj any) (FieldsOrderInput, error) {
@@ -14651,6 +14689,18 @@ func (ec *executionContext) unmarshalInputFieldsOrderInput(ctx context.Context, 
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalFieldsOrderInput unmarshals raw into the FieldsOrderInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalFieldsOrderInput(ctx context.Context, raw any) (FieldsOrderInput, error) {
+	var out FieldsOrderInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "FieldsOrderInput", raw, &out)
+	return out, err
 }
 
 func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, obj any) (InnerDirectives, error) {
@@ -14708,6 +14758,18 @@ func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, o
 	return it, nil
 }
 
+// UnmarshalInnerDirectives unmarshals raw into the InnerDirectives input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalInnerDirectives(ctx context.Context, raw any) (InnerDirectives, error) {
+	var out InnerDirectives
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "InnerDirectives", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputInnerInput(ctx context.Context, obj any) (InnerInput, error) {
 	var it InnerInput
 	if obj == nil {
@@ -14736,6 +14798,18 @@ func (ec *executionContext) unmarshalInputInnerInput(ctx context.Context, obj an
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalInnerInput unmarshals raw into the InnerInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalInnerInput(ctx context.Context, raw any) (InnerInput, error) {
+	var out InnerInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "InnerInput", raw, &out)
+	return out, err
 }
 
 func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, obj any) (InputDirectives, error) {
@@ -14890,6 +14964,18 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 	return it, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from INPUT_OBJECT directive, should be InputDirectives`, tmp))
 }
 
+// UnmarshalInputDirectives unmarshals raw into the InputDirectives input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalInputDirectives(ctx context.Context, raw any) (InputDirectives, error) {
+	var out InputDirectives
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "InputDirectives", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputInputDirectivesWithArgs(ctx context.Context, obj any) (InputDirectivesWithArgs, error) {
 	var it InputDirectivesWithArgs
 	if obj == nil {
@@ -14942,6 +15028,18 @@ func (ec *executionContext) unmarshalInputInputDirectivesWithArgs(ctx context.Co
 	return it, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from INPUT_OBJECT directive, should be InputDirectivesWithArgs`, tmp))
 }
 
+// UnmarshalInputDirectivesWithArgs unmarshals raw into the InputDirectivesWithArgs input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalInputDirectivesWithArgs(ctx context.Context, raw any) (InputDirectivesWithArgs, error) {
+	var out InputDirectivesWithArgs
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "InputDirectivesWithArgs", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputInputWithEnumValue(ctx context.Context, obj any) (InputWithEnumValue, error) {
 	var it InputWithEnumValue
 	if obj == nil {
@@ -14972,6 +15070,18 @@ func (ec *executionContext) unmarshalInputInputWithEnumValue(ctx context.Context
 	return it, nil
 }
 
+// UnmarshalInputWithEnumValue unmarshals raw into the InputWithEnumValue input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalInputWithEnumValue(ctx context.Context, raw any) (InputWithEnumValue, error) {
+	var out InputWithEnumValue
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "InputWithEnumValue", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputIssue4053Input1(ctx context.Context, obj any) (Issue4053Input1, error) {
 	var it Issue4053Input1
 	if obj == nil {
@@ -15000,6 +15110,18 @@ func (ec *executionContext) unmarshalInputIssue4053Input1(ctx context.Context, o
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalIssue4053Input1 unmarshals raw into the Issue4053Input1 input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalIssue4053Input1(ctx context.Context, raw any) (Issue4053Input1, error) {
+	var out Issue4053Input1
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "Issue4053Input1", raw, &out)
+	return out, err
 }
 
 func (ec *executionContext) unmarshalInputIssue4053Input2(ctx context.Context, obj any) (Issue4053Input2, error) {
@@ -15043,6 +15165,18 @@ func (ec *executionContext) unmarshalInputIssue4053Input2(ctx context.Context, o
 	return it, nil
 }
 
+// UnmarshalIssue4053Input2 unmarshals raw into the Issue4053Input2 input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalIssue4053Input2(ctx context.Context, raw any) (Issue4053Input2, error) {
+	var out Issue4053Input2
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "Issue4053Input2", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputMapNestedInput(ctx context.Context, obj any) (MapNested, error) {
 	var it MapNested
 	if obj == nil {
@@ -15071,6 +15205,18 @@ func (ec *executionContext) unmarshalInputMapNestedInput(ctx context.Context, ob
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalMapNestedInput unmarshals raw into the MapNestedInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalMapNestedInput(ctx context.Context, raw any) (MapNested, error) {
+	var out MapNested
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "MapNestedInput", raw, &out)
+	return out, err
 }
 
 func (ec *executionContext) unmarshalInputMapNestedMapSliceInput(ctx context.Context, obj any) (map[string]any, error) {
@@ -15109,6 +15255,18 @@ func (ec *executionContext) unmarshalInputMapNestedMapSliceInput(ctx context.Con
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalMapNestedMapSliceInput unmarshals raw into the MapNestedMapSliceInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalMapNestedMapSliceInput(ctx context.Context, raw any) (map[string]any, error) {
+	var out map[string]any
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "MapNestedMapSliceInput", raw, &out)
+	return out, err
 }
 
 func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Context, obj any) (map[string]any, error) {
@@ -15163,6 +15321,18 @@ func (ec *executionContext) unmarshalInputMapStringInterfaceInput(ctx context.Co
 	return it, nil
 }
 
+// UnmarshalMapStringInterfaceInput unmarshals raw into the MapStringInterfaceInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalMapStringInterfaceInput(ctx context.Context, raw any) (map[string]any, error) {
+	var out map[string]any
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "MapStringInterfaceInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputNestedInput(ctx context.Context, obj any) (NestedInput, error) {
 	var it NestedInput
 	if obj == nil {
@@ -15193,6 +15363,18 @@ func (ec *executionContext) unmarshalInputNestedInput(ctx context.Context, obj a
 	return it, nil
 }
 
+// UnmarshalNestedInput unmarshals raw into the NestedInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalNestedInput(ctx context.Context, raw any) (NestedInput, error) {
+	var out NestedInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "NestedInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputNestedMapInput(ctx context.Context, obj any) (NestedMapInput, error) {
 	var it NestedMapInput
 	if obj == nil {
@@ -15221,6 +15403,18 @@ func (ec *executionContext) unmarshalInputNestedMapInput(ctx context.Context, ob
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalNestedMapInput unmarshals raw into the NestedMapInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalNestedMapInput(ctx context.Context, raw any) (NestedMapInput, error) {
+	var out NestedMapInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "NestedMapInput", raw, &out)
+	return out, err
 }
 
 func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, obj any) (OmittableInput, error) {
@@ -15302,6 +15496,18 @@ func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, ob
 	return it, nil
 }
 
+// UnmarshalOmittableInput unmarshals raw into the OmittableInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalOmittableInput(ctx context.Context, raw any) (OmittableInput, error) {
+	var out OmittableInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "OmittableInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputOuterInput(ctx context.Context, obj any) (OuterInput, error) {
 	var it OuterInput
 	if obj == nil {
@@ -15330,6 +15536,18 @@ func (ec *executionContext) unmarshalInputOuterInput(ctx context.Context, obj an
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalOuterInput unmarshals raw into the OuterInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalOuterInput(ctx context.Context, raw any) (OuterInput, error) {
+	var out OuterInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "OuterInput", raw, &out)
+	return out, err
 }
 
 func (ec *executionContext) unmarshalInputOuterWrapperInput(ctx context.Context, obj any) (OuterWrapperInput, error) {
@@ -15362,6 +15580,18 @@ func (ec *executionContext) unmarshalInputOuterWrapperInput(ctx context.Context,
 	return it, nil
 }
 
+// UnmarshalOuterWrapperInput unmarshals raw into the OuterWrapperInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalOuterWrapperInput(ctx context.Context, raw any) (OuterWrapperInput, error) {
+	var out OuterWrapperInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "OuterWrapperInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputRecursiveInputSlice(ctx context.Context, obj any) (RecursiveInputSlice, error) {
 	var it RecursiveInputSlice
 	if obj == nil {
@@ -15390,6 +15620,18 @@ func (ec *executionContext) unmarshalInputRecursiveInputSlice(ctx context.Contex
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalRecursiveInputSlice unmarshals raw into the RecursiveInputSlice input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalRecursiveInputSlice(ctx context.Context, raw any) (RecursiveInputSlice, error) {
+	var out RecursiveInputSlice
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "RecursiveInputSlice", raw, &out)
+	return out, err
 }
 
 func (ec *executionContext) unmarshalInputRequiredFilters(ctx context.Context, obj any) (map[string]any, error) {
@@ -15428,6 +15670,18 @@ func (ec *executionContext) unmarshalInputRequiredFilters(ctx context.Context, o
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalRequiredFilters unmarshals raw into the RequiredFilters input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalRequiredFilters(ctx context.Context, raw any) (map[string]any, error) {
+	var out map[string]any
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "RequiredFilters", raw, &out)
+	return out, err
 }
 
 func (ec *executionContext) unmarshalInputSearchFilters(ctx context.Context, obj any) (map[string]any, error) {
@@ -15473,6 +15727,18 @@ func (ec *executionContext) unmarshalInputSearchFilters(ctx context.Context, obj
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalSearchFilters unmarshals raw into the SearchFilters input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalSearchFilters(ctx context.Context, raw any) (map[string]any, error) {
+	var out map[string]any
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "SearchFilters", raw, &out)
+	return out, err
 }
 
 func (ec *executionContext) unmarshalInputSearchWithDefaults(ctx context.Context, obj any) (map[string]any, error) {
@@ -15530,6 +15796,18 @@ func (ec *executionContext) unmarshalInputSearchWithDefaults(ctx context.Context
 	return it, nil
 }
 
+// UnmarshalSearchWithDefaults unmarshals raw into the SearchWithDefaults input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalSearchWithDefaults(ctx context.Context, raw any) (map[string]any, error) {
+	var out map[string]any
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "SearchWithDefaults", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputSpecialInput(ctx context.Context, obj any) (SpecialInput, error) {
 	var it SpecialInput
 	if obj == nil {
@@ -15558,6 +15836,18 @@ func (ec *executionContext) unmarshalInputSpecialInput(ctx context.Context, obj 
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalSpecialInput unmarshals raw into the SpecialInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalSpecialInput(ctx context.Context, raw any) (SpecialInput, error) {
+	var out SpecialInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "SpecialInput", raw, &out)
+	return out, err
 }
 
 func (ec *executionContext) unmarshalInputUpdateProductInput(ctx context.Context, obj any) (map[string]any, error) {
@@ -15605,6 +15895,18 @@ func (ec *executionContext) unmarshalInputUpdateProductInput(ctx context.Context
 	return it, nil
 }
 
+// UnmarshalUpdateProductInput unmarshals raw into the UpdateProductInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalUpdateProductInput(ctx context.Context, raw any) (map[string]any, error) {
+	var out map[string]any
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "UpdateProductInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputUpdatePtrToPtrInner(ctx context.Context, obj any) (UpdatePtrToPtrInner, error) {
 	var it UpdatePtrToPtrInner
 	if obj == nil {
@@ -15640,6 +15942,18 @@ func (ec *executionContext) unmarshalInputUpdatePtrToPtrInner(ctx context.Contex
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalUpdatePtrToPtrInner unmarshals raw into the UpdatePtrToPtrInner input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalUpdatePtrToPtrInner(ctx context.Context, raw any) (UpdatePtrToPtrInner, error) {
+	var out UpdatePtrToPtrInner
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "UpdatePtrToPtrInner", raw, &out)
+	return out, err
 }
 
 func (ec *executionContext) unmarshalInputUpdatePtrToPtrOuter(ctx context.Context, obj any) (UpdatePtrToPtrOuter, error) {
@@ -15684,6 +15998,18 @@ func (ec *executionContext) unmarshalInputUpdatePtrToPtrOuter(ctx context.Contex
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalUpdatePtrToPtrOuter unmarshals raw into the UpdatePtrToPtrOuter input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalUpdatePtrToPtrOuter(ctx context.Context, raw any) (UpdatePtrToPtrOuter, error) {
+	var out UpdatePtrToPtrOuter
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "UpdatePtrToPtrOuter", raw, &out)
+	return out, err
 }
 
 func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj any) (ValidInput, error) {
@@ -15889,6 +16215,18 @@ func (ec *executionContext) unmarshalInputValidInput(ctx context.Context, obj an
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalValidInput unmarshals raw into the ValidInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalValidInput(ctx context.Context, raw any) (ValidInput, error) {
+	var out ValidInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "ValidInput", raw, &out)
+	return out, err
 }
 
 // endregion **************************** input.gotpl *****************************

@@ -152,9 +152,11 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		ec.unmarshalInputTodoInput,
-	)
+	inputUnmarshalers := func() *graphql.InputUnmarshalerIndex {
+		return graphql.NewInputUnmarshalerIndex(
+			graphql.NewInputUnmarshaler("TodoInput", ec.unmarshalInputTodoInput),
+		)
+	}
 	first := true
 
 	switch opCtx.Operation.Operation {
@@ -164,7 +166,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			var data graphql.Marshaler
 			if first {
 				first = false
-				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
+				ctx = graphql.WithLazyInputUnmarshalerIndex(ctx, inputUnmarshalers)
 				data = ec._MyQuery(ctx, opCtx.Operation.SelectionSet)
 			} else {
 				if atomic.LoadInt32(&ec.PendingDeferred) > 0 {
@@ -194,7 +196,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				return nil
 			}
 			first = false
-			ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
+			ctx = graphql.WithLazyInputUnmarshalerIndex(ctx, inputUnmarshalers)
 			data := ec._MyMutation(ctx, opCtx.Operation.SelectionSet)
 			var buf bytes.Buffer
 			data.MarshalGQL(&buf)
@@ -1933,6 +1935,18 @@ func (ec *executionContext) unmarshalInputTodoInput(ctx context.Context, obj any
 		return data, nil
 	}
 	return it, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from INPUT_OBJECT directive, should be TodoInput`, tmp))
+}
+
+// UnmarshalTodoInput unmarshals raw into the TodoInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalTodoInput(ctx context.Context, raw any) (TodoInput, error) {
+	var out TodoInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "TodoInput", raw, &out)
+	return out, err
 }
 
 // endregion **************************** input.gotpl *****************************

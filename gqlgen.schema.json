@@ -300,6 +300,11 @@
       "type": "boolean",
       "default": false
     },
+    "omit_typed_input_unmarshalers": {
+      "description": "Turn on to omit the generated Unmarshal<Input> helpers; graphql.UnmarshalNamedInputFromContext still resolves every input",
+      "type": "boolean",
+      "default": false
+    },
     "struct_fields_always_pointers": {
       "description": "Turn off to make struct-type struct fields not use pointers",
       "type": "boolean",

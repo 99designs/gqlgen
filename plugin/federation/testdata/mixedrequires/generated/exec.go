@@ -102,9 +102,11 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		ec.unmarshalInputProductByIDsInput,
-	)
+	inputUnmarshalers := func() *graphql.InputUnmarshalerIndex {
+		return graphql.NewInputUnmarshalerIndex(
+			graphql.NewInputUnmarshaler("ProductByIDsInput", ec.unmarshalInputProductByIDsInput),
+		)
+	}
 	first := true
 
 	switch opCtx.Operation.Operation {
@@ -114,7 +116,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			var data graphql.Marshaler
 			if first {
 				first = false
-				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
+				ctx = graphql.WithLazyInputUnmarshalerIndex(ctx, inputUnmarshalers)
 				data = ec._Query(ctx, opCtx.Operation.SelectionSet)
 			} else {
 				if atomic.LoadInt32(&ec.PendingDeferred) > 0 {
@@ -2115,6 +2117,18 @@ func (ec *executionContext) unmarshalInputProductByIDsInput(ctx context.Context,
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalProductByIDsInput unmarshals raw into the ProductByIDsInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalProductByIDsInput(ctx context.Context, raw any) (model.ProductByIDsInput, error) {
+	var out model.ProductByIDsInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "ProductByIDsInput", raw, &out)
+	return out, err
 }
 
 // endregion **************************** input.gotpl *****************************

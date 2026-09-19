@@ -7,7 +7,7 @@
 	func {{$.FuncReceiver}}unmarshalInput{{ .Name }}(ctx context.Context, {{$.ECFuncParam}}obj any) ({{ if .PointersInUnmarshalInput }}*{{ end }}{{.Type | ref}}, error) {
 		var it {{.Type | ref}}
 		if obj == nil {
-			return it, nil
+			return {{$it}}, nil
 		}
 
 		asMap := map[string]any{}
@@ -114,6 +114,21 @@
 		return {{$it}}, nil
 		{{- end }}
 	}
+
+	{{- if not $.Config.OmitTypedInputUnmarshalers }}
+
+	// Unmarshal{{ .Name }} unmarshals raw into the {{ .Name }} input type, using the
+	// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+	// object that was not passed as a field argument.
+	//
+	// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+	// and the returned error says so.
+	func Unmarshal{{ .Name }}(ctx context.Context, raw any) ({{ if .PointersInUnmarshalInput }}*{{ end }}{{.Type | ref}}, error) {
+		var out {{ if .PointersInUnmarshalInput }}*{{ end }}{{.Type | ref}}
+		err := graphql.UnmarshalNamedInputFromContext(ctx, {{ .Name | quote }}, raw, &out)
+		return out, err
+	}
+	{{- end }}
 	{{- end }}
 {{ end }}
 

@@ -145,10 +145,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
-	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
-		ec.unmarshalInputInput,
-		ec.unmarshalInputInput64,
-	)
+	inputUnmarshalers := func() *graphql.InputUnmarshalerIndex {
+		return graphql.NewInputUnmarshalerIndex(
+			graphql.NewInputUnmarshaler("Input", ec.unmarshalInputInput),
+			graphql.NewInputUnmarshaler("Input64", ec.unmarshalInputInput64),
+		)
+	}
 	first := true
 
 	switch opCtx.Operation.Operation {
@@ -158,7 +160,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			var data graphql.Marshaler
 			if first {
 				first = false
-				ctx = graphql.WithUnmarshalerMap(ctx, inputUnmarshalMap)
+				ctx = graphql.WithLazyInputUnmarshalerIndex(ctx, inputUnmarshalers)
 				data = ec._Query(ctx, opCtx.Operation.SelectionSet)
 			} else {
 				if atomic.LoadInt32(&ec.PendingDeferred) > 0 {
@@ -1889,6 +1891,18 @@ func (ec *executionContext) unmarshalInputInput(ctx context.Context, obj any) (I
 	return it, nil
 }
 
+// UnmarshalInput unmarshals raw into the Input input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalInput(ctx context.Context, raw any) (Input, error) {
+	var out Input
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "Input", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputInput64(ctx context.Context, obj any) (Input64, error) {
 	var it Input64
 	if obj == nil {
@@ -1917,6 +1931,18 @@ func (ec *executionContext) unmarshalInputInput64(ctx context.Context, obj any) 
 		}
 	}
 	return it, nil
+}
+
+// UnmarshalInput64 unmarshals raw into the Input64 input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalInput64(ctx context.Context, raw any) (Input64, error) {
+	var out Input64
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "Input64", raw, &out)
+	return out, err
 }
 
 // endregion **************************** input.gotpl *****************************

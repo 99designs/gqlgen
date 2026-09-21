@@ -166,8 +166,7 @@ func (ec *executionContext) _DeferModel(ctx context.Context, sel ast.SelectionSe
 	fields := graphql.CollectFields(ec.OperationContext, sel, deferModelImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferredFieldSet := graphql.NewFieldSet(nil)
-	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	deferred := graphql.NewDeferredGroup(ctx)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
@@ -183,81 +182,17 @@ func (ec *executionContext) _DeferModel(ctx context.Context, sel ast.SelectionSe
 				atomic.AddUint32(&out.Invalids, 1)
 			}
 		case "otherResolvedValue":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._DeferModel_otherResolvedValue(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.IsDeferred() {
-				deferredFieldSet.AddField(field)
-				fieldIndex := len(deferredFieldSet.Values) - 1
-				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, deferredFieldSet)
+			out.ResolveConcurrently(ec.OperationContext, &deferred, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._DeferModel_otherResolvedValue(ctx, field, obj)
 				})
-
-				for _, deferrable := range field.Deferrables {
-					view, ok := deferLabelToView[deferrable.Label]
-					if !ok {
-						view = deferredFieldSet.NewView()
-						deferLabelToView[deferrable.Label] = view
-					}
-					view.AddIndices(fieldIndex)
-				}
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		case "values":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._DeferModel_values(ctx, field, obj)
-				if res == graphql.Null {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			if field.IsDeferred() {
-				deferredFieldSet.AddField(field)
-				fieldIndex := len(deferredFieldSet.Values) - 1
-				deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
-					return innerFunc(ctx, deferredFieldSet)
+			out.ResolveConcurrently(ec.OperationContext, &deferred, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._DeferModel_values(ctx, field, obj)
 				})
-
-				for _, deferrable := range field.Deferrables {
-					view, ok := deferLabelToView[deferrable.Label]
-					if !ok {
-						view = deferredFieldSet.NewView()
-						deferLabelToView[deferrable.Label] = view
-					}
-					view.AddIndices(fieldIndex)
-				}
-
-				// don't run the out.Concurrently() call below
-				out.Values[i] = graphql.Null
-				continue
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -267,14 +202,10 @@ func (ec *executionContext) _DeferModel(ctx context.Context, sel ast.SelectionSe
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
-
-	ec.ProcessDeferredGroup(graphql.DeferredGroup{
-		Defers:   deferLabelToView,
-		Path:     graphql.GetPath(ctx),
-		FieldSet: deferredFieldSet,
-		Context:  ctx,
-	})
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
 
 	return out
 }

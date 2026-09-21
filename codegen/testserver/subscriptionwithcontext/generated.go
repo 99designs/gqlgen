@@ -1588,8 +1588,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	})
 
 	out := graphql.NewFieldSet(fields)
-	deferredFieldSet := graphql.NewFieldSet(nil)
-	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	deferred := graphql.NewDeferredGroup(ctx)
 	for i, field := range fields {
 		innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{
 			Object: field.Name,
@@ -1600,27 +1599,11 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Query")
 		case "noop":
-			field := field
-
-			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_noop(ctx, field)
-				if res == graphql.RequiredNull {
-					atomic.AddUint32(&fs.Invalids, 1)
-				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_noop(ctx, field)
+				})
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -1644,14 +1627,10 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
-
-	ec.ProcessDeferredGroup(graphql.DeferredGroup{
-		Defers:   deferLabelToView,
-		Path:     graphql.GetPath(ctx),
-		FieldSet: deferredFieldSet,
-		Context:  ctx,
-	})
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
 
 	return out
 }
@@ -1684,8 +1663,7 @@ func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionS
 	fields := graphql.CollectFields(ec.OperationContext, sel, __DirectiveImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferredFieldSet := graphql.NewFieldSet(nil)
-	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	deferred := graphql.NewDeferredGroup(ctx)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
@@ -1724,14 +1702,10 @@ func (ec *executionContext) ___Directive(ctx context.Context, sel ast.SelectionS
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
-
-	ec.ProcessDeferredGroup(graphql.DeferredGroup{
-		Defers:   deferLabelToView,
-		Path:     graphql.GetPath(ctx),
-		FieldSet: deferredFieldSet,
-		Context:  ctx,
-	})
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
 
 	return out
 }
@@ -1742,8 +1716,7 @@ func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionS
 	fields := graphql.CollectFields(ec.OperationContext, sel, __EnumValueImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferredFieldSet := graphql.NewFieldSet(nil)
-	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	deferred := graphql.NewDeferredGroup(ctx)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
@@ -1777,14 +1750,10 @@ func (ec *executionContext) ___EnumValue(ctx context.Context, sel ast.SelectionS
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
-
-	ec.ProcessDeferredGroup(graphql.DeferredGroup{
-		Defers:   deferLabelToView,
-		Path:     graphql.GetPath(ctx),
-		FieldSet: deferredFieldSet,
-		Context:  ctx,
-	})
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
 
 	return out
 }
@@ -1795,8 +1764,7 @@ func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, 
 	fields := graphql.CollectFields(ec.OperationContext, sel, __FieldImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferredFieldSet := graphql.NewFieldSet(nil)
-	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	deferred := graphql.NewDeferredGroup(ctx)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
@@ -1840,14 +1808,10 @@ func (ec *executionContext) ___Field(ctx context.Context, sel ast.SelectionSet, 
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
-
-	ec.ProcessDeferredGroup(graphql.DeferredGroup{
-		Defers:   deferLabelToView,
-		Path:     graphql.GetPath(ctx),
-		FieldSet: deferredFieldSet,
-		Context:  ctx,
-	})
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
 
 	return out
 }
@@ -1858,8 +1822,7 @@ func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.Selection
 	fields := graphql.CollectFields(ec.OperationContext, sel, __InputValueImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferredFieldSet := graphql.NewFieldSet(nil)
-	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	deferred := graphql.NewDeferredGroup(ctx)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
@@ -1903,14 +1866,10 @@ func (ec *executionContext) ___InputValue(ctx context.Context, sel ast.Selection
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
-
-	ec.ProcessDeferredGroup(graphql.DeferredGroup{
-		Defers:   deferLabelToView,
-		Path:     graphql.GetPath(ctx),
-		FieldSet: deferredFieldSet,
-		Context:  ctx,
-	})
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
 
 	return out
 }
@@ -1921,8 +1880,7 @@ func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet,
 	fields := graphql.CollectFields(ec.OperationContext, sel, __SchemaImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferredFieldSet := graphql.NewFieldSet(nil)
-	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	deferred := graphql.NewDeferredGroup(ctx)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
@@ -1966,14 +1924,10 @@ func (ec *executionContext) ___Schema(ctx context.Context, sel ast.SelectionSet,
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
-
-	ec.ProcessDeferredGroup(graphql.DeferredGroup{
-		Defers:   deferLabelToView,
-		Path:     graphql.GetPath(ctx),
-		FieldSet: deferredFieldSet,
-		Context:  ctx,
-	})
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
 
 	return out
 }
@@ -1984,8 +1938,7 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 	fields := graphql.CollectFields(ec.OperationContext, sel, __TypeImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferredFieldSet := graphql.NewFieldSet(nil)
-	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	deferred := graphql.NewDeferredGroup(ctx)
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
@@ -2054,14 +2007,10 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 		return graphql.Null
 	}
 
-	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
-
-	ec.ProcessDeferredGroup(graphql.DeferredGroup{
-		Defers:   deferLabelToView,
-		Path:     graphql.GetPath(ctx),
-		FieldSet: deferredFieldSet,
-		Context:  ctx,
-	})
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
 
 	return out
 }

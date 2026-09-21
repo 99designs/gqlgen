@@ -18,6 +18,20 @@ type DeferredGroup struct {
 	Context  context.Context
 }
 
+// NewDeferredGroup returns an empty group ready to collect the @defer'd fields
+// of the object being resolved at ctx. The incremental payloads the group
+// eventually emits are labelled with ctx's path and resolved under ctx, so it
+// must be the same context the object's fields are collected and dispatched
+// with.
+func NewDeferredGroup(ctx context.Context) DeferredGroup {
+	return DeferredGroup{
+		Path:     GetPath(ctx),
+		FieldSet: NewFieldSet(nil),
+		Defers:   make(map[string]*FieldSetView),
+		Context:  ctx,
+	}
+}
+
 type DeferredResult struct {
 	Path   ast.Path
 	Label  string

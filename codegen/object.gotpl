@@ -60,8 +60,7 @@ func {{$.FuncReceiver}}_{{$object.Name}}(ctx context.Context, {{$.ECFuncParam}}s
 	{{end}}
 
 	out := graphql.NewFieldSet(fields)
-	deferredFieldSet := graphql.NewFieldSet(nil)
-	deferLabelToView := make(map[string]*graphql.FieldSetView)
+	deferred := graphql.NewDeferredGroup(ctx)
 	for i, field := range fields {
 		{{- if $object.Root }}
 			innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{
@@ -75,68 +74,19 @@ func {{$.FuncReceiver}}_{{$object.Name}}(ctx context.Context, {{$.ECFuncParam}}s
 		{{- range $field := $object.Fields }}
 		case "{{$field.Name}}":
 			{{- if $field.IsConcurrent }}
-				field := field
-
-				innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
-					{{- if not $.Config.OmitPanicHandler }}
-					defer func() {
-						if r := recover(); r != nil {
-							ec.Error(ctx, ec.Recover(ctx, r))
-						}
-					}()
-					{{- end }}
-					res = {{$.ECDot}}_{{$object.Name}}_{{$field.Name}}(ctx, {{$.ECArg}}field{{if not $object.Root}}, obj{{end}})
-					{{- if $field.TypeReference.GQL.NonNull }}
-						if res == graphql.Null { {{ $object.InvalidsIncrement "fs" }} }
-					{{- else }}
-						if res == graphql.RequiredNull {
-							{{- if $object.IsConcurrent }}
-								atomic.AddUint32(&fs.Invalids, 1)
-							{{- else }}
-								fs.Invalids++
-							{{- end }}
-						}
-					{{- end }}
-					return res
-				}
-
-				{{if $object.Root}}
-					rrm := func(ctx context.Context) graphql.Marshaler {
-						return ec.OperationContext.RootResolverMiddleware(ctx,
-							func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-					}
-				{{end}}
-
-				{{if not $object.Root}}
-					if field.IsDeferred() {
-						deferredFieldSet.AddField(field)
-						fieldIndex := len(deferredFieldSet.Values) - 1
-						deferredFieldSet.Concurrently(fieldIndex, func(ctx context.Context) graphql.Marshaler {
-							return innerFunc(ctx, deferredFieldSet)
+				{{- if $object.Root }}
+					out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+						{{ not $.Config.OmitPanicHandler }}, {{ $field.TypeReference.GQL.NonNull }},
+						func(ctx context.Context) graphql.Marshaler {
+							return {{$.ECDot}}_{{$object.Name}}_{{$field.Name}}(ctx, {{$.ECArg}}field)
 						})
-
-						for _, deferrable := range field.Deferrables {
-							view, ok := deferLabelToView[deferrable.Label]
-							if !ok {
-								view = deferredFieldSet.NewView()
-								deferLabelToView[deferrable.Label] = view
-							}
-							view.AddIndices(fieldIndex)
-						}
-
-						// don't run the out.Concurrently() call below
-						out.Values[i] = graphql.Null
-						continue
-					}
-				{{end}}
-
-				out.Concurrently(i, func(ctx context.Context) graphql.Marshaler {
-					{{- if $object.Root -}}
-						return rrm(innerCtx)
-					{{- else -}}
-						return innerFunc(ctx, out)
-					{{- end -}}
-				})
+				{{- else }}
+					out.ResolveConcurrently(ec.OperationContext, &deferred, i,
+						{{ not $.Config.OmitPanicHandler }}, {{ $field.TypeReference.GQL.NonNull }},
+						func(ctx context.Context) graphql.Marshaler {
+							return {{$.ECDot}}_{{$object.Name}}_{{$field.Name}}(ctx, {{$.ECArg}}field, obj)
+						})
+				{{- end }}
 			{{- else }}
 				{{- if $object.Root -}}
 					out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
@@ -149,13 +99,7 @@ func {{$.FuncReceiver}}_{{$object.Name}}(ctx context.Context, {{$.ECFuncParam}}s
 				{{- if $field.TypeReference.GQL.NonNull }}
 					if out.Values[i] == graphql.Null { {{ $object.InvalidsIncrement "out" }} }
 				{{- else }}
-					if out.Values[i] == graphql.RequiredNull {
-						{{- if $object.IsConcurrent }}
-							atomic.AddUint32(&out.Invalids, 1)
-						{{- else }}
-							out.Invalids++
-						{{- end }}
-					}
+					if out.Values[i] == graphql.RequiredNull { {{ $object.InvalidsIncrement "out" }} }
 				{{- end }}
 			{{- end }}
 		{{- end }}
@@ -166,14 +110,10 @@ func {{$.FuncReceiver}}_{{$object.Name}}(ctx context.Context, {{$.ECFuncParam}}s
 	out.Dispatch(ctx)
 	if out.Invalids > 0 { return graphql.Null }
 
-	atomic.AddInt32(&ec.Deferred, int32(min(len(deferLabelToView), math.MaxInt32)))
-
-	ec.ProcessDeferredGroup(graphql.DeferredGroup{
-		Defers:   deferLabelToView,
-		Path:     graphql.GetPath(ctx),
-		FieldSet: deferredFieldSet,
-		Context:  ctx,
-	})
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
 
 	return out
 }

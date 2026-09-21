@@ -1,0 +1,12 @@
+type Query {
+  missingRequiredField: Parent!
+}
+
+type Parent {
+  id: ID!
+  child: Child!
+}
+
+type Child {
+  name: String!
+}

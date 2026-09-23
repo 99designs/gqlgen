@@ -23,6 +23,7 @@ cd _examples
 go get github.com/vektah/gqlparser/v2@${release_tag}
 go mod tidy
 cd ..
+find . -name 'go.mod' -execdir go mod tidy \;
 git commit -s -S -am "Update github.com/vektah/gqlparser/v2@${release_tag}"
 go generate ./...
 git commit -s -S -am "Re-generate after update"

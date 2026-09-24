@@ -61,6 +61,7 @@ type Config struct {
 	ReturnPointersInUnmarshalInput bool  `yaml:"return_pointers_in_unmarshalinput,omitempty"`
 	ResolversAlwaysReturnPointers  bool  `yaml:"resolvers_always_return_pointers,omitempty"`
 	NullableInputOmittable         bool  `yaml:"nullable_input_omittable,omitempty"`
+	ZeroValueNonNullObjectFields   bool  `yaml:"zero_value_non_null_object_fields,omitempty"`
 	EnableModelJsonOmitemptyTag    *bool `yaml:"enable_model_json_omitempty_tag,omitempty"`
 	EnableModelJsonOmitzeroTag     *bool `yaml:"enable_model_json_omitzero_tag,omitempty"`
 	SkipValidation                 bool  `yaml:"skip_validation,omitempty"`

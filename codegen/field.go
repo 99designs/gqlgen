@@ -45,6 +45,10 @@ type Field struct {
 	// option, resolved once at build time so UsesSubscriptionContext and the methods
 	// that depend on it stay nullary instead of threading the flag through the call chain.
 	SubscriptionContextField bool
+	// ZeroValueNonNullObjectFields mirrors the global zero_value_non_null_object_fields
+	// config option, resolved once at build time so FallsBackToZeroValue stays nullary
+	// instead of threading the flag through the call chain.
+	ZeroValueNonNullObjectFields bool
 }
 
 func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, error) {
@@ -54,13 +58,14 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 	}
 
 	f := Field{
-		FieldDefinition:          field,
-		Object:                   obj,
-		Directives:               dirs,
-		GoFieldName:              templates.ToGo(field.Name),
-		GoFieldType:              GoFieldVariable,
-		GoReceiverName:           "obj",
-		SubscriptionContextField: b.Config.SubscriptionContextField,
+		FieldDefinition:              field,
+		Object:                       obj,
+		Directives:                   dirs,
+		GoFieldName:                  templates.ToGo(field.Name),
+		GoFieldType:                  GoFieldVariable,
+		GoReceiverName:               "obj",
+		SubscriptionContextField:     b.Config.SubscriptionContextField,
+		ZeroValueNonNullObjectFields: b.Config.ZeroValueNonNullObjectFields,
 	}
 
 	if field.DefaultValue != nil {
@@ -658,6 +663,29 @@ func (f *Field) IsMethod() bool {
 
 func (f *Field) IsVariable() bool {
 	return f.GoFieldType == GoFieldVariable
+}
+
+// FallsBackToZeroValue reports whether a nil value for this field should be
+// replaced with new(T) instead of triggering GraphQL's null-propagation error.
+// Gated on the zero_value_non_null_object_fields config option (off by default,
+// since per spec a null at a non-null position is always an error); when on, it
+// only fires for direct struct field access on a non-null object type backed by
+// a concrete Go struct pointer, excluding GraphQL's own introspection types
+// (__Type, __Field, __InputValue, ...), where a nil means the schema-building
+// machinery is broken. See https://github.com/99designs/gqlgen/issues/3912.
+func (f *Field) FallsBackToZeroValue() bool {
+	if !f.ZeroValueNonNullObjectFields || !f.IsVariable() {
+		return false
+	}
+	ref := f.TypeReference
+	if !ref.GQL.NonNull || !ref.IsPtr() || ref.Definition.Kind != ast.Object {
+		return false
+	}
+	if strings.HasPrefix(ref.Definition.Name, "__") {
+		return false
+	}
+	elem := ref.Elem()
+	return elem != nil && elem.IsStruct()
 }
 
 func (f *Field) IsMap() bool {

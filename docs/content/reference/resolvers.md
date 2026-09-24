@@ -41,6 +41,24 @@ models:
 In this case, each field in the graphQL type will be bound to the respective field on the go struct
 ignoring the case of the fields
 
+### Missing non-null object fields
+
+Per the [GraphQL specification](https://spec.graphql.org/draft/#sec-Handling-Execution-Errors), a
+`nil` value at a non-null (`!`) position is an error, regardless of how the value was produced, and
+gqlgen follows that by default: if a field bound this way is non-null, its graphQL type is an
+object, and the Go struct field holding it is `nil`, the error propagates and nulls out the nearest
+nullable ancestor.
+
+Setting `zero_value_non_null_object_fields: true` in the gqlgen config trades that spec-compliant
+behavior for convenience: instead of erroring, gqlgen fills the field with a zero-value pointer. This
+is meant for structs you build by hand (a test stub, a partially populated DTO) where it's easy to
+forget to set a nested field and you'd rather see zero values than a collapsed response. Leave it off
+for any schema where a missing nested object should keep surfacing as an error.
+
+The option only applies to fields read by direct struct field access. A resolver method or interface
+field that explicitly returns `nil` still triggers the usual null-propagation error, and gqlgen's own
+introspection types are never auto-filled even with the option on.
+
 
 ## Bind to a method name
 

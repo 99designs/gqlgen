@@ -16,8 +16,21 @@ import (
 type ExecutionContextState[R any, D any, C any] struct {
 	*OperationContext
 	*ExecutableSchemaState[R, D, C]
-	ParsedSchema    *ast.Schema
-	Deferred        int32
+	ParsedSchema *ast.Schema
+
+	// Deferred counts the @defer labels this request has produced. The
+	// response writer reads it to decide whether a payload reports hasNext,
+	// so a deferred query must have incremented it before its first response
+	// is written.
+	//
+	// One counter serves the whole request, and every object resolved in that
+	// request would otherwise touch it. Generated code therefore adds to it
+	// only when an object carries deferred fields: adding zero from each of
+	// them would put every query that uses no @defer on one contended cache
+	// line. That is what the guard in the generated code is for — not
+	// ProcessDeferredGroup, which already ignores an empty group.
+	Deferred int32
+
 	PendingDeferred int32
 	DeferredResults chan DeferredResult
 }

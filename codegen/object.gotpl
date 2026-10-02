@@ -110,6 +110,16 @@ func {{$.FuncReceiver}}_{{$object.Name}}(ctx context.Context, {{$.ECFuncParam}}s
 	out.Dispatch(ctx)
 	if out.Invalids > 0 { return graphql.Null }
 
+	{{/*
+	   The guard looks redundant, because ProcessDeferredGroup already returns
+	   early on an empty group. It is here for the atomic add above it: see the
+	   Deferred field on graphql.ExecutionContextState for why.
+
+	   A template comment, which emits nothing, rather than a generated one.
+	   This block is written once per object, so four lines of prose here cost
+	   2,908 lines across the generated files, and the explanation belongs
+	   with the counter rather than with each of its hundreds of call sites.
+	*/ -}}
 	if n := len(deferred.Defers); n > 0 {
 		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
 		ec.ProcessDeferredGroup(deferred)

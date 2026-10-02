@@ -4,7 +4,8 @@ set -exuo pipefail
 export GO111MODULE=on
 export GOTOOLCHAIN=local
 go fmt ./...
-cd _examples && go fmt ./...
+(cd _examples && go fmt ./...)
+(cd _proptests && go fmt ./...)
 if [[ $(git --no-pager diff) ]] ; then
     echo "you need to run "go fmt" and commit the changes"
     git --no-pager diff

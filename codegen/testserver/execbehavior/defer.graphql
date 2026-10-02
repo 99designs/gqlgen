@@ -1,0 +1,13 @@
+# Fields that resolve concurrently may be deferred. A deferred field is sent in a later
+# response, grouped by the label of its fragment.
+type DeferItem {
+  id: Int!
+  slow: String!
+  failing: String
+  nonNullFailing: String!
+}
+
+extend type Query {
+  deferItem: DeferItem
+  deferItems: [DeferItem!]!
+}

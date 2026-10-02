@@ -28,6 +28,7 @@ func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 type ResolverRoot interface {
+	DeferItem() DeferItemResolver
 	LimitedItem() LimitedItemResolver
 	MarkedChild() MarkedChildResolver
 	Mutation() MutationResolver
@@ -53,6 +54,13 @@ type ComplexityRoot struct {
 	ChildProbeObject struct {
 		ID     func(childComplexity int) int
 		Nested func(childComplexity int, limit *int) int
+	}
+
+	DeferItem struct {
+		Failing        func(childComplexity int) int
+		ID             func(childComplexity int) int
+		NonNullFailing func(childComplexity int) int
+		Slow           func(childComplexity int) int
 	}
 
 	Described struct {
@@ -91,6 +99,8 @@ type ComplexityRoot struct {
 	Query struct {
 		CheckedInput     func(childComplexity int, input CheckedInput) int
 		ChildProbe       func(childComplexity int) int
+		DeferItem        func(childComplexity int) int
+		DeferItems       func(childComplexity int) int
 		Described        func(childComplexity int, input *DescribedInput, choice *OneOfInput) int
 		LimitedItems     func(childComplexity int, count int) int
 		MarkedParent     func(childComplexity int) int
@@ -128,6 +138,11 @@ type ComplexityRoot struct {
 
 // region    ************************** generated!.gotpl **************************
 
+type DeferItemResolver interface {
+	Slow(ctx context.Context, obj *DeferItem) (string, error)
+	Failing(ctx context.Context, obj *DeferItem) (*string, error)
+	NonNullFailing(ctx context.Context, obj *DeferItem) (string, error)
+}
 type LimitedItemResolver interface {
 	Slow(ctx context.Context, obj *LimitedItem) (int, error)
 }
@@ -142,6 +157,8 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Ping(ctx context.Context) (string, error)
+	DeferItem(ctx context.Context) (*DeferItem, error)
+	DeferItems(ctx context.Context) ([]*DeferItem, error)
 	ChildProbe(ctx context.Context) (*ChildProbe, error)
 	CheckedInput(ctx context.Context, input CheckedInput) (string, error)
 	Described(ctx context.Context, input *DescribedInput, choice *OneOfInput) (*Described, error)
@@ -228,6 +245,31 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.ChildProbeObject.Nested(childComplexity, args["limit"].(*int)), true
+
+	case "DeferItem.failing":
+		if e.ComplexityRoot.DeferItem.Failing == nil {
+			break
+		}
+
+		return e.ComplexityRoot.DeferItem.Failing(childComplexity), true
+	case "DeferItem.id":
+		if e.ComplexityRoot.DeferItem.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.DeferItem.ID(childComplexity), true
+	case "DeferItem.nonNullFailing":
+		if e.ComplexityRoot.DeferItem.NonNullFailing == nil {
+			break
+		}
+
+		return e.ComplexityRoot.DeferItem.NonNullFailing(childComplexity), true
+	case "DeferItem.slow":
+		if e.ComplexityRoot.DeferItem.Slow == nil {
+			break
+		}
+
+		return e.ComplexityRoot.DeferItem.Slow(childComplexity), true
 
 	case "Described.link":
 		if e.ComplexityRoot.Described.Link == nil {
@@ -352,6 +394,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.ChildProbe(childComplexity), true
+	case "Query.deferItem":
+		if e.ComplexityRoot.Query.DeferItem == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Query.DeferItem(childComplexity), true
+	case "Query.deferItems":
+		if e.ComplexityRoot.Query.DeferItems == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Query.DeferItems(childComplexity), true
 	case "Query.described":
 		if e.ComplexityRoot.Query.Described == nil {
 			break
@@ -591,7 +645,7 @@ func newExecutionContext(
 	}
 }
 
-//go:embed "field_context_child.graphql" "input_object_directive.graphql" "introspection.graphql" "mark_non_null.graphql" "panic.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "worker_limit.graphql" "wrong_type.graphql"
+//go:embed "defer.graphql" "field_context_child.graphql" "input_object_directive.graphql" "introspection.graphql" "mark_non_null.graphql" "panic.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "worker_limit.graphql" "wrong_type.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -603,6 +657,7 @@ func sourceData(filename string) string {
 }
 
 var sources = []*ast.Source{
+	{Name: "defer.graphql", Input: sourceData("defer.graphql"), BuiltIn: false},
 	{Name: "field_context_child.graphql", Input: sourceData("field_context_child.graphql"), BuiltIn: false},
 	{Name: "input_object_directive.graphql", Input: sourceData("input_object_directive.graphql"), BuiltIn: false},
 	{Name: "introspection.graphql", Input: sourceData("introspection.graphql"), BuiltIn: false},
@@ -646,6 +701,20 @@ func (ec *executionContext) childFields_ChildProbeObject(ctx context.Context, fi
 		return ec.fieldContext_ChildProbeObject_nested(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type ChildProbeObject", field.Name)
+}
+
+func (ec *executionContext) childFields_DeferItem(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_DeferItem_id(ctx, field)
+	case "slow":
+		return ec.fieldContext_DeferItem_slow(ctx, field)
+	case "failing":
+		return ec.fieldContext_DeferItem_failing(ctx, field)
+	case "nonNullFailing":
+		return ec.fieldContext_DeferItem_nonNullFailing(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type DeferItem", field.Name)
 }
 
 func (ec *executionContext) childFields_Described(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
@@ -710,6 +779,10 @@ func (ec *executionContext) childFields_Query(ctx context.Context, field graphql
 	switch field.Name {
 	case "ping":
 		return ec.fieldContext_Query_ping(ctx, field)
+	case "deferItem":
+		return ec.fieldContext_Query_deferItem(ctx, field)
+	case "deferItems":
+		return ec.fieldContext_Query_deferItems(ctx, field)
 	case "childProbe":
 		return ec.fieldContext_Query_childProbe(ctx, field)
 	case "checkedInput":
@@ -1417,6 +1490,98 @@ func (ec *executionContext) fieldContext_ChildProbeObject_nested(ctx context.Con
 	return fc, nil
 }
 
+func (ec *executionContext) _DeferItem_id(ctx context.Context, field graphql.CollectedField, obj *DeferItem) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_DeferItem_id(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_DeferItem_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("DeferItem", field, false, false, "Int")
+}
+
+func (ec *executionContext) _DeferItem_slow(ctx context.Context, field graphql.CollectedField, obj *DeferItem) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_DeferItem_slow(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.DeferItem().Slow(ctx, obj)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_DeferItem_slow(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("DeferItem", field, true, true, "String")
+}
+
+func (ec *executionContext) _DeferItem_failing(ctx context.Context, field graphql.CollectedField, obj *DeferItem) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_DeferItem_failing(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.DeferItem().Failing(ctx, obj)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_DeferItem_failing(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("DeferItem", field, true, true, "String")
+}
+
+func (ec *executionContext) _DeferItem_nonNullFailing(ctx context.Context, field graphql.CollectedField, obj *DeferItem) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_DeferItem_nonNullFailing(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.DeferItem().NonNullFailing(ctx, obj)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_DeferItem_nonNullFailing(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("DeferItem", field, true, true, "String")
+}
+
 func (ec *executionContext) _Described_name(ctx context.Context, field graphql.CollectedField, obj *Described) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1869,6 +2034,70 @@ func (ec *executionContext) _Query_ping(ctx context.Context, field graphql.Colle
 }
 func (ec *executionContext) fieldContext_Query_ping(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("Query", field, true, true, "String")
+}
+
+func (ec *executionContext) _Query_deferItem(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_deferItem(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Query().DeferItem(ctx)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *DeferItem) graphql.Marshaler {
+			return ec.marshalODeferItem2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐDeferItem(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Query_deferItem(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_DeferItem(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_deferItems(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_deferItems(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Query().DeferItems(ctx)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*DeferItem) graphql.Marshaler {
+			return ec.marshalNDeferItem2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐDeferItemᚄ(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Query_deferItems(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_DeferItem(ctx, field)
+		},
+	}
+	return fc, nil
 }
 
 func (ec *executionContext) _Query_childProbe(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4161,6 +4390,57 @@ func (ec *executionContext) _ChildProbeObject(ctx context.Context, sel ast.Selec
 	return out
 }
 
+var deferItemImplementors = []string{"DeferItem"}
+
+func (ec *executionContext) _DeferItem(ctx context.Context, sel ast.SelectionSet, obj *DeferItem) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, deferItemImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("DeferItem")
+		case "id":
+			out.Values[i] = ec._DeferItem_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "slow":
+			out.ResolveConcurrently(ec.OperationContext, &deferred, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._DeferItem_slow(ctx, field, obj)
+				})
+		case "failing":
+			out.ResolveConcurrently(ec.OperationContext, &deferred, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._DeferItem_failing(ctx, field, obj)
+				})
+		case "nonNullFailing":
+			out.ResolveConcurrently(ec.OperationContext, &deferred, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._DeferItem_nonNullFailing(ctx, field, obj)
+				})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
 var describedImplementors = []string{"Described"}
 
 func (ec *executionContext) _Described(ctx context.Context, sel ast.SelectionSet, obj *Described) graphql.Marshaler {
@@ -4445,6 +4725,18 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				true, true,
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._Query_ping(ctx, field)
+				})
+		case "deferItem":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_deferItem(ctx, field)
+				})
+		case "deferItems":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_deferItems(ctx, field)
 				})
 		case "childProbe":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
@@ -5072,6 +5364,30 @@ func (ec *executionContext) marshalNChildProbeObject2ᚖgithubᚗcomᚋ99designs
 	return ec._ChildProbeObject(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNDeferItem2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐDeferItemᚄ(ctx context.Context, sel ast.SelectionSet, v []*DeferItem) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 2, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNDeferItem2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐDeferItem(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNDeferItem2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐDeferItem(ctx context.Context, sel ast.SelectionSet, v *DeferItem) graphql.Marshaler {
+	if v == nil {
+		graphql.AddInvalidNullError(ctx, "DeferItem!")
+		return graphql.Null
+	}
+	return ec._DeferItem(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (string, error) {
 	res, err := graphql.UnmarshalID(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -5403,6 +5719,13 @@ func (ec *executionContext) marshalOChildProbeObject2ᚖgithubᚗcomᚋ99designs
 		return graphql.Null
 	}
 	return ec._ChildProbeObject(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalODeferItem2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐDeferItem(ctx context.Context, sel ast.SelectionSet, v *DeferItem) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._DeferItem(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalODescribed2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐDescribed(ctx context.Context, sel ast.SelectionSet, v *Described) graphql.Marshaler {

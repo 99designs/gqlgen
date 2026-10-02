@@ -7,6 +7,11 @@ import (
 )
 
 type Stub struct {
+	DeferItemResolver struct {
+		Slow           func(ctx context.Context, obj *DeferItem) (string, error)
+		Failing        func(ctx context.Context, obj *DeferItem) (*string, error)
+		NonNullFailing func(ctx context.Context, obj *DeferItem) (string, error)
+	}
 	LimitedItemResolver struct {
 		Slow func(ctx context.Context, obj *LimitedItem) (int, error)
 	}
@@ -21,6 +26,8 @@ type Stub struct {
 	}
 	QueryResolver struct {
 		Ping             func(ctx context.Context) (string, error)
+		DeferItem        func(ctx context.Context) (*DeferItem, error)
+		DeferItems       func(ctx context.Context) ([]*DeferItem, error)
 		ChildProbe       func(ctx context.Context) (*ChildProbe, error)
 		CheckedInput     func(ctx context.Context, input CheckedInput) (string, error)
 		Described        func(ctx context.Context, input *DescribedInput, choice *OneOfInput) (*Described, error)
@@ -36,6 +43,9 @@ type Stub struct {
 	}
 }
 
+func (r *Stub) DeferItem() DeferItemResolver {
+	return &stubDeferItem{r}
+}
 func (r *Stub) LimitedItem() LimitedItemResolver {
 	return &stubLimitedItem{r}
 }
@@ -47,6 +57,18 @@ func (r *Stub) Mutation() MutationResolver {
 }
 func (r *Stub) Query() QueryResolver {
 	return &stubQuery{r}
+}
+
+type stubDeferItem struct{ *Stub }
+
+func (r *stubDeferItem) Slow(ctx context.Context, obj *DeferItem) (string, error) {
+	return r.DeferItemResolver.Slow(ctx, obj)
+}
+func (r *stubDeferItem) Failing(ctx context.Context, obj *DeferItem) (*string, error) {
+	return r.DeferItemResolver.Failing(ctx, obj)
+}
+func (r *stubDeferItem) NonNullFailing(ctx context.Context, obj *DeferItem) (string, error) {
+	return r.DeferItemResolver.NonNullFailing(ctx, obj)
 }
 
 type stubLimitedItem struct{ *Stub }
@@ -80,6 +102,12 @@ type stubQuery struct{ *Stub }
 
 func (r *stubQuery) Ping(ctx context.Context) (string, error) {
 	return r.QueryResolver.Ping(ctx)
+}
+func (r *stubQuery) DeferItem(ctx context.Context) (*DeferItem, error) {
+	return r.QueryResolver.DeferItem(ctx)
+}
+func (r *stubQuery) DeferItems(ctx context.Context) ([]*DeferItem, error) {
+	return r.QueryResolver.DeferItems(ctx)
 }
 func (r *stubQuery) ChildProbe(ctx context.Context) (*ChildProbe, error) {
 	return r.QueryResolver.ChildProbe(ctx)

@@ -39,6 +39,13 @@ type ChildProbeObject struct {
 
 func (ChildProbeObject) IsProbeUnion() {}
 
+type DeferItem struct {
+	ID             int     `json:"id"`
+	Slow           string  `json:"slow"`
+	Failing        *string `json:"failing,omitempty"`
+	NonNullFailing string  `json:"nonNullFailing"`
+}
+
 // An object with descriptions and deprecations.
 type Described struct {
 	// The current name.

@@ -22,3 +22,11 @@ models:
     fields:
       slow:
         resolver: true
+  DeferItem:
+    fields:
+      slow:
+        resolver: true
+      failing:
+        resolver: true
+      nonNullFailing:
+        resolver: true

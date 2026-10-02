@@ -50,6 +50,7 @@ type Stub struct {
 		CheckedInput       func(ctx context.Context, input CheckedInput) (string, error)
 		Described          func(ctx context.Context, input *DescribedInput, choice *OneOfInput) (*Described, error)
 		MarkedParent       func(ctx context.Context) (*MarkedParent, error)
+		UnmarshalNamed     func(ctx context.Context, kind string, raw map[string]any) (*string, error)
 		Nullability        func(ctx context.Context, valid bool) (*Nullability, error)
 		Panicking          func(ctx context.Context) (*string, error)
 		PanickingNonNull   func(ctx context.Context) (string, error)
@@ -195,6 +196,9 @@ func (r *stubQuery) Described(ctx context.Context, input *DescribedInput, choice
 }
 func (r *stubQuery) MarkedParent(ctx context.Context) (*MarkedParent, error) {
 	return r.QueryResolver.MarkedParent(ctx)
+}
+func (r *stubQuery) UnmarshalNamed(ctx context.Context, kind string, raw map[string]any) (*string, error) {
+	return r.QueryResolver.UnmarshalNamed(ctx, kind, raw)
 }
 func (r *stubQuery) Nullability(ctx context.Context, valid bool) (*Nullability, error) {
 	return r.QueryResolver.Nullability(ctx, valid)

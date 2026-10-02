@@ -1,0 +1,7 @@
+# Resolvers may unmarshal an input object from a raw value with the generated
+# Unmarshal<Input> function, which uses the unmarshaler of the current request.
+scalar Map
+
+extend type Query {
+  unmarshalNamed(kind: String!, raw: Map!): String
+}

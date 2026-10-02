@@ -1,4 +1,4 @@
-package graphql
+package proptests
 
 import (
 	"bytes"
@@ -12,6 +12,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/require"
 	"pgregory.net/rapid"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 // Every scalar in this package has a Marshal/Unmarshal pair, and the pair has
@@ -32,7 +34,7 @@ import (
 // The UseNumber call matters and is copied from transport.jsonDecode: numbers
 // reach an Unmarshal function as json.Number rather than float64, which is what
 // lets a 64-bit integer survive a round trip at all.
-func overTheWire(t *rapid.T, m Marshaler) any {
+func overTheWire(t *rapid.T, m graphql.Marshaler) any {
 	t.Helper()
 
 	var buf bytes.Buffer
@@ -52,7 +54,7 @@ func overTheWire(t *rapid.T, m Marshaler) any {
 // monotonic reading that the wire format does not.
 func roundTrip[T any](
 	gen *rapid.Generator[T],
-	marshal func(T) Marshaler,
+	marshal func(T) graphql.Marshaler,
 	unmarshal func(any) (T, error),
 	equal func(t *rapid.T, want, got T),
 ) func(*rapid.T) {
@@ -100,7 +102,7 @@ func utcTime() *rapid.Generator[time.Time] {
 	})
 }
 
-// utcDate generates midnight-UTC instants, which is the only shape MarshalDate
+// utcDate generates midnight-UTC instants, which is the only shape graphql.MarshalDate
 // round-trips: it formats date components only, so any time of day is
 // discarded on the way out.
 func utcDate() *rapid.Generator[time.Time] {
@@ -131,8 +133,8 @@ func durationNanos() *rapid.Generator[int64] {
 }
 
 // jsonValue generates values already in the shape a JSON decoder produces:
-// strings, bools, nil, json.Number, and maps and slices of those. MarshalMap and
-// MarshalAny encode whatever they are given and their Unmarshal counterparts
+// strings, bools, nil, json.Number, and maps and slices of those. graphql.MarshalMap and
+// graphql.MarshalAny encode whatever they are given and their Unmarshal counterparts
 // hand the decoded form straight back, so a round trip is only an identity over
 // values that are already decoded JSON. A Go int put in would come back as a
 // json.Number, which is a lossy conversion rather than a bug.
@@ -165,85 +167,88 @@ func TestScalarRoundTripProperties(t *testing.T) {
 	t.Parallel()
 
 	t.Run("Boolean", rapid.MakeCheck(
-		roundTrip(rapid.Bool(), MarshalBoolean, UnmarshalBoolean, equalValue)))
+		roundTrip(rapid.Bool(), graphql.MarshalBoolean, graphql.UnmarshalBoolean, equalValue)))
 	t.Run("String", rapid.MakeCheck(
-		roundTrip(rapid.String(), MarshalString, UnmarshalString, equalValue)))
+		roundTrip(rapid.String(), graphql.MarshalString, graphql.UnmarshalString, equalValue)))
 	t.Run("ID", rapid.MakeCheck(
-		roundTrip(rapid.String(), MarshalID, UnmarshalID, equalValue)))
+		roundTrip(rapid.String(), graphql.MarshalID, graphql.UnmarshalID, equalValue)))
 
 	t.Run("Int", rapid.MakeCheck(
-		roundTrip(rapid.Int(), MarshalInt, UnmarshalInt, equalValue)))
+		roundTrip(rapid.Int(), graphql.MarshalInt, graphql.UnmarshalInt, equalValue)))
 	t.Run("Int8", rapid.MakeCheck(
-		roundTrip(rapid.Int8(), MarshalInt8, UnmarshalInt8, equalValue)))
+		roundTrip(rapid.Int8(), graphql.MarshalInt8, graphql.UnmarshalInt8, equalValue)))
 	t.Run("Int16", rapid.MakeCheck(
-		roundTrip(rapid.Int16(), MarshalInt16, UnmarshalInt16, equalValue)))
+		roundTrip(rapid.Int16(), graphql.MarshalInt16, graphql.UnmarshalInt16, equalValue)))
 	t.Run("Int32", rapid.MakeCheck(
-		roundTrip(rapid.Int32(), MarshalInt32, UnmarshalInt32, equalValue)))
+		roundTrip(rapid.Int32(), graphql.MarshalInt32, graphql.UnmarshalInt32, equalValue)))
 	t.Run("Int64", rapid.MakeCheck(
-		roundTrip(rapid.Int64(), MarshalInt64, UnmarshalInt64, equalValue)))
+		roundTrip(rapid.Int64(), graphql.MarshalInt64, graphql.UnmarshalInt64, equalValue)))
 	t.Run("IntID", rapid.MakeCheck(
-		roundTrip(rapid.Int(), MarshalIntID, UnmarshalIntID, equalValue)))
+		roundTrip(rapid.Int(), graphql.MarshalIntID, graphql.UnmarshalIntID, equalValue)))
 
 	t.Run("Uint", rapid.MakeCheck(
-		roundTrip(rapid.Uint(), MarshalUint, UnmarshalUint, equalValue)))
+		roundTrip(rapid.Uint(), graphql.MarshalUint, graphql.UnmarshalUint, equalValue)))
 	t.Run("Uint8", rapid.MakeCheck(
-		roundTrip(rapid.Uint8(), MarshalUint8, UnmarshalUint8, equalValue)))
+		roundTrip(rapid.Uint8(), graphql.MarshalUint8, graphql.UnmarshalUint8, equalValue)))
 	t.Run("Uint16", rapid.MakeCheck(
-		roundTrip(rapid.Uint16(), MarshalUint16, UnmarshalUint16, equalValue)))
+		roundTrip(rapid.Uint16(), graphql.MarshalUint16, graphql.UnmarshalUint16, equalValue)))
 	t.Run("Uint32", rapid.MakeCheck(
-		roundTrip(rapid.Uint32(), MarshalUint32, UnmarshalUint32, equalValue)))
+		roundTrip(rapid.Uint32(), graphql.MarshalUint32, graphql.UnmarshalUint32, equalValue)))
 	t.Run("Uint64", rapid.MakeCheck(
-		roundTrip(rapid.Uint64(), MarshalUint64, UnmarshalUint64, equalValue)))
+		roundTrip(rapid.Uint64(), graphql.MarshalUint64, graphql.UnmarshalUint64, equalValue)))
 	t.Run("UintID", rapid.MakeCheck(
-		roundTrip(rapid.Uint(), MarshalUintID, UnmarshalUintID, equalValue)))
+		roundTrip(rapid.Uint(), graphql.MarshalUintID, graphql.UnmarshalUintID, equalValue)))
 
 	t.Run("Float", rapid.MakeCheck(
-		roundTrip(finiteFloat(), MarshalFloat, UnmarshalFloat, equalValue)))
+		roundTrip(finiteFloat(), graphql.MarshalFloat, graphql.UnmarshalFloat, equalValue)))
 	t.Run("FloatContext", rapid.MakeCheck(
 		roundTrip(finiteFloat(),
-			func(f float64) Marshaler {
-				return WrapContextMarshaler(context.Background(), MarshalFloatContext(f))
+			func(f float64) graphql.Marshaler {
+				return graphql.WrapContextMarshaler(
+					context.Background(),
+					graphql.MarshalFloatContext(f),
+				)
 			},
 			func(v any) (float64, error) {
-				return UnmarshalFloatContext(context.Background(), v)
+				return graphql.UnmarshalFloatContext(context.Background(), v)
 			},
 			equalValue)))
 
 	t.Run("Time", rapid.MakeCheck(
-		roundTrip(utcTime(), MarshalTime, UnmarshalTime, equalInstant)))
+		roundTrip(utcTime(), graphql.MarshalTime, graphql.UnmarshalTime, equalInstant)))
 	t.Run("Date", rapid.MakeCheck(
-		roundTrip(utcDate(), MarshalDate, UnmarshalDate, equalInstant)))
+		roundTrip(utcDate(), graphql.MarshalDate, graphql.UnmarshalDate, equalInstant)))
 	t.Run("Duration", rapid.MakeCheck(
 		roundTrip(durationNanos(),
-			func(i int64) Marshaler { return MarshalDuration(time.Duration(i)) },
+			func(i int64) graphql.Marshaler { return graphql.MarshalDuration(time.Duration(i)) },
 			func(v any) (int64, error) {
-				d, err := UnmarshalDuration(v)
+				d, err := graphql.UnmarshalDuration(v)
 				return int64(d), err
 			},
 			equalValue)))
 
 	t.Run("UUID", rapid.MakeCheck(
-		roundTrip(uuidValue(), MarshalUUID, UnmarshalUUID, equalValue)))
+		roundTrip(uuidValue(), graphql.MarshalUUID, graphql.UnmarshalUUID, equalValue)))
 
 	t.Run("Any", rapid.MakeCheck(
-		roundTrip(jsonValue(2), MarshalAny, UnmarshalAny, equalValue)))
+		roundTrip(jsonValue(2), graphql.MarshalAny, graphql.UnmarshalAny, equalValue)))
 	t.Run("Map", rapid.MakeCheck(
 		roundTrip(
 			rapid.MapOfN(rapid.String(), jsonValue(2), 0, 4),
-			MarshalMap, UnmarshalMap, equalValue)))
+			graphql.MarshalMap, graphql.UnmarshalMap, equalValue)))
 }
 
 // Upload has no round-trip property and is excluded above deliberately.
-// MarshalUpload copies the file's bytes to the writer rather than encoding
-// JSON, and UnmarshalUpload only type-asserts an Upload that the multipart
+// graphql.MarshalUpload copies the file's bytes to the writer rather than encoding
+// JSON, and graphql.UnmarshalUpload only type-asserts an Upload that the multipart
 // transport built. The two are not inverses of each other and were never meant
 // to be, so a property asserting they are would be asserting a false thing.
 func TestUploadHasNoRoundTripProperty(t *testing.T) {
 	t.Parallel()
 
-	_, err := UnmarshalUpload("a string that came off the wire")
+	_, err := graphql.UnmarshalUpload("a string that came off the wire")
 	require.Error(t, err,
-		"UnmarshalUpload takes an Upload the transport built, not a marshalled form")
+		"graphql.UnmarshalUpload takes an Upload the transport built, not a marshalled form")
 }
 
 // The minimum duration does not survive a round trip, and the failure is in
@@ -258,19 +263,19 @@ func TestMarshalDurationFailsAtMinInt64(t *testing.T) {
 	t.Parallel()
 
 	var buf bytes.Buffer
-	MarshalDuration(math.MinInt64).MarshalGQL(&buf)
+	graphql.MarshalDuration(math.MinInt64).MarshalGQL(&buf)
 
 	var decoded any
 	dec := json.NewDecoder(bytes.NewReader(buf.Bytes()))
 	dec.UseNumber()
 	require.NoError(t, dec.Decode(&decoded), "the marshalled form is still valid JSON")
 
-	_, err := UnmarshalDuration(decoded)
+	_, err := graphql.UnmarshalDuration(decoded)
 	require.Error(t, err,
 		"the minimum duration marshals to %s, which does not parse back", buf.String())
 }
 
-// MarshalFloat formats with %g, which renders a non-finite float as +Inf, -Inf
+// graphql.MarshalFloat formats with %g, which renders a non-finite float as +Inf, -Inf
 // or NaN. None of those is valid JSON, so the value a resolver returns cannot
 // be parsed by any client. This records the behaviour rather than asserting it
 // is correct: the property test above excludes non-finite floats because of it.
@@ -286,7 +291,7 @@ func TestMarshalFloatEmitsInvalidJSONForNonFiniteValues(t *testing.T) {
 			t.Parallel()
 
 			var buf bytes.Buffer
-			MarshalFloat(f).MarshalGQL(&buf)
+			graphql.MarshalFloat(f).MarshalGQL(&buf)
 
 			var decoded any
 			dec := json.NewDecoder(bytes.NewReader(buf.Bytes()))

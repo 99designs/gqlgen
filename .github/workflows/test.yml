@@ -54,6 +54,13 @@ jobs:
         cd _examples
         go mod download
         gotestsum --junitfile ../go_examples_report.xml --format-icons=hivis --format=pkgname-and-test-fails -- -race ./... -trimpath
+    - name: Property tests
+      shell: bash
+      if: success() || failure() # always run even if the previous step fails
+      run: |
+        cd _proptests
+        go mod download
+        gotestsum --junitfile ../go_proptests_report.xml --format-icons=hivis --format=pkgname-and-test-fails -- -race ./... -trimpath
     - name: Upload Test Report
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: always() # always run even if the previous step fails
@@ -73,6 +80,7 @@ jobs:
         report_paths: |
           report.xml
           go_examples_report.xml
+          go_proptests_report.xml
     - name: robherley/go-test-action announcement
       shell: bash
       if: success() || failure() # always run even if the previous step fails
@@ -107,3 +115,4 @@ jobs:
         paths: |
           report.xml
           go_examples_report.xml
+          go_proptests_report.xml

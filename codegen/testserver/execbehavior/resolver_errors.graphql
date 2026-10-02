@@ -1,0 +1,15 @@
+# A resolver that returns an error nulls its field and reports the error with the
+# field's path.
+type ErrorProbe {
+  ok: String!
+  failing: String
+  failingNonNull: String!
+  withExtensions: String
+  multiple: String
+  valueAndError: String
+}
+
+extend type Query {
+  errorProbe: ErrorProbe
+  failingRoot: String
+}

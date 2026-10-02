@@ -12,6 +12,13 @@ type Stub struct {
 		Failing        func(ctx context.Context, obj *DeferItem) (*string, error)
 		NonNullFailing func(ctx context.Context, obj *DeferItem) (string, error)
 	}
+	ErrorProbeResolver struct {
+		Failing        func(ctx context.Context, obj *ErrorProbe) (*string, error)
+		FailingNonNull func(ctx context.Context, obj *ErrorProbe) (string, error)
+		WithExtensions func(ctx context.Context, obj *ErrorProbe) (*string, error)
+		Multiple       func(ctx context.Context, obj *ErrorProbe) (*string, error)
+		ValueAndError  func(ctx context.Context, obj *ErrorProbe) (*string, error)
+	}
 	LimitedItemResolver struct {
 		Slow func(ctx context.Context, obj *LimitedItem) (int, error)
 	}
@@ -38,6 +45,8 @@ type Stub struct {
 		Nullability      func(ctx context.Context, valid bool) (*Nullability, error)
 		Panicking        func(ctx context.Context) (*string, error)
 		PanickingNonNull func(ctx context.Context) (string, error)
+		ErrorProbe       func(ctx context.Context) (*ErrorProbe, error)
+		FailingRoot      func(ctx context.Context) (*string, error)
 		Viewer           func(ctx context.Context) (*Viewer, error)
 		ValueViewer      func(ctx context.Context) (*ValueViewer, error)
 		LimitedItems     func(ctx context.Context, count int) ([]*LimitedItem, error)
@@ -49,6 +58,9 @@ type Stub struct {
 
 func (r *Stub) DeferItem() DeferItemResolver {
 	return &stubDeferItem{r}
+}
+func (r *Stub) ErrorProbe() ErrorProbeResolver {
+	return &stubErrorProbe{r}
 }
 func (r *Stub) LimitedItem() LimitedItemResolver {
 	return &stubLimitedItem{r}
@@ -73,6 +85,24 @@ func (r *stubDeferItem) Failing(ctx context.Context, obj *DeferItem) (*string, e
 }
 func (r *stubDeferItem) NonNullFailing(ctx context.Context, obj *DeferItem) (string, error) {
 	return r.DeferItemResolver.NonNullFailing(ctx, obj)
+}
+
+type stubErrorProbe struct{ *Stub }
+
+func (r *stubErrorProbe) Failing(ctx context.Context, obj *ErrorProbe) (*string, error) {
+	return r.ErrorProbeResolver.Failing(ctx, obj)
+}
+func (r *stubErrorProbe) FailingNonNull(ctx context.Context, obj *ErrorProbe) (string, error) {
+	return r.ErrorProbeResolver.FailingNonNull(ctx, obj)
+}
+func (r *stubErrorProbe) WithExtensions(ctx context.Context, obj *ErrorProbe) (*string, error) {
+	return r.ErrorProbeResolver.WithExtensions(ctx, obj)
+}
+func (r *stubErrorProbe) Multiple(ctx context.Context, obj *ErrorProbe) (*string, error) {
+	return r.ErrorProbeResolver.Multiple(ctx, obj)
+}
+func (r *stubErrorProbe) ValueAndError(ctx context.Context, obj *ErrorProbe) (*string, error) {
+	return r.ErrorProbeResolver.ValueAndError(ctx, obj)
 }
 
 type stubLimitedItem struct{ *Stub }
@@ -142,6 +172,12 @@ func (r *stubQuery) Panicking(ctx context.Context) (*string, error) {
 }
 func (r *stubQuery) PanickingNonNull(ctx context.Context) (string, error) {
 	return r.QueryResolver.PanickingNonNull(ctx)
+}
+func (r *stubQuery) ErrorProbe(ctx context.Context) (*ErrorProbe, error) {
+	return r.QueryResolver.ErrorProbe(ctx)
+}
+func (r *stubQuery) FailingRoot(ctx context.Context) (*string, error) {
+	return r.QueryResolver.FailingRoot(ctx)
 }
 func (r *stubQuery) Viewer(ctx context.Context) (*Viewer, error) {
 	return r.QueryResolver.Viewer(ctx)

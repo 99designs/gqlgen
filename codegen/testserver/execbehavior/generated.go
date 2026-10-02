@@ -29,6 +29,7 @@ type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 type ResolverRoot interface {
 	DeferItem() DeferItemResolver
+	ErrorProbe() ErrorProbeResolver
 	LimitedItem() LimitedItemResolver
 	MarkedChild() MarkedChildResolver
 	Mutation() MutationResolver
@@ -79,6 +80,15 @@ type ComplexityRoot struct {
 		Name  func(childComplexity int) int
 	}
 
+	ErrorProbe struct {
+		Failing        func(childComplexity int) int
+		FailingNonNull func(childComplexity int) int
+		Multiple       func(childComplexity int) int
+		Ok             func(childComplexity int) int
+		ValueAndError  func(childComplexity int) int
+		WithExtensions func(childComplexity int) int
+	}
+
 	LimitedItem struct {
 		ID   func(childComplexity int) int
 		Slow func(childComplexity int) int
@@ -123,6 +133,8 @@ type ComplexityRoot struct {
 		DeferItem        func(childComplexity int) int
 		DeferItems       func(childComplexity int) int
 		Described        func(childComplexity int, input *DescribedInput, choice *OneOfInput) int
+		ErrorProbe       func(childComplexity int) int
+		FailingRoot      func(childComplexity int) int
 		LimitedItems     func(childComplexity int, count int) int
 		MarkedParent     func(childComplexity int) int
 		Nullability      func(childComplexity int, valid bool) int
@@ -167,6 +179,13 @@ type DeferItemResolver interface {
 	Failing(ctx context.Context, obj *DeferItem) (*string, error)
 	NonNullFailing(ctx context.Context, obj *DeferItem) (string, error)
 }
+type ErrorProbeResolver interface {
+	Failing(ctx context.Context, obj *ErrorProbe) (*string, error)
+	FailingNonNull(ctx context.Context, obj *ErrorProbe) (string, error)
+	WithExtensions(ctx context.Context, obj *ErrorProbe) (*string, error)
+	Multiple(ctx context.Context, obj *ErrorProbe) (*string, error)
+	ValueAndError(ctx context.Context, obj *ErrorProbe) (*string, error)
+}
 type LimitedItemResolver interface {
 	Slow(ctx context.Context, obj *LimitedItem) (int, error)
 }
@@ -193,6 +212,8 @@ type QueryResolver interface {
 	Nullability(ctx context.Context, valid bool) (*Nullability, error)
 	Panicking(ctx context.Context) (*string, error)
 	PanickingNonNull(ctx context.Context) (string, error)
+	ErrorProbe(ctx context.Context) (*ErrorProbe, error)
+	FailingRoot(ctx context.Context) (*string, error)
 	Viewer(ctx context.Context) (*Viewer, error)
 	ValueViewer(ctx context.Context) (*ValueViewer, error)
 	LimitedItems(ctx context.Context, count int) ([]*LimitedItem, error)
@@ -348,6 +369,43 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Dog.Name(childComplexity), true
+
+	case "ErrorProbe.failing":
+		if e.ComplexityRoot.ErrorProbe.Failing == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ErrorProbe.Failing(childComplexity), true
+	case "ErrorProbe.failingNonNull":
+		if e.ComplexityRoot.ErrorProbe.FailingNonNull == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ErrorProbe.FailingNonNull(childComplexity), true
+	case "ErrorProbe.multiple":
+		if e.ComplexityRoot.ErrorProbe.Multiple == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ErrorProbe.Multiple(childComplexity), true
+	case "ErrorProbe.ok":
+		if e.ComplexityRoot.ErrorProbe.Ok == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ErrorProbe.Ok(childComplexity), true
+	case "ErrorProbe.valueAndError":
+		if e.ComplexityRoot.ErrorProbe.ValueAndError == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ErrorProbe.ValueAndError(childComplexity), true
+	case "ErrorProbe.withExtensions":
+		if e.ComplexityRoot.ErrorProbe.WithExtensions == nil {
+			break
+		}
+
+		return e.ComplexityRoot.ErrorProbe.WithExtensions(childComplexity), true
 
 	case "LimitedItem.id":
 		if e.ComplexityRoot.LimitedItem.ID == nil {
@@ -520,6 +578,18 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Described(childComplexity, args["input"].(*DescribedInput), args["choice"].(*OneOfInput)), true
+	case "Query.errorProbe":
+		if e.ComplexityRoot.Query.ErrorProbe == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Query.ErrorProbe(childComplexity), true
+	case "Query.failingRoot":
+		if e.ComplexityRoot.Query.FailingRoot == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Query.FailingRoot(childComplexity), true
 
 	case "Query.limitedItems":
 		if e.ComplexityRoot.Query.LimitedItems == nil {
@@ -776,7 +846,7 @@ func newExecutionContext(
 	}
 }
 
-//go:embed "abstract_types.graphql" "defer.graphql" "field_context_child.graphql" "input_object_directive.graphql" "introspection.graphql" "mark_non_null.graphql" "nullability.graphql" "panic.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "worker_limit.graphql" "wrong_type.graphql"
+//go:embed "abstract_types.graphql" "defer.graphql" "field_context_child.graphql" "input_object_directive.graphql" "introspection.graphql" "mark_non_null.graphql" "nullability.graphql" "panic.graphql" "resolver_errors.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "worker_limit.graphql" "wrong_type.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -796,6 +866,7 @@ var sources = []*ast.Source{
 	{Name: "mark_non_null.graphql", Input: sourceData("mark_non_null.graphql"), BuiltIn: false},
 	{Name: "nullability.graphql", Input: sourceData("nullability.graphql"), BuiltIn: false},
 	{Name: "panic.graphql", Input: sourceData("panic.graphql"), BuiltIn: false},
+	{Name: "resolver_errors.graphql", Input: sourceData("resolver_errors.graphql"), BuiltIn: false},
 	{Name: "root_fields.graphql", Input: sourceData("root_fields.graphql"), BuiltIn: false},
 	{Name: "root_typed_field.graphql", Input: sourceData("root_typed_field.graphql"), BuiltIn: false},
 	{Name: "schema.graphql", Input: sourceData("schema.graphql"), BuiltIn: false},
@@ -870,6 +941,24 @@ func (ec *executionContext) childFields_Dog(ctx context.Context, field graphql.C
 		return ec.fieldContext_Dog_barks(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type Dog", field.Name)
+}
+
+func (ec *executionContext) childFields_ErrorProbe(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "ok":
+		return ec.fieldContext_ErrorProbe_ok(ctx, field)
+	case "failing":
+		return ec.fieldContext_ErrorProbe_failing(ctx, field)
+	case "failingNonNull":
+		return ec.fieldContext_ErrorProbe_failingNonNull(ctx, field)
+	case "withExtensions":
+		return ec.fieldContext_ErrorProbe_withExtensions(ctx, field)
+	case "multiple":
+		return ec.fieldContext_ErrorProbe_multiple(ctx, field)
+	case "valueAndError":
+		return ec.fieldContext_ErrorProbe_valueAndError(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type ErrorProbe", field.Name)
 }
 
 func (ec *executionContext) childFields_LimitedItem(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
@@ -966,6 +1055,10 @@ func (ec *executionContext) childFields_Query(ctx context.Context, field graphql
 		return ec.fieldContext_Query_panicking(ctx, field)
 	case "panickingNonNull":
 		return ec.fieldContext_Query_panickingNonNull(ctx, field)
+	case "errorProbe":
+		return ec.fieldContext_Query_errorProbe(ctx, field)
+	case "failingRoot":
+		return ec.fieldContext_Query_failingRoot(ctx, field)
 	case "viewer":
 		return ec.fieldContext_Query_viewer(ctx, field)
 	case "valueViewer":
@@ -1980,6 +2073,144 @@ func (ec *executionContext) fieldContext_Dog_barks(_ context.Context, field grap
 	return graphql.NewScalarFieldContext("Dog", field, false, false, "Boolean")
 }
 
+func (ec *executionContext) _ErrorProbe_ok(ctx context.Context, field graphql.CollectedField, obj *ErrorProbe) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ErrorProbe_ok(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Ok, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_ErrorProbe_ok(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("ErrorProbe", field, false, false, "String")
+}
+
+func (ec *executionContext) _ErrorProbe_failing(ctx context.Context, field graphql.CollectedField, obj *ErrorProbe) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ErrorProbe_failing(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.ErrorProbe().Failing(ctx, obj)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_ErrorProbe_failing(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("ErrorProbe", field, true, true, "String")
+}
+
+func (ec *executionContext) _ErrorProbe_failingNonNull(ctx context.Context, field graphql.CollectedField, obj *ErrorProbe) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ErrorProbe_failingNonNull(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.ErrorProbe().FailingNonNull(ctx, obj)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_ErrorProbe_failingNonNull(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("ErrorProbe", field, true, true, "String")
+}
+
+func (ec *executionContext) _ErrorProbe_withExtensions(ctx context.Context, field graphql.CollectedField, obj *ErrorProbe) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ErrorProbe_withExtensions(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.ErrorProbe().WithExtensions(ctx, obj)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_ErrorProbe_withExtensions(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("ErrorProbe", field, true, true, "String")
+}
+
+func (ec *executionContext) _ErrorProbe_multiple(ctx context.Context, field graphql.CollectedField, obj *ErrorProbe) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ErrorProbe_multiple(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.ErrorProbe().Multiple(ctx, obj)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_ErrorProbe_multiple(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("ErrorProbe", field, true, true, "String")
+}
+
+func (ec *executionContext) _ErrorProbe_valueAndError(ctx context.Context, field graphql.CollectedField, obj *ErrorProbe) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_ErrorProbe_valueAndError(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.ErrorProbe().ValueAndError(ctx, obj)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_ErrorProbe_valueAndError(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("ErrorProbe", field, true, true, "String")
+}
+
 func (ec *executionContext) _LimitedItem_id(ctx context.Context, field graphql.CollectedField, obj *LimitedItem) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -2938,6 +3169,61 @@ func (ec *executionContext) _Query_panickingNonNull(ctx context.Context, field g
 	)
 }
 func (ec *executionContext) fieldContext_Query_panickingNonNull(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Query", field, true, true, "String")
+}
+
+func (ec *executionContext) _Query_errorProbe(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_errorProbe(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Query().ErrorProbe(ctx)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *ErrorProbe) graphql.Marshaler {
+			return ec.marshalOErrorProbe2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐErrorProbe(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Query_errorProbe(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_ErrorProbe(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_failingRoot(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_failingRoot(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Query().FailingRoot(ctx)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Query_failingRoot(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("Query", field, true, true, "String")
 }
 
@@ -5223,6 +5509,69 @@ func (ec *executionContext) _Dog(ctx context.Context, sel ast.SelectionSet, obj 
 	return out
 }
 
+var errorProbeImplementors = []string{"ErrorProbe"}
+
+func (ec *executionContext) _ErrorProbe(ctx context.Context, sel ast.SelectionSet, obj *ErrorProbe) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, errorProbeImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ErrorProbe")
+		case "ok":
+			out.Values[i] = ec._ErrorProbe_ok(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "failing":
+			out.ResolveConcurrently(ec.OperationContext, &deferred, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._ErrorProbe_failing(ctx, field, obj)
+				})
+		case "failingNonNull":
+			out.ResolveConcurrently(ec.OperationContext, &deferred, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._ErrorProbe_failingNonNull(ctx, field, obj)
+				})
+		case "withExtensions":
+			out.ResolveConcurrently(ec.OperationContext, &deferred, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._ErrorProbe_withExtensions(ctx, field, obj)
+				})
+		case "multiple":
+			out.ResolveConcurrently(ec.OperationContext, &deferred, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._ErrorProbe_multiple(ctx, field, obj)
+				})
+		case "valueAndError":
+			out.ResolveConcurrently(ec.OperationContext, &deferred, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._ErrorProbe_valueAndError(ctx, field, obj)
+				})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
 var limitedItemImplementors = []string{"LimitedItem"}
 
 func (ec *executionContext) _LimitedItem(ctx context.Context, sel ast.SelectionSet, obj *LimitedItem) graphql.Marshaler {
@@ -5599,6 +5948,18 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				true, true,
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._Query_panickingNonNull(ctx, field)
+				})
+		case "errorProbe":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_errorProbe(ctx, field)
+				})
+		case "failingRoot":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_failingRoot(ctx, field)
 				})
 		case "viewer":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
@@ -6705,6 +7066,13 @@ func (ec *executionContext) marshalODog2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgen�
 	}
 
 	return ret
+}
+
+func (ec *executionContext) marshalOErrorProbe2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐErrorProbe(ctx context.Context, sel ast.SelectionSet, v *ErrorProbe) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._ErrorProbe(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v any) (*string, error) {

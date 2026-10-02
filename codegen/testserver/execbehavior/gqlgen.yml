@@ -22,6 +22,18 @@ models:
     fields:
       slow:
         resolver: true
+  ErrorProbe:
+    fields:
+      failing:
+        resolver: true
+      failingNonNull:
+        resolver: true
+      withExtensions:
+        resolver: true
+      multiple:
+        resolver: true
+      valueAndError:
+        resolver: true
   DeferItem:
     fields:
       slow:

@@ -60,6 +60,15 @@ type DescribedInput struct {
 	OldName *string `json:"oldName,omitempty"`
 }
 
+type ErrorProbe struct {
+	Ok             string  `json:"ok"`
+	Failing        *string `json:"failing,omitempty"`
+	FailingNonNull string  `json:"failingNonNull"`
+	WithExtensions *string `json:"withExtensions,omitempty"`
+	Multiple       *string `json:"multiple,omitempty"`
+	ValueAndError  *string `json:"valueAndError,omitempty"`
+}
+
 type LimitedItem struct {
 	ID   int `json:"id"`
 	Slow int `json:"slow"`

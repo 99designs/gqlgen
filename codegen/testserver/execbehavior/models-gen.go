@@ -2,15 +2,42 @@
 
 package execbehavior
 
+import (
+	"bytes"
+	"fmt"
+	"io"
+	"strconv"
+)
+
 type MarkedNode interface {
 	IsMarkedNode()
 	GetID() string
+}
+
+type ProbeUnion interface {
+	IsProbeUnion()
 }
 
 type CheckedInput struct {
 	Mode  string `json:"mode"`
 	Value string `json:"value"`
 }
+
+type ChildProbe struct {
+	Scalar    *string             `json:"scalar,omitempty"`
+	EnumValue *ProbeEnum          `json:"enumValue,omitempty"`
+	Union     ProbeUnion          `json:"union,omitempty"`
+	Iface     MarkedNode          `json:"iface,omitempty"`
+	Object    *ChildProbeObject   `json:"object,omitempty"`
+	List      []*ChildProbeObject `json:"list,omitempty"`
+}
+
+type ChildProbeObject struct {
+	ID     string  `json:"id"`
+	Nested *string `json:"nested,omitempty"`
+}
+
+func (ChildProbeObject) IsProbeUnion() {}
 
 type MarkedChild struct {
 	Value         *string    `json:"value,omitempty"`
@@ -53,4 +80,57 @@ type WrongTypes struct {
 	NonNullIntAsString   string  `json:"nonNullIntAsString"`
 	Marshaler            string  `json:"marshaler"`
 	ReplacedByMiddleware *string `json:"replacedByMiddleware,omitempty"`
+}
+
+type ProbeEnum string
+
+const (
+	ProbeEnumA ProbeEnum = "A"
+)
+
+var AllProbeEnum = []ProbeEnum{
+	ProbeEnumA,
+}
+
+func (e ProbeEnum) IsValid() bool {
+	switch e {
+	case ProbeEnumA:
+		return true
+	}
+	return false
+}
+
+func (e ProbeEnum) String() string {
+	return string(e)
+}
+
+func (e *ProbeEnum) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ProbeEnum(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ProbeEnum", str)
+	}
+	return nil
+}
+
+func (e ProbeEnum) MarshalGQL(w io.Writer) {
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *ProbeEnum) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e ProbeEnum) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }

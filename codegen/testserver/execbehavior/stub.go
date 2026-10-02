@@ -16,6 +16,7 @@ type Stub struct {
 	}
 	QueryResolver struct {
 		Ping           func(ctx context.Context) (string, error)
+		ChildProbe     func(ctx context.Context) (*ChildProbe, error)
 		CheckedInput   func(ctx context.Context, input CheckedInput) (string, error)
 		MarkedParent   func(ctx context.Context) (*MarkedParent, error)
 		Viewer         func(ctx context.Context) (*Viewer, error)
@@ -55,6 +56,9 @@ type stubQuery struct{ *Stub }
 
 func (r *stubQuery) Ping(ctx context.Context) (string, error) {
 	return r.QueryResolver.Ping(ctx)
+}
+func (r *stubQuery) ChildProbe(ctx context.Context) (*ChildProbe, error) {
+	return r.QueryResolver.ChildProbe(ctx)
 }
 func (r *stubQuery) CheckedInput(ctx context.Context, input CheckedInput) (string, error) {
 	return r.QueryResolver.CheckedInput(ctx, input)

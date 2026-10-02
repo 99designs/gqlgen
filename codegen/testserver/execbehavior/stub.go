@@ -46,6 +46,7 @@ type Stub struct {
 		DeferItem          func(ctx context.Context) (*DeferItem, error)
 		DeferItems         func(ctx context.Context) ([]*DeferItem, error)
 		ChildProbe         func(ctx context.Context) (*ChildProbe, error)
+		Coerce             func(ctx context.Context, input *CoerceInput, numbers []int, nested [][]int) (*string, error)
 		CheckedInput       func(ctx context.Context, input CheckedInput) (string, error)
 		Described          func(ctx context.Context, input *DescribedInput, choice *OneOfInput) (*Described, error)
 		MarkedParent       func(ctx context.Context) (*MarkedParent, error)
@@ -182,6 +183,9 @@ func (r *stubQuery) DeferItems(ctx context.Context) ([]*DeferItem, error) {
 }
 func (r *stubQuery) ChildProbe(ctx context.Context) (*ChildProbe, error) {
 	return r.QueryResolver.ChildProbe(ctx)
+}
+func (r *stubQuery) Coerce(ctx context.Context, input *CoerceInput, numbers []int, nested [][]int) (*string, error) {
+	return r.QueryResolver.Coerce(ctx, input, numbers, nested)
 }
 func (r *stubQuery) CheckedInput(ctx context.Context, input CheckedInput) (string, error) {
 	return r.QueryResolver.CheckedInput(ctx, input)

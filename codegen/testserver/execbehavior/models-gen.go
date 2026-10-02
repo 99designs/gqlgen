@@ -44,6 +44,15 @@ type ChildProbeObject struct {
 
 func (ChildProbeObject) IsProbeUnion() {}
 
+type CoerceInput struct {
+	Numbers []int         `json:"numbers,omitempty"`
+	Items   []*CoerceItem `json:"items,omitempty"`
+}
+
+type CoerceItem struct {
+	Value Strict `json:"value"`
+}
+
 type DeferItem struct {
 	ID             int     `json:"id"`
 	Slow           string  `json:"slow"`

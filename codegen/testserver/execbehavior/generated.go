@@ -140,6 +140,7 @@ type ComplexityRoot struct {
 		BadStrictDirective func(childComplexity int) int
 		CheckedInput       func(childComplexity int, input CheckedInput) int
 		ChildProbe         func(childComplexity int) int
+		Coerce             func(childComplexity int, input *CoerceInput, numbers []int, nested [][]int) int
 		DeferItem          func(childComplexity int) int
 		DeferItems         func(childComplexity int) int
 		Described          func(childComplexity int, input *DescribedInput, choice *OneOfInput) int
@@ -224,6 +225,7 @@ type QueryResolver interface {
 	DeferItem(ctx context.Context) (*DeferItem, error)
 	DeferItems(ctx context.Context) ([]*DeferItem, error)
 	ChildProbe(ctx context.Context) (*ChildProbe, error)
+	Coerce(ctx context.Context, input *CoerceInput, numbers []int, nested [][]int) (*string, error)
 	CheckedInput(ctx context.Context, input CheckedInput) (string, error)
 	Described(ctx context.Context, input *DescribedInput, choice *OneOfInput) (*Described, error)
 	MarkedParent(ctx context.Context) (*MarkedParent, error)
@@ -614,6 +616,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.ChildProbe(childComplexity), true
+	case "Query.coerce":
+		if e.ComplexityRoot.Query.Coerce == nil {
+			break
+		}
+
+		args, err := ec.field_Query_coerce_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.Coerce(childComplexity, args["input"].(*CoerceInput), args["numbers"].([]int), args["nested"].([][]int)), true
 	case "Query.deferItem":
 		if e.ComplexityRoot.Query.DeferItem == nil {
 			break
@@ -833,6 +846,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	inputUnmarshalers := func() *graphql.InputUnmarshalerIndex {
 		return graphql.NewInputUnmarshalerIndex(
 			graphql.NewInputUnmarshaler("CheckedInput", ec.unmarshalInputCheckedInput),
+			graphql.NewInputUnmarshaler("CoerceInput", ec.unmarshalInputCoerceInput),
+			graphql.NewInputUnmarshaler("CoerceItem", ec.unmarshalInputCoerceItem),
 			graphql.NewInputUnmarshaler("DescribedInput", ec.unmarshalInputDescribedInput),
 			graphql.NewInputUnmarshaler("OneOfInput", ec.unmarshalInputOneOfInput),
 			graphql.NewInputUnmarshaler("WrongTypeInput", ec.unmarshalInputWrongTypeInput),
@@ -911,7 +926,7 @@ func newExecutionContext(
 	}
 }
 
-//go:embed "abstract_types.graphql" "arguments.graphql" "defer.graphql" "field_context_child.graphql" "input_object_directive.graphql" "introspection.graphql" "mark_non_null.graphql" "nullability.graphql" "panic.graphql" "resolver_errors.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "worker_limit.graphql" "wrong_type.graphql"
+//go:embed "abstract_types.graphql" "arguments.graphql" "defer.graphql" "field_context_child.graphql" "input_coercion.graphql" "input_object_directive.graphql" "introspection.graphql" "mark_non_null.graphql" "nullability.graphql" "panic.graphql" "resolver_errors.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "worker_limit.graphql" "wrong_type.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -927,6 +942,7 @@ var sources = []*ast.Source{
 	{Name: "arguments.graphql", Input: sourceData("arguments.graphql"), BuiltIn: false},
 	{Name: "defer.graphql", Input: sourceData("defer.graphql"), BuiltIn: false},
 	{Name: "field_context_child.graphql", Input: sourceData("field_context_child.graphql"), BuiltIn: false},
+	{Name: "input_coercion.graphql", Input: sourceData("input_coercion.graphql"), BuiltIn: false},
 	{Name: "input_object_directive.graphql", Input: sourceData("input_object_directive.graphql"), BuiltIn: false},
 	{Name: "introspection.graphql", Input: sourceData("introspection.graphql"), BuiltIn: false},
 	{Name: "mark_non_null.graphql", Input: sourceData("mark_non_null.graphql"), BuiltIn: false},
@@ -1127,6 +1143,8 @@ func (ec *executionContext) childFields_Query(ctx context.Context, field graphql
 		return ec.fieldContext_Query_deferItems(ctx, field)
 	case "childProbe":
 		return ec.fieldContext_Query_childProbe(ctx, field)
+	case "coerce":
+		return ec.fieldContext_Query_coerce(ctx, field)
 	case "checkedInput":
 		return ec.fieldContext_Query_checkedInput(ctx, field)
 	case "described":
@@ -1478,6 +1496,36 @@ func (ec *executionContext) field_Query_checkedInput_args(ctx context.Context, r
 		return nil, err
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_coerce_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (*CoerceInput, error) {
+			return ec.unmarshalOCoerceInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐCoerceInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "numbers",
+		func(ctx context.Context, v any) ([]int, error) {
+			return ec.unmarshalOInt2ᚕintᚄ(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["numbers"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "nested",
+		func(ctx context.Context, v any) ([][]int, error) {
+			return ec.unmarshalOInt2ᚕᚕint(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["nested"] = arg2
 	return args, nil
 }
 
@@ -3295,6 +3343,50 @@ func (ec *executionContext) fieldContext_Query_childProbe(_ context.Context, fie
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return ec.childFields_ChildProbe(ctx, field)
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_coerce(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_coerce(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().Coerce(ctx, fc.Args["input"].(*CoerceInput), fc.Args["numbers"].([]int), fc.Args["nested"].([][]int))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Query_coerce(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_coerce_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -5346,6 +5438,97 @@ func UnmarshalCheckedInput(ctx context.Context, raw any) (CheckedInput, error) {
 	return out, err
 }
 
+func (ec *executionContext) unmarshalInputCoerceInput(ctx context.Context, obj any) (CoerceInput, error) {
+	var it CoerceInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"numbers", "items"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "numbers":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("numbers"))
+			data, err := ec.unmarshalOInt2ᚕintᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Numbers = data
+		case "items":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("items"))
+			data, err := ec.unmarshalOCoerceItem2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐCoerceItemᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Items = data
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalCoerceInput unmarshals raw into the CoerceInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalCoerceInput(ctx context.Context, raw any) (CoerceInput, error) {
+	var out CoerceInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "CoerceInput", raw, &out)
+	return out, err
+}
+
+func (ec *executionContext) unmarshalInputCoerceItem(ctx context.Context, obj any) (CoerceItem, error) {
+	var it CoerceItem
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"value"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "value":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
+			data, err := ec.unmarshalNStrict2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐStrict(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Value = data
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalCoerceItem unmarshals raw into the CoerceItem input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalCoerceItem(ctx context.Context, raw any) (CoerceItem, error) {
+	var out CoerceItem
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "CoerceItem", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputDescribedInput(ctx context.Context, obj any) (DescribedInput, error) {
 	var it DescribedInput
 	if obj == nil {
@@ -6343,6 +6526,12 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._Query_childProbe(ctx, field)
 				})
+		case "coerce":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_coerce(ctx, field)
+				})
 		case "checkedInput":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
 				true, true,
@@ -6991,6 +7180,11 @@ func (ec *executionContext) marshalNChildProbeObject2ᚖgithubᚗcomᚋ99designs
 	return ec._ChildProbeObject(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNCoerceItem2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐCoerceItem(ctx context.Context, v any) (*CoerceItem, error) {
+	res, err := ec.unmarshalInputCoerceItem(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNDeferItem2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐDeferItemᚄ(ctx context.Context, sel ast.SelectionSet, v []*DeferItem) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 2, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
@@ -7474,6 +7668,31 @@ func (ec *executionContext) marshalOChildProbeObject2ᚖgithubᚗcomᚋ99designs
 	return ec._ChildProbeObject(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalOCoerceInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐCoerceInput(ctx context.Context, v any) (*CoerceInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputCoerceInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOCoerceItem2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐCoerceItemᚄ(ctx context.Context, v any) ([]*CoerceItem, error) {
+	if v == nil {
+		return nil, nil
+	}
+	vSlice := graphql.CoerceList(v)
+	var err error
+	res := make([]*CoerceItem, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNCoerceItem2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐCoerceItem(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
 func (ec *executionContext) marshalODeferItem2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐDeferItem(ctx context.Context, sel ast.SelectionSet, v *DeferItem) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -7538,6 +7757,70 @@ func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.Se
 	_ = ctx
 	res := graphql.MarshalID(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOInt2ᚕintᚄ(ctx context.Context, v any) ([]int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	vSlice := graphql.CoerceList(v)
+	var err error
+	res := make([]int, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNInt2int(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOInt2ᚕintᚄ(ctx context.Context, sel ast.SelectionSet, v []int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNInt2int(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOInt2ᚕᚕint(ctx context.Context, v any) ([][]int, error) {
+	if v == nil {
+		return nil, nil
+	}
+	vSlice := graphql.CoerceList(v)
+	var err error
+	res := make([][]int, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOInt2ᚕintᚄ(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOInt2ᚕᚕint(ctx context.Context, sel ast.SelectionSet, v [][]int) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalOInt2ᚕintᚄ(ctx, sel, v[i])
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v any) (*int, error) {

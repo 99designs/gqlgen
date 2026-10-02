@@ -1,4 +1,4 @@
-//go:generate go run github.com/matryer/moq@v0.7.1 -out executable_schema_mock.go . ExecutableSchema
+//go:generate go run github.com/vektra/mockery/v3@v3.8.0 --config=.mockery.yaml
 
 package graphql
 

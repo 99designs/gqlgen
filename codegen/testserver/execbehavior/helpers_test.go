@@ -32,6 +32,12 @@ func post(t *testing.T, srv http.Handler, query string) string {
 	return exectest.Post(t, srv, query, nil)
 }
 
+// postVars is post with variables.
+func postVars(t *testing.T, srv http.Handler, query string, variables map[string]any) string {
+	t.Helper()
+	return exectest.Post(t, srv, query, variables)
+}
+
 // execute runs query on es and returns every response, including the deferred ones
 // that follow the first, as a JSON array. The deferred responses are sorted by label
 // and path, and the errors of each response are normalized by exectest.NormalizeErrors,

@@ -1,0 +1,23 @@
+# Values of interface and union types are marshaled as the object type of their Go
+# type. Go types that are not in the schema must marshal themselves.
+interface Animal {
+  name: String!
+}
+
+type Dog implements Animal {
+  name: String!
+  barks: Boolean!
+}
+
+type Cat implements Animal {
+  name: String!
+  lives: Int!
+}
+
+union Pet = Dog | Cat
+
+extend type Query {
+  animals: [Animal]!
+  pets: [Pet!]!
+  strangeAnimal(kind: String!): Animal
+}

@@ -26,6 +26,9 @@ type Stub struct {
 	}
 	QueryResolver struct {
 		Ping             func(ctx context.Context) (string, error)
+		Animals          func(ctx context.Context) ([]Animal, error)
+		Pets             func(ctx context.Context) ([]Pet, error)
+		StrangeAnimal    func(ctx context.Context, kind string) (Animal, error)
 		DeferItem        func(ctx context.Context) (*DeferItem, error)
 		DeferItems       func(ctx context.Context) ([]*DeferItem, error)
 		ChildProbe       func(ctx context.Context) (*ChildProbe, error)
@@ -102,6 +105,15 @@ type stubQuery struct{ *Stub }
 
 func (r *stubQuery) Ping(ctx context.Context) (string, error) {
 	return r.QueryResolver.Ping(ctx)
+}
+func (r *stubQuery) Animals(ctx context.Context) ([]Animal, error) {
+	return r.QueryResolver.Animals(ctx)
+}
+func (r *stubQuery) Pets(ctx context.Context) ([]Pet, error) {
+	return r.QueryResolver.Pets(ctx)
+}
+func (r *stubQuery) StrangeAnimal(ctx context.Context, kind string) (Animal, error) {
+	return r.QueryResolver.StrangeAnimal(ctx, kind)
 }
 func (r *stubQuery) DeferItem(ctx context.Context) (*DeferItem, error) {
 	return r.QueryResolver.DeferItem(ctx)

@@ -42,6 +42,11 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	Cat struct {
+		Lives func(childComplexity int) int
+		Name  func(childComplexity int) int
+	}
+
 	ChildProbe struct {
 		EnumValue func(childComplexity int) int
 		Iface     func(childComplexity int) int
@@ -67,6 +72,11 @@ type ComplexityRoot struct {
 		Link    func(childComplexity int) int
 		Name    func(childComplexity int, format *NameFormat, legacyFormat *string) int
 		OldName func(childComplexity int) int
+	}
+
+	Dog struct {
+		Barks func(childComplexity int) int
+		Name  func(childComplexity int) int
 	}
 
 	LimitedItem struct {
@@ -97,6 +107,7 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
+		Animals          func(childComplexity int) int
 		CheckedInput     func(childComplexity int, input CheckedInput) int
 		ChildProbe       func(childComplexity int) int
 		DeferItem        func(childComplexity int) int
@@ -106,7 +117,9 @@ type ComplexityRoot struct {
 		MarkedParent     func(childComplexity int) int
 		Panicking        func(childComplexity int) int
 		PanickingNonNull func(childComplexity int) int
+		Pets             func(childComplexity int) int
 		Ping             func(childComplexity int) int
+		StrangeAnimal    func(childComplexity int, kind string) int
 		ValueViewer      func(childComplexity int) int
 		Viewer           func(childComplexity int) int
 		WrongTypeArg     func(childComplexity int, value *string) int
@@ -157,6 +170,9 @@ type MutationResolver interface {
 }
 type QueryResolver interface {
 	Ping(ctx context.Context) (string, error)
+	Animals(ctx context.Context) ([]Animal, error)
+	Pets(ctx context.Context) ([]Pet, error)
+	StrangeAnimal(ctx context.Context, kind string) (Animal, error)
 	DeferItem(ctx context.Context) (*DeferItem, error)
 	DeferItems(ctx context.Context) ([]*DeferItem, error)
 	ChildProbe(ctx context.Context) (*ChildProbe, error)
@@ -190,6 +206,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	ec := newExecutionContext(nil, e, nil)
 	_ = ec
 	switch typeName + "." + field {
+
+	case "Cat.lives":
+		if e.ComplexityRoot.Cat.Lives == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Cat.Lives(childComplexity), true
+	case "Cat.name":
+		if e.ComplexityRoot.Cat.Name == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Cat.Name(childComplexity), true
 
 	case "ChildProbe.enumValue":
 		if e.ComplexityRoot.ChildProbe.EnumValue == nil {
@@ -295,6 +324,19 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Described.OldName(childComplexity), true
 
+	case "Dog.barks":
+		if e.ComplexityRoot.Dog.Barks == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Dog.Barks(childComplexity), true
+	case "Dog.name":
+		if e.ComplexityRoot.Dog.Name == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Dog.Name(childComplexity), true
+
 	case "LimitedItem.id":
 		if e.ComplexityRoot.LimitedItem.ID == nil {
 			break
@@ -377,6 +419,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Mutation.Touch(childComplexity), true
 
+	case "Query.animals":
+		if e.ComplexityRoot.Query.Animals == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Query.Animals(childComplexity), true
 	case "Query.checkedInput":
 		if e.ComplexityRoot.Query.CheckedInput == nil {
 			break
@@ -447,12 +495,29 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.PanickingNonNull(childComplexity), true
+	case "Query.pets":
+		if e.ComplexityRoot.Query.Pets == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Query.Pets(childComplexity), true
 	case "Query.ping":
 		if e.ComplexityRoot.Query.Ping == nil {
 			break
 		}
 
 		return e.ComplexityRoot.Query.Ping(childComplexity), true
+	case "Query.strangeAnimal":
+		if e.ComplexityRoot.Query.StrangeAnimal == nil {
+			break
+		}
+
+		args, err := ec.field_Query_strangeAnimal_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.StrangeAnimal(childComplexity, args["kind"].(string)), true
 	case "Query.valueViewer":
 		if e.ComplexityRoot.Query.ValueViewer == nil {
 			break
@@ -645,7 +710,7 @@ func newExecutionContext(
 	}
 }
 
-//go:embed "defer.graphql" "field_context_child.graphql" "input_object_directive.graphql" "introspection.graphql" "mark_non_null.graphql" "panic.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "worker_limit.graphql" "wrong_type.graphql"
+//go:embed "abstract_types.graphql" "defer.graphql" "field_context_child.graphql" "input_object_directive.graphql" "introspection.graphql" "mark_non_null.graphql" "panic.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "worker_limit.graphql" "wrong_type.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -657,6 +722,7 @@ func sourceData(filename string) string {
 }
 
 var sources = []*ast.Source{
+	{Name: "abstract_types.graphql", Input: sourceData("abstract_types.graphql"), BuiltIn: false},
 	{Name: "defer.graphql", Input: sourceData("defer.graphql"), BuiltIn: false},
 	{Name: "field_context_child.graphql", Input: sourceData("field_context_child.graphql"), BuiltIn: false},
 	{Name: "input_object_directive.graphql", Input: sourceData("input_object_directive.graphql"), BuiltIn: false},
@@ -779,6 +845,12 @@ func (ec *executionContext) childFields_Query(ctx context.Context, field graphql
 	switch field.Name {
 	case "ping":
 		return ec.fieldContext_Query_ping(ctx, field)
+	case "animals":
+		return ec.fieldContext_Query_animals(ctx, field)
+	case "pets":
+		return ec.fieldContext_Query_pets(ctx, field)
+	case "strangeAnimal":
+		return ec.fieldContext_Query_strangeAnimal(ctx, field)
 	case "deferItem":
 		return ec.fieldContext_Query_deferItem(ctx, field)
 	case "deferItems":
@@ -1111,6 +1183,20 @@ func (ec *executionContext) field_Query_limitedItems_args(ctx context.Context, r
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_strangeAnimal_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "kind",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNString2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["kind"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_wrongTypeArg_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1258,6 +1344,52 @@ func (ec *executionContext) field___Type_inputFields_args(ctx context.Context, r
 // endregion ***************************** args.gotpl *****************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _Cat_name(ctx context.Context, field graphql.CollectedField, obj *Cat) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Cat_name(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Cat_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Cat", field, false, false, "String")
+}
+
+func (ec *executionContext) _Cat_lives(ctx context.Context, field graphql.CollectedField, obj *Cat) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Cat_lives(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Lives, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Cat_lives(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Cat", field, false, false, "Int")
+}
 
 func (ec *executionContext) _ChildProbe_scalar(ctx context.Context, field graphql.CollectedField, obj *ChildProbe) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -1689,6 +1821,52 @@ func (ec *executionContext) fieldContext_Described_link(_ context.Context, field
 	return graphql.NewScalarFieldContext("Described", field, false, false, "Url")
 }
 
+func (ec *executionContext) _Dog_name(ctx context.Context, field graphql.CollectedField, obj *Dog) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Dog_name(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Dog_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Dog", field, false, false, "String")
+}
+
+func (ec *executionContext) _Dog_barks(ctx context.Context, field graphql.CollectedField, obj *Dog) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Dog_barks(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Barks, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v bool) graphql.Marshaler {
+			return ec.marshalNBoolean2bool(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Dog_barks(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Dog", field, false, false, "Boolean")
+}
+
 func (ec *executionContext) _LimitedItem_id(ctx context.Context, field graphql.CollectedField, obj *LimitedItem) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -2034,6 +2212,105 @@ func (ec *executionContext) _Query_ping(ctx context.Context, field graphql.Colle
 }
 func (ec *executionContext) fieldContext_Query_ping(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("Query", field, true, true, "String")
+}
+
+func (ec *executionContext) _Query_animals(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_animals(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Query().Animals(ctx)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []Animal) graphql.Marshaler {
+			return ec.marshalNAnimal2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐAnimal(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Query_animals(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("FieldContext.Child cannot be called on type INTERFACE")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_pets(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_pets(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Query().Pets(ctx)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []Pet) graphql.Marshaler {
+			return ec.marshalNPet2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐPetᚄ(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Query_pets(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Query", field, true, true, "Pet")
+}
+
+func (ec *executionContext) _Query_strangeAnimal(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_strangeAnimal(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().StrangeAnimal(ctx, fc.Args["kind"].(string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v Animal) graphql.Marshaler {
+			return ec.marshalOAnimal2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐAnimal(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Query_strangeAnimal(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("FieldContext.Child cannot be called on type INTERFACE")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_strangeAnimal_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
 }
 
 func (ec *executionContext) _Query_deferItem(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -4250,6 +4527,31 @@ func UnmarshalWrongTypeInput(ctx context.Context, raw any) (WrongTypeInput, erro
 
 // region    ************************** interface.gotpl ***************************
 
+func (ec *executionContext) _Animal(ctx context.Context, sel ast.SelectionSet, obj Animal) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case Dog:
+		return ec._Dog(ctx, sel, &obj)
+	case *Dog:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Dog(ctx, sel, obj)
+	case *Cat:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Cat(ctx, sel, obj)
+	default:
+		if typedObj, ok := obj.(graphql.Marshaler); ok {
+			return typedObj
+		} else {
+			panic(fmt.Errorf("unexpected type %T; non-generated variants of Animal must implement graphql.Marshaler", obj))
+		}
+	}
+}
+
 func (ec *executionContext) _MarkedNode(ctx context.Context, sel ast.SelectionSet, obj MarkedNode) graphql.Marshaler {
 	switch obj := (obj).(type) {
 	case nil:
@@ -4266,6 +4568,31 @@ func (ec *executionContext) _MarkedNode(ctx context.Context, sel ast.SelectionSe
 			return typedObj
 		} else {
 			panic(fmt.Errorf("unexpected type %T; non-generated variants of MarkedNode must implement graphql.Marshaler", obj))
+		}
+	}
+}
+
+func (ec *executionContext) _Pet(ctx context.Context, sel ast.SelectionSet, obj Pet) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case Dog:
+		return ec._Dog(ctx, sel, &obj)
+	case *Dog:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Dog(ctx, sel, obj)
+	case *Cat:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Cat(ctx, sel, obj)
+	default:
+		if typedObj, ok := obj.(graphql.Marshaler); ok {
+			return typedObj
+		} else {
+			panic(fmt.Errorf("unexpected type %T; non-generated variants of Pet must implement graphql.Marshaler", obj))
 		}
 	}
 }
@@ -4293,6 +4620,44 @@ func (ec *executionContext) _ProbeUnion(ctx context.Context, sel ast.SelectionSe
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
+
+var catImplementors = []string{"Cat", "Animal", "Pet"}
+
+func (ec *executionContext) _Cat(ctx context.Context, sel ast.SelectionSet, obj *Cat) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, catImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Cat")
+		case "name":
+			out.Values[i] = ec._Cat_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "lives":
+			out.Values[i] = ec._Cat_lives(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
 
 var childProbeImplementors = []string{"ChildProbe"}
 
@@ -4465,6 +4830,44 @@ func (ec *executionContext) _Described(ctx context.Context, sel ast.SelectionSet
 		case "link":
 			out.Values[i] = ec._Described_link(ctx, field, obj)
 			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
+var dogImplementors = []string{"Dog", "Animal", "Pet"}
+
+func (ec *executionContext) _Dog(ctx context.Context, sel ast.SelectionSet, obj *Dog) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, dogImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Dog")
+		case "name":
+			out.Values[i] = ec._Dog_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "barks":
+			out.Values[i] = ec._Dog_barks(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
 		default:
@@ -4725,6 +5128,24 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				true, true,
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._Query_ping(ctx, field)
+				})
+		case "animals":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_animals(ctx, field)
+				})
+		case "pets":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_pets(ctx, field)
+				})
+		case "strangeAnimal":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_strangeAnimal(ctx, field)
 				})
 		case "deferItem":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
@@ -5337,6 +5758,16 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNAnimal2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐAnimal(ctx context.Context, sel ast.SelectionSet, v []Animal) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 2, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalOAnimal2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐAnimal(ctx, sel, v[i])
+	})
+
+	return ret
+}
+
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v any) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -5438,6 +5869,30 @@ func (ec *executionContext) marshalNLimitedItem2ᚖgithubᚗcomᚋ99designsᚋgq
 		return graphql.Null
 	}
 	return ec._LimitedItem(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNPet2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐPet(ctx context.Context, sel ast.SelectionSet, v Pet) graphql.Marshaler {
+	if v == nil {
+		graphql.AddInvalidNullError(ctx, "Pet!")
+		return graphql.Null
+	}
+	return ec._Pet(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNPet2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐPetᚄ(ctx context.Context, sel ast.SelectionSet, v []Pet) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 2, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNPet2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐPet(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalNQuery2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐQuery(ctx context.Context, sel ast.SelectionSet, v Query) graphql.Marshaler {
@@ -5656,6 +6111,13 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 		graphql.AddInvalidNullFromMarshaler(ctx, "__TypeKind!")
 	}
 	return res
+}
+
+func (ec *executionContext) marshalOAnimal2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐAnimal(ctx context.Context, sel ast.SelectionSet, v Animal) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Animal(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v any) (bool, error) {

@@ -14,10 +14,11 @@ import (
 // that marks the enclosing object invalid: Null for non-null fields,
 // RequiredNull for nullable ones.
 //
-// A field carrying a @defer directive is appended to deferred.FieldSet instead
-// of m, and registered in deferred.Defers under each of its labels so the
+// A field carrying a @defer directive is scheduled on deferred.FieldSet rather
+// than on m, and registered in deferred.Defers under each of its labels so the
 // incremental payload for a label is emitted once every field under it
-// resolves.
+// resolves. m keeps Null at i, so the initial response reports the field as
+// null until the incremental payload replaces it.
 //
 // Like NewView, this schedules work rather than doing it, so it must be called
 // from the single goroutine that owns m and deferred, before either field set
@@ -50,8 +51,9 @@ func (m *FieldSet) ResolveConcurrently(
 			view.AddIndices(fieldIndex)
 		}
 
-		// The value travels in a later incremental payload, so it is kept out
-		// of the initial response and not scheduled on m.
+		// Not scheduled on m: the value travels in a later incremental
+		// payload. Null rather than leaving the slot unset, because
+		// marshalFieldSet dereferences every entry.
 		m.Values[i] = Null
 		return
 	}

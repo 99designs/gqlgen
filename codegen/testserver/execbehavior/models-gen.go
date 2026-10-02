@@ -39,6 +39,20 @@ type ChildProbeObject struct {
 
 func (ChildProbeObject) IsProbeUnion() {}
 
+// An object with descriptions and deprecations.
+type Described struct {
+	// The current name.
+	Name    string  `json:"name"`
+	OldName *string `json:"oldName,omitempty"`
+	Link    *string `json:"link,omitempty"`
+}
+
+type DescribedInput struct {
+	// The name.
+	Name    *string `json:"name,omitempty"`
+	OldName *string `json:"oldName,omitempty"`
+}
+
 type LimitedItem struct {
 	ID   int `json:"id"`
 	Slow int `json:"slow"`
@@ -66,6 +80,12 @@ type MarkedParent struct {
 type Mutation struct {
 }
 
+// Exactly one of the fields.
+type OneOfInput struct {
+	ByName *string `json:"byName,omitempty"`
+	ByID   *string `json:"byId,omitempty"`
+}
+
 type Query struct {
 }
 
@@ -85,6 +105,62 @@ type WrongTypes struct {
 	NonNullIntAsString   string  `json:"nonNullIntAsString"`
 	Marshaler            string  `json:"marshaler"`
 	ReplacedByMiddleware *string `json:"replacedByMiddleware,omitempty"`
+}
+
+// How to format a name.
+type NameFormat string
+
+const (
+	NameFormatFull  NameFormat = "FULL"
+	NameFormatShort NameFormat = "SHORT"
+)
+
+var AllNameFormat = []NameFormat{
+	NameFormatFull,
+	NameFormatShort,
+}
+
+func (e NameFormat) IsValid() bool {
+	switch e {
+	case NameFormatFull, NameFormatShort:
+		return true
+	}
+	return false
+}
+
+func (e NameFormat) String() string {
+	return string(e)
+}
+
+func (e *NameFormat) UnmarshalGQL(v any) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = NameFormat(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid NameFormat", str)
+	}
+	return nil
+}
+
+func (e NameFormat) MarshalGQL(w io.Writer) {
+	_, _ = fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+func (e *NameFormat) UnmarshalJSON(b []byte) error {
+	s, err := strconv.Unquote(string(b))
+	if err != nil {
+		return err
+	}
+	return e.UnmarshalGQL(s)
+}
+
+func (e NameFormat) MarshalJSON() ([]byte, error) {
+	var buf bytes.Buffer
+	e.MarshalGQL(&buf)
+	return buf.Bytes(), nil
 }
 
 type ProbeEnum string

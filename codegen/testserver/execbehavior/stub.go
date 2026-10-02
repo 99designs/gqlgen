@@ -23,6 +23,7 @@ type Stub struct {
 		Ping             func(ctx context.Context) (string, error)
 		ChildProbe       func(ctx context.Context) (*ChildProbe, error)
 		CheckedInput     func(ctx context.Context, input CheckedInput) (string, error)
+		Described        func(ctx context.Context, input *DescribedInput, choice *OneOfInput) (*Described, error)
 		MarkedParent     func(ctx context.Context) (*MarkedParent, error)
 		Panicking        func(ctx context.Context) (*string, error)
 		PanickingNonNull func(ctx context.Context) (string, error)
@@ -85,6 +86,9 @@ func (r *stubQuery) ChildProbe(ctx context.Context) (*ChildProbe, error) {
 }
 func (r *stubQuery) CheckedInput(ctx context.Context, input CheckedInput) (string, error) {
 	return r.QueryResolver.CheckedInput(ctx, input)
+}
+func (r *stubQuery) Described(ctx context.Context, input *DescribedInput, choice *OneOfInput) (*Described, error) {
+	return r.QueryResolver.Described(ctx, input, choice)
 }
 func (r *stubQuery) MarkedParent(ctx context.Context) (*MarkedParent, error) {
 	return r.QueryResolver.MarkedParent(ctx)

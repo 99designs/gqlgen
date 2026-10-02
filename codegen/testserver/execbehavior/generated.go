@@ -37,6 +37,7 @@ type ResolverRoot interface {
 type DirectiveRoot struct {
 	InputCheck  func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
 	ReturnValue func(ctx context.Context, obj any, next graphql.Resolver, kind string) (res any, err error)
+	Tag         func(ctx context.Context, obj any, next graphql.Resolver, name string) (res any, err error)
 }
 
 type ComplexityRoot struct {
@@ -52,6 +53,12 @@ type ComplexityRoot struct {
 	ChildProbeObject struct {
 		ID     func(childComplexity int) int
 		Nested func(childComplexity int, limit *int) int
+	}
+
+	Described struct {
+		Link    func(childComplexity int) int
+		Name    func(childComplexity int, format *NameFormat, legacyFormat *string) int
+		OldName func(childComplexity int) int
 	}
 
 	LimitedItem struct {
@@ -84,6 +91,7 @@ type ComplexityRoot struct {
 	Query struct {
 		CheckedInput     func(childComplexity int, input CheckedInput) int
 		ChildProbe       func(childComplexity int) int
+		Described        func(childComplexity int, input *DescribedInput, choice *OneOfInput) int
 		LimitedItems     func(childComplexity int, count int) int
 		MarkedParent     func(childComplexity int) int
 		Panicking        func(childComplexity int) int
@@ -136,6 +144,7 @@ type QueryResolver interface {
 	Ping(ctx context.Context) (string, error)
 	ChildProbe(ctx context.Context) (*ChildProbe, error)
 	CheckedInput(ctx context.Context, input CheckedInput) (string, error)
+	Described(ctx context.Context, input *DescribedInput, choice *OneOfInput) (*Described, error)
 	MarkedParent(ctx context.Context) (*MarkedParent, error)
 	Panicking(ctx context.Context) (*string, error)
 	PanickingNonNull(ctx context.Context) (string, error)
@@ -219,6 +228,30 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.ChildProbeObject.Nested(childComplexity, args["limit"].(*int)), true
+
+	case "Described.link":
+		if e.ComplexityRoot.Described.Link == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Described.Link(childComplexity), true
+	case "Described.name":
+		if e.ComplexityRoot.Described.Name == nil {
+			break
+		}
+
+		args, err := ec.field_Described_name_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Described.Name(childComplexity, args["format"].(*NameFormat), args["legacyFormat"].(*string)), true
+	case "Described.oldName":
+		if e.ComplexityRoot.Described.OldName == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Described.OldName(childComplexity), true
 
 	case "LimitedItem.id":
 		if e.ComplexityRoot.LimitedItem.ID == nil {
@@ -319,6 +352,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.ChildProbe(childComplexity), true
+	case "Query.described":
+		if e.ComplexityRoot.Query.Described == nil {
+			break
+		}
+
+		args, err := ec.field_Query_described_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.Described(childComplexity, args["input"].(*DescribedInput), args["choice"].(*OneOfInput)), true
 
 	case "Query.limitedItems":
 		if e.ComplexityRoot.Query.LimitedItems == nil {
@@ -469,6 +513,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	inputUnmarshalers := func() *graphql.InputUnmarshalerIndex {
 		return graphql.NewInputUnmarshalerIndex(
 			graphql.NewInputUnmarshaler("CheckedInput", ec.unmarshalInputCheckedInput),
+			graphql.NewInputUnmarshaler("DescribedInput", ec.unmarshalInputDescribedInput),
+			graphql.NewInputUnmarshaler("OneOfInput", ec.unmarshalInputOneOfInput),
 			graphql.NewInputUnmarshaler("WrongTypeInput", ec.unmarshalInputWrongTypeInput),
 		)
 	}
@@ -545,7 +591,7 @@ func newExecutionContext(
 	}
 }
 
-//go:embed "field_context_child.graphql" "input_object_directive.graphql" "mark_non_null.graphql" "panic.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "worker_limit.graphql" "wrong_type.graphql"
+//go:embed "field_context_child.graphql" "input_object_directive.graphql" "introspection.graphql" "mark_non_null.graphql" "panic.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "worker_limit.graphql" "wrong_type.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -559,6 +605,7 @@ func sourceData(filename string) string {
 var sources = []*ast.Source{
 	{Name: "field_context_child.graphql", Input: sourceData("field_context_child.graphql"), BuiltIn: false},
 	{Name: "input_object_directive.graphql", Input: sourceData("input_object_directive.graphql"), BuiltIn: false},
+	{Name: "introspection.graphql", Input: sourceData("introspection.graphql"), BuiltIn: false},
 	{Name: "mark_non_null.graphql", Input: sourceData("mark_non_null.graphql"), BuiltIn: false},
 	{Name: "panic.graphql", Input: sourceData("panic.graphql"), BuiltIn: false},
 	{Name: "root_fields.graphql", Input: sourceData("root_fields.graphql"), BuiltIn: false},
@@ -599,6 +646,18 @@ func (ec *executionContext) childFields_ChildProbeObject(ctx context.Context, fi
 		return ec.fieldContext_ChildProbeObject_nested(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type ChildProbeObject", field.Name)
+}
+
+func (ec *executionContext) childFields_Described(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "name":
+		return ec.fieldContext_Described_name(ctx, field)
+	case "oldName":
+		return ec.fieldContext_Described_oldName(ctx, field)
+	case "link":
+		return ec.fieldContext_Described_link(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type Described", field.Name)
 }
 
 func (ec *executionContext) childFields_LimitedItem(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
@@ -655,6 +714,8 @@ func (ec *executionContext) childFields_Query(ctx context.Context, field graphql
 		return ec.fieldContext_Query_childProbe(ctx, field)
 	case "checkedInput":
 		return ec.fieldContext_Query_checkedInput(ctx, field)
+	case "described":
+		return ec.fieldContext_Query_described(ctx, field)
 	case "markedParent":
 		return ec.fieldContext_Query_markedParent(ctx, field)
 	case "panicking":
@@ -849,6 +910,20 @@ func (ec *executionContext) dir_returnValue_args(ctx context.Context, rawArgs ma
 	return args, nil
 }
 
+func (ec *executionContext) dir_tag_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "name",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNString2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["name"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_ChildProbeObject_nested_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -860,6 +935,28 @@ func (ec *executionContext) field_ChildProbeObject_nested_args(ctx context.Conte
 		return nil, err
 	}
 	args["limit"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Described_name_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "format",
+		func(ctx context.Context, v any) (*NameFormat, error) {
+			return ec.unmarshalONameFormat2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐNameFormat(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["format"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "legacyFormat",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["legacyFormat"] = arg1
 	return args, nil
 }
 
@@ -902,6 +999,28 @@ func (ec *executionContext) field_Query_checkedInput_args(ctx context.Context, r
 		return nil, err
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_described_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (*DescribedInput, error) {
+			return ec.unmarshalODescribedInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐDescribedInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "choice",
+		func(ctx context.Context, v any) (*OneOfInput, error) {
+			return ec.unmarshalOOneOfInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐOneOfInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["choice"] = arg1
 	return args, nil
 }
 
@@ -1296,6 +1415,113 @@ func (ec *executionContext) fieldContext_ChildProbeObject_nested(ctx context.Con
 		return fc, err
 	}
 	return fc, nil
+}
+
+func (ec *executionContext) _Described_name(ctx context.Context, field graphql.CollectedField, obj *Described) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Described_name(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				name, err := ec.unmarshalNString2string(ctx, "c")
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.Directives.Tag == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive tag is not implemented")
+				}
+				return ec.Directives.Tag(ctx, obj, directive0, name)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Described_name(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Described",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Described_name_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Described_oldName(ctx context.Context, field graphql.CollectedField, obj *Described) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Described_oldName(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.OldName, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Described_oldName(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Described", field, false, false, "String")
+}
+
+func (ec *executionContext) _Described_link(ctx context.Context, field graphql.CollectedField, obj *Described) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Described_link(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Link, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOUrl2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Described_link(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Described", field, false, false, "Url")
 }
 
 func (ec *executionContext) _LimitedItem_id(ctx context.Context, field graphql.CollectedField, obj *LimitedItem) (ret graphql.Marshaler) {
@@ -1715,6 +1941,80 @@ func (ec *executionContext) fieldContext_Query_checkedInput(ctx context.Context,
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_checkedInput_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_described(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_described(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().Described(ctx, fc.Args["input"].(*DescribedInput), fc.Args["choice"].(*OneOfInput))
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				name, err := ec.unmarshalNString2string(ctx, "a")
+				if err != nil {
+					var zeroVal *Described
+					return zeroVal, err
+				}
+				if ec.Directives.Tag == nil {
+					var zeroVal *Described
+					return zeroVal, errors.New("directive tag is not implemented")
+				}
+				return ec.Directives.Tag(ctx, nil, directive0, name)
+			}
+			directive2 := func(ctx context.Context) (any, error) {
+				name, err := ec.unmarshalNString2string(ctx, "b")
+				if err != nil {
+					var zeroVal *Described
+					return zeroVal, err
+				}
+				if ec.Directives.Tag == nil {
+					var zeroVal *Described
+					return zeroVal, errors.New("directive tag is not implemented")
+				}
+				return ec.Directives.Tag(ctx, nil, directive1, name)
+			}
+
+			next = directive2
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *Described) graphql.Marshaler {
+			return ec.marshalODescribed2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐDescribed(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Query_described(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Described(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_described_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -3551,6 +3851,108 @@ func UnmarshalCheckedInput(ctx context.Context, raw any) (CheckedInput, error) {
 	return out, err
 }
 
+func (ec *executionContext) unmarshalInputDescribedInput(ctx context.Context, obj any) (DescribedInput, error) {
+	var it DescribedInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	if _, present := asMap["name"]; !present {
+		asMap["name"] = "anonymous"
+	}
+
+	fieldsInOrder := [...]string{"name", "oldName"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "oldName":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("oldName"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.OldName = data
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalDescribedInput unmarshals raw into the DescribedInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalDescribedInput(ctx context.Context, raw any) (DescribedInput, error) {
+	var out DescribedInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "DescribedInput", raw, &out)
+	return out, err
+}
+
+func (ec *executionContext) unmarshalInputOneOfInput(ctx context.Context, obj any) (OneOfInput, error) {
+	var it OneOfInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"byName", "byId"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "byName":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("byName"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ByName = data
+		case "byId":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("byId"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ByID = data
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalOneOfInput unmarshals raw into the OneOfInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalOneOfInput(ctx context.Context, raw any) (OneOfInput, error) {
+	var out OneOfInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "OneOfInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputWrongTypeInput(ctx context.Context, obj any) (WrongTypeInput, error) {
 	var it WrongTypeInput
 	if obj == nil {
@@ -3739,6 +4141,49 @@ func (ec *executionContext) _ChildProbeObject(ctx context.Context, sel ast.Selec
 			}
 		case "nested":
 			out.Values[i] = ec._ChildProbeObject_nested(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
+var describedImplementors = []string{"Described"}
+
+func (ec *executionContext) _Described(ctx context.Context, sel ast.SelectionSet, obj *Described) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, describedImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Described")
+		case "name":
+			out.Values[i] = ec._Described_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "oldName":
+			out.Values[i] = ec._Described_oldName(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "link":
+			out.Values[i] = ec._Described_link(ctx, field, obj)
 			if out.Values[i] == graphql.RequiredNull {
 				out.Invalids++
 			}
@@ -4012,6 +4457,12 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				true, true,
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._Query_checkedInput(ctx, field)
+				})
+		case "described":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_described(ctx, field)
 				})
 		case "markedParent":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
@@ -4954,6 +5405,39 @@ func (ec *executionContext) marshalOChildProbeObject2ᚖgithubᚗcomᚋ99designs
 	return ec._ChildProbeObject(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalODescribed2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐDescribed(ctx context.Context, sel ast.SelectionSet, v *Described) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Described(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalODescribedInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐDescribedInput(ctx context.Context, v any) (*DescribedInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputDescribedInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v any) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalID(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalID(*v)
+	return res
+}
+
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v any) (*int, error) {
 	if v == nil {
 		return nil, nil
@@ -5000,6 +5484,30 @@ func (ec *executionContext) marshalOMutation2ᚖgithubᚗcomᚋ99designsᚋgqlge
 	return ec._Mutation(ctx, sel)
 }
 
+func (ec *executionContext) unmarshalONameFormat2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐNameFormat(ctx context.Context, v any) (*NameFormat, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(NameFormat)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalONameFormat2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐNameFormat(ctx context.Context, sel ast.SelectionSet, v *NameFormat) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
+func (ec *executionContext) unmarshalOOneOfInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐOneOfInput(ctx context.Context, v any) (*OneOfInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputOneOfInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalOProbeEnum2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐProbeEnum(ctx context.Context, v any) (*ProbeEnum, error) {
 	if v == nil {
 		return nil, nil
@@ -5039,6 +5547,24 @@ func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v an
 }
 
 func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalString(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOUrl2ᚖstring(ctx context.Context, v any) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalString(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOUrl2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
 	}

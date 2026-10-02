@@ -1,0 +1,44 @@
+# Elements that only show in introspection, for the snapshot of the full introspection
+# response.
+
+"A directive that may be repeated."
+directive @tag(name: String!) repeatable on OBJECT | FIELD_DEFINITION
+
+"A scalar with a specification."
+scalar Url @specifiedBy(url: "https://url.spec.whatwg.org/")
+
+"""
+An object with descriptions and deprecations.
+"""
+type Described @tag(name: "a") @tag(name: "b") {
+  "The current name."
+  name(
+    "How to format it."
+    format: NameFormat = FULL
+    legacyFormat: String @deprecated(reason: "Use format.")
+  ): String! @tag(name: "c")
+  oldName: String @deprecated(reason: "Use name.")
+  link: Url
+}
+
+"How to format a name."
+enum NameFormat {
+  FULL
+  SHORT @deprecated(reason: "Too short.")
+}
+
+"Exactly one of the fields."
+input OneOfInput @oneOf {
+  byName: String
+  byId: ID
+}
+
+input DescribedInput {
+  "The name."
+  name: String = "anonymous"
+  oldName: String @deprecated(reason: "Use name.")
+}
+
+extend type Query {
+  described(input: DescribedInput, choice: OneOfInput): Described
+}

@@ -31,7 +31,17 @@ type MarkedParent struct {
 	Child *MarkedChild `json:"child,omitempty"`
 }
 
+type Mutation struct {
+}
+
 type Query struct {
+}
+
+type Viewer struct {
+	Name          string    `json:"name"`
+	Query         *Query    `json:"query"`
+	OptionalQuery *Query    `json:"optionalQuery,omitempty"`
+	Mutation      *Mutation `json:"mutation,omitempty"`
 }
 
 type WrongTypeInput struct {

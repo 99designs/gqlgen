@@ -11,10 +11,15 @@ type Stub struct {
 		ResolvedValue func(ctx context.Context, obj *MarkedChild) (*string, error)
 		Node          func(ctx context.Context, obj *MarkedChild) (MarkedNode, error)
 	}
+	MutationResolver struct {
+		Touch func(ctx context.Context) (string, error)
+	}
 	QueryResolver struct {
 		Ping           func(ctx context.Context) (string, error)
 		CheckedInput   func(ctx context.Context, input CheckedInput) (string, error)
 		MarkedParent   func(ctx context.Context) (*MarkedParent, error)
+		Viewer         func(ctx context.Context) (*Viewer, error)
+		ValueViewer    func(ctx context.Context) (*ValueViewer, error)
 		WrongTypes     func(ctx context.Context) (*WrongTypes, error)
 		WrongTypeArg   func(ctx context.Context, value *string) (*string, error)
 		WrongTypeInput func(ctx context.Context, input WrongTypeInput) (*string, error)
@@ -23,6 +28,9 @@ type Stub struct {
 
 func (r *Stub) MarkedChild() MarkedChildResolver {
 	return &stubMarkedChild{r}
+}
+func (r *Stub) Mutation() MutationResolver {
+	return &stubMutation{r}
 }
 func (r *Stub) Query() QueryResolver {
 	return &stubQuery{r}
@@ -37,6 +45,12 @@ func (r *stubMarkedChild) Node(ctx context.Context, obj *MarkedChild) (MarkedNod
 	return r.MarkedChildResolver.Node(ctx, obj)
 }
 
+type stubMutation struct{ *Stub }
+
+func (r *stubMutation) Touch(ctx context.Context) (string, error) {
+	return r.MutationResolver.Touch(ctx)
+}
+
 type stubQuery struct{ *Stub }
 
 func (r *stubQuery) Ping(ctx context.Context) (string, error) {
@@ -47,6 +61,12 @@ func (r *stubQuery) CheckedInput(ctx context.Context, input CheckedInput) (strin
 }
 func (r *stubQuery) MarkedParent(ctx context.Context) (*MarkedParent, error) {
 	return r.QueryResolver.MarkedParent(ctx)
+}
+func (r *stubQuery) Viewer(ctx context.Context) (*Viewer, error) {
+	return r.QueryResolver.Viewer(ctx)
+}
+func (r *stubQuery) ValueViewer(ctx context.Context) (*ValueViewer, error) {
+	return r.QueryResolver.ValueViewer(ctx)
 }
 func (r *stubQuery) WrongTypes(ctx context.Context) (*WrongTypes, error) {
 	return r.QueryResolver.WrongTypes(ctx)

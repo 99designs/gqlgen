@@ -7,6 +7,8 @@ exec:
 model:
   filename: models-gen.go
   package: execbehavior
+autobind:
+  - github.com/99designs/gqlgen/codegen/testserver/execbehavior
 
 models:
   MarkedChild:

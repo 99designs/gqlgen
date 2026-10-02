@@ -35,6 +35,7 @@ type Stub struct {
 		CheckedInput     func(ctx context.Context, input CheckedInput) (string, error)
 		Described        func(ctx context.Context, input *DescribedInput, choice *OneOfInput) (*Described, error)
 		MarkedParent     func(ctx context.Context) (*MarkedParent, error)
+		Nullability      func(ctx context.Context, valid bool) (*Nullability, error)
 		Panicking        func(ctx context.Context) (*string, error)
 		PanickingNonNull func(ctx context.Context) (string, error)
 		Viewer           func(ctx context.Context) (*Viewer, error)
@@ -132,6 +133,9 @@ func (r *stubQuery) Described(ctx context.Context, input *DescribedInput, choice
 }
 func (r *stubQuery) MarkedParent(ctx context.Context) (*MarkedParent, error) {
 	return r.QueryResolver.MarkedParent(ctx)
+}
+func (r *stubQuery) Nullability(ctx context.Context, valid bool) (*Nullability, error) {
+	return r.QueryResolver.Nullability(ctx, valid)
 }
 func (r *stubQuery) Panicking(ctx context.Context) (*string, error) {
 	return r.QueryResolver.Panicking(ctx)

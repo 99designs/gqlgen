@@ -1,0 +1,21 @@
+# Non-null positions that hold a nil Go value report an error, and the null propagates
+# to the nearest nullable position.
+#
+# Uses Dog from abstract_types.graphql.
+type Nullability {
+  optional: String
+  required: String!
+  requiredElems: [String!]
+  requiredList: [String]!
+  nested: [[String!]!]
+  requiredObject: Dog!
+}
+
+extend type Query {
+  nullability(valid: Boolean!): Nullability
+}
+
+# Lists of objects marshal each element with its index in the path.
+extend type Nullability {
+  requiredDogs: [Dog!]
+}

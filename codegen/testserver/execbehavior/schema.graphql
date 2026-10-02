@@ -1,0 +1,7 @@
+# execbehavior pins down how the generated executor behaves at runtime, so that a
+# change to how the executor is generated can be checked against it. Each file next
+# to this one covers one behavior.
+
+type Query {
+  ping: String!
+}

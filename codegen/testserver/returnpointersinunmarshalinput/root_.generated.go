@@ -26,6 +26,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	InputCheck func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
 }
 
 type ComplexityRoot struct {
@@ -51,6 +52,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
 	inputUnmarshalers := func() *graphql.InputUnmarshalerIndex {
 		return graphql.NewInputUnmarshalerIndex(
+			graphql.NewInputUnmarshaler("CheckedInput", ec.unmarshalInputCheckedInput),
 			graphql.NewInputUnmarshaler("LegacyFilters", ec.unmarshalInputLegacyFilters),
 			graphql.NewInputUnmarshaler("SearchFilters", ec.unmarshalInputSearchFilters),
 		)
@@ -113,7 +115,7 @@ func newExecutionContext(
 	}
 }
 
-//go:embed "schema.graphql"
+//go:embed "input_object_directive.graphql" "schema.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -125,6 +127,7 @@ func sourceData(filename string) string {
 }
 
 var sources = []*ast.Source{
+	{Name: "input_object_directive.graphql", Input: sourceData("input_object_directive.graphql"), BuiltIn: false},
 	{Name: "schema.graphql", Input: sourceData("schema.graphql"), BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)

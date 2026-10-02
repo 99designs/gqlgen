@@ -1,0 +1,9 @@
+schema:
+  - "*.graphql"
+skip_validation: true
+exec:
+  filename: generated.go
+  package: execbehavior
+model:
+  filename: models-gen.go
+  package: execbehavior

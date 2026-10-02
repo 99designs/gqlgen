@@ -28,6 +28,7 @@ func NewExecutableSchema(cfg Config) graphql.ExecutableSchema {
 type Config = graphql.Config[ResolverRoot, DirectiveRoot, ComplexityRoot]
 
 type ResolverRoot interface {
+	MarkedChild() MarkedChildResolver
 	Query() QueryResolver
 }
 
@@ -37,8 +38,25 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	MarkedChild struct {
+		Node          func(childComplexity int) int
+		PlainNode     func(childComplexity int) int
+		ResolvedValue func(childComplexity int) int
+		Value         func(childComplexity int) int
+	}
+
+	MarkedLeaf struct {
+		ID func(childComplexity int) int
+	}
+
+	MarkedParent struct {
+		Child func(childComplexity int) int
+		Name  func(childComplexity int) int
+	}
+
 	Query struct {
 		CheckedInput   func(childComplexity int, input CheckedInput) int
+		MarkedParent   func(childComplexity int) int
 		Ping           func(childComplexity int) int
 		WrongTypeArg   func(childComplexity int, value *string) int
 		WrongTypeInput func(childComplexity int, input WrongTypeInput) int
@@ -57,9 +75,14 @@ type ComplexityRoot struct {
 
 // region    ************************** generated!.gotpl **************************
 
+type MarkedChildResolver interface {
+	ResolvedValue(ctx context.Context, obj *MarkedChild) (*string, error)
+	Node(ctx context.Context, obj *MarkedChild) (MarkedNode, error)
+}
 type QueryResolver interface {
 	Ping(ctx context.Context) (string, error)
 	CheckedInput(ctx context.Context, input CheckedInput) (string, error)
+	MarkedParent(ctx context.Context) (*MarkedParent, error)
 	WrongTypes(ctx context.Context) (*WrongTypes, error)
 	WrongTypeArg(ctx context.Context, value *string) (*string, error)
 	WrongTypeInput(ctx context.Context, input WrongTypeInput) (*string, error)
@@ -83,6 +106,51 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	_ = ec
 	switch typeName + "." + field {
 
+	case "MarkedChild.node":
+		if e.ComplexityRoot.MarkedChild.Node == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MarkedChild.Node(childComplexity), true
+	case "MarkedChild.plainNode":
+		if e.ComplexityRoot.MarkedChild.PlainNode == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MarkedChild.PlainNode(childComplexity), true
+	case "MarkedChild.resolvedValue":
+		if e.ComplexityRoot.MarkedChild.ResolvedValue == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MarkedChild.ResolvedValue(childComplexity), true
+	case "MarkedChild.value":
+		if e.ComplexityRoot.MarkedChild.Value == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MarkedChild.Value(childComplexity), true
+
+	case "MarkedLeaf.id":
+		if e.ComplexityRoot.MarkedLeaf.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MarkedLeaf.ID(childComplexity), true
+
+	case "MarkedParent.child":
+		if e.ComplexityRoot.MarkedParent.Child == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MarkedParent.Child(childComplexity), true
+	case "MarkedParent.name":
+		if e.ComplexityRoot.MarkedParent.Name == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MarkedParent.Name(childComplexity), true
+
 	case "Query.checkedInput":
 		if e.ComplexityRoot.Query.CheckedInput == nil {
 			break
@@ -95,6 +163,12 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Query.CheckedInput(childComplexity, args["input"].(CheckedInput)), true
 
+	case "Query.markedParent":
+		if e.ComplexityRoot.Query.MarkedParent == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Query.MarkedParent(childComplexity), true
 	case "Query.ping":
 		if e.ComplexityRoot.Query.Ping == nil {
 			break
@@ -226,7 +300,7 @@ func newExecutionContext(
 	}
 }
 
-//go:embed "input_object_directive.graphql" "schema.graphql" "wrong_type.graphql"
+//go:embed "input_object_directive.graphql" "mark_non_null.graphql" "schema.graphql" "wrong_type.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -239,6 +313,7 @@ func sourceData(filename string) string {
 
 var sources = []*ast.Source{
 	{Name: "input_object_directive.graphql", Input: sourceData("input_object_directive.graphql"), BuiltIn: false},
+	{Name: "mark_non_null.graphql", Input: sourceData("mark_non_null.graphql"), BuiltIn: false},
 	{Name: "schema.graphql", Input: sourceData("schema.graphql"), BuiltIn: false},
 	{Name: "wrong_type.graphql", Input: sourceData("wrong_type.graphql"), BuiltIn: false},
 }
@@ -247,6 +322,30 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // childFields_* functions provide shared child field context lookups.
 // Each function is generated once per unique object type, deduplicating the
 // switch statements that were previously inlined in every fieldContext_* function.
+
+func (ec *executionContext) childFields_MarkedChild(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "value":
+		return ec.fieldContext_MarkedChild_value(ctx, field)
+	case "resolvedValue":
+		return ec.fieldContext_MarkedChild_resolvedValue(ctx, field)
+	case "node":
+		return ec.fieldContext_MarkedChild_node(ctx, field)
+	case "plainNode":
+		return ec.fieldContext_MarkedChild_plainNode(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type MarkedChild", field.Name)
+}
+
+func (ec *executionContext) childFields_MarkedParent(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "name":
+		return ec.fieldContext_MarkedParent_name(ctx, field)
+	case "child":
+		return ec.fieldContext_MarkedParent_child(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type MarkedParent", field.Name)
+}
 
 func (ec *executionContext) childFields_WrongTypes(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
@@ -568,6 +667,194 @@ func (ec *executionContext) field___Type_inputFields_args(ctx context.Context, r
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _MarkedChild_value(ctx context.Context, field graphql.CollectedField, obj *MarkedChild) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MarkedChild_value(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Value, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_MarkedChild_value(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("MarkedChild", field, false, false, "String")
+}
+
+func (ec *executionContext) _MarkedChild_resolvedValue(ctx context.Context, field graphql.CollectedField, obj *MarkedChild) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MarkedChild_resolvedValue(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.MarkedChild().ResolvedValue(ctx, obj)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_MarkedChild_resolvedValue(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("MarkedChild", field, true, true, "String")
+}
+
+func (ec *executionContext) _MarkedChild_node(ctx context.Context, field graphql.CollectedField, obj *MarkedChild) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MarkedChild_node(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.MarkedChild().Node(ctx, obj)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v MarkedNode) graphql.Marshaler {
+			return ec.marshalOMarkedNode2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐMarkedNode(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_MarkedChild_node(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MarkedChild",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("FieldContext.Child cannot be called on type INTERFACE")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MarkedChild_plainNode(ctx context.Context, field graphql.CollectedField, obj *MarkedChild) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MarkedChild_plainNode(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.PlainNode, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v MarkedNode) graphql.Marshaler {
+			return ec.marshalOMarkedNode2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐMarkedNode(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_MarkedChild_plainNode(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MarkedChild",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("FieldContext.Child cannot be called on type INTERFACE")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MarkedLeaf_id(ctx context.Context, field graphql.CollectedField, obj *MarkedLeaf) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MarkedLeaf_id(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_MarkedLeaf_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("MarkedLeaf", field, false, false, "ID")
+}
+
+func (ec *executionContext) _MarkedParent_name(ctx context.Context, field graphql.CollectedField, obj *MarkedParent) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MarkedParent_name(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_MarkedParent_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("MarkedParent", field, false, false, "String")
+}
+
+func (ec *executionContext) _MarkedParent_child(ctx context.Context, field graphql.CollectedField, obj *MarkedParent) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MarkedParent_child(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Child, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *MarkedChild) graphql.Marshaler {
+			return ec.marshalOMarkedChild2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐMarkedChild(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_MarkedParent_child(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MarkedParent",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_MarkedChild(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_ping(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -631,6 +918,38 @@ func (ec *executionContext) fieldContext_Query_checkedInput(ctx context.Context,
 	if fc.Args, err = ec.field_Query_checkedInput_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_markedParent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_markedParent(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Query().MarkedParent(ctx)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *MarkedParent) graphql.Marshaler {
+			return ec.marshalOMarkedParent2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐMarkedParent(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Query_markedParent(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_MarkedParent(ctx, field)
+		},
 	}
 	return fc, nil
 }
@@ -2185,9 +2504,150 @@ func UnmarshalWrongTypeInput(ctx context.Context, raw any) (WrongTypeInput, erro
 
 // region    ************************** interface.gotpl ***************************
 
+func (ec *executionContext) _MarkedNode(ctx context.Context, sel ast.SelectionSet, obj MarkedNode) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case MarkedLeaf:
+		return ec._MarkedLeaf(ctx, sel, &obj)
+	case *MarkedLeaf:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._MarkedLeaf(ctx, sel, obj)
+	default:
+		if typedObj, ok := obj.(graphql.Marshaler); ok {
+			return typedObj
+		} else {
+			panic(fmt.Errorf("unexpected type %T; non-generated variants of MarkedNode must implement graphql.Marshaler", obj))
+		}
+	}
+}
+
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
+
+var markedChildImplementors = []string{"MarkedChild"}
+
+func (ec *executionContext) _MarkedChild(ctx context.Context, sel ast.SelectionSet, obj *MarkedChild) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, markedChildImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MarkedChild")
+		case "value":
+			out.Values[i] = ec._MarkedChild_value(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		case "resolvedValue":
+			out.ResolveConcurrently(ec.OperationContext, &deferred, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._MarkedChild_resolvedValue(ctx, field, obj)
+				})
+		case "node":
+			out.ResolveConcurrently(ec.OperationContext, &deferred, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._MarkedChild_node(ctx, field, obj)
+				})
+		case "plainNode":
+			out.Values[i] = ec._MarkedChild_plainNode(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				atomic.AddUint32(&out.Invalids, 1)
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
+var markedLeafImplementors = []string{"MarkedLeaf", "MarkedNode"}
+
+func (ec *executionContext) _MarkedLeaf(ctx context.Context, sel ast.SelectionSet, obj *MarkedLeaf) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, markedLeafImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MarkedLeaf")
+		case "id":
+			out.Values[i] = ec._MarkedLeaf_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
+var markedParentImplementors = []string{"MarkedParent"}
+
+func (ec *executionContext) _MarkedParent(ctx context.Context, sel ast.SelectionSet, obj *MarkedParent) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, markedParentImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MarkedParent")
+		case "name":
+			out.Values[i] = ec._MarkedParent_name(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "child":
+			out.Values[i] = ec._MarkedParent_child(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
 
 var queryImplementors = []string{"Query"}
 
@@ -2219,6 +2679,12 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				true, true,
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._Query_checkedInput(ctx, field)
+				})
+		case "markedParent":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_markedParent(ctx, field)
 				})
 		case "wrongTypes":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
@@ -2698,6 +3164,20 @@ func (ec *executionContext) unmarshalNCheckedInput2githubᚗcomᚋ99designsᚋgq
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (string, error) {
+	res, err := graphql.UnmarshalID(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalID(v)
+	if res == graphql.Null {
+		graphql.AddInvalidNullFromMarshaler(ctx, "ID!")
+	}
+	return res
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -2887,6 +3367,27 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	_ = ctx
 	res := graphql.MarshalBoolean(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOMarkedChild2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐMarkedChild(ctx context.Context, sel ast.SelectionSet, v *MarkedChild) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._MarkedChild(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOMarkedNode2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐMarkedNode(ctx context.Context, sel ast.SelectionSet, v MarkedNode) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._MarkedNode(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOMarkedParent2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐMarkedParent(ctx context.Context, sel ast.SelectionSet, v *MarkedParent) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._MarkedParent(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalOString2ᚖstring(ctx context.Context, v any) (*string, error) {

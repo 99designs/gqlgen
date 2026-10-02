@@ -2,9 +2,33 @@
 
 package execbehavior
 
+type MarkedNode interface {
+	IsMarkedNode()
+	GetID() string
+}
+
 type CheckedInput struct {
 	Mode  string `json:"mode"`
 	Value string `json:"value"`
+}
+
+type MarkedChild struct {
+	Value         *string    `json:"value,omitempty"`
+	ResolvedValue *string    `json:"resolvedValue,omitempty"`
+	Node          MarkedNode `json:"node,omitempty"`
+	PlainNode     MarkedNode `json:"plainNode,omitempty"`
+}
+
+type MarkedLeaf struct {
+	ID string `json:"id"`
+}
+
+func (MarkedLeaf) IsMarkedNode()      {}
+func (this MarkedLeaf) GetID() string { return this.ID }
+
+type MarkedParent struct {
+	Name  *string      `json:"name,omitempty"`
+	Child *MarkedChild `json:"child,omitempty"`
 }
 
 type Query struct {

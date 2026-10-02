@@ -7,17 +7,34 @@ import (
 )
 
 type Stub struct {
+	MarkedChildResolver struct {
+		ResolvedValue func(ctx context.Context, obj *MarkedChild) (*string, error)
+		Node          func(ctx context.Context, obj *MarkedChild) (MarkedNode, error)
+	}
 	QueryResolver struct {
 		Ping           func(ctx context.Context) (string, error)
 		CheckedInput   func(ctx context.Context, input CheckedInput) (string, error)
+		MarkedParent   func(ctx context.Context) (*MarkedParent, error)
 		WrongTypes     func(ctx context.Context) (*WrongTypes, error)
 		WrongTypeArg   func(ctx context.Context, value *string) (*string, error)
 		WrongTypeInput func(ctx context.Context, input WrongTypeInput) (*string, error)
 	}
 }
 
+func (r *Stub) MarkedChild() MarkedChildResolver {
+	return &stubMarkedChild{r}
+}
 func (r *Stub) Query() QueryResolver {
 	return &stubQuery{r}
+}
+
+type stubMarkedChild struct{ *Stub }
+
+func (r *stubMarkedChild) ResolvedValue(ctx context.Context, obj *MarkedChild) (*string, error) {
+	return r.MarkedChildResolver.ResolvedValue(ctx, obj)
+}
+func (r *stubMarkedChild) Node(ctx context.Context, obj *MarkedChild) (MarkedNode, error) {
+	return r.MarkedChildResolver.Node(ctx, obj)
 }
 
 type stubQuery struct{ *Stub }
@@ -27,6 +44,9 @@ func (r *stubQuery) Ping(ctx context.Context) (string, error) {
 }
 func (r *stubQuery) CheckedInput(ctx context.Context, input CheckedInput) (string, error) {
 	return r.QueryResolver.CheckedInput(ctx, input)
+}
+func (r *stubQuery) MarkedParent(ctx context.Context) (*MarkedParent, error) {
+	return r.QueryResolver.MarkedParent(ctx)
 }
 func (r *stubQuery) WrongTypes(ctx context.Context) (*WrongTypes, error) {
 	return r.QueryResolver.WrongTypes(ctx)

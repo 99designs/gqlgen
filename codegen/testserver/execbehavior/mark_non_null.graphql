@@ -1,0 +1,25 @@
+# graphql.MarkNonNull makes a nullable field non-null at runtime: when it resolves to
+# null, the null propagates to the parent as if the schema declared the field non-null.
+type MarkedParent {
+  name: String
+  child: MarkedChild
+}
+
+type MarkedChild {
+  value: String
+  resolvedValue: String
+  node: MarkedNode
+  plainNode: MarkedNode
+}
+
+interface MarkedNode {
+  id: ID!
+}
+
+type MarkedLeaf implements MarkedNode {
+  id: ID!
+}
+
+extend type Query {
+  markedParent: MarkedParent
+}

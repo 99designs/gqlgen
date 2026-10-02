@@ -7,3 +7,11 @@ exec:
 model:
   filename: models-gen.go
   package: execbehavior
+
+models:
+  MarkedChild:
+    fields:
+      resolvedValue:
+        resolver: true
+      node:
+        resolver: true

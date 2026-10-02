@@ -24,3 +24,8 @@ node_modules
 /api/testdata/default/graph/generated.go
 /api/testdata/federation2/graph/federation.go
 /api/testdata/federation2/graph/generated.go
+
+# pgregory.net/rapid writes a reproduction file here whenever a property test
+# fails, named with a timestamp and PID. They are debugging aids for one run,
+# not a corpus rapid reloads later, so they should never be committed.
+**/testdata/rapid/**

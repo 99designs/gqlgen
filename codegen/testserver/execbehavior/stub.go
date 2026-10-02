@@ -13,18 +13,21 @@ type Stub struct {
 	}
 	MutationResolver struct {
 		Touch     func(ctx context.Context) (string, error)
+		Panicking func(ctx context.Context) (*string, error)
 		AppendLog func(ctx context.Context, entry string) ([]string, error)
 	}
 	QueryResolver struct {
-		Ping           func(ctx context.Context) (string, error)
-		ChildProbe     func(ctx context.Context) (*ChildProbe, error)
-		CheckedInput   func(ctx context.Context, input CheckedInput) (string, error)
-		MarkedParent   func(ctx context.Context) (*MarkedParent, error)
-		Viewer         func(ctx context.Context) (*Viewer, error)
-		ValueViewer    func(ctx context.Context) (*ValueViewer, error)
-		WrongTypes     func(ctx context.Context) (*WrongTypes, error)
-		WrongTypeArg   func(ctx context.Context, value *string) (*string, error)
-		WrongTypeInput func(ctx context.Context, input WrongTypeInput) (*string, error)
+		Ping             func(ctx context.Context) (string, error)
+		ChildProbe       func(ctx context.Context) (*ChildProbe, error)
+		CheckedInput     func(ctx context.Context, input CheckedInput) (string, error)
+		MarkedParent     func(ctx context.Context) (*MarkedParent, error)
+		Panicking        func(ctx context.Context) (*string, error)
+		PanickingNonNull func(ctx context.Context) (string, error)
+		Viewer           func(ctx context.Context) (*Viewer, error)
+		ValueViewer      func(ctx context.Context) (*ValueViewer, error)
+		WrongTypes       func(ctx context.Context) (*WrongTypes, error)
+		WrongTypeArg     func(ctx context.Context, value *string) (*string, error)
+		WrongTypeInput   func(ctx context.Context, input WrongTypeInput) (*string, error)
 	}
 }
 
@@ -52,6 +55,9 @@ type stubMutation struct{ *Stub }
 func (r *stubMutation) Touch(ctx context.Context) (string, error) {
 	return r.MutationResolver.Touch(ctx)
 }
+func (r *stubMutation) Panicking(ctx context.Context) (*string, error) {
+	return r.MutationResolver.Panicking(ctx)
+}
 func (r *stubMutation) AppendLog(ctx context.Context, entry string) ([]string, error) {
 	return r.MutationResolver.AppendLog(ctx, entry)
 }
@@ -69,6 +75,12 @@ func (r *stubQuery) CheckedInput(ctx context.Context, input CheckedInput) (strin
 }
 func (r *stubQuery) MarkedParent(ctx context.Context) (*MarkedParent, error) {
 	return r.QueryResolver.MarkedParent(ctx)
+}
+func (r *stubQuery) Panicking(ctx context.Context) (*string, error) {
+	return r.QueryResolver.Panicking(ctx)
+}
+func (r *stubQuery) PanickingNonNull(ctx context.Context) (string, error) {
+	return r.QueryResolver.PanickingNonNull(ctx)
 }
 func (r *stubQuery) Viewer(ctx context.Context) (*Viewer, error) {
 	return r.QueryResolver.Viewer(ctx)

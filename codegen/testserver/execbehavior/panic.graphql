@@ -1,0 +1,12 @@
+# By default the generated executor recovers a panic in a field, reports it as an
+# error and nulls the field. nopanichandler covers omit_panic_handler.
+#
+# Extends Mutation from root_typed_field.graphql.
+extend type Query {
+  panicking: String
+  panickingNonNull: String!
+}
+
+extend type Mutation {
+  panicking: String
+}

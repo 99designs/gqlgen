@@ -32,13 +32,24 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	InputCheck func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
+	InputCheck  func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
+	ReturnValue func(ctx context.Context, obj any, next graphql.Resolver, kind string) (res any, err error)
 }
 
 type ComplexityRoot struct {
 	Query struct {
-		CheckedInput func(childComplexity int, input CheckedInput) int
-		Ping         func(childComplexity int) int
+		CheckedInput   func(childComplexity int, input CheckedInput) int
+		Ping           func(childComplexity int) int
+		WrongTypeArg   func(childComplexity int, value *string) int
+		WrongTypeInput func(childComplexity int, input WrongTypeInput) int
+		WrongTypes     func(childComplexity int) int
+	}
+
+	WrongTypes struct {
+		IntAsString          func(childComplexity int) int
+		Marshaler            func(childComplexity int) int
+		NonNullIntAsString   func(childComplexity int) int
+		ReplacedByMiddleware func(childComplexity int) int
 	}
 }
 
@@ -49,6 +60,9 @@ type ComplexityRoot struct {
 type QueryResolver interface {
 	Ping(ctx context.Context) (string, error)
 	CheckedInput(ctx context.Context, input CheckedInput) (string, error)
+	WrongTypes(ctx context.Context) (*WrongTypes, error)
+	WrongTypeArg(ctx context.Context, value *string) (*string, error)
+	WrongTypeInput(ctx context.Context, input WrongTypeInput) (*string, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -87,6 +101,59 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Ping(childComplexity), true
+	case "Query.wrongTypeArg":
+		if e.ComplexityRoot.Query.WrongTypeArg == nil {
+			break
+		}
+
+		args, err := ec.field_Query_wrongTypeArg_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.WrongTypeArg(childComplexity, args["value"].(*string)), true
+	case "Query.wrongTypeInput":
+		if e.ComplexityRoot.Query.WrongTypeInput == nil {
+			break
+		}
+
+		args, err := ec.field_Query_wrongTypeInput_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.WrongTypeInput(childComplexity, args["input"].(WrongTypeInput)), true
+	case "Query.wrongTypes":
+		if e.ComplexityRoot.Query.WrongTypes == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Query.WrongTypes(childComplexity), true
+
+	case "WrongTypes.intAsString":
+		if e.ComplexityRoot.WrongTypes.IntAsString == nil {
+			break
+		}
+
+		return e.ComplexityRoot.WrongTypes.IntAsString(childComplexity), true
+	case "WrongTypes.marshaler":
+		if e.ComplexityRoot.WrongTypes.Marshaler == nil {
+			break
+		}
+
+		return e.ComplexityRoot.WrongTypes.Marshaler(childComplexity), true
+	case "WrongTypes.nonNullIntAsString":
+		if e.ComplexityRoot.WrongTypes.NonNullIntAsString == nil {
+			break
+		}
+
+		return e.ComplexityRoot.WrongTypes.NonNullIntAsString(childComplexity), true
+	case "WrongTypes.replacedByMiddleware":
+		if e.ComplexityRoot.WrongTypes.ReplacedByMiddleware == nil {
+			break
+		}
+
+		return e.ComplexityRoot.WrongTypes.ReplacedByMiddleware(childComplexity), true
 
 	}
 	return 0, false
@@ -98,6 +165,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	inputUnmarshalers := func() *graphql.InputUnmarshalerIndex {
 		return graphql.NewInputUnmarshalerIndex(
 			graphql.NewInputUnmarshaler("CheckedInput", ec.unmarshalInputCheckedInput),
+			graphql.NewInputUnmarshaler("WrongTypeInput", ec.unmarshalInputWrongTypeInput),
 		)
 	}
 	first := true
@@ -158,7 +226,7 @@ func newExecutionContext(
 	}
 }
 
-//go:embed "input_object_directive.graphql" "schema.graphql"
+//go:embed "input_object_directive.graphql" "schema.graphql" "wrong_type.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -172,12 +240,27 @@ func sourceData(filename string) string {
 var sources = []*ast.Source{
 	{Name: "input_object_directive.graphql", Input: sourceData("input_object_directive.graphql"), BuiltIn: false},
 	{Name: "schema.graphql", Input: sourceData("schema.graphql"), BuiltIn: false},
+	{Name: "wrong_type.graphql", Input: sourceData("wrong_type.graphql"), BuiltIn: false},
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
 // childFields_* functions provide shared child field context lookups.
 // Each function is generated once per unique object type, deduplicating the
 // switch statements that were previously inlined in every fieldContext_* function.
+
+func (ec *executionContext) childFields_WrongTypes(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "intAsString":
+		return ec.fieldContext_WrongTypes_intAsString(ctx, field)
+	case "nonNullIntAsString":
+		return ec.fieldContext_WrongTypes_nonNullIntAsString(ctx, field)
+	case "marshaler":
+		return ec.fieldContext_WrongTypes_marshaler(ctx, field)
+	case "replacedByMiddleware":
+		return ec.fieldContext_WrongTypes_replacedByMiddleware(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type WrongTypes", field.Name)
+}
 
 func (ec *executionContext) childFields___Directive(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
@@ -295,6 +378,20 @@ func (ec *executionContext) childFields___Type(ctx context.Context, field graphq
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) dir_returnValue_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "kind",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNString2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["kind"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query___type_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -315,6 +412,80 @@ func (ec *executionContext) field_Query_checkedInput_args(ctx context.Context, r
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
 		func(ctx context.Context, v any) (CheckedInput, error) {
 			return ec.unmarshalNCheckedInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐCheckedInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_wrongTypeArg_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+
+	arg0, err := ec.field_Query_wrongTypeArg_argsValue(ctx, rawArgs)
+	if err != nil {
+		return nil, err
+	}
+	args["value"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_wrongTypeArg_argsValue(
+	ctx context.Context,
+	rawArgs map[string]any,
+) (*string, error) {
+	if _, ok := rawArgs["value"]; !ok {
+		var zeroVal *string
+		return zeroVal, nil
+	}
+
+	ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
+	directive0 := func(ctx context.Context) (any, error) {
+		tmp, ok := rawArgs["value"]
+		if !ok {
+			var zeroVal *string
+			return zeroVal, nil
+		}
+		return ec.unmarshalOString2ᚖstring(ctx, tmp)
+	}
+
+	directive1 := func(ctx context.Context) (any, error) {
+		kind, err := ec.unmarshalNString2string(ctx, "int")
+		if err != nil {
+			var zeroVal *string
+			return zeroVal, err
+		}
+		if ec.Directives.ReturnValue == nil {
+			var zeroVal *string
+			return zeroVal, errors.New("directive returnValue is not implemented")
+		}
+		return ec.Directives.ReturnValue(ctx, rawArgs, directive0, kind)
+	}
+
+	tmp, err := directive1(ctx)
+	if err != nil {
+		var zeroVal *string
+		return zeroVal, graphql.ErrorOnPath(ctx, err)
+	}
+	if data, ok := tmp.(*string); ok {
+		return data, nil
+	} else if tmp == nil {
+		var zeroVal *string
+		return zeroVal, nil
+	} else {
+		var zeroVal *string
+		return zeroVal, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp))
+	}
+}
+
+func (ec *executionContext) field_Query_wrongTypeInput_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (WrongTypeInput, error) {
+			return ec.unmarshalNWrongTypeInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐWrongTypeInput(ctx, v)
 		})
 	if err != nil {
 		return nil, err
@@ -464,6 +635,126 @@ func (ec *executionContext) fieldContext_Query_checkedInput(ctx context.Context,
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_wrongTypes(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_wrongTypes(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Query().WrongTypes(ctx)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *WrongTypes) graphql.Marshaler {
+			return ec.marshalOWrongTypes2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐWrongTypes(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Query_wrongTypes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_WrongTypes(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_wrongTypeArg(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_wrongTypeArg(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().WrongTypeArg(ctx, fc.Args["value"].(*string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Query_wrongTypeArg(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_wrongTypeArg_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_wrongTypeInput(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_wrongTypeInput(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().WrongTypeInput(ctx, fc.Args["input"].(WrongTypeInput))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Query_wrongTypeInput(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_wrongTypeInput_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -538,6 +829,152 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 		},
 	}
 	return fc, nil
+}
+
+func (ec *executionContext) _WrongTypes_intAsString(ctx context.Context, field graphql.CollectedField, obj *WrongTypes) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_WrongTypes_intAsString(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.IntAsString, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				kind, err := ec.unmarshalNString2string(ctx, "int")
+				if err != nil {
+					var zeroVal *string
+					return zeroVal, err
+				}
+				if ec.Directives.ReturnValue == nil {
+					var zeroVal *string
+					return zeroVal, errors.New("directive returnValue is not implemented")
+				}
+				return ec.Directives.ReturnValue(ctx, obj, directive0, kind)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_WrongTypes_intAsString(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("WrongTypes", field, false, false, "String")
+}
+
+func (ec *executionContext) _WrongTypes_nonNullIntAsString(ctx context.Context, field graphql.CollectedField, obj *WrongTypes) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_WrongTypes_nonNullIntAsString(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.NonNullIntAsString, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				kind, err := ec.unmarshalNString2string(ctx, "int")
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.Directives.ReturnValue == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive returnValue is not implemented")
+				}
+				return ec.Directives.ReturnValue(ctx, obj, directive0, kind)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_WrongTypes_nonNullIntAsString(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("WrongTypes", field, false, false, "String")
+}
+
+func (ec *executionContext) _WrongTypes_marshaler(ctx context.Context, field graphql.CollectedField, obj *WrongTypes) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_WrongTypes_marshaler(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Marshaler, nil
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				kind, err := ec.unmarshalNString2string(ctx, "marshaler")
+				if err != nil {
+					var zeroVal string
+					return zeroVal, err
+				}
+				if ec.Directives.ReturnValue == nil {
+					var zeroVal string
+					return zeroVal, errors.New("directive returnValue is not implemented")
+				}
+				return ec.Directives.ReturnValue(ctx, obj, directive0, kind)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_WrongTypes_marshaler(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("WrongTypes", field, false, false, "String")
+}
+
+func (ec *executionContext) _WrongTypes_replacedByMiddleware(ctx context.Context, field graphql.CollectedField, obj *WrongTypes) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_WrongTypes_replacedByMiddleware(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ReplacedByMiddleware, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_WrongTypes_replacedByMiddleware(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("WrongTypes", field, false, false, "String")
 }
 
 func (ec *executionContext) ___Directive_name(ctx context.Context, field graphql.CollectedField, obj *introspection.Directive) (ret graphql.Marshaler) {
@@ -1680,6 +2117,70 @@ func UnmarshalCheckedInput(ctx context.Context, raw any) (CheckedInput, error) {
 	return out, err
 }
 
+func (ec *executionContext) unmarshalInputWrongTypeInput(ctx context.Context, obj any) (WrongTypeInput, error) {
+	var it WrongTypeInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"value"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "value":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
+			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalOString2ᚖstring(ctx, v) }
+
+			directive1 := func(ctx context.Context) (any, error) {
+				kind, err := ec.unmarshalNString2string(ctx, "int")
+				if err != nil {
+					var zeroVal *string
+					return zeroVal, err
+				}
+				if ec.Directives.ReturnValue == nil {
+					var zeroVal *string
+					return zeroVal, errors.New("directive returnValue is not implemented")
+				}
+				return ec.Directives.ReturnValue(ctx, obj, directive0, kind)
+			}
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(*string); ok {
+				it.Value = data
+			} else if tmp == nil {
+				it.Value = nil
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalWrongTypeInput unmarshals raw into the WrongTypeInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalWrongTypeInput(ctx context.Context, raw any) (WrongTypeInput, error) {
+	var out WrongTypeInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "WrongTypeInput", raw, &out)
+	return out, err
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -1719,6 +2220,24 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._Query_checkedInput(ctx, field)
 				})
+		case "wrongTypes":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_wrongTypes(ctx, field)
+				})
+		case "wrongTypeArg":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_wrongTypeArg(ctx, field)
+				})
+		case "wrongTypeInput":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_wrongTypeInput(ctx, field)
+				})
 		case "__type":
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return ec._Query___type(ctx, field)
@@ -1732,6 +2251,54 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			})
 			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
+var wrongTypesImplementors = []string{"WrongTypes"}
+
+func (ec *executionContext) _WrongTypes(ctx context.Context, sel ast.SelectionSet, obj *WrongTypes) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, wrongTypesImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("WrongTypes")
+		case "intAsString":
+			out.Values[i] = ec._WrongTypes_intAsString(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		case "nonNullIntAsString":
+			out.Values[i] = ec._WrongTypes_nonNullIntAsString(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "marshaler":
+			out.Values[i] = ec._WrongTypes_marshaler(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "replacedByMiddleware":
+			out.Values[i] = ec._WrongTypes_replacedByMiddleware(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -2145,6 +2712,11 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	return res
 }
 
+func (ec *executionContext) unmarshalNWrongTypeInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐWrongTypeInput(ctx context.Context, v any) (WrongTypeInput, error) {
+	res, err := ec.unmarshalInputWrongTypeInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalN__Directive2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐDirective(ctx context.Context, sel ast.SelectionSet, v introspection.Directive) graphql.Marshaler {
 	return ec.___Directive(ctx, sel, &v)
 }
@@ -2333,6 +2905,13 @@ func (ec *executionContext) marshalOString2ᚖstring(ctx context.Context, sel as
 	_ = ctx
 	res := graphql.MarshalString(*v)
 	return res
+}
+
+func (ec *executionContext) marshalOWrongTypes2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐWrongTypes(ctx context.Context, sel ast.SelectionSet, v *WrongTypes) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._WrongTypes(ctx, sel, v)
 }
 
 func (ec *executionContext) marshalO__EnumValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐEnumValueᚄ(ctx context.Context, sel ast.SelectionSet, v []introspection.EnumValue) graphql.Marshaler {

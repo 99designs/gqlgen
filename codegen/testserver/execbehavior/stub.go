@@ -8,8 +8,11 @@ import (
 
 type Stub struct {
 	QueryResolver struct {
-		Ping         func(ctx context.Context) (string, error)
-		CheckedInput func(ctx context.Context, input CheckedInput) (string, error)
+		Ping           func(ctx context.Context) (string, error)
+		CheckedInput   func(ctx context.Context, input CheckedInput) (string, error)
+		WrongTypes     func(ctx context.Context) (*WrongTypes, error)
+		WrongTypeArg   func(ctx context.Context, value *string) (*string, error)
+		WrongTypeInput func(ctx context.Context, input WrongTypeInput) (*string, error)
 	}
 }
 
@@ -24,4 +27,13 @@ func (r *stubQuery) Ping(ctx context.Context) (string, error) {
 }
 func (r *stubQuery) CheckedInput(ctx context.Context, input CheckedInput) (string, error) {
 	return r.QueryResolver.CheckedInput(ctx, input)
+}
+func (r *stubQuery) WrongTypes(ctx context.Context) (*WrongTypes, error) {
+	return r.QueryResolver.WrongTypes(ctx)
+}
+func (r *stubQuery) WrongTypeArg(ctx context.Context, value *string) (*string, error) {
+	return r.QueryResolver.WrongTypeArg(ctx, value)
+}
+func (r *stubQuery) WrongTypeInput(ctx context.Context, input WrongTypeInput) (*string, error) {
+	return r.QueryResolver.WrongTypeInput(ctx, input)
 }

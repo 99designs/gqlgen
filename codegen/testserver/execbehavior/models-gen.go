@@ -9,3 +9,14 @@ type CheckedInput struct {
 
 type Query struct {
 }
+
+type WrongTypeInput struct {
+	Value *string `json:"value,omitempty"`
+}
+
+type WrongTypes struct {
+	IntAsString          *string `json:"intAsString,omitempty"`
+	NonNullIntAsString   string  `json:"nonNullIntAsString"`
+	Marshaler            string  `json:"marshaler"`
+	ReplacedByMiddleware *string `json:"replacedByMiddleware,omitempty"`
+}

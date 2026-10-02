@@ -1,0 +1,22 @@
+# Arguments are unmarshaled into the field context before the resolver runs. An
+# argument that fails to unmarshal nulls the field.
+scalar Strict
+
+type ArgObject {
+  echo(strict: Strict!): String
+  ok: String!
+}
+
+extend type Query {
+  argProbe(strict: Strict, withDefault: Int = 7, plain: String): String
+  argObject: ArgObject
+}
+
+# The arguments of a directive are unmarshaled when the field runs, so a value that
+# fails to unmarshal fails the field the directive is on.
+directive @strictArg(value: Strict!) on FIELD_DEFINITION
+
+extend type Query {
+  strictDirective: String @strictArg(value: "good")
+  badStrictDirective: String @strictArg(value: "bad")
+}

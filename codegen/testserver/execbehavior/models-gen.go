@@ -18,6 +18,11 @@ type ProbeUnion interface {
 	IsProbeUnion()
 }
 
+type ArgObject struct {
+	Echo *string `json:"echo,omitempty"`
+	Ok   string  `json:"ok"`
+}
+
 type CheckedInput struct {
 	Mode  string `json:"mode"`
 	Value string `json:"value"`

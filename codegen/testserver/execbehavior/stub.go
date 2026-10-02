@@ -7,6 +7,9 @@ import (
 )
 
 type Stub struct {
+	ArgObjectResolver struct {
+		Echo func(ctx context.Context, obj *ArgObject, strict Strict) (*string, error)
+	}
 	DeferItemResolver struct {
 		Slow           func(ctx context.Context, obj *DeferItem) (string, error)
 		Failing        func(ctx context.Context, obj *DeferItem) (*string, error)
@@ -32,30 +35,37 @@ type Stub struct {
 		AppendLog func(ctx context.Context, entry string) ([]string, error)
 	}
 	QueryResolver struct {
-		Ping             func(ctx context.Context) (string, error)
-		Animals          func(ctx context.Context) ([]Animal, error)
-		Pets             func(ctx context.Context) ([]Pet, error)
-		StrangeAnimal    func(ctx context.Context, kind string) (Animal, error)
-		DeferItem        func(ctx context.Context) (*DeferItem, error)
-		DeferItems       func(ctx context.Context) ([]*DeferItem, error)
-		ChildProbe       func(ctx context.Context) (*ChildProbe, error)
-		CheckedInput     func(ctx context.Context, input CheckedInput) (string, error)
-		Described        func(ctx context.Context, input *DescribedInput, choice *OneOfInput) (*Described, error)
-		MarkedParent     func(ctx context.Context) (*MarkedParent, error)
-		Nullability      func(ctx context.Context, valid bool) (*Nullability, error)
-		Panicking        func(ctx context.Context) (*string, error)
-		PanickingNonNull func(ctx context.Context) (string, error)
-		ErrorProbe       func(ctx context.Context) (*ErrorProbe, error)
-		FailingRoot      func(ctx context.Context) (*string, error)
-		Viewer           func(ctx context.Context) (*Viewer, error)
-		ValueViewer      func(ctx context.Context) (*ValueViewer, error)
-		LimitedItems     func(ctx context.Context, count int) ([]*LimitedItem, error)
-		WrongTypes       func(ctx context.Context) (*WrongTypes, error)
-		WrongTypeArg     func(ctx context.Context, value *string) (*string, error)
-		WrongTypeInput   func(ctx context.Context, input WrongTypeInput) (*string, error)
+		Ping               func(ctx context.Context) (string, error)
+		Animals            func(ctx context.Context) ([]Animal, error)
+		Pets               func(ctx context.Context) ([]Pet, error)
+		StrangeAnimal      func(ctx context.Context, kind string) (Animal, error)
+		ArgProbe           func(ctx context.Context, strict *Strict, withDefault *int, plain *string) (*string, error)
+		ArgObject          func(ctx context.Context) (*ArgObject, error)
+		StrictDirective    func(ctx context.Context) (*string, error)
+		BadStrictDirective func(ctx context.Context) (*string, error)
+		DeferItem          func(ctx context.Context) (*DeferItem, error)
+		DeferItems         func(ctx context.Context) ([]*DeferItem, error)
+		ChildProbe         func(ctx context.Context) (*ChildProbe, error)
+		CheckedInput       func(ctx context.Context, input CheckedInput) (string, error)
+		Described          func(ctx context.Context, input *DescribedInput, choice *OneOfInput) (*Described, error)
+		MarkedParent       func(ctx context.Context) (*MarkedParent, error)
+		Nullability        func(ctx context.Context, valid bool) (*Nullability, error)
+		Panicking          func(ctx context.Context) (*string, error)
+		PanickingNonNull   func(ctx context.Context) (string, error)
+		ErrorProbe         func(ctx context.Context) (*ErrorProbe, error)
+		FailingRoot        func(ctx context.Context) (*string, error)
+		Viewer             func(ctx context.Context) (*Viewer, error)
+		ValueViewer        func(ctx context.Context) (*ValueViewer, error)
+		LimitedItems       func(ctx context.Context, count int) ([]*LimitedItem, error)
+		WrongTypes         func(ctx context.Context) (*WrongTypes, error)
+		WrongTypeArg       func(ctx context.Context, value *string) (*string, error)
+		WrongTypeInput     func(ctx context.Context, input WrongTypeInput) (*string, error)
 	}
 }
 
+func (r *Stub) ArgObject() ArgObjectResolver {
+	return &stubArgObject{r}
+}
 func (r *Stub) DeferItem() DeferItemResolver {
 	return &stubDeferItem{r}
 }
@@ -73,6 +83,12 @@ func (r *Stub) Mutation() MutationResolver {
 }
 func (r *Stub) Query() QueryResolver {
 	return &stubQuery{r}
+}
+
+type stubArgObject struct{ *Stub }
+
+func (r *stubArgObject) Echo(ctx context.Context, obj *ArgObject, strict Strict) (*string, error) {
+	return r.ArgObjectResolver.Echo(ctx, obj, strict)
 }
 
 type stubDeferItem struct{ *Stub }
@@ -145,6 +161,18 @@ func (r *stubQuery) Pets(ctx context.Context) ([]Pet, error) {
 }
 func (r *stubQuery) StrangeAnimal(ctx context.Context, kind string) (Animal, error) {
 	return r.QueryResolver.StrangeAnimal(ctx, kind)
+}
+func (r *stubQuery) ArgProbe(ctx context.Context, strict *Strict, withDefault *int, plain *string) (*string, error) {
+	return r.QueryResolver.ArgProbe(ctx, strict, withDefault, plain)
+}
+func (r *stubQuery) ArgObject(ctx context.Context) (*ArgObject, error) {
+	return r.QueryResolver.ArgObject(ctx)
+}
+func (r *stubQuery) StrictDirective(ctx context.Context) (*string, error) {
+	return r.QueryResolver.StrictDirective(ctx)
+}
+func (r *stubQuery) BadStrictDirective(ctx context.Context) (*string, error) {
+	return r.QueryResolver.BadStrictDirective(ctx)
 }
 func (r *stubQuery) DeferItem(ctx context.Context) (*DeferItem, error) {
 	return r.QueryResolver.DeferItem(ctx)

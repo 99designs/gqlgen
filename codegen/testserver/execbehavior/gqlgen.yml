@@ -4,6 +4,7 @@ skip_validation: true
 exec:
   filename: generated.go
   package: execbehavior
+  worker_limit: 2
 model:
   filename: models-gen.go
   package: execbehavior
@@ -16,4 +17,8 @@ models:
       resolvedValue:
         resolver: true
       node:
+        resolver: true
+  LimitedItem:
+    fields:
+      slow:
         resolver: true

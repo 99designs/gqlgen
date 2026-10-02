@@ -39,6 +39,11 @@ type ChildProbeObject struct {
 
 func (ChildProbeObject) IsProbeUnion() {}
 
+type LimitedItem struct {
+	ID   int `json:"id"`
+	Slow int `json:"slow"`
+}
+
 type MarkedChild struct {
 	Value         *string    `json:"value,omitempty"`
 	ResolvedValue *string    `json:"resolvedValue,omitempty"`

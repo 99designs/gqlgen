@@ -7,6 +7,9 @@ import (
 )
 
 type Stub struct {
+	LimitedItemResolver struct {
+		Slow func(ctx context.Context, obj *LimitedItem) (int, error)
+	}
 	MarkedChildResolver struct {
 		ResolvedValue func(ctx context.Context, obj *MarkedChild) (*string, error)
 		Node          func(ctx context.Context, obj *MarkedChild) (MarkedNode, error)
@@ -25,12 +28,16 @@ type Stub struct {
 		PanickingNonNull func(ctx context.Context) (string, error)
 		Viewer           func(ctx context.Context) (*Viewer, error)
 		ValueViewer      func(ctx context.Context) (*ValueViewer, error)
+		LimitedItems     func(ctx context.Context, count int) ([]*LimitedItem, error)
 		WrongTypes       func(ctx context.Context) (*WrongTypes, error)
 		WrongTypeArg     func(ctx context.Context, value *string) (*string, error)
 		WrongTypeInput   func(ctx context.Context, input WrongTypeInput) (*string, error)
 	}
 }
 
+func (r *Stub) LimitedItem() LimitedItemResolver {
+	return &stubLimitedItem{r}
+}
 func (r *Stub) MarkedChild() MarkedChildResolver {
 	return &stubMarkedChild{r}
 }
@@ -39,6 +46,12 @@ func (r *Stub) Mutation() MutationResolver {
 }
 func (r *Stub) Query() QueryResolver {
 	return &stubQuery{r}
+}
+
+type stubLimitedItem struct{ *Stub }
+
+func (r *stubLimitedItem) Slow(ctx context.Context, obj *LimitedItem) (int, error) {
+	return r.LimitedItemResolver.Slow(ctx, obj)
 }
 
 type stubMarkedChild struct{ *Stub }
@@ -87,6 +100,9 @@ func (r *stubQuery) Viewer(ctx context.Context) (*Viewer, error) {
 }
 func (r *stubQuery) ValueViewer(ctx context.Context) (*ValueViewer, error) {
 	return r.QueryResolver.ValueViewer(ctx)
+}
+func (r *stubQuery) LimitedItems(ctx context.Context, count int) ([]*LimitedItem, error) {
+	return r.QueryResolver.LimitedItems(ctx, count)
 }
 func (r *stubQuery) WrongTypes(ctx context.Context) (*WrongTypes, error) {
 	return r.QueryResolver.WrongTypes(ctx)

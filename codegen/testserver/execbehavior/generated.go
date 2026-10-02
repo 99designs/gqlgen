@@ -70,7 +70,8 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
-		Touch func(childComplexity int) int
+		AppendLog func(childComplexity int, entry string) int
+		Touch     func(childComplexity int) int
 	}
 
 	Query struct {
@@ -115,6 +116,7 @@ type MarkedChildResolver interface {
 }
 type MutationResolver interface {
 	Touch(ctx context.Context) (string, error)
+	AppendLog(ctx context.Context, entry string) ([]string, error)
 }
 type QueryResolver interface {
 	Ping(ctx context.Context) (string, error)
@@ -246,6 +248,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.MarkedParent.Name(childComplexity), true
 
+	case "Mutation.appendLog":
+		if e.ComplexityRoot.Mutation.AppendLog == nil {
+			break
+		}
+
+		args, err := ec.field_Mutation_appendLog_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Mutation.AppendLog(childComplexity, args["entry"].(string)), true
 	case "Mutation.touch":
 		if e.ComplexityRoot.Mutation.Touch == nil {
 			break
@@ -473,7 +486,7 @@ func newExecutionContext(
 	}
 }
 
-//go:embed "field_context_child.graphql" "input_object_directive.graphql" "mark_non_null.graphql" "root_typed_field.graphql" "schema.graphql" "wrong_type.graphql"
+//go:embed "field_context_child.graphql" "input_object_directive.graphql" "mark_non_null.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "wrong_type.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -488,6 +501,7 @@ var sources = []*ast.Source{
 	{Name: "field_context_child.graphql", Input: sourceData("field_context_child.graphql"), BuiltIn: false},
 	{Name: "input_object_directive.graphql", Input: sourceData("input_object_directive.graphql"), BuiltIn: false},
 	{Name: "mark_non_null.graphql", Input: sourceData("mark_non_null.graphql"), BuiltIn: false},
+	{Name: "root_fields.graphql", Input: sourceData("root_fields.graphql"), BuiltIn: false},
 	{Name: "root_typed_field.graphql", Input: sourceData("root_typed_field.graphql"), BuiltIn: false},
 	{Name: "schema.graphql", Input: sourceData("schema.graphql"), BuiltIn: false},
 	{Name: "wrong_type.graphql", Input: sourceData("wrong_type.graphql"), BuiltIn: false},
@@ -554,6 +568,8 @@ func (ec *executionContext) childFields_Mutation(ctx context.Context, field grap
 	switch field.Name {
 	case "touch":
 		return ec.fieldContext_Mutation_touch(ctx, field)
+	case "appendLog":
+		return ec.fieldContext_Mutation_appendLog(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type Mutation", field.Name)
 }
@@ -765,6 +781,20 @@ func (ec *executionContext) field_ChildProbeObject_nested_args(ctx context.Conte
 		return nil, err
 	}
 	args["limit"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Mutation_appendLog_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "entry",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNString2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["entry"] = arg0
 	return args, nil
 }
 
@@ -1384,6 +1414,50 @@ func (ec *executionContext) _Mutation_touch(ctx context.Context, field graphql.C
 }
 func (ec *executionContext) fieldContext_Mutation_touch(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("Mutation", field, true, true, "String")
+}
+
+func (ec *executionContext) _Mutation_appendLog(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Mutation_appendLog(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Mutation().AppendLog(ctx, fc.Args["entry"].(string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []string) graphql.Marshaler {
+			return ec.marshalNString2ᚕstringᚄ(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Mutation_appendLog(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Mutation",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Mutation_appendLog_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
 }
 
 func (ec *executionContext) _Query_ping(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -3580,6 +3654,13 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
+		case "appendLog":
+			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
+				return ec._Mutation_appendLog(ctx, field)
+			})
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -4262,6 +4343,35 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 		graphql.AddInvalidNullFromMarshaler(ctx, "String!")
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNString2ᚕstringᚄ(ctx context.Context, v any) ([]string, error) {
+	vSlice := graphql.CoerceList(v)
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalNString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) marshalNValueViewer2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐValueViewer(ctx context.Context, sel ast.SelectionSet, v *ValueViewer) graphql.Marshaler {

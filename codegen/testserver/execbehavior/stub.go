@@ -12,7 +12,8 @@ type Stub struct {
 		Node          func(ctx context.Context, obj *MarkedChild) (MarkedNode, error)
 	}
 	MutationResolver struct {
-		Touch func(ctx context.Context) (string, error)
+		Touch     func(ctx context.Context) (string, error)
+		AppendLog func(ctx context.Context, entry string) ([]string, error)
 	}
 	QueryResolver struct {
 		Ping           func(ctx context.Context) (string, error)
@@ -50,6 +51,9 @@ type stubMutation struct{ *Stub }
 
 func (r *stubMutation) Touch(ctx context.Context) (string, error) {
 	return r.MutationResolver.Touch(ctx)
+}
+func (r *stubMutation) AppendLog(ctx context.Context, entry string) ([]string, error) {
+	return r.MutationResolver.AppendLog(ctx, entry)
 }
 
 type stubQuery struct{ *Stub }

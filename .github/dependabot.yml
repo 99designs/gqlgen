@@ -19,6 +19,18 @@ updates:
     # For websocket, v1.5.1 has serious bugs
     versions: ["v1.5.1"]
 - package-ecosystem: "gomod" # See documentation for possible values
+  directory: "/bin/_tools" # Pinned code generators (mockery)
+  schedule:
+    interval: "weekly"
+  # A `tool` directive records its module as `// indirect` in go.mod, and gomod
+  # version updates only consider direct dependencies by default. Without this
+  # allow entry Dependabot silently never bumps mockery.
+  # See https://github.com/dependabot/dependabot-core/issues/12050
+  # Each tool added to bin/_tools/go.mod needs its own entry here.
+  allow:
+  - dependency-name: "github.com/vektra/mockery/v3"
+    dependency-type: "all"
+- package-ecosystem: "gomod" # See documentation for possible values
   directory: "/_examples" # Location of package manifests
   schedule:
     interval: "weekly"

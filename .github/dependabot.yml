@@ -9,6 +9,8 @@ updates:
   directory: "/"
   schedule:
     interval: "weekly"
+  cooldown:
+    default-days: 7
 # Maintain dependencies for Go Modules
 - package-ecosystem: "gomod" # See documentation for possible values
   directory: "/" # Location of package manifests
@@ -18,6 +20,8 @@ updates:
   - dependency-name: "github.com/gorilla/websocket"
     # For websocket, v1.5.1 has serious bugs
     versions: ["v1.5.1"]
+  cooldown:
+    default-days: 7
 - package-ecosystem: "gomod" # See documentation for possible values
   directory: "/bin/_tools" # Pinned code generators (mockery)
   schedule:
@@ -30,6 +34,8 @@ updates:
   allow:
   - dependency-name: "github.com/vektra/mockery/v3"
     dependency-type: "all"
+  cooldown:
+    default-days: 7
 - package-ecosystem: "gomod" # See documentation for possible values
   directory: "/_examples" # Location of package manifests
   schedule:
@@ -38,16 +44,24 @@ updates:
   - dependency-name: "github.com/gorilla/websocket"
     # For websocket, v1.5.1 has serious bugs
     versions: ["v1.5.1"]
+  cooldown:
+    default-days: 7
 # Maintain dependencies for npm
 - package-ecosystem: "npm" # See documentation for possible values
   directory: "integration" # Location of package manifests
   schedule:
     interval: "weekly"
+  cooldown:
+    default-days: 7
 - package-ecosystem: "npm" # See documentation for possible values
   directory: "_examples/chat" # Location of package manifests
   schedule:
     interval: "weekly"
+  cooldown:
+    default-days: 7
 - package-ecosystem: "npm" # See documentation for possible values
   directory: "_examples/federation" # Location of package manifests
   schedule:
     interval: "weekly"
+  cooldown:
+    default-days: 7

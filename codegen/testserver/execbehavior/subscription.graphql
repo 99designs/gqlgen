@@ -1,0 +1,30 @@
+# A subscription field returns a channel, and each value sent on it becomes one response.
+# The stream ends when the channel is closed or the context is canceled. The events of
+# fields marked @subscriptionContext carry their own context, and the other fields are
+# adapted to the same shape.
+#
+# Uses Animal from abstract_types.graphql.
+directive @subscriptionContext on FIELD_DEFINITION
+
+# replaceStream replaces the channel of the field with what "with" names: "stream" or
+# "events" for a function that marshals the events itself, "nil" for nil, anything else
+# for a value of the wrong type.
+directive @replaceStream(with: String!) on FIELD_DEFINITION
+
+type Subscription {
+  count(to: Int!): Int!
+  events(to: Int!): Int! @subscriptionContext
+  failing: Int!
+  failingEvents: Int! @subscriptionContext
+  nilStream: Int! @replaceStream(with: "nil")
+  nullableNilStream: Int @replaceStream(with: "nil")
+  nilEvents: Int! @subscriptionContext @replaceStream(with: "nil")
+  panicking: Int!
+  replacedStream: String @replaceStream(with: "stream")
+  replacedEvents: String @subscriptionContext @replaceStream(with: "events")
+  wrongType: Int @replaceStream(with: "wrong")
+  wrongTypeEvents: Int @subscriptionContext @replaceStream(with: "wrong")
+  silentEvents: Int @subscriptionContext
+  nilAnimal: Animal!
+  nullableNilAnimal: Animal
+}

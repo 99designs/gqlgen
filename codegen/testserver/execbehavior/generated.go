@@ -35,13 +35,15 @@ type ResolverRoot interface {
 	MarkedChild() MarkedChildResolver
 	Mutation() MutationResolver
 	Query() QueryResolver
+	Subscription() SubscriptionResolver
 }
 
 type DirectiveRoot struct {
-	InputCheck  func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
-	ReturnValue func(ctx context.Context, obj any, next graphql.Resolver, kind string) (res any, err error)
-	StrictArg   func(ctx context.Context, obj any, next graphql.Resolver, value Strict) (res any, err error)
-	Tag         func(ctx context.Context, obj any, next graphql.Resolver, name string) (res any, err error)
+	InputCheck    func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
+	ReplaceStream func(ctx context.Context, obj any, next graphql.Resolver, with string) (res any, err error)
+	ReturnValue   func(ctx context.Context, obj any, next graphql.Resolver, kind string) (res any, err error)
+	StrictArg     func(ctx context.Context, obj any, next graphql.Resolver, value Strict) (res any, err error)
+	Tag           func(ctx context.Context, obj any, next graphql.Resolver, name string) (res any, err error)
 }
 
 type ComplexityRoot struct {
@@ -163,6 +165,24 @@ type ComplexityRoot struct {
 		WrongTypes         func(childComplexity int) int
 	}
 
+	Subscription struct {
+		Count             func(childComplexity int, to int) int
+		Events            func(childComplexity int, to int) int
+		Failing           func(childComplexity int) int
+		FailingEvents     func(childComplexity int) int
+		NilAnimal         func(childComplexity int) int
+		NilEvents         func(childComplexity int) int
+		NilStream         func(childComplexity int) int
+		NullableNilAnimal func(childComplexity int) int
+		NullableNilStream func(childComplexity int) int
+		Panicking         func(childComplexity int) int
+		ReplacedEvents    func(childComplexity int) int
+		ReplacedStream    func(childComplexity int) int
+		SilentEvents      func(childComplexity int) int
+		WrongType         func(childComplexity int) int
+		WrongTypeEvents   func(childComplexity int) int
+	}
+
 	ValueViewer struct {
 		Name  func(childComplexity int) int
 		Query func(childComplexity int) int
@@ -242,6 +262,23 @@ type QueryResolver interface {
 	WrongTypes(ctx context.Context) (*WrongTypes, error)
 	WrongTypeArg(ctx context.Context, value *string) (*string, error)
 	WrongTypeInput(ctx context.Context, input WrongTypeInput) (*string, error)
+}
+type SubscriptionResolver interface {
+	Count(ctx context.Context, to int) (<-chan int, error)
+	Events(ctx context.Context, to int) (<-chan graphql.Event[int], error)
+	Failing(ctx context.Context) (<-chan int, error)
+	FailingEvents(ctx context.Context) (<-chan graphql.Event[int], error)
+	NilStream(ctx context.Context) (<-chan int, error)
+	NullableNilStream(ctx context.Context) (<-chan *int, error)
+	NilEvents(ctx context.Context) (<-chan graphql.Event[int], error)
+	Panicking(ctx context.Context) (<-chan int, error)
+	ReplacedStream(ctx context.Context) (<-chan *string, error)
+	ReplacedEvents(ctx context.Context) (<-chan graphql.Event[*string], error)
+	WrongType(ctx context.Context) (<-chan *int, error)
+	WrongTypeEvents(ctx context.Context) (<-chan graphql.Event[*int], error)
+	SilentEvents(ctx context.Context) (<-chan graphql.Event[*int], error)
+	NilAnimal(ctx context.Context) (<-chan Animal, error)
+	NullableNilAnimal(ctx context.Context) (<-chan Animal, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -786,6 +823,107 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Query.WrongTypes(childComplexity), true
 
+	case "Subscription.count":
+		if e.ComplexityRoot.Subscription.Count == nil {
+			break
+		}
+
+		args, err := ec.field_Subscription_count_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Subscription.Count(childComplexity, args["to"].(int)), true
+	case "Subscription.events":
+		if e.ComplexityRoot.Subscription.Events == nil {
+			break
+		}
+
+		args, err := ec.field_Subscription_events_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Subscription.Events(childComplexity, args["to"].(int)), true
+	case "Subscription.failing":
+		if e.ComplexityRoot.Subscription.Failing == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Subscription.Failing(childComplexity), true
+	case "Subscription.failingEvents":
+		if e.ComplexityRoot.Subscription.FailingEvents == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Subscription.FailingEvents(childComplexity), true
+	case "Subscription.nilAnimal":
+		if e.ComplexityRoot.Subscription.NilAnimal == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Subscription.NilAnimal(childComplexity), true
+	case "Subscription.nilEvents":
+		if e.ComplexityRoot.Subscription.NilEvents == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Subscription.NilEvents(childComplexity), true
+	case "Subscription.nilStream":
+		if e.ComplexityRoot.Subscription.NilStream == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Subscription.NilStream(childComplexity), true
+	case "Subscription.nullableNilAnimal":
+		if e.ComplexityRoot.Subscription.NullableNilAnimal == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Subscription.NullableNilAnimal(childComplexity), true
+	case "Subscription.nullableNilStream":
+		if e.ComplexityRoot.Subscription.NullableNilStream == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Subscription.NullableNilStream(childComplexity), true
+	case "Subscription.panicking":
+		if e.ComplexityRoot.Subscription.Panicking == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Subscription.Panicking(childComplexity), true
+	case "Subscription.replacedEvents":
+		if e.ComplexityRoot.Subscription.ReplacedEvents == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Subscription.ReplacedEvents(childComplexity), true
+	case "Subscription.replacedStream":
+		if e.ComplexityRoot.Subscription.ReplacedStream == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Subscription.ReplacedStream(childComplexity), true
+	case "Subscription.silentEvents":
+		if e.ComplexityRoot.Subscription.SilentEvents == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Subscription.SilentEvents(childComplexity), true
+	case "Subscription.wrongType":
+		if e.ComplexityRoot.Subscription.WrongType == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Subscription.WrongType(childComplexity), true
+	case "Subscription.wrongTypeEvents":
+		if e.ComplexityRoot.Subscription.WrongTypeEvents == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Subscription.WrongTypeEvents(childComplexity), true
+
 	case "ValueViewer.name":
 		if e.ComplexityRoot.ValueViewer.Name == nil {
 			break
@@ -914,9 +1052,34 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 				Data: buf.Bytes(),
 			}
 		}
+	case ast.Subscription:
+		// Exec discards the per-event context; the event-aware path is exposed
+		// via ExecWithEventContext and used by the executor when it detects
+		// ExecutableSchemaWithEventContext.
+		return graphql.SubscriptionResponseHandler(ec._Subscription(ctx, opCtx.Operation.SelectionSet))
 
 	default:
 		return graphql.OneShot(graphql.ErrorResponse(ctx, "unsupported GraphQL operation"))
+	}
+}
+
+// ExecWithEventContext is the per-event-context-aware response handler. The
+// graphql executor type-asserts the executable schema for this method when
+// at least one subscription field is annotated @subscriptionContext; absence
+// falls back to Exec.
+func (e *executableSchema) ExecWithEventContext(ctx context.Context) graphql.ResponseHandlerWithContext {
+	opCtx := graphql.GetOperationContext(ctx)
+	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
+
+	switch opCtx.Operation.Operation {
+	case ast.Subscription:
+		return graphql.SubscriptionEventResponseHandler(ec._Subscription(ctx, opCtx.Operation.SelectionSet))
+	default:
+		// Non-subscription operations fall through to Exec via the executor's
+		// default path; this method only handles ast.Subscription.
+		return func(ctx context.Context) (context.Context, *graphql.Response) {
+			return ctx, graphql.ErrorResponse(ctx, "ExecWithEventContext only handles subscriptions")
+		}
 	}
 }
 
@@ -939,7 +1102,7 @@ func newExecutionContext(
 	}
 }
 
-//go:embed "abstract_types.graphql" "arguments.graphql" "defer.graphql" "field_context_child.graphql" "input_coercion.graphql" "input_object_directive.graphql" "introspection.graphql" "mark_non_null.graphql" "named_input.graphql" "nullability.graphql" "panic.graphql" "resolver_errors.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "worker_limit.graphql" "wrong_type.graphql"
+//go:embed "abstract_types.graphql" "arguments.graphql" "defer.graphql" "field_context_child.graphql" "input_coercion.graphql" "input_object_directive.graphql" "introspection.graphql" "mark_non_null.graphql" "named_input.graphql" "nullability.graphql" "panic.graphql" "resolver_errors.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "subscription.graphql" "worker_limit.graphql" "wrong_type.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -966,6 +1129,7 @@ var sources = []*ast.Source{
 	{Name: "root_fields.graphql", Input: sourceData("root_fields.graphql"), BuiltIn: false},
 	{Name: "root_typed_field.graphql", Input: sourceData("root_typed_field.graphql"), BuiltIn: false},
 	{Name: "schema.graphql", Input: sourceData("schema.graphql"), BuiltIn: false},
+	{Name: "subscription.graphql", Input: sourceData("subscription.graphql"), BuiltIn: false},
 	{Name: "worker_limit.graphql", Input: sourceData("worker_limit.graphql"), BuiltIn: false},
 	{Name: "wrong_type.graphql", Input: sourceData("wrong_type.graphql"), BuiltIn: false},
 }
@@ -1351,6 +1515,20 @@ func (ec *executionContext) childFields___Type(ctx context.Context, field graphq
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) dir_replaceStream_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "with",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNString2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["with"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) dir_returnValue_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1702,6 +1880,34 @@ func (ec *executionContext) field_Query_wrongTypeInput_args(ctx context.Context,
 		return nil, err
 	}
 	args["input"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Subscription_count_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "to",
+		func(ctx context.Context, v any) (int, error) {
+			return ec.unmarshalNInt2int(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["to"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Subscription_events_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "to",
+		func(ctx context.Context, v any) (int, error) {
+			return ec.unmarshalNInt2int(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["to"] = arg0
 	return args, nil
 }
 
@@ -4067,6 +4273,537 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return ec.childFields___Schema(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Subscription_count(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+	return graphql.ResolveFieldStream(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Subscription_count(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Subscription().Count(ctx, fc.Args["to"].(int))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Subscription_count(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Subscription_count_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Subscription_events(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) (context.Context, graphql.Marshaler)) {
+	return graphql.ResolveFieldStreamWithEventContext(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Subscription_events(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Subscription().Events(ctx, fc.Args["to"].(int))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Subscription_events(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Subscription_events_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Subscription_failing(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+	return graphql.ResolveFieldStream(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Subscription_failing(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Subscription().Failing(ctx)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Subscription_failing(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Subscription", field, true, true, "Int")
+}
+
+func (ec *executionContext) _Subscription_failingEvents(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) (context.Context, graphql.Marshaler)) {
+	return graphql.ResolveFieldStreamWithEventContext(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Subscription_failingEvents(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Subscription().FailingEvents(ctx)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Subscription_failingEvents(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Subscription", field, true, true, "Int")
+}
+
+func (ec *executionContext) _Subscription_nilStream(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+	return graphql.ResolveFieldStream(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Subscription_nilStream(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Subscription().NilStream(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				with, err := ec.unmarshalNString2string(ctx, "nil")
+				if err != nil {
+					var zeroVal int
+					return zeroVal, err
+				}
+				if ec.Directives.ReplaceStream == nil {
+					var zeroVal int
+					return zeroVal, errors.New("directive replaceStream is not implemented")
+				}
+				return ec.Directives.ReplaceStream(ctx, nil, directive0, with)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Subscription_nilStream(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Subscription", field, true, true, "Int")
+}
+
+func (ec *executionContext) _Subscription_nullableNilStream(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+	return graphql.ResolveFieldStream(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Subscription_nullableNilStream(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Subscription().NullableNilStream(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				with, err := ec.unmarshalNString2string(ctx, "nil")
+				if err != nil {
+					var zeroVal *int
+					return zeroVal, err
+				}
+				if ec.Directives.ReplaceStream == nil {
+					var zeroVal *int
+					return zeroVal, errors.New("directive replaceStream is not implemented")
+				}
+				return ec.Directives.ReplaceStream(ctx, nil, directive0, with)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *int) graphql.Marshaler {
+			return ec.marshalOInt2ᚖint(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Subscription_nullableNilStream(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Subscription", field, true, true, "Int")
+}
+
+func (ec *executionContext) _Subscription_nilEvents(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) (context.Context, graphql.Marshaler)) {
+	return graphql.ResolveFieldStreamWithEventContext(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Subscription_nilEvents(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Subscription().NilEvents(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				with, err := ec.unmarshalNString2string(ctx, "nil")
+				if err != nil {
+					var zeroVal int
+					return zeroVal, err
+				}
+				if ec.Directives.ReplaceStream == nil {
+					var zeroVal int
+					return zeroVal, errors.New("directive replaceStream is not implemented")
+				}
+				return ec.Directives.ReplaceStream(ctx, nil, directive0, with)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Subscription_nilEvents(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Subscription", field, true, true, "Int")
+}
+
+func (ec *executionContext) _Subscription_panicking(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+	return graphql.ResolveFieldStream(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Subscription_panicking(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Subscription().Panicking(ctx)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Subscription_panicking(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Subscription", field, true, true, "Int")
+}
+
+func (ec *executionContext) _Subscription_replacedStream(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+	return graphql.ResolveFieldStream(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Subscription_replacedStream(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Subscription().ReplacedStream(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				with, err := ec.unmarshalNString2string(ctx, "stream")
+				if err != nil {
+					var zeroVal *string
+					return zeroVal, err
+				}
+				if ec.Directives.ReplaceStream == nil {
+					var zeroVal *string
+					return zeroVal, errors.New("directive replaceStream is not implemented")
+				}
+				return ec.Directives.ReplaceStream(ctx, nil, directive0, with)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Subscription_replacedStream(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Subscription", field, true, true, "String")
+}
+
+func (ec *executionContext) _Subscription_replacedEvents(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) (context.Context, graphql.Marshaler)) {
+	return graphql.ResolveFieldStreamWithEventContext(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Subscription_replacedEvents(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Subscription().ReplacedEvents(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				with, err := ec.unmarshalNString2string(ctx, "events")
+				if err != nil {
+					var zeroVal *string
+					return zeroVal, err
+				}
+				if ec.Directives.ReplaceStream == nil {
+					var zeroVal *string
+					return zeroVal, errors.New("directive replaceStream is not implemented")
+				}
+				return ec.Directives.ReplaceStream(ctx, nil, directive0, with)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Subscription_replacedEvents(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Subscription", field, true, true, "String")
+}
+
+func (ec *executionContext) _Subscription_wrongType(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+	return graphql.ResolveFieldStream(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Subscription_wrongType(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Subscription().WrongType(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				with, err := ec.unmarshalNString2string(ctx, "wrong")
+				if err != nil {
+					var zeroVal *int
+					return zeroVal, err
+				}
+				if ec.Directives.ReplaceStream == nil {
+					var zeroVal *int
+					return zeroVal, errors.New("directive replaceStream is not implemented")
+				}
+				return ec.Directives.ReplaceStream(ctx, nil, directive0, with)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *int) graphql.Marshaler {
+			return ec.marshalOInt2ᚖint(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Subscription_wrongType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Subscription", field, true, true, "Int")
+}
+
+func (ec *executionContext) _Subscription_wrongTypeEvents(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) (context.Context, graphql.Marshaler)) {
+	return graphql.ResolveFieldStreamWithEventContext(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Subscription_wrongTypeEvents(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Subscription().WrongTypeEvents(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				with, err := ec.unmarshalNString2string(ctx, "wrong")
+				if err != nil {
+					var zeroVal *int
+					return zeroVal, err
+				}
+				if ec.Directives.ReplaceStream == nil {
+					var zeroVal *int
+					return zeroVal, errors.New("directive replaceStream is not implemented")
+				}
+				return ec.Directives.ReplaceStream(ctx, nil, directive0, with)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *int) graphql.Marshaler {
+			return ec.marshalOInt2ᚖint(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Subscription_wrongTypeEvents(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Subscription", field, true, true, "Int")
+}
+
+func (ec *executionContext) _Subscription_silentEvents(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) (context.Context, graphql.Marshaler)) {
+	return graphql.ResolveFieldStreamWithEventContext(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Subscription_silentEvents(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Subscription().SilentEvents(ctx)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *int) graphql.Marshaler {
+			return ec.marshalOInt2ᚖint(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Subscription_silentEvents(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Subscription", field, true, true, "Int")
+}
+
+func (ec *executionContext) _Subscription_nilAnimal(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+	return graphql.ResolveFieldStream(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Subscription_nilAnimal(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Subscription().NilAnimal(ctx)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v Animal) graphql.Marshaler {
+			return ec.marshalNAnimal2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐAnimal(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Subscription_nilAnimal(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("FieldContext.Child cannot be called on type INTERFACE")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Subscription_nullableNilAnimal(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
+	return graphql.ResolveFieldStream(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Subscription_nullableNilAnimal(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Subscription().NullableNilAnimal(ctx)
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v Animal) graphql.Marshaler {
+			return ec.marshalOAnimal2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐAnimal(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Subscription_nullableNilAnimal(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Subscription",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("FieldContext.Child cannot be called on type INTERFACE")
 		},
 	}
 	return fc, nil
@@ -6735,6 +7472,54 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 	return out
 }
 
+var subscriptionImplementors = []string{"Subscription"}
+
+func (ec *executionContext) _Subscription(ctx context.Context, sel ast.SelectionSet) func(ctx context.Context) (context.Context, graphql.Marshaler) {
+	fields := graphql.CollectFields(ec.OperationContext, sel, subscriptionImplementors)
+	ctx = graphql.WithFieldContext(ctx, &graphql.FieldContext{
+		Object: "Subscription",
+	})
+	if len(fields) != 1 {
+		graphql.AddErrorf(ctx, "must subscribe to exactly one stream")
+		return nil
+	}
+
+	switch fields[0].Name {
+	case "count":
+		return graphql.StreamWithoutEventContext(ec._Subscription_count(ctx, fields[0]))
+	case "events":
+		return ec._Subscription_events(ctx, fields[0])
+	case "failing":
+		return graphql.StreamWithoutEventContext(ec._Subscription_failing(ctx, fields[0]))
+	case "failingEvents":
+		return ec._Subscription_failingEvents(ctx, fields[0])
+	case "nilStream":
+		return graphql.StreamWithoutEventContext(ec._Subscription_nilStream(ctx, fields[0]))
+	case "nullableNilStream":
+		return graphql.StreamWithoutEventContext(ec._Subscription_nullableNilStream(ctx, fields[0]))
+	case "nilEvents":
+		return ec._Subscription_nilEvents(ctx, fields[0])
+	case "panicking":
+		return graphql.StreamWithoutEventContext(ec._Subscription_panicking(ctx, fields[0]))
+	case "replacedStream":
+		return graphql.StreamWithoutEventContext(ec._Subscription_replacedStream(ctx, fields[0]))
+	case "replacedEvents":
+		return ec._Subscription_replacedEvents(ctx, fields[0])
+	case "wrongType":
+		return graphql.StreamWithoutEventContext(ec._Subscription_wrongType(ctx, fields[0]))
+	case "wrongTypeEvents":
+		return ec._Subscription_wrongTypeEvents(ctx, fields[0])
+	case "silentEvents":
+		return ec._Subscription_silentEvents(ctx, fields[0])
+	case "nilAnimal":
+		return graphql.StreamWithoutEventContext(ec._Subscription_nilAnimal(ctx, fields[0]))
+	case "nullableNilAnimal":
+		return graphql.StreamWithoutEventContext(ec._Subscription_nullableNilAnimal(ctx, fields[0]))
+	default:
+		panic("unknown field " + strconv.Quote(fields[0].Name))
+	}
+}
+
 var valueViewerImplementors = []string{"ValueViewer"}
 
 func (ec *executionContext) _ValueViewer(ctx context.Context, sel ast.SelectionSet, obj *ValueViewer) graphql.Marshaler {
@@ -7230,6 +8015,14 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 // endregion **************************** object.gotpl ****************************
 
 // region    ***************************** type.gotpl *****************************
+
+func (ec *executionContext) marshalNAnimal2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐAnimal(ctx context.Context, sel ast.SelectionSet, v Animal) graphql.Marshaler {
+	if v == nil {
+		graphql.AddInvalidNullError(ctx, "Animal!")
+		return graphql.Null
+	}
+	return ec._Animal(ctx, sel, v)
+}
 
 func (ec *executionContext) marshalNAnimal2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐAnimal(ctx context.Context, sel ast.SelectionSet, v []Animal) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 2, false, func(ctx context.Context, i int) graphql.Marshaler {

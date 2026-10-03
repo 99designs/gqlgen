@@ -15,3 +15,11 @@ type PanicObject {
 type Mutation {
   panicking: String
 }
+
+# Subscription fields without @subscriptionContext. A panic in the resolver fails the
+# request like it does for the other operations.
+type Subscription {
+  count: Int!
+  failing: Int!
+  panicking: Int
+}

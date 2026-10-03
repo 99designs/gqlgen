@@ -119,6 +119,9 @@ type OneOfInput struct {
 type Query struct {
 }
 
+type Subscription struct {
+}
+
 type Viewer struct {
 	Name          string    `json:"name"`
 	Query         *Query    `json:"query"`

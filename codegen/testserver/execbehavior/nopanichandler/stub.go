@@ -16,6 +16,11 @@ type Stub struct {
 		PanickingObject func(ctx context.Context) (*PanicObject, error)
 		PanickingList   func(ctx context.Context) ([]*PanicObject, error)
 	}
+	SubscriptionResolver struct {
+		Count     func(ctx context.Context) (<-chan int, error)
+		Failing   func(ctx context.Context) (<-chan int, error)
+		Panicking func(ctx context.Context) (<-chan *int, error)
+	}
 }
 
 func (r *Stub) Mutation() MutationResolver {
@@ -23,6 +28,9 @@ func (r *Stub) Mutation() MutationResolver {
 }
 func (r *Stub) Query() QueryResolver {
 	return &stubQuery{r}
+}
+func (r *Stub) Subscription() SubscriptionResolver {
+	return &stubSubscription{r}
 }
 
 type stubMutation struct{ *Stub }
@@ -44,4 +52,16 @@ func (r *stubQuery) PanickingObject(ctx context.Context) (*PanicObject, error) {
 }
 func (r *stubQuery) PanickingList(ctx context.Context) ([]*PanicObject, error) {
 	return r.QueryResolver.PanickingList(ctx)
+}
+
+type stubSubscription struct{ *Stub }
+
+func (r *stubSubscription) Count(ctx context.Context) (<-chan int, error) {
+	return r.SubscriptionResolver.Count(ctx)
+}
+func (r *stubSubscription) Failing(ctx context.Context) (<-chan int, error) {
+	return r.SubscriptionResolver.Failing(ctx)
+}
+func (r *stubSubscription) Panicking(ctx context.Context) (<-chan *int, error) {
+	return r.SubscriptionResolver.Panicking(ctx)
 }

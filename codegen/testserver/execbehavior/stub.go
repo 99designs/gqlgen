@@ -4,6 +4,8 @@ package execbehavior
 
 import (
 	"context"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type Stub struct {
@@ -63,6 +65,23 @@ type Stub struct {
 		WrongTypeArg       func(ctx context.Context, value *string) (*string, error)
 		WrongTypeInput     func(ctx context.Context, input WrongTypeInput) (*string, error)
 	}
+	SubscriptionResolver struct {
+		Count             func(ctx context.Context, to int) (<-chan int, error)
+		Events            func(ctx context.Context, to int) (<-chan graphql.Event[int], error)
+		Failing           func(ctx context.Context) (<-chan int, error)
+		FailingEvents     func(ctx context.Context) (<-chan graphql.Event[int], error)
+		NilStream         func(ctx context.Context) (<-chan int, error)
+		NullableNilStream func(ctx context.Context) (<-chan *int, error)
+		NilEvents         func(ctx context.Context) (<-chan graphql.Event[int], error)
+		Panicking         func(ctx context.Context) (<-chan int, error)
+		ReplacedStream    func(ctx context.Context) (<-chan *string, error)
+		ReplacedEvents    func(ctx context.Context) (<-chan graphql.Event[*string], error)
+		WrongType         func(ctx context.Context) (<-chan *int, error)
+		WrongTypeEvents   func(ctx context.Context) (<-chan graphql.Event[*int], error)
+		SilentEvents      func(ctx context.Context) (<-chan graphql.Event[*int], error)
+		NilAnimal         func(ctx context.Context) (<-chan Animal, error)
+		NullableNilAnimal func(ctx context.Context) (<-chan Animal, error)
+	}
 }
 
 func (r *Stub) ArgObject() ArgObjectResolver {
@@ -85,6 +104,9 @@ func (r *Stub) Mutation() MutationResolver {
 }
 func (r *Stub) Query() QueryResolver {
 	return &stubQuery{r}
+}
+func (r *Stub) Subscription() SubscriptionResolver {
+	return &stubSubscription{r}
 }
 
 type stubArgObject struct{ *Stub }
@@ -232,4 +254,52 @@ func (r *stubQuery) WrongTypeArg(ctx context.Context, value *string) (*string, e
 }
 func (r *stubQuery) WrongTypeInput(ctx context.Context, input WrongTypeInput) (*string, error) {
 	return r.QueryResolver.WrongTypeInput(ctx, input)
+}
+
+type stubSubscription struct{ *Stub }
+
+func (r *stubSubscription) Count(ctx context.Context, to int) (<-chan int, error) {
+	return r.SubscriptionResolver.Count(ctx, to)
+}
+func (r *stubSubscription) Events(ctx context.Context, to int) (<-chan graphql.Event[int], error) {
+	return r.SubscriptionResolver.Events(ctx, to)
+}
+func (r *stubSubscription) Failing(ctx context.Context) (<-chan int, error) {
+	return r.SubscriptionResolver.Failing(ctx)
+}
+func (r *stubSubscription) FailingEvents(ctx context.Context) (<-chan graphql.Event[int], error) {
+	return r.SubscriptionResolver.FailingEvents(ctx)
+}
+func (r *stubSubscription) NilStream(ctx context.Context) (<-chan int, error) {
+	return r.SubscriptionResolver.NilStream(ctx)
+}
+func (r *stubSubscription) NullableNilStream(ctx context.Context) (<-chan *int, error) {
+	return r.SubscriptionResolver.NullableNilStream(ctx)
+}
+func (r *stubSubscription) NilEvents(ctx context.Context) (<-chan graphql.Event[int], error) {
+	return r.SubscriptionResolver.NilEvents(ctx)
+}
+func (r *stubSubscription) Panicking(ctx context.Context) (<-chan int, error) {
+	return r.SubscriptionResolver.Panicking(ctx)
+}
+func (r *stubSubscription) ReplacedStream(ctx context.Context) (<-chan *string, error) {
+	return r.SubscriptionResolver.ReplacedStream(ctx)
+}
+func (r *stubSubscription) ReplacedEvents(ctx context.Context) (<-chan graphql.Event[*string], error) {
+	return r.SubscriptionResolver.ReplacedEvents(ctx)
+}
+func (r *stubSubscription) WrongType(ctx context.Context) (<-chan *int, error) {
+	return r.SubscriptionResolver.WrongType(ctx)
+}
+func (r *stubSubscription) WrongTypeEvents(ctx context.Context) (<-chan graphql.Event[*int], error) {
+	return r.SubscriptionResolver.WrongTypeEvents(ctx)
+}
+func (r *stubSubscription) SilentEvents(ctx context.Context) (<-chan graphql.Event[*int], error) {
+	return r.SubscriptionResolver.SilentEvents(ctx)
+}
+func (r *stubSubscription) NilAnimal(ctx context.Context) (<-chan Animal, error) {
+	return r.SubscriptionResolver.NilAnimal(ctx)
+}
+func (r *stubSubscription) NullableNilAnimal(ctx context.Context) (<-chan Animal, error) {
+	return r.SubscriptionResolver.NullableNilAnimal(ctx)
 }

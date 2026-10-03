@@ -5,7 +5,9 @@ package exectest
 import (
 	"bytes"
 	"cmp"
+	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"slices"
@@ -16,6 +18,7 @@ import (
 	"github.com/vektah/gqlparser/v2/gqlerror"
 
 	"github.com/99designs/gqlgen/graphql"
+	"github.com/99designs/gqlgen/graphql/executor"
 )
 
 // RawPost sends query with variables to srv as a JSON POST request, and returns the
@@ -86,4 +89,42 @@ func ComparePaths(a, b ast.Path) int {
 		}
 	}
 	return cmp.Compare(len(a), len(b))
+}
+
+// Subscribe runs the subscription query on exec and returns its responses as a JSON
+// array, without the locations of errors, or, when running it panics, the value of the
+// panic as a string.
+func Subscribe(t testing.TB, exec *executor.Executor, query string) (res string) {
+	t.Helper()
+	defer func() {
+		if r := recover(); r != nil {
+			b, err := json.Marshal(fmt.Sprint("panic: ", r))
+			require.NoError(t, err)
+			res = string(b)
+		}
+	}()
+
+	ctx := graphql.StartOperationTrace(context.Background())
+	opCtx, errs := exec.CreateOperationContext(ctx, &graphql.RawParams{Query: query})
+	require.Empty(t, errs)
+	handler, ctx := exec.DispatchOperation(ctx, opCtx)
+
+	// The handler reuses the buffer of the data, so each response is encoded before the
+	// next one is read.
+	var responses []json.RawMessage
+	for range 100 {
+		resp := handler(ctx)
+		if resp == nil {
+			break
+		}
+		for _, err := range resp.Errors {
+			err.Locations = nil
+		}
+		b, err := json.Marshal(resp)
+		require.NoError(t, err)
+		responses = append(responses, b)
+	}
+	b, err := json.Marshal(responses)
+	require.NoError(t, err)
+	return string(b)
 }

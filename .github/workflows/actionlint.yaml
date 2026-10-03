@@ -74,6 +74,20 @@ jobs:
       uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
     - name: Install GHALINT
       run: go install github.com/suzuki-shunsuke/ghalint/cmd/ghalint@v1.5.3 # v1.5.3
-    - run: cd ..; ghalint run
+    - name: Run GHALINT
+      run: ghalint run
       env:
         GHALINT_LOG_COLOR: always
+    - name: Run zizmor
+      if: ${{ always() }}
+      uses: zizmorcore/zizmor-action@cc914d7f3750a2d13d75c7f184a1060aa0e9d482 # v0.6.4
+      with:
+        # Pinned rather than latest, for the same reason the actions themselves are:
+        # a new zizmor release would otherwise start failing pull requests that
+        # changed nothing. Bump it alongside what contributors run locally.
+        version: v1.30.1
+        # Report on the diff the way actionlint and shellcheck above do. The SARIF
+        # upload is the alternative, and it is mutually exclusive with annotations
+        # and would need security-events: write, which this job does not have.
+        advanced-security: "false"
+        annotations: "true"

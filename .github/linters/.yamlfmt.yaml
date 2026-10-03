@@ -5,5 +5,8 @@
 formatter:
   type: basic
   indentless_arrays: true
+  # Blank lines between groups of keys are load-bearing in the heavily commented
+  # workflows: without this, a formatting run silently reflows them into one block.
+  retain_line_breaks: true
 indent: 2
 line_ending: lf

@@ -198,6 +198,11 @@ func (ec *executionContext) resolveBatch_{{$object.Name}}_{{$field.Name}}(ctx co
 			return nil, nil
 		}
 		{{- end -}}
+		{{- if .FallsBackToZeroValue -}}
+		if {{.GoReceiverName}}.{{.GoFieldName}} == nil {
+			return new({{ .TypeReference.Elem.GO | ref }}), nil
+		}
+		{{ end -}}
 		return {{.GoReceiverName}}.{{.GoFieldName}}, nil
 	{{- end }}
 	{{- end }}

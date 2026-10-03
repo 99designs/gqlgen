@@ -1,0 +1,17 @@
+schema:
+  - "*.graphql"
+skip_validation: true
+zero_value_non_null_object_fields: true
+exec:
+  layout: follow-schema
+  dir: .
+  package: zerovaluenonnullobjectfields
+model:
+  filename: models-gen.go
+  package: zerovaluenonnullobjectfields
+resolver:
+  layout: follow-schema
+  dir: .
+  package: zerovaluenonnullobjectfields
+  type: Resolver
+omit_complexity: true

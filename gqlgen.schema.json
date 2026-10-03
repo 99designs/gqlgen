@@ -325,6 +325,11 @@
       "type": "boolean",
       "default": true
     },
+    "zero_value_non_null_object_fields": {
+      "description": "Turn on to fill a nil non-null object field (resolved by direct struct field access) with a zero value instead of the spec-mandated null-propagation error",
+      "type": "boolean",
+      "default": false
+    },
     "enable_model_json_omitempty_tag": {
       "description": "Enable adding omitempty to the json tag of generated model fields",
       "type": "boolean",

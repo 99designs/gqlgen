@@ -112,6 +112,11 @@ resolver:
 # Optional: wrap nullable input fields with Omittable
 # nullable_input_omittable: true
 
+# Optional: turn on to fill a nil non-null object field (resolved by direct struct field
+# access) with a zero value instead of the spec-mandated null-propagation error. See
+# the "Missing non-null object fields" section under Resolvers in the docs. Default: false
+# zero_value_non_null_object_fields: false
+
 # Optional: set to speed up generation time by not performing a final validation pass.
 # skip_validation: true
 

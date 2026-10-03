@@ -29,6 +29,7 @@ type (
 		loadErrors            []error
 		buildFlags            []string
 		packagesToCachePrefix string
+		overlay               map[string][]byte
 
 		numLoadCalls int // stupid test steam. ignore.
 		numNameCalls int // stupid test steam. ignore.
@@ -58,6 +59,18 @@ func PackagePrefixToCache(prefixPath string) func(p *Packages) {
 	}
 }
 
+// WithOverlay option for NewPackages supplies the packages.Config.Overlay map
+// used by every Load: files present in the map are read from it INSTEAD of
+// the file system. The map is held by REFERENCE (not copied) so a caller —
+// config.Config, which recreates its Packages instance during LoadSchema —
+// can keep one overlay alive across recreations, and MaskFile/UnmaskFile
+// mutations remain visible to whichever Packages instance currently holds it.
+func WithOverlay(overlay map[string][]byte) func(p *Packages) {
+	return func(p *Packages) {
+		p.overlay = overlay
+	}
+}
+
 // NewPackages creates a new packages cache
 // It will load all packages in the current module, and any packages that are passed to Load or
 // LoadAll
@@ -67,6 +80,35 @@ func NewPackages(opts ...Option) *Packages {
 		opt(p)
 	}
 	return p
+}
+
+// MaskFile makes every subsequent Load treat the file at absPath as if it
+// contained only the given contents (a package-clause-only stub), WITHOUT
+// touching the file on disk — a packages.Config.Overlay entry. gqlgen uses
+// this to hide its OWN previously-generated outputs (the model file) from the
+// type loader during generation: if a stale models_gen.go is visible while
+// the schema loads, autobind finds the previously-generated types in it and
+// binds them as if they were user-written models, so modelgen skips
+// (re)generating them and the freshly-written model file comes out empty —
+// the types vanish and the exec build fails with "unable to find type".
+// Historically api.Generate prevented that by DELETING the outputs up front
+// (syscall.Unlink), but that is exactly what left users with a missing
+// generated.go when generation was interrupted (#2345, #3505): masking at the
+// loader gives the same load semantics with no destructive disk write.
+func (p *Packages) MaskFile(absPath, contents string) {
+	if p.overlay == nil {
+		p.overlay = map[string][]byte{}
+	}
+	p.overlay[absPath] = []byte(contents)
+}
+
+// UnmaskFile removes a MaskFile entry so subsequent Loads read the real file
+// from disk again — called right after gqlgen atomically writes that file
+// (see codegen/templates.write): once the new contents are on disk, disk is
+// the truth and later reloads (e.g. the exec build after modelgen runs) must
+// see the just-generated types, not the mask.
+func (p *Packages) UnmaskFile(absPath string) {
+	delete(p.overlay, absPath)
 }
 
 func dedupPackages(packages []string) []string {
@@ -132,6 +174,7 @@ func (p *Packages) LoadAll(importPaths ...string) []*packages.Package {
 		pkgs, err := packages.Load(&packages.Config{
 			Mode:       mode,
 			BuildFlags: p.buildFlags,
+			Overlay:    p.overlay,
 		}, missing...)
 		if err != nil {
 			p.loadErrors = append(p.loadErrors, err)
@@ -208,6 +251,7 @@ func (p *Packages) LoadWithTypes(importPath string) *packages.Package {
 		pkgs, err := packages.Load(&packages.Config{
 			Mode:       mode,
 			BuildFlags: p.buildFlags,
+			Overlay:    p.overlay,
 		}, importPath)
 		if err != nil {
 			p.loadErrors = append(p.loadErrors, err)

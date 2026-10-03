@@ -1,0 +1,13 @@
+schema:
+  - "*.graphql"
+skip_validation: true
+call_argument_directives_with_null: true
+exec:
+  filename: generated.go
+  package: nullargdirectives
+model:
+  filename: models-gen.go
+  package: nullargdirectives
+omit_complexity: true
+autobind:
+  - github.com/99designs/gqlgen/codegen/testserver/execbehavior/nullargdirectives

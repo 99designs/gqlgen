@@ -1,4 +1,4 @@
-//go:generate go run github.com/matryer/moq -out executable_schema_mock.go . ExecutableSchema
+//go:generate go tool -modfile=../bin/_tools/go.mod mockery --config=.mockery.yaml
 
 package graphql
 

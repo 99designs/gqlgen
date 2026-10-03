@@ -1,0 +1,11 @@
+template: matryer
+packages:
+  github.com/99designs/gqlgen/graphql:
+    interfaces:
+      ExecutableSchema:
+        config:
+          dir: .
+          filename: executable_schema_mock.go
+          inpackage: true
+          pkgname: graphql
+          structname: '{{.InterfaceName}}Mock'

@@ -143,6 +143,8 @@ type ComplexityRoot struct {
 		CheckedInput       func(childComplexity int, input CheckedInput) int
 		ChildProbe         func(childComplexity int) int
 		Coerce             func(childComplexity int, input *CoerceInput, numbers []int, nested [][]int) int
+		CtxMaybe           func(childComplexity int, v *string) int
+		CtxMaybeNonNull    func(childComplexity int, v string) int
 		DeferItem          func(childComplexity int) int
 		DeferItems         func(childComplexity int) int
 		Described          func(childComplexity int, input *DescribedInput, choice *OneOfInput) int
@@ -150,6 +152,8 @@ type ComplexityRoot struct {
 		FailingRoot        func(childComplexity int) int
 		LimitedItems       func(childComplexity int, count int) int
 		MarkedParent       func(childComplexity int) int
+		Maybe              func(childComplexity int, v string) int
+		MaybeNonNull       func(childComplexity int, v string) int
 		Nullability        func(childComplexity int, valid bool) int
 		Panicking          func(childComplexity int) int
 		PanickingNonNull   func(childComplexity int) int
@@ -246,6 +250,10 @@ type QueryResolver interface {
 	DeferItem(ctx context.Context) (*DeferItem, error)
 	DeferItems(ctx context.Context) ([]*DeferItem, error)
 	ChildProbe(ctx context.Context) (*ChildProbe, error)
+	Maybe(ctx context.Context, v string) (*string, error)
+	MaybeNonNull(ctx context.Context, v string) (string, error)
+	CtxMaybe(ctx context.Context, v *string) (*string, error)
+	CtxMaybeNonNull(ctx context.Context, v string) (string, error)
 	Coerce(ctx context.Context, input *CoerceInput, numbers []int, nested [][]int) (*string, error)
 	CheckedInput(ctx context.Context, input CheckedInput) (string, error)
 	Described(ctx context.Context, input *DescribedInput, choice *OneOfInput) (*Described, error)
@@ -666,6 +674,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Coerce(childComplexity, args["input"].(*CoerceInput), args["numbers"].([]int), args["nested"].([][]int)), true
+	case "Query.ctxMaybe":
+		if e.ComplexityRoot.Query.CtxMaybe == nil {
+			break
+		}
+
+		args, err := ec.field_Query_ctxMaybe_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.CtxMaybe(childComplexity, args["v"].(*string)), true
+	case "Query.ctxMaybeNonNull":
+		if e.ComplexityRoot.Query.CtxMaybeNonNull == nil {
+			break
+		}
+
+		args, err := ec.field_Query_ctxMaybeNonNull_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.CtxMaybeNonNull(childComplexity, args["v"].(string)), true
 	case "Query.deferItem":
 		if e.ComplexityRoot.Query.DeferItem == nil {
 			break
@@ -719,6 +749,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.MarkedParent(childComplexity), true
+	case "Query.maybe":
+		if e.ComplexityRoot.Query.Maybe == nil {
+			break
+		}
+
+		args, err := ec.field_Query_maybe_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.Maybe(childComplexity, args["v"].(string)), true
+	case "Query.maybeNonNull":
+		if e.ComplexityRoot.Query.MaybeNonNull == nil {
+			break
+		}
+
+		args, err := ec.field_Query_maybeNonNull_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.MaybeNonNull(childComplexity, args["v"].(string)), true
 	case "Query.nullability":
 		if e.ComplexityRoot.Query.Nullability == nil {
 			break
@@ -1102,7 +1154,7 @@ func newExecutionContext(
 	}
 }
 
-//go:embed "abstract_types.graphql" "arguments.graphql" "defer.graphql" "field_context_child.graphql" "input_coercion.graphql" "input_object_directive.graphql" "introspection.graphql" "mark_non_null.graphql" "named_input.graphql" "nullability.graphql" "panic.graphql" "resolver_errors.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "subscription.graphql" "worker_limit.graphql" "wrong_type.graphql"
+//go:embed "abstract_types.graphql" "arguments.graphql" "defer.graphql" "field_context_child.graphql" "function_scalars.graphql" "input_coercion.graphql" "input_object_directive.graphql" "introspection.graphql" "mark_non_null.graphql" "named_input.graphql" "nullability.graphql" "panic.graphql" "resolver_errors.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "subscription.graphql" "worker_limit.graphql" "wrong_type.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -1118,6 +1170,7 @@ var sources = []*ast.Source{
 	{Name: "arguments.graphql", Input: sourceData("arguments.graphql"), BuiltIn: false},
 	{Name: "defer.graphql", Input: sourceData("defer.graphql"), BuiltIn: false},
 	{Name: "field_context_child.graphql", Input: sourceData("field_context_child.graphql"), BuiltIn: false},
+	{Name: "function_scalars.graphql", Input: sourceData("function_scalars.graphql"), BuiltIn: false},
 	{Name: "input_coercion.graphql", Input: sourceData("input_coercion.graphql"), BuiltIn: false},
 	{Name: "input_object_directive.graphql", Input: sourceData("input_object_directive.graphql"), BuiltIn: false},
 	{Name: "introspection.graphql", Input: sourceData("introspection.graphql"), BuiltIn: false},
@@ -1321,6 +1374,14 @@ func (ec *executionContext) childFields_Query(ctx context.Context, field graphql
 		return ec.fieldContext_Query_deferItems(ctx, field)
 	case "childProbe":
 		return ec.fieldContext_Query_childProbe(ctx, field)
+	case "maybe":
+		return ec.fieldContext_Query_maybe(ctx, field)
+	case "maybeNonNull":
+		return ec.fieldContext_Query_maybeNonNull(ctx, field)
+	case "ctxMaybe":
+		return ec.fieldContext_Query_ctxMaybe(ctx, field)
+	case "ctxMaybeNonNull":
+		return ec.fieldContext_Query_ctxMaybeNonNull(ctx, field)
 	case "coerce":
 		return ec.fieldContext_Query_coerce(ctx, field)
 	case "checkedInput":
@@ -1723,6 +1784,34 @@ func (ec *executionContext) field_Query_coerce_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_ctxMaybeNonNull_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "v",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNCtxMaybe2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["v"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_ctxMaybe_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "v",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOCtxMaybe2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["v"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_described_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1756,6 +1845,34 @@ func (ec *executionContext) field_Query_limitedItems_args(ctx context.Context, r
 		return nil, err
 	}
 	args["count"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_maybeNonNull_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "v",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNString2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["v"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_maybe_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "v",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNString2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["v"] = arg0
 	return args, nil
 }
 
@@ -3587,6 +3704,182 @@ func (ec *executionContext) fieldContext_Query_childProbe(_ context.Context, fie
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return ec.childFields_ChildProbe(ctx, field)
 		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_maybe(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_maybe(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().Maybe(ctx, fc.Args["v"].(string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOMaybe2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Query_maybe(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Maybe does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_maybe_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_maybeNonNull(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_maybeNonNull(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().MaybeNonNull(ctx, fc.Args["v"].(string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNMaybe2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Query_maybeNonNull(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Maybe does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_maybeNonNull_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_ctxMaybe(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_ctxMaybe(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().CtxMaybe(ctx, fc.Args["v"].(*string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOCtxMaybe2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Query_ctxMaybe(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type CtxMaybe does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_ctxMaybe_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_ctxMaybeNonNull(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_ctxMaybeNonNull(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().CtxMaybeNonNull(ctx, fc.Args["v"].(string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNCtxMaybe2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Query_ctxMaybeNonNull(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type CtxMaybe does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_ctxMaybeNonNull_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -7345,6 +7638,30 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._Query_childProbe(ctx, field)
 				})
+		case "maybe":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_maybe(ctx, field)
+				})
+		case "maybeNonNull":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_maybeNonNull(ctx, field)
+				})
+		case "ctxMaybe":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_ctxMaybe(ctx, field)
+				})
+		case "ctxMaybeNonNull":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_ctxMaybeNonNull(ctx, field)
+				})
 		case "coerce":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
 				true, false,
@@ -8066,6 +8383,20 @@ func (ec *executionContext) unmarshalNCoerceItem2ᚖgithubᚗcomᚋ99designsᚋg
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNCtxMaybe2string(ctx context.Context, v any) (string, error) {
+	res, err := UnmarshalCtxMaybe(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNCtxMaybe2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
+	res := MarshalCtxMaybe(v)
+	if res == graphql.Null {
+		graphql.AddInvalidNullFromMarshaler(ctx, "CtxMaybe!")
+	}
+	return graphql.WrapContextMarshaler(ctx, res)
+}
+
 func (ec *executionContext) marshalNDeferItem2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐDeferItemᚄ(ctx context.Context, sel ast.SelectionSet, v []*DeferItem) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 2, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
@@ -8164,6 +8495,20 @@ func (ec *executionContext) marshalNMap2map(ctx context.Context, sel ast.Selecti
 	res := graphql.MarshalMap(v)
 	if res == graphql.Null {
 		graphql.AddInvalidNullFromMarshaler(ctx, "Map!")
+	}
+	return res
+}
+
+func (ec *executionContext) unmarshalNMaybe2string(ctx context.Context, v any) (string, error) {
+	res, err := UnmarshalMaybe(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNMaybe2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
+	res := MarshalMaybe(v)
+	if res == graphql.Null {
+		graphql.AddInvalidNullFromMarshaler(ctx, "Maybe!")
 	}
 	return res
 }
@@ -8592,6 +8937,23 @@ func (ec *executionContext) unmarshalOCoerceItem2ᚕᚖgithubᚗcomᚋ99designs�
 	return res, nil
 }
 
+func (ec *executionContext) unmarshalOCtxMaybe2ᚖstring(ctx context.Context, v any) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := UnmarshalCtxMaybe(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOCtxMaybe2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	res := MarshalCtxMaybe(*v)
+	return graphql.WrapContextMarshaler(ctx, res)
+}
+
 func (ec *executionContext) marshalODeferItem2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐDeferItem(ctx context.Context, sel ast.SelectionSet, v *DeferItem) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -8759,6 +9121,24 @@ func (ec *executionContext) marshalOMarkedParent2ᚖgithubᚗcomᚋ99designsᚋg
 		return graphql.Null
 	}
 	return ec._MarkedParent(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOMaybe2ᚖstring(ctx context.Context, v any) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := UnmarshalMaybe(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOMaybe2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := MarshalMaybe(*v)
+	return res
 }
 
 func (ec *executionContext) marshalOMutation2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐMutation(ctx context.Context, sel ast.SelectionSet, v *Mutation) graphql.Marshaler {

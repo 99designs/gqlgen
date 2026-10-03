@@ -12,6 +12,10 @@ autobind:
   - github.com/99designs/gqlgen/codegen/testserver/execbehavior
 
 models:
+  Maybe:
+    model: github.com/99designs/gqlgen/codegen/testserver/execbehavior.Maybe
+  CtxMaybe:
+    model: github.com/99designs/gqlgen/codegen/testserver/execbehavior.CtxMaybe
   MarkedChild:
     fields:
       resolvedValue:

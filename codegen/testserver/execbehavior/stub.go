@@ -48,6 +48,10 @@ type Stub struct {
 		DeferItem          func(ctx context.Context) (*DeferItem, error)
 		DeferItems         func(ctx context.Context) ([]*DeferItem, error)
 		ChildProbe         func(ctx context.Context) (*ChildProbe, error)
+		Maybe              func(ctx context.Context, v string) (*string, error)
+		MaybeNonNull       func(ctx context.Context, v string) (string, error)
+		CtxMaybe           func(ctx context.Context, v *string) (*string, error)
+		CtxMaybeNonNull    func(ctx context.Context, v string) (string, error)
 		Coerce             func(ctx context.Context, input *CoerceInput, numbers []int, nested [][]int) (*string, error)
 		CheckedInput       func(ctx context.Context, input CheckedInput) (string, error)
 		Described          func(ctx context.Context, input *DescribedInput, choice *OneOfInput) (*Described, error)
@@ -206,6 +210,18 @@ func (r *stubQuery) DeferItems(ctx context.Context) ([]*DeferItem, error) {
 }
 func (r *stubQuery) ChildProbe(ctx context.Context) (*ChildProbe, error) {
 	return r.QueryResolver.ChildProbe(ctx)
+}
+func (r *stubQuery) Maybe(ctx context.Context, v string) (*string, error) {
+	return r.QueryResolver.Maybe(ctx, v)
+}
+func (r *stubQuery) MaybeNonNull(ctx context.Context, v string) (string, error) {
+	return r.QueryResolver.MaybeNonNull(ctx, v)
+}
+func (r *stubQuery) CtxMaybe(ctx context.Context, v *string) (*string, error) {
+	return r.QueryResolver.CtxMaybe(ctx, v)
+}
+func (r *stubQuery) CtxMaybeNonNull(ctx context.Context, v string) (string, error) {
+	return r.QueryResolver.CtxMaybeNonNull(ctx, v)
 }
 func (r *stubQuery) Coerce(ctx context.Context, input *CoerceInput, numbers []int, nested [][]int) (*string, error) {
 	return r.QueryResolver.Coerce(ctx, input, numbers, nested)

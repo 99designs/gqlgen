@@ -190,6 +190,12 @@ func TestErrorServer(t *testing.T) {
 
 type panicTransport struct{}
 
+var _ graphql.Transport = panicTransport{}
+
+func (t panicTransport) String() string {
+	return "panicTransport"
+}
+
 func (t panicTransport) Supports(r *http.Request) bool {
 	return true
 }

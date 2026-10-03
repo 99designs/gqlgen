@@ -28,6 +28,10 @@ type GET struct {
 
 var _ graphql.Transport = GET{}
 
+func (h GET) String() string {
+	return "GET"
+}
+
 func (h GET) Supports(r *http.Request) bool {
 	if r.Header.Get("Upgrade") != "" {
 		return false

@@ -23,6 +23,10 @@ type GRAPHQL struct {
 
 var _ graphql.Transport = GRAPHQL{}
 
+func (h GRAPHQL) String() string {
+	return "GRAPHQL"
+}
+
 func (h GRAPHQL) Supports(r *http.Request) bool {
 	if r.Header.Get("Upgrade") != "" {
 		return false

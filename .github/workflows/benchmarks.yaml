@@ -1,0 +1,78 @@
+name: Benchmarks
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [opened, synchronize]
+# When a new revision is pushed to a PR, cancel all in-progress CI runs for that
+# PR. See https://docs.github.com/en/actions/using-jobs/using-concurrency
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+env:
+  GOTOOLCHAIN: local
+# The repository default is read/write. benchgate reports through
+# $GITHUB_STEP_SUMMARY and never calls the API, so the only thing this job needs
+# a token for is the checkout.
+permissions:
+  contents: read
+jobs:
+  benchgate:
+    name: Regressions and benchmark coverage
+    runs-on: ubuntu-latest
+    # A ceiling against a hung benchmark, not a performance target: the default is
+    # 360 minutes, and a benchmark that stops terminating would spend all of them.
+    # Twelve interleaved passes plus the build leave plenty of room under this.
+    timeout-minutes: 20
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      with:
+        # benchgate measures the base revision in a detached worktree, so it needs real
+        # history. A shallow clone has none.
+        fetch-depth: 0
+        # Nothing here talks to the remote again: fetch-depth 0 has already brought down
+        # origin/<base>, so benchgate's unshallow guard is a no-op and the token has no
+        # reason to stay behind in .git/config while this job runs benchmark code from
+        # the pull request under test.
+        persist-credentials: "false"
+    - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7
+      with:
+        go-version: "1.27"
+    - uses: StevenACoffman/benchgate@ab2d4a87775c1f3fbd712a529e3d193077823130 # v0.2.0
+      with:
+        # Pinned deliberately: an unpinned gate changes its own verdicts when a new release
+        # lands, and a build that starts failing for that reason looks exactly like a real
+        # regression.
+        version: v0.2.0
+
+        # Allocations are what gets gated, at zero tolerance. B/op and allocs/op barely move
+        # with runner load, so a change in them is a change in this code rather than in the
+        # weather, and a parser that starts allocating per token will say so here on the
+        # pull request that did it. Wall time is measured and reported in the job summary but
+        # does not block: ns/op on a shared runner is noisy enough that gating it teaches
+        # people to re-run the job until it passes. Add a second job with
+        # `metrics: ns/op` and a loose tolerance once these runners' real variance is known.
+        metrics: B/op allocs/op
+        tolerance: '0'
+        fail-on-regression: 'true'
+
+        # Six rounds is the minimum that can produce a significant result at the default
+        # alpha, and 100ms keeps a full interleaved run of both revisions inside a couple of
+        # minutes.
+        rounds: '6'
+        benchtime: 100ms
+
+        # The other half: which code no benchmark reaches. A delta report only speaks about
+        # code that ran, so without this a package could lose all its benchmarks and the gate
+        # would report everything as fine.
+        #
+        # Reporting only, for now. Benchmark statement coverage is 48.1% as of this workflow
+        # landing, and the one package with no benchmark at all is parser/testrunner, which is
+        # test support rather than library code. Set min-bench-coverage somewhere below the
+        # real number and flip fail-on-gap once that number has been watched for a while;
+        # a floor guessed in advance is a floor somebody disables in a hurry.
+        require-benchmark-per-package: 'true'
+        report-unreached: 'true'
+        min-bench-coverage: '0'
+        fail-on-gap: 'false'
+
+        job-summary: 'true'

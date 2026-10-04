@@ -65,6 +65,7 @@ type Stub struct {
 		FailingRoot        func(ctx context.Context) (*string, error)
 		Viewer             func(ctx context.Context) (*Viewer, error)
 		ValueViewer        func(ctx context.Context) (*ValueViewer, error)
+		GenerationOnly     func(ctx context.Context, arg string, input GenerationOnlyInput) (string, error)
 		LimitedItems       func(ctx context.Context, count int) ([]*LimitedItem, error)
 		WrongTypes         func(ctx context.Context) (*WrongTypes, error)
 		WrongTypeArg       func(ctx context.Context, value *string) (*string, error)
@@ -262,6 +263,9 @@ func (r *stubQuery) Viewer(ctx context.Context) (*Viewer, error) {
 }
 func (r *stubQuery) ValueViewer(ctx context.Context) (*ValueViewer, error) {
 	return r.QueryResolver.ValueViewer(ctx)
+}
+func (r *stubQuery) GenerationOnly(ctx context.Context, arg string, input GenerationOnlyInput) (string, error) {
+	return r.QueryResolver.GenerationOnly(ctx, arg, input)
 }
 func (r *stubQuery) LimitedItems(ctx context.Context, count int) ([]*LimitedItem, error) {
 	return r.QueryResolver.LimitedItems(ctx, count)

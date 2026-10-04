@@ -11,6 +11,10 @@ model:
 autobind:
   - github.com/99designs/gqlgen/codegen/testserver/execbehavior
 
+directives:
+  generationOnly:
+    skip_runtime: true
+
 models:
   Maybe:
     model: github.com/99designs/gqlgen/codegen/testserver/execbehavior.Maybe

@@ -85,6 +85,10 @@ type ErrorProbe struct {
 	ValueAndError  *string `json:"valueAndError,omitempty"`
 }
 
+type GenerationOnlyInput struct {
+	Value string `json:"value"`
+}
+
 type LimitedItem struct {
 	ID   int `json:"id"`
 	Slow int `json:"slow"`

@@ -150,6 +150,7 @@ type ComplexityRoot struct {
 		Described          func(childComplexity int, input *DescribedInput, choice *OneOfInput) int
 		ErrorProbe         func(childComplexity int) int
 		FailingRoot        func(childComplexity int) int
+		GenerationOnly     func(childComplexity int, arg string, input GenerationOnlyInput) int
 		LimitedItems       func(childComplexity int, count int) int
 		MarkedParent       func(childComplexity int) int
 		Maybe              func(childComplexity int, v string) int
@@ -268,6 +269,7 @@ type QueryResolver interface {
 	FailingRoot(ctx context.Context) (*string, error)
 	Viewer(ctx context.Context) (*Viewer, error)
 	ValueViewer(ctx context.Context) (*ValueViewer, error)
+	GenerationOnly(ctx context.Context, arg string, input GenerationOnlyInput) (string, error)
 	LimitedItems(ctx context.Context, count int) ([]*LimitedItem, error)
 	WrongTypes(ctx context.Context) (*WrongTypes, error)
 	WrongTypeArg(ctx context.Context, value *string) (*string, error)
@@ -733,6 +735,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.FailingRoot(childComplexity), true
+	case "Query.generationOnly":
+		if e.ComplexityRoot.Query.GenerationOnly == nil {
+			break
+		}
+
+		args, err := ec.field_Query_generationOnly_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.GenerationOnly(childComplexity, args["arg"].(string), args["input"].(GenerationOnlyInput)), true
 
 	case "Query.limitedItems":
 		if e.ComplexityRoot.Query.LimitedItems == nil {
@@ -1065,6 +1078,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			graphql.NewInputUnmarshaler("CoerceInput", ec.unmarshalInputCoerceInput),
 			graphql.NewInputUnmarshaler("CoerceItem", ec.unmarshalInputCoerceItem),
 			graphql.NewInputUnmarshaler("DescribedInput", ec.unmarshalInputDescribedInput),
+			graphql.NewInputUnmarshaler("GenerationOnlyInput", ec.unmarshalInputGenerationOnlyInput),
 			graphql.NewInputUnmarshaler("OmittableInput", ec.unmarshalInputOmittableInput),
 			graphql.NewInputUnmarshaler("OneOfInput", ec.unmarshalInputOneOfInput),
 			graphql.NewInputUnmarshaler("WrongTypeInput", ec.unmarshalInputWrongTypeInput),
@@ -1168,7 +1182,7 @@ func newExecutionContext(
 	}
 }
 
-//go:embed "abstract_types.graphql" "arguments.graphql" "defer.graphql" "field_context_child.graphql" "function_scalars.graphql" "input_coercion.graphql" "input_object_directive.graphql" "introspection.graphql" "mark_non_null.graphql" "named_input.graphql" "nullability.graphql" "omittable.graphql" "panic.graphql" "resolver_errors.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "subscription.graphql" "worker_limit.graphql" "wrong_type.graphql"
+//go:embed "abstract_types.graphql" "arguments.graphql" "defer.graphql" "field_context_child.graphql" "function_scalars.graphql" "input_coercion.graphql" "input_object_directive.graphql" "introspection.graphql" "mark_non_null.graphql" "named_input.graphql" "nullability.graphql" "omittable.graphql" "panic.graphql" "resolver_errors.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "skip_runtime.graphql" "subscription.graphql" "worker_limit.graphql" "wrong_type.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -1197,6 +1211,7 @@ var sources = []*ast.Source{
 	{Name: "root_fields.graphql", Input: sourceData("root_fields.graphql"), BuiltIn: false},
 	{Name: "root_typed_field.graphql", Input: sourceData("root_typed_field.graphql"), BuiltIn: false},
 	{Name: "schema.graphql", Input: sourceData("schema.graphql"), BuiltIn: false},
+	{Name: "skip_runtime.graphql", Input: sourceData("skip_runtime.graphql"), BuiltIn: false},
 	{Name: "subscription.graphql", Input: sourceData("subscription.graphql"), BuiltIn: false},
 	{Name: "worker_limit.graphql", Input: sourceData("worker_limit.graphql"), BuiltIn: false},
 	{Name: "wrong_type.graphql", Input: sourceData("wrong_type.graphql"), BuiltIn: false},
@@ -1423,6 +1438,8 @@ func (ec *executionContext) childFields_Query(ctx context.Context, field graphql
 		return ec.fieldContext_Query_viewer(ctx, field)
 	case "valueViewer":
 		return ec.fieldContext_Query_valueViewer(ctx, field)
+	case "generationOnly":
+		return ec.fieldContext_Query_generationOnly(ctx, field)
 	case "limitedItems":
 		return ec.fieldContext_Query_limitedItems(ctx, field)
 	case "wrongTypes":
@@ -1848,6 +1865,28 @@ func (ec *executionContext) field_Query_described_args(ctx context.Context, rawA
 		return nil, err
 	}
 	args["choice"] = arg1
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_generationOnly_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "arg",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNString2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["arg"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (GenerationOnlyInput, error) {
+			return ec.unmarshalNGenerationOnlyInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐGenerationOnlyInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg1
 	return args, nil
 }
 
@@ -4406,6 +4445,50 @@ func (ec *executionContext) fieldContext_Query_valueViewer(_ context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_generationOnly(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_generationOnly(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().GenerationOnly(ctx, fc.Args["arg"].(string), fc.Args["input"].(GenerationOnlyInput))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Query_generationOnly(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_generationOnly_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_limitedItems(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -6769,6 +6852,48 @@ func UnmarshalDescribedInput(ctx context.Context, raw any) (DescribedInput, erro
 	return out, err
 }
 
+func (ec *executionContext) unmarshalInputGenerationOnlyInput(ctx context.Context, obj any) (GenerationOnlyInput, error) {
+	var it GenerationOnlyInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"value"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "value":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("value"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Value = data
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalGenerationOnlyInput unmarshals raw into the GenerationOnlyInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalGenerationOnlyInput(ctx context.Context, raw any) (GenerationOnlyInput, error) {
+	var out GenerationOnlyInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "GenerationOnlyInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, obj any) (OmittableInput, error) {
 	var it OmittableInput
 	if obj == nil {
@@ -7871,6 +7996,12 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._Query_valueViewer(ctx, field)
 				})
+		case "generationOnly":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_generationOnly(ctx, field)
+				})
 		case "limitedItems":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
 				true, true,
@@ -8564,6 +8695,11 @@ func (ec *executionContext) marshalNDog2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋc
 		return graphql.Null
 	}
 	return ec._Dog(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNGenerationOnlyInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐGenerationOnlyInput(ctx context.Context, v any) (GenerationOnlyInput, error) {
+	res, err := ec.unmarshalInputGenerationOnlyInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (string, error) {

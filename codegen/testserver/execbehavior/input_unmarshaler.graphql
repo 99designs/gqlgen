@@ -1,0 +1,11 @@
+# An input object bound to a Go type that implements graphql.Unmarshaler is unmarshaled
+# by its UnmarshalGQL method instead of field by field.
+input Coordinates {
+  lat: Float!
+  lng: Float!
+}
+
+extend type Query {
+  coordinates(at: Coordinates!): String!
+  nullableCoordinates(at: Coordinates): String!
+}

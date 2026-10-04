@@ -136,39 +136,41 @@ type ComplexityRoot struct {
 	}
 
 	Query struct {
-		Animals            func(childComplexity int) int
-		ArgObject          func(childComplexity int) int
-		ArgProbe           func(childComplexity int, strict *Strict, withDefault *int, plain *string) int
-		BadStrictDirective func(childComplexity int) int
-		CheckedInput       func(childComplexity int, input CheckedInput) int
-		ChildProbe         func(childComplexity int) int
-		Coerce             func(childComplexity int, input *CoerceInput, numbers []int, nested [][]int) int
-		CtxMaybe           func(childComplexity int, v *string) int
-		CtxMaybeNonNull    func(childComplexity int, v string) int
-		DeferItem          func(childComplexity int) int
-		DeferItems         func(childComplexity int) int
-		Described          func(childComplexity int, input *DescribedInput, choice *OneOfInput) int
-		ErrorProbe         func(childComplexity int) int
-		FailingRoot        func(childComplexity int) int
-		GenerationOnly     func(childComplexity int, arg string, input GenerationOnlyInput) int
-		LimitedItems       func(childComplexity int, count int) int
-		MarkedParent       func(childComplexity int) int
-		Maybe              func(childComplexity int, v string) int
-		MaybeNonNull       func(childComplexity int, v string) int
-		Nullability        func(childComplexity int, valid bool) int
-		Omittable          func(childComplexity int, input OmittableInput) int
-		Panicking          func(childComplexity int) int
-		PanickingNonNull   func(childComplexity int) int
-		Pets               func(childComplexity int) int
-		Ping               func(childComplexity int) int
-		StrangeAnimal      func(childComplexity int, kind string) int
-		StrictDirective    func(childComplexity int) int
-		UnmarshalNamed     func(childComplexity int, kind string, raw map[string]any) int
-		ValueViewer        func(childComplexity int) int
-		Viewer             func(childComplexity int) int
-		WrongTypeArg       func(childComplexity int, value *string) int
-		WrongTypeInput     func(childComplexity int, input WrongTypeInput) int
-		WrongTypes         func(childComplexity int) int
+		Animals             func(childComplexity int) int
+		ArgObject           func(childComplexity int) int
+		ArgProbe            func(childComplexity int, strict *Strict, withDefault *int, plain *string) int
+		BadStrictDirective  func(childComplexity int) int
+		CheckedInput        func(childComplexity int, input CheckedInput) int
+		ChildProbe          func(childComplexity int) int
+		Coerce              func(childComplexity int, input *CoerceInput, numbers []int, nested [][]int) int
+		Coordinates         func(childComplexity int, at Coordinates) int
+		CtxMaybe            func(childComplexity int, v *string) int
+		CtxMaybeNonNull     func(childComplexity int, v string) int
+		DeferItem           func(childComplexity int) int
+		DeferItems          func(childComplexity int) int
+		Described           func(childComplexity int, input *DescribedInput, choice *OneOfInput) int
+		ErrorProbe          func(childComplexity int) int
+		FailingRoot         func(childComplexity int) int
+		GenerationOnly      func(childComplexity int, arg string, input GenerationOnlyInput) int
+		LimitedItems        func(childComplexity int, count int) int
+		MarkedParent        func(childComplexity int) int
+		Maybe               func(childComplexity int, v string) int
+		MaybeNonNull        func(childComplexity int, v string) int
+		Nullability         func(childComplexity int, valid bool) int
+		NullableCoordinates func(childComplexity int, at *Coordinates) int
+		Omittable           func(childComplexity int, input OmittableInput) int
+		Panicking           func(childComplexity int) int
+		PanickingNonNull    func(childComplexity int) int
+		Pets                func(childComplexity int) int
+		Ping                func(childComplexity int) int
+		StrangeAnimal       func(childComplexity int, kind string) int
+		StrictDirective     func(childComplexity int) int
+		UnmarshalNamed      func(childComplexity int, kind string, raw map[string]any) int
+		ValueViewer         func(childComplexity int) int
+		Viewer              func(childComplexity int) int
+		WrongTypeArg        func(childComplexity int, value *string) int
+		WrongTypeInput      func(childComplexity int, input WrongTypeInput) int
+		WrongTypes          func(childComplexity int) int
 	}
 
 	Subscription struct {
@@ -258,6 +260,8 @@ type QueryResolver interface {
 	CtxMaybeNonNull(ctx context.Context, v string) (string, error)
 	Coerce(ctx context.Context, input *CoerceInput, numbers []int, nested [][]int) (*string, error)
 	CheckedInput(ctx context.Context, input CheckedInput) (string, error)
+	Coordinates(ctx context.Context, at Coordinates) (string, error)
+	NullableCoordinates(ctx context.Context, at *Coordinates) (string, error)
 	Described(ctx context.Context, input *DescribedInput, choice *OneOfInput) (*Described, error)
 	MarkedParent(ctx context.Context) (*MarkedParent, error)
 	UnmarshalNamed(ctx context.Context, kind string, raw map[string]any) (*string, error)
@@ -678,6 +682,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Coerce(childComplexity, args["input"].(*CoerceInput), args["numbers"].([]int), args["nested"].([][]int)), true
+	case "Query.coordinates":
+		if e.ComplexityRoot.Query.Coordinates == nil {
+			break
+		}
+
+		args, err := ec.field_Query_coordinates_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.Coordinates(childComplexity, args["at"].(Coordinates)), true
 	case "Query.ctxMaybe":
 		if e.ComplexityRoot.Query.CtxMaybe == nil {
 			break
@@ -797,6 +812,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Nullability(childComplexity, args["valid"].(bool)), true
+	case "Query.nullableCoordinates":
+		if e.ComplexityRoot.Query.NullableCoordinates == nil {
+			break
+		}
+
+		args, err := ec.field_Query_nullableCoordinates_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.NullableCoordinates(childComplexity, args["at"].(*Coordinates)), true
 	case "Query.omittable":
 		if e.ComplexityRoot.Query.Omittable == nil {
 			break
@@ -1182,7 +1208,7 @@ func newExecutionContext(
 	}
 }
 
-//go:embed "abstract_types.graphql" "arguments.graphql" "defer.graphql" "field_context_child.graphql" "function_scalars.graphql" "input_coercion.graphql" "input_object_directive.graphql" "introspection.graphql" "mark_non_null.graphql" "named_input.graphql" "nullability.graphql" "omittable.graphql" "panic.graphql" "resolver_errors.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "skip_runtime.graphql" "subscription.graphql" "worker_limit.graphql" "wrong_type.graphql"
+//go:embed "abstract_types.graphql" "arguments.graphql" "defer.graphql" "field_context_child.graphql" "function_scalars.graphql" "input_coercion.graphql" "input_object_directive.graphql" "input_unmarshaler.graphql" "introspection.graphql" "mark_non_null.graphql" "named_input.graphql" "nullability.graphql" "omittable.graphql" "panic.graphql" "resolver_errors.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "skip_runtime.graphql" "subscription.graphql" "worker_limit.graphql" "wrong_type.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -1201,6 +1227,7 @@ var sources = []*ast.Source{
 	{Name: "function_scalars.graphql", Input: sourceData("function_scalars.graphql"), BuiltIn: false},
 	{Name: "input_coercion.graphql", Input: sourceData("input_coercion.graphql"), BuiltIn: false},
 	{Name: "input_object_directive.graphql", Input: sourceData("input_object_directive.graphql"), BuiltIn: false},
+	{Name: "input_unmarshaler.graphql", Input: sourceData("input_unmarshaler.graphql"), BuiltIn: false},
 	{Name: "introspection.graphql", Input: sourceData("introspection.graphql"), BuiltIn: false},
 	{Name: "mark_non_null.graphql", Input: sourceData("mark_non_null.graphql"), BuiltIn: false},
 	{Name: "named_input.graphql", Input: sourceData("named_input.graphql"), BuiltIn: false},
@@ -1416,6 +1443,10 @@ func (ec *executionContext) childFields_Query(ctx context.Context, field graphql
 		return ec.fieldContext_Query_coerce(ctx, field)
 	case "checkedInput":
 		return ec.fieldContext_Query_checkedInput(ctx, field)
+	case "coordinates":
+		return ec.fieldContext_Query_coordinates(ctx, field)
+	case "nullableCoordinates":
+		return ec.fieldContext_Query_nullableCoordinates(ctx, field)
 	case "described":
 		return ec.fieldContext_Query_described(ctx, field)
 	case "markedParent":
@@ -1818,6 +1849,20 @@ func (ec *executionContext) field_Query_coerce_args(ctx context.Context, rawArgs
 	return args, nil
 }
 
+func (ec *executionContext) field_Query_coordinates_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "at",
+		func(ctx context.Context, v any) (Coordinates, error) {
+			return ec.unmarshalNCoordinates2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐCoordinates(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["at"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Query_ctxMaybeNonNull_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1943,6 +1988,20 @@ func (ec *executionContext) field_Query_nullability_args(ctx context.Context, ra
 		return nil, err
 	}
 	args["valid"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_nullableCoordinates_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "at",
+		func(ctx context.Context, v any) (*Coordinates, error) {
+			return ec.unmarshalOCoordinates2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐCoordinates(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["at"] = arg0
 	return args, nil
 }
 
@@ -4036,6 +4095,94 @@ func (ec *executionContext) fieldContext_Query_checkedInput(ctx context.Context,
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_checkedInput_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_coordinates(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_coordinates(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().Coordinates(ctx, fc.Args["at"].(Coordinates))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Query_coordinates(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_coordinates_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_nullableCoordinates(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_nullableCoordinates(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().NullableCoordinates(ctx, fc.Args["at"].(*Coordinates))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Query_nullableCoordinates(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_nullableCoordinates_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -7930,6 +8077,18 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._Query_checkedInput(ctx, field)
 				})
+		case "coordinates":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_coordinates(ctx, field)
+				})
+		case "nullableCoordinates":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_nullableCoordinates(ctx, field)
+				})
 		case "described":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
 				true, false,
@@ -8651,6 +8810,12 @@ func (ec *executionContext) unmarshalNCoerceItem2ᚖgithubᚗcomᚋ99designsᚋg
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNCoordinates2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐCoordinates(ctx context.Context, v any) (Coordinates, error) {
+	var res Coordinates
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNCtxMaybe2string(ctx context.Context, v any) (string, error) {
 	res, err := UnmarshalCtxMaybe(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -8695,6 +8860,20 @@ func (ec *executionContext) marshalNDog2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋc
 		return graphql.Null
 	}
 	return ec._Dog(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNFloat2float64(ctx context.Context, v any) (float64, error) {
+	res, err := graphql.UnmarshalFloatContext(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNFloat2float64(ctx context.Context, sel ast.SelectionSet, v float64) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalFloatContext(v)
+	if res == graphql.Null {
+		graphql.AddInvalidNullFromMarshaler(ctx, "Float!")
+	}
+	return graphql.WrapContextMarshaler(ctx, res)
 }
 
 func (ec *executionContext) unmarshalNGenerationOnlyInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐGenerationOnlyInput(ctx context.Context, v any) (GenerationOnlyInput, error) {
@@ -9213,6 +9392,15 @@ func (ec *executionContext) unmarshalOCoerceItem2ᚕᚖgithubᚗcomᚋ99designs�
 		}
 	}
 	return res, nil
+}
+
+func (ec *executionContext) unmarshalOCoordinates2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐCoordinates(ctx context.Context, v any) (*Coordinates, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(Coordinates)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOCtxMaybe2ᚖstring(ctx context.Context, v any) (*string, error) {

@@ -155,6 +155,7 @@ type ComplexityRoot struct {
 		Maybe              func(childComplexity int, v string) int
 		MaybeNonNull       func(childComplexity int, v string) int
 		Nullability        func(childComplexity int, valid bool) int
+		Omittable          func(childComplexity int, input OmittableInput) int
 		Panicking          func(childComplexity int) int
 		PanickingNonNull   func(childComplexity int) int
 		Pets               func(childComplexity int) int
@@ -260,6 +261,7 @@ type QueryResolver interface {
 	MarkedParent(ctx context.Context) (*MarkedParent, error)
 	UnmarshalNamed(ctx context.Context, kind string, raw map[string]any) (*string, error)
 	Nullability(ctx context.Context, valid bool) (*Nullability, error)
+	Omittable(ctx context.Context, input OmittableInput) (string, error)
 	Panicking(ctx context.Context) (*string, error)
 	PanickingNonNull(ctx context.Context) (string, error)
 	ErrorProbe(ctx context.Context) (*ErrorProbe, error)
@@ -782,6 +784,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Nullability(childComplexity, args["valid"].(bool)), true
+	case "Query.omittable":
+		if e.ComplexityRoot.Query.Omittable == nil {
+			break
+		}
+
+		args, err := ec.field_Query_omittable_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.Omittable(childComplexity, args["input"].(OmittableInput)), true
 	case "Query.panicking":
 		if e.ComplexityRoot.Query.Panicking == nil {
 			break
@@ -1052,6 +1065,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			graphql.NewInputUnmarshaler("CoerceInput", ec.unmarshalInputCoerceInput),
 			graphql.NewInputUnmarshaler("CoerceItem", ec.unmarshalInputCoerceItem),
 			graphql.NewInputUnmarshaler("DescribedInput", ec.unmarshalInputDescribedInput),
+			graphql.NewInputUnmarshaler("OmittableInput", ec.unmarshalInputOmittableInput),
 			graphql.NewInputUnmarshaler("OneOfInput", ec.unmarshalInputOneOfInput),
 			graphql.NewInputUnmarshaler("WrongTypeInput", ec.unmarshalInputWrongTypeInput),
 		)
@@ -1154,7 +1168,7 @@ func newExecutionContext(
 	}
 }
 
-//go:embed "abstract_types.graphql" "arguments.graphql" "defer.graphql" "field_context_child.graphql" "function_scalars.graphql" "input_coercion.graphql" "input_object_directive.graphql" "introspection.graphql" "mark_non_null.graphql" "named_input.graphql" "nullability.graphql" "panic.graphql" "resolver_errors.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "subscription.graphql" "worker_limit.graphql" "wrong_type.graphql"
+//go:embed "abstract_types.graphql" "arguments.graphql" "defer.graphql" "field_context_child.graphql" "function_scalars.graphql" "input_coercion.graphql" "input_object_directive.graphql" "introspection.graphql" "mark_non_null.graphql" "named_input.graphql" "nullability.graphql" "omittable.graphql" "panic.graphql" "resolver_errors.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "subscription.graphql" "worker_limit.graphql" "wrong_type.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -1177,6 +1191,7 @@ var sources = []*ast.Source{
 	{Name: "mark_non_null.graphql", Input: sourceData("mark_non_null.graphql"), BuiltIn: false},
 	{Name: "named_input.graphql", Input: sourceData("named_input.graphql"), BuiltIn: false},
 	{Name: "nullability.graphql", Input: sourceData("nullability.graphql"), BuiltIn: false},
+	{Name: "omittable.graphql", Input: sourceData("omittable.graphql"), BuiltIn: false},
 	{Name: "panic.graphql", Input: sourceData("panic.graphql"), BuiltIn: false},
 	{Name: "resolver_errors.graphql", Input: sourceData("resolver_errors.graphql"), BuiltIn: false},
 	{Name: "root_fields.graphql", Input: sourceData("root_fields.graphql"), BuiltIn: false},
@@ -1394,6 +1409,8 @@ func (ec *executionContext) childFields_Query(ctx context.Context, field graphql
 		return ec.fieldContext_Query_unmarshalNamed(ctx, field)
 	case "nullability":
 		return ec.fieldContext_Query_nullability(ctx, field)
+	case "omittable":
+		return ec.fieldContext_Query_omittable(ctx, field)
 	case "panicking":
 		return ec.fieldContext_Query_panicking(ctx, field)
 	case "panickingNonNull":
@@ -1887,6 +1904,20 @@ func (ec *executionContext) field_Query_nullability_args(ctx context.Context, ra
 		return nil, err
 	}
 	args["valid"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_omittable_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (OmittableInput, error) {
+			return ec.unmarshalNOmittableInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐOmittableInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -4160,6 +4191,50 @@ func (ec *executionContext) fieldContext_Query_nullability(ctx context.Context, 
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_nullability_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_omittable(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_omittable(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().Omittable(ctx, fc.Args["input"].(OmittableInput))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Query_omittable(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_omittable_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -6694,6 +6769,62 @@ func UnmarshalDescribedInput(ctx context.Context, raw any) (DescribedInput, erro
 	return out, err
 }
 
+func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, obj any) (OmittableInput, error) {
+	var it OmittableInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"text", "count", "list"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "text":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("text"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Text = graphql.OmittableOf(data)
+		case "count":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("count"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Count = graphql.OmittableOf(data)
+		case "list":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("list"))
+			data, err := ec.unmarshalOString2ᚕstringᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.List = graphql.OmittableOf(data)
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalOmittableInput unmarshals raw into the OmittableInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalOmittableInput(ctx context.Context, raw any) (OmittableInput, error) {
+	var out OmittableInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "OmittableInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputOneOfInput(ctx context.Context, obj any) (OneOfInput, error) {
 	var it OneOfInput
 	if obj == nil {
@@ -7698,6 +7829,12 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._Query_nullability(ctx, field)
 				})
+		case "omittable":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_omittable(ctx, field)
+				})
 		case "panicking":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
 				true, false,
@@ -8513,6 +8650,11 @@ func (ec *executionContext) marshalNMaybe2string(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) unmarshalNOmittableInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐOmittableInput(ctx context.Context, v any) (OmittableInput, error) {
+	res, err := ec.unmarshalInputOmittableInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNPet2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐPet(ctx context.Context, sel ast.SelectionSet, v Pet) graphql.Marshaler {
 	if v == nil {
 		graphql.AddInvalidNullError(ctx, "Pet!")
@@ -9223,6 +9365,41 @@ func (ec *executionContext) marshalOStrict2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 		return graphql.Null
 	}
 	return v
+}
+
+func (ec *executionContext) unmarshalOString2ᚕstringᚄ(ctx context.Context, v any) ([]string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	vSlice := graphql.CoerceList(v)
+	var err error
+	res := make([]string, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNString2string(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOString2ᚕstringᚄ(ctx context.Context, sel ast.SelectionSet, v []string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	for i := range v {
+		ret[i] = ec.marshalNString2string(ctx, sel, v[i])
+	}
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
 }
 
 func (ec *executionContext) unmarshalOString2ᚕᚕᚖstringᚄ(ctx context.Context, v any) ([][]*string, error) {

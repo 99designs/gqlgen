@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+
+	"github.com/99designs/gqlgen/graphql"
 )
 
 type MarkedNode interface {
@@ -108,6 +110,12 @@ type MarkedParent struct {
 }
 
 type Mutation struct {
+}
+
+type OmittableInput struct {
+	Text  graphql.Omittable[*string]  `json:"text,omitempty"`
+	Count graphql.Omittable[*int]     `json:"count,omitempty"`
+	List  graphql.Omittable[[]string] `json:"list,omitempty"`
 }
 
 // Exactly one of the fields.

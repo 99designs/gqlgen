@@ -58,6 +58,7 @@ type Stub struct {
 		MarkedParent       func(ctx context.Context) (*MarkedParent, error)
 		UnmarshalNamed     func(ctx context.Context, kind string, raw map[string]any) (*string, error)
 		Nullability        func(ctx context.Context, valid bool) (*Nullability, error)
+		Omittable          func(ctx context.Context, input OmittableInput) (string, error)
 		Panicking          func(ctx context.Context) (*string, error)
 		PanickingNonNull   func(ctx context.Context) (string, error)
 		ErrorProbe         func(ctx context.Context) (*ErrorProbe, error)
@@ -240,6 +241,9 @@ func (r *stubQuery) UnmarshalNamed(ctx context.Context, kind string, raw map[str
 }
 func (r *stubQuery) Nullability(ctx context.Context, valid bool) (*Nullability, error) {
 	return r.QueryResolver.Nullability(ctx, valid)
+}
+func (r *stubQuery) Omittable(ctx context.Context, input OmittableInput) (string, error) {
+	return r.QueryResolver.Omittable(ctx, input)
 }
 func (r *stubQuery) Panicking(ctx context.Context) (*string, error) {
 	return r.QueryResolver.Panicking(ctx)

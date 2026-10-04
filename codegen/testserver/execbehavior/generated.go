@@ -39,6 +39,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	AnyArg        func(ctx context.Context, obj any, next graphql.Resolver, value any) (res any, err error)
 	InputCheck    func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
 	ReplaceStream func(ctx context.Context, obj any, next graphql.Resolver, with string) (res any, err error)
 	ReturnValue   func(ctx context.Context, obj any, next graphql.Resolver, kind string) (res any, err error)
@@ -137,6 +138,9 @@ type ComplexityRoot struct {
 
 	Query struct {
 		Animals             func(childComplexity int) int
+		AnyArgAbsent        func(childComplexity int) int
+		AnyArgMap           func(childComplexity int) int
+		AnyArgNull          func(childComplexity int) int
 		ArgObject           func(childComplexity int) int
 		ArgProbe            func(childComplexity int, strict *Strict, withDefault *int, plain *string) int
 		BadStrictDirective  func(childComplexity int) int
@@ -146,6 +150,7 @@ type ComplexityRoot struct {
 		Coordinates         func(childComplexity int, at Coordinates) int
 		CtxMaybe            func(childComplexity int, v *string) int
 		CtxMaybeNonNull     func(childComplexity int, v string) int
+		DefaultMap          func(childComplexity int, input DefaultMapInput) int
 		DeferItem           func(childComplexity int) int
 		DeferItems          func(childComplexity int) int
 		Described           func(childComplexity int, input *DescribedInput, choice *OneOfInput) int
@@ -273,6 +278,10 @@ type QueryResolver interface {
 	FailingRoot(ctx context.Context) (*string, error)
 	Viewer(ctx context.Context) (*Viewer, error)
 	ValueViewer(ctx context.Context) (*ValueViewer, error)
+	AnyArgAbsent(ctx context.Context) (*string, error)
+	AnyArgNull(ctx context.Context) (*string, error)
+	AnyArgMap(ctx context.Context) (*string, error)
+	DefaultMap(ctx context.Context, input DefaultMapInput) (*string, error)
 	GenerationOnly(ctx context.Context, arg string, input GenerationOnlyInput) (string, error)
 	LimitedItems(ctx context.Context, count int) ([]*LimitedItem, error)
 	WrongTypes(ctx context.Context) (*WrongTypes, error)
@@ -631,6 +640,24 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.Animals(childComplexity), true
+	case "Query.anyArgAbsent":
+		if e.ComplexityRoot.Query.AnyArgAbsent == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Query.AnyArgAbsent(childComplexity), true
+	case "Query.anyArgMap":
+		if e.ComplexityRoot.Query.AnyArgMap == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Query.AnyArgMap(childComplexity), true
+	case "Query.anyArgNull":
+		if e.ComplexityRoot.Query.AnyArgNull == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Query.AnyArgNull(childComplexity), true
 	case "Query.argObject":
 		if e.ComplexityRoot.Query.ArgObject == nil {
 			break
@@ -715,6 +742,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.CtxMaybeNonNull(childComplexity, args["v"].(string)), true
+	case "Query.defaultMap":
+		if e.ComplexityRoot.Query.DefaultMap == nil {
+			break
+		}
+
+		args, err := ec.field_Query_defaultMap_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.DefaultMap(childComplexity, args["input"].(DefaultMapInput)), true
 	case "Query.deferItem":
 		if e.ComplexityRoot.Query.DeferItem == nil {
 			break
@@ -1103,6 +1141,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			graphql.NewInputUnmarshaler("CheckedInput", ec.unmarshalInputCheckedInput),
 			graphql.NewInputUnmarshaler("CoerceInput", ec.unmarshalInputCoerceInput),
 			graphql.NewInputUnmarshaler("CoerceItem", ec.unmarshalInputCoerceItem),
+			graphql.NewInputUnmarshaler("DefaultMapInput", ec.unmarshalInputDefaultMapInput),
 			graphql.NewInputUnmarshaler("DescribedInput", ec.unmarshalInputDescribedInput),
 			graphql.NewInputUnmarshaler("GenerationOnlyInput", ec.unmarshalInputGenerationOnlyInput),
 			graphql.NewInputUnmarshaler("OmittableInput", ec.unmarshalInputOmittableInput),
@@ -1208,7 +1247,7 @@ func newExecutionContext(
 	}
 }
 
-//go:embed "abstract_types.graphql" "arguments.graphql" "defer.graphql" "field_context_child.graphql" "function_scalars.graphql" "input_coercion.graphql" "input_object_directive.graphql" "input_unmarshaler.graphql" "introspection.graphql" "mark_non_null.graphql" "named_input.graphql" "nullability.graphql" "omittable.graphql" "panic.graphql" "resolver_errors.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "skip_runtime.graphql" "subscription.graphql" "worker_limit.graphql" "wrong_type.graphql"
+//go:embed "abstract_types.graphql" "arguments.graphql" "defer.graphql" "field_context_child.graphql" "function_scalars.graphql" "input_coercion.graphql" "input_object_directive.graphql" "input_unmarshaler.graphql" "introspection.graphql" "mark_non_null.graphql" "named_input.graphql" "nullability.graphql" "omittable.graphql" "panic.graphql" "resolver_errors.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "schema_values.graphql" "skip_runtime.graphql" "subscription.graphql" "worker_limit.graphql" "wrong_type.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -1238,6 +1277,7 @@ var sources = []*ast.Source{
 	{Name: "root_fields.graphql", Input: sourceData("root_fields.graphql"), BuiltIn: false},
 	{Name: "root_typed_field.graphql", Input: sourceData("root_typed_field.graphql"), BuiltIn: false},
 	{Name: "schema.graphql", Input: sourceData("schema.graphql"), BuiltIn: false},
+	{Name: "schema_values.graphql", Input: sourceData("schema_values.graphql"), BuiltIn: false},
 	{Name: "skip_runtime.graphql", Input: sourceData("skip_runtime.graphql"), BuiltIn: false},
 	{Name: "subscription.graphql", Input: sourceData("subscription.graphql"), BuiltIn: false},
 	{Name: "worker_limit.graphql", Input: sourceData("worker_limit.graphql"), BuiltIn: false},
@@ -1469,6 +1509,14 @@ func (ec *executionContext) childFields_Query(ctx context.Context, field graphql
 		return ec.fieldContext_Query_viewer(ctx, field)
 	case "valueViewer":
 		return ec.fieldContext_Query_valueViewer(ctx, field)
+	case "anyArgAbsent":
+		return ec.fieldContext_Query_anyArgAbsent(ctx, field)
+	case "anyArgNull":
+		return ec.fieldContext_Query_anyArgNull(ctx, field)
+	case "anyArgMap":
+		return ec.fieldContext_Query_anyArgMap(ctx, field)
+	case "defaultMap":
+		return ec.fieldContext_Query_defaultMap(ctx, field)
 	case "generationOnly":
 		return ec.fieldContext_Query_generationOnly(ctx, field)
 	case "limitedItems":
@@ -1640,6 +1688,20 @@ func (ec *executionContext) childFields___Type(ctx context.Context, field graphq
 // endregion ************************** internal!.gotpl ***************************
 
 // region    ***************************** args.gotpl *****************************
+
+func (ec *executionContext) dir_anyArg_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "value",
+		func(ctx context.Context, v any) (any, error) {
+			return ec.unmarshalOAny2interface(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["value"] = arg0
+	return args, nil
+}
 
 func (ec *executionContext) dir_replaceStream_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
@@ -1888,6 +1950,20 @@ func (ec *executionContext) field_Query_ctxMaybe_args(ctx context.Context, rawAr
 		return nil, err
 	}
 	args["v"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_defaultMap_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (DefaultMapInput, error) {
+			return ec.unmarshalNDefaultMapInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐDefaultMapInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -4592,6 +4668,163 @@ func (ec *executionContext) fieldContext_Query_valueViewer(_ context.Context, fi
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_anyArgAbsent(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_anyArgAbsent(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Query().AnyArgAbsent(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.AnyArg == nil {
+					var zeroVal *string
+					return zeroVal, errors.New("directive anyArg is not implemented")
+				}
+				return ec.Directives.AnyArg(ctx, nil, directive0, nil)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Query_anyArgAbsent(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Query", field, true, true, "String")
+}
+
+func (ec *executionContext) _Query_anyArgNull(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_anyArgNull(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Query().AnyArgNull(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				if ec.Directives.AnyArg == nil {
+					var zeroVal *string
+					return zeroVal, errors.New("directive anyArg is not implemented")
+				}
+				return ec.Directives.AnyArg(ctx, nil, directive0, nil)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Query_anyArgNull(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Query", field, true, true, "String")
+}
+
+func (ec *executionContext) _Query_anyArgMap(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_anyArgMap(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return ec.Resolvers.Query().AnyArgMap(ctx)
+		},
+		func(ctx context.Context, next graphql.Resolver) graphql.Resolver {
+			directive0 := next
+
+			directive1 := func(ctx context.Context) (any, error) {
+				value, err := ec.unmarshalOAny2interface(ctx, map[string]any{"a": 1})
+				if err != nil {
+					var zeroVal *string
+					return zeroVal, err
+				}
+				if ec.Directives.AnyArg == nil {
+					var zeroVal *string
+					return zeroVal, errors.New("directive anyArg is not implemented")
+				}
+				return ec.Directives.AnyArg(ctx, nil, directive0, value)
+			}
+
+			next = directive1
+			return next
+		},
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Query_anyArgMap(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Query", field, true, true, "String")
+}
+
+func (ec *executionContext) _Query_defaultMap(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_defaultMap(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().DefaultMap(ctx, fc.Args["input"].(DefaultMapInput))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Query_defaultMap(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_defaultMap_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_generationOnly(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -6946,6 +7179,52 @@ func UnmarshalCoerceItem(ctx context.Context, raw any) (CoerceItem, error) {
 	return out, err
 }
 
+func (ec *executionContext) unmarshalInputDefaultMapInput(ctx context.Context, obj any) (DefaultMapInput, error) {
+	var it DefaultMapInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	if _, present := asMap["meta"]; !present {
+		asMap["meta"] = map[string]any{"a": 1}
+	}
+
+	fieldsInOrder := [...]string{"meta"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "meta":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("meta"))
+			data, err := ec.unmarshalOMap2map(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Meta = data
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalDefaultMapInput unmarshals raw into the DefaultMapInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalDefaultMapInput(ctx context.Context, raw any) (DefaultMapInput, error) {
+	var out DefaultMapInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "DefaultMapInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputDescribedInput(ctx context.Context, obj any) (DescribedInput, error) {
 	var it DescribedInput
 	if obj == nil {
@@ -8155,6 +8434,30 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._Query_valueViewer(ctx, field)
 				})
+		case "anyArgAbsent":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_anyArgAbsent(ctx, field)
+				})
+		case "anyArgNull":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_anyArgNull(ctx, field)
+				})
+		case "anyArgMap":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_anyArgMap(ctx, field)
+				})
+		case "defaultMap":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_defaultMap(ctx, field)
+				})
 		case "generationOnly":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
 				true, true,
@@ -8830,6 +9133,11 @@ func (ec *executionContext) marshalNCtxMaybe2string(ctx context.Context, sel ast
 	return graphql.WrapContextMarshaler(ctx, res)
 }
 
+func (ec *executionContext) unmarshalNDefaultMapInput2githubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐDefaultMapInput(ctx context.Context, v any) (DefaultMapInput, error) {
+	res, err := ec.unmarshalInputDefaultMapInput(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) marshalNDeferItem2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐDeferItemᚄ(ctx context.Context, sel ast.SelectionSet, v []*DeferItem) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 2, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
@@ -9299,6 +9607,24 @@ func (ec *executionContext) marshalOAnimal2githubᚗcomᚋ99designsᚋgqlgenᚋc
 	return ec._Animal(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalOAny2interface(ctx context.Context, v any) (any, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalAny(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOAny2interface(ctx context.Context, sel ast.SelectionSet, v any) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalAny(v)
+	return res
+}
+
 func (ec *executionContext) marshalOArgObject2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋexecbehaviorᚐArgObject(ctx context.Context, sel ast.SelectionSet, v *ArgObject) graphql.Marshaler {
 	if v == nil {
 		return graphql.Null
@@ -9565,6 +9891,24 @@ func (ec *executionContext) marshalOInt2ᚖint(ctx context.Context, sel ast.Sele
 	_ = sel
 	_ = ctx
 	res := graphql.MarshalInt(*v)
+	return res
+}
+
+func (ec *executionContext) unmarshalOMap2map(ctx context.Context, v any) (map[string]any, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalMap(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOMap2map(ctx context.Context, sel ast.SelectionSet, v map[string]any) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalMap(v)
 	return res
 }
 

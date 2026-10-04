@@ -55,6 +55,10 @@ type CoerceItem struct {
 	Value Strict `json:"value"`
 }
 
+type DefaultMapInput struct {
+	Meta map[string]any `json:"meta,omitempty"`
+}
+
 type DeferItem struct {
 	ID             int     `json:"id"`
 	Slow           string  `json:"slow"`

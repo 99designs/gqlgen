@@ -1948,9 +1948,7 @@ func _User(ctx context.Context, ec *executionContext, sel ast.SelectionSet, obj 
 
 func marshalNAuthor2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋchildfielddedupᚐAuthor(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v *Author) graphql.Marshaler {
 	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullError(ctx, "Author!")
 		return graphql.Null
 	}
 	return _Author(ctx, ec, sel, v)
@@ -1958,9 +1956,7 @@ func marshalNAuthor2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserver�
 
 func marshalNUser2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋchildfielddedupᚐUser(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v *User) graphql.Marshaler {
 	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullError(ctx, "User!")
 		return graphql.Null
 	}
 	return _User(ctx, ec, sel, v)

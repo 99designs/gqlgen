@@ -87,7 +87,8 @@ func TestNullBubbling(t *testing.T) {
 		require.EqualError(
 			t,
 			err,
-			`[{"message":"the requested element is null which the schema does not allow","path":["errorBubble","nilOnRequiredField"]}]`,
+			`[{"message":"cannot return null for non-null field Error.nilOnRequiredField (String!): `+
+				`the model method returned nil","path":["errorBubble","nilOnRequiredField"]}]`,
 		)
 		require.Nil(t, resp.ErrorBubble)
 		require.Equal(t, "Ok", resp.Valid)
@@ -116,12 +117,14 @@ func TestNullBubbling(t *testing.T) {
 		require.Contains(
 			t,
 			err.Error(),
-			`{"message":"the requested element is null which the schema does not allow","path":["errorBubbleList",2]}`,
+			`{"message":"cannot return null for non-null element of field Query.errorBubbleList `+
+				`(Error!): the list element was nil","path":["errorBubbleList",2]}`,
 		)
 		require.Contains(
 			t,
 			err.Error(),
-			`{"message":"the requested element is null which the schema does not allow","path":["errorBubbleList",1]}`,
+			`{"message":"cannot return null for non-null element of field Query.errorBubbleList `+
+				`(Error!): the list element was nil","path":["errorBubbleList",1]}`,
 		)
 		require.Nil(t, resp.ErrorBubbleList)
 		require.Equal(t, "Ok", resp.Valid)
@@ -161,7 +164,7 @@ func TestNullBubbling(t *testing.T) {
 		require.Contains(
 			t,
 			err.Error(),
-			"the requested element is null which the schema does not allow",
+			"cannot return null for non-null field Errors.",
 		)
 	})
 

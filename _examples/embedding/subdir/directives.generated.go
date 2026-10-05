@@ -44,9 +44,7 @@ func (ec *executionContext) marshalN_FieldSet2string(ctx context.Context, sel as
 	_ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "_FieldSet!")
 	}
 	return res
 }

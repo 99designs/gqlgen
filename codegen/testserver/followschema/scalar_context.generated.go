@@ -44,9 +44,7 @@ func (ec *executionContext) marshalNStringFromContextFunction2string(ctx context
 	_ = sel
 	res := MarshalStringFromContextFunction(v)
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "StringFromContextFunction!")
 	}
 	return graphql.WrapContextMarshaler(ctx, res)
 }
@@ -59,9 +57,7 @@ func (ec *executionContext) unmarshalNStringFromContextInterface2ᚖgithubᚗcom
 
 func (ec *executionContext) marshalNStringFromContextInterface2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐStringFromContextInterface(ctx context.Context, sel ast.SelectionSet, v *StringFromContextInterface) graphql.Marshaler {
 	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullError(ctx, "StringFromContextInterface!")
 		return graphql.Null
 	}
 	return graphql.WrapContextMarshaler(ctx, v)

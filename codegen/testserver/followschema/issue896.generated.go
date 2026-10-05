@@ -98,9 +98,7 @@ func (ec *executionContext) _CheckIssue896(ctx context.Context, sel ast.Selectio
 
 func (ec *executionContext) marshalNCheckIssue8962ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐCheckIssue896(ctx context.Context, sel ast.SelectionSet, v *CheckIssue896) graphql.Marshaler {
 	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullError(ctx, "CheckIssue896!")
 		return graphql.Null
 	}
 	return ec._CheckIssue896(ctx, sel, v)

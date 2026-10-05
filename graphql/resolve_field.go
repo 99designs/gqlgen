@@ -181,9 +181,7 @@ func resolveField[T, R any](
 	}
 	if resTmp == nil {
 		if nonNull || fc.NonNull {
-			if !HasFieldError(ctx, fc) {
-				oc.Errorf(ctx, "must not be null")
-			}
+			AddInvalidNullError(ctx, "")
 		}
 		if fc.NonNull && !nonNull {
 			return requiredNullResult

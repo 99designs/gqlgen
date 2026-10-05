@@ -657,9 +657,7 @@ func (ec *executionContext) unmarshalNDefaultInput2githubᚗcomᚋ99designsᚋgq
 
 func (ec *executionContext) marshalNDefaultParametersMirror2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐDefaultParametersMirror(ctx context.Context, sel ast.SelectionSet, v *DefaultParametersMirror) graphql.Marshaler {
 	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullError(ctx, "DefaultParametersMirror!")
 		return graphql.Null
 	}
 	return ec._DefaultParametersMirror(ctx, sel, v)

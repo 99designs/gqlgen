@@ -205,6 +205,75 @@ This function will be called with the same resolver context that generated it, s
 current resolver path and whatever other state you might want to notify the client about.
 
 
+### Non-null violations
+
+When a field the schema declares non-null (`String!`) resolves to null, gqlgen raises a field
+error and propagates the null to the nearest nullable ancestor, as the GraphQL specification
+requires. The error it raises is a `*graphql.InvalidNullError`, which carries the diagnosis as
+fields rather than only as message text:
+
+```go
+server.SetErrorPresenter(func(ctx context.Context, e error) *gqlerror.Error {
+	err := graphql.DefaultErrorPresenter(ctx, e)
+
+	if nullErr, ok := errors.AsType[*graphql.InvalidNullError](e); ok {
+		err.Extensions = map[string]any{
+			"code":  "INVALID_NULL",
+			"field": nullErr.SchemaCoordinate(), // "OuterObject.inner"
+			"type":  nullErr.DeclaredType,       // "InnerObject!"
+			"from":  string(nullErr.Source),     // "model_field"
+		}
+	}
+
+	return err
+})
+```
+
+`errors.Is(e, graphql.ErrInvalidNull)` matches any such violation when you only need to know that one
+happened.
+
+`SchemaCoordinate()` returns the field's
+[schema coordinate](https://spec.graphql.org/September2025/#sec-Schema-Coordinates). It names the
+**concrete** object type, which the error path cannot: for a field reached through an interface the
+path shows `["node","child"]`, while the coordinate shows `ConcreteNodeA.child`. `Source` says
+where to look in your Go code:
+
+| `Source`           | Meaning                                                                      |
+| ------------------ | ---------------------------------------------------------------------------- |
+| `resolver`         | A resolver method returned nil.                                              |
+| `model_method`     | A method on the model returned nil.                                          |
+| `model_field`      | A model struct field was nil, and the field has no resolver.                 |
+| `marshaler`        | A marshaler mapped a non-nil value to null (`MarshalTime` on the zero time). |
+| `runtime_non_null` | `graphql.MarkNonNull` raised a nullable field that then resolved to nil.     |
+
+`ListElement` reports that the null was an element of a list rather than the field's own value;
+`Path` is the response path, including list indices.
+
+The text of `Error()` is intended for developers and is not part of the API — match on the type or
+the sentinel rather than on the message.
+
+#### Structured logging
+
+`InvalidNullError` also answers `Attrs() []slog.Attr`, so logging middleware can record the diagnosis
+without importing gqlgen's type. Walk the chain and ask each error for its attributes:
+
+```go
+func attrs(err error) []slog.Attr {
+	var out []slog.Attr
+	for e := err; e != nil; e = errors.Unwrap(e) {
+		if a, ok := e.(interface{ Attrs() []slog.Attr }); ok {
+			out = append(out, a.Attrs()...)
+		}
+	}
+	return out
+}
+```
+
+A violation yields `gql.field`, `gql.type`, `gql.null_source`, `gql.path`, and `gql.list_element`
+when it applies. Empty values are omitted. Because `gqlerror.List` unwraps to its members, a
+collector that follows multi-error branches gathers the attributes for every violation in one
+response.
+
 ### The panic handler
 
 There is also a panic handler, called whenever a panic happens to gracefully return a message to the user before

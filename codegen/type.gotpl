@@ -179,9 +179,7 @@
 				{{- if $type.IsNilable }}
 					if v == nil {
 						{{- if $type.GQL.NonNull }}
-							if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-								graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-							}
+							graphql.AddInvalidNullError(ctx, {{ $type.GQL.String | quote }})
 						{{- end }}
 						return {{- if $eventCtx }} ctx,{{- end}} graphql.Null
 					}
@@ -211,9 +209,7 @@
 					res := {{ $type.Marshaler | call }}({{ $v }})
 					{{- if $type.GQL.NonNull }}
 						if res == graphql.Null {
-							if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-								graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-							}
+							graphql.AddInvalidNullFromMarshaler(ctx, {{ $type.GQL.String | quote }})
 						}
 					{{- end }}
 					{{- if $type.IsContext }}

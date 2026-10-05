@@ -3128,9 +3128,7 @@ func (ec *executionContext) marshalNBoolTyped2githubᚗcomᚋ99designsᚋgqlgen�
 	_ = sel
 	res := graphql.MarshalString(marshalNBoolTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐBoolTyped[v])
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "BoolTyped!")
 	}
 	return res
 }
@@ -3156,9 +3154,7 @@ func (ec *executionContext) marshalNBoolUntyped2bool(ctx context.Context, sel as
 	_ = sel
 	res := graphql.MarshalString(marshalNBoolUntyped2bool[v])
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "BoolUntyped!")
 	}
 	return res
 }
@@ -3183,9 +3179,7 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	_ = sel
 	res := graphql.MarshalBoolean(v)
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "Boolean!")
 	}
 	return res
 }
@@ -3200,9 +3194,7 @@ func (ec *executionContext) marshalNInPackage2githubᚗcomᚋ99designsᚋgqlgen�
 	_ = sel
 	res := graphql.MarshalString(marshalNInPackage2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋapiᚐInPackage[v])
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "InPackage!")
 	}
 	return res
 }
@@ -3228,9 +3220,7 @@ func (ec *executionContext) marshalNIntTyped2githubᚗcomᚋ99designsᚋgqlgen�
 	_ = sel
 	res := graphql.MarshalString(marshalNIntTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐIntTyped[v])
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "IntTyped!")
 	}
 	return res
 }
@@ -3256,9 +3246,7 @@ func (ec *executionContext) marshalNIntUntyped2int(ctx context.Context, sel ast.
 	_ = sel
 	res := graphql.MarshalString(marshalNIntUntyped2int[v])
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "IntUntyped!")
 	}
 	return res
 }
@@ -3283,9 +3271,7 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	_ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "String!")
 	}
 	return res
 }
@@ -3300,9 +3286,7 @@ func (ec *executionContext) marshalNStringTyped2githubᚗcomᚋ99designsᚋgqlge
 	_ = sel
 	res := graphql.MarshalString(marshalNStringTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐStringTyped[v])
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "StringTyped!")
 	}
 	return res
 }
@@ -3328,9 +3312,7 @@ func (ec *executionContext) marshalNStringUntyped2string(ctx context.Context, se
 	_ = sel
 	res := graphql.MarshalString(marshalNStringUntyped2string[v])
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "StringUntyped!")
 	}
 	return res
 }
@@ -3356,9 +3338,7 @@ func (ec *executionContext) marshalNVarTyped2githubᚗcomᚋ99designsᚋgqlgen�
 	_ = sel
 	res := graphql.MarshalString(marshalNVarTyped2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋenumᚋmodelᚐVarTyped[v])
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "VarTyped!")
 	}
 	return res
 }
@@ -3384,9 +3364,7 @@ func (ec *executionContext) marshalNVarUntyped2bool(ctx context.Context, sel ast
 	_ = sel
 	res := graphql.MarshalString(marshalNVarUntyped2bool[v])
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "VarUntyped!")
 	}
 	return res
 }
@@ -3431,9 +3409,7 @@ func (ec *executionContext) marshalN__DirectiveLocation2string(ctx context.Conte
 	_ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "__DirectiveLocation!")
 	}
 	return res
 }
@@ -3518,9 +3494,7 @@ func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 
 func (ec *executionContext) marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, sel ast.SelectionSet, v *introspection.Type) graphql.Marshaler {
 	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullError(ctx, "__Type!")
 		return graphql.Null
 	}
 	return ec.___Type(ctx, sel, v)
@@ -3535,9 +3509,7 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	_ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "__TypeKind!")
 	}
 	return res
 }

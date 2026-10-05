@@ -128,9 +128,7 @@ func (ec *executionContext) _PtrToAnyContainer(ctx context.Context, sel ast.Sele
 
 func (ec *executionContext) marshalNPtrToAnyContainer2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPtrToAnyContainer(ctx context.Context, sel ast.SelectionSet, v *PtrToAnyContainer) graphql.Marshaler {
 	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullError(ctx, "PtrToAnyContainer!")
 		return graphql.Null
 	}
 	return ec._PtrToAnyContainer(ctx, sel, v)

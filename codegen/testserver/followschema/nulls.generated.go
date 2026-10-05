@@ -424,9 +424,7 @@ func (ec *executionContext) _Errors(ctx context.Context, sel ast.SelectionSet, o
 
 func (ec *executionContext) marshalNError2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐError(ctx context.Context, sel ast.SelectionSet, v *Error) graphql.Marshaler {
 	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullError(ctx, "Error!")
 		return graphql.Null
 	}
 	return ec._Error(ctx, sel, v)

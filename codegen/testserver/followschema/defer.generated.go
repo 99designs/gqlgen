@@ -216,9 +216,7 @@ func (ec *executionContext) _DeferModel(ctx context.Context, sel ast.SelectionSe
 
 func (ec *executionContext) marshalNDeferModel2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐDeferModel(ctx context.Context, sel ast.SelectionSet, v *DeferModel) graphql.Marshaler {
 	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullError(ctx, "DeferModel!")
 		return graphql.Null
 	}
 	return ec._DeferModel(ctx, sel, v)

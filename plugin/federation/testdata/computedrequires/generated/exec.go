@@ -6451,9 +6451,7 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	_ = sel
 	res := graphql.MarshalBoolean(v)
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "Boolean!")
 	}
 	return res
 }
@@ -6467,18 +6465,14 @@ func (ec *executionContext) marshalNFieldSet2string(ctx context.Context, sel ast
 	_ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "FieldSet!")
 	}
 	return res
 }
 
 func (ec *executionContext) marshalNGender2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐGender(ctx context.Context, sel ast.SelectionSet, v model.Gender) graphql.Marshaler {
 	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullError(ctx, "Gender!")
 		return graphql.Null
 	}
 	return ec._Gender(ctx, sel, v)
@@ -6486,9 +6480,7 @@ func (ec *executionContext) marshalNGender2githubᚗcomᚋ99designsᚋgqlgenᚋp
 
 func (ec *executionContext) marshalNHello2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐHello(ctx context.Context, sel ast.SelectionSet, v *model.Hello) graphql.Marshaler {
 	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullError(ctx, "Hello!")
 		return graphql.Null
 	}
 	return ec._Hello(ctx, sel, v)
@@ -6496,9 +6488,7 @@ func (ec *executionContext) marshalNHello2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 
 func (ec *executionContext) marshalNHelloMultiSingleKeys2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐHelloMultiSingleKeys(ctx context.Context, sel ast.SelectionSet, v *model.HelloMultiSingleKeys) graphql.Marshaler {
 	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullError(ctx, "HelloMultiSingleKeys!")
 		return graphql.Null
 	}
 	return ec._HelloMultiSingleKeys(ctx, sel, v)
@@ -6506,9 +6496,7 @@ func (ec *executionContext) marshalNHelloMultiSingleKeys2ᚖgithubᚗcomᚋ99des
 
 func (ec *executionContext) marshalNHelloWithErrors2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐHelloWithErrors(ctx context.Context, sel ast.SelectionSet, v *model.HelloWithErrors) graphql.Marshaler {
 	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullError(ctx, "HelloWithErrors!")
 		return graphql.Null
 	}
 	return ec._HelloWithErrors(ctx, sel, v)
@@ -6523,9 +6511,7 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 	_ = sel
 	res := graphql.MarshalInt(v)
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "Int!")
 	}
 	return res
 }
@@ -6602,9 +6588,7 @@ func (ec *executionContext) unmarshalNMultiPlanetRequiresNestedByNamesInput2ᚕ�
 
 func (ec *executionContext) marshalNPerson2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐPerson(ctx context.Context, sel ast.SelectionSet, v *model.Person) graphql.Marshaler {
 	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullError(ctx, "Person!")
 		return graphql.Null
 	}
 	return ec._Person(ctx, sel, v)
@@ -6612,9 +6596,7 @@ func (ec *executionContext) marshalNPerson2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 
 func (ec *executionContext) marshalNPlanetMultipleRequires2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐPlanetMultipleRequires(ctx context.Context, sel ast.SelectionSet, v *model.PlanetMultipleRequires) graphql.Marshaler {
 	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullError(ctx, "PlanetMultipleRequires!")
 		return graphql.Null
 	}
 	return ec._PlanetMultipleRequires(ctx, sel, v)
@@ -6622,9 +6604,7 @@ func (ec *executionContext) marshalNPlanetMultipleRequires2ᚖgithubᚗcomᚋ99d
 
 func (ec *executionContext) marshalNPlanetRequires2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐPlanetRequires(ctx context.Context, sel ast.SelectionSet, v *model.PlanetRequires) graphql.Marshaler {
 	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullError(ctx, "PlanetRequires!")
 		return graphql.Null
 	}
 	return ec._PlanetRequires(ctx, sel, v)
@@ -6632,9 +6612,7 @@ func (ec *executionContext) marshalNPlanetRequires2ᚖgithubᚗcomᚋ99designs�
 
 func (ec *executionContext) marshalNPlanetRequiresNested2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐPlanetRequiresNested(ctx context.Context, sel ast.SelectionSet, v *model.PlanetRequiresNested) graphql.Marshaler {
 	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullError(ctx, "PlanetRequiresNested!")
 		return graphql.Null
 	}
 	return ec._PlanetRequiresNested(ctx, sel, v)
@@ -6649,18 +6627,14 @@ func (ec *executionContext) marshalNString2string(ctx context.Context, sel ast.S
 	_ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "String!")
 	}
 	return res
 }
 
 func (ec *executionContext) marshalNWorld2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐWorld(ctx context.Context, sel ast.SelectionSet, v *model.World) graphql.Marshaler {
 	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullError(ctx, "World!")
 		return graphql.Null
 	}
 	return ec._World(ctx, sel, v)
@@ -6668,9 +6642,7 @@ func (ec *executionContext) marshalNWorld2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 
 func (ec *executionContext) marshalNWorldName2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐWorldName(ctx context.Context, sel ast.SelectionSet, v *model.WorldName) graphql.Marshaler {
 	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullError(ctx, "WorldName!")
 		return graphql.Null
 	}
 	return ec._WorldName(ctx, sel, v)
@@ -6678,9 +6650,7 @@ func (ec *executionContext) marshalNWorldName2ᚖgithubᚗcomᚋ99designsᚋgqlg
 
 func (ec *executionContext) marshalNWorldWithMultipleKeys2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋcomputedrequiresᚋgeneratedᚋmodelsᚐWorldWithMultipleKeys(ctx context.Context, sel ast.SelectionSet, v *model.WorldWithMultipleKeys) graphql.Marshaler {
 	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullError(ctx, "WorldWithMultipleKeys!")
 		return graphql.Null
 	}
 	return ec._WorldWithMultipleKeys(ctx, sel, v)
@@ -6693,17 +6663,13 @@ func (ec *executionContext) unmarshalN_Any2map(ctx context.Context, v any) (map[
 
 func (ec *executionContext) marshalN_Any2map(ctx context.Context, sel ast.SelectionSet, v map[string]any) graphql.Marshaler {
 	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullError(ctx, "_Any!")
 		return graphql.Null
 	}
 	_ = sel
 	res := graphql.MarshalMap(v)
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "_Any!")
 	}
 	return res
 }
@@ -6797,9 +6763,7 @@ func (ec *executionContext) marshalN__DirectiveLocation2string(ctx context.Conte
 	_ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "__DirectiveLocation!")
 	}
 	return res
 }
@@ -6884,9 +6848,7 @@ func (ec *executionContext) marshalN__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgen�
 
 func (ec *executionContext) marshalN__Type2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, sel ast.SelectionSet, v *introspection.Type) graphql.Marshaler {
 	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullError(ctx, "__Type!")
 		return graphql.Null
 	}
 	return ec.___Type(ctx, sel, v)
@@ -6901,9 +6863,7 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 	_ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "__TypeKind!")
 	}
 	return res
 }
@@ -6917,9 +6877,7 @@ func (ec *executionContext) marshalNfederation__Policy2string(ctx context.Contex
 	_ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "federation__Policy!")
 	}
 	return res
 }
@@ -6991,9 +6949,7 @@ func (ec *executionContext) marshalNfederation__Scope2string(ctx context.Context
 	_ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "federation__Scope!")
 	}
 	return res
 }

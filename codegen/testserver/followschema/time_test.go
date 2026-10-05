@@ -47,7 +47,8 @@ func TestTime(t *testing.T) {
 		require.EqualError(
 			t,
 			err,
-			`[{"message":"the requested element is null which the schema does not allow","path":["user","created"]}]`,
+			`[{"message":"cannot return null for non-null field User.created (Time!): `+
+				`the marshaler returned null for a non-nil value","path":["user","created"]}]`,
 		)
 	})
 

@@ -105,9 +105,7 @@ func (ec *executionContext) marshalNDefaultScalarImplementation2string(ctx conte
 	_ = sel
 	res := graphql.MarshalString(v)
 	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullFromMarshaler(ctx, "DefaultScalarImplementation!")
 	}
 	return res
 }

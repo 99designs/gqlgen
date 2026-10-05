@@ -40,8 +40,9 @@ var commonResolveFieldTests = []ResolveFieldTest{
 		nonNull:            true,
 		fieldResolverValue: nil,
 		expected:           "null",
-		expectedErr:        "input: testField must not be null\n",
-		expectedCalls:      4,
+		expectedErr: "input: testField cannot return null for non-null field Test.testField: " +
+			"the model struct field was nil and the field has no resolver\n",
+		expectedCalls: 4,
 	},
 	{
 		name:                      "should fail when initialize field context returns an error",
@@ -417,7 +418,12 @@ func TestResolveFieldRuntimeNonNull(t *testing.T) {
 				result,
 				"should return RequiredNull sentinel for runtime non-null violation",
 			)
-			require.EqualError(t, GetErrors(ctx), "input: testField must not be null\n")
+			require.EqualError(
+				t,
+				GetErrors(ctx),
+				"input: testField cannot return null for non-null field Test.testField: "+
+					"the field was marked non-null at runtime and resolved to nil\n",
+			)
 		},
 	)
 

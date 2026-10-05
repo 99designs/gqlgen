@@ -369,9 +369,7 @@ func (ec *executionContext) _PtrToPtrOuter(ctx context.Context, sel ast.Selectio
 
 func (ec *executionContext) marshalNPtrToPtrOuter2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋcodegenᚋtestserverᚋfollowschemaᚐPtrToPtrOuter(ctx context.Context, sel ast.SelectionSet, v *PtrToPtrOuter) graphql.Marshaler {
 	if v == nil {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
+		graphql.AddInvalidNullError(ctx, "PtrToPtrOuter!")
 		return graphql.Null
 	}
 	return ec._PtrToPtrOuter(ctx, sel, v)

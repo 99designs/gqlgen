@@ -59,6 +59,121 @@ func TestField_StreamResolverShape(t *testing.T) {
 	}
 }
 
+func TestField_IsConcurrent(t *testing.T) {
+	tests := map[string]struct {
+		field *Field
+		want  bool
+	}{
+		"ctx method is concurrent": {
+			field: &Field{MethodHasContext: true, Object: &Object{}},
+			want:  true,
+		},
+		"resolver is concurrent": {
+			field: &Field{IsResolver: true, Object: &Object{}},
+			want:  true,
+		},
+		"plain field is not concurrent": {
+			field: &Field{Object: &Object{}},
+			want:  false,
+		},
+		"@disableConcurrency forces inline for ctx method": {
+			field: &Field{MethodHasContext: true, DisableConcurrency: true, Object: &Object{}},
+			want:  false,
+		},
+		"@disableConcurrency forces inline for resolver": {
+			field: &Field{IsResolver: true, DisableConcurrency: true, Object: &Object{}},
+			want:  false,
+		},
+		"object-level disable forces inline": {
+			field: &Field{MethodHasContext: true, Object: &Object{DisableConcurrency: true}},
+			want:  false,
+		},
+	}
+
+	for name, tt := range tests {
+		t.Run(name, func(t *testing.T) {
+			require.Equal(t, tt.want, tt.field.IsConcurrent())
+		})
+	}
+}
+
+func TestField_DisableConcurrencyDirective(t *testing.T) {
+	baseModels := config.TypeMap{
+		"Boolean": {Model: config.StringList{"github.com/99designs/gqlgen/graphql.Boolean"}},
+		"Float":   {Model: config.StringList{"github.com/99designs/gqlgen/graphql.Float"}},
+		"ID":      {Model: config.StringList{"github.com/99designs/gqlgen/graphql.ID"}},
+		"Int":     {Model: config.StringList{"github.com/99designs/gqlgen/graphql.Int"}},
+		"String":  {Model: config.StringList{"github.com/99designs/gqlgen/graphql.String"}},
+	}
+
+	buildQuery := func(t *testing.T, input string) *Object {
+		t.Helper()
+		cfg := &config.Config{
+			Exec: config.ExecConfig{
+				Layout:   config.ExecLayoutSingleFile,
+				Filename: "generated.go",
+				Package:  "generated",
+			},
+			Models:     baseModels,
+			Directives: map[string]config.DirectiveConfig{config.DirDisableConcurrency: {SkipRuntime: true}},
+			Packages:   code.NewPackages(),
+		}
+		cfg.Schema = gqlparser.MustLoadSchema(&ast2.Source{
+			Name:  "schema.graphql",
+			Input: input,
+		})
+
+		b := builder{Config: cfg, Schema: cfg.Schema}
+		b.Binder = b.Config.NewBinder()
+		var err error
+		b.Directives, err = b.buildDirectives()
+		require.NoError(t, err)
+
+		obj, err := b.buildObject(cfg.Schema.Query)
+		require.NoError(t, err)
+		return obj
+	}
+
+	t.Run("field-level directive opts the field out of concurrency", func(t *testing.T) {
+		obj := buildQuery(t, `
+			directive @disableConcurrency on FIELD_DEFINITION | OBJECT
+			schema { query: Query }
+			type Query {
+				plain: String
+				inline: String @disableConcurrency
+			}
+		`)
+
+		byName := map[string]*Field{}
+		for _, f := range obj.Fields {
+			byName[f.Name] = f
+		}
+
+		// Root fields are resolvers, so concurrent by default.
+		require.False(t, byName["plain"].DisableConcurrency)
+		require.True(t, byName["plain"].IsConcurrent())
+
+		require.True(t, byName["inline"].DisableConcurrency)
+		require.False(t, byName["inline"].IsConcurrent())
+	})
+
+	t.Run("object-level directive opts every field out of concurrency", func(t *testing.T) {
+		obj := buildQuery(t, `
+			directive @disableConcurrency on FIELD_DEFINITION | OBJECT
+			schema { query: Query }
+			type Query @disableConcurrency {
+				a: String
+				b: String
+			}
+		`)
+
+		require.True(t, obj.DisableConcurrency)
+		for _, f := range obj.Fields {
+			require.False(t, f.IsConcurrent(), "field %s should be inline", f.Name)
+		}
+	})
+}
+
 func TestFindField(t *testing.T) {
 	input := `
 package test

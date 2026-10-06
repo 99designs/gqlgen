@@ -373,6 +373,42 @@ func TestWebsocketInitFunc(t *testing.T) {
 			assert.JSONEq(t, `{"message":"beep boop"}`, string(m.Payload))
 		},
 	)
+	t.Run("does not send complete when the init context is cancelled", func(t *testing.T) {
+		h := testserver.New()
+		cancels := make(chan context.CancelFunc, 1)
+		h.AddTransport(transport.Websocket{
+			InitFunc: func(ctx context.Context, _ transport.InitPayload) (context.Context, *transport.InitPayload, error) {
+				ctx, cancel := context.WithCancel(ctx)
+				cancels <- cancel
+				return ctx, nil, nil
+			},
+		})
+		srv := httptest.NewServer(h)
+		defer srv.Close()
+
+		c := wsConnect(srv.URL)
+		defer c.Close()
+		require.NoError(t, c.WriteJSON(&operationMessage{Type: connectionInitMsg}))
+		assert.Equal(t, connectionAckMsg, readOp(c).Type)
+		assert.Equal(t, connectionKeepAliveMsg, readOp(c).Type)
+
+		require.NoError(t, c.WriteJSON(&operationMessage{
+			Type:    startMsg,
+			ID:      "test_1",
+			Payload: json.RawMessage(`{"query": "subscription { name }"}`),
+		}))
+		h.SendNextSubscriptionMessage()
+		assert.Equal(t, dataMsg, readOp(c).Type)
+
+		(<-cancels)()
+
+		c.SetReadDeadline(time.Now().Add(time.Second))
+		var msg operationMessage
+		err := c.ReadJSON(&msg)
+		var closeErr coderws.CloseError
+		require.ErrorAs(t, err, &closeErr, "got %q before the close frame", msg.Type)
+		assert.Equal(t, coderws.StatusNormalClosure, closeErr.Code)
+	})
 	t.Run(
 		"accept connection if WebsocketInitFunc is provided and is accepting connection",
 		func(t *testing.T) {

@@ -57,6 +57,7 @@ type Stub struct {
 		Coordinates         func(ctx context.Context, at Coordinates) (string, error)
 		NullableCoordinates func(ctx context.Context, at *Coordinates) (string, error)
 		Described           func(ctx context.Context, input *DescribedInput, choice *OneOfInput) (*Described, error)
+		MapNote             func(ctx context.Context, input map[string]any) (*string, error)
 		MarkedParent        func(ctx context.Context) (*MarkedParent, error)
 		UnmarshalNamed      func(ctx context.Context, kind string, raw map[string]any) (*string, error)
 		Nullability         func(ctx context.Context, valid bool) (*Nullability, error)
@@ -245,6 +246,9 @@ func (r *stubQuery) NullableCoordinates(ctx context.Context, at *Coordinates) (s
 }
 func (r *stubQuery) Described(ctx context.Context, input *DescribedInput, choice *OneOfInput) (*Described, error) {
 	return r.QueryResolver.Described(ctx, input, choice)
+}
+func (r *stubQuery) MapNote(ctx context.Context, input map[string]any) (*string, error) {
+	return r.QueryResolver.MapNote(ctx, input)
 }
 func (r *stubQuery) MarkedParent(ctx context.Context) (*MarkedParent, error) {
 	return r.QueryResolver.MarkedParent(ctx)

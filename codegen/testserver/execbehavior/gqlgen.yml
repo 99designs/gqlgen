@@ -16,6 +16,8 @@ directives:
     skip_runtime: true
 
 models:
+  MapNote:
+    model: map[string]any
   Coordinates:
     model: github.com/99designs/gqlgen/codegen/testserver/execbehavior.Coordinates
   Maybe:

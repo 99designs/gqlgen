@@ -158,6 +158,7 @@ type ComplexityRoot struct {
 		FailingRoot         func(childComplexity int) int
 		GenerationOnly      func(childComplexity int, arg string, input GenerationOnlyInput) int
 		LimitedItems        func(childComplexity int, count int) int
+		MapNote             func(childComplexity int, input map[string]any) int
 		MarkedParent        func(childComplexity int) int
 		Maybe               func(childComplexity int, v string) int
 		MaybeNonNull        func(childComplexity int, v string) int
@@ -268,6 +269,7 @@ type QueryResolver interface {
 	Coordinates(ctx context.Context, at Coordinates) (string, error)
 	NullableCoordinates(ctx context.Context, at *Coordinates) (string, error)
 	Described(ctx context.Context, input *DescribedInput, choice *OneOfInput) (*Described, error)
+	MapNote(ctx context.Context, input map[string]any) (*string, error)
 	MarkedParent(ctx context.Context) (*MarkedParent, error)
 	UnmarshalNamed(ctx context.Context, kind string, raw map[string]any) (*string, error)
 	Nullability(ctx context.Context, valid bool) (*Nullability, error)
@@ -811,6 +813,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Query.LimitedItems(childComplexity, args["count"].(int)), true
+	case "Query.mapNote":
+		if e.ComplexityRoot.Query.MapNote == nil {
+			break
+		}
+
+		args, err := ec.field_Query_mapNote_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Query.MapNote(childComplexity, args["input"].(map[string]any)), true
 	case "Query.markedParent":
 		if e.ComplexityRoot.Query.MarkedParent == nil {
 			break
@@ -1144,6 +1157,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			graphql.NewInputUnmarshaler("DefaultMapInput", ec.unmarshalInputDefaultMapInput),
 			graphql.NewInputUnmarshaler("DescribedInput", ec.unmarshalInputDescribedInput),
 			graphql.NewInputUnmarshaler("GenerationOnlyInput", ec.unmarshalInputGenerationOnlyInput),
+			graphql.NewInputUnmarshaler("MapNote", ec.unmarshalInputMapNote),
 			graphql.NewInputUnmarshaler("OmittableInput", ec.unmarshalInputOmittableInput),
 			graphql.NewInputUnmarshaler("OneOfInput", ec.unmarshalInputOneOfInput),
 			graphql.NewInputUnmarshaler("WrongTypeInput", ec.unmarshalInputWrongTypeInput),
@@ -1247,7 +1261,7 @@ func newExecutionContext(
 	}
 }
 
-//go:embed "abstract_types.graphql" "arguments.graphql" "defer.graphql" "field_context_child.graphql" "function_scalars.graphql" "input_coercion.graphql" "input_object_directive.graphql" "input_unmarshaler.graphql" "introspection.graphql" "mark_non_null.graphql" "named_input.graphql" "nullability.graphql" "omittable.graphql" "panic.graphql" "resolver_errors.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "schema_values.graphql" "skip_runtime.graphql" "subscription.graphql" "worker_limit.graphql" "wrong_type.graphql"
+//go:embed "abstract_types.graphql" "arguments.graphql" "defer.graphql" "field_context_child.graphql" "function_scalars.graphql" "input_coercion.graphql" "input_object_directive.graphql" "input_unmarshaler.graphql" "introspection.graphql" "map_input.graphql" "mark_non_null.graphql" "named_input.graphql" "nullability.graphql" "omittable.graphql" "panic.graphql" "resolver_errors.graphql" "root_fields.graphql" "root_typed_field.graphql" "schema.graphql" "schema_values.graphql" "skip_runtime.graphql" "subscription.graphql" "worker_limit.graphql" "wrong_type.graphql"
 var sourcesFS embed.FS
 
 func sourceData(filename string) string {
@@ -1268,6 +1282,7 @@ var sources = []*ast.Source{
 	{Name: "input_object_directive.graphql", Input: sourceData("input_object_directive.graphql"), BuiltIn: false},
 	{Name: "input_unmarshaler.graphql", Input: sourceData("input_unmarshaler.graphql"), BuiltIn: false},
 	{Name: "introspection.graphql", Input: sourceData("introspection.graphql"), BuiltIn: false},
+	{Name: "map_input.graphql", Input: sourceData("map_input.graphql"), BuiltIn: false},
 	{Name: "mark_non_null.graphql", Input: sourceData("mark_non_null.graphql"), BuiltIn: false},
 	{Name: "named_input.graphql", Input: sourceData("named_input.graphql"), BuiltIn: false},
 	{Name: "nullability.graphql", Input: sourceData("nullability.graphql"), BuiltIn: false},
@@ -1489,6 +1504,8 @@ func (ec *executionContext) childFields_Query(ctx context.Context, field graphql
 		return ec.fieldContext_Query_nullableCoordinates(ctx, field)
 	case "described":
 		return ec.fieldContext_Query_described(ctx, field)
+	case "mapNote":
+		return ec.fieldContext_Query_mapNote(ctx, field)
 	case "markedParent":
 		return ec.fieldContext_Query_markedParent(ctx, field)
 	case "unmarshalNamed":
@@ -2022,6 +2039,20 @@ func (ec *executionContext) field_Query_limitedItems_args(ctx context.Context, r
 		return nil, err
 	}
 	args["count"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_mapNote_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "input",
+		func(ctx context.Context, v any) (map[string]any, error) {
+			return ec.unmarshalNMapNote2map(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["input"] = arg0
 	return args, nil
 }
 
@@ -4333,6 +4364,50 @@ func (ec *executionContext) fieldContext_Query_described(ctx context.Context, fi
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_described_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Query_mapNote(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Query_mapNote(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Query().MapNote(ctx, fc.Args["input"].(map[string]any))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Query_mapNote(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_mapNote_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -7320,6 +7395,71 @@ func UnmarshalGenerationOnlyInput(ctx context.Context, raw any) (GenerationOnlyI
 	return out, err
 }
 
+func (ec *executionContext) unmarshalInputMapNote(ctx context.Context, obj any) (map[string]any, error) {
+	var it map[string]any
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"note"}
+	it = make(map[string]any, len(asMap))
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "note":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("note"))
+			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalOString2ᚖstring(ctx, v) }
+
+			directive1 := func(ctx context.Context) (any, error) {
+				kind, err := ec.unmarshalNString2string(ctx, "nil")
+				if err != nil {
+					var zeroVal *string
+					return zeroVal, err
+				}
+				if ec.Directives.ReturnValue == nil {
+					var zeroVal *string
+					return zeroVal, errors.New("directive returnValue is not implemented")
+				}
+				return ec.Directives.ReturnValue(ctx, obj, directive0, kind)
+			}
+
+			tmp, err := directive1(ctx)
+			if err != nil {
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+			if data, ok := tmp.(*string); ok {
+				it["note"] = data
+			} else if tmp == nil {
+				it["note"] = nil
+			} else {
+				err := fmt.Errorf(`unexpected type %T from directive, should be *string`, tmp)
+				return it, graphql.ErrorOnPath(ctx, err)
+			}
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalMapNote unmarshals raw into the MapNote input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalMapNote(ctx context.Context, raw any) (map[string]any, error) {
+	var out map[string]any
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "MapNote", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputOmittableInput(ctx context.Context, obj any) (OmittableInput, error) {
 	var it OmittableInput
 	if obj == nil {
@@ -8374,6 +8514,12 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._Query_described(ctx, field)
 				})
+		case "mapNote":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Query_mapNote(ctx, field)
+				})
 		case "markedParent":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
 				true, false,
@@ -9257,6 +9403,11 @@ func (ec *executionContext) marshalNMap2map(ctx context.Context, sel ast.Selecti
 		graphql.AddInvalidNullFromMarshaler(ctx, "Map!")
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNMapNote2map(ctx context.Context, v any) (map[string]any, error) {
+	res, err := ec.unmarshalInputMapNote(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNMaybe2string(ctx context.Context, v any) (string, error) {

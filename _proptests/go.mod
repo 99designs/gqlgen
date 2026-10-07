@@ -21,7 +21,7 @@ require (
 
 require (
 	github.com/sosodev/duration v1.4.0 // indirect
-	github.com/vektah/gqlparser/v2 v2.5.60 // indirect
+	github.com/vektah/gqlparser/v2 v2.5.61 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/sync v0.23.0 // indirect
 )

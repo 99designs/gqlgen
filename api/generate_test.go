@@ -2,6 +2,7 @@ package api
 
 import (
 	"errors"
+	"maps"
 	"os"
 	"path/filepath"
 	"strings"
@@ -168,6 +169,115 @@ func TestGenerateValidatesOutput(t *testing.T) {
 	require.Error(t, err, "generation should fail when the generated package does not compile")
 	require.Contains(t, err.Error(), "validation failed")
 	require.Contains(t, err.Error(), "ThisTypeDoesNotExist")
+}
+
+// TestValidateModules covers output directories on both sides of the main module boundary.
+//
+// The go command rejects a file path pattern outside the main module, so a directory in another
+// module has to be built by import path. Inside the main module it has to be built by file path,
+// because an import path pattern skips testdata directories.
+func TestValidateModules(t *testing.T) {
+	const brokenModel = "package model\n\nvar _ ThisTypeDoesNotExist\n"
+	const replaceShared = "require example.com/shared v0.0.0\n\n" +
+		"replace example.com/shared => ../shared\n"
+	const workspace = "go 1.21\n\nuse (\n\t./main\n\t./shared\n)\n"
+
+	tests := []struct {
+		name string
+		// files are written below a temporary root, on top of a main module in main/ and
+		// a second module, example.com/shared, in shared/. Validation runs in main/.
+		files map[string]string
+		// modelFile is the model filename, relative to main/.
+		modelFile string
+		// wantErr is a substring of the expected error, or empty if validation must pass.
+		wantErr string
+	}{
+		{
+			name: "replaced module",
+			files: map[string]string{
+				"main/go.mod":           "module example.com/main\n\ngo 1.21\n\n" + replaceShared,
+				"shared/model/model.go": "package model\n",
+			},
+			modelFile: "../shared/model/models_gen.go",
+		},
+		{
+			// Validation must not pass by building nothing for the other module.
+			name: "replaced module does not compile",
+			files: map[string]string{
+				"main/go.mod":           "module example.com/main\n\ngo 1.21\n\n" + replaceShared,
+				"shared/model/model.go": brokenModel,
+			},
+			modelFile: "../shared/model/models_gen.go",
+			wantErr:   "ThisTypeDoesNotExist",
+		},
+		{
+			// A go.mod below the main module starts another module, even though its
+			// directory is inside the main module's.
+			name: "nested module",
+			files: map[string]string{
+				"main/go.mod": "module example.com/main\n\ngo 1.21\n\n" +
+					"require example.com/nested v0.0.0\n\n" +
+					"replace example.com/nested => ./nested\n",
+				"main/nested/go.mod":         "module example.com/nested\n\ngo 1.21\n",
+				"main/nested/model/model.go": "package model\n",
+			},
+			modelFile: "nested/model/models_gen.go",
+		},
+		{
+			name: "workspace module",
+			files: map[string]string{
+				"go.work":               workspace,
+				"shared/model/model.go": "package model\n",
+			},
+			modelFile: "../shared/model/models_gen.go",
+		},
+		{
+			// An import path pattern would skip testdata and pass having built nothing.
+			name: "main module testdata does not compile",
+			files: map[string]string{
+				"main/testdata/model/model.go": brokenModel,
+			},
+			modelFile: "testdata/model/models_gen.go",
+			wantErr:   "ThisTypeDoesNotExist",
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			root := t.TempDir()
+			files := map[string]string{
+				"main/go.mod":         "module example.com/main\n\ngo 1.21\n",
+				"main/graph/graph.go": "package graph\n",
+				"shared/go.mod":       "module example.com/shared\n\ngo 1.21\n",
+			}
+			maps.Copy(files, tt.files)
+			for name, content := range files {
+				path := filepath.Join(root, filepath.FromSlash(name))
+				require.NoError(t, os.MkdirAll(filepath.Dir(path), 0o755))
+				require.NoError(t, os.WriteFile(path, []byte(content), 0o644))
+			}
+			// Pin workspace mode, so that a go.work above the temporary root cannot leak in.
+			gowork := "off"
+			if _, ok := files["go.work"]; ok {
+				gowork = filepath.Join(root, "go.work")
+			}
+			t.Setenv("GOWORK", gowork)
+			t.Chdir(filepath.Join(root, "main"))
+
+			cfg := &config.Config{
+				Exec: config.ExecConfig{
+					Layout:   config.ExecLayoutSingleFile,
+					Filename: "graph/generated.go",
+				},
+				Model: config.PackageConfig{Filename: tt.modelFile},
+			}
+			err := validate(cfg)
+			if tt.wantErr == "" {
+				require.NoError(t, err)
+				return
+			}
+			require.ErrorContains(t, err, tt.wantErr)
+		})
+	}
 }
 
 type testSchemaMutator struct {

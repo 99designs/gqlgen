@@ -442,10 +442,12 @@ func TestInvalidNullErrorAttrs(t *testing.T) {
 				Path:         ast.Path{ast.PathName("errors"), ast.PathName("b")},
 			},
 			Expected: []slog.Attr{
-				slog.String("gql.field", "Errors.b"),
-				slog.String("gql.type", "Error!"),
-				slog.String("gql.null_source", "resolver"),
-				slog.String("gql.path", "errors.b"),
+				slog.Group("gql",
+					slog.String("field", "Errors.b"),
+					slog.String("type", "Error!"),
+					slog.String("null_source", "resolver"),
+					slog.String("path", "errors.b"),
+				),
 			},
 		},
 		{
@@ -459,17 +461,19 @@ func TestInvalidNullErrorAttrs(t *testing.T) {
 				Path:         ast.Path{ast.PathName("errorBubbleList"), ast.PathIndex(1)},
 			},
 			Expected: []slog.Attr{
-				slog.String("gql.field", "Query.errorBubbleList"),
-				slog.String("gql.type", "Error!"),
-				slog.String("gql.null_source", "resolver"),
-				slog.Bool("gql.list_element", true),
-				slog.String("gql.path", "errorBubbleList[1]"),
+				slog.Group("gql",
+					slog.String("field", "Query.errorBubbleList"),
+					slog.String("type", "Error!"),
+					slog.String("null_source", "resolver"),
+					slog.Bool("list_element", true),
+					slog.String("path", "errorBubbleList[1]"),
+				),
 			},
 		},
 		{
 			Name:     "nothing known yields no blanks",
 			Err:      InvalidNullError{},
-			Expected: []slog.Attr{},
+			Expected: nil,
 		},
 	}
 
@@ -502,21 +506,14 @@ func TestInvalidNullErrorAttrsThroughPresenter(t *testing.T) {
 	errs := GetErrors(ctx)
 	require.Len(t, errs, 1)
 
+	// Both errors report into "gql"; CollectAttrs merges them, keeping the outer path.
 	assert.Equal(t, []slog.Attr{
-		slog.String("gql.field", "Errors.b"),
-		slog.String("gql.type", "Error!"),
-		slog.String("gql.null_source", "resolver"),
-		slog.String("gql.path", "b"),
-	}, collectAttrs(error(errs[0])))
-}
-
-// collectAttrs gathers slog attributes the way logging middleware would.
-func collectAttrs(err error) []slog.Attr {
-	var attrs []slog.Attr
-	for e := err; e != nil; e = errors.Unwrap(e) {
-		if a, ok := e.(interface{ Attrs() []slog.Attr }); ok {
-			attrs = append(attrs, a.Attrs()...)
-		}
-	}
-	return attrs
+		slog.Group("gql",
+			slog.String("message", errs[0].Message),
+			slog.String("path", "b"),
+			slog.String("field", "Errors.b"),
+			slog.String("type", "Error!"),
+			slog.String("null_source", "resolver"),
+		),
+	}, gqlerror.CollectAttrs(errs[0]))
 }

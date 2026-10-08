@@ -373,7 +373,7 @@ func TestWebsocketInitFunc(t *testing.T) {
 			assert.JSONEq(t, `{"message":"beep boop"}`, string(m.Payload))
 		},
 	)
-	t.Run("does not send complete when the init context is cancelled", func(t *testing.T) {
+	t.Run("does not send complete when the connection context is cancelled", func(t *testing.T) {
 		h := testserver.New()
 		cancels := make(chan context.CancelFunc, 1)
 		h.AddTransport(transport.Websocket{
@@ -847,6 +847,44 @@ func TestWebsocketGraphqltransportwsSubprotocol(t *testing.T) {
 		msg = readOp(c)
 		require.Equal(t, graphqltransportwsCompleteMsg, msg.Type)
 		require.Equal(t, "test_1", msg.ID)
+	})
+
+	t.Run("does not send complete when the connection context is cancelled", func(t *testing.T) {
+		cancels := make(chan context.CancelFunc, 1)
+		handler, srv := initialize(transport.Websocket{
+			InitFunc: func(ctx context.Context, _ transport.InitPayload) (context.Context, *transport.InitPayload, error) {
+				ctx, cancel := context.WithCancel(ctx)
+				cancels <- cancel
+				return ctx, nil, nil
+			},
+		})
+		defer srv.Close()
+
+		c := wsConnectWithSubprotocol(srv.URL, graphqltransportwsSubprotocol)
+		defer c.Close()
+
+		require.NoError(
+			t,
+			c.WriteJSON(&operationMessage{Type: graphqltransportwsConnectionInitMsg}),
+		)
+		assert.Equal(t, graphqltransportwsConnectionAckMsg, readOp(c).Type)
+
+		require.NoError(t, c.WriteJSON(&operationMessage{
+			Type:    graphqltransportwsSubscribeMsg,
+			ID:      "test_1",
+			Payload: json.RawMessage(`{"query": "subscription { name }"}`),
+		}))
+		handler.SendNextSubscriptionMessage()
+		assert.Equal(t, graphqltransportwsNextMsg, readOp(c).Type)
+
+		(<-cancels)()
+
+		c.SetReadDeadline(time.Now().Add(time.Second))
+		var msg operationMessage
+		err := c.ReadJSON(&msg)
+		var closeErr coderws.CloseError
+		require.ErrorAs(t, err, &closeErr, "got %q before the close frame", msg.Type)
+		assert.Equal(t, coderws.StatusNormalClosure, closeErr.Code)
 	})
 
 	t.Run("fail on null payload", func(t *testing.T) {

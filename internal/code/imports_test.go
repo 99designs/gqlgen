@@ -62,7 +62,10 @@ func TestNameForDir(t *testing.T) {
 	wd, err := os.Getwd()
 	require.NoError(t, err)
 
-	assert.Equal(t, "tmp", NameForDir("/tmp"))
+	// A Go-free directory takes its base name; /tmp itself may hold stray Go files.
+	tmp := filepath.Join(t.TempDir(), "tmp")
+	require.NoError(t, os.Mkdir(tmp, 0o755))
+	assert.Equal(t, "tmp", NameForDir(tmp))
 	assert.Equal(t, "code", NameForDir(wd))
 	assert.Equal(t, "docs", NameForDir(wd+"/../../docs"))
 	assert.Equal(t, "main", NameForDir(wd+"/../.."))

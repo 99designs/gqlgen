@@ -63,27 +63,30 @@ func (e *InvalidNullError) SchemaCoordinate() string {
 	return e.Object + "." + e.Field
 }
 
-// Attrs reports the violation as log attributes, so middleware that collects
-// Attrs() []slog.Attr along an error chain can record it without knowing this
-// type. Empty values are omitted rather than logged as blanks.
+// Attrs reports the violation as one slog group, "gql", which
+// [gqlerror.CollectAttrs] merges with the wrapping error's own; on that merge the
+// outer error's path wins. Empty values are omitted, and nil means nothing is known.
 func (e *InvalidNullError) Attrs() []slog.Attr {
-	attrs := make([]slog.Attr, 0, 5)
+	fields := make([]slog.Attr, 0, 5)
 	if coord := e.SchemaCoordinate(); coord != "" {
-		attrs = append(attrs, slog.String("gql.field", coord))
+		fields = append(fields, slog.String("field", coord))
 	}
 	if e.DeclaredType != "" {
-		attrs = append(attrs, slog.String("gql.type", e.DeclaredType))
+		fields = append(fields, slog.String("type", e.DeclaredType))
 	}
 	if e.Source != "" {
-		attrs = append(attrs, slog.String("gql.null_source", string(e.Source)))
+		fields = append(fields, slog.String("null_source", string(e.Source)))
 	}
 	if e.ListElement {
-		attrs = append(attrs, slog.Bool("gql.list_element", true))
+		fields = append(fields, slog.Bool("list_element", true))
 	}
 	if path := e.Path.String(); path != "" {
-		attrs = append(attrs, slog.String("gql.path", path))
+		fields = append(fields, slog.String("path", path))
 	}
-	return attrs
+	if len(fields) == 0 {
+		return nil
+	}
+	return []slog.Attr{slog.GroupAttrs("gql", fields...)}
 }
 
 // Is reports [ErrInvalidNull] so errors.Is matches any non-null violation. Unwrap

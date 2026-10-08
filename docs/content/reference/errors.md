@@ -255,24 +255,20 @@ the sentinel rather than on the message.
 #### Structured logging
 
 `InvalidNullError` also answers `Attrs() []slog.Attr`, so logging middleware can record the diagnosis
-without importing gqlgen's type. Walk the chain and ask each error for its attributes:
+without importing gqlgen's type. In a response interceptor, collect each error's attributes from
+`resp := next(ctx)` with `gqlerror.CollectAttrs`:
 
 ```go
-func attrs(err error) []slog.Attr {
-	var out []slog.Attr
-	for e := err; e != nil; e = errors.Unwrap(e) {
-		if a, ok := e.(interface{ Attrs() []slog.Attr }); ok {
-			out = append(out, a.Attrs()...)
-		}
-	}
-	return out
+for _, err := range resp.Errors {
+	slog.LogAttrs(ctx, slog.LevelError, "graphql error", gqlerror.CollectAttrs(err)...)
 }
 ```
 
-A violation yields `gql.field`, `gql.type`, `gql.null_source`, `gql.path`, and `gql.list_element`
-when it applies. Empty values are omitted. Because `gqlerror.List` unwraps to its members, a
-collector that follows multi-error branches gathers the attributes for every violation in one
-response.
+A violation reports one `gql` group holding `field`, `type`, `null_source`, `path`, and
+`list_element` when it applies; empty values are omitted. `CollectAttrs` merges it with the
+wrapping `*gqlerror.Error`'s own `gql` group, where the outer `path` wins. Since the first value
+for each key wins, pass `CollectAttrs` one error at a time rather than a whole `gqlerror.List`,
+which would fold every error into one group.
 
 ### The panic handler
 

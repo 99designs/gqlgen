@@ -16,6 +16,88 @@ import (
 	"github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/generated"
 )
 
+func TestEntityResolverCustomOutputID(t *testing.T) {
+	srv := handler.New(generated.NewExecutableSchema(generated.Config{
+		Resolvers: &entityresolver.Resolver{},
+	}))
+	srv.AddTransport(transport.POST{})
+	c := client.New(srv)
+
+	for _, typeName := range []string{"CustomIDEntity", "MultiCustomIDEntity"} {
+		t.Run(typeName, func(t *testing.T) {
+			representations := []map[string]any{
+				{
+					"__typename": typeName,
+					"id":         "42",
+					"owner":      map[string]any{"id": "owner:first"},
+					"optionalID": nil,
+				},
+				{
+					"__typename": typeName,
+					"id":         "opaque:asset",
+					"owner":      map[string]any{"id": "owner:second"},
+					"optionalID": "revision:third",
+				},
+				{
+					"__typename": typeName,
+					"id":         7,
+					"owner":      map[string]any{"id": 8},
+					"optionalID": 9,
+				},
+			}
+			var resp struct {
+				Entities []struct {
+					ID    string
+					Owner struct {
+						ID string
+					}
+					OptionalID *string
+				} `json:"_entities"`
+			}
+
+			err := c.Post(
+				entityQuery([]string{typeName + " { id owner { id } optionalID }"}),
+				&resp,
+				client.Var("representations", representations),
+			)
+
+			require.NoError(t, err)
+			require.Len(t, resp.Entities, 3)
+			require.Equal(t, "42", resp.Entities[0].ID)
+			require.Equal(t, "owner:first", resp.Entities[0].Owner.ID)
+			require.Nil(t, resp.Entities[0].OptionalID)
+			require.Equal(t, "opaque:asset", resp.Entities[1].ID)
+			require.Equal(t, "owner:second", resp.Entities[1].Owner.ID)
+			require.NotNil(t, resp.Entities[1].OptionalID)
+			require.Equal(t, "revision:third", *resp.Entities[1].OptionalID)
+			require.Equal(t, "7", resp.Entities[2].ID)
+			require.Equal(t, "8", resp.Entities[2].Owner.ID)
+			require.NotNil(t, resp.Entities[2].OptionalID)
+			require.Equal(t, "9", *resp.Entities[2].OptionalID)
+		})
+
+		t.Run(typeName+" rejects malformed ID", func(t *testing.T) {
+			representations := []map[string]any{
+				{
+					"__typename": typeName,
+					"id":         map[string]any{"bad": true},
+					"owner":      map[string]any{"id": "owner:first"},
+					"optionalID": nil,
+				},
+			}
+			var resp map[string]any
+
+			err := c.Post(
+				entityQuery([]string{typeName + " { id owner { id } optionalID }"}),
+				&resp,
+				client.Var("representations", representations),
+			)
+
+			require.Error(t, err)
+		})
+	}
+}
+
 func TestEntityResolver(t *testing.T) {
 	srv := handler.New(
 		generated.NewExecutableSchema(generated.Config{

@@ -10,9 +10,9 @@ import (
 // accounting the generated executor needs per field.
 //
 // When recoverFromPanic is true a panic raised by resolve is reported through
-// oc and the field is left with a nil marshaler. nonNull picks the sentinel
-// that marks the enclosing object invalid: Null for non-null fields,
-// RequiredNull for nullable ones.
+// oc and the field resolves to Null, counted against m.Invalids when the
+// field is non-null. nonNull picks the sentinel that marks the enclosing
+// object invalid: Null for non-null fields, RequiredNull for nullable ones.
 //
 // A field carrying a @defer directive is scheduled on deferred.FieldSet rather
 // than on m, and registered in deferred.Defers under each of its labels so the
@@ -98,6 +98,14 @@ func (m *FieldSet) resolveAndCount(
 		defer func() {
 			if r := recover(); r != nil {
 				oc.Error(ctx, oc.Recover(ctx, r))
+				// Leave what a resolver returning an error would have: the
+				// field null, and the enclosing object nulled when the field
+				// is non-null. A nil here would crash the marshaller, which
+				// writes every entry.
+				res = Null
+				if nonNull {
+					atomic.AddUint32(&m.Invalids, 1)
+				}
 			}
 		}()
 	}

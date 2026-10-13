@@ -13,6 +13,22 @@ import (
 	"github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/generated/model"
 )
 
+// FindCollisionByID is the resolver for the findCollisionByID field.
+func (r *entityResolver) FindCollisionByID(ctx context.Context, id string) (*model.Collision, error) {
+	return &model.Collision{
+		LegacyID:   id,
+		ResolvedBy: "_id",
+	}, nil
+}
+
+// FindCollisionByID2 is the resolver for the findCollisionByID2 field.
+func (r *entityResolver) FindCollisionByID2(ctx context.Context, id string) (*model.Collision, error) {
+	return &model.Collision{
+		ID:         id,
+		ResolvedBy: "id",
+	}, nil
+}
+
 // FindHelloByName is the resolver for the findHelloByName field.
 func (r *entityResolver) FindHelloByName(ctx context.Context, name string) (*model.Hello, error) {
 	return &model.Hello{
@@ -36,6 +52,34 @@ func (r *entityResolver) FindHelloWithErrorsByName(ctx context.Context, name str
 	return &model.HelloWithErrors{
 		Name: name,
 	}, nil
+}
+
+// FindManyMultiCollisionByIDs is the resolver for the findManyMultiCollisionByIDs field.
+func (r *entityResolver) FindManyMultiCollisionByIDs(ctx context.Context, reps []*model.MultiCollisionByIDsInput) ([]*model.MultiCollision, error) {
+	results := make([]*model.MultiCollision, len(reps))
+
+	for i := range reps {
+		results[i] = &model.MultiCollision{
+			LegacyID:   reps[i].ID,
+			ResolvedBy: "_id",
+		}
+	}
+
+	return results, nil
+}
+
+// FindManyMultiCollisionByIDs2 is the resolver for the findManyMultiCollisionByIDs2 field.
+func (r *entityResolver) FindManyMultiCollisionByIDs2(ctx context.Context, reps []*model.MultiCollisionByIDs2Input) ([]*model.MultiCollision, error) {
+	results := make([]*model.MultiCollision, len(reps))
+
+	for i := range reps {
+		results[i] = &model.MultiCollision{
+			ID:         reps[i].ID,
+			ResolvedBy: "id",
+		}
+	}
+
+	return results, nil
 }
 
 // FindManyMultiHelloByNames is the resolver for the findManyMultiHelloByNames field.

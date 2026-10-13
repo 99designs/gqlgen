@@ -36,10 +36,20 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	Collision struct {
+		ID         func(childComplexity int) int
+		LegacyID   func(childComplexity int) int
+		ResolvedBy func(childComplexity int) int
+	}
+
 	Entity struct {
+		FindCollisionByID                          func(childComplexity int, id string) int
+		FindCollisionByID2                         func(childComplexity int, id string) int
 		FindHelloByName                            func(childComplexity int, name string) int
 		FindHelloMultiSingleKeysByKey1AndKey2      func(childComplexity int, key1 string, key2 string) int
 		FindHelloWithErrorsByName                  func(childComplexity int, name string) int
+		FindManyMultiCollisionByIDs                func(childComplexity int, reps []*model.MultiCollisionByIDsInput) int
+		FindManyMultiCollisionByIDs2               func(childComplexity int, reps []*model.MultiCollisionByIDs2Input) int
 		FindManyMultiHelloByNames                  func(childComplexity int, reps []*model.MultiHelloByNamesInput) int
 		FindManyMultiHelloMultipleRequiresByNames  func(childComplexity int, reps []*model.MultiHelloMultipleRequiresByNamesInput) int
 		FindManyMultiHelloRequiresByNames          func(childComplexity int, reps []*model.MultiHelloRequiresByNamesInput) int
@@ -66,6 +76,12 @@ type ComplexityRoot struct {
 
 	HelloWithErrors struct {
 		Name func(childComplexity int) int
+	}
+
+	MultiCollision struct {
+		ID         func(childComplexity int) int
+		LegacyID   func(childComplexity int) int
+		ResolvedBy func(childComplexity int) int
 	}
 
 	MultiHello struct {
@@ -145,9 +161,13 @@ type ComplexityRoot struct {
 // region    ************************** generated!.gotpl **************************
 
 type EntityResolver interface {
+	FindCollisionByID(ctx context.Context, id string) (*model.Collision, error)
+	FindCollisionByID2(ctx context.Context, id string) (*model.Collision, error)
 	FindHelloByName(ctx context.Context, name string) (*model.Hello, error)
 	FindHelloMultiSingleKeysByKey1AndKey2(ctx context.Context, key1 string, key2 string) (*model.HelloMultiSingleKeys, error)
 	FindHelloWithErrorsByName(ctx context.Context, name string) (*model.HelloWithErrors, error)
+	FindManyMultiCollisionByIDs(ctx context.Context, reps []*model.MultiCollisionByIDsInput) ([]*model.MultiCollision, error)
+	FindManyMultiCollisionByIDs2(ctx context.Context, reps []*model.MultiCollisionByIDs2Input) ([]*model.MultiCollision, error)
 	FindManyMultiHelloByNames(ctx context.Context, reps []*model.MultiHelloByNamesInput) ([]*model.MultiHello, error)
 	FindManyMultiHelloMultipleRequiresByNames(ctx context.Context, reps []*model.MultiHelloMultipleRequiresByNamesInput) ([]*model.MultiHelloMultipleRequires, error)
 	FindManyMultiHelloRequiresByNames(ctx context.Context, reps []*model.MultiHelloRequiresByNamesInput) ([]*model.MultiHelloRequires, error)
@@ -180,6 +200,47 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	_ = ec
 	switch typeName + "." + field {
 
+	case "Collision.id":
+		if e.ComplexityRoot.Collision.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Collision.ID(childComplexity), true
+	case "Collision._id":
+		if e.ComplexityRoot.Collision.LegacyID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Collision.LegacyID(childComplexity), true
+	case "Collision.resolvedBy":
+		if e.ComplexityRoot.Collision.ResolvedBy == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Collision.ResolvedBy(childComplexity), true
+
+	case "Entity.findCollisionByID":
+		if e.ComplexityRoot.Entity.FindCollisionByID == nil {
+			break
+		}
+
+		args, err := ec.field_Entity_findCollisionByID_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Entity.FindCollisionByID(childComplexity, args["id"].(string)), true
+	case "Entity.findCollisionByID2":
+		if e.ComplexityRoot.Entity.FindCollisionByID2 == nil {
+			break
+		}
+
+		args, err := ec.field_Entity_findCollisionByID2_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Entity.FindCollisionByID2(childComplexity, args["id"].(string)), true
 	case "Entity.findHelloByName":
 		if e.ComplexityRoot.Entity.FindHelloByName == nil {
 			break
@@ -213,6 +274,28 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindHelloWithErrorsByName(childComplexity, args["name"].(string)), true
+	case "Entity.findManyMultiCollisionByIDs":
+		if e.ComplexityRoot.Entity.FindManyMultiCollisionByIDs == nil {
+			break
+		}
+
+		args, err := ec.field_Entity_findManyMultiCollisionByIDs_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Entity.FindManyMultiCollisionByIDs(childComplexity, args["reps"].([]*model.MultiCollisionByIDsInput)), true
+	case "Entity.findManyMultiCollisionByIDs2":
+		if e.ComplexityRoot.Entity.FindManyMultiCollisionByIDs2 == nil {
+			break
+		}
+
+		args, err := ec.field_Entity_findManyMultiCollisionByIDs2_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Entity.FindManyMultiCollisionByIDs2(childComplexity, args["reps"].([]*model.MultiCollisionByIDs2Input)), true
 	case "Entity.findManyMultiHelloByNames":
 		if e.ComplexityRoot.Entity.FindManyMultiHelloByNames == nil {
 			break
@@ -378,6 +461,25 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.HelloWithErrors.Name(childComplexity), true
+
+	case "MultiCollision.id":
+		if e.ComplexityRoot.MultiCollision.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MultiCollision.ID(childComplexity), true
+	case "MultiCollision._id":
+		if e.ComplexityRoot.MultiCollision.LegacyID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MultiCollision.LegacyID(childComplexity), true
+	case "MultiCollision.resolvedBy":
+		if e.ComplexityRoot.MultiCollision.ResolvedBy == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MultiCollision.ResolvedBy(childComplexity), true
 
 	case "MultiHello.name":
 		if e.ComplexityRoot.MultiHello.Name == nil {
@@ -598,6 +700,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
 	inputUnmarshalers := func() *graphql.InputUnmarshalerIndex {
 		return graphql.NewInputUnmarshalerIndex(
+			graphql.NewInputUnmarshaler("MultiCollisionByIDs2Input", ec.unmarshalInputMultiCollisionByIDs2Input),
+			graphql.NewInputUnmarshaler("MultiCollisionByIDsInput", ec.unmarshalInputMultiCollisionByIDsInput),
 			graphql.NewInputUnmarshaler("MultiHelloByNamesInput", ec.unmarshalInputMultiHelloByNamesInput),
 			graphql.NewInputUnmarshaler("MultiHelloMultipleRequiresByNamesInput", ec.unmarshalInputMultiHelloMultipleRequiresByNamesInput),
 			graphql.NewInputUnmarshaler("MultiHelloRequiresByNamesInput", ec.unmarshalInputMultiHelloRequiresByNamesInput),
@@ -665,6 +769,7 @@ func newExecutionContext(
 
 var sources = []*ast.Source{
 	{Name: "../schema.graphql", Input: `directive @entityResolver(multi: Boolean) on OBJECT
+directive @goField(name: String) on FIELD_DEFINITION
 
 type Hello @key(fields: "name") {
     name: String!
@@ -741,6 +846,19 @@ type MultiHelloMultipleRequires @key(fields: "name") @entityResolver(multi: true
     key2: String! @external
     key3: String! @requires(fields: "key1 key2")
 }
+
+# These distinct key fields normalize to the same Go name.
+type Collision @key(fields: "_id") @key(fields: "id") {
+    _id: String! @goField(name: "LegacyID")
+    id: ID!
+    resolvedBy: String!
+}
+
+type MultiCollision @key(fields: "_id") @key(fields: "id") @entityResolver(multi: true) {
+    _id: String! @goField(name: "LegacyID")
+    id: ID!
+    resolvedBy: String!
+}
 `, BuiltIn: false},
 	{Name: "../../../federation/directives.graphql", Input: `
 	directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE
@@ -754,7 +872,15 @@ type MultiHelloMultipleRequires @key(fields: "name") @entityResolver(multi: true
 `, BuiltIn: true},
 	{Name: "../../../federation/entity.graphql", Input: `
 # a union of all types that use the @key directive
-union _Entity = Hello | HelloMultiSingleKeys | HelloWithErrors | MultiHello | MultiHelloMultipleRequires | MultiHelloRequires | MultiHelloWithError | MultiPlanetRequiresNested | PlanetMultipleRequires | PlanetRequires | PlanetRequiresNested | World | WorldName | WorldWithMultipleKeys
+union _Entity = Collision | Hello | HelloMultiSingleKeys | HelloWithErrors | MultiCollision | MultiHello | MultiHelloMultipleRequires | MultiHelloRequires | MultiHelloWithError | MultiPlanetRequiresNested | PlanetMultipleRequires | PlanetRequires | PlanetRequiresNested | World | WorldName | WorldWithMultipleKeys
+
+input MultiCollisionByIDsInput {
+	ID: String!
+}
+
+input MultiCollisionByIDs2Input {
+	ID: ID!
+}
 
 input MultiHelloByNamesInput {
 	Name: String!
@@ -778,9 +904,13 @@ input MultiPlanetRequiresNestedByNamesInput {
 
 # fake type to build resolver interfaces for users to implement
 type Entity {
+	findCollisionByID(id: String!,): Collision!
+	findCollisionByID2(id: ID!,): Collision!
 	findHelloByName(name: String!,): Hello!
 	findHelloMultiSingleKeysByKey1AndKey2(key1: String!,key2: String!,): HelloMultiSingleKeys!
 	findHelloWithErrorsByName(name: String!,): HelloWithErrors!
+	findManyMultiCollisionByIDs(reps: [MultiCollisionByIDsInput]!): [MultiCollision]
+	findManyMultiCollisionByIDs2(reps: [MultiCollisionByIDs2Input]!): [MultiCollision]
 	findManyMultiHelloByNames(reps: [MultiHelloByNamesInput]!): [MultiHello]
 	findManyMultiHelloMultipleRequiresByNames(reps: [MultiHelloMultipleRequiresByNamesInput]!): [MultiHelloMultipleRequires]
 	findManyMultiHelloRequiresByNames(reps: [MultiHelloRequiresByNamesInput]!): [MultiHelloRequires]
@@ -811,6 +941,18 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // Each function is generated once per unique object type, deduplicating the
 // switch statements that were previously inlined in every fieldContext_* function.
 
+func (ec *executionContext) childFields_Collision(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "_id":
+		return ec.fieldContext_Collision__id(ctx, field)
+	case "id":
+		return ec.fieldContext_Collision_id(ctx, field)
+	case "resolvedBy":
+		return ec.fieldContext_Collision_resolvedBy(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type Collision", field.Name)
+}
+
 func (ec *executionContext) childFields_Hello(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
@@ -837,6 +979,18 @@ func (ec *executionContext) childFields_HelloWithErrors(ctx context.Context, fie
 		return ec.fieldContext_HelloWithErrors_name(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type HelloWithErrors", field.Name)
+}
+
+func (ec *executionContext) childFields_MultiCollision(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "_id":
+		return ec.fieldContext_MultiCollision__id(ctx, field)
+	case "id":
+		return ec.fieldContext_MultiCollision_id(ctx, field)
+	case "resolvedBy":
+		return ec.fieldContext_MultiCollision_resolvedBy(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type MultiCollision", field.Name)
 }
 
 func (ec *executionContext) childFields_MultiHello(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
@@ -1087,6 +1241,34 @@ func (ec *executionContext) childFields___Type(ctx context.Context, field graphq
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Entity_findCollisionByID2_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Entity_findCollisionByID_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNString2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Entity_findHelloByName_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1134,6 +1316,34 @@ func (ec *executionContext) field_Entity_findHelloWithErrorsByName_args(ctx cont
 		return nil, err
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Entity_findManyMultiCollisionByIDs2_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "reps",
+		func(ctx context.Context, v any) ([]*model.MultiCollisionByIDs2Input, error) {
+			return ec.unmarshalNMultiCollisionByIDs2Input2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiCollisionByIDs2Input(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["reps"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Entity_findManyMultiCollisionByIDs_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "reps",
+		func(ctx context.Context, v any) ([]*model.MultiCollisionByIDsInput, error) {
+			return ec.unmarshalNMultiCollisionByIDsInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiCollisionByIDsInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["reps"] = arg0
 	return args, nil
 }
 
@@ -1409,6 +1619,163 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _Collision__id(ctx context.Context, field graphql.CollectedField, obj *model.Collision) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Collision__id(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.LegacyID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Collision__id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Collision", field, false, false, "String")
+}
+
+func (ec *executionContext) _Collision_id(ctx context.Context, field graphql.CollectedField, obj *model.Collision) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Collision_id(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Collision_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Collision", field, false, false, "ID")
+}
+
+func (ec *executionContext) _Collision_resolvedBy(ctx context.Context, field graphql.CollectedField, obj *model.Collision) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Collision_resolvedBy(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ResolvedBy, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Collision_resolvedBy(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Collision", field, false, false, "String")
+}
+
+func (ec *executionContext) _Entity_findCollisionByID(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Entity_findCollisionByID(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Entity().FindCollisionByID(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.Collision) graphql.Marshaler {
+			return ec.marshalNCollision2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐCollision(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Entity_findCollisionByID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Entity",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Collision(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Entity_findCollisionByID_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Entity_findCollisionByID2(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Entity_findCollisionByID2(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Entity().FindCollisionByID2(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.Collision) graphql.Marshaler {
+			return ec.marshalNCollision2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐCollision(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Entity_findCollisionByID2(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Entity",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Collision(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Entity_findCollisionByID2_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Entity_findHelloByName(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1535,6 +1902,94 @@ func (ec *executionContext) fieldContext_Entity_findHelloWithErrorsByName(ctx co
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Entity_findHelloWithErrorsByName_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Entity_findManyMultiCollisionByIDs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Entity_findManyMultiCollisionByIDs(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Entity().FindManyMultiCollisionByIDs(ctx, fc.Args["reps"].([]*model.MultiCollisionByIDsInput))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.MultiCollision) graphql.Marshaler {
+			return ec.marshalOMultiCollision2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiCollision(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Entity_findManyMultiCollisionByIDs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Entity",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_MultiCollision(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Entity_findManyMultiCollisionByIDs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Entity_findManyMultiCollisionByIDs2(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Entity_findManyMultiCollisionByIDs2(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Entity().FindManyMultiCollisionByIDs2(ctx, fc.Args["reps"].([]*model.MultiCollisionByIDs2Input))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.MultiCollision) graphql.Marshaler {
+			return ec.marshalOMultiCollision2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiCollision(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Entity_findManyMultiCollisionByIDs2(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Entity",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_MultiCollision(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Entity_findManyMultiCollisionByIDs2_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -2182,6 +2637,75 @@ func (ec *executionContext) _HelloWithErrors_name(ctx context.Context, field gra
 }
 func (ec *executionContext) fieldContext_HelloWithErrors_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("HelloWithErrors", field, false, false, "String")
+}
+
+func (ec *executionContext) _MultiCollision__id(ctx context.Context, field graphql.CollectedField, obj *model.MultiCollision) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MultiCollision__id(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.LegacyID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_MultiCollision__id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("MultiCollision", field, false, false, "String")
+}
+
+func (ec *executionContext) _MultiCollision_id(ctx context.Context, field graphql.CollectedField, obj *model.MultiCollision) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MultiCollision_id(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_MultiCollision_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("MultiCollision", field, false, false, "ID")
+}
+
+func (ec *executionContext) _MultiCollision_resolvedBy(ctx context.Context, field graphql.CollectedField, obj *model.MultiCollision) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MultiCollision_resolvedBy(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ResolvedBy, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_MultiCollision_resolvedBy(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("MultiCollision", field, false, false, "String")
 }
 
 func (ec *executionContext) _MultiHello_name(ctx context.Context, field graphql.CollectedField, obj *model.MultiHello) (ret graphql.Marshaler) {
@@ -4121,6 +4645,90 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputMultiCollisionByIDs2Input(ctx context.Context, obj any) (model.MultiCollisionByIDs2Input, error) {
+	var it model.MultiCollisionByIDs2Input
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"ID"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "ID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ID"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalMultiCollisionByIDs2Input unmarshals raw into the MultiCollisionByIDs2Input input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalMultiCollisionByIDs2Input(ctx context.Context, raw any) (model.MultiCollisionByIDs2Input, error) {
+	var out model.MultiCollisionByIDs2Input
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "MultiCollisionByIDs2Input", raw, &out)
+	return out, err
+}
+
+func (ec *executionContext) unmarshalInputMultiCollisionByIDsInput(ctx context.Context, obj any) (model.MultiCollisionByIDsInput, error) {
+	var it model.MultiCollisionByIDsInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"ID"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "ID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ID"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalMultiCollisionByIDsInput unmarshals raw into the MultiCollisionByIDsInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalMultiCollisionByIDsInput(ctx context.Context, raw any) (model.MultiCollisionByIDsInput, error) {
+	var out model.MultiCollisionByIDsInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "MultiCollisionByIDsInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputMultiHelloByNamesInput(ctx context.Context, obj any) (model.MultiHelloByNamesInput, error) {
 	var it model.MultiHelloByNamesInput
 	if obj == nil {
@@ -4416,6 +5024,13 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 			return graphql.Null
 		}
 		return ec._MultiHello(ctx, sel, obj)
+	case model.MultiCollision:
+		return ec._MultiCollision(ctx, sel, &obj)
+	case *model.MultiCollision:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._MultiCollision(ctx, sel, obj)
 	case model.HelloWithErrors:
 		return ec._HelloWithErrors(ctx, sel, &obj)
 	case *model.HelloWithErrors:
@@ -4437,6 +5052,13 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 			return graphql.Null
 		}
 		return ec._Hello(ctx, sel, obj)
+	case model.Collision:
+		return ec._Collision(ctx, sel, &obj)
+	case *model.Collision:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Collision(ctx, sel, obj)
 	default:
 		if typedObj, ok := obj.(graphql.Marshaler); ok {
 			return typedObj
@@ -4449,6 +5071,49 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
+
+var collisionImplementors = []string{"Collision", "_Entity"}
+
+func (ec *executionContext) _Collision(ctx context.Context, sel ast.SelectionSet, obj *model.Collision) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, collisionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Collision")
+		case "_id":
+			out.Values[i] = ec._Collision__id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "id":
+			out.Values[i] = ec._Collision_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resolvedBy":
+			out.Values[i] = ec._Collision_resolvedBy(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
 
 var entityImplementors = []string{"Entity"}
 
@@ -4469,6 +5134,18 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Entity")
+		case "findCollisionByID":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Entity_findCollisionByID(ctx, field)
+				})
+		case "findCollisionByID2":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Entity_findCollisionByID2(ctx, field)
+				})
 		case "findHelloByName":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
 				true, true,
@@ -4486,6 +5163,18 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 				true, true,
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._Entity_findHelloWithErrorsByName(ctx, field)
+				})
+		case "findManyMultiCollisionByIDs":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Entity_findManyMultiCollisionByIDs(ctx, field)
+				})
+		case "findManyMultiCollisionByIDs2":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Entity_findManyMultiCollisionByIDs2(ctx, field)
 				})
 		case "findManyMultiHelloByNames":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
@@ -4665,6 +5354,49 @@ func (ec *executionContext) _HelloWithErrors(ctx context.Context, sel ast.Select
 			out.Values[i] = graphql.MarshalString("HelloWithErrors")
 		case "name":
 			out.Values[i] = ec._HelloWithErrors_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
+var multiCollisionImplementors = []string{"MultiCollision", "_Entity"}
+
+func (ec *executionContext) _MultiCollision(ctx context.Context, sel ast.SelectionSet, obj *model.MultiCollision) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, multiCollisionImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MultiCollision")
+		case "_id":
+			out.Values[i] = ec._MultiCollision__id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "id":
+			out.Values[i] = ec._MultiCollision_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resolvedBy":
+			out.Values[i] = ec._MultiCollision_resolvedBy(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -5609,6 +6341,14 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) marshalNCollision2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐCollision(ctx context.Context, sel ast.SelectionSet, v *model.Collision) graphql.Marshaler {
+	if v == nil {
+		graphql.AddInvalidNullError(ctx, "Collision!")
+		return graphql.Null
+	}
+	return ec._Collision(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNHello2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐHello(ctx context.Context, sel ast.SelectionSet, v *model.Hello) graphql.Marshaler {
 	if v == nil {
 		graphql.AddInvalidNullError(ctx, "Hello!")
@@ -5633,6 +6373,20 @@ func (ec *executionContext) marshalNHelloWithErrors2ᚖgithubᚗcomᚋ99designs�
 	return ec._HelloWithErrors(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (string, error) {
+	res, err := graphql.UnmarshalID(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalID(v)
+	if res == graphql.Null {
+		graphql.AddInvalidNullFromMarshaler(ctx, "ID!")
+	}
+	return res
+}
+
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v any) (int, error) {
 	res, err := graphql.UnmarshalInt(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -5645,6 +6399,34 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 		graphql.AddInvalidNullFromMarshaler(ctx, "Int!")
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNMultiCollisionByIDs2Input2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiCollisionByIDs2Input(ctx context.Context, v any) ([]*model.MultiCollisionByIDs2Input, error) {
+	vSlice := graphql.CoerceList(v)
+	var err error
+	res := make([]*model.MultiCollisionByIDs2Input, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOMultiCollisionByIDs2Input2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiCollisionByIDs2Input(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNMultiCollisionByIDsInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiCollisionByIDsInput(ctx context.Context, v any) ([]*model.MultiCollisionByIDsInput, error) {
+	vSlice := graphql.CoerceList(v)
+	var err error
+	res := make([]*model.MultiCollisionByIDsInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOMultiCollisionByIDsInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiCollisionByIDsInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) unmarshalNMultiHelloByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloByNamesInput(ctx context.Context, v any) ([]*model.MultiHelloByNamesInput, error) {
@@ -6023,6 +6805,42 @@ func (ec *executionContext) marshalOHello2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 		return graphql.Null
 	}
 	return ec._Hello(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalOMultiCollision2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiCollision(ctx context.Context, sel ast.SelectionSet, v []*model.MultiCollision) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalOMultiCollision2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiCollision(ctx, sel, v[i])
+	})
+
+	return ret
+}
+
+func (ec *executionContext) marshalOMultiCollision2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiCollision(ctx context.Context, sel ast.SelectionSet, v *model.MultiCollision) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._MultiCollision(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOMultiCollisionByIDs2Input2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiCollisionByIDs2Input(ctx context.Context, v any) (*model.MultiCollisionByIDs2Input, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputMultiCollisionByIDs2Input(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOMultiCollisionByIDsInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiCollisionByIDsInput(ctx context.Context, v any) (*model.MultiCollisionByIDsInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputMultiCollisionByIDsInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOMultiHello2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHello(ctx context.Context, sel ast.SelectionSet, v []*model.MultiHello) graphql.Marshaler {

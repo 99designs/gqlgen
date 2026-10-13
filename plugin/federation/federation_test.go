@@ -137,6 +137,161 @@ func TestNew(t *testing.T) {
 	})
 }
 
+func TestEntityResolverNameCollisions(t *testing.T) {
+	t.Parallel()
+
+	cases := []struct {
+		name      string
+		schema    string
+		resolvers []string
+		inputs    []string
+	}{
+		{
+			name: "unique names ignore model overrides",
+			schema: `
+				directive @goField(name: String) on FIELD_DEFINITION
+				type Port @key(fields: "_id") @key(fields: "name") {
+					_id: String! @goField(name: "LegacyID")
+					name: String!
+				}`,
+			resolvers: []string{"findPortByID", "findPortByName"},
+		},
+		{
+			name: "leading underscore",
+			schema: `type Port @key(fields: "_id") @key(fields: "id") {
+				_id: String!
+				id: ID!
+			}`,
+			resolvers: []string{"findPortByID", "findPortByID2"},
+		},
+		{
+			name: "reserve a later unique name",
+			schema: `type Port @key(fields: "_id") @key(fields: "id") @key(fields: "id2") {
+				_id: String!
+				id: ID!
+				id2: ID!
+			}`,
+			resolvers: []string{"findPortByID", "findPortByID3", "findPortByID2"},
+		},
+		{
+			name: "reserve an earlier unique name",
+			schema: `type Port @key(fields: "id2") @key(fields: "_id") @key(fields: "id") {
+				_id: String!
+				id: ID!
+				id2: ID!
+			}`,
+			resolvers: []string{"findPortByID2", "findPortByID", "findPortByID3"},
+		},
+		{
+			name: "three collisions",
+			schema: `type Port @key(fields: "_id") @key(fields: "id") @key(fields: "id_") {
+				_id: String!
+				id: ID!
+				id_: ID!
+			}`,
+			resolvers: []string{"findPortByID", "findPortByID2", "findPortByID3"},
+		},
+		{
+			name: "snake and camel case",
+			schema: `type Port @key(fields: "port_id") @key(fields: "portID") {
+				port_id: ID!
+				portID: ID!
+			}`,
+			resolvers: []string{"findPortByPortID", "findPortByPortID2"},
+		},
+		{
+			name: "flat and nested paths",
+			schema: `
+				type Port @key(fields: "id") @key(fields: "i { d }") {
+					id: ID!
+					i: Owner!
+				}
+				type Owner { d: ID! }`,
+			resolvers: []string{"findPortByID", "findPortByID2"},
+		},
+		{
+			name:      "repeated key keeps directive order",
+			schema:    `type Port @key(fields: "id") @key(fields: "id") { id: ID! }`,
+			resolvers: []string{"findPortByID", "findPortByID2"},
+		},
+		{
+			name: "batch input names",
+			schema: `type Port @key(fields: "_id") @key(fields: "id")
+				@entityResolver(multi: true) {
+				_id: String!
+				id: ID!
+			}`,
+			resolvers: []string{"findManyPortByIDs", "findManyPortByIDs2"},
+			inputs:    []string{"PortByIDsInput", "PortByIDs2Input"},
+		},
+		{
+			name: "case-distinct input names retain existing model naming",
+			schema: `
+				type FooBar @key(fields: "id") @entityResolver(multi: true) { id: ID! }
+				type fooBar @key(fields: "id") @entityResolver(multi: true) { id: ID! }`,
+			resolvers: []string{"findManyFooBarByIDs", "findManyfooBarByIDs"},
+			inputs:    []string{"FooBarByIDsInput", "fooBarByIDsInput"},
+		},
+		{
+			name: "reserve user-defined type names for batch suffixes",
+			schema: `
+				type Port @key(fields: "_id") @key(fields: "id") @entityResolver(multi: true) {
+					_id: String!
+					id: ID!
+				}
+				input PortByIDs2Input { other: String }`,
+			resolvers: []string{"findManyPortByIDs", "findManyPortByIDs3"},
+			inputs:    []string{"PortByIDsInput", "PortByIDs3Input"},
+		},
+		{
+			name: "different entities share the resolver namespace",
+			schema: `
+				type Port @key(fields: "id") @entityResolver(multi: true) { id: ID! }
+				type ManyPort @key(fields: "IDs") @key(fields: "IDs2") {
+					IDs: ID!
+					IDs2: ID!
+				}`,
+			resolvers: []string{"findManyPortByIDs", "findManyPortByIDs2", "findManyPortByIDs3"},
+			inputs:    []string{"PortByIDs3Input"},
+		},
+	}
+
+	for _, testCase := range cases {
+		t.Run(testCase.name, func(t *testing.T) {
+			t.Parallel()
+
+			f := &Federation{version: 2}
+			early, err := f.InjectSourcesEarly()
+			require.NoError(t, err)
+			cfg := config.DefaultConfig()
+			cfg.Sources = early
+			cfg.Sources = append(cfg.Sources, &ast.Source{
+				Name: "schema.graphql",
+				Input: `directive @entityResolver(multi: Boolean) on OBJECT
+					type Query { ok: Boolean }` + testCase.schema,
+			})
+			require.NoError(t, cfg.LoadSchema())
+			late, err := f.InjectSourcesLate(cfg.Schema)
+			require.NoError(t, err)
+			cfg.Sources = append(cfg.Sources, late...)
+			require.NoError(t, cfg.LoadSchema())
+
+			var resolvers, inputs []string
+			for _, entity := range f.Entities {
+				for _, resolver := range entity.Resolvers {
+					resolvers = append(resolvers, resolver.ResolverName)
+					if entity.Multi {
+						inputs = append(inputs, resolver.InputTypeName)
+						require.NotNil(t, cfg.Schema.Types[resolver.InputTypeName])
+					}
+				}
+			}
+			require.Equal(t, testCase.resolvers, resolvers)
+			require.Equal(t, testCase.inputs, inputs)
+		})
+	}
+}
+
 func TestAssignKeyFieldGoNames(t *testing.T) {
 	t.Parallel()
 

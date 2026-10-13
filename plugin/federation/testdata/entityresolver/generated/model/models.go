@@ -2,6 +2,14 @@
 
 package model
 
+type Collision struct {
+	LegacyID   string `json:"_id"`
+	ID         string `json:"id"`
+	ResolvedBy string `json:"resolvedBy"`
+}
+
+func (Collision) IsEntity() {}
+
 type Hello struct {
 	Name      string `json:"name"`
 	Secondary string `json:"secondary"`
@@ -21,6 +29,22 @@ type HelloWithErrors struct {
 }
 
 func (HelloWithErrors) IsEntity() {}
+
+type MultiCollision struct {
+	LegacyID   string `json:"_id"`
+	ID         string `json:"id"`
+	ResolvedBy string `json:"resolvedBy"`
+}
+
+func (MultiCollision) IsEntity() {}
+
+type MultiCollisionByIDs2Input struct {
+	ID string `json:"ID"`
+}
+
+type MultiCollisionByIDsInput struct {
+	ID string `json:"ID"`
+}
 
 type MultiHello struct {
 	Name string `json:"name"`

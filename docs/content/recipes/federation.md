@@ -373,6 +373,19 @@ func (ec *executionContext) PopulateTodoRequires(ctx context.Context, entity *mo
 }
 ```
 
+## Entity resolver names
+
+gqlgen derives entity resolver names from the entity type and its `@key` fields.
+If different keys produce the same Go name, gqlgen keeps the first name and adds
+a numeric suffix to later collisions. For example, `Port @key(fields: "_id")
+@key(fields: "id")` generates `FindPortByID` and `FindPortByID2`.
+
+Names that are already unique stay unchanged. Suffixes skip names already used
+by other keys; batch input type names are disambiguated too. Assignment follows
+entity name order and the order of `@key` directives on each entity. GraphQL key
+fields and representation values are unchanged. `@goField(name: ...)` continues
+to control model field binding, not entity resolver naming.
+
 ## Using @entityResolver
 
 The `@entityResolver` directive enables optimization for entity resolver generation in GraphQL federation.

@@ -136,6 +136,8 @@ func (ec *executionContext) resolveEntityGroup(
 
 func isMulti(typeName string) bool {
 	switch typeName {
+	case "MultiCollision":
+		return true
 	case "MultiHello":
 		return true
 	case "MultiHelloMultipleRequires":
@@ -165,6 +167,36 @@ func (ec *executionContext) resolveEntity(
 	}()
 
 	switch typeName {
+	case "Collision":
+		resolverName, err := entityResolverNameForCollision(ctx, rep)
+		if err != nil {
+			return nil, fmt.Errorf(`finding resolver for Entity "Collision": %w`, err)
+		}
+		switch resolverName {
+
+		case "findCollisionByID":
+			id0, err := ec.unmarshalNString2string(ctx, rep["_id"])
+			if err != nil {
+				return nil, fmt.Errorf(`unmarshalling param 0 for findCollisionByID(): %w`, err)
+			}
+			entity, err := ec.Resolvers.Entity().FindCollisionByID(ctx, id0)
+			if err != nil {
+				return nil, fmt.Errorf(`resolving Entity "Collision": %w`, err)
+			}
+
+			return entity, nil
+		case "findCollisionByID2":
+			id0, err := ec.unmarshalNID2string(ctx, rep["id"])
+			if err != nil {
+				return nil, fmt.Errorf(`unmarshalling param 0 for findCollisionByID2(): %w`, err)
+			}
+			entity, err := ec.Resolvers.Entity().FindCollisionByID2(ctx, id0)
+			if err != nil {
+				return nil, fmt.Errorf(`resolving Entity "Collision": %w`, err)
+			}
+
+			return entity, nil
+		}
 	case "Hello":
 		resolverName, err := entityResolverNameForHello(ctx, rep)
 		if err != nil {
@@ -396,6 +428,75 @@ func (ec *executionContext) resolveManyEntities(
 
 	switch typeName {
 
+	case "MultiCollision":
+		resolverName, err := entityResolverNameForMultiCollision(ctx, reps[0].entity)
+		if err != nil {
+			return fmt.Errorf(`finding resolver for Entity "MultiCollision": %w`, err)
+		}
+		switch resolverName {
+
+		case "findManyMultiCollisionByIDs":
+			typedReps := make([]*model.MultiCollisionByIDsInput, len(reps))
+
+			for i, rep := range reps {
+				id0, err := ec.unmarshalNString2string(ctx, rep.entity["_id"])
+				if err != nil {
+					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "id"))
+				}
+
+				typedReps[i] = &model.MultiCollisionByIDsInput{
+					ID: id0,
+				}
+			}
+
+			entities, err := ec.Resolvers.Entity().FindManyMultiCollisionByIDs(ctx, typedReps)
+			entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
+			if err != nil {
+				return err
+			}
+
+			for i, entity := range entities {
+				if i < len(entityErrs) && entityErrs[i] != nil {
+					ec.Error(graphql.WithPathContext(ctx, graphql.NewPathWithIndex(reps[i].index)), entityErrs[i])
+					continue
+				}
+				list[reps[i].index] = entity
+			}
+			return nil
+
+		case "findManyMultiCollisionByIDs2":
+			typedReps := make([]*model.MultiCollisionByIDs2Input, len(reps))
+
+			for i, rep := range reps {
+				id0, err := ec.unmarshalNID2string(ctx, rep.entity["id"])
+				if err != nil {
+					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "id"))
+				}
+
+				typedReps[i] = &model.MultiCollisionByIDs2Input{
+					ID: id0,
+				}
+			}
+
+			entities, err := ec.Resolvers.Entity().FindManyMultiCollisionByIDs2(ctx, typedReps)
+			entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
+			if err != nil {
+				return err
+			}
+
+			for i, entity := range entities {
+				if i < len(entityErrs) && entityErrs[i] != nil {
+					ec.Error(graphql.WithPathContext(ctx, graphql.NewPathWithIndex(reps[i].index)), entityErrs[i])
+					continue
+				}
+				list[reps[i].index] = entity
+			}
+			return nil
+
+		default:
+			return fmt.Errorf("unknown resolver: %s", resolverName)
+		}
+
 	case "MultiHello":
 		resolverName, err := entityResolverNameForMultiHello(ctx, reps[0].entity)
 		if err != nil {
@@ -617,6 +718,68 @@ func (ec *executionContext) resolveManyEntities(
 	}
 }
 
+func entityResolverNameForCollision(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
+	for {
+		var (
+			m   EntityRepresentation
+			val any
+			ok  bool
+		)
+		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
+		m = rep
+		val, ok = m["_id"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"_id\" for Collision", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for Collision", ErrTypeNotFound))
+			break
+		}
+		return "findCollisionByID", nil
+	}
+	for {
+		var (
+			m   EntityRepresentation
+			val any
+			ok  bool
+		)
+		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
+		m = rep
+		val, ok = m["id"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"id\" for Collision", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for Collision", ErrTypeNotFound))
+			break
+		}
+		return "findCollisionByID2", nil
+	}
+	return "", fmt.Errorf("%w for Collision due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
+}
+
 func entityResolverNameForHello(ctx context.Context, rep EntityRepresentation) (string, error) {
 	// we collect errors because a later entity resolver may work fine
 	// when an entity has multiple keys
@@ -729,6 +892,68 @@ func entityResolverNameForHelloWithErrors(ctx context.Context, rep EntityReprese
 		return "findHelloWithErrorsByName", nil
 	}
 	return "", fmt.Errorf("%w for HelloWithErrors due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
+}
+
+func entityResolverNameForMultiCollision(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
+	for {
+		var (
+			m   EntityRepresentation
+			val any
+			ok  bool
+		)
+		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
+		m = rep
+		val, ok = m["_id"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"_id\" for MultiCollision", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for MultiCollision", ErrTypeNotFound))
+			break
+		}
+		return "findManyMultiCollisionByIDs", nil
+	}
+	for {
+		var (
+			m   EntityRepresentation
+			val any
+			ok  bool
+		)
+		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
+		m = rep
+		val, ok = m["id"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"id\" for MultiCollision", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for MultiCollision", ErrTypeNotFound))
+			break
+		}
+		return "findManyMultiCollisionByIDs2", nil
+	}
+	return "", fmt.Errorf("%w for MultiCollision due to %v", ErrTypeNotFound,
 		errors.Join(entityResolverErrs...).Error())
 }
 

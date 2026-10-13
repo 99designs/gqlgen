@@ -221,20 +221,18 @@ func TestResolveRootConcurrently(t *testing.T) {
 	})
 }
 
-// A recovered panic reports an error and leaves no marshaler behind. That
-// second half is a latent crash rather than a design: the field set holds a
-// nil Marshaler, Invalids is untouched because the increment was skipped by
-// the unwinding, so nothing bubbles the object to null, and marshalling the
-// object dereferences the nil.
+// A recovered panic reports an error and must leave behind what a resolver
+// returning an error would have: the field null, counted against Invalids
+// when the field is non-null so the enclosing object bubbles to null.
 //
 // The panic guard here is the outer one. A panic inside a resolver is caught
 // by ResolveField, which returns Null; this guard only sees panics raised
 // before that one is armed, which in generated code means argument coercion
 // and custom scalar unmarshalers.
 //
-// This test characterizes the behaviour rather than endorsing it. A fix that
-// substitutes a sentinel for the nil should make the final assertion fail.
-func TestResolveConcurrentlyLeavesANilMarshalerAfterARecoveredPanic(t *testing.T) {
+// Leaving the nil the unwinding produced instead would crash the marshaller,
+// which writes every entry: the object is marshalled with a nil Marshaler.
+func TestResolveConcurrentlyNullsAFieldAfterARecoveredPanic(t *testing.T) {
 	t.Parallel()
 
 	ctx, oc := newResolveConcurrentlyTestContext()
@@ -246,11 +244,69 @@ func TestResolveConcurrentlyLeavesANilMarshalerAfterARecoveredPanic(t *testing.T
 	out.Dispatch(ctx)
 
 	assert.Equal(t, "input: internal system error\n", GetErrors(ctx).Error())
-	assert.Nil(t, out.Values[0], "the panicking field is left without a marshaler")
-	assert.Zero(t, out.Invalids, "the invalids increment is skipped by the unwinding")
+	assert.Same(t, Null, out.Values[0], "the panicking field resolves to null")
+	assert.Equal(t, uint32(1), out.Invalids, "a panicked non-null field invalidates the object")
 
-	assert.Panics(t, func() { out.MarshalGQL(&bytes.Buffer{}) },
-		"marshalling the object dereferences the nil marshaler")
+	var b bytes.Buffer
+	out.MarshalGQL(&b)
+	assert.JSONEq(t, `{"name":null}`, b.String())
+}
+
+// The same recovered panic on a @defer'd field must land on the deferred
+// field set with the same invariants: Null in the slot, counted against
+// Invalids only when the field is non-null. The slot is what the incremental
+// payload marshals, and a nil there is silently skipped by the view, so a
+// panicking field would vanish from its payload instead of reporting null.
+func TestResolveConcurrentlyNullsADeferredFieldAfterARecoveredPanic(t *testing.T) {
+	t.Parallel()
+
+	t.Run("non-null field", func(t *testing.T) {
+		t.Parallel()
+
+		ctx, oc := newResolveConcurrentlyTestContext()
+		out := NewFieldSet([]CollectedField{collectedField("name", "label")})
+		deferred := NewDeferredGroup(ctx)
+
+		out.ResolveConcurrently(oc, &deferred, 0, true, true,
+			func(context.Context) Marshaler { panic("boom") })
+		deferred.FieldSet.Dispatch(ctx)
+
+		assert.Equal(t, "input: internal system error\n", GetErrors(ctx).Error())
+		assert.Same(t, Null, out.Values[0], "the initial response reports a deferred field as null")
+		require.Len(t, deferred.FieldSet.Values, 1)
+		assert.Same(t, Null, deferred.FieldSet.Values[0],
+			"the panicking deferred field resolves to null")
+		assert.Equal(t, uint32(1), deferred.FieldSet.Invalids,
+			"a panicked non-null deferred field invalidates the incremental payload")
+
+		var b bytes.Buffer
+		deferred.Defers["label"].MarshalGQL(&b)
+		assert.JSONEq(t, `{"name":null}`, b.String())
+	})
+
+	t.Run("nullable field", func(t *testing.T) {
+		t.Parallel()
+
+		ctx, oc := newResolveConcurrentlyTestContext()
+		out := NewFieldSet([]CollectedField{collectedField("name", "label")})
+		deferred := NewDeferredGroup(ctx)
+
+		out.ResolveConcurrently(oc, &deferred, 0, true, false,
+			func(context.Context) Marshaler { panic("boom") })
+		deferred.FieldSet.Dispatch(ctx)
+
+		assert.Equal(t, "input: internal system error\n", GetErrors(ctx).Error())
+		assert.Same(t, Null, out.Values[0], "the initial response reports a deferred field as null")
+		require.Len(t, deferred.FieldSet.Values, 1)
+		assert.Same(t, Null, deferred.FieldSet.Values[0],
+			"the panicking deferred field resolves to null")
+		assert.Zero(t, deferred.FieldSet.Invalids,
+			"a nullable field's panic is absorbed as null, like a resolver error")
+
+		var b bytes.Buffer
+		deferred.Defers["label"].MarshalGQL(&b)
+		assert.JSONEq(t, `{"name":null}`, b.String())
+	})
 }
 
 // The root helper reaches the same guard through RootResolverMiddleware, so a

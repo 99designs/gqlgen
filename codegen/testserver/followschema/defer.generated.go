@@ -34,7 +34,7 @@ func (ec *executionContext) _DeferModel_id(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_DeferModel_id(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_DeferModel_id)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -49,9 +49,6 @@ func (ec *executionContext) _DeferModel_id(ctx context.Context, field graphql.Co
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_DeferModel_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("DeferModel", field, false, false, "ID")
-}
 
 func (ec *executionContext) _DeferModel_name(ctx context.Context, field graphql.CollectedField, obj *DeferModel) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -59,7 +56,7 @@ func (ec *executionContext) _DeferModel_name(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_DeferModel_name(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_DeferModel_name)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -74,9 +71,6 @@ func (ec *executionContext) _DeferModel_name(ctx context.Context, field graphql.
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_DeferModel_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("DeferModel", field, false, false, "String")
-}
 
 func (ec *executionContext) _DeferModel_otherResolvedValue(ctx context.Context, field graphql.CollectedField, obj *DeferModel) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -84,7 +78,7 @@ func (ec *executionContext) _DeferModel_otherResolvedValue(ctx context.Context, 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_DeferModel_otherResolvedValue(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_DeferModel_otherResolvedValue)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.DeferModel().OtherResolvedValue(ctx, obj)
@@ -99,9 +93,6 @@ func (ec *executionContext) _DeferModel_otherResolvedValue(ctx context.Context, 
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_DeferModel_otherResolvedValue(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("DeferModel", field, true, true, "String")
-}
 
 func (ec *executionContext) _DeferModel_values(ctx context.Context, field graphql.CollectedField, obj *DeferModel) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -109,7 +100,7 @@ func (ec *executionContext) _DeferModel_values(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_DeferModel_values(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_DeferModel_values)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.DeferModel().Values(ctx, obj)
@@ -123,9 +114,6 @@ func (ec *executionContext) _DeferModel_values(ctx context.Context, field graphq
 		true,
 		true,
 	)
-}
-func (ec *executionContext) fieldContext_DeferModel_values(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("DeferModel", field, true, true, "String")
 }
 
 // endregion **************************** field.gotpl *****************************

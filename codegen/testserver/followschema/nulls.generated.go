@@ -36,7 +36,7 @@ func (ec *executionContext) _Error_id(ctx context.Context, field graphql.Collect
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Error_id(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Error_id)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -51,9 +51,6 @@ func (ec *executionContext) _Error_id(ctx context.Context, field graphql.Collect
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Error_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Error", field, false, false, "ID")
-}
 
 func (ec *executionContext) _Error_errorOnNonRequiredField(ctx context.Context, field graphql.CollectedField, obj *Error) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -61,7 +58,7 @@ func (ec *executionContext) _Error_errorOnNonRequiredField(ctx context.Context, 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Error_errorOnNonRequiredField(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Error_errorOnNonRequiredField)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ErrorOnNonRequiredField()
@@ -76,9 +73,6 @@ func (ec *executionContext) _Error_errorOnNonRequiredField(ctx context.Context, 
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Error_errorOnNonRequiredField(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Error", field, true, false, "String")
-}
 
 func (ec *executionContext) _Error_errorOnRequiredField(ctx context.Context, field graphql.CollectedField, obj *Error) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -86,7 +80,7 @@ func (ec *executionContext) _Error_errorOnRequiredField(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Error_errorOnRequiredField(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Error_errorOnRequiredField)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ErrorOnRequiredField()
@@ -101,9 +95,6 @@ func (ec *executionContext) _Error_errorOnRequiredField(ctx context.Context, fie
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Error_errorOnRequiredField(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Error", field, true, false, "String")
-}
 
 func (ec *executionContext) _Error_nilOnRequiredField(ctx context.Context, field graphql.CollectedField, obj *Error) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -111,7 +102,7 @@ func (ec *executionContext) _Error_nilOnRequiredField(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Error_nilOnRequiredField(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Error_nilOnRequiredField)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.NilOnRequiredField(), nil
@@ -126,9 +117,6 @@ func (ec *executionContext) _Error_nilOnRequiredField(ctx context.Context, field
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Error_nilOnRequiredField(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Error", field, true, false, "String")
-}
 
 func (ec *executionContext) _Errors_a(ctx context.Context, field graphql.CollectedField, obj *Errors) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -136,7 +124,7 @@ func (ec *executionContext) _Errors_a(ctx context.Context, field graphql.Collect
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Errors_a(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Errors_a)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Errors().A(ctx, obj)
@@ -151,18 +139,6 @@ func (ec *executionContext) _Errors_a(ctx context.Context, field graphql.Collect
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Errors_a(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Errors",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Error(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Errors_b(ctx context.Context, field graphql.CollectedField, obj *Errors) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -170,7 +146,7 @@ func (ec *executionContext) _Errors_b(ctx context.Context, field graphql.Collect
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Errors_b(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Errors_b)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Errors().B(ctx, obj)
@@ -185,18 +161,6 @@ func (ec *executionContext) _Errors_b(ctx context.Context, field graphql.Collect
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Errors_b(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Errors",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Error(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Errors_c(ctx context.Context, field graphql.CollectedField, obj *Errors) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -204,7 +168,7 @@ func (ec *executionContext) _Errors_c(ctx context.Context, field graphql.Collect
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Errors_c(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Errors_c)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Errors().C(ctx, obj)
@@ -219,18 +183,6 @@ func (ec *executionContext) _Errors_c(ctx context.Context, field graphql.Collect
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Errors_c(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Errors",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Error(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Errors_d(ctx context.Context, field graphql.CollectedField, obj *Errors) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -238,7 +190,7 @@ func (ec *executionContext) _Errors_d(ctx context.Context, field graphql.Collect
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Errors_d(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Errors_d)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Errors().D(ctx, obj)
@@ -253,18 +205,6 @@ func (ec *executionContext) _Errors_d(ctx context.Context, field graphql.Collect
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Errors_d(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Errors",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Error(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Errors_e(ctx context.Context, field graphql.CollectedField, obj *Errors) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -272,7 +212,7 @@ func (ec *executionContext) _Errors_e(ctx context.Context, field graphql.Collect
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Errors_e(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Errors_e)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Errors().E(ctx, obj)
@@ -286,18 +226,6 @@ func (ec *executionContext) _Errors_e(ctx context.Context, field graphql.Collect
 		true,
 		true,
 	)
-}
-func (ec *executionContext) fieldContext_Errors_e(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Errors",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Error(ctx, field)
-		},
-	}
-	return fc, nil
 }
 
 // endregion **************************** field.gotpl *****************************

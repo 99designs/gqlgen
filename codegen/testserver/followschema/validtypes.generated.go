@@ -4,7 +4,6 @@ package followschema
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
 	"strconv"
@@ -258,7 +257,7 @@ func (ec *executionContext) _Content_Post_foo(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Content_Post_foo(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Content_Post_foo)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Foo, nil
@@ -272,9 +271,6 @@ func (ec *executionContext) _Content_Post_foo(ctx context.Context, field graphql
 		true,
 		false,
 	)
-}
-func (ec *executionContext) fieldContext_Content_Post_foo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Content_Post", field, false, false, "String")
 }
 
 func (ec *executionContext) _Content_User_foo(ctx context.Context, field graphql.CollectedField, obj *ContentUser) (ret graphql.Marshaler) {
@@ -283,7 +279,7 @@ func (ec *executionContext) _Content_User_foo(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Content_User_foo(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Content_User_foo)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Foo, nil
@@ -298,9 +294,6 @@ func (ec *executionContext) _Content_User_foo(ctx context.Context, field graphql
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Content_User_foo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Content_User", field, false, false, "String")
-}
 
 func (ec *executionContext) _ValidType_differentCase(ctx context.Context, field graphql.CollectedField, obj *ValidType) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -308,7 +301,7 @@ func (ec *executionContext) _ValidType_differentCase(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_ValidType_differentCase(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_ValidType_differentCase)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.DifferentCase, nil
@@ -323,9 +316,6 @@ func (ec *executionContext) _ValidType_differentCase(ctx context.Context, field 
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_ValidType_differentCase(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("ValidType", field, false, false, "String")
-}
 
 func (ec *executionContext) _ValidType_different_case(ctx context.Context, field graphql.CollectedField, obj *ValidType) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -333,7 +323,7 @@ func (ec *executionContext) _ValidType_different_case(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_ValidType_different_case(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_ValidType_different_case)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.DifferentCaseOld, nil
@@ -348,9 +338,6 @@ func (ec *executionContext) _ValidType_different_case(ctx context.Context, field
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_ValidType_different_case(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("ValidType", field, false, false, "String")
-}
 
 func (ec *executionContext) _ValidType_validInputKeywords(ctx context.Context, field graphql.CollectedField, obj *ValidType) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -358,7 +345,7 @@ func (ec *executionContext) _ValidType_validInputKeywords(ctx context.Context, f
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_ValidType_validInputKeywords(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_ValidType_validInputKeywords)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ValidInputKeywords, nil
@@ -373,29 +360,6 @@ func (ec *executionContext) _ValidType_validInputKeywords(ctx context.Context, f
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_ValidType_validInputKeywords(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ValidType",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_ValidType_validInputKeywords_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _ValidType_validArgs(ctx context.Context, field graphql.CollectedField, obj *ValidType) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -403,7 +367,7 @@ func (ec *executionContext) _ValidType_validArgs(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_ValidType_validArgs(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_ValidType_validArgs)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ValidArgs, nil
@@ -417,29 +381,6 @@ func (ec *executionContext) _ValidType_validArgs(ctx context.Context, field grap
 		true,
 		true,
 	)
-}
-func (ec *executionContext) fieldContext_ValidType_validArgs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ValidType",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_ValidType_validArgs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
 }
 
 // endregion **************************** field.gotpl *****************************

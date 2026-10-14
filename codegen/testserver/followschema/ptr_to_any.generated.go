@@ -28,7 +28,7 @@ func (ec *executionContext) _PtrToAnyContainer_ptrToAny(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_PtrToAnyContainer_ptrToAny(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_PtrToAnyContainer_ptrToAny)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.PtrToAny, nil
@@ -43,9 +43,6 @@ func (ec *executionContext) _PtrToAnyContainer_ptrToAny(ctx context.Context, fie
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_PtrToAnyContainer_ptrToAny(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("PtrToAnyContainer", field, false, false, "Any")
-}
 
 func (ec *executionContext) _PtrToAnyContainer_binding(ctx context.Context, field graphql.CollectedField, obj *PtrToAnyContainer) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -53,7 +50,7 @@ func (ec *executionContext) _PtrToAnyContainer_binding(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_PtrToAnyContainer_binding(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_PtrToAnyContainer_binding)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Binding(), nil
@@ -67,9 +64,6 @@ func (ec *executionContext) _PtrToAnyContainer_binding(ctx context.Context, fiel
 		true,
 		false,
 	)
-}
-func (ec *executionContext) fieldContext_PtrToAnyContainer_binding(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("PtrToAnyContainer", field, true, false, "Any")
 }
 
 // endregion **************************** field.gotpl *****************************

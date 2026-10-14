@@ -7,7 +7,7 @@ func {{$.FuncReceiver}}_{{$object.Name}}_{{$field.Name}}(ctx context.Context, {{
 	{{- end }}
 
 	{{- if $field.TypeReference.IsRoot }}
-		fc, err := {{$.ECDot}}{{ $field.FieldContextFunc }}(ctx, {{$.ECArg}}field)
+		fc, err := {{$.ECDot}}fieldContextByID(ctx, {{$.ECArg}}field, {{ $field.FieldContextID }})
 		if err != nil {
 			return {{- if $field.UsesSubscriptionContext }} ctx,{{- end}} {{ $null }}
 		}
@@ -33,7 +33,7 @@ func {{$.FuncReceiver}}_{{$object.Name}}_{{$field.Name}}(ctx context.Context, {{
 			ctx,
 			ec.OperationContext,
 			field,
-			func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) { return {{$.ECDot}}{{ $field.FieldContextFunc }}(ctx, {{$.ECArg}}field) },
+			func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) { return {{$.ECDot}}fieldContextByID(ctx, {{$.ECArg}}field, {{ $field.FieldContextID }}) },
 			func(ctx context.Context) (any, error) {
 				{{- template "fieldDefinition" $field }}
 			},
@@ -59,47 +59,6 @@ func {{$.FuncReceiver}}_{{$object.Name}}_{{$field.Name}}(ctx context.Context, {{
 		)
 	{{- end }}
 }
-
-{{- /* Scalar/enum fields without args: use graphql.NewScalarFieldContext (saves ~8 lines per field) */ -}}
-{{- if and (not $field.Args) (not $field.TypeReference.Definition.Fields) }}
-func {{$.FuncReceiver}}{{ $field.FieldContextFunc }}(_ context.Context, {{$.ECFuncParam}}field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext({{quote $field.Object.Name}}, field, {{or $field.IsMethod $field.IsResolver}}, {{ $field.IsResolver }}, {{quote $field.TypeReference.Definition.Name}})
-}
-{{- else }}
-func {{$.FuncReceiver}}{{ $field.FieldContextFunc }}({{ if not $field.Args }}_{{ else }}ctx{{ end }} context.Context, {{$.ECFuncParam}}field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object: {{quote $field.Object.Name}},
-		Field: field,
-		IsMethod: {{or $field.IsMethod $field.IsResolver}},
-		IsResolver: {{ $field.IsResolver }},
-		Child: func (ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			{{- if not $field.TypeReference.Definition.Fields }}
-				return nil, errors.New("field of type {{ $field.TypeReference.Definition.Name }} does not have child fields")
-			{{- else if ne $field.TypeReference.Definition.Kind "OBJECT" }}
-				return nil, errors.New("FieldContext.Child cannot be called on type {{ $field.TypeReference.Definition.Kind }}")
-			{{- else }}
-				return {{$.ECDot}}childFields_{{ $field.ChildFieldContextTypeName }}(ctx, {{$.ECArg}}field)
-			{{- end }}
-		},
-	}
-	{{- if $field.Args }}
-		{{- if not $.Config.OmitPanicHandler }}
-		defer func () {
-			if r := recover(); r != nil {
-				err = ec.Recover(ctx, r)
-				ec.Error(ctx, err)
-			}
-		}()
-		{{- end }}
-		ctx = graphql.WithFieldContext(ctx, fc)
-		if fc.Args, err = {{$.ECDot}}{{ $field.ArgsFunc }}(ctx, {{$.ECArg}}field.ArgumentMap(ec.Variables)); err != nil {
-			ec.Error(ctx, err)
-			return fc, err
-		}
-	{{- end }}
-	return fc, nil
-}
-{{- end }}
 
 {{- if and $field.IsBatch (not $object.Root) }}
 func (ec *executionContext) resolveBatch_{{$object.Name}}_{{$field.Name}}(ctx context.Context, field graphql.CollectedField, obj {{$object.Reference | ref}}) (any, error) {

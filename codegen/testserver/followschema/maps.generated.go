@@ -29,7 +29,7 @@ func (ec *executionContext) _MapNested_value(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_MapNested_value(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_MapNested_value)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Value, nil
@@ -44,9 +44,6 @@ func (ec *executionContext) _MapNested_value(ctx context.Context, field graphql.
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_MapNested_value(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("MapNested", field, false, false, "CustomScalar")
-}
 
 func (ec *executionContext) _MapStringInterfaceType_a(ctx context.Context, field graphql.CollectedField, obj map[string]any) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -54,7 +51,7 @@ func (ec *executionContext) _MapStringInterfaceType_a(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_MapStringInterfaceType_a(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_MapStringInterfaceType_a)
 		},
 		func(ctx context.Context) (any, error) {
 			switch v := obj["a"].(type) {
@@ -78,9 +75,6 @@ func (ec *executionContext) _MapStringInterfaceType_a(ctx context.Context, field
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_MapStringInterfaceType_a(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("MapStringInterfaceType", field, false, false, "String")
-}
 
 func (ec *executionContext) _MapStringInterfaceType_b(ctx context.Context, field graphql.CollectedField, obj map[string]any) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -88,7 +82,7 @@ func (ec *executionContext) _MapStringInterfaceType_b(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_MapStringInterfaceType_b(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_MapStringInterfaceType_b)
 		},
 		func(ctx context.Context) (any, error) {
 			switch v := obj["b"].(type) {
@@ -112,9 +106,6 @@ func (ec *executionContext) _MapStringInterfaceType_b(ctx context.Context, field
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_MapStringInterfaceType_b(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("MapStringInterfaceType", field, false, false, "Int")
-}
 
 func (ec *executionContext) _MapStringInterfaceType_c(ctx context.Context, field graphql.CollectedField, obj map[string]any) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -122,7 +113,7 @@ func (ec *executionContext) _MapStringInterfaceType_c(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_MapStringInterfaceType_c(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_MapStringInterfaceType_c)
 		},
 		func(ctx context.Context) (any, error) {
 			switch v := obj["c"].(type) {
@@ -146,9 +137,6 @@ func (ec *executionContext) _MapStringInterfaceType_c(ctx context.Context, field
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_MapStringInterfaceType_c(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("MapStringInterfaceType", field, false, false, "CustomScalar")
-}
 
 func (ec *executionContext) _MapStringInterfaceType_nested(ctx context.Context, field graphql.CollectedField, obj map[string]any) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -156,7 +144,7 @@ func (ec *executionContext) _MapStringInterfaceType_nested(ctx context.Context, 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_MapStringInterfaceType_nested(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_MapStringInterfaceType_nested)
 		},
 		func(ctx context.Context) (any, error) {
 			switch v := obj["nested"].(type) {
@@ -179,18 +167,6 @@ func (ec *executionContext) _MapStringInterfaceType_nested(ctx context.Context, 
 		true,
 		false,
 	)
-}
-func (ec *executionContext) fieldContext_MapStringInterfaceType_nested(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "MapStringInterfaceType",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_MapNested(ctx, field)
-		},
-	}
-	return fc, nil
 }
 
 // endregion **************************** field.gotpl *****************************

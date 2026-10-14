@@ -130,18 +130,69 @@ func TestUniqueChildFieldTypes_Empty(t *testing.T) {
 	assert.Empty(t, d.UniqueChildFieldTypes())
 }
 
+func TestChildFieldTypes(t *testing.T) {
+	userDef := &ast.Definition{
+		Kind:   ast.Object,
+		Name:   "User",
+		Fields: ast.FieldList{{Name: "id"}},
+	}
+	stringDef := &ast.Definition{
+		Kind: ast.Scalar,
+		Name: "String",
+	}
+
+	d := Data{
+		Objects: Objects{
+			{
+				Fields: []*Field{
+					{TypeReference: &config.TypeReference{Definition: userDef}},
+					{TypeReference: &config.TypeReference{Definition: stringDef}},
+					// duplicate, should be deduped
+					{TypeReference: &config.TypeReference{Definition: userDef}},
+					// nil ref, should be skipped
+					{TypeReference: nil},
+				},
+			},
+		},
+	}
+
+	result := d.ChildFieldTypes()
+
+	// every kind is included, sorted alphabetically
+	require.Len(t, result, 2)
+	assert.Equal(t, "String", result[0].TypeName)
+	assert.Equal(t, stringDef, result[0].Definition)
+	assert.Equal(t, "User", result[1].TypeName)
+	assert.Equal(t, userDef, result[1].Definition)
+	assert.Equal(t, "fieldContextID_User_id", result[1].FieldContextID("id"))
+}
+
+func TestField_FieldContextID(t *testing.T) {
+	f := &Field{
+		Object:          &Object{Definition: &ast.Definition{Name: "User"}},
+		FieldDefinition: &ast.FieldDefinition{Name: "name"},
+	}
+	assert.Equal(t, "fieldContextID_User_name", f.FieldContextID())
+}
+
 func TestDataECHelpers(t *testing.T) {
 	receiver := &Data{Config: &config.Config{UseFunctionSyntaxForExecutionContext: false}}
 	assert.Equal(t, "(ec *executionContext) ", receiver.FuncReceiver())
 	assert.Empty(t, receiver.ECFuncParam())
 	assert.Equal(t, "ec.", receiver.ECDot())
 	assert.Empty(t, receiver.ECArg())
+	assert.Equal(t, "(*executionContext).", receiver.ECFuncValue())
+	assert.Equal(t, "ec *executionContext, ctx context.Context, ", receiver.ECFuncValueParams())
+	assert.Equal(t, "ec, ctx, ", receiver.ECFuncValueArgs())
 
 	function := &Data{Config: &config.Config{UseFunctionSyntaxForExecutionContext: true}}
 	assert.Empty(t, function.FuncReceiver())
 	assert.Equal(t, "ec *executionContext, ", function.ECFuncParam())
 	assert.Empty(t, function.ECDot())
 	assert.Equal(t, "ec, ", function.ECArg())
+	assert.Empty(t, function.ECFuncValue())
+	assert.Equal(t, "ctx context.Context, ec *executionContext, ", function.ECFuncValueParams())
+	assert.Equal(t, "ctx, ec, ", function.ECFuncValueArgs())
 }
 
 // implDirectivesFieldStub satisfies ImplDirectivesField for testing purposes.

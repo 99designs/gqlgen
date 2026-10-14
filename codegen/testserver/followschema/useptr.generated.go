@@ -29,7 +29,7 @@ func (ec *executionContext) _A_id(ctx context.Context, field graphql.CollectedFi
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_A_id(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_A_id)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -43,9 +43,6 @@ func (ec *executionContext) _A_id(ctx context.Context, field graphql.CollectedFi
 		true,
 		true,
 	)
-}
-func (ec *executionContext) fieldContext_A_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("A", field, false, false, "ID")
 }
 
 func (ec *executionContext) _B_id(ctx context.Context, field graphql.CollectedField, obj *B) (ret graphql.Marshaler) {
@@ -54,7 +51,7 @@ func (ec *executionContext) _B_id(ctx context.Context, field graphql.CollectedFi
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_B_id(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_B_id)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -68,9 +65,6 @@ func (ec *executionContext) _B_id(ctx context.Context, field graphql.CollectedFi
 		true,
 		true,
 	)
-}
-func (ec *executionContext) fieldContext_B_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("B", field, false, false, "ID")
 }
 
 // endregion **************************** field.gotpl *****************************

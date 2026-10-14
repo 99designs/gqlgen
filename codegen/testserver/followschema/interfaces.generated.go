@@ -4,7 +4,6 @@ package followschema
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math"
 	"strconv"
@@ -34,7 +33,7 @@ func (ec *executionContext) _BackedByInterface_id(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_BackedByInterface_id(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_BackedByInterface_id)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.BackedByInterface().ID(ctx, obj)
@@ -49,9 +48,6 @@ func (ec *executionContext) _BackedByInterface_id(ctx context.Context, field gra
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_BackedByInterface_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("BackedByInterface", field, true, true, "String")
-}
 
 func (ec *executionContext) _BackedByInterface_thisShouldBind(ctx context.Context, field graphql.CollectedField, obj BackedByInterface) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -59,7 +55,7 @@ func (ec *executionContext) _BackedByInterface_thisShouldBind(ctx context.Contex
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_BackedByInterface_thisShouldBind(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_BackedByInterface_thisShouldBind)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ThisShouldBind(), nil
@@ -74,9 +70,6 @@ func (ec *executionContext) _BackedByInterface_thisShouldBind(ctx context.Contex
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_BackedByInterface_thisShouldBind(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("BackedByInterface", field, true, false, "String")
-}
 
 func (ec *executionContext) _BackedByInterface_thisShouldBindWithError(ctx context.Context, field graphql.CollectedField, obj BackedByInterface) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -84,7 +77,7 @@ func (ec *executionContext) _BackedByInterface_thisShouldBindWithError(ctx conte
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_BackedByInterface_thisShouldBindWithError(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_BackedByInterface_thisShouldBindWithError)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ThisShouldBindWithError()
@@ -99,9 +92,6 @@ func (ec *executionContext) _BackedByInterface_thisShouldBindWithError(ctx conte
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_BackedByInterface_thisShouldBindWithError(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("BackedByInterface", field, true, false, "String")
-}
 
 func (ec *executionContext) _Cat_species(ctx context.Context, field graphql.CollectedField, obj *Cat) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -109,7 +99,7 @@ func (ec *executionContext) _Cat_species(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Cat_species(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Cat_species)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Species, nil
@@ -124,9 +114,6 @@ func (ec *executionContext) _Cat_species(ctx context.Context, field graphql.Coll
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Cat_species(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Cat", field, false, false, "String")
-}
 
 func (ec *executionContext) _Cat_size(ctx context.Context, field graphql.CollectedField, obj *Cat) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -134,7 +121,7 @@ func (ec *executionContext) _Cat_size(ctx context.Context, field graphql.Collect
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Cat_size(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Cat_size)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Size, nil
@@ -149,18 +136,6 @@ func (ec *executionContext) _Cat_size(ctx context.Context, field graphql.Collect
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Cat_size(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Cat",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Size(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Cat_catBreed(ctx context.Context, field graphql.CollectedField, obj *Cat) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -168,7 +143,7 @@ func (ec *executionContext) _Cat_catBreed(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Cat_catBreed(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Cat_catBreed)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.CatBreed, nil
@@ -183,9 +158,6 @@ func (ec *executionContext) _Cat_catBreed(ctx context.Context, field graphql.Col
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Cat_catBreed(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Cat", field, false, false, "String")
-}
 
 func (ec *executionContext) _Circle_radius(ctx context.Context, field graphql.CollectedField, obj *Circle) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -193,7 +165,7 @@ func (ec *executionContext) _Circle_radius(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Circle_radius(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Circle_radius)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Radius, nil
@@ -208,9 +180,6 @@ func (ec *executionContext) _Circle_radius(ctx context.Context, field graphql.Co
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Circle_radius(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Circle", field, false, false, "Float")
-}
 
 func (ec *executionContext) _Circle_area(ctx context.Context, field graphql.CollectedField, obj *Circle) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -218,7 +187,7 @@ func (ec *executionContext) _Circle_area(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Circle_area(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Circle_area)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Area(), nil
@@ -233,9 +202,6 @@ func (ec *executionContext) _Circle_area(ctx context.Context, field graphql.Coll
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Circle_area(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Circle", field, true, false, "Float")
-}
 
 func (ec *executionContext) _Circle_coordinates(ctx context.Context, field graphql.CollectedField, obj *Circle) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -243,7 +209,7 @@ func (ec *executionContext) _Circle_coordinates(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Circle_coordinates(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Circle_coordinates)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Coordinates, nil
@@ -258,18 +224,6 @@ func (ec *executionContext) _Circle_coordinates(ctx context.Context, field graph
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Circle_coordinates(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Circle",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Coordinates(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _ConcreteNodeA_id(ctx context.Context, field graphql.CollectedField, obj *ConcreteNodeA) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -277,7 +231,7 @@ func (ec *executionContext) _ConcreteNodeA_id(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_ConcreteNodeA_id(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_ConcreteNodeA_id)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -292,9 +246,6 @@ func (ec *executionContext) _ConcreteNodeA_id(ctx context.Context, field graphql
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_ConcreteNodeA_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("ConcreteNodeA", field, false, false, "ID")
-}
 
 func (ec *executionContext) _ConcreteNodeA_child(ctx context.Context, field graphql.CollectedField, obj *ConcreteNodeA) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -302,7 +253,7 @@ func (ec *executionContext) _ConcreteNodeA_child(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_ConcreteNodeA_child(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_ConcreteNodeA_child)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Child()
@@ -317,18 +268,6 @@ func (ec *executionContext) _ConcreteNodeA_child(ctx context.Context, field grap
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_ConcreteNodeA_child(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ConcreteNodeA",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("FieldContext.Child cannot be called on type INTERFACE")
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _ConcreteNodeA_name(ctx context.Context, field graphql.CollectedField, obj *ConcreteNodeA) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -336,7 +275,7 @@ func (ec *executionContext) _ConcreteNodeA_name(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_ConcreteNodeA_name(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_ConcreteNodeA_name)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -351,9 +290,6 @@ func (ec *executionContext) _ConcreteNodeA_name(ctx context.Context, field graph
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_ConcreteNodeA_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("ConcreteNodeA", field, false, false, "String")
-}
 
 func (ec *executionContext) _ConcreteNodeInterface_id(ctx context.Context, field graphql.CollectedField, obj ConcreteNodeInterface) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -361,7 +297,7 @@ func (ec *executionContext) _ConcreteNodeInterface_id(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_ConcreteNodeInterface_id(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_ConcreteNodeInterface_id)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID(), nil
@@ -376,9 +312,6 @@ func (ec *executionContext) _ConcreteNodeInterface_id(ctx context.Context, field
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_ConcreteNodeInterface_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("ConcreteNodeInterface", field, true, false, "ID")
-}
 
 func (ec *executionContext) _ConcreteNodeInterface_child(ctx context.Context, field graphql.CollectedField, obj ConcreteNodeInterface) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -386,7 +319,7 @@ func (ec *executionContext) _ConcreteNodeInterface_child(ctx context.Context, fi
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_ConcreteNodeInterface_child(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_ConcreteNodeInterface_child)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Child()
@@ -401,18 +334,6 @@ func (ec *executionContext) _ConcreteNodeInterface_child(ctx context.Context, fi
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_ConcreteNodeInterface_child(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ConcreteNodeInterface",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("FieldContext.Child cannot be called on type INTERFACE")
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Coordinates_x(ctx context.Context, field graphql.CollectedField, obj *Coordinates) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -420,7 +341,7 @@ func (ec *executionContext) _Coordinates_x(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Coordinates_x(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Coordinates_x)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.X, nil
@@ -435,9 +356,6 @@ func (ec *executionContext) _Coordinates_x(ctx context.Context, field graphql.Co
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Coordinates_x(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Coordinates", field, false, false, "Float")
-}
 
 func (ec *executionContext) _Coordinates_y(ctx context.Context, field graphql.CollectedField, obj *Coordinates) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -445,7 +363,7 @@ func (ec *executionContext) _Coordinates_y(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Coordinates_y(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Coordinates_y)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Y, nil
@@ -460,9 +378,6 @@ func (ec *executionContext) _Coordinates_y(ctx context.Context, field graphql.Co
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Coordinates_y(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Coordinates", field, false, false, "Float")
-}
 
 func (ec *executionContext) _Dog_species(ctx context.Context, field graphql.CollectedField, obj *Dog) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -470,7 +385,7 @@ func (ec *executionContext) _Dog_species(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Dog_species(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Dog_species)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Species, nil
@@ -485,9 +400,6 @@ func (ec *executionContext) _Dog_species(ctx context.Context, field graphql.Coll
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Dog_species(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Dog", field, false, false, "String")
-}
 
 func (ec *executionContext) _Dog_size(ctx context.Context, field graphql.CollectedField, obj *Dog) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -495,7 +407,7 @@ func (ec *executionContext) _Dog_size(ctx context.Context, field graphql.Collect
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Dog_size(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Dog_size)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Size, nil
@@ -510,18 +422,6 @@ func (ec *executionContext) _Dog_size(ctx context.Context, field graphql.Collect
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Dog_size(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Dog",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Size(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Dog_dogBreed(ctx context.Context, field graphql.CollectedField, obj *Dog) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -529,7 +429,7 @@ func (ec *executionContext) _Dog_dogBreed(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Dog_dogBreed(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Dog_dogBreed)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.DogBreed, nil
@@ -544,9 +444,6 @@ func (ec *executionContext) _Dog_dogBreed(ctx context.Context, field graphql.Col
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Dog_dogBreed(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Dog", field, false, false, "String")
-}
 
 func (ec *executionContext) _Horse_species(ctx context.Context, field graphql.CollectedField, obj *Horse) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -554,7 +451,7 @@ func (ec *executionContext) _Horse_species(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Horse_species(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Horse_species)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Species, nil
@@ -569,9 +466,6 @@ func (ec *executionContext) _Horse_species(ctx context.Context, field graphql.Co
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Horse_species(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Horse", field, false, false, "String")
-}
 
 func (ec *executionContext) _Horse_size(ctx context.Context, field graphql.CollectedField, obj *Horse) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -579,7 +473,7 @@ func (ec *executionContext) _Horse_size(ctx context.Context, field graphql.Colle
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Horse_size(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Horse_size)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Size, nil
@@ -594,18 +488,6 @@ func (ec *executionContext) _Horse_size(ctx context.Context, field graphql.Colle
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Horse_size(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Horse",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Size(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Horse_horseBreed(ctx context.Context, field graphql.CollectedField, obj *Horse) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -613,7 +495,7 @@ func (ec *executionContext) _Horse_horseBreed(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Horse_horseBreed(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Horse_horseBreed)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.HorseBreed, nil
@@ -628,9 +510,6 @@ func (ec *executionContext) _Horse_horseBreed(ctx context.Context, field graphql
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Horse_horseBreed(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Horse", field, false, false, "String")
-}
 
 func (ec *executionContext) _Rectangle_length(ctx context.Context, field graphql.CollectedField, obj *Rectangle) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -638,7 +517,7 @@ func (ec *executionContext) _Rectangle_length(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Rectangle_length(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Rectangle_length)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Length, nil
@@ -653,9 +532,6 @@ func (ec *executionContext) _Rectangle_length(ctx context.Context, field graphql
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Rectangle_length(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Rectangle", field, false, false, "Float")
-}
 
 func (ec *executionContext) _Rectangle_width(ctx context.Context, field graphql.CollectedField, obj *Rectangle) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -663,7 +539,7 @@ func (ec *executionContext) _Rectangle_width(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Rectangle_width(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Rectangle_width)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Width, nil
@@ -678,9 +554,6 @@ func (ec *executionContext) _Rectangle_width(ctx context.Context, field graphql.
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Rectangle_width(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Rectangle", field, false, false, "Float")
-}
 
 func (ec *executionContext) _Rectangle_area(ctx context.Context, field graphql.CollectedField, obj *Rectangle) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -688,7 +561,7 @@ func (ec *executionContext) _Rectangle_area(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Rectangle_area(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Rectangle_area)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Area(), nil
@@ -703,9 +576,6 @@ func (ec *executionContext) _Rectangle_area(ctx context.Context, field graphql.C
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Rectangle_area(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Rectangle", field, true, false, "Float")
-}
 
 func (ec *executionContext) _Rectangle_coordinates(ctx context.Context, field graphql.CollectedField, obj *Rectangle) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -713,7 +583,7 @@ func (ec *executionContext) _Rectangle_coordinates(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Rectangle_coordinates(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Rectangle_coordinates)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Coordinates, nil
@@ -728,18 +598,6 @@ func (ec *executionContext) _Rectangle_coordinates(ctx context.Context, field gr
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Rectangle_coordinates(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Rectangle",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Coordinates(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Size_height(ctx context.Context, field graphql.CollectedField, obj *Size) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -747,7 +605,7 @@ func (ec *executionContext) _Size_height(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Size_height(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Size_height)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Height, nil
@@ -762,9 +620,6 @@ func (ec *executionContext) _Size_height(ctx context.Context, field graphql.Coll
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Size_height(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Size", field, false, false, "Int")
-}
 
 func (ec *executionContext) _Size_weight(ctx context.Context, field graphql.CollectedField, obj *Size) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -772,7 +627,7 @@ func (ec *executionContext) _Size_weight(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Size_weight(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Size_weight)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Weight, nil
@@ -786,9 +641,6 @@ func (ec *executionContext) _Size_weight(ctx context.Context, field graphql.Coll
 		true,
 		true,
 	)
-}
-func (ec *executionContext) fieldContext_Size_weight(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Size", field, false, false, "Int")
 }
 
 // endregion **************************** field.gotpl *****************************

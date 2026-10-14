@@ -125,19 +125,23 @@ func (d *Data) BatchImplementors(name string) []InterfaceImplementor {
 	return impls
 }
 
-// ChildFieldType represents a unique object type referenced as a return type
-// from fields across all objects. Used to generate shared childFields_*
-// functions that deduplicate the repeated switch statements in fieldContext_*.
+// ChildFieldType represents a unique type referenced as a return type from fields across
+// all objects. Each one gets a shared childFields_* function that serves as the
+// FieldContext.Child dispatcher of every field returning that type.
 type ChildFieldType struct {
 	TypeName   string
 	Definition *ast.Definition
 }
 
-// UniqueChildFieldTypes collects all unique OBJECT types that appear as return
-// types from fields. Each type appears once, enabling generation of a shared
-// childFields_* lookup function instead of inlining the switch in every
-// fieldContext_* function.
-func (d *Data) UniqueChildFieldTypes() []*ChildFieldType {
+// FieldContextID returns the name of the generated fieldContextID constant for the field
+// name of this type.
+func (ct *ChildFieldType) FieldContextID(name string) string {
+	return fieldContextID(ct.TypeName, name)
+}
+
+// ChildFieldTypes collects all unique types that appear as return types from fields,
+// sorted by name.
+func (d *Data) ChildFieldTypes() []*ChildFieldType {
 	seen := map[string]bool{}
 	var result []*ChildFieldType
 	for _, obj := range d.Objects {
@@ -146,9 +150,6 @@ func (d *Data) UniqueChildFieldTypes() []*ChildFieldType {
 				continue
 			}
 			def := field.TypeReference.Definition
-			if def.Kind != ast.Object || len(def.Fields) == 0 {
-				continue
-			}
 			if seen[def.Name] {
 				continue
 			}
@@ -162,6 +163,20 @@ func (d *Data) UniqueChildFieldTypes() []*ChildFieldType {
 	sort.Slice(result, func(i, j int) bool {
 		return result[i].TypeName < result[j].TypeName
 	})
+	return result
+}
+
+// UniqueChildFieldTypes collects all unique OBJECT types with fields that appear as return
+// types from fields, sorted by name.
+//
+// Deprecated: the templates no longer use it; ChildFieldTypes returns every child type.
+func (d *Data) UniqueChildFieldTypes() []*ChildFieldType {
+	var result []*ChildFieldType
+	for _, ct := range d.ChildFieldTypes() {
+		if ct.Definition.Kind == ast.Object && len(ct.Definition.Fields) > 0 {
+			result = append(result, ct)
+		}
+	}
 	return result
 }
 
@@ -262,6 +277,42 @@ func (d *Data) ECArg() string {
 		return "ec, "
 	}
 	return ""
+}
+
+// ECFuncValue returns the prefix that turns a generated function name into a function value.
+// With receiver syntax the value is a method expression, which takes ec as its first
+// parameter; ECFuncValueParams and ECFuncValueArgs follow that order.
+//
+//	function syntax:  ""
+//	receiver syntax:  "(*executionContext)."
+func (d *Data) ECFuncValue() string {
+	if d.Config.UseFunctionSyntaxForExecutionContext {
+		return ""
+	}
+	return "(*executionContext)."
+}
+
+// ECFuncValueParams returns the leading parameters of a function type that holds an
+// ECFuncValue.
+//
+//	function syntax:  "ctx context.Context, ec *executionContext, "
+//	receiver syntax:  "ec *executionContext, ctx context.Context, "
+func (d *Data) ECFuncValueParams() string {
+	if d.Config.UseFunctionSyntaxForExecutionContext {
+		return "ctx context.Context, ec *executionContext, "
+	}
+	return "ec *executionContext, ctx context.Context, "
+}
+
+// ECFuncValueArgs returns the leading arguments of a call through an ECFuncValue.
+//
+//	function syntax:  "ctx, ec, "
+//	receiver syntax:  "ec, ctx, "
+func (d *Data) ECFuncValueArgs() string {
+	if d.Config.UseFunctionSyntaxForExecutionContext {
+		return "ctx, ec, "
+	}
+	return "ec, ctx, "
 }
 
 // ImplDirectivesField is the subset of Field and FieldArgument needed by the

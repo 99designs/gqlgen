@@ -225,19 +225,103 @@ var sources = []*ast.Source{
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
-// childFields_* functions provide shared child field context lookups.
-// Each function is generated once per unique object type, deduplicating the
-// switch statements that were previously inlined in every fieldContext_* function.
-{{- range $ct := .UniqueChildFieldTypes }}
+// fieldContextID identifies a schema field's row in fieldContextDescs.
+type fieldContextID int
+
+// The constants and the fieldContextDescs rows are grouped by object, so gofmt aligns each
+// group on its own and a long field name does not realign the whole table.
+const (
+{{- $first := true }}
+{{- range $object := .Objects }}{{- if $object.Fields }}
+{{- if not $first }}
+{{ end }}
+	// {{ $object.Name }}
+{{- range $field := $object.Fields }}
+	{{ $field.FieldContextID }}{{ if $first }} fieldContextID = iota{{ $first = false }}{{ end }}
+{{- end }}
+{{- end }}{{- end }}
+)
+
+// fieldContextDesc is the request-independent part of a field's graphql.FieldContext.
+// fieldContextDescs holds one per schema field, so a single fieldContextByID replaces a
+// constructor per field.
+type fieldContextDesc struct {
+	object     string
+	child      func({{$.ECFuncValueParams}}field graphql.CollectedField) (*graphql.FieldContext, error)
+	args       func({{$.ECFuncValueParams}}rawArgs map[string]any) (map[string]any, error)
+	isMethod   bool
+	isResolver bool
+}
+
+// fieldContextDescs is filled in init rather than by its initializer because it refers to
+// the childFields_* functions, which read it back through fieldContextByID; the compiler
+// rejects that as an initialization cycle.
+var fieldContextDescs []fieldContextDesc
+
+func init() {
+	fieldContextDescs = []fieldContextDesc{
+	{{- $firstRow := true }}
+	{{- range $object := .Objects }}{{- if $object.Fields }}
+	{{- if not $firstRow }}
+{{ end }}{{ $firstRow = false }}
+	{{- range $field := $object.Fields }}
+		{{ $field.FieldContextID }}: {object: {{ quote $object.Name }}, child: {{$.ECFuncValue}}childFields_{{ $field.ChildFieldContextTypeName }}
+			{{- if $field.Args }}, args: {{$.ECFuncValue}}{{ $field.ArgsFunc }}{{ end }}
+			{{- if or $field.IsMethod $field.IsResolver }}, isMethod: true{{ end }}
+			{{- if $field.IsResolver }}, isResolver: true{{ end }}},
+	{{- end }}
+	{{- end }}{{- end }}
+	}
+}
+
+func {{$.FuncReceiver}}fieldContextByID(ctx context.Context, {{$.ECFuncParam}}field graphql.CollectedField, id fieldContextID) (fc *graphql.FieldContext, err error) {
+	d := &fieldContextDescs[id]
+	fc = &graphql.FieldContext{
+		Object:     d.object,
+		Field:      field,
+		IsMethod:   d.isMethod,
+		IsResolver: d.isResolver,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return d.child({{$.ECFuncValueArgs}}field)
+		},
+	}
+	if d.args == nil {
+		return fc, nil
+	}
+	{{- if not $.Config.OmitPanicHandler }}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	{{- end }}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = d.args({{$.ECFuncValueArgs}}field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+// childFields_* functions are the FieldContext.Child dispatchers, generated once per type
+// that fields return rather than once per field.
+{{- range $ct := .ChildFieldTypes }}
 
 func {{$.FuncReceiver}}childFields_{{ $ct.TypeName }}(ctx context.Context, {{$.ECFuncParam}}field graphql.CollectedField) (*graphql.FieldContext, error) {
+	{{- if not $ct.Definition.Fields }}
+	return nil, errors.New("field of type {{ $ct.TypeName }} does not have child fields")
+	{{- else if ne $ct.Definition.Kind "OBJECT" }}
+	return nil, errors.New("FieldContext.Child cannot be called on type {{ $ct.Definition.Kind }}")
+	{{- else }}
 	switch field.Name {
 	{{- range $f := $ct.Definition.Fields }}
 	case "{{ $f.Name }}":
-		return {{$.ECDot}}fieldContext_{{ $ct.TypeName }}_{{ $f.Name }}(ctx, {{$.ECArg}}field)
+		return {{$.ECDot}}fieldContextByID(ctx, {{$.ECArg}}field, {{ $ct.FieldContextID $f.Name }})
 	{{- end }}
 	}
 	return nil, fmt.Errorf("no field named %q was found under type {{ $ct.TypeName }}", field.Name)
+	{{- end }}
 }
 {{- end }}
 

@@ -28,7 +28,7 @@ func (ec *executionContext) _AIt_id(ctx context.Context, field graphql.Collected
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_AIt_id(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_AIt_id)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -42,9 +42,6 @@ func (ec *executionContext) _AIt_id(ctx context.Context, field graphql.Collected
 		true,
 		true,
 	)
-}
-func (ec *executionContext) fieldContext_AIt_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("AIt", field, false, false, "ID")
 }
 
 func (ec *executionContext) _AbIt_id(ctx context.Context, field graphql.CollectedField, obj *AbIt) (ret graphql.Marshaler) {
@@ -53,7 +50,7 @@ func (ec *executionContext) _AbIt_id(ctx context.Context, field graphql.Collecte
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_AbIt_id(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_AbIt_id)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -67,9 +64,6 @@ func (ec *executionContext) _AbIt_id(ctx context.Context, field graphql.Collecte
 		true,
 		true,
 	)
-}
-func (ec *executionContext) fieldContext_AbIt_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("AbIt", field, false, false, "ID")
 }
 
 func (ec *executionContext) _XXIt_id(ctx context.Context, field graphql.CollectedField, obj *XXIt) (ret graphql.Marshaler) {
@@ -78,7 +72,7 @@ func (ec *executionContext) _XXIt_id(ctx context.Context, field graphql.Collecte
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_XXIt_id(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_XXIt_id)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -92,9 +86,6 @@ func (ec *executionContext) _XXIt_id(ctx context.Context, field graphql.Collecte
 		true,
 		true,
 	)
-}
-func (ec *executionContext) fieldContext_XXIt_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("XXIt", field, false, false, "ID")
 }
 
 func (ec *executionContext) _XxIt_id(ctx context.Context, field graphql.CollectedField, obj *XxIt) (ret graphql.Marshaler) {
@@ -103,7 +94,7 @@ func (ec *executionContext) _XxIt_id(ctx context.Context, field graphql.Collecte
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_XxIt_id(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_XxIt_id)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -117,9 +108,6 @@ func (ec *executionContext) _XxIt_id(ctx context.Context, field graphql.Collecte
 		true,
 		true,
 	)
-}
-func (ec *executionContext) fieldContext_XxIt_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("XxIt", field, false, false, "ID")
 }
 
 func (ec *executionContext) _asdfIt_id(ctx context.Context, field graphql.CollectedField, obj *AsdfIt) (ret graphql.Marshaler) {
@@ -128,7 +116,7 @@ func (ec *executionContext) _asdfIt_id(ctx context.Context, field graphql.Collec
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_asdfIt_id(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_asdfIt_id)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -142,9 +130,6 @@ func (ec *executionContext) _asdfIt_id(ctx context.Context, field graphql.Collec
 		true,
 		true,
 	)
-}
-func (ec *executionContext) fieldContext_asdfIt_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("asdfIt", field, false, false, "ID")
 }
 
 func (ec *executionContext) _iIt_id(ctx context.Context, field graphql.CollectedField, obj *IIt) (ret graphql.Marshaler) {
@@ -153,7 +138,7 @@ func (ec *executionContext) _iIt_id(ctx context.Context, field graphql.Collected
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_iIt_id(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_iIt_id)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -167,9 +152,6 @@ func (ec *executionContext) _iIt_id(ctx context.Context, field graphql.Collected
 		true,
 		true,
 	)
-}
-func (ec *executionContext) fieldContext_iIt_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("iIt", field, false, false, "ID")
 }
 
 // endregion **************************** field.gotpl *****************************

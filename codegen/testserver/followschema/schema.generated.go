@@ -1332,7 +1332,7 @@ func (ec *executionContext) _Autobind_int(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Autobind_int(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Autobind_int)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Int, nil
@@ -1347,9 +1347,6 @@ func (ec *executionContext) _Autobind_int(ctx context.Context, field graphql.Col
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Autobind_int(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Autobind", field, false, false, "Int")
-}
 
 func (ec *executionContext) _Autobind_int32(ctx context.Context, field graphql.CollectedField, obj *Autobind) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -1357,7 +1354,7 @@ func (ec *executionContext) _Autobind_int32(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Autobind_int32(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Autobind_int32)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Int32, nil
@@ -1372,9 +1369,6 @@ func (ec *executionContext) _Autobind_int32(ctx context.Context, field graphql.C
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Autobind_int32(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Autobind", field, false, false, "Int")
-}
 
 func (ec *executionContext) _Autobind_int64(ctx context.Context, field graphql.CollectedField, obj *Autobind) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -1382,7 +1376,7 @@ func (ec *executionContext) _Autobind_int64(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Autobind_int64(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Autobind_int64)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Int64, nil
@@ -1397,9 +1391,6 @@ func (ec *executionContext) _Autobind_int64(ctx context.Context, field graphql.C
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Autobind_int64(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Autobind", field, false, false, "Int")
-}
 
 func (ec *executionContext) _Autobind_idStr(ctx context.Context, field graphql.CollectedField, obj *Autobind) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -1407,7 +1398,7 @@ func (ec *executionContext) _Autobind_idStr(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Autobind_idStr(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Autobind_idStr)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.IdStr, nil
@@ -1422,9 +1413,6 @@ func (ec *executionContext) _Autobind_idStr(ctx context.Context, field graphql.C
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Autobind_idStr(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Autobind", field, false, false, "ID")
-}
 
 func (ec *executionContext) _Autobind_idInt(ctx context.Context, field graphql.CollectedField, obj *Autobind) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -1432,7 +1420,7 @@ func (ec *executionContext) _Autobind_idInt(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Autobind_idInt(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Autobind_idInt)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.IdInt, nil
@@ -1447,9 +1435,6 @@ func (ec *executionContext) _Autobind_idInt(ctx context.Context, field graphql.C
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Autobind_idInt(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Autobind", field, false, false, "ID")
-}
 
 func (ec *executionContext) _EmbeddedPointer_ID(ctx context.Context, field graphql.CollectedField, obj *EmbeddedPointerModel) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -1457,7 +1442,7 @@ func (ec *executionContext) _EmbeddedPointer_ID(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_EmbeddedPointer_ID(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_EmbeddedPointer_ID)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -1472,9 +1457,6 @@ func (ec *executionContext) _EmbeddedPointer_ID(ctx context.Context, field graph
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_EmbeddedPointer_ID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("EmbeddedPointer", field, false, false, "String")
-}
 
 func (ec *executionContext) _EmbeddedPointer_Title(ctx context.Context, field graphql.CollectedField, obj *EmbeddedPointerModel) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -1482,7 +1464,7 @@ func (ec *executionContext) _EmbeddedPointer_Title(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_EmbeddedPointer_Title(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_EmbeddedPointer_Title)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Title, nil
@@ -1497,9 +1479,6 @@ func (ec *executionContext) _EmbeddedPointer_Title(ctx context.Context, field gr
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_EmbeddedPointer_Title(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("EmbeddedPointer", field, false, false, "String")
-}
 
 func (ec *executionContext) _ForcedResolver_field(ctx context.Context, field graphql.CollectedField, obj *ForcedResolver) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -1507,7 +1486,7 @@ func (ec *executionContext) _ForcedResolver_field(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_ForcedResolver_field(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_ForcedResolver_field)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.ForcedResolver().Field(ctx, obj)
@@ -1522,18 +1501,6 @@ func (ec *executionContext) _ForcedResolver_field(ctx context.Context, field gra
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_ForcedResolver_field(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "ForcedResolver",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Circle(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _InnerObject_id(ctx context.Context, field graphql.CollectedField, obj *InnerObject) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -1541,7 +1508,7 @@ func (ec *executionContext) _InnerObject_id(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_InnerObject_id(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_InnerObject_id)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -1555,9 +1522,6 @@ func (ec *executionContext) _InnerObject_id(ctx context.Context, field graphql.C
 		true,
 		true,
 	)
-}
-func (ec *executionContext) fieldContext_InnerObject_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("InnerObject", field, false, false, "Int")
 }
 
 func (ec *executionContext) _InvalidIdentifier_id(ctx context.Context, field graphql.CollectedField, obj *invalid_packagename.InvalidIdentifier) (ret graphql.Marshaler) {
@@ -1566,7 +1530,7 @@ func (ec *executionContext) _InvalidIdentifier_id(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_InvalidIdentifier_id(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_InvalidIdentifier_id)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -1581,9 +1545,6 @@ func (ec *executionContext) _InvalidIdentifier_id(ctx context.Context, field gra
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_InvalidIdentifier_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("InvalidIdentifier", field, false, false, "Int")
-}
 
 func (ec *executionContext) _It_id(ctx context.Context, field graphql.CollectedField, obj *introspection1.It) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -1591,7 +1552,7 @@ func (ec *executionContext) _It_id(ctx context.Context, field graphql.CollectedF
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_It_id(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_It_id)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -1606,9 +1567,6 @@ func (ec *executionContext) _It_id(ctx context.Context, field graphql.CollectedF
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_It_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("It", field, false, false, "ID")
-}
 
 func (ec *executionContext) _ModelMethods_resolverField(ctx context.Context, field graphql.CollectedField, obj *ModelMethods) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -1616,7 +1574,7 @@ func (ec *executionContext) _ModelMethods_resolverField(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_ModelMethods_resolverField(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_ModelMethods_resolverField)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.ModelMethods().ResolverField(ctx, obj)
@@ -1631,9 +1589,6 @@ func (ec *executionContext) _ModelMethods_resolverField(ctx context.Context, fie
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_ModelMethods_resolverField(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("ModelMethods", field, true, true, "Boolean")
-}
 
 func (ec *executionContext) _ModelMethods_noContext(ctx context.Context, field graphql.CollectedField, obj *ModelMethods) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -1641,7 +1596,7 @@ func (ec *executionContext) _ModelMethods_noContext(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_ModelMethods_noContext(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_ModelMethods_noContext)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.NoContext(), nil
@@ -1656,9 +1611,6 @@ func (ec *executionContext) _ModelMethods_noContext(ctx context.Context, field g
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_ModelMethods_noContext(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("ModelMethods", field, true, false, "Boolean")
-}
 
 func (ec *executionContext) _ModelMethods_withContext(ctx context.Context, field graphql.CollectedField, obj *ModelMethods) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -1666,7 +1618,7 @@ func (ec *executionContext) _ModelMethods_withContext(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_ModelMethods_withContext(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_ModelMethods_withContext)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.WithContext(ctx), nil
@@ -1681,9 +1633,6 @@ func (ec *executionContext) _ModelMethods_withContext(ctx context.Context, field
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_ModelMethods_withContext(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("ModelMethods", field, true, false, "Boolean")
-}
 
 func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphql.CollectedField, obj *OuterObject) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -1691,7 +1640,7 @@ func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_OuterObject_inner(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_OuterObject_inner)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Inner, nil
@@ -1706,18 +1655,6 @@ func (ec *executionContext) _OuterObject_inner(ctx context.Context, field graphq
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_OuterObject_inner(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "OuterObject",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_InnerObject(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Pet_id(ctx context.Context, field graphql.CollectedField, obj *Pet) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -1725,7 +1662,7 @@ func (ec *executionContext) _Pet_id(ctx context.Context, field graphql.Collected
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Pet_id(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Pet_id)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -1740,9 +1677,6 @@ func (ec *executionContext) _Pet_id(ctx context.Context, field graphql.Collected
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Pet_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Pet", field, false, false, "Int")
-}
 
 func (ec *executionContext) _Pet_friends(ctx context.Context, field graphql.CollectedField, obj *Pet) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -1750,7 +1684,7 @@ func (ec *executionContext) _Pet_friends(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Pet_friends(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Pet_friends)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -1766,29 +1700,6 @@ func (ec *executionContext) _Pet_friends(ctx context.Context, field graphql.Coll
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Pet_friends(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Pet",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Pet(ctx, field)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Pet_friends_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_invalidIdentifier(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -1796,7 +1707,7 @@ func (ec *executionContext) _Query_invalidIdentifier(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_invalidIdentifier(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_invalidIdentifier)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().InvalidIdentifier(ctx)
@@ -1811,18 +1722,6 @@ func (ec *executionContext) _Query_invalidIdentifier(ctx context.Context, field 
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_invalidIdentifier(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_InvalidIdentifier(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_collision(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -1830,7 +1729,7 @@ func (ec *executionContext) _Query_collision(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_collision(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_collision)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Collision(ctx)
@@ -1845,18 +1744,6 @@ func (ec *executionContext) _Query_collision(ctx context.Context, field graphql.
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_collision(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_It(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -1864,7 +1751,7 @@ func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_mapInput(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_mapInput)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -1880,29 +1767,6 @@ func (ec *executionContext) _Query_mapInput(ctx context.Context, field graphql.C
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_mapInput(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_mapInput_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_recursive(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -1910,7 +1774,7 @@ func (ec *executionContext) _Query_recursive(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_recursive(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_recursive)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -1926,29 +1790,6 @@ func (ec *executionContext) _Query_recursive(ctx context.Context, field graphql.
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_recursive(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_recursive_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -1956,7 +1797,7 @@ func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_nestedInputs(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_nestedInputs)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -1972,29 +1813,6 @@ func (ec *executionContext) _Query_nestedInputs(ctx context.Context, field graph
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_nestedInputs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_nestedInputs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_nestedOutputs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2002,7 +1820,7 @@ func (ec *executionContext) _Query_nestedOutputs(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_nestedOutputs(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_nestedOutputs)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().NestedOutputs(ctx)
@@ -2017,18 +1835,6 @@ func (ec *executionContext) _Query_nestedOutputs(ctx context.Context, field grap
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_nestedOutputs(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_OuterObject(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_modelMethods(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2036,7 +1842,7 @@ func (ec *executionContext) _Query_modelMethods(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_modelMethods(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_modelMethods)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().ModelMethods(ctx)
@@ -2051,18 +1857,6 @@ func (ec *executionContext) _Query_modelMethods(ctx context.Context, field graph
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_modelMethods(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_ModelMethods(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_user(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2070,7 +1864,7 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_user(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_user)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -2086,29 +1880,6 @@ func (ec *executionContext) _Query_user(ctx context.Context, field graphql.Colle
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_user(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_User(ctx, field)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_user_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_nullableArg(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2116,7 +1887,7 @@ func (ec *executionContext) _Query_nullableArg(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_nullableArg(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_nullableArg)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -2132,29 +1903,6 @@ func (ec *executionContext) _Query_nullableArg(ctx context.Context, field graphq
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_nullableArg(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_nullableArg_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_inputSlice(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2162,7 +1910,7 @@ func (ec *executionContext) _Query_inputSlice(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_inputSlice(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_inputSlice)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -2178,29 +1926,6 @@ func (ec *executionContext) _Query_inputSlice(ctx context.Context, field graphql
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_inputSlice(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_inputSlice_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_inputNullableSlice(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2208,7 +1933,7 @@ func (ec *executionContext) _Query_inputNullableSlice(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_inputNullableSlice(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_inputNullableSlice)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -2224,29 +1949,6 @@ func (ec *executionContext) _Query_inputNullableSlice(ctx context.Context, field
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_inputNullableSlice(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_inputNullableSlice_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_inputOmittable(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2254,7 +1956,7 @@ func (ec *executionContext) _Query_inputOmittable(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_inputOmittable(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_inputOmittable)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -2270,29 +1972,6 @@ func (ec *executionContext) _Query_inputOmittable(ctx context.Context, field gra
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_inputOmittable(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_inputOmittable_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_shapeUnion(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2300,7 +1979,7 @@ func (ec *executionContext) _Query_shapeUnion(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_shapeUnion(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_shapeUnion)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().ShapeUnion(ctx)
@@ -2315,9 +1994,6 @@ func (ec *executionContext) _Query_shapeUnion(ctx context.Context, field graphql
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_shapeUnion(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, "ShapeUnion")
-}
 
 func (ec *executionContext) _Query_autobind(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2325,7 +2001,7 @@ func (ec *executionContext) _Query_autobind(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_autobind(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_autobind)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Autobind(ctx)
@@ -2340,18 +2016,6 @@ func (ec *executionContext) _Query_autobind(ctx context.Context, field graphql.C
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_autobind(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Autobind(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_deprecatedField(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2359,7 +2023,7 @@ func (ec *executionContext) _Query_deprecatedField(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_deprecatedField(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_deprecatedField)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().DeprecatedField(ctx)
@@ -2374,9 +2038,6 @@ func (ec *executionContext) _Query_deprecatedField(ctx context.Context, field gr
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_deprecatedField(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, "String")
-}
 
 func (ec *executionContext) _Query_fieldWithDeprecatedArg(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2384,7 +2045,7 @@ func (ec *executionContext) _Query_fieldWithDeprecatedArg(ctx context.Context, f
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_fieldWithDeprecatedArg(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_fieldWithDeprecatedArg)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -2400,29 +2061,6 @@ func (ec *executionContext) _Query_fieldWithDeprecatedArg(ctx context.Context, f
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_fieldWithDeprecatedArg(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_fieldWithDeprecatedArg_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_overlapping(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2430,7 +2068,7 @@ func (ec *executionContext) _Query_overlapping(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_overlapping(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_overlapping)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Overlapping(ctx)
@@ -2445,18 +2083,6 @@ func (ec *executionContext) _Query_overlapping(ctx context.Context, field graphq
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_overlapping(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_OverlappingFields(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_defaultParameters(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2464,7 +2090,7 @@ func (ec *executionContext) _Query_defaultParameters(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_defaultParameters(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_defaultParameters)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -2480,29 +2106,6 @@ func (ec *executionContext) _Query_defaultParameters(ctx context.Context, field 
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_defaultParameters(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_DefaultParametersMirror(ctx, field)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_defaultParameters_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_deferSingle(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2510,7 +2113,7 @@ func (ec *executionContext) _Query_deferSingle(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_deferSingle(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_deferSingle)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().DeferSingle(ctx)
@@ -2525,18 +2128,6 @@ func (ec *executionContext) _Query_deferSingle(ctx context.Context, field graphq
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_deferSingle(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_DeferModel(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_deferMultiple(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2544,7 +2135,7 @@ func (ec *executionContext) _Query_deferMultiple(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_deferMultiple(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_deferMultiple)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().DeferMultiple(ctx)
@@ -2559,18 +2150,6 @@ func (ec *executionContext) _Query_deferMultiple(ctx context.Context, field grap
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_deferMultiple(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_DeferModel(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_directiveArg(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2578,7 +2157,7 @@ func (ec *executionContext) _Query_directiveArg(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_directiveArg(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_directiveArg)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -2594,29 +2173,6 @@ func (ec *executionContext) _Query_directiveArg(ctx context.Context, field graph
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_directiveArg(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_directiveArg_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_directiveNullableArg(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2624,7 +2180,7 @@ func (ec *executionContext) _Query_directiveNullableArg(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_directiveNullableArg(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_directiveNullableArg)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -2640,29 +2196,6 @@ func (ec *executionContext) _Query_directiveNullableArg(ctx context.Context, fie
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_directiveNullableArg(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_directiveNullableArg_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_directiveSingleNullableArg(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2670,7 +2203,7 @@ func (ec *executionContext) _Query_directiveSingleNullableArg(ctx context.Contex
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_directiveSingleNullableArg(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_directiveSingleNullableArg)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -2686,29 +2219,6 @@ func (ec *executionContext) _Query_directiveSingleNullableArg(ctx context.Contex
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_directiveSingleNullableArg(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_directiveSingleNullableArg_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_directiveInputNullable(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2716,7 +2226,7 @@ func (ec *executionContext) _Query_directiveInputNullable(ctx context.Context, f
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_directiveInputNullable(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_directiveInputNullable)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -2732,29 +2242,6 @@ func (ec *executionContext) _Query_directiveInputNullable(ctx context.Context, f
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_directiveInputNullable(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_directiveInputNullable_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_directiveInput(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2762,7 +2249,7 @@ func (ec *executionContext) _Query_directiveInput(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_directiveInput(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_directiveInput)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -2778,29 +2265,6 @@ func (ec *executionContext) _Query_directiveInput(ctx context.Context, field gra
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_directiveInput(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_directiveInput_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_directiveInputType(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2808,7 +2272,7 @@ func (ec *executionContext) _Query_directiveInputType(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_directiveInputType(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_directiveInputType)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -2824,29 +2288,6 @@ func (ec *executionContext) _Query_directiveInputType(ctx context.Context, field
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_directiveInputType(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_directiveInputType_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_directiveInputOuter(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2854,7 +2295,7 @@ func (ec *executionContext) _Query_directiveInputOuter(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_directiveInputOuter(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_directiveInputOuter)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -2870,29 +2311,6 @@ func (ec *executionContext) _Query_directiveInputOuter(ctx context.Context, fiel
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_directiveInputOuter(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_directiveInputOuter_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_directiveInputWithArgs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2900,7 +2318,7 @@ func (ec *executionContext) _Query_directiveInputWithArgs(ctx context.Context, f
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_directiveInputWithArgs(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_directiveInputWithArgs)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -2916,29 +2334,6 @@ func (ec *executionContext) _Query_directiveInputWithArgs(ctx context.Context, f
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_directiveInputWithArgs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_directiveInputWithArgs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_directiveObject(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -2946,7 +2341,7 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_directiveObject(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_directiveObject)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().DirectiveObject(ctx)
@@ -3013,18 +2408,6 @@ func (ec *executionContext) _Query_directiveObject(ctx context.Context, field gr
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_directiveObject(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_ObjectDirectives(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_directiveObjectWithCustomGoModel(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -3032,7 +2415,7 @@ func (ec *executionContext) _Query_directiveObjectWithCustomGoModel(ctx context.
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_directiveObjectWithCustomGoModel(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_directiveObjectWithCustomGoModel)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().DirectiveObjectWithCustomGoModel(ctx)
@@ -3047,18 +2430,6 @@ func (ec *executionContext) _Query_directiveObjectWithCustomGoModel(ctx context.
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_directiveObjectWithCustomGoModel(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_ObjectDirectivesWithCustomGoModel(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_directiveFieldDef(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -3066,7 +2437,7 @@ func (ec *executionContext) _Query_directiveFieldDef(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_directiveFieldDef(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_directiveFieldDef)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -3103,29 +2474,6 @@ func (ec *executionContext) _Query_directiveFieldDef(ctx context.Context, field 
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_directiveFieldDef(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_directiveFieldDef_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_directiveField(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -3133,7 +2481,7 @@ func (ec *executionContext) _Query_directiveField(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_directiveField(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_directiveField)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().DirectiveField(ctx)
@@ -3148,9 +2496,6 @@ func (ec *executionContext) _Query_directiveField(ctx context.Context, field gra
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_directiveField(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, "String")
-}
 
 func (ec *executionContext) _Query_directiveDouble(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -3158,7 +2503,7 @@ func (ec *executionContext) _Query_directiveDouble(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_directiveDouble(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_directiveDouble)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().DirectiveDouble(ctx)
@@ -3191,9 +2536,6 @@ func (ec *executionContext) _Query_directiveDouble(ctx context.Context, field gr
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_directiveDouble(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, "String")
-}
 
 func (ec *executionContext) _Query_directiveUnimplemented(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -3201,7 +2543,7 @@ func (ec *executionContext) _Query_directiveUnimplemented(ctx context.Context, f
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_directiveUnimplemented(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_directiveUnimplemented)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().DirectiveUnimplemented(ctx)
@@ -3227,9 +2569,6 @@ func (ec *executionContext) _Query_directiveUnimplemented(ctx context.Context, f
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_directiveUnimplemented(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, "String")
-}
 
 func (ec *executionContext) _Query_embeddedCase1(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -3237,7 +2576,7 @@ func (ec *executionContext) _Query_embeddedCase1(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_embeddedCase1(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_embeddedCase1)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().EmbeddedCase1(ctx)
@@ -3252,18 +2591,6 @@ func (ec *executionContext) _Query_embeddedCase1(ctx context.Context, field grap
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_embeddedCase1(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_EmbeddedCase1(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_embeddedCase2(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -3271,7 +2598,7 @@ func (ec *executionContext) _Query_embeddedCase2(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_embeddedCase2(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_embeddedCase2)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().EmbeddedCase2(ctx)
@@ -3286,18 +2613,6 @@ func (ec *executionContext) _Query_embeddedCase2(ctx context.Context, field grap
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_embeddedCase2(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_EmbeddedCase2(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_embeddedCase3(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -3305,7 +2620,7 @@ func (ec *executionContext) _Query_embeddedCase3(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_embeddedCase3(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_embeddedCase3)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().EmbeddedCase3(ctx)
@@ -3320,18 +2635,6 @@ func (ec *executionContext) _Query_embeddedCase3(ctx context.Context, field grap
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_embeddedCase3(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_EmbeddedCase3(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_enumInInput(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -3339,7 +2642,7 @@ func (ec *executionContext) _Query_enumInInput(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_enumInInput(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_enumInInput)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -3355,29 +2658,6 @@ func (ec *executionContext) _Query_enumInInput(ctx context.Context, field graphq
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_enumInInput(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type EnumTest does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_enumInInput_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_searchProducts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -3385,7 +2665,7 @@ func (ec *executionContext) _Query_searchProducts(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_searchProducts(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_searchProducts)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -3405,29 +2685,6 @@ func (ec *executionContext) _Query_searchProducts(ctx context.Context, field gra
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_searchProducts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_searchProducts_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_searchRequired(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -3435,7 +2692,7 @@ func (ec *executionContext) _Query_searchRequired(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_searchRequired(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_searchRequired)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -3454,29 +2711,6 @@ func (ec *executionContext) _Query_searchRequired(ctx context.Context, field gra
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_searchRequired(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_searchRequired_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_searchProductsNormal(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -3484,7 +2718,7 @@ func (ec *executionContext) _Query_searchProductsNormal(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_searchProductsNormal(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_searchProductsNormal)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -3500,29 +2734,6 @@ func (ec *executionContext) _Query_searchProductsNormal(ctx context.Context, fie
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_searchProductsNormal(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_searchProductsNormal_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_searchWithDefaults(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -3530,7 +2741,7 @@ func (ec *executionContext) _Query_searchWithDefaults(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_searchWithDefaults(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_searchWithDefaults)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -3550,29 +2761,6 @@ func (ec *executionContext) _Query_searchWithDefaults(ctx context.Context, field
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_searchWithDefaults(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_searchWithDefaults_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_searchMixed(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -3580,7 +2768,7 @@ func (ec *executionContext) _Query_searchMixed(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_searchMixed(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_searchMixed)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -3600,29 +2788,6 @@ func (ec *executionContext) _Query_searchMixed(ctx context.Context, field graphq
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_searchMixed(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_searchMixed_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_filterProducts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -3630,7 +2795,7 @@ func (ec *executionContext) _Query_filterProducts(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_filterProducts(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_filterProducts)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -3650,29 +2815,6 @@ func (ec *executionContext) _Query_filterProducts(ctx context.Context, field gra
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_filterProducts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_filterProducts_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_findProducts(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -3680,7 +2822,7 @@ func (ec *executionContext) _Query_findProducts(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_findProducts(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_findProducts)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -3700,29 +2842,6 @@ func (ec *executionContext) _Query_findProducts(ctx context.Context, field graph
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_findProducts(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_findProducts_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_searchWithDirectives(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -3730,7 +2849,7 @@ func (ec *executionContext) _Query_searchWithDirectives(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_searchWithDirectives(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_searchWithDirectives)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -3749,29 +2868,6 @@ func (ec *executionContext) _Query_searchWithDirectives(ctx context.Context, fie
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_searchWithDirectives(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_searchWithDirectives_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -3779,7 +2875,7 @@ func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_shapes(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_shapes)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Shapes(ctx)
@@ -3794,18 +2890,6 @@ func (ec *executionContext) _Query_shapes(ctx context.Context, field graphql.Col
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_shapes(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("FieldContext.Child cannot be called on type INTERFACE")
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_noShape(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -3813,7 +2897,7 @@ func (ec *executionContext) _Query_noShape(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_noShape(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_noShape)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().NoShape(ctx)
@@ -3839,18 +2923,6 @@ func (ec *executionContext) _Query_noShape(ctx context.Context, field graphql.Co
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_noShape(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("FieldContext.Child cannot be called on type INTERFACE")
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_node(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -3858,7 +2930,7 @@ func (ec *executionContext) _Query_node(ctx context.Context, field graphql.Colle
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_node(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_node)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Node(ctx)
@@ -3873,18 +2945,6 @@ func (ec *executionContext) _Query_node(ctx context.Context, field graphql.Colle
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_node(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("FieldContext.Child cannot be called on type INTERFACE")
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_noShapeTypedNil(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -3892,7 +2952,7 @@ func (ec *executionContext) _Query_noShapeTypedNil(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_noShapeTypedNil(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_noShapeTypedNil)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().NoShapeTypedNil(ctx)
@@ -3918,18 +2978,6 @@ func (ec *executionContext) _Query_noShapeTypedNil(ctx context.Context, field gr
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_noShapeTypedNil(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("FieldContext.Child cannot be called on type INTERFACE")
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_animal(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -3937,7 +2985,7 @@ func (ec *executionContext) _Query_animal(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_animal(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_animal)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Animal(ctx)
@@ -3963,18 +3011,6 @@ func (ec *executionContext) _Query_animal(ctx context.Context, field graphql.Col
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_animal(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("FieldContext.Child cannot be called on type INTERFACE")
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_notAnInterface(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -3982,7 +3018,7 @@ func (ec *executionContext) _Query_notAnInterface(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_notAnInterface(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_notAnInterface)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().NotAnInterface(ctx)
@@ -3997,18 +3033,6 @@ func (ec *executionContext) _Query_notAnInterface(ctx context.Context, field gra
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_notAnInterface(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_BackedByInterface(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_dog(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4016,7 +3040,7 @@ func (ec *executionContext) _Query_dog(ctx context.Context, field graphql.Collec
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_dog(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_dog)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Dog(ctx)
@@ -4031,18 +3055,6 @@ func (ec *executionContext) _Query_dog(ctx context.Context, field graphql.Collec
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_dog(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Dog(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_issue896a(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4050,7 +3062,7 @@ func (ec *executionContext) _Query_issue896a(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_issue896a(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_issue896a)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Issue896a(ctx)
@@ -4065,18 +3077,6 @@ func (ec *executionContext) _Query_issue896a(ctx context.Context, field graphql.
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_issue896a(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_CheckIssue896(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_mapStringInterface(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4084,7 +3084,7 @@ func (ec *executionContext) _Query_mapStringInterface(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_mapStringInterface(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_mapStringInterface)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -4100,29 +3100,6 @@ func (ec *executionContext) _Query_mapStringInterface(ctx context.Context, field
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_mapStringInterface(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_MapStringInterfaceType(ctx, field)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_mapStringInterface_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_mapNestedStringInterface(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4130,7 +3107,7 @@ func (ec *executionContext) _Query_mapNestedStringInterface(ctx context.Context,
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_mapNestedStringInterface(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_mapNestedStringInterface)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -4146,29 +3123,6 @@ func (ec *executionContext) _Query_mapNestedStringInterface(ctx context.Context,
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_mapNestedStringInterface(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_MapStringInterfaceType(ctx, field)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_mapNestedStringInterface_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_mapNestedMapSlice(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4176,7 +3130,7 @@ func (ec *executionContext) _Query_mapNestedMapSlice(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_mapNestedMapSlice(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_mapNestedMapSlice)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -4192,29 +3146,6 @@ func (ec *executionContext) _Query_mapNestedMapSlice(ctx context.Context, field 
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_mapNestedMapSlice(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_mapNestedMapSlice_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_errorBubble(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4222,7 +3153,7 @@ func (ec *executionContext) _Query_errorBubble(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_errorBubble(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_errorBubble)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().ErrorBubble(ctx)
@@ -4237,18 +3168,6 @@ func (ec *executionContext) _Query_errorBubble(ctx context.Context, field graphq
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_errorBubble(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Error(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_errorBubbleList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4256,7 +3175,7 @@ func (ec *executionContext) _Query_errorBubbleList(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_errorBubbleList(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_errorBubbleList)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().ErrorBubbleList(ctx)
@@ -4271,18 +3190,6 @@ func (ec *executionContext) _Query_errorBubbleList(ctx context.Context, field gr
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_errorBubbleList(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Error(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_errorList(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4290,7 +3197,7 @@ func (ec *executionContext) _Query_errorList(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_errorList(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_errorList)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().ErrorList(ctx)
@@ -4305,18 +3212,6 @@ func (ec *executionContext) _Query_errorList(ctx context.Context, field graphql.
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_errorList(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Error(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_errors(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4324,7 +3219,7 @@ func (ec *executionContext) _Query_errors(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_errors(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_errors)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Errors(ctx)
@@ -4339,18 +3234,6 @@ func (ec *executionContext) _Query_errors(ctx context.Context, field graphql.Col
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_errors(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Errors(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_valid(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4358,7 +3241,7 @@ func (ec *executionContext) _Query_valid(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_valid(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_valid)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Valid(ctx)
@@ -4373,9 +3256,6 @@ func (ec *executionContext) _Query_valid(ctx context.Context, field graphql.Coll
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_valid(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, "String")
-}
 
 func (ec *executionContext) _Query_invalid(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4383,7 +3263,7 @@ func (ec *executionContext) _Query_invalid(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_invalid(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_invalid)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Invalid(ctx)
@@ -4398,9 +3278,6 @@ func (ec *executionContext) _Query_invalid(ctx context.Context, field graphql.Co
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_invalid(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, "String")
-}
 
 func (ec *executionContext) _Query_panics(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4408,7 +3285,7 @@ func (ec *executionContext) _Query_panics(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_panics(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_panics)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Panics(ctx)
@@ -4423,18 +3300,6 @@ func (ec *executionContext) _Query_panics(ctx context.Context, field graphql.Col
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_panics(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Panics(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_primitiveObject(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4442,7 +3307,7 @@ func (ec *executionContext) _Query_primitiveObject(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_primitiveObject(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_primitiveObject)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().PrimitiveObject(ctx)
@@ -4457,18 +3322,6 @@ func (ec *executionContext) _Query_primitiveObject(ctx context.Context, field gr
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_primitiveObject(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Primitive(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_primitiveStringObject(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4476,7 +3329,7 @@ func (ec *executionContext) _Query_primitiveStringObject(ctx context.Context, fi
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_primitiveStringObject(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_primitiveStringObject)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().PrimitiveStringObject(ctx)
@@ -4491,18 +3344,6 @@ func (ec *executionContext) _Query_primitiveStringObject(ctx context.Context, fi
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_primitiveStringObject(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_PrimitiveString(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_ptrToAnyContainer(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4510,7 +3351,7 @@ func (ec *executionContext) _Query_ptrToAnyContainer(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_ptrToAnyContainer(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_ptrToAnyContainer)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().PtrToAnyContainer(ctx)
@@ -4525,18 +3366,6 @@ func (ec *executionContext) _Query_ptrToAnyContainer(ctx context.Context, field 
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_ptrToAnyContainer(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_PtrToAnyContainer(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_ptrToSliceContainer(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4544,7 +3373,7 @@ func (ec *executionContext) _Query_ptrToSliceContainer(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_ptrToSliceContainer(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_ptrToSliceContainer)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().PtrToSliceContainer(ctx)
@@ -4559,18 +3388,6 @@ func (ec *executionContext) _Query_ptrToSliceContainer(ctx context.Context, fiel
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_ptrToSliceContainer(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_PtrToSliceContainer(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_infinity(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4578,7 +3395,7 @@ func (ec *executionContext) _Query_infinity(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_infinity(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_infinity)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Infinity(ctx)
@@ -4593,9 +3410,6 @@ func (ec *executionContext) _Query_infinity(ctx context.Context, field graphql.C
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_infinity(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, "Float")
-}
 
 func (ec *executionContext) _Query_stringFromContextInterface(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4603,7 +3417,7 @@ func (ec *executionContext) _Query_stringFromContextInterface(ctx context.Contex
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_stringFromContextInterface(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_stringFromContextInterface)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().StringFromContextInterface(ctx)
@@ -4618,9 +3432,6 @@ func (ec *executionContext) _Query_stringFromContextInterface(ctx context.Contex
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_stringFromContextInterface(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, "StringFromContextInterface")
-}
 
 func (ec *executionContext) _Query_stringFromContextFunction(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4628,7 +3439,7 @@ func (ec *executionContext) _Query_stringFromContextFunction(ctx context.Context
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_stringFromContextFunction(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_stringFromContextFunction)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().StringFromContextFunction(ctx)
@@ -4643,9 +3454,6 @@ func (ec *executionContext) _Query_stringFromContextFunction(ctx context.Context
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_stringFromContextFunction(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, "StringFromContextFunction")
-}
 
 func (ec *executionContext) _Query_defaultScalar(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4653,7 +3461,7 @@ func (ec *executionContext) _Query_defaultScalar(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_defaultScalar(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_defaultScalar)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -4669,29 +3477,6 @@ func (ec *executionContext) _Query_defaultScalar(ctx context.Context, field grap
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_defaultScalar(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type DefaultScalarImplementation does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_defaultScalar_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_skipInclude(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4699,7 +3484,7 @@ func (ec *executionContext) _Query_skipInclude(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_skipInclude(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_skipInclude)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().SkipInclude(ctx)
@@ -4714,18 +3499,6 @@ func (ec *executionContext) _Query_skipInclude(ctx context.Context, field graphq
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_skipInclude(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_SkipIncludeTestType(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_slices(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4733,7 +3506,7 @@ func (ec *executionContext) _Query_slices(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_slices(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_slices)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().Slices(ctx)
@@ -4748,18 +3521,6 @@ func (ec *executionContext) _Query_slices(ctx context.Context, field graphql.Col
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_slices(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Slices(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_scalarSlice(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4767,7 +3528,7 @@ func (ec *executionContext) _Query_scalarSlice(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_scalarSlice(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_scalarSlice)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().ScalarSlice(ctx)
@@ -4782,9 +3543,6 @@ func (ec *executionContext) _Query_scalarSlice(ctx context.Context, field graphq
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_scalarSlice(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, "Bytes")
-}
 
 func (ec *executionContext) _Query_fallback(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4792,7 +3550,7 @@ func (ec *executionContext) _Query_fallback(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_fallback(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_fallback)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -4808,29 +3566,6 @@ func (ec *executionContext) _Query_fallback(ctx context.Context, field graphql.C
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_fallback(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type FallbackToStringEncoding does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_fallback_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_optionalUnion(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4838,7 +3573,7 @@ func (ec *executionContext) _Query_optionalUnion(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_optionalUnion(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_optionalUnion)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().OptionalUnion(ctx)
@@ -4853,9 +3588,6 @@ func (ec *executionContext) _Query_optionalUnion(ctx context.Context, field grap
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_optionalUnion(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, "TestUnion")
-}
 
 func (ec *executionContext) _Query_vOkCaseValue(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4863,7 +3595,7 @@ func (ec *executionContext) _Query_vOkCaseValue(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_vOkCaseValue(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_vOkCaseValue)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().VOkCaseValue(ctx)
@@ -4878,18 +3610,6 @@ func (ec *executionContext) _Query_vOkCaseValue(ctx context.Context, field graph
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_vOkCaseValue(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_VOkCaseValue(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_vOkCaseNil(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4897,7 +3617,7 @@ func (ec *executionContext) _Query_vOkCaseNil(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_vOkCaseNil(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_vOkCaseNil)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().VOkCaseNil(ctx)
@@ -4912,18 +3632,6 @@ func (ec *executionContext) _Query_vOkCaseNil(ctx context.Context, field graphql
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_vOkCaseNil(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_VOkCaseNil(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_validType(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4931,7 +3639,7 @@ func (ec *executionContext) _Query_validType(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_validType(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_validType)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().ValidType(ctx)
@@ -4946,18 +3654,6 @@ func (ec *executionContext) _Query_validType(ctx context.Context, field graphql.
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_validType(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_ValidType(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_variadicModel(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4965,7 +3661,7 @@ func (ec *executionContext) _Query_variadicModel(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_variadicModel(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_variadicModel)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().VariadicModel(ctx)
@@ -4980,18 +3676,6 @@ func (ec *executionContext) _Query_variadicModel(ctx context.Context, field grap
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_variadicModel(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_VariadicModel(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_wrappedStruct(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -4999,7 +3683,7 @@ func (ec *executionContext) _Query_wrappedStruct(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_wrappedStruct(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_wrappedStruct)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().WrappedStruct(ctx)
@@ -5014,18 +3698,6 @@ func (ec *executionContext) _Query_wrappedStruct(ctx context.Context, field grap
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_wrappedStruct(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_WrappedStruct(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_wrappedScalar(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -5033,7 +3705,7 @@ func (ec *executionContext) _Query_wrappedScalar(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_wrappedScalar(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_wrappedScalar)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().WrappedScalar(ctx)
@@ -5048,9 +3720,6 @@ func (ec *executionContext) _Query_wrappedScalar(ctx context.Context, field grap
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_wrappedScalar(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Query", field, true, true, "WrappedScalar")
-}
 
 func (ec *executionContext) _Query_wrappedMap(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -5058,7 +3727,7 @@ func (ec *executionContext) _Query_wrappedMap(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_wrappedMap(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_wrappedMap)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().WrappedMap(ctx)
@@ -5073,18 +3742,6 @@ func (ec *executionContext) _Query_wrappedMap(ctx context.Context, field graphql
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_wrappedMap(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_WrappedMap(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query_wrappedSlice(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -5092,7 +3749,7 @@ func (ec *executionContext) _Query_wrappedSlice(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_wrappedSlice(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query_wrappedSlice)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Query().WrappedSlice(ctx)
@@ -5107,18 +3764,6 @@ func (ec *executionContext) _Query_wrappedSlice(ctx context.Context, field graph
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Query_wrappedSlice(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_WrappedSlice(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -5126,7 +3771,7 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query___type(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query___type)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -5142,29 +3787,6 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query___type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields___Type(ctx, field)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query___type_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -5172,7 +3794,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query___schema(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Query___schema)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.IntrospectSchema()
@@ -5187,18 +3809,6 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields___Schema(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Subscription_updated(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	return graphql.ResolveFieldStream(
@@ -5206,7 +3816,7 @@ func (ec *executionContext) _Subscription_updated(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Subscription_updated(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Subscription_updated)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Subscription().Updated(ctx)
@@ -5221,9 +3831,6 @@ func (ec *executionContext) _Subscription_updated(ctx context.Context, field gra
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Subscription_updated(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Subscription", field, true, true, "String")
-}
 
 func (ec *executionContext) _Subscription_initPayload(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	return graphql.ResolveFieldStream(
@@ -5231,7 +3838,7 @@ func (ec *executionContext) _Subscription_initPayload(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Subscription_initPayload(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Subscription_initPayload)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Subscription().InitPayload(ctx)
@@ -5246,9 +3853,6 @@ func (ec *executionContext) _Subscription_initPayload(ctx context.Context, field
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Subscription_initPayload(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Subscription", field, true, true, "String")
-}
 
 func (ec *executionContext) _Subscription_directiveArg(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	return graphql.ResolveFieldStream(
@@ -5256,7 +3860,7 @@ func (ec *executionContext) _Subscription_directiveArg(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Subscription_directiveArg(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Subscription_directiveArg)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -5272,29 +3876,6 @@ func (ec *executionContext) _Subscription_directiveArg(ctx context.Context, fiel
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Subscription_directiveArg(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Subscription",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Subscription_directiveArg_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Subscription_directiveNullableArg(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	return graphql.ResolveFieldStream(
@@ -5302,7 +3883,7 @@ func (ec *executionContext) _Subscription_directiveNullableArg(ctx context.Conte
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Subscription_directiveNullableArg(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Subscription_directiveNullableArg)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -5318,29 +3899,6 @@ func (ec *executionContext) _Subscription_directiveNullableArg(ctx context.Conte
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Subscription_directiveNullableArg(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Subscription",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Subscription_directiveNullableArg_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Subscription_directiveDouble(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	return graphql.ResolveFieldStream(
@@ -5348,7 +3906,7 @@ func (ec *executionContext) _Subscription_directiveDouble(ctx context.Context, f
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Subscription_directiveDouble(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Subscription_directiveDouble)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Subscription().DirectiveDouble(ctx)
@@ -5381,9 +3939,6 @@ func (ec *executionContext) _Subscription_directiveDouble(ctx context.Context, f
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Subscription_directiveDouble(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Subscription", field, true, true, "String")
-}
 
 func (ec *executionContext) _Subscription_directiveUnimplemented(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	return graphql.ResolveFieldStream(
@@ -5391,7 +3946,7 @@ func (ec *executionContext) _Subscription_directiveUnimplemented(ctx context.Con
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Subscription_directiveUnimplemented(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Subscription_directiveUnimplemented)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Subscription().DirectiveUnimplemented(ctx)
@@ -5417,9 +3972,6 @@ func (ec *executionContext) _Subscription_directiveUnimplemented(ctx context.Con
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Subscription_directiveUnimplemented(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Subscription", field, true, true, "String")
-}
 
 func (ec *executionContext) _Subscription_issue896b(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	return graphql.ResolveFieldStream(
@@ -5427,7 +3979,7 @@ func (ec *executionContext) _Subscription_issue896b(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Subscription_issue896b(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Subscription_issue896b)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Subscription().Issue896b(ctx)
@@ -5442,18 +3994,6 @@ func (ec *executionContext) _Subscription_issue896b(ctx context.Context, field g
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Subscription_issue896b(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Subscription",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_CheckIssue896(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Subscription_errorRequired(ctx context.Context, field graphql.CollectedField) (ret func(ctx context.Context) graphql.Marshaler) {
 	return graphql.ResolveFieldStream(
@@ -5461,7 +4001,7 @@ func (ec *executionContext) _Subscription_errorRequired(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Subscription_errorRequired(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Subscription_errorRequired)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Subscription().ErrorRequired(ctx)
@@ -5476,18 +4016,6 @@ func (ec *executionContext) _Subscription_errorRequired(ctx context.Context, fie
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Subscription_errorRequired(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Subscription",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Error(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _User_id(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -5495,7 +4023,7 @@ func (ec *executionContext) _User_id(ctx context.Context, field graphql.Collecte
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_User_id(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_User_id)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -5510,9 +4038,6 @@ func (ec *executionContext) _User_id(ctx context.Context, field graphql.Collecte
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_User_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("User", field, false, false, "Int")
-}
 
 func (ec *executionContext) _User_friends(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -5520,7 +4045,7 @@ func (ec *executionContext) _User_friends(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_User_friends(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_User_friends)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.User().Friends(ctx, obj)
@@ -5535,18 +4060,6 @@ func (ec *executionContext) _User_friends(ctx context.Context, field graphql.Col
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_User_friends(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "User",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_User(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _User_created(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -5554,7 +4067,7 @@ func (ec *executionContext) _User_created(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_User_created(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_User_created)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Created, nil
@@ -5569,9 +4082,6 @@ func (ec *executionContext) _User_created(ctx context.Context, field graphql.Col
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_User_created(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("User", field, false, false, "Time")
-}
 
 func (ec *executionContext) _User_updated(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -5579,7 +4089,7 @@ func (ec *executionContext) _User_updated(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_User_updated(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_User_updated)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Updated, nil
@@ -5594,9 +4104,6 @@ func (ec *executionContext) _User_updated(ctx context.Context, field graphql.Col
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_User_updated(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("User", field, false, false, "Time")
-}
 
 func (ec *executionContext) _User_pets(ctx context.Context, field graphql.CollectedField, obj *User) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -5604,7 +4111,7 @@ func (ec *executionContext) _User_pets(ctx context.Context, field graphql.Collec
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_User_pets(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_User_pets)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -5619,29 +4126,6 @@ func (ec *executionContext) _User_pets(ctx context.Context, field graphql.Collec
 		true,
 		false,
 	)
-}
-func (ec *executionContext) fieldContext_User_pets(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "User",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_Pet(ctx, field)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_User_pets_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
 }
 
 // endregion **************************** field.gotpl *****************************

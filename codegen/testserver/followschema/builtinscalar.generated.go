@@ -28,7 +28,7 @@ func (ec *executionContext) _Map_id(ctx context.Context, field graphql.Collected
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Map_id(ctx, field)
+			return ec.fieldContextByID(ctx, field, 62 /* Map.id */)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -42,9 +42,6 @@ func (ec *executionContext) _Map_id(ctx context.Context, field graphql.Collected
 		true,
 		true,
 	)
-}
-func (ec *executionContext) fieldContext_Map_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Map", field, false, false, "ID")
 }
 
 // endregion **************************** field.gotpl *****************************

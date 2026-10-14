@@ -32,7 +32,7 @@ func (ec *executionContext) _OverlappingFields_oneFoo(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_OverlappingFields_oneFoo(ctx, field)
+			return ec.fieldContextByID(ctx, field, 82 /* OverlappingFields.oneFoo */)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Foo, nil
@@ -46,9 +46,6 @@ func (ec *executionContext) _OverlappingFields_oneFoo(ctx context.Context, field
 		true,
 		true,
 	)
-}
-func (ec *executionContext) fieldContext_OverlappingFields_oneFoo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("OverlappingFields", field, false, false, "Int")
 }
 
 func (ec *executionContext) _OverlappingFields_twoFoo(ctx context.Context, field graphql.CollectedField, obj *OverlappingFields) (ret graphql.Marshaler) {
@@ -57,7 +54,7 @@ func (ec *executionContext) _OverlappingFields_twoFoo(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_OverlappingFields_twoFoo(ctx, field)
+			return ec.fieldContextByID(ctx, field, 83 /* OverlappingFields.twoFoo */)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Foo, nil
@@ -72,9 +69,6 @@ func (ec *executionContext) _OverlappingFields_twoFoo(ctx context.Context, field
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_OverlappingFields_twoFoo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("OverlappingFields", field, false, false, "Int")
-}
 
 func (ec *executionContext) _OverlappingFields_oldFoo(ctx context.Context, field graphql.CollectedField, obj *OverlappingFields) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -82,7 +76,7 @@ func (ec *executionContext) _OverlappingFields_oldFoo(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_OverlappingFields_oldFoo(ctx, field)
+			return ec.fieldContextByID(ctx, field, 84 /* OverlappingFields.oldFoo */)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.OverlappingFields().OldFoo(ctx, obj)
@@ -97,9 +91,6 @@ func (ec *executionContext) _OverlappingFields_oldFoo(ctx context.Context, field
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_OverlappingFields_oldFoo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("OverlappingFields", field, true, true, "Int")
-}
 
 func (ec *executionContext) _OverlappingFields_newFoo(ctx context.Context, field graphql.CollectedField, obj *OverlappingFields) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -107,7 +98,7 @@ func (ec *executionContext) _OverlappingFields_newFoo(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_OverlappingFields_newFoo(ctx, field)
+			return ec.fieldContextByID(ctx, field, 85 /* OverlappingFields.newFoo */)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.NewFoo, nil
@@ -121,9 +112,6 @@ func (ec *executionContext) _OverlappingFields_newFoo(ctx context.Context, field
 		true,
 		true,
 	)
-}
-func (ec *executionContext) fieldContext_OverlappingFields_newFoo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("OverlappingFields", field, false, false, "Int")
 }
 
 func (ec *executionContext) _OverlappingFields_new_foo(ctx context.Context, field graphql.CollectedField, obj *OverlappingFields) (ret graphql.Marshaler) {
@@ -132,7 +120,7 @@ func (ec *executionContext) _OverlappingFields_new_foo(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_OverlappingFields_new_foo(ctx, field)
+			return ec.fieldContextByID(ctx, field, 86 /* OverlappingFields.new_foo */)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.NewFoo, nil
@@ -146,9 +134,6 @@ func (ec *executionContext) _OverlappingFields_new_foo(ctx context.Context, fiel
 		true,
 		true,
 	)
-}
-func (ec *executionContext) fieldContext_OverlappingFields_new_foo(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("OverlappingFields", field, false, false, "Int")
 }
 
 // endregion **************************** field.gotpl *****************************

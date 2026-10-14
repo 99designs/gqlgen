@@ -28,7 +28,7 @@ func (ec *executionContext) _PtrToSliceContainer_ptrToSlice(ctx context.Context,
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_PtrToSliceContainer_ptrToSlice(ctx, field)
+			return ec.fieldContextByID(ctx, field, 104 /* PtrToSliceContainer.ptrToSlice */)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.PtrToSlice, nil
@@ -42,9 +42,6 @@ func (ec *executionContext) _PtrToSliceContainer_ptrToSlice(ctx context.Context,
 		true,
 		false,
 	)
-}
-func (ec *executionContext) fieldContext_PtrToSliceContainer_ptrToSlice(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("PtrToSliceContainer", field, false, false, "String")
 }
 
 // endregion **************************** field.gotpl *****************************

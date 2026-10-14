@@ -152,7 +152,7 @@ func (ec *executionContext) _ObjectDirectives_text(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_ObjectDirectives_text(ctx, field)
+			return ec.fieldContextByID(ctx, field, 77 /* ObjectDirectives.text */)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Text, nil
@@ -193,9 +193,6 @@ func (ec *executionContext) _ObjectDirectives_text(ctx context.Context, field gr
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_ObjectDirectives_text(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("ObjectDirectives", field, false, false, "String")
-}
 
 func (ec *executionContext) _ObjectDirectives_nullableText(ctx context.Context, field graphql.CollectedField, obj *ObjectDirectives) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -203,7 +200,7 @@ func (ec *executionContext) _ObjectDirectives_nullableText(ctx context.Context, 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_ObjectDirectives_nullableText(ctx, field)
+			return ec.fieldContextByID(ctx, field, 78 /* ObjectDirectives.nullableText */)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.NullableText, nil
@@ -229,9 +226,6 @@ func (ec *executionContext) _ObjectDirectives_nullableText(ctx context.Context, 
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_ObjectDirectives_nullableText(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("ObjectDirectives", field, false, false, "String")
-}
 
 func (ec *executionContext) _ObjectDirectives_order(ctx context.Context, field graphql.CollectedField, obj *ObjectDirectives) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -239,7 +233,7 @@ func (ec *executionContext) _ObjectDirectives_order(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_ObjectDirectives_order(ctx, field)
+			return ec.fieldContextByID(ctx, field, 79 /* ObjectDirectives.order */)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Order, nil
@@ -254,9 +248,6 @@ func (ec *executionContext) _ObjectDirectives_order(ctx context.Context, field g
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_ObjectDirectives_order(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("ObjectDirectives", field, false, false, "String")
-}
 
 func (ec *executionContext) _ObjectDirectivesWithCustomGoModel_nullableText(ctx context.Context, field graphql.CollectedField, obj *ObjectDirectivesWithCustomGoModel) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -264,7 +255,7 @@ func (ec *executionContext) _ObjectDirectivesWithCustomGoModel_nullableText(ctx 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_ObjectDirectivesWithCustomGoModel_nullableText(ctx, field)
+			return ec.fieldContextByID(ctx, field, 80 /* ObjectDirectivesWithCustomGoModel.nullableText */)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.NullableText, nil
@@ -289,9 +280,6 @@ func (ec *executionContext) _ObjectDirectivesWithCustomGoModel_nullableText(ctx 
 		true,
 		false,
 	)
-}
-func (ec *executionContext) fieldContext_ObjectDirectivesWithCustomGoModel_nullableText(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("ObjectDirectivesWithCustomGoModel", field, false, false, "String")
 }
 
 // endregion **************************** field.gotpl *****************************

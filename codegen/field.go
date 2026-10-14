@@ -45,6 +45,8 @@ type Field struct {
 	// option, resolved once at build time so UsesSubscriptionContext and the methods
 	// that depend on it stay nullary instead of threading the flag through the call chain.
 	SubscriptionContextField bool
+	// fieldContextIndex is the field's row in the generated fieldContextDescs table.
+	fieldContextIndex int
 }
 
 func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, error) {
@@ -787,15 +789,25 @@ func (f *Field) ArgsFunc() string {
 	return "field_" + f.Object.Name + "_" + f.Name + "_args"
 }
 
-func (f *Field) FieldContextFunc() string {
-	return "fieldContext_" + f.Object.Name + "_" + f.Name
+// FieldContextID returns the field's fieldContextDescs index as a literal annotated with
+// the field's name.
+func (f *Field) FieldContextID() string {
+	return fmt.Sprintf("%d /* %s.%s */", f.fieldContextIndex, f.Object.Name, f.Name)
 }
 
-// ChildFieldContextFunc returns the fieldContext function name for a child field.
-// Callers must ensure TypeReference and Definition are non-nil (guaranteed by the
-// template rendering path, which only calls this for bound fields).
-func (f *Field) ChildFieldContextFunc(name string) string {
-	return "fieldContext_" + f.TypeReference.Definition.Name + "_" + name
+// FieldContextConstructor returns the generated function that builds the field's
+// graphql.FieldContext: fieldContextWithArgsByID for a field with arguments,
+// fieldContextByID otherwise.
+func (f *Field) FieldContextConstructor() string {
+	if len(f.Args) > 0 {
+		return "fieldContextWithArgsByID"
+	}
+	return "fieldContextByID"
+}
+
+// FieldContextIndex returns the field's row in the fieldContextDescs table.
+func (f *Field) FieldContextIndex() int {
+	return f.fieldContextIndex
 }
 
 // ChildFieldContextTypeName returns the GraphQL type name that this field

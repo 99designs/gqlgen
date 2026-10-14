@@ -97,6 +97,7 @@ func TestUniqueChildFieldTypes(t *testing.T) {
 	d := Data{
 		Objects: Objects{
 			{
+				Definition: &ast.Definition{Name: "Query"},
 				Fields: []*Field{
 					{TypeReference: &config.TypeReference{Definition: userDef}},
 					// scalar, should be excluded
@@ -130,18 +131,84 @@ func TestUniqueChildFieldTypes_Empty(t *testing.T) {
 	assert.Empty(t, d.UniqueChildFieldTypes())
 }
 
+func TestChildFieldTypes(t *testing.T) {
+	userDef := &ast.Definition{
+		Kind:   ast.Object,
+		Name:   "User",
+		Fields: ast.FieldList{{Name: "id"}},
+	}
+	stringDef := &ast.Definition{
+		Kind: ast.Scalar,
+		Name: "String",
+	}
+	userObj := &Object{Definition: userDef}
+
+	d := Data{
+		Objects: Objects{
+			{
+				Definition: &ast.Definition{Name: "Query"},
+				Fields: []*Field{
+					{TypeReference: &config.TypeReference{Definition: userDef}},
+					{TypeReference: &config.TypeReference{Definition: stringDef}},
+					// duplicate, should be deduped
+					{TypeReference: &config.TypeReference{Definition: userDef}},
+					// nil ref, should be skipped
+					{TypeReference: nil},
+				},
+			},
+			userObj,
+		},
+	}
+
+	result := d.ChildFieldTypes()
+
+	// every kind is included, sorted alphabetically
+	require.Len(t, result, 2)
+	assert.Equal(t, "String", result[0].TypeName)
+	assert.Equal(t, stringDef, result[0].Definition)
+	assert.Nil(t, result[0].Object)
+	assert.Equal(t, "User", result[1].TypeName)
+	assert.Equal(t, userDef, result[1].Definition)
+	assert.Same(t, userObj, result[1].Object)
+}
+
+func TestField_FieldContextID(t *testing.T) {
+	objects := Objects{
+		{Definition: &ast.Definition{Name: "Query"}},
+		{Definition: &ast.Definition{Name: "User"}},
+	}
+	objects[1].Fields = []*Field{
+		{Object: objects[1], FieldDefinition: &ast.FieldDefinition{Name: "id"}},
+		{Object: objects[1], FieldDefinition: &ast.FieldDefinition{Name: "name"}},
+	}
+	objects[0].Fields = []*Field{
+		{Object: objects[0], FieldDefinition: &ast.FieldDefinition{Name: "user"}},
+	}
+	objects.assignFieldContextIndexes()
+
+	assert.Equal(t, "0 /* Query.user */", objects[0].Fields[0].FieldContextID())
+	assert.Equal(t, "1 /* User.id */", objects[1].Fields[0].FieldContextID())
+	assert.Equal(t, "2 /* User.name */", objects[1].Fields[1].FieldContextID())
+}
+
 func TestDataECHelpers(t *testing.T) {
 	receiver := &Data{Config: &config.Config{UseFunctionSyntaxForExecutionContext: false}}
 	assert.Equal(t, "(ec *executionContext) ", receiver.FuncReceiver())
 	assert.Empty(t, receiver.ECFuncParam())
 	assert.Equal(t, "ec.", receiver.ECDot())
 	assert.Empty(t, receiver.ECArg())
+	assert.Equal(t, "(*executionContext).", receiver.ECFuncValue())
+	assert.Equal(t, "ec *executionContext, ctx context.Context, ", receiver.ECFuncValueParams())
+	assert.Equal(t, "ec, ctx, ", receiver.ECFuncValueArgs())
 
 	function := &Data{Config: &config.Config{UseFunctionSyntaxForExecutionContext: true}}
 	assert.Empty(t, function.FuncReceiver())
 	assert.Equal(t, "ec *executionContext, ", function.ECFuncParam())
 	assert.Empty(t, function.ECDot())
 	assert.Equal(t, "ec, ", function.ECArg())
+	assert.Empty(t, function.ECFuncValue())
+	assert.Equal(t, "ctx context.Context, ec *executionContext, ", function.ECFuncValueParams())
+	assert.Equal(t, "ctx, ec, ", function.ECFuncValueArgs())
 }
 
 // implDirectivesFieldStub satisfies ImplDirectivesField for testing purposes.

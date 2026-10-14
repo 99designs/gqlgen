@@ -224,6 +224,17 @@ func (os Objects) ByName(name string) *Object {
 	return nil
 }
 
+// assignFieldContextIndexes numbers all fields in fieldContextDescs row order.
+func (os Objects) assignFieldContextIndexes() {
+	i := 0
+	for _, o := range os {
+		for _, f := range o.Fields {
+			f.fieldContextIndex = i
+			i++
+		}
+	}
+}
+
 func ucFirst(s string) string {
 	if s == "" {
 		return ""

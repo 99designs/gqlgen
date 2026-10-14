@@ -125,7 +125,7 @@ func (ec *executionContext) _Query_directiveSingleNullableArg(ctx context.Contex
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query_directiveSingleNullableArg(ctx, field)
+			return ec.fieldContextWithArgsByID(ctx, field, 0 /* Query.directiveSingleNullableArg */)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -139,29 +139,6 @@ func (ec *executionContext) _Query_directiveSingleNullableArg(ctx context.Contex
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query_directiveSingleNullableArg(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_directiveSingleNullableArg_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -169,7 +146,7 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query___type(ctx, field)
+			return ec.fieldContextWithArgsByID(ctx, field, 1 /* Query.__type */)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -183,29 +160,6 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Query___type(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields___Type(ctx, field)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query___type_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -213,7 +167,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Query___schema(ctx, field)
+			return ec.fieldContextByID(ctx, field, 2 /* Query.__schema */)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.IntrospectSchema()
@@ -225,18 +179,6 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 		true,
 		true,
 	)
-}
-func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields___Schema(ctx, field)
-		},
-	}
-	return fc, nil
 }
 
 // endregion **************************** field.gotpl *****************************

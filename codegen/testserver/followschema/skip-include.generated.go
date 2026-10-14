@@ -28,7 +28,7 @@ func (ec *executionContext) _SkipIncludeTestType_a(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_SkipIncludeTestType_a(ctx, field)
+			return ec.fieldContextByID(ctx, field, 198 /* SkipIncludeTestType.a */)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.A, nil
@@ -43,9 +43,6 @@ func (ec *executionContext) _SkipIncludeTestType_a(ctx context.Context, field gr
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_SkipIncludeTestType_a(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("SkipIncludeTestType", field, false, false, "String")
-}
 
 func (ec *executionContext) _SkipIncludeTestType_b(ctx context.Context, field graphql.CollectedField, obj *SkipIncludeTestType) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -53,7 +50,7 @@ func (ec *executionContext) _SkipIncludeTestType_b(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_SkipIncludeTestType_b(ctx, field)
+			return ec.fieldContextByID(ctx, field, 199 /* SkipIncludeTestType.b */)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.B, nil
@@ -67,9 +64,6 @@ func (ec *executionContext) _SkipIncludeTestType_b(ctx context.Context, field gr
 		true,
 		false,
 	)
-}
-func (ec *executionContext) fieldContext_SkipIncludeTestType_b(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("SkipIncludeTestType", field, false, false, "String")
 }
 
 // endregion **************************** field.gotpl *****************************

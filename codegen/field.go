@@ -41,6 +41,9 @@ type Field struct {
 	HasHaser         bool   // Whether a haser method is available (e.g., HasName())
 	HaserMethodName  string // Name of the haser method
 	Batch            bool   // Enable batch resolver for this field
+	// DisableConcurrency, set by @disableConcurrency, resolves this field inline on
+	// the parent goroutine even when its bound method takes a context.Context.
+	DisableConcurrency bool
 	// SubscriptionContextField mirrors the global subscription_context_field config
 	// option, resolved once at build time so UsesSubscriptionContext and the methods
 	// that depend on it stay nullary instead of threading the flag through the call chain.
@@ -61,6 +64,7 @@ func (b *builder) buildField(obj *Object, field *ast.FieldDefinition) (*Field, e
 		GoFieldType:              GoFieldVariable,
 		GoReceiverName:           "obj",
 		SubscriptionContextField: b.Config.SubscriptionContextField,
+		DisableConcurrency:       field.Directives.ForName(config.DirDisableConcurrency) != nil,
 	}
 
 	if field.DefaultValue != nil {
@@ -665,7 +669,7 @@ func (f *Field) IsMap() bool {
 }
 
 func (f *Field) IsConcurrent() bool {
-	if f.Object.DisableConcurrency {
+	if f.Object.DisableConcurrency || f.DisableConcurrency {
 		return false
 	}
 	return f.MethodHasContext || f.IsResolver

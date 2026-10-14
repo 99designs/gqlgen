@@ -1,0 +1,16 @@
+schema:
+  - "*.graphql"
+skip_validation: true
+exec:
+  filename: generated.go
+  package: disableconcurrency
+model:
+  filename: models-gen.go
+  package: disableconcurrency
+resolver:
+  filename: resolver.go
+  package: disableconcurrency
+  type: Resolver
+
+autobind:
+  - "github.com/99designs/gqlgen/codegen/testserver/disableconcurrency"

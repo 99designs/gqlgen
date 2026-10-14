@@ -117,6 +117,7 @@ const (
 	DirGoEnum              = "goEnum"
 	DirInlineArguments     = "inlineArguments"
 	DirSubscriptionContext = "subscriptionContext"
+	DirDisableConcurrency  = "disableConcurrency"
 
 	DirArgName                = "name"
 	DirArgModel               = "model"
@@ -405,6 +406,7 @@ func (c *Config) injectTypesFromSchema() error {
 		DirGoEnum,
 		DirInlineArguments,
 		DirSubscriptionContext,
+		DirDisableConcurrency,
 	} {
 		c.Directives[d] = DirectiveConfig{SkipRuntime: true}
 	}

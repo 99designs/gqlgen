@@ -662,6 +662,7 @@ func populateKeyFieldTypes(
 // assignEntityResolverNames disambiguates generated resolver and batch input names
 // in entity and key order. Reserve all original names before assigning suffixes so
 // a collision cannot rename another key's otherwise unique resolver.
+// An input-only collision leaves the resolver name unchanged.
 func assignEntityResolverNames(entities []*Entity, schema *ast.Schema) {
 	reservedResolvers := make(map[string]bool)
 	reservedInputs := make(map[string]bool)
@@ -683,14 +684,20 @@ func assignEntityResolverNames(entities []*Entity, schema *ast.Schema) {
 		for _, resolver := range entity.Resolvers {
 			resolverName := resolver.ResolverName
 			inputName := resolver.InputTypeName
-			if usedResolvers[templates.ToGo(resolverName)] ||
-				(entity.Multi && usedInputs[inputName]) {
+			resolverCollision := usedResolvers[templates.ToGo(resolverName)]
+			inputCollision := entity.Multi &&
+				(usedInputs[inputName] || schema.Types[inputName] != nil)
+			if resolverCollision || inputCollision {
 				for suffix := 2; ; suffix++ {
-					resolverName = resolver.ResolverName + strconv.Itoa(suffix)
+					if resolverCollision {
+						resolverName = resolver.ResolverName + strconv.Itoa(suffix)
+					}
 					inputName = strings.TrimSuffix(resolver.InputTypeName, "Input") +
 						strconv.Itoa(suffix) + "Input"
 					goResolverName := templates.ToGo(resolverName)
-					if !reservedResolvers[goResolverName] && !usedResolvers[goResolverName] &&
+					resolverAvailable := !reservedResolvers[goResolverName] &&
+						!usedResolvers[goResolverName]
+					if (!resolverCollision || resolverAvailable) &&
 						(!entity.Multi || (!reservedInputs[inputName] && !usedInputs[inputName])) {
 						break
 					}

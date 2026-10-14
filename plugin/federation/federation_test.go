@@ -233,6 +233,37 @@ func TestEntityResolverNameCollisions(t *testing.T) {
 			inputs:    []string{"FooBarByIDsInput", "fooBarByIDsInput"},
 		},
 		{
+			name: "existing input name preserves non-colliding resolvers",
+			schema: `
+				type Port @key(fields: "id") @key(fields: "name") @entityResolver(multi: true) {
+					id: ID!
+					name: String!
+				}
+				input PortByIDsInput { other: String }`,
+			resolvers: []string{"findManyPortByIDs", "findManyPortByNames"},
+			inputs:    []string{"PortByIDs2Input", "PortByNamesInput"},
+		},
+		{
+			name: "existing input name skips reserved suffixes",
+			schema: `
+				type Port @key(fields: "id") @entityResolver(multi: true) { id: ID! }
+				input PortByIDsInput { other: String }
+				input PortByIDs2Input { other: String }`,
+			resolvers: []string{"findManyPortByIDs"},
+			inputs:    []string{"PortByIDs3Input"},
+		},
+		{
+			name: "existing input name and colliding resolvers",
+			schema: `
+				type Port @key(fields: "_id") @key(fields: "id") @entityResolver(multi: true) {
+					_id: String!
+					id: ID!
+				}
+				input PortByIDsInput { other: String }`,
+			resolvers: []string{"findManyPortByIDs", "findManyPortByIDs3"},
+			inputs:    []string{"PortByIDs2Input", "PortByIDs3Input"},
+		},
+		{
 			name: "reserve user-defined type names for batch suffixes",
 			schema: `
 				type Port @key(fields: "_id") @key(fields: "id") @entityResolver(multi: true) {

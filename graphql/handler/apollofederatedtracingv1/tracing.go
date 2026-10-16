@@ -68,7 +68,7 @@ func (Tracer) Validate(graphql.ExecutableSchema) error {
 
 func (t *Tracer) shouldTrace(ctx context.Context) bool {
 	return graphql.HasOperationContext(ctx) &&
-		graphql.GetOperationContext(ctx).Headers.Get("apollo-federation-include-trace") == "ftv1"
+		graphql.GetOperationContext(ctx).Headers.Get("Apollo-Federation-Include-Trace") == "ftv1"
 }
 
 func (t *Tracer) getTreeBuilder(ctx context.Context) *TreeBuilder {

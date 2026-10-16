@@ -13,7 +13,7 @@ go 1.26.0
 replace github.com/99designs/gqlgen => ../
 
 require (
-	github.com/99designs/gqlgen v0.0.0-00010101000000-000000000000
+	github.com/99designs/gqlgen v0.17.95
 	github.com/google/uuid v1.6.0
 	github.com/stretchr/testify v1.12.1
 	pgregory.net/rapid v1.3.0

@@ -76,6 +76,7 @@ func collectFields(
 				sel.Name,
 				sel.Alias,
 				sel.ObjectDefinition,
+				satisfies,
 				func() CollectedField {
 					return CollectedField{Field: sel}
 				},
@@ -106,6 +107,7 @@ func collectFields(
 				var isChildField bool
 				f := getOrCreateAndAppendField(
 					&groupedFields, childField.Name, childField.Alias, childField.ObjectDefinition,
+					satisfies,
 					func() CollectedField {
 						isChildField = true
 						return childField
@@ -156,7 +158,7 @@ func collectFields(
 			for _, childField := range childFields {
 				var isChildField bool
 				f := getOrCreateAndAppendField(&groupedFields,
-					childField.Name, childField.Alias, childField.ObjectDefinition,
+					childField.Name, childField.Alias, childField.ObjectDefinition, satisfies,
 					func() CollectedField {
 						isChildField = true
 						return childField
@@ -242,6 +244,7 @@ func getOrCreateAndAppendField(
 	c *[]CollectedField,
 	name, alias string,
 	objectDefinition *ast.Definition,
+	satisfies []string,
 	creator func() CollectedField,
 ) *CollectedField {
 	for i, cf := range *c {
@@ -262,6 +265,13 @@ func getOrCreateAndAppendField(
 				return &(*c)[i]
 			}
 			if slices.Contains(cf.ObjectDefinition.Interfaces, objectDefinition.Name) {
+				return &(*c)[i]
+			}
+			// satisfies holds one object and its abstract types, so that object implements both.
+			if cf.ObjectDefinition.Kind == ast.Interface &&
+				objectDefinition.Kind == ast.Interface &&
+				slices.Contains(satisfies, cf.ObjectDefinition.Name) &&
+				slices.Contains(satisfies, objectDefinition.Name) {
 				return &(*c)[i]
 			}
 		}

@@ -487,7 +487,8 @@ func (c *wsConnection) subscribe(start time.Time, msg *message) {
 			}
 			if errs := getSubscriptionError(ctx); len(errs) != 0 {
 				c.sendError(msg.id, errs...)
-			} else {
+			} else if c.ctx.Err() == nil {
+				// A cancelled connection context closes the socket; complete would signal a normal end.
 				c.complete(msg.id)
 			}
 			c.mu.Lock()

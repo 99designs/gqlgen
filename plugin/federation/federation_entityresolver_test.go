@@ -25,6 +25,37 @@ func TestEntityResolver(t *testing.T) {
 	srv.AddTransport(transport.POST{})
 	c := client.New(srv)
 
+	t.Run("colliding key names", func(t *testing.T) {
+		for _, key := range []string{"_id", "id"} {
+			t.Run(key, func(t *testing.T) {
+				representations := []map[string]any{
+					{"__typename": "Collision", key: "first"},
+					{"__typename": "Collision", key: "second"},
+				}
+				var resp struct {
+					Entities []struct {
+						Value      string `json:"value"`
+						ResolvedBy string `json:"resolvedBy"`
+					} `json:"_entities"`
+				}
+
+				err := c.Post(
+					entityQuery([]string{"Collision {value: " + key + " resolvedBy}"}),
+					&resp,
+					client.Var("representations", representations),
+				)
+
+				require.NoError(t, err)
+				require.Len(t, resp.Entities, 2)
+				require.Equal(t, "first", resp.Entities[0].Value)
+				require.Equal(t, "second", resp.Entities[1].Value)
+				for _, entity := range resp.Entities {
+					require.Equal(t, key, entity.ResolvedBy)
+				}
+			})
+		}
+	})
+
 	t.Run("Hello entities", func(t *testing.T) {
 		representations := []map[string]any{
 			{
@@ -419,6 +450,37 @@ func TestMultiEntityResolver(t *testing.T) {
 	)
 	srv.AddTransport(transport.POST{})
 	c := client.New(srv)
+
+	t.Run("colliding key names", func(t *testing.T) {
+		for _, key := range []string{"_id", "id"} {
+			t.Run(key, func(t *testing.T) {
+				representations := []map[string]any{
+					{"__typename": "MultiCollision", key: "first"},
+					{"__typename": "MultiCollision", key: "second"},
+				}
+				var resp struct {
+					Entities []struct {
+						Value      string `json:"value"`
+						ResolvedBy string `json:"resolvedBy"`
+					} `json:"_entities"`
+				}
+
+				err := c.Post(
+					entityQuery([]string{"MultiCollision {value: " + key + " resolvedBy}"}),
+					&resp,
+					client.Var("representations", representations),
+				)
+
+				require.NoError(t, err)
+				require.Len(t, resp.Entities, 2)
+				require.Equal(t, "first", resp.Entities[0].Value)
+				require.Equal(t, "second", resp.Entities[1].Value)
+				for _, entity := range resp.Entities {
+					require.Equal(t, key, entity.ResolvedBy)
+				}
+			})
+		}
+	})
 
 	t.Run("MultiHello entities", func(t *testing.T) {
 		itemCount := 10

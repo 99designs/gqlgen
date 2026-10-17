@@ -659,6 +659,60 @@ func populateKeyFieldTypes(
 	}
 }
 
+// assignEntityResolverNames disambiguates generated resolver and batch input names
+// in entity and key order. Reserve all original names before assigning suffixes so
+// a collision cannot rename another key's otherwise unique resolver.
+// An input-only collision leaves the resolver name unchanged.
+func assignEntityResolverNames(entities []*Entity, schema *ast.Schema) {
+	reservedResolvers := make(map[string]bool)
+	reservedInputs := make(map[string]bool)
+	for name := range schema.Types {
+		reservedInputs[name] = true
+	}
+	for _, entity := range entities {
+		for _, resolver := range entity.Resolvers {
+			reservedResolvers[templates.ToGo(resolver.ResolverName)] = true
+			if entity.Multi {
+				reservedInputs[resolver.InputTypeName] = true
+			}
+		}
+	}
+
+	usedResolvers := make(map[string]bool)
+	usedInputs := make(map[string]bool)
+	for _, entity := range entities {
+		for _, resolver := range entity.Resolvers {
+			resolverName := resolver.ResolverName
+			inputName := resolver.InputTypeName
+			resolverCollision := usedResolvers[templates.ToGo(resolverName)]
+			inputCollision := entity.Multi &&
+				(usedInputs[inputName] || schema.Types[inputName] != nil)
+			if resolverCollision || inputCollision {
+				for suffix := 2; ; suffix++ {
+					if resolverCollision {
+						resolverName = resolver.ResolverName + strconv.Itoa(suffix)
+					}
+					inputName = strings.TrimSuffix(resolver.InputTypeName, "Input") +
+						strconv.Itoa(suffix) + "Input"
+					goResolverName := templates.ToGo(resolverName)
+					resolverAvailable := !reservedResolvers[goResolverName] &&
+						!usedResolvers[goResolverName]
+					if (!resolverCollision || resolverAvailable) &&
+						(!entity.Multi || (!reservedInputs[inputName] && !usedInputs[inputName])) {
+						break
+					}
+				}
+			}
+			resolver.ResolverName = resolverName
+			resolver.InputTypeName = inputName
+			usedResolvers[templates.ToGo(resolverName)] = true
+			if entity.Multi {
+				usedInputs[inputName] = true
+			}
+		}
+	}
+}
+
 func (f *Federation) buildEntities(schema *ast.Schema, version int) ([]*Entity, error) {
 	entities := make([]*Entity, 0)
 	for _, schemaType := range schema.Types {
@@ -675,6 +729,7 @@ func (f *Federation) buildEntities(schema *ast.Schema, version int) ([]*Entity, 
 	sort.Slice(entities, func(i, j int) bool {
 		return entities[i].Name < entities[j].Name
 	})
+	assignEntityResolverNames(entities, schema)
 
 	return entities, nil
 }

@@ -32,7 +32,7 @@ func (ec *executionContext) _FieldsOrderPayload_firstFieldValue(ctx context.Cont
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_FieldsOrderPayload_firstFieldValue(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_FieldsOrderPayload_firstFieldValue)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.FirstFieldValue, nil
@@ -46,9 +46,6 @@ func (ec *executionContext) _FieldsOrderPayload_firstFieldValue(ctx context.Cont
 		true,
 		false,
 	)
-}
-func (ec *executionContext) fieldContext_FieldsOrderPayload_firstFieldValue(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("FieldsOrderPayload", field, false, false, "String")
 }
 
 // endregion **************************** field.gotpl *****************************

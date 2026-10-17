@@ -781,15 +781,15 @@ func (f *Field) ArgsFunc() string {
 	return "field_" + f.Object.Name + "_" + f.Name + "_args"
 }
 
-func (f *Field) FieldContextFunc() string {
-	return "fieldContext_" + f.Object.Name + "_" + f.Name
+// FieldContextID returns the name of the generated constant that indexes this field's row
+// in the fieldContextDescs table, which fieldContextByID uses to build the field's
+// graphql.FieldContext.
+func (f *Field) FieldContextID() string {
+	return fieldContextID(f.Object.Name, f.Name)
 }
 
-// ChildFieldContextFunc returns the fieldContext function name for a child field.
-// Callers must ensure TypeReference and Definition are non-nil (guaranteed by the
-// template rendering path, which only calls this for bound fields).
-func (f *Field) ChildFieldContextFunc(name string) string {
-	return "fieldContext_" + f.TypeReference.Definition.Name + "_" + name
+func fieldContextID(object, field string) string {
+	return "fieldContextID_" + object + "_" + field
 }
 
 // ChildFieldContextTypeName returns the GraphQL type name that this field

@@ -4,7 +4,6 @@ package followschema
 
 import (
 	"context"
-	"errors"
 	"math"
 	"strconv"
 	"sync/atomic"
@@ -65,7 +64,7 @@ func (ec *executionContext) _WrappedMap_get(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_WrappedMap_get(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_WrappedMap_get)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -81,29 +80,6 @@ func (ec *executionContext) _WrappedMap_get(ctx context.Context, field graphql.C
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_WrappedMap_get(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "WrappedMap",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_WrappedMap_get_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _WrappedSlice_get(ctx context.Context, field graphql.CollectedField, obj WrappedSlice) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -111,7 +87,7 @@ func (ec *executionContext) _WrappedSlice_get(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_WrappedSlice_get(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_WrappedSlice_get)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -127,29 +103,6 @@ func (ec *executionContext) _WrappedSlice_get(ctx context.Context, field graphql
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_WrappedSlice_get(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "WrappedSlice",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_WrappedSlice_get_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _WrappedStruct_name(ctx context.Context, field graphql.CollectedField, obj *WrappedStruct) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -157,7 +110,7 @@ func (ec *executionContext) _WrappedStruct_name(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_WrappedStruct_name(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_WrappedStruct_name)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -172,9 +125,6 @@ func (ec *executionContext) _WrappedStruct_name(ctx context.Context, field graph
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_WrappedStruct_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("WrappedStruct", field, false, false, "WrappedScalar")
-}
 
 func (ec *executionContext) _WrappedStruct_desc(ctx context.Context, field graphql.CollectedField, obj *WrappedStruct) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -182,7 +132,7 @@ func (ec *executionContext) _WrappedStruct_desc(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_WrappedStruct_desc(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_WrappedStruct_desc)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Desc, nil
@@ -196,9 +146,6 @@ func (ec *executionContext) _WrappedStruct_desc(ctx context.Context, field graph
 		true,
 		false,
 	)
-}
-func (ec *executionContext) fieldContext_WrappedStruct_desc(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("WrappedStruct", field, false, false, "WrappedScalar")
 }
 
 // endregion **************************** field.gotpl *****************************

@@ -4,7 +4,6 @@ package followschema
 
 import (
 	"context"
-	"errors"
 	"math"
 	"strconv"
 	"sync/atomic"
@@ -138,7 +137,7 @@ func (ec *executionContext) _DefaultParametersMirror_falsyBoolean(ctx context.Co
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_DefaultParametersMirror_falsyBoolean(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_DefaultParametersMirror_falsyBoolean)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.FalsyBoolean, nil
@@ -153,9 +152,6 @@ func (ec *executionContext) _DefaultParametersMirror_falsyBoolean(ctx context.Co
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_DefaultParametersMirror_falsyBoolean(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("DefaultParametersMirror", field, false, false, "Boolean")
-}
 
 func (ec *executionContext) _DefaultParametersMirror_truthyBoolean(ctx context.Context, field graphql.CollectedField, obj *DefaultParametersMirror) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -163,7 +159,7 @@ func (ec *executionContext) _DefaultParametersMirror_truthyBoolean(ctx context.C
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_DefaultParametersMirror_truthyBoolean(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_DefaultParametersMirror_truthyBoolean)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.TruthyBoolean, nil
@@ -178,9 +174,6 @@ func (ec *executionContext) _DefaultParametersMirror_truthyBoolean(ctx context.C
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_DefaultParametersMirror_truthyBoolean(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("DefaultParametersMirror", field, false, false, "Boolean")
-}
 
 func (ec *executionContext) _Mutation_defaultInput(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -188,7 +181,7 @@ func (ec *executionContext) _Mutation_defaultInput(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Mutation_defaultInput(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Mutation_defaultInput)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -204,29 +197,6 @@ func (ec *executionContext) _Mutation_defaultInput(ctx context.Context, field gr
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Mutation_defaultInput(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_DefaultParametersMirror(ctx, field)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_defaultInput_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Mutation_overrideValueViaInput(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -234,7 +204,7 @@ func (ec *executionContext) _Mutation_overrideValueViaInput(ctx context.Context,
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Mutation_overrideValueViaInput(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Mutation_overrideValueViaInput)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -250,29 +220,6 @@ func (ec *executionContext) _Mutation_overrideValueViaInput(ctx context.Context,
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Mutation_overrideValueViaInput(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_FieldsOrderPayload(ctx, field)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_overrideValueViaInput_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Mutation_updateProduct(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -280,7 +227,7 @@ func (ec *executionContext) _Mutation_updateProduct(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Mutation_updateProduct(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Mutation_updateProduct)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -300,29 +247,6 @@ func (ec *executionContext) _Mutation_updateProduct(ctx context.Context, field g
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Mutation_updateProduct(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_updateProduct_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Mutation_issue4053(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -330,7 +254,7 @@ func (ec *executionContext) _Mutation_issue4053(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Mutation_issue4053(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Mutation_issue4053)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -346,29 +270,6 @@ func (ec *executionContext) _Mutation_issue4053(ctx context.Context, field graph
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Mutation_issue4053(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type Boolean does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_issue4053_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Mutation_updateSomething(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -376,7 +277,7 @@ func (ec *executionContext) _Mutation_updateSomething(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Mutation_updateSomething(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Mutation_updateSomething)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -392,29 +293,6 @@ func (ec *executionContext) _Mutation_updateSomething(ctx context.Context, field
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Mutation_updateSomething(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type String does not have child fields")
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_updateSomething_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _Mutation_updatePtrToPtr(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -422,7 +300,7 @@ func (ec *executionContext) _Mutation_updatePtrToPtr(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Mutation_updatePtrToPtr(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID_Mutation_updatePtrToPtr)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -437,29 +315,6 @@ func (ec *executionContext) _Mutation_updatePtrToPtr(ctx context.Context, field 
 		true,
 		true,
 	)
-}
-func (ec *executionContext) fieldContext_Mutation_updatePtrToPtr(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Mutation",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_PtrToPtrOuter(ctx, field)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Mutation_updatePtrToPtr_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
 }
 
 // endregion **************************** field.gotpl *****************************

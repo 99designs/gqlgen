@@ -29,7 +29,7 @@ func (ec *executionContext) __Service_sdl(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext__Service_sdl(ctx, field)
+			return ec.fieldContextByID(ctx, field, fieldContextID__Service_sdl)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.SDL, nil
@@ -41,9 +41,6 @@ func (ec *executionContext) __Service_sdl(ctx context.Context, field graphql.Col
 		true,
 		false,
 	)
-}
-func (ec *executionContext) fieldContext__Service_sdl(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("_Service", field, false, false, "String")
 }
 
 // endregion **************************** field.gotpl *****************************

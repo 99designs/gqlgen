@@ -6,6 +6,7 @@ import (
 	"bytes"
 	"context"
 	"embed"
+	"errors"
 	"fmt"
 	"sync/atomic"
 
@@ -127,20 +128,285 @@ var sources = []*ast.Source{
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
-// childFields_* functions provide shared child field context lookups.
-// Each function is generated once per unique object type, deduplicating the
-// switch statements that were previously inlined in every fieldContext_* function.
+// fieldContextID identifies a schema field's row in fieldContextDescs.
+type fieldContextID int
+
+// The constants and the fieldContextDescs rows are grouped by object, so gofmt aligns each
+// group on its own and a long field name does not realign the whole table.
+const (
+	// Article
+	fieldContextID_Article_id fieldContextID = iota
+	fieldContextID_Article_headline
+	fieldContextID_Article_author
+	fieldContextID_Article_assignee
+
+	// Author
+	fieldContextID_Author_id
+	fieldContextID_Author_name
+	fieldContextID_Author_email
+
+	// Book
+	fieldContextID_Book_id
+	fieldContextID_Book_title
+	fieldContextID_Book_author
+	fieldContextID_Book_reviewer
+	fieldContextID_Book_editor
+
+	// Comment
+	fieldContextID_Comment_id
+	fieldContextID_Comment_text
+	fieldContextID_Comment_commenter
+
+	// Invoice
+	fieldContextID_Invoice_id
+	fieldContextID_Invoice_total
+	fieldContextID_Invoice_createdBy
+	fieldContextID_Invoice_approvedBy
+
+	// Query
+	fieldContextID_Query_book
+	fieldContextID_Query_article
+	fieldContextID_Query_review
+	fieldContextID_Query_comment
+	fieldContextID_Query_task
+	fieldContextID_Query_invoice
+	fieldContextID_Query___type
+	fieldContextID_Query___schema
+
+	// Review
+	fieldContextID_Review_id
+	fieldContextID_Review_body
+	fieldContextID_Review_author
+	fieldContextID_Review_moderator
+
+	// Task
+	fieldContextID_Task_id
+	fieldContextID_Task_title
+	fieldContextID_Task_assignee
+	fieldContextID_Task_reporter
+
+	// User
+	fieldContextID_User_id
+	fieldContextID_User_name
+	fieldContextID_User_email
+	fieldContextID_User_phone
+	fieldContextID_User_avatar
+	fieldContextID_User_role
+	fieldContextID_User_status
+	fieldContextID_User_language
+	fieldContextID_User_timezone
+	fieldContextID_User_createdAt
+
+	// __Directive
+	fieldContextID___Directive_name
+	fieldContextID___Directive_description
+	fieldContextID___Directive_isRepeatable
+	fieldContextID___Directive_locations
+	fieldContextID___Directive_args
+
+	// __EnumValue
+	fieldContextID___EnumValue_name
+	fieldContextID___EnumValue_description
+	fieldContextID___EnumValue_isDeprecated
+	fieldContextID___EnumValue_deprecationReason
+
+	// __Field
+	fieldContextID___Field_name
+	fieldContextID___Field_description
+	fieldContextID___Field_args
+	fieldContextID___Field_type
+	fieldContextID___Field_isDeprecated
+	fieldContextID___Field_deprecationReason
+
+	// __InputValue
+	fieldContextID___InputValue_name
+	fieldContextID___InputValue_description
+	fieldContextID___InputValue_type
+	fieldContextID___InputValue_defaultValue
+	fieldContextID___InputValue_isDeprecated
+	fieldContextID___InputValue_deprecationReason
+
+	// __Schema
+	fieldContextID___Schema_description
+	fieldContextID___Schema_types
+	fieldContextID___Schema_queryType
+	fieldContextID___Schema_mutationType
+	fieldContextID___Schema_subscriptionType
+	fieldContextID___Schema_directives
+
+	// __Type
+	fieldContextID___Type_kind
+	fieldContextID___Type_name
+	fieldContextID___Type_description
+	fieldContextID___Type_specifiedByURL
+	fieldContextID___Type_fields
+	fieldContextID___Type_interfaces
+	fieldContextID___Type_possibleTypes
+	fieldContextID___Type_enumValues
+	fieldContextID___Type_inputFields
+	fieldContextID___Type_ofType
+	fieldContextID___Type_isOneOf
+)
+
+// fieldContextDesc is the request-independent part of a field's graphql.FieldContext.
+// fieldContextDescs holds one per schema field, so a single fieldContextByID replaces a
+// constructor per field.
+type fieldContextDesc struct {
+	object     string
+	child      func(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error)
+	args       func(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error)
+	isMethod   bool
+	isResolver bool
+}
+
+// fieldContextDescs is filled in init rather than by its initializer because it refers to
+// the childFields_* functions, which read it back through fieldContextByID; the compiler
+// rejects that as an initialization cycle.
+var fieldContextDescs []fieldContextDesc
+
+func init() {
+	fieldContextDescs = []fieldContextDesc{
+		fieldContextID_Article_id:       {object: "Article", child: childFields_ID},
+		fieldContextID_Article_headline: {object: "Article", child: childFields_String},
+		fieldContextID_Article_author:   {object: "Article", child: childFields_Author},
+		fieldContextID_Article_assignee: {object: "Article", child: childFields_User},
+
+		fieldContextID_Author_id:    {object: "Author", child: childFields_ID},
+		fieldContextID_Author_name:  {object: "Author", child: childFields_String},
+		fieldContextID_Author_email: {object: "Author", child: childFields_String},
+
+		fieldContextID_Book_id:       {object: "Book", child: childFields_ID},
+		fieldContextID_Book_title:    {object: "Book", child: childFields_String},
+		fieldContextID_Book_author:   {object: "Book", child: childFields_Author},
+		fieldContextID_Book_reviewer: {object: "Book", child: childFields_User},
+		fieldContextID_Book_editor:   {object: "Book", child: childFields_User},
+
+		fieldContextID_Comment_id:        {object: "Comment", child: childFields_ID},
+		fieldContextID_Comment_text:      {object: "Comment", child: childFields_String},
+		fieldContextID_Comment_commenter: {object: "Comment", child: childFields_User},
+
+		fieldContextID_Invoice_id:         {object: "Invoice", child: childFields_ID},
+		fieldContextID_Invoice_total:      {object: "Invoice", child: childFields_String},
+		fieldContextID_Invoice_createdBy:  {object: "Invoice", child: childFields_User, isMethod: true, isResolver: true},
+		fieldContextID_Invoice_approvedBy: {object: "Invoice", child: childFields_User, isMethod: true, isResolver: true},
+
+		fieldContextID_Query_book:     {object: "Query", child: childFields_Book, args: field_Query_book_args, isMethod: true, isResolver: true},
+		fieldContextID_Query_article:  {object: "Query", child: childFields_Article, args: field_Query_article_args, isMethod: true, isResolver: true},
+		fieldContextID_Query_review:   {object: "Query", child: childFields_Review, args: field_Query_review_args, isMethod: true, isResolver: true},
+		fieldContextID_Query_comment:  {object: "Query", child: childFields_Comment, args: field_Query_comment_args, isMethod: true, isResolver: true},
+		fieldContextID_Query_task:     {object: "Query", child: childFields_Task, args: field_Query_task_args, isMethod: true, isResolver: true},
+		fieldContextID_Query_invoice:  {object: "Query", child: childFields_Invoice, args: field_Query_invoice_args, isMethod: true, isResolver: true},
+		fieldContextID_Query___type:   {object: "Query", child: childFields___Type, args: field_Query___type_args, isMethod: true},
+		fieldContextID_Query___schema: {object: "Query", child: childFields___Schema, isMethod: true},
+
+		fieldContextID_Review_id:        {object: "Review", child: childFields_ID},
+		fieldContextID_Review_body:      {object: "Review", child: childFields_String},
+		fieldContextID_Review_author:    {object: "Review", child: childFields_Author},
+		fieldContextID_Review_moderator: {object: "Review", child: childFields_User},
+
+		fieldContextID_Task_id:       {object: "Task", child: childFields_ID},
+		fieldContextID_Task_title:    {object: "Task", child: childFields_String},
+		fieldContextID_Task_assignee: {object: "Task", child: childFields_User},
+		fieldContextID_Task_reporter: {object: "Task", child: childFields_User},
+
+		fieldContextID_User_id:        {object: "User", child: childFields_ID},
+		fieldContextID_User_name:      {object: "User", child: childFields_String},
+		fieldContextID_User_email:     {object: "User", child: childFields_String},
+		fieldContextID_User_phone:     {object: "User", child: childFields_String},
+		fieldContextID_User_avatar:    {object: "User", child: childFields_String},
+		fieldContextID_User_role:      {object: "User", child: childFields_String},
+		fieldContextID_User_status:    {object: "User", child: childFields_String},
+		fieldContextID_User_language:  {object: "User", child: childFields_String},
+		fieldContextID_User_timezone:  {object: "User", child: childFields_String},
+		fieldContextID_User_createdAt: {object: "User", child: childFields_String},
+
+		fieldContextID___Directive_name:         {object: "__Directive", child: childFields_String},
+		fieldContextID___Directive_description:  {object: "__Directive", child: childFields_String, isMethod: true},
+		fieldContextID___Directive_isRepeatable: {object: "__Directive", child: childFields_Boolean},
+		fieldContextID___Directive_locations:    {object: "__Directive", child: childFields___DirectiveLocation},
+		fieldContextID___Directive_args:         {object: "__Directive", child: childFields___InputValue, args: field___Directive_args_args},
+
+		fieldContextID___EnumValue_name:              {object: "__EnumValue", child: childFields_String},
+		fieldContextID___EnumValue_description:       {object: "__EnumValue", child: childFields_String, isMethod: true},
+		fieldContextID___EnumValue_isDeprecated:      {object: "__EnumValue", child: childFields_Boolean, isMethod: true},
+		fieldContextID___EnumValue_deprecationReason: {object: "__EnumValue", child: childFields_String, isMethod: true},
+
+		fieldContextID___Field_name:              {object: "__Field", child: childFields_String},
+		fieldContextID___Field_description:       {object: "__Field", child: childFields_String, isMethod: true},
+		fieldContextID___Field_args:              {object: "__Field", child: childFields___InputValue, args: field___Field_args_args},
+		fieldContextID___Field_type:              {object: "__Field", child: childFields___Type},
+		fieldContextID___Field_isDeprecated:      {object: "__Field", child: childFields_Boolean, isMethod: true},
+		fieldContextID___Field_deprecationReason: {object: "__Field", child: childFields_String, isMethod: true},
+
+		fieldContextID___InputValue_name:              {object: "__InputValue", child: childFields_String},
+		fieldContextID___InputValue_description:       {object: "__InputValue", child: childFields_String, isMethod: true},
+		fieldContextID___InputValue_type:              {object: "__InputValue", child: childFields___Type},
+		fieldContextID___InputValue_defaultValue:      {object: "__InputValue", child: childFields_String},
+		fieldContextID___InputValue_isDeprecated:      {object: "__InputValue", child: childFields_Boolean, isMethod: true},
+		fieldContextID___InputValue_deprecationReason: {object: "__InputValue", child: childFields_String, isMethod: true},
+
+		fieldContextID___Schema_description:      {object: "__Schema", child: childFields_String, isMethod: true},
+		fieldContextID___Schema_types:            {object: "__Schema", child: childFields___Type, isMethod: true},
+		fieldContextID___Schema_queryType:        {object: "__Schema", child: childFields___Type, isMethod: true},
+		fieldContextID___Schema_mutationType:     {object: "__Schema", child: childFields___Type, isMethod: true},
+		fieldContextID___Schema_subscriptionType: {object: "__Schema", child: childFields___Type, isMethod: true},
+		fieldContextID___Schema_directives:       {object: "__Schema", child: childFields___Directive, isMethod: true},
+
+		fieldContextID___Type_kind:           {object: "__Type", child: childFields___TypeKind, isMethod: true},
+		fieldContextID___Type_name:           {object: "__Type", child: childFields_String, isMethod: true},
+		fieldContextID___Type_description:    {object: "__Type", child: childFields_String, isMethod: true},
+		fieldContextID___Type_specifiedByURL: {object: "__Type", child: childFields_String, isMethod: true},
+		fieldContextID___Type_fields:         {object: "__Type", child: childFields___Field, args: field___Type_fields_args, isMethod: true},
+		fieldContextID___Type_interfaces:     {object: "__Type", child: childFields___Type, isMethod: true},
+		fieldContextID___Type_possibleTypes:  {object: "__Type", child: childFields___Type, isMethod: true},
+		fieldContextID___Type_enumValues:     {object: "__Type", child: childFields___EnumValue, args: field___Type_enumValues_args, isMethod: true},
+		fieldContextID___Type_inputFields:    {object: "__Type", child: childFields___InputValue, isMethod: true},
+		fieldContextID___Type_ofType:         {object: "__Type", child: childFields___Type, isMethod: true},
+		fieldContextID___Type_isOneOf:        {object: "__Type", child: childFields_Boolean, isMethod: true},
+	}
+}
+
+func fieldContextByID(ctx context.Context, ec *executionContext, field graphql.CollectedField, id fieldContextID) (fc *graphql.FieldContext, err error) {
+	d := &fieldContextDescs[id]
+	fc = &graphql.FieldContext{
+		Object:     d.object,
+		Field:      field,
+		IsMethod:   d.isMethod,
+		IsResolver: d.isResolver,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return d.child(ctx, ec, field)
+		},
+	}
+	if d.args == nil {
+		return fc, nil
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = d.args(ctx, ec, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+// childFields_* functions are the FieldContext.Child dispatchers, generated once per type
+// that fields return rather than once per field.
 
 func childFields_Article(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "id":
-		return fieldContext_Article_id(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Article_id)
 	case "headline":
-		return fieldContext_Article_headline(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Article_headline)
 	case "author":
-		return fieldContext_Article_author(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Article_author)
 	case "assignee":
-		return fieldContext_Article_assignee(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Article_assignee)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type Article", field.Name)
 }
@@ -148,11 +414,11 @@ func childFields_Article(ctx context.Context, ec *executionContext, field graphq
 func childFields_Author(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "id":
-		return fieldContext_Author_id(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Author_id)
 	case "name":
-		return fieldContext_Author_name(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Author_name)
 	case "email":
-		return fieldContext_Author_email(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Author_email)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
 }
@@ -160,41 +426,49 @@ func childFields_Author(ctx context.Context, ec *executionContext, field graphql
 func childFields_Book(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "id":
-		return fieldContext_Book_id(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Book_id)
 	case "title":
-		return fieldContext_Book_title(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Book_title)
 	case "author":
-		return fieldContext_Book_author(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Book_author)
 	case "reviewer":
-		return fieldContext_Book_reviewer(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Book_reviewer)
 	case "editor":
-		return fieldContext_Book_editor(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Book_editor)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type Book", field.Name)
+}
+
+func childFields_Boolean(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	return nil, errors.New("field of type Boolean does not have child fields")
 }
 
 func childFields_Comment(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "id":
-		return fieldContext_Comment_id(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Comment_id)
 	case "text":
-		return fieldContext_Comment_text(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Comment_text)
 	case "commenter":
-		return fieldContext_Comment_commenter(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Comment_commenter)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type Comment", field.Name)
+}
+
+func childFields_ID(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	return nil, errors.New("field of type ID does not have child fields")
 }
 
 func childFields_Invoice(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "id":
-		return fieldContext_Invoice_id(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Invoice_id)
 	case "total":
-		return fieldContext_Invoice_total(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Invoice_total)
 	case "createdBy":
-		return fieldContext_Invoice_createdBy(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Invoice_createdBy)
 	case "approvedBy":
-		return fieldContext_Invoice_approvedBy(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Invoice_approvedBy)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type Invoice", field.Name)
 }
@@ -202,27 +476,31 @@ func childFields_Invoice(ctx context.Context, ec *executionContext, field graphq
 func childFields_Review(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "id":
-		return fieldContext_Review_id(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Review_id)
 	case "body":
-		return fieldContext_Review_body(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Review_body)
 	case "author":
-		return fieldContext_Review_author(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Review_author)
 	case "moderator":
-		return fieldContext_Review_moderator(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Review_moderator)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type Review", field.Name)
+}
+
+func childFields_String(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	return nil, errors.New("field of type String does not have child fields")
 }
 
 func childFields_Task(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "id":
-		return fieldContext_Task_id(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Task_id)
 	case "title":
-		return fieldContext_Task_title(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Task_title)
 	case "assignee":
-		return fieldContext_Task_assignee(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Task_assignee)
 	case "reporter":
-		return fieldContext_Task_reporter(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_Task_reporter)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type Task", field.Name)
 }
@@ -230,25 +508,25 @@ func childFields_Task(ctx context.Context, ec *executionContext, field graphql.C
 func childFields_User(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "id":
-		return fieldContext_User_id(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_User_id)
 	case "name":
-		return fieldContext_User_name(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_User_name)
 	case "email":
-		return fieldContext_User_email(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_User_email)
 	case "phone":
-		return fieldContext_User_phone(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_User_phone)
 	case "avatar":
-		return fieldContext_User_avatar(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_User_avatar)
 	case "role":
-		return fieldContext_User_role(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_User_role)
 	case "status":
-		return fieldContext_User_status(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_User_status)
 	case "language":
-		return fieldContext_User_language(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_User_language)
 	case "timezone":
-		return fieldContext_User_timezone(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_User_timezone)
 	case "createdAt":
-		return fieldContext_User_createdAt(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID_User_createdAt)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 }
@@ -256,29 +534,33 @@ func childFields_User(ctx context.Context, ec *executionContext, field graphql.C
 func childFields___Directive(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
-		return fieldContext___Directive_name(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Directive_name)
 	case "description":
-		return fieldContext___Directive_description(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Directive_description)
 	case "isRepeatable":
-		return fieldContext___Directive_isRepeatable(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Directive_isRepeatable)
 	case "locations":
-		return fieldContext___Directive_locations(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Directive_locations)
 	case "args":
-		return fieldContext___Directive_args(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Directive_args)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type __Directive", field.Name)
+}
+
+func childFields___DirectiveLocation(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	return nil, errors.New("field of type __DirectiveLocation does not have child fields")
 }
 
 func childFields___EnumValue(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
-		return fieldContext___EnumValue_name(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___EnumValue_name)
 	case "description":
-		return fieldContext___EnumValue_description(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___EnumValue_description)
 	case "isDeprecated":
-		return fieldContext___EnumValue_isDeprecated(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___EnumValue_isDeprecated)
 	case "deprecationReason":
-		return fieldContext___EnumValue_deprecationReason(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___EnumValue_deprecationReason)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type __EnumValue", field.Name)
 }
@@ -286,17 +568,17 @@ func childFields___EnumValue(ctx context.Context, ec *executionContext, field gr
 func childFields___Field(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
-		return fieldContext___Field_name(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Field_name)
 	case "description":
-		return fieldContext___Field_description(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Field_description)
 	case "args":
-		return fieldContext___Field_args(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Field_args)
 	case "type":
-		return fieldContext___Field_type(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Field_type)
 	case "isDeprecated":
-		return fieldContext___Field_isDeprecated(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Field_isDeprecated)
 	case "deprecationReason":
-		return fieldContext___Field_deprecationReason(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Field_deprecationReason)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type __Field", field.Name)
 }
@@ -304,17 +586,17 @@ func childFields___Field(ctx context.Context, ec *executionContext, field graphq
 func childFields___InputValue(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
-		return fieldContext___InputValue_name(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___InputValue_name)
 	case "description":
-		return fieldContext___InputValue_description(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___InputValue_description)
 	case "type":
-		return fieldContext___InputValue_type(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___InputValue_type)
 	case "defaultValue":
-		return fieldContext___InputValue_defaultValue(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___InputValue_defaultValue)
 	case "isDeprecated":
-		return fieldContext___InputValue_isDeprecated(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___InputValue_isDeprecated)
 	case "deprecationReason":
-		return fieldContext___InputValue_deprecationReason(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___InputValue_deprecationReason)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type __InputValue", field.Name)
 }
@@ -322,17 +604,17 @@ func childFields___InputValue(ctx context.Context, ec *executionContext, field g
 func childFields___Schema(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "description":
-		return fieldContext___Schema_description(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Schema_description)
 	case "types":
-		return fieldContext___Schema_types(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Schema_types)
 	case "queryType":
-		return fieldContext___Schema_queryType(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Schema_queryType)
 	case "mutationType":
-		return fieldContext___Schema_mutationType(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Schema_mutationType)
 	case "subscriptionType":
-		return fieldContext___Schema_subscriptionType(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Schema_subscriptionType)
 	case "directives":
-		return fieldContext___Schema_directives(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Schema_directives)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
 }
@@ -340,27 +622,31 @@ func childFields___Schema(ctx context.Context, ec *executionContext, field graph
 func childFields___Type(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "kind":
-		return fieldContext___Type_kind(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Type_kind)
 	case "name":
-		return fieldContext___Type_name(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Type_name)
 	case "description":
-		return fieldContext___Type_description(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Type_description)
 	case "specifiedByURL":
-		return fieldContext___Type_specifiedByURL(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Type_specifiedByURL)
 	case "fields":
-		return fieldContext___Type_fields(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Type_fields)
 	case "interfaces":
-		return fieldContext___Type_interfaces(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Type_interfaces)
 	case "possibleTypes":
-		return fieldContext___Type_possibleTypes(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Type_possibleTypes)
 	case "enumValues":
-		return fieldContext___Type_enumValues(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Type_enumValues)
 	case "inputFields":
-		return fieldContext___Type_inputFields(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Type_inputFields)
 	case "ofType":
-		return fieldContext___Type_ofType(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Type_ofType)
 	case "isOneOf":
-		return fieldContext___Type_isOneOf(ctx, ec, field)
+		return fieldContextByID(ctx, ec, field, fieldContextID___Type_isOneOf)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
+}
+
+func childFields___TypeKind(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	return nil, errors.New("field of type __TypeKind does not have child fields")
 }

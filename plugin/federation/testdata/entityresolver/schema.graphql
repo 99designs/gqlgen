@@ -75,3 +75,19 @@ type MultiHelloMultipleRequires @key(fields: "name") @entityResolver(multi: true
     key2: String! @external
     key3: String! @requires(fields: "key1 key2")
 }
+
+type CustomIDEntity @key(fields: "id owner { id } optionalID") {
+    id: ID!
+    owner: CustomIDOwner!
+    optionalID: ID
+}
+
+type MultiCustomIDEntity @key(fields: "id owner { id } optionalID") @entityResolver(multi: true) {
+    id: ID!
+    owner: CustomIDOwner!
+    optionalID: ID
+}
+
+type CustomIDOwner {
+    id: ID!
+}

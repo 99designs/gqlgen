@@ -9,9 +9,23 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/custommodel"
 	"github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/generated"
 	"github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/generated/model"
 )
+
+// FindCustomIDEntityByIDAndOwnerIDAndOptionalID is the resolver for the findCustomIDEntityByIDAndOwnerIDAndOptionalID field.
+func (r *entityResolver) FindCustomIDEntityByIDAndOwnerIDAndOptionalID(ctx context.Context, id string, ownerID string, optionalID *string) (*custommodel.Entity, error) {
+	entity := &custommodel.Entity{
+		ID:    custommodel.OutputID(id),
+		Owner: &custommodel.Owner{ID: custommodel.OutputID(ownerID)},
+	}
+	if optionalID != nil {
+		outputID := custommodel.OutputID(*optionalID)
+		entity.OptionalID = &outputID
+	}
+	return entity, nil
+}
 
 // FindHelloByName is the resolver for the findHelloByName field.
 func (r *entityResolver) FindHelloByName(ctx context.Context, name string) (*model.Hello, error) {
@@ -36,6 +50,22 @@ func (r *entityResolver) FindHelloWithErrorsByName(ctx context.Context, name str
 	return &model.HelloWithErrors{
 		Name: name,
 	}, nil
+}
+
+// FindManyMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDs is the resolver for the findManyMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDs field.
+func (r *entityResolver) FindManyMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDs(ctx context.Context, reps []*model.MultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput) ([]*custommodel.MultiEntity, error) {
+	entities := make([]*custommodel.MultiEntity, len(reps))
+	for i, rep := range reps {
+		entities[i] = &custommodel.MultiEntity{
+			ID:    custommodel.OutputID(rep.ID),
+			Owner: &custommodel.Owner{ID: custommodel.OutputID(rep.OwnerID)},
+		}
+		if rep.OptionalID != nil {
+			outputID := custommodel.OutputID(*rep.OptionalID)
+			entities[i].OptionalID = &outputID
+		}
+	}
+	return entities, nil
 }
 
 // FindManyMultiHelloByNames is the resolver for the findManyMultiHelloByNames field.

@@ -130,6 +130,11 @@ type KeyField struct {
 	GoName string
 }
 
+// ArgName is the argument name this key takes on a single entity resolver.
+func (k *KeyField) ArgName() string {
+	return k.Field.ToGoPrivate()
+}
+
 // Requires represents an @requires clause
 type Requires struct {
 	Name  string                // the name of the field

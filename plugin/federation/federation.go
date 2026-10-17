@@ -514,8 +514,17 @@ func (f *Federation) GenerateCode(data *codegen.Data) error {
 				obj = data.Objects.ByName(data.Interfaces[e.Def.Name].Implementors[0].Name)
 			}
 
+			// Keys are typed from resolver inputs, not the entity's output
+			// fields: the two can bind different Go types to one scalar.
 			for _, r := range e.Resolvers {
-				populateKeyFieldTypes(r, obj, data.Objects, e.Def.Name)
+				if e.Multi {
+					err = populateMultiKeyFieldTypes(r, data.Inputs)
+				} else {
+					err = populateSingleKeyFieldTypes(r, data.Objects.ByName("Entity"))
+				}
+				if err != nil {
+					return err
+				}
 			}
 
 			// fill in types for requires fields
@@ -540,23 +549,6 @@ func (f *Federation) GenerateCode(data *codegen.Data) error {
 			}
 			// add type info to entity
 			e.Type = obj.Type
-		}
-	}
-
-	// fill in types for resolver inputs
-	//
-	for _, entity := range f.Entities {
-		if !entity.Multi {
-			continue
-		}
-
-		for _, resolver := range entity.Resolvers {
-			obj := data.Inputs.ByName(resolver.InputTypeName)
-			if obj == nil {
-				return fmt.Errorf("input object %s not found", resolver.InputTypeName)
-			}
-
-			resolver.InputType = obj.Type
 		}
 	}
 
@@ -640,23 +632,73 @@ func containsUnionField(reqField *Requires) bool {
 	return false
 }
 
-// Fill in types for key fields
-func populateKeyFieldTypes(
-	resolver *EntityResolver,
-	obj *codegen.Object,
-	allObjects codegen.Objects,
-	name string,
-) {
-	for _, keyField := range resolver.KeyFields {
-		if len(keyField.Field) == 0 {
-			fmt.Println(
-				"skipping @key field " + keyField.Definition.Name + " in " + resolver.ResolverName + " in " + name,
-			)
-			continue
+// fieldByName returns obj's field with the given GraphQL name, or nil.
+func fieldByName(obj *codegen.Object, name string) *codegen.Field {
+	if obj != nil {
+		for _, field := range obj.Fields {
+			if field.Name == name {
+				return field
+			}
 		}
-		cgField := keyField.Field.TypeReference(obj, allObjects)
-		keyField.Type = cgField.TypeReference
 	}
+	return nil
+}
+
+// argByName returns field's argument with the given GraphQL name, or nil.
+func argByName(field *codegen.Field, name string) *codegen.FieldArgument {
+	for _, arg := range field.Args {
+		if arg.Name == name {
+			return arg
+		}
+	}
+	return nil
+}
+
+// populateMultiKeyFieldTypes sets a batch resolver's InputType and key types
+// from its input object.
+//
+// Requires: inputs holds the input object generated for resolver.
+// Ensures:  every KeyField.Type is set, or an error names what is missing.
+func populateMultiKeyFieldTypes(resolver *EntityResolver, inputs codegen.Objects) error {
+	input := inputs.ByName(resolver.InputTypeName)
+	if input == nil {
+		return fmt.Errorf("input object %s not found", resolver.InputTypeName)
+	}
+	resolver.InputType = input.Type
+	for _, keyField := range resolver.KeyFields {
+		field := fieldByName(input, keyField.GoName)
+		if field == nil || field.TypeReference == nil {
+			return fmt.Errorf(
+				"type for key field %s in input object %s not found",
+				keyField.GoName, resolver.InputTypeName,
+			)
+		}
+		keyField.Type = field.TypeReference
+	}
+	return nil
+}
+
+// populateSingleKeyFieldTypes sets a single resolver's key types from its
+// arguments.
+//
+// Requires: entity is the generated Entity object holding resolver's field.
+// Ensures:  every KeyField.Type is set, or an error names what is missing.
+func populateSingleKeyFieldTypes(resolver *EntityResolver, entity *codegen.Object) error {
+	field := fieldByName(entity, resolver.ResolverName)
+	if field == nil {
+		return fmt.Errorf("entity resolver %s not found", resolver.ResolverName)
+	}
+	for _, keyField := range resolver.KeyFields {
+		arg := argByName(field, keyField.ArgName())
+		if arg == nil || arg.TypeReference == nil {
+			return fmt.Errorf(
+				"type for key argument %s in entity resolver %s not found",
+				keyField.ArgName(), resolver.ResolverName,
+			)
+		}
+		keyField.Type = arg.TypeReference
+	}
+	return nil
 }
 
 func (f *Federation) buildEntities(schema *ast.Schema, version int) ([]*Entity, error) {
@@ -1180,7 +1222,7 @@ func buildResolverSDL(
 		fmt.Fprintf(
 			&resolverArgsSb705,
 			"%s: %s,",
-			keyField.Field.ToGoPrivate(),
+			keyField.ArgName(),
 			keyField.Definition.Type.String(),
 		)
 	}

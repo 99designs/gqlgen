@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"go/types"
+	"maps"
 	"sort"
 	"strconv"
 	"strings"
@@ -701,57 +702,83 @@ func populateSingleKeyFieldTypes(resolver *EntityResolver, entity *codegen.Objec
 	return nil
 }
 
-// assignEntityResolverNames disambiguates generated resolver and batch input names
-// in entity and key order. Reserve all original names before assigning suffixes so
-// a collision cannot rename another key's otherwise unique resolver.
-// An input-only collision leaves the resolver name unchanged.
-func assignEntityResolverNames(entities []*Entity, schema *ast.Schema) {
-	reservedResolvers := make(map[string]bool)
-	reservedInputs := make(map[string]bool)
-	for name := range schema.Types {
-		reservedInputs[name] = true
-	}
-	for _, entity := range entities {
-		for _, resolver := range entity.Resolvers {
-			reservedResolvers[templates.ToGo(resolver.ResolverName)] = true
-			if entity.Multi {
-				reservedInputs[resolver.InputTypeName] = true
-			}
-		}
+// uniqueGoNames returns names, in order, made unique as Go identifiers.
+//
+// Requires: suffixed(name, n) gives a distinct name for each n >= 2.
+// Ensures:  a name whose Go form is not in existing and not held by an earlier
+// name is unchanged; a repeat becomes suffixed(name, n) for the smallest
+// n >= 2 whose Go form is in neither existing, names, nor earlier results.
+func uniqueGoNames(
+	names []string,
+	existing map[string]bool,
+	suffixed func(name string, n int) string,
+) []string {
+	reserved := make(map[string]bool, len(existing)+len(names))
+	maps.Copy(reserved, existing)
+	for _, name := range names {
+		reserved[templates.ToGo(name)] = true
 	}
 
-	usedResolvers := make(map[string]bool)
-	usedInputs := make(map[string]bool)
-	for _, entity := range entities {
-		for _, resolver := range entity.Resolvers {
-			resolverName := resolver.ResolverName
-			inputName := resolver.InputTypeName
-			resolverCollision := usedResolvers[templates.ToGo(resolverName)]
-			inputCollision := entity.Multi &&
-				(usedInputs[inputName] || schema.Types[inputName] != nil)
-			if resolverCollision || inputCollision {
-				for suffix := 2; ; suffix++ {
-					if resolverCollision {
-						resolverName = resolver.ResolverName + strconv.Itoa(suffix)
-					}
-					inputName = strings.TrimSuffix(resolver.InputTypeName, "Input") +
-						strconv.Itoa(suffix) + "Input"
-					goResolverName := templates.ToGo(resolverName)
-					resolverAvailable := !reservedResolvers[goResolverName] &&
-						!usedResolvers[goResolverName]
-					if (!resolverCollision || resolverAvailable) &&
-						(!entity.Multi || (!reservedInputs[inputName] && !usedInputs[inputName])) {
-						break
-					}
+	used := make(map[string]bool, len(names))
+	taken := func(name string) bool {
+		return reserved[templates.ToGo(name)] || used[templates.ToGo(name)]
+	}
+	unique := make([]string, len(names))
+	for i, name := range names {
+		if existing[templates.ToGo(name)] || used[templates.ToGo(name)] {
+			base := name
+			for n := 2; ; n++ {
+				if name = suffixed(base, n); !taken(name) {
+					break
 				}
 			}
-			resolver.ResolverName = resolverName
-			resolver.InputTypeName = inputName
-			usedResolvers[templates.ToGo(resolverName)] = true
-			if entity.Multi {
-				usedInputs[inputName] = true
+		}
+		used[templates.ToGo(name)] = true
+		unique[i] = name
+	}
+	return unique
+}
+
+// assignResolverNames makes resolver names unique across entities, in order.
+func assignResolverNames(entities []*Entity) {
+	var resolvers []*EntityResolver
+	var names []string
+	for _, entity := range entities {
+		for _, resolver := range entity.Resolvers {
+			resolvers = append(resolvers, resolver)
+			names = append(names, resolver.ResolverName)
+		}
+	}
+	unique := uniqueGoNames(names, nil, func(name string, n int) string {
+		return name + strconv.Itoa(n)
+	})
+	for i, resolver := range resolvers {
+		resolver.ResolverName = unique[i]
+	}
+}
+
+// assignBatchInputNames makes batch input names unique across entities and
+// against the types already in schema, in order.
+func assignBatchInputNames(entities []*Entity, schema *ast.Schema) {
+	existing := make(map[string]bool, len(schema.Types))
+	for name := range schema.Types {
+		existing[templates.ToGo(name)] = true
+	}
+	var resolvers []*EntityResolver
+	var names []string
+	for _, entity := range entities {
+		if entity.Multi {
+			for _, resolver := range entity.Resolvers {
+				resolvers = append(resolvers, resolver)
+				names = append(names, resolver.InputTypeName)
 			}
 		}
+	}
+	unique := uniqueGoNames(names, existing, func(name string, n int) string {
+		return strings.TrimSuffix(name, "Input") + strconv.Itoa(n) + "Input"
+	})
+	for i, resolver := range resolvers {
+		resolver.InputTypeName = unique[i]
 	}
 }
 
@@ -771,7 +798,8 @@ func (f *Federation) buildEntities(schema *ast.Schema, version int) ([]*Entity, 
 	sort.Slice(entities, func(i, j int) bool {
 		return entities[i].Name < entities[j].Name
 	})
-	assignEntityResolverNames(entities, schema)
+	assignResolverNames(entities)
+	assignBatchInputNames(entities, schema)
 
 	return entities, nil
 }

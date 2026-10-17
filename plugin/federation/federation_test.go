@@ -137,9 +137,8 @@ func TestNew(t *testing.T) {
 	})
 }
 
+// Not parallel: LoadSchema writes package-level caches in internal/code.
 func TestEntityResolverNameCollisions(t *testing.T) {
-	t.Parallel()
-
 	cases := []struct {
 		name      string
 		schema    string
@@ -225,12 +224,12 @@ func TestEntityResolverNameCollisions(t *testing.T) {
 			inputs:    []string{"PortByIDsInput", "PortByIDs2Input"},
 		},
 		{
-			name: "case-distinct input names retain existing model naming",
+			name: "existing type with the same Go name as an input",
 			schema: `
-				type FooBar @key(fields: "id") @entityResolver(multi: true) { id: ID! }
-				type fooBar @key(fields: "id") @entityResolver(multi: true) { id: ID! }`,
-			resolvers: []string{"findManyFooBarByIDs", "findManyfooBarByIDs"},
-			inputs:    []string{"FooBarByIDsInput", "fooBarByIDsInput"},
+				type Port @key(fields: "id") @entityResolver(multi: true) { id: ID! }
+				input portByIDsInput { other: String }`,
+			resolvers: []string{"findManyPortByIDs"},
+			inputs:    []string{"PortByIDs2Input"},
 		},
 		{
 			name: "existing input name preserves non-colliding resolvers",
@@ -260,7 +259,7 @@ func TestEntityResolverNameCollisions(t *testing.T) {
 					id: ID!
 				}
 				input PortByIDsInput { other: String }`,
-			resolvers: []string{"findManyPortByIDs", "findManyPortByIDs3"},
+			resolvers: []string{"findManyPortByIDs", "findManyPortByIDs2"},
 			inputs:    []string{"PortByIDs2Input", "PortByIDs3Input"},
 		},
 		{
@@ -271,7 +270,7 @@ func TestEntityResolverNameCollisions(t *testing.T) {
 					id: ID!
 				}
 				input PortByIDs2Input { other: String }`,
-			resolvers: []string{"findManyPortByIDs", "findManyPortByIDs3"},
+			resolvers: []string{"findManyPortByIDs", "findManyPortByIDs2"},
 			inputs:    []string{"PortByIDsInput", "PortByIDs3Input"},
 		},
 		{
@@ -283,14 +282,12 @@ func TestEntityResolverNameCollisions(t *testing.T) {
 					IDs2: ID!
 				}`,
 			resolvers: []string{"findManyPortByIDs", "findManyPortByIDs2", "findManyPortByIDs3"},
-			inputs:    []string{"PortByIDs3Input"},
+			inputs:    []string{"PortByIDsInput"},
 		},
 	}
 
 	for _, testCase := range cases {
 		t.Run(testCase.name, func(t *testing.T) {
-			t.Parallel()
-
 			f := &Federation{version: 2}
 			early, err := f.InjectSourcesEarly()
 			require.NoError(t, err)
@@ -313,7 +310,8 @@ func TestEntityResolverNameCollisions(t *testing.T) {
 					resolvers = append(resolvers, resolver.ResolverName)
 					if entity.Multi {
 						inputs = append(inputs, resolver.InputTypeName)
-						require.NotNil(t, cfg.Schema.Types[resolver.InputTypeName])
+						require.NotNil(t, cfg.Schema.Types[resolver.InputTypeName],
+							"input %s missing from schema", resolver.InputTypeName)
 					}
 				}
 			}

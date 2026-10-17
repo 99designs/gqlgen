@@ -125,11 +125,12 @@ func TestEntityResolver(t *testing.T) {
 					{"__typename": "Collision", key: "first"},
 					{"__typename": "Collision", key: "second"},
 				}
+				type collision struct {
+					Value      string `json:"value"`
+					ResolvedBy string `json:"resolvedBy"`
+				}
 				var resp struct {
-					Entities []struct {
-						Value      string `json:"value"`
-						ResolvedBy string `json:"resolvedBy"`
-					} `json:"_entities"`
+					Entities []collision `json:"_entities"`
 				}
 
 				err := c.Post(
@@ -139,12 +140,10 @@ func TestEntityResolver(t *testing.T) {
 				)
 
 				require.NoError(t, err)
-				require.Len(t, resp.Entities, 2)
-				require.Equal(t, "first", resp.Entities[0].Value)
-				require.Equal(t, "second", resp.Entities[1].Value)
-				for _, entity := range resp.Entities {
-					require.Equal(t, key, entity.ResolvedBy)
-				}
+				require.Equal(t, []collision{
+					{Value: "first", ResolvedBy: key},
+					{Value: "second", ResolvedBy: key},
+				}, resp.Entities)
 			})
 		}
 	})
@@ -551,11 +550,12 @@ func TestMultiEntityResolver(t *testing.T) {
 					{"__typename": "MultiCollision", key: "first"},
 					{"__typename": "MultiCollision", key: "second"},
 				}
+				type collision struct {
+					Value      string `json:"value"`
+					ResolvedBy string `json:"resolvedBy"`
+				}
 				var resp struct {
-					Entities []struct {
-						Value      string `json:"value"`
-						ResolvedBy string `json:"resolvedBy"`
-					} `json:"_entities"`
+					Entities []collision `json:"_entities"`
 				}
 
 				err := c.Post(
@@ -565,12 +565,10 @@ func TestMultiEntityResolver(t *testing.T) {
 				)
 
 				require.NoError(t, err)
-				require.Len(t, resp.Entities, 2)
-				require.Equal(t, "first", resp.Entities[0].Value)
-				require.Equal(t, "second", resp.Entities[1].Value)
-				for _, entity := range resp.Entities {
-					require.Equal(t, key, entity.ResolvedBy)
-				}
+				require.Equal(t, []collision{
+					{Value: "first", ResolvedBy: key},
+					{Value: "second", ResolvedBy: key},
+				}, resp.Entities)
 			})
 		}
 	})

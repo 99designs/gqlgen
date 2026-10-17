@@ -376,15 +376,28 @@ func (ec *executionContext) PopulateTodoRequires(ctx context.Context, entity *mo
 ## Entity resolver names
 
 gqlgen derives entity resolver names from the entity type and its `@key` fields.
-If different keys produce the same Go name, gqlgen keeps the first name and adds
-a numeric suffix to later collisions. For example, `Port @key(fields: "_id")
-@key(fields: "id")` generates `FindPortByID` and `FindPortByID2`.
+If different keys produce the same Go name, gqlgen keeps the first name and gives
+each later one the smallest numeric suffix that is still free:
 
-Names that are already unique stay unchanged. Suffixes skip names already used
-by other keys; batch input type names are disambiguated too. Assignment follows
-entity name order and the order of `@key` directives on each entity. GraphQL key
-fields and representation values are unchanged. `@goField(name: ...)` continues
-to control model field binding, not entity resolver naming.
+```graphql
+type Port @key(fields: "_id") @key(fields: "id") {
+  _id: String! @goField(name: "LegacyID")
+  id: ID!
+}
+```
+
+This generates `FindPortByID` and `FindPortByID2`. (`_id` and `id` also produce
+the same model field name, so one of them needs `@goField`, which controls model
+binding but not resolver names.)
+
+Batch input type names are disambiguated the same way, independently of resolver
+names, and also avoid types already in your schema. Names that don't collide stay
+unchanged. Names are assigned in entity name order, then in `@key` order.
+
+Because names are assigned across all entities, adding an entity or a `@key` can
+change an existing resolver's name. gqlgen keeps resolver bodies by method name,
+so check your entity resolvers after regenerating: an existing body can end up on
+another entity's resolver.
 
 ## Using @entityResolver
 

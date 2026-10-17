@@ -58,6 +58,28 @@ func TestImportPathForDir(t *testing.T) {
 	}
 }
 
+func TestModulePathForDir(t *testing.T) {
+	wd, err := os.Getwd()
+	require.NoError(t, err)
+
+	assert.Equal(t, "github.com/99designs/gqlgen", ModulePathForDir(wd))
+	assert.Equal(
+		t,
+		"github.com/99designs/gqlgen",
+		ModulePathForDir(filepath.Join(wd, "..", "..", "api")),
+	)
+
+	// a nested module
+	assert.Equal(
+		t,
+		"github.com/99designs/gqlgen/_examples",
+		ModulePathForDir(filepath.Join(wd, "..", "..", "_examples", "chat")),
+	)
+
+	// out of module
+	assert.Empty(t, ModulePathForDir(filepath.Join(wd, "..", "..", "..")))
+}
+
 func TestNameForDir(t *testing.T) {
 	wd, err := os.Getwd()
 	require.NoError(t, err)

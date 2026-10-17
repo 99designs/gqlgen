@@ -209,12 +209,14 @@ func generate(
 }
 
 func validate(cfg *config.Config) error {
-	roots := []string{buildPattern(cfg.Exec.Dir())}
+	// go build runs in the working directory, so the module found there is the main module.
+	mainModule := code.ModulePathForDir(".")
+	roots := []string{validationRoot(cfg.Exec.Dir(), mainModule)}
 	if cfg.Model.IsDefined() {
-		roots = append(roots, buildPattern(cfg.Model.Dir()))
+		roots = append(roots, validationRoot(cfg.Model.Dir(), mainModule))
 	}
 	if cfg.Resolver.IsDefined() {
-		roots = append(roots, buildPattern(cfg.Resolver.Dir()))
+		roots = append(roots, validationRoot(cfg.Resolver.Dir(), mainModule))
 	}
 
 	// Use go build for validation instead of packages.Load with NeedTypes.
@@ -230,6 +232,20 @@ func validate(cfg *config.Config) error {
 // subpackagesWildcard is the Go tooling pattern for "this package and all subpackages".
 // Used by go build, go test, etc. (e.g., "go build ./...")
 const subpackagesWildcard = "/..."
+
+// validationRoot returns the go build pattern that validate compiles for the output directory
+// dir: dir itself and every package beneath it.
+//
+// Within the main module that is a file path pattern, see buildPattern. The go command refuses
+// a file path pattern outside the main module, though, so a directory that belongs to another
+// module, such as one wired in with a replace directive or a go.work file, is addressed by its
+// import path instead, which resolves through the module graph.
+func validationRoot(dir, mainModule string) string {
+	if module := code.ModulePathForDir(dir); module != "" && module != mainModule {
+		return code.ImportPathForDir(dir) + subpackagesWildcard
+	}
+	return buildPattern(dir)
+}
 
 // buildPattern returns a go build pattern matching dir and every package beneath it.
 //

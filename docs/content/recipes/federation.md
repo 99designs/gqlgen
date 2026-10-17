@@ -373,6 +373,48 @@ func (ec *executionContext) PopulateTodoRequires(ctx context.Context, entity *mo
 }
 ```
 
+## One resolver per entity
+
+By default gqlgen generates one entity resolver per `@key`. With
+`@entityResolver(perEntity: true)` it generates a single resolver for the entity,
+which receives the keys the router sent as one representation:
+
+```graphql
+directive @entityResolver(multi: Boolean, perEntity: Boolean) on OBJECT
+
+type Port @key(fields: "_id") @key(fields: "id") @entityResolver(perEntity: true) {
+  _id: String! @goField(name: "LegacyID")
+  id: ID!
+}
+```
+
+```go
+func (r *entityResolver) FindPort(ctx context.Context, rep model.PortRepresentation) (*model.Port, error) {
+	switch {
+	case rep.LegacyID != nil:
+		return r.portByLegacyID(ctx, *rep.LegacyID)
+	case rep.ID != nil:
+		return r.portByID(ctx, *rep.ID)
+	}
+	return nil, errors.New("port representation has no key")
+}
+```
+
+- `PortRepresentation` is a generated input holding every key field of `Port`,
+  all nullable: a key the router did not send is `nil`. A nested key such as
+  `owner { id }` gets a representation of the nested type (`OwnerRepresentation`),
+  shared by every entity whose keys select into it.
+- Representation fields take the entity's Go field names, so `@goField(name: ...)`
+  or `fieldName` config on `Port` also applies to `PortRepresentation`.
+- With `multi: true` the resolver takes `reps []*model.PortRepresentation`, and
+  each representation in a batch can use a different key.
+- The resolver name comes from the entity name alone (`findPort`), so keys whose
+  Go names collide, such as `_id` and `id`, need no distinct names (compare
+  [Entity resolver names](#entity-resolver-names)). Generation fails if another
+  entity's resolver already has that name.
+- `@requires` works with the default and explicit strategies; `preloaded` is not
+  supported. A type named `<Entity>Representation` must not already exist.
+
 ## Using @entityResolver
 
 The `@entityResolver` directive enables optimization for entity resolver generation in GraphQL federation.
@@ -577,7 +619,8 @@ When the names would still collide, generation fails with an error that says
 what to change:
 
 - Two keys on one entity, such as `id` and `i { d }`: give one of their key
-  fields a distinct `@goField(name:)` or `fieldName`.
+  fields a distinct `@goField(name:)` or `fieldName`, or give the entity
+  [one resolver per entity](#one-resolver-per-entity).
 - The same `@key` declared twice: remove one.
 - Two entities, such as a single `ManyPort @key(fields: "IDs")` and a multi
   `Port @key(fields: "id")`: you can't rename either entity, so give both the

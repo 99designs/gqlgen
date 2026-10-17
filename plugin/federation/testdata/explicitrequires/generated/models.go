@@ -83,6 +83,18 @@ type MultiHelloWithErrorByNamesInput struct {
 	Name string `json:"Name"`
 }
 
+type MultiPerEntityPlanet struct {
+	Name     string `json:"name"`
+	Diameter int    `json:"diameter"`
+	Size     int    `json:"size"`
+}
+
+func (MultiPerEntityPlanet) IsEntity() {}
+
+type MultiPerEntityPlanetRepresentation struct {
+	Name *string `json:"name,omitempty"`
+}
+
 type MultiPlanetRequiresNested struct {
 	Name   string   `json:"name"`
 	World  *World   `json:"world"`
@@ -95,6 +107,18 @@ func (MultiPlanetRequiresNested) IsEntity() {}
 
 type MultiPlanetRequiresNestedByNamesInput struct {
 	Name string `json:"Name"`
+}
+
+type PerEntityPlanet struct {
+	Name     string `json:"name"`
+	Diameter int    `json:"diameter"`
+	Size     int    `json:"size"`
+}
+
+func (PerEntityPlanet) IsEntity() {}
+
+type PerEntityPlanetRepresentation struct {
+	Name *string `json:"name,omitempty"`
 }
 
 type Person struct {

@@ -81,8 +81,8 @@ func sameKeyPath(a, b *KeyField) bool {
 //
 // Requires: each entity's resolvers have distinct Go names (buildResolvers).
 // Ensures:  nil, or an error naming both owners of the first Go name that
-// two entities' resolvers share, or that a batch input shares with a schema
-// type.
+// two entities' generated resolvers share, or that a per-key batch input
+// shares with a schema type.
 func checkResolverNames(entities []*Entity, schema *ast.Schema) error {
 	types := make(map[string]string, len(schema.Types))
 	for name := range schema.Types {
@@ -91,30 +91,54 @@ func checkResolverNames(entities []*Entity, schema *ast.Schema) error {
 
 	owners := make(map[string]*Entity)
 	for _, entity := range entities {
-		for _, resolver := range entity.Resolvers {
-			goName := templates.ToGo(resolver.ResolverName)
+		for _, resolver := range generatedResolvers(entity) {
+			goName := templates.ToGo(resolver.name)
 			if other, ok := owners[goName]; ok {
 				hint := ""
-				if other.Multi != entity.Multi {
+				if !other.PerEntity && !entity.PerEntity && other.Multi != entity.Multi {
 					hint = "; giving both the same @entityResolver(multi:) setting avoids this"
 				}
 				return fmt.Errorf(
 					"entities %q and %q both generate entity resolver %s%s",
-					other.Name, entity.Name, resolver.ResolverName, hint,
+					other.Name, entity.Name, resolver.name, hint,
 				)
 			}
 			owners[goName] = entity
 
-			if !entity.Multi {
+			if resolver.input == "" {
 				continue
 			}
-			if name, ok := types[templates.ToGo(resolver.InputTypeName)]; ok {
+			if name, ok := types[templates.ToGo(resolver.input)]; ok {
 				return fmt.Errorf(
 					"type %q has the same Go name as input %s of entity resolver %s; rename %q",
-					name, resolver.InputTypeName, resolver.ResolverName, name,
+					name, resolver.input, resolver.name, name,
 				)
 			}
 		}
 	}
 	return nil
+}
+
+// generatedResolver is a field gqlgen generates on the Entity type, with the
+// per-key batch input it generates for it, if any.
+type generatedResolver struct {
+	name  string
+	input string
+}
+
+// generatedResolvers returns the resolver fields gqlgen generates for
+// entity: its one per-entity resolver, or one per @key. A per-entity
+// entity's representation inputs are checked in buildRepresentations.
+func generatedResolvers(entity *Entity) []generatedResolver {
+	if entity.PerEntity {
+		return []generatedResolver{{name: entity.PerEntityResolverName()}}
+	}
+	resolvers := make([]generatedResolver, len(entity.Resolvers))
+	for i, resolver := range entity.Resolvers {
+		resolvers[i].name = resolver.ResolverName
+		if entity.Multi {
+			resolvers[i].input = resolver.InputTypeName
+		}
+	}
+	return resolvers
 }

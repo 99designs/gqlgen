@@ -68,6 +68,13 @@ type Entity struct {
 	Resolvers []*EntityResolver
 	Requires  []*Requires
 	Multi     bool
+	// PerEntity selects one resolver for the entity, taking a representation
+	// input, instead of one resolver per @key. Set by
+	// @entityResolver(perEntity: true).
+	PerEntity bool
+	// RepresentationType is the Go type of a per-entity resolver's argument:
+	// one representation, or a list of them for a batch resolver.
+	RepresentationType *config.TypeReference
 	// RequiresStrategy is how this entity's @requires fields are delivered to
 	// the resolver. Resolved per entity in buildEntity.
 	RequiresStrategy RequiresStrategy
@@ -76,6 +83,12 @@ type Entity struct {
 	// with full type information, populated in GenerateCode for use in the
 	// federation template to wrap entity resolver calls.
 	ImplDirectives []*codegen.Directive
+}
+
+// PerEntityResolverName is the GraphQL field name of the entity's per-entity
+// resolver; the Go method name is its ToGo form.
+func (e *Entity) PerEntityResolverName() string {
+	return "find" + e.Name
 }
 
 // IsDefaultRequires reports whether @requires uses the default (post-resolver

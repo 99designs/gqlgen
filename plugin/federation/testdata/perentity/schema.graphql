@@ -1,0 +1,36 @@
+extend schema
+  @link(url: "https://specs.apollo.dev/federation/v2.7",
+        import: ["@key", "@external", "@requires"])
+
+directive @entityResolver(multi: Boolean, requires: String, perEntity: Boolean) on OBJECT
+directive @goField(name: String) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+# _id and id produce the same Go name, so the model needs @goField; the single
+# per-entity resolver needs no per-key names at all.
+type Port @key(fields: "_id") @key(fields: "id") @entityResolver(perEntity: true) {
+    _id: String! @goField(name: "LegacyID")
+    id: ID!
+    size: Int! @external
+    label: String! @requires(fields: "size")
+    resolvedBy: String!
+}
+
+type Ship @key(fields: "id owner { id }") @key(fields: "_id") @entityResolver(perEntity: true, multi: true) {
+    _id: String! @goField(name: "LegacyID")
+    id: ID!
+    owner: Owner!
+    resolvedBy: String!
+}
+
+type Owner {
+    id: ID!
+    name: String
+}
+
+type Plain @key(fields: "id") {
+    id: ID!
+}
+
+type Query {
+    ok: Boolean
+}

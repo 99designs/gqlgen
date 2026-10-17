@@ -2,6 +2,7 @@ package federation
 
 import (
 	"maps"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -48,7 +49,8 @@ func TestEntityResolverNames(t *testing.T) {
 				id: ID!
 			}`,
 			err: `@key(fields: "_id") and @key(fields: "id") on "Port" both generate ` +
-				`entity resolver findPortByID; give one of their key fields a distinct @goField(name: ...) or gqlgen.yml fieldName`,
+				`entity resolver findPortByID; give one of their key fields a distinct @goField(name: ...) or gqlgen.yml fieldName, ` +
+				`or set @entityResolver(perEntity: true) on "Port"`,
 		},
 		{
 			name: "leading underscore uses gqlgen.yml fieldName",
@@ -172,6 +174,29 @@ func TestEntityResolverNames(t *testing.T) {
 			resolvers: []string{"findManyManyPortByIDss", "findManyPortByIDs"},
 			inputs:    []string{"ManyPortByIDssInput", "PortByIDsInput"},
 		},
+		{
+			name: "per-entity keys don't need distinct names",
+			schema: `type Port @key(fields: "_id") @key(fields: "id") @entityResolver(perEntity: true) {
+				_id: String!
+				id: ID!
+			}`,
+			resolvers: []string{"findPort"},
+		},
+		{
+			name: "per-entity resolver name taken by another entity",
+			schema: `
+				type Port @key(fields: "id") { id: ID! }
+				type PortByID @key(fields: "x") @entityResolver(perEntity: true) { x: ID! }`,
+			err: `entities "Port" and "PortByID" both generate entity resolver findPortByID`,
+		},
+		{
+			name: "per-entity and per-key entities with distinct names",
+			schema: `
+				type Port @key(fields: "id") @entityResolver(perEntity: true, multi: true) { id: ID! }
+				type Ship @key(fields: "id") @entityResolver(multi: true) { id: ID! }`,
+			resolvers: []string{"findPort", "findManyShipByIDs"},
+			inputs:    []string{"ShipByIDsInput"},
+		},
 	}
 
 	for _, tc := range cases {
@@ -186,7 +211,7 @@ func TestEntityResolverNames(t *testing.T) {
 			cfg.Sources = early
 			cfg.Sources = append(cfg.Sources, &ast.Source{
 				Name: "schema.graphql",
-				Input: `directive @entityResolver(multi: Boolean) on OBJECT
+				Input: `directive @entityResolver(multi: Boolean, perEntity: Boolean) on OBJECT
 					directive @goField(name: String) on FIELD_DEFINITION
 					type Query { ok: Boolean }` + tc.schema,
 			})
@@ -202,14 +227,19 @@ func TestEntityResolverNames(t *testing.T) {
 			require.NoError(t, cfg.LoadSchema())
 
 			var resolvers, inputs []string
+			for _, field := range cfg.Schema.Types["Entity"].Fields {
+				if !strings.HasPrefix(field.Name, "__") {
+					resolvers = append(resolvers, field.Name)
+				}
+			}
 			for _, entity := range f.Entities {
+				if !entity.Multi || entity.PerEntity {
+					continue
+				}
 				for _, resolver := range entity.Resolvers {
-					resolvers = append(resolvers, resolver.ResolverName)
-					if entity.Multi {
-						inputs = append(inputs, resolver.InputTypeName)
-						require.NotNil(t, cfg.Schema.Types[resolver.InputTypeName],
-							"input %s missing from schema", resolver.InputTypeName)
-					}
+					inputs = append(inputs, resolver.InputTypeName)
+					require.NotNil(t, cfg.Schema.Types[resolver.InputTypeName],
+						"input %s missing from schema", resolver.InputTypeName)
 				}
 			}
 			require.Equal(t, tc.resolvers, resolvers)

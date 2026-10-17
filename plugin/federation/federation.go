@@ -514,8 +514,15 @@ func (f *Federation) GenerateCode(data *codegen.Data) error {
 				obj = data.Objects.ByName(data.Interfaces[e.Def.Name].Implementors[0].Name)
 			}
 
+			// Keys are typed from resolver inputs, not the entity's output
+			// fields: the two can bind different Go types to one scalar.
 			for _, r := range e.Resolvers {
-				if err := populateKeyFieldTypes(r, data, e.Multi); err != nil {
+				if e.Multi {
+					err = populateMultiKeyFieldTypes(r, data.Inputs)
+				} else {
+					err = populateSingleKeyFieldTypes(r, data.Objects.ByName("Entity"))
+				}
+				if err != nil {
 					return err
 				}
 			}
@@ -542,23 +549,6 @@ func (f *Federation) GenerateCode(data *codegen.Data) error {
 			}
 			// add type info to entity
 			e.Type = obj.Type
-		}
-	}
-
-	// fill in types for resolver inputs
-	//
-	for _, entity := range f.Entities {
-		if !entity.Multi {
-			continue
-		}
-
-		for _, resolver := range entity.Resolvers {
-			obj := data.Inputs.ByName(resolver.InputTypeName)
-			if obj == nil {
-				return fmt.Errorf("input object %s not found", resolver.InputTypeName)
-			}
-
-			resolver.InputType = obj.Type
 		}
 	}
 
@@ -642,6 +632,7 @@ func containsUnionField(reqField *Requires) bool {
 	return false
 }
 
+// fieldByName returns obj's field with the given GraphQL name, or nil.
 func fieldByName(obj *codegen.Object, name string) *codegen.Field {
 	if obj != nil {
 		for _, field := range obj.Fields {
@@ -653,51 +644,59 @@ func fieldByName(obj *codegen.Object, name string) *codegen.Field {
 	return nil
 }
 
-// Key values are passed to resolver inputs, whose Go types can differ from
-// the bound output fields even when they share a GraphQL scalar type.
-func populateKeyFieldTypes(
-	resolver *EntityResolver,
-	data *codegen.Data,
-	multi bool,
-) error {
-	if multi {
-		input := data.Inputs.ByName(resolver.InputTypeName)
-		if input == nil {
-			return fmt.Errorf("input object %s not found", resolver.InputTypeName)
+// argByName returns field's argument with the given GraphQL name, or nil.
+func argByName(field *codegen.Field, name string) *codegen.FieldArgument {
+	for _, arg := range field.Args {
+		if arg.Name == name {
+			return arg
 		}
-		for _, keyField := range resolver.KeyFields {
-			field := fieldByName(input, keyField.GoName)
-			if field == nil || field.TypeReference == nil {
-				return fmt.Errorf(
-					"type for key field %s in input object %s not found",
-					keyField.GoName, resolver.InputTypeName,
-				)
-			}
-			keyField.Type = field.TypeReference
-		}
-		return nil
 	}
+	return nil
+}
 
-	field := fieldByName(data.Objects.ByName("Entity"), resolver.ResolverName)
+// populateMultiKeyFieldTypes sets a batch resolver's InputType and key types
+// from its input object.
+//
+// Requires: inputs holds the input object generated for resolver.
+// Ensures:  every KeyField.Type is set, or an error names what is missing.
+func populateMultiKeyFieldTypes(resolver *EntityResolver, inputs codegen.Objects) error {
+	input := inputs.ByName(resolver.InputTypeName)
+	if input == nil {
+		return fmt.Errorf("input object %s not found", resolver.InputTypeName)
+	}
+	resolver.InputType = input.Type
+	for _, keyField := range resolver.KeyFields {
+		field := fieldByName(input, keyField.GoName)
+		if field == nil || field.TypeReference == nil {
+			return fmt.Errorf(
+				"type for key field %s in input object %s not found",
+				keyField.GoName, resolver.InputTypeName,
+			)
+		}
+		keyField.Type = field.TypeReference
+	}
+	return nil
+}
+
+// populateSingleKeyFieldTypes sets a single resolver's key types from its
+// arguments.
+//
+// Requires: entity is the generated Entity object holding resolver's field.
+// Ensures:  every KeyField.Type is set, or an error names what is missing.
+func populateSingleKeyFieldTypes(resolver *EntityResolver, entity *codegen.Object) error {
+	field := fieldByName(entity, resolver.ResolverName)
 	if field == nil {
 		return fmt.Errorf("entity resolver %s not found", resolver.ResolverName)
 	}
 	for _, keyField := range resolver.KeyFields {
-		name := keyField.Field.ToGoPrivate()
-		var inputType *config.TypeReference
-		for _, arg := range field.Args {
-			if arg.Name == name {
-				inputType = arg.TypeReference
-				break
-			}
-		}
-		if inputType == nil {
+		arg := argByName(field, keyField.ArgName())
+		if arg == nil || arg.TypeReference == nil {
 			return fmt.Errorf(
 				"type for key argument %s in entity resolver %s not found",
-				name, resolver.ResolverName,
+				keyField.ArgName(), resolver.ResolverName,
 			)
 		}
-		keyField.Type = inputType
+		keyField.Type = arg.TypeReference
 	}
 	return nil
 }
@@ -1223,7 +1222,7 @@ func buildResolverSDL(
 		fmt.Fprintf(
 			&resolverArgsSb705,
 			"%s: %s,",
-			keyField.Field.ToGoPrivate(),
+			keyField.ArgName(),
 			keyField.Definition.Type.String(),
 		)
 	}

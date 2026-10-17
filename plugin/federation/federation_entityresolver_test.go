@@ -3,6 +3,7 @@ package federation
 
 import (
 	"encoding/json"
+	"maps"
 	"strconv"
 	"strings"
 	"testing"
@@ -23,77 +24,87 @@ func TestEntityResolverCustomOutputID(t *testing.T) {
 	srv.AddTransport(transport.POST{})
 	c := client.New(srv)
 
-	for _, typeName := range []string{"CustomIDEntity", "MultiCustomIDEntity"} {
-		t.Run(typeName, func(t *testing.T) {
-			representations := []map[string]any{
-				{
-					"__typename": typeName,
-					"id":         "42",
-					"owner":      map[string]any{"id": "owner:first"},
-					"optionalID": nil,
-				},
-				{
-					"__typename": typeName,
-					"id":         "opaque:asset",
-					"owner":      map[string]any{"id": "owner:second"},
-					"optionalID": "revision:third",
-				},
-				{
-					"__typename": typeName,
-					"id":         7,
-					"owner":      map[string]any{"id": 8},
-					"optionalID": 9,
-				},
-			}
-			var resp struct {
-				Entities []struct {
-					ID    string
-					Owner struct {
-						ID string
-					}
-					OptionalID *string
-				} `json:"_entities"`
-			}
+	type owner struct{ ID string }
+	type entity struct {
+		ID         string
+		Owner      owner
+		OptionalID *string
+	}
 
-			err := c.Post(
-				entityQuery([]string{typeName + " { id owner { id } optionalID }"}),
-				&resp,
-				client.Var("representations", representations),
-			)
+	cases := []struct {
+		name string
+		rep  map[string]any
+		want entity
+	}{
+		{
+			name: "null optional ID",
+			rep: map[string]any{
+				"id":         "42",
+				"owner":      map[string]any{"id": "owner:first"},
+				"optionalID": nil,
+			},
+			want: entity{ID: "42", Owner: owner{ID: "owner:first"}},
+		},
+		{
+			name: "opaque strings",
+			rep: map[string]any{
+				"id":         "opaque:asset",
+				"owner":      map[string]any{"id": "owner:second"},
+				"optionalID": "revision:third",
+			},
+			want: entity{
+				ID:         "opaque:asset",
+				Owner:      owner{ID: "owner:second"},
+				OptionalID: new("revision:third"),
+			},
+		},
+		{
+			name: "numeric JSON IDs",
+			rep:  map[string]any{"id": 7, "owner": map[string]any{"id": 8}, "optionalID": 9},
+			want: entity{ID: "7", Owner: owner{ID: "8"}, OptionalID: new("9")},
+		},
+	}
 
-			require.NoError(t, err)
-			require.Len(t, resp.Entities, 3)
-			require.Equal(t, "42", resp.Entities[0].ID)
-			require.Equal(t, "owner:first", resp.Entities[0].Owner.ID)
-			require.Nil(t, resp.Entities[0].OptionalID)
-			require.Equal(t, "opaque:asset", resp.Entities[1].ID)
-			require.Equal(t, "owner:second", resp.Entities[1].Owner.ID)
-			require.NotNil(t, resp.Entities[1].OptionalID)
-			require.Equal(t, "revision:third", *resp.Entities[1].OptionalID)
-			require.Equal(t, "7", resp.Entities[2].ID)
-			require.Equal(t, "8", resp.Entities[2].Owner.ID)
-			require.NotNil(t, resp.Entities[2].OptionalID)
-			require.Equal(t, "9", *resp.Entities[2].OptionalID)
-		})
+	entityTypes := []struct {
+		name         string
+		malformedErr string
+	}{
+		{name: "CustomIDEntity", malformedErr: "is not a string"},
+		// The batch template replaces decode errors with this message.
+		{name: "MultiCustomIDEntity", malformedErr: "Field id undefined in schema."},
+	}
 
-		t.Run(typeName+" rejects malformed ID", func(t *testing.T) {
-			representations := []map[string]any{
-				{
-					"__typename": typeName,
-					"id":         map[string]any{"bad": true},
-					"owner":      map[string]any{"id": "owner:first"},
-					"optionalID": nil,
-				},
+	for _, et := range entityTypes {
+		query := entityQuery([]string{et.name + " { id owner { id } optionalID }"})
+
+		for _, tc := range cases {
+			t.Run(et.name+"/"+tc.name, func(t *testing.T) {
+				rep := maps.Clone(tc.rep)
+				rep["__typename"] = et.name
+				var resp struct {
+					Entities []entity `json:"_entities"`
+				}
+
+				err := c.Post(query, &resp,
+					client.Var("representations", []map[string]any{rep}))
+
+				require.NoError(t, err)
+				require.Equal(t, []entity{tc.want}, resp.Entities)
+			})
+		}
+
+		t.Run(et.name+"/malformed ID", func(t *testing.T) {
+			rep := map[string]any{
+				"__typename": et.name,
+				"id":         map[string]any{"bad": true},
+				"owner":      map[string]any{"id": "owner:first"},
+				"optionalID": nil,
 			}
 			var resp map[string]any
 
-			err := c.Post(
-				entityQuery([]string{typeName + " { id owner { id } optionalID }"}),
-				&resp,
-				client.Var("representations", representations),
-			)
+			err := c.Post(query, &resp, client.Var("representations", []map[string]any{rep}))
 
-			require.Error(t, err)
+			require.ErrorContains(t, err, et.malformedErr)
 		})
 	}
 }

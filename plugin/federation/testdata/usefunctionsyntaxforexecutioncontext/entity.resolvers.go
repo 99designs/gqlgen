@@ -82,6 +82,11 @@ func (r *entityResolver) FindManyMultiHelloWithErrorByNames(ctx context.Context,
 	return nil, fmt.Errorf("error resolving MultiHelloWorldWithError")
 }
 
+// FindMultiPerEntityPlanet is the resolver for the findMultiPerEntityPlanet field.
+func (r *entityResolver) FindMultiPerEntityPlanet(ctx context.Context, reps []*model.MultiPerEntityPlanetRepresentation) ([]*model.MultiPerEntityPlanet, error) {
+	panic(fmt.Errorf("not implemented: FindMultiPerEntityPlanet - findMultiPerEntityPlanet"))
+}
+
 // FindManyMultiPlanetRequiresNestedByNames is the resolver for the findManyMultiPlanetRequiresNestedByNames field.
 func (r *entityResolver) FindManyMultiPlanetRequiresNestedByNames(ctx context.Context, reps []*model.MultiPlanetRequiresNestedByNamesInput) ([]*model.MultiPlanetRequiresNested, error) {
 	worlds := map[string]*model.World{
@@ -109,6 +114,11 @@ func (r *entityResolver) FindManyMultiPlanetRequiresNestedByNames(ctx context.Co
 	}
 
 	return results, nil
+}
+
+// FindPerEntityPlanet is the resolver for the findPerEntityPlanet field.
+func (r *entityResolver) FindPerEntityPlanet(ctx context.Context, rep model.PerEntityPlanetRepresentation) (*model.PerEntityPlanet, error) {
+	panic(fmt.Errorf("not implemented: FindPerEntityPlanet - findPerEntityPlanet"))
 }
 
 // FindPlanetMultipleRequiresByName is the resolver for the findPlanetMultipleRequiresByName field.

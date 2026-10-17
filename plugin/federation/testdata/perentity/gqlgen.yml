@@ -1,0 +1,15 @@
+schema:
+  - "testdata/perentity/schema.graphql"
+exec:
+  filename: testdata/perentity/generated/exec.go
+federation:
+  filename: testdata/perentity/generated/federation.go
+  version: 2
+model:
+  filename: testdata/perentity/generated/model/models.go
+  package: model
+resolver:
+  filename: testdata/perentity/resolver.go
+  layout: follow-schema
+  dir: testdata/perentity
+  package: perentity

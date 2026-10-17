@@ -34,6 +34,9 @@ type Federation struct {
 
 	// true if @requires is used in the schema
 	usesRequires bool
+
+	// representations are the generated inputs of per-entity resolvers.
+	representations []*representation
 }
 
 type PackageOptions struct {
@@ -182,6 +185,7 @@ func (f *Federation) MutateConfig(cfg *config.Config) error {
 		}
 		cfg.Models[typeName] = entry
 	}
+	copyRepresentationFieldNames(f.representations, cfg.Models)
 	cfg.Directives["external"] = config.DirectiveConfig{SkipRuntime: true}
 	cfg.Directives[dirNameRequires] = config.DirectiveConfig{SkipRuntime: true}
 	cfg.Directives["provides"] = config.DirectiveConfig{SkipRuntime: true}
@@ -408,10 +412,17 @@ func (f *Federation) InjectSourcesLate(schema *ast.Schema) ([]*ast.Source, error
 		return nil, err
 	}
 	f.Entities = builtEntities
+	f.representations, err = buildRepresentations(f.Entities, schema)
+	if err != nil {
+		return nil, err
+	}
 
 	entityNames := make([]string, 0)
 	resolvers := make([]string, 0)
-	entityResolverInputDefinitions := make([]string, 0)
+	entityResolverInputDefinitions := make([]string, 0, len(f.representations))
+	for _, r := range f.representations {
+		entityResolverInputDefinitions = append(entityResolverInputDefinitions, r.SDL())
+	}
 	for _, e := range f.Entities {
 		if e.Def.Kind != ast.Interface {
 			entityNames = append(entityNames, e.Name)
@@ -421,6 +432,10 @@ func (f *Federation) InjectSourcesLate(schema *ast.Schema) ([]*ast.Source, error
 			)
 		}
 
+		if e.PerEntity {
+			resolvers = append(resolvers, perEntityResolverSDL(e))
+			continue
+		}
 		for _, r := range e.Resolvers {
 			resolverSDL, entityResolverInputSDL := buildResolverSDL(r, e.Multi)
 			resolvers = append(resolvers, resolverSDL)
@@ -515,15 +530,22 @@ func (f *Federation) GenerateCode(data *codegen.Data) error {
 			}
 
 			// Keys are typed from resolver inputs, not the entity's output
-			// fields: the two can bind different Go types to one scalar.
-			for _, r := range e.Resolvers {
-				if e.Multi {
-					err = populateMultiKeyFieldTypes(r, data.Inputs)
-				} else {
-					err = populateSingleKeyFieldTypes(r, data.Objects.ByName("Entity"))
-				}
-				if err != nil {
+			// fields: the two can bind different Go types to one scalar. A
+			// per-entity resolver decodes all its keys as one representation.
+			if e.PerEntity {
+				if err := populateRepresentationType(e, data.Objects.ByName("Entity")); err != nil {
 					return err
+				}
+			} else {
+				for _, r := range e.Resolvers {
+					if e.Multi {
+						err = populateMultiKeyFieldTypes(r, data.Inputs)
+					} else {
+						err = populateSingleKeyFieldTypes(r, data.Objects.ByName("Entity"))
+					}
+					if err != nil {
+						return err
+					}
 				}
 			}
 
@@ -654,6 +676,17 @@ func argByName(field *codegen.Field, name string) *codegen.FieldArgument {
 	return nil
 }
 
+// populateRepresentationType sets entity.RepresentationType from the argument
+// of its per-entity resolver field on the generated Entity object.
+func populateRepresentationType(entity *Entity, entityObj *codegen.Object) error {
+	field := fieldByName(entityObj, entity.PerEntityResolverName())
+	if field == nil || len(field.Args) != 1 || field.Args[0].TypeReference == nil {
+		return fmt.Errorf("per-entity resolver %s not found", entity.PerEntityResolverName())
+	}
+	entity.RepresentationType = field.Args[0].TypeReference
+	return nil
+}
+
 // populateMultiKeyFieldTypes sets a batch resolver's InputType and key types
 // from its input object.
 //
@@ -744,6 +777,13 @@ func (f *Federation) buildEntity(
 	if err != nil {
 		return nil, err
 	}
+	perEntity, _ := entityResolverBool(schemaType, "perEntity")
+	if perEntity && requiresStrategy == RequiresPreloaded {
+		return nil, fmt.Errorf(
+			"entity %q: @entityResolver(perEntity: true) cannot be combined with requires: %q",
+			schemaType.Name, RequiresPreloaded,
+		)
+	}
 	if err := validateComputedFields(schemaType, requiresStrategy); err != nil {
 		return nil, err
 	}
@@ -784,6 +824,8 @@ func (f *Federation) buildEntity(
 		return nil, err
 	}
 	entity.Resolvers = resolvers
+	// Set only here: an entity returned above has no resolver to replace.
+	entity.PerEntity = perEntity
 	entity.Requires = buildRequires(schemaType, entity.RequiresStrategy)
 	if len(entity.Requires) > 0 {
 		f.usesRequires = true
@@ -889,18 +931,29 @@ func parseRequiresStrategy(v any) (RequiresStrategy, bool) {
 // isMultiEntity returns @entityResolver(multi) value, if directive is not defined,
 // then global configuration parameter will be used.
 func (f *Federation) isMultiEntity(schemaType *ast.Definition) bool {
+	if multi, ok := entityResolverBool(schemaType, "multi"); ok {
+		return multi
+	}
+	return f.PackageOptions.EntityResolverMulti
+}
+
+// entityResolverBool returns the named boolean @entityResolver argument and
+// whether it is set.
+func entityResolverBool(schemaType *ast.Definition, name string) (value, ok bool) {
 	dir := schemaType.Directives.ForName(dirNameEntityResolver)
 	if dir == nil {
-		return f.PackageOptions.EntityResolverMulti
+		return false, false
 	}
-
-	if dirArg := dir.Arguments.ForName("multi"); dirArg != nil {
-		if dirVal, err := dirArg.Value.Value(nil); err == nil {
-			return dirVal.(bool)
-		}
+	arg := dir.Arguments.ForName(name)
+	if arg == nil {
+		return false, false
 	}
-
-	return f.PackageOptions.EntityResolverMulti
+	v, err := arg.Value.Value(nil)
+	if err != nil {
+		return false, false
+	}
+	value, ok = v.(bool)
+	return value, ok
 }
 
 func buildResolvers(

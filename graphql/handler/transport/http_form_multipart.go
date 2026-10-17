@@ -127,7 +127,15 @@ func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.G
 		delete(uploadsMap, key)
 
 		var upload graphql.Upload
-		if r.ContentLength < f.maxMemory() {
+		// Choose the in-memory path only when we know the request body is
+		// smaller than maxMemory. Chunked (Transfer-Encoding: chunked)
+		// requests arrive with r.ContentLength == -1; previously that was
+		// "always smaller", so the whole part was slurped via io.ReadAll
+		// regardless of MaxMemory. For an unknown length, read up to
+		// maxMemory bytes into memory and spill to a temp file only if we
+		// actually overflow, so small streamed uploads still benefit from
+		// the fast path while large ones stay bounded.
+		if r.ContentLength >= 0 && r.ContentLength < f.maxMemory() {
 			fileBytes, err := io.ReadAll(part)
 			if err != nil {
 				w.WriteHeader(http.StatusUnprocessableEntity)

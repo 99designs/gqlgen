@@ -14,6 +14,7 @@ import (
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/introspection"
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
+	"github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/custommodel"
 	"github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/generated/model"
 	gqlparser "github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
@@ -36,22 +37,34 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	CustomIDEntity struct {
+		ID         func(childComplexity int) int
+		OptionalID func(childComplexity int) int
+		Owner      func(childComplexity int) int
+	}
+
+	CustomIDOwner struct {
+		ID func(childComplexity int) int
+	}
+
 	Entity struct {
-		FindHelloByName                            func(childComplexity int, name string) int
-		FindHelloMultiSingleKeysByKey1AndKey2      func(childComplexity int, key1 string, key2 string) int
-		FindHelloWithErrorsByName                  func(childComplexity int, name string) int
-		FindManyMultiHelloByNames                  func(childComplexity int, reps []*model.MultiHelloByNamesInput) int
-		FindManyMultiHelloMultipleRequiresByNames  func(childComplexity int, reps []*model.MultiHelloMultipleRequiresByNamesInput) int
-		FindManyMultiHelloRequiresByNames          func(childComplexity int, reps []*model.MultiHelloRequiresByNamesInput) int
-		FindManyMultiHelloWithErrorByNames         func(childComplexity int, reps []*model.MultiHelloWithErrorByNamesInput) int
-		FindManyMultiPlanetRequiresNestedByNames   func(childComplexity int, reps []*model.MultiPlanetRequiresNestedByNamesInput) int
-		FindPlanetMultipleRequiresByName           func(childComplexity int, name string) int
-		FindPlanetRequiresByName                   func(childComplexity int, name string) int
-		FindPlanetRequiresNestedByName             func(childComplexity int, name string) int
-		FindWorldByHelloNameAndFoo                 func(childComplexity int, helloName string, foo string) int
-		FindWorldNameByName                        func(childComplexity int, name string) int
-		FindWorldWithMultipleKeysByBar             func(childComplexity int, bar int) int
-		FindWorldWithMultipleKeysByHelloNameAndFoo func(childComplexity int, helloName string, foo string) int
+		FindCustomIDEntityByIDAndOwnerIDAndOptionalID           func(childComplexity int, id string, ownerID string, optionalID *string) int
+		FindHelloByName                                         func(childComplexity int, name string) int
+		FindHelloMultiSingleKeysByKey1AndKey2                   func(childComplexity int, key1 string, key2 string) int
+		FindHelloWithErrorsByName                               func(childComplexity int, name string) int
+		FindManyMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDs func(childComplexity int, reps []*model.MultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput) int
+		FindManyMultiHelloByNames                               func(childComplexity int, reps []*model.MultiHelloByNamesInput) int
+		FindManyMultiHelloMultipleRequiresByNames               func(childComplexity int, reps []*model.MultiHelloMultipleRequiresByNamesInput) int
+		FindManyMultiHelloRequiresByNames                       func(childComplexity int, reps []*model.MultiHelloRequiresByNamesInput) int
+		FindManyMultiHelloWithErrorByNames                      func(childComplexity int, reps []*model.MultiHelloWithErrorByNamesInput) int
+		FindManyMultiPlanetRequiresNestedByNames                func(childComplexity int, reps []*model.MultiPlanetRequiresNestedByNamesInput) int
+		FindPlanetMultipleRequiresByName                        func(childComplexity int, name string) int
+		FindPlanetRequiresByName                                func(childComplexity int, name string) int
+		FindPlanetRequiresNestedByName                          func(childComplexity int, name string) int
+		FindWorldByHelloNameAndFoo                              func(childComplexity int, helloName string, foo string) int
+		FindWorldNameByName                                     func(childComplexity int, name string) int
+		FindWorldWithMultipleKeysByBar                          func(childComplexity int, bar int) int
+		FindWorldWithMultipleKeysByHelloNameAndFoo              func(childComplexity int, helloName string, foo string) int
 	}
 
 	Hello struct {
@@ -66,6 +79,12 @@ type ComplexityRoot struct {
 
 	HelloWithErrors struct {
 		Name func(childComplexity int) int
+	}
+
+	MultiCustomIDEntity struct {
+		ID         func(childComplexity int) int
+		OptionalID func(childComplexity int) int
+		Owner      func(childComplexity int) int
 	}
 
 	MultiHello struct {
@@ -145,9 +164,11 @@ type ComplexityRoot struct {
 // region    ************************** generated!.gotpl **************************
 
 type EntityResolver interface {
+	FindCustomIDEntityByIDAndOwnerIDAndOptionalID(ctx context.Context, id string, ownerID string, optionalID *string) (*custommodel.Entity, error)
 	FindHelloByName(ctx context.Context, name string) (*model.Hello, error)
 	FindHelloMultiSingleKeysByKey1AndKey2(ctx context.Context, key1 string, key2 string) (*model.HelloMultiSingleKeys, error)
 	FindHelloWithErrorsByName(ctx context.Context, name string) (*model.HelloWithErrors, error)
+	FindManyMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDs(ctx context.Context, reps []*model.MultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput) ([]*custommodel.MultiEntity, error)
 	FindManyMultiHelloByNames(ctx context.Context, reps []*model.MultiHelloByNamesInput) ([]*model.MultiHello, error)
 	FindManyMultiHelloMultipleRequiresByNames(ctx context.Context, reps []*model.MultiHelloMultipleRequiresByNamesInput) ([]*model.MultiHelloMultipleRequires, error)
 	FindManyMultiHelloRequiresByNames(ctx context.Context, reps []*model.MultiHelloRequiresByNamesInput) ([]*model.MultiHelloRequires, error)
@@ -180,6 +201,43 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	_ = ec
 	switch typeName + "." + field {
 
+	case "CustomIDEntity.id":
+		if e.ComplexityRoot.CustomIDEntity.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.CustomIDEntity.ID(childComplexity), true
+	case "CustomIDEntity.optionalID":
+		if e.ComplexityRoot.CustomIDEntity.OptionalID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.CustomIDEntity.OptionalID(childComplexity), true
+	case "CustomIDEntity.owner":
+		if e.ComplexityRoot.CustomIDEntity.Owner == nil {
+			break
+		}
+
+		return e.ComplexityRoot.CustomIDEntity.Owner(childComplexity), true
+
+	case "CustomIDOwner.id":
+		if e.ComplexityRoot.CustomIDOwner.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.CustomIDOwner.ID(childComplexity), true
+
+	case "Entity.findCustomIDEntityByIDAndOwnerIDAndOptionalID":
+		if e.ComplexityRoot.Entity.FindCustomIDEntityByIDAndOwnerIDAndOptionalID == nil {
+			break
+		}
+
+		args, err := ec.field_Entity_findCustomIDEntityByIDAndOwnerIDAndOptionalID_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Entity.FindCustomIDEntityByIDAndOwnerIDAndOptionalID(childComplexity, args["id"].(string), args["ownerID"].(string), args["optionalID"].(*string)), true
 	case "Entity.findHelloByName":
 		if e.ComplexityRoot.Entity.FindHelloByName == nil {
 			break
@@ -213,6 +271,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindHelloWithErrorsByName(childComplexity, args["name"].(string)), true
+	case "Entity.findManyMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDs":
+		if e.ComplexityRoot.Entity.FindManyMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDs == nil {
+			break
+		}
+
+		args, err := ec.field_Entity_findManyMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDs_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Entity.FindManyMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDs(childComplexity, args["reps"].([]*model.MultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput)), true
 	case "Entity.findManyMultiHelloByNames":
 		if e.ComplexityRoot.Entity.FindManyMultiHelloByNames == nil {
 			break
@@ -378,6 +447,25 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.HelloWithErrors.Name(childComplexity), true
+
+	case "MultiCustomIDEntity.id":
+		if e.ComplexityRoot.MultiCustomIDEntity.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MultiCustomIDEntity.ID(childComplexity), true
+	case "MultiCustomIDEntity.optionalID":
+		if e.ComplexityRoot.MultiCustomIDEntity.OptionalID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MultiCustomIDEntity.OptionalID(childComplexity), true
+	case "MultiCustomIDEntity.owner":
+		if e.ComplexityRoot.MultiCustomIDEntity.Owner == nil {
+			break
+		}
+
+		return e.ComplexityRoot.MultiCustomIDEntity.Owner(childComplexity), true
 
 	case "MultiHello.name":
 		if e.ComplexityRoot.MultiHello.Name == nil {
@@ -598,6 +686,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
 	inputUnmarshalers := func() *graphql.InputUnmarshalerIndex {
 		return graphql.NewInputUnmarshalerIndex(
+			graphql.NewInputUnmarshaler("MultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput", ec.unmarshalInputMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput),
 			graphql.NewInputUnmarshaler("MultiHelloByNamesInput", ec.unmarshalInputMultiHelloByNamesInput),
 			graphql.NewInputUnmarshaler("MultiHelloMultipleRequiresByNamesInput", ec.unmarshalInputMultiHelloMultipleRequiresByNamesInput),
 			graphql.NewInputUnmarshaler("MultiHelloRequiresByNamesInput", ec.unmarshalInputMultiHelloRequiresByNamesInput),
@@ -741,6 +830,22 @@ type MultiHelloMultipleRequires @key(fields: "name") @entityResolver(multi: true
     key2: String! @external
     key3: String! @requires(fields: "key1 key2")
 }
+
+type CustomIDEntity @key(fields: "id owner { id } optionalID") {
+    id: ID!
+    owner: CustomIDOwner!
+    optionalID: ID
+}
+
+type MultiCustomIDEntity @key(fields: "id owner { id } optionalID") @entityResolver(multi: true) {
+    id: ID!
+    owner: CustomIDOwner!
+    optionalID: ID
+}
+
+type CustomIDOwner {
+    id: ID!
+}
 `, BuiltIn: false},
 	{Name: "../../../federation/directives.graphql", Input: `
 	directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE
@@ -754,7 +859,13 @@ type MultiHelloMultipleRequires @key(fields: "name") @entityResolver(multi: true
 `, BuiltIn: true},
 	{Name: "../../../federation/entity.graphql", Input: `
 # a union of all types that use the @key directive
-union _Entity = Hello | HelloMultiSingleKeys | HelloWithErrors | MultiHello | MultiHelloMultipleRequires | MultiHelloRequires | MultiHelloWithError | MultiPlanetRequiresNested | PlanetMultipleRequires | PlanetRequires | PlanetRequiresNested | World | WorldName | WorldWithMultipleKeys
+union _Entity = CustomIDEntity | Hello | HelloMultiSingleKeys | HelloWithErrors | MultiCustomIDEntity | MultiHello | MultiHelloMultipleRequires | MultiHelloRequires | MultiHelloWithError | MultiPlanetRequiresNested | PlanetMultipleRequires | PlanetRequires | PlanetRequiresNested | World | WorldName | WorldWithMultipleKeys
+
+input MultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput {
+	ID: ID!
+	OwnerID: ID!
+	OptionalID: ID
+}
 
 input MultiHelloByNamesInput {
 	Name: String!
@@ -778,9 +889,11 @@ input MultiPlanetRequiresNestedByNamesInput {
 
 # fake type to build resolver interfaces for users to implement
 type Entity {
+	findCustomIDEntityByIDAndOwnerIDAndOptionalID(id: ID!,ownerID: ID!,optionalID: ID,): CustomIDEntity!
 	findHelloByName(name: String!,): Hello!
 	findHelloMultiSingleKeysByKey1AndKey2(key1: String!,key2: String!,): HelloMultiSingleKeys!
 	findHelloWithErrorsByName(name: String!,): HelloWithErrors!
+	findManyMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDs(reps: [MultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput]!): [MultiCustomIDEntity]
 	findManyMultiHelloByNames(reps: [MultiHelloByNamesInput]!): [MultiHello]
 	findManyMultiHelloMultipleRequiresByNames(reps: [MultiHelloMultipleRequiresByNamesInput]!): [MultiHelloMultipleRequires]
 	findManyMultiHelloRequiresByNames(reps: [MultiHelloRequiresByNamesInput]!): [MultiHelloRequires]
@@ -811,6 +924,26 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // Each function is generated once per unique object type, deduplicating the
 // switch statements that were previously inlined in every fieldContext_* function.
 
+func (ec *executionContext) childFields_CustomIDEntity(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_CustomIDEntity_id(ctx, field)
+	case "owner":
+		return ec.fieldContext_CustomIDEntity_owner(ctx, field)
+	case "optionalID":
+		return ec.fieldContext_CustomIDEntity_optionalID(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type CustomIDEntity", field.Name)
+}
+
+func (ec *executionContext) childFields_CustomIDOwner(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_CustomIDOwner_id(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type CustomIDOwner", field.Name)
+}
+
 func (ec *executionContext) childFields_Hello(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
@@ -837,6 +970,18 @@ func (ec *executionContext) childFields_HelloWithErrors(ctx context.Context, fie
 		return ec.fieldContext_HelloWithErrors_name(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type HelloWithErrors", field.Name)
+}
+
+func (ec *executionContext) childFields_MultiCustomIDEntity(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "id":
+		return ec.fieldContext_MultiCustomIDEntity_id(ctx, field)
+	case "owner":
+		return ec.fieldContext_MultiCustomIDEntity_owner(ctx, field)
+	case "optionalID":
+		return ec.fieldContext_MultiCustomIDEntity_optionalID(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type MultiCustomIDEntity", field.Name)
 }
 
 func (ec *executionContext) childFields_MultiHello(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
@@ -1087,6 +1232,36 @@ func (ec *executionContext) childFields___Type(ctx context.Context, field graphq
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Entity_findCustomIDEntityByIDAndOwnerIDAndOptionalID_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "ownerID",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["ownerID"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "optionalID",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOID2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["optionalID"] = arg2
+	return args, nil
+}
+
 func (ec *executionContext) field_Entity_findHelloByName_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -1134,6 +1309,20 @@ func (ec *executionContext) field_Entity_findHelloWithErrorsByName_args(ctx cont
 		return nil, err
 	}
 	args["name"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Entity_findManyMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDs_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "reps",
+		func(ctx context.Context, v any) ([]*model.MultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput, error) {
+			return ec.unmarshalNMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["reps"] = arg0
 	return args, nil
 }
 
@@ -1409,6 +1598,151 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _CustomIDEntity_id(ctx context.Context, field graphql.CollectedField, obj *custommodel.Entity) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_CustomIDEntity_id(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v custommodel.OutputID) graphql.Marshaler {
+			return ec.marshalNID2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋcustommodelᚐOutputID(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_CustomIDEntity_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("CustomIDEntity", field, false, false, "ID")
+}
+
+func (ec *executionContext) _CustomIDEntity_owner(ctx context.Context, field graphql.CollectedField, obj *custommodel.Entity) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_CustomIDEntity_owner(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Owner, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *custommodel.Owner) graphql.Marshaler {
+			return ec.marshalNCustomIDOwner2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋcustommodelᚐOwner(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_CustomIDEntity_owner(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "CustomIDEntity",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_CustomIDOwner(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _CustomIDEntity_optionalID(ctx context.Context, field graphql.CollectedField, obj *custommodel.Entity) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_CustomIDEntity_optionalID(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.OptionalID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *custommodel.OutputID) graphql.Marshaler {
+			return ec.marshalOID2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋcustommodelᚐOutputID(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_CustomIDEntity_optionalID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("CustomIDEntity", field, false, false, "ID")
+}
+
+func (ec *executionContext) _CustomIDOwner_id(ctx context.Context, field graphql.CollectedField, obj *custommodel.Owner) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_CustomIDOwner_id(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v custommodel.OutputID) graphql.Marshaler {
+			return ec.marshalNID2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋcustommodelᚐOutputID(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_CustomIDOwner_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("CustomIDOwner", field, false, false, "ID")
+}
+
+func (ec *executionContext) _Entity_findCustomIDEntityByIDAndOwnerIDAndOptionalID(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Entity_findCustomIDEntityByIDAndOwnerIDAndOptionalID(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Entity().FindCustomIDEntityByIDAndOwnerIDAndOptionalID(ctx, fc.Args["id"].(string), fc.Args["ownerID"].(string), fc.Args["optionalID"].(*string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *custommodel.Entity) graphql.Marshaler {
+			return ec.marshalNCustomIDEntity2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋcustommodelᚐEntity(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Entity_findCustomIDEntityByIDAndOwnerIDAndOptionalID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Entity",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_CustomIDEntity(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Entity_findCustomIDEntityByIDAndOwnerIDAndOptionalID_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Entity_findHelloByName(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1535,6 +1869,50 @@ func (ec *executionContext) fieldContext_Entity_findHelloWithErrorsByName(ctx co
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Entity_findHelloWithErrorsByName_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Entity_findManyMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Entity_findManyMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDs(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Entity().FindManyMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDs(ctx, fc.Args["reps"].([]*model.MultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*custommodel.MultiEntity) graphql.Marshaler {
+			return ec.marshalOMultiCustomIDEntity2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋcustommodelᚐMultiEntity(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Entity_findManyMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Entity",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_MultiCustomIDEntity(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Entity_findManyMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -2182,6 +2560,84 @@ func (ec *executionContext) _HelloWithErrors_name(ctx context.Context, field gra
 }
 func (ec *executionContext) fieldContext_HelloWithErrors_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("HelloWithErrors", field, false, false, "String")
+}
+
+func (ec *executionContext) _MultiCustomIDEntity_id(ctx context.Context, field graphql.CollectedField, obj *custommodel.MultiEntity) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MultiCustomIDEntity_id(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v custommodel.OutputID) graphql.Marshaler {
+			return ec.marshalNID2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋcustommodelᚐOutputID(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_MultiCustomIDEntity_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("MultiCustomIDEntity", field, false, false, "ID")
+}
+
+func (ec *executionContext) _MultiCustomIDEntity_owner(ctx context.Context, field graphql.CollectedField, obj *custommodel.MultiEntity) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MultiCustomIDEntity_owner(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Owner, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *custommodel.Owner) graphql.Marshaler {
+			return ec.marshalNCustomIDOwner2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋcustommodelᚐOwner(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_MultiCustomIDEntity_owner(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "MultiCustomIDEntity",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_CustomIDOwner(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _MultiCustomIDEntity_optionalID(ctx context.Context, field graphql.CollectedField, obj *custommodel.MultiEntity) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_MultiCustomIDEntity_optionalID(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.OptionalID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *custommodel.OutputID) graphql.Marshaler {
+			return ec.marshalOID2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋcustommodelᚐOutputID(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_MultiCustomIDEntity_optionalID(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("MultiCustomIDEntity", field, false, false, "ID")
 }
 
 func (ec *executionContext) _MultiHello_name(ctx context.Context, field graphql.CollectedField, obj *model.MultiHello) (ret graphql.Marshaler) {
@@ -4121,6 +4577,62 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput(ctx context.Context, obj any) (model.MultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput, error) {
+	var it model.MultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"ID", "OwnerID", "OptionalID"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "ID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ID"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		case "OwnerID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("OwnerID"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.OwnerID = data
+		case "OptionalID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("OptionalID"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.OptionalID = data
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput unmarshals raw into the MultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput(ctx context.Context, raw any) (model.MultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput, error) {
+	var out model.MultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "MultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputMultiHelloByNamesInput(ctx context.Context, obj any) (model.MultiHelloByNamesInput, error) {
 	var it model.MultiHelloByNamesInput
 	if obj == nil {
@@ -4416,6 +4928,13 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 			return graphql.Null
 		}
 		return ec._MultiHello(ctx, sel, obj)
+	case custommodel.MultiEntity:
+		return ec._MultiCustomIDEntity(ctx, sel, &obj)
+	case *custommodel.MultiEntity:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._MultiCustomIDEntity(ctx, sel, obj)
 	case model.HelloWithErrors:
 		return ec._HelloWithErrors(ctx, sel, &obj)
 	case *model.HelloWithErrors:
@@ -4437,6 +4956,13 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 			return graphql.Null
 		}
 		return ec._Hello(ctx, sel, obj)
+	case custommodel.Entity:
+		return ec._CustomIDEntity(ctx, sel, &obj)
+	case *custommodel.Entity:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._CustomIDEntity(ctx, sel, obj)
 	default:
 		if typedObj, ok := obj.(graphql.Marshaler); ok {
 			return typedObj
@@ -4449,6 +4975,82 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
+
+var customIDEntityImplementors = []string{"CustomIDEntity", "_Entity"}
+
+func (ec *executionContext) _CustomIDEntity(ctx context.Context, sel ast.SelectionSet, obj *custommodel.Entity) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, customIDEntityImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CustomIDEntity")
+		case "id":
+			out.Values[i] = ec._CustomIDEntity_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "owner":
+			out.Values[i] = ec._CustomIDEntity_owner(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "optionalID":
+			out.Values[i] = ec._CustomIDEntity_optionalID(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
+var customIDOwnerImplementors = []string{"CustomIDOwner"}
+
+func (ec *executionContext) _CustomIDOwner(ctx context.Context, sel ast.SelectionSet, obj *custommodel.Owner) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, customIDOwnerImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("CustomIDOwner")
+		case "id":
+			out.Values[i] = ec._CustomIDOwner_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
 
 var entityImplementors = []string{"Entity"}
 
@@ -4469,6 +5071,12 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Entity")
+		case "findCustomIDEntityByIDAndOwnerIDAndOptionalID":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Entity_findCustomIDEntityByIDAndOwnerIDAndOptionalID(ctx, field)
+				})
 		case "findHelloByName":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
 				true, true,
@@ -4486,6 +5094,12 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 				true, true,
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._Entity_findHelloWithErrorsByName(ctx, field)
+				})
+		case "findManyMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDs":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Entity_findManyMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDs(ctx, field)
 				})
 		case "findManyMultiHelloByNames":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
@@ -4666,6 +5280,49 @@ func (ec *executionContext) _HelloWithErrors(ctx context.Context, sel ast.Select
 		case "name":
 			out.Values[i] = ec._HelloWithErrors_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
+var multiCustomIDEntityImplementors = []string{"MultiCustomIDEntity", "_Entity"}
+
+func (ec *executionContext) _MultiCustomIDEntity(ctx context.Context, sel ast.SelectionSet, obj *custommodel.MultiEntity) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, multiCustomIDEntityImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("MultiCustomIDEntity")
+		case "id":
+			out.Values[i] = ec._MultiCustomIDEntity_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "owner":
+			out.Values[i] = ec._MultiCustomIDEntity_owner(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "optionalID":
+			out.Values[i] = ec._MultiCustomIDEntity_optionalID(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
 				out.Invalids++
 			}
 		default:
@@ -5609,6 +6266,22 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 	return res
 }
 
+func (ec *executionContext) marshalNCustomIDEntity2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋcustommodelᚐEntity(ctx context.Context, sel ast.SelectionSet, v *custommodel.Entity) graphql.Marshaler {
+	if v == nil {
+		graphql.AddInvalidNullError(ctx, "CustomIDEntity!")
+		return graphql.Null
+	}
+	return ec._CustomIDEntity(ctx, sel, v)
+}
+
+func (ec *executionContext) marshalNCustomIDOwner2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋcustommodelᚐOwner(ctx context.Context, sel ast.SelectionSet, v *custommodel.Owner) graphql.Marshaler {
+	if v == nil {
+		graphql.AddInvalidNullError(ctx, "CustomIDOwner!")
+		return graphql.Null
+	}
+	return ec._CustomIDOwner(ctx, sel, v)
+}
+
 func (ec *executionContext) marshalNHello2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐHello(ctx context.Context, sel ast.SelectionSet, v *model.Hello) graphql.Marshaler {
 	if v == nil {
 		graphql.AddInvalidNullError(ctx, "Hello!")
@@ -5633,6 +6306,30 @@ func (ec *executionContext) marshalNHelloWithErrors2ᚖgithubᚗcomᚋ99designs�
 	return ec._HelloWithErrors(ctx, sel, v)
 }
 
+func (ec *executionContext) unmarshalNID2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋcustommodelᚐOutputID(ctx context.Context, v any) (custommodel.OutputID, error) {
+	var res custommodel.OutputID
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNID2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋcustommodelᚐOutputID(ctx context.Context, sel ast.SelectionSet, v custommodel.OutputID) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (string, error) {
+	res, err := graphql.UnmarshalID(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
+	_ = sel
+	res := graphql.MarshalID(v)
+	if res == graphql.Null {
+		graphql.AddInvalidNullFromMarshaler(ctx, "ID!")
+	}
+	return res
+}
+
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v any) (int, error) {
 	res, err := graphql.UnmarshalInt(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -5645,6 +6342,20 @@ func (ec *executionContext) marshalNInt2int(ctx context.Context, sel ast.Selecti
 		graphql.AddInvalidNullFromMarshaler(ctx, "Int!")
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalNMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput(ctx context.Context, v any) ([]*model.MultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput, error) {
+	vSlice := graphql.CoerceList(v)
+	var err error
+	res := make([]*model.MultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) unmarshalNMultiHelloByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHelloByNamesInput(ctx context.Context, v any) ([]*model.MultiHelloByNamesInput, error) {
@@ -6023,6 +6734,68 @@ func (ec *executionContext) marshalOHello2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 		return graphql.Null
 	}
 	return ec._Hello(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOID2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋcustommodelᚐOutputID(ctx context.Context, v any) (*custommodel.OutputID, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var res = new(custommodel.OutputID)
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOID2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋcustommodelᚐOutputID(ctx context.Context, sel ast.SelectionSet, v *custommodel.OutputID) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return v
+}
+
+func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v any) (*string, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := graphql.UnmarshalID(v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOID2ᚖstring(ctx context.Context, sel ast.SelectionSet, v *string) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	_ = sel
+	_ = ctx
+	res := graphql.MarshalID(*v)
+	return res
+}
+
+func (ec *executionContext) marshalOMultiCustomIDEntity2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋcustommodelᚐMultiEntity(ctx context.Context, sel ast.SelectionSet, v []*custommodel.MultiEntity) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalOMultiCustomIDEntity2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋcustommodelᚐMultiEntity(ctx, sel, v[i])
+	})
+
+	return ret
+}
+
+func (ec *executionContext) marshalOMultiCustomIDEntity2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋcustommodelᚐMultiEntity(ctx context.Context, sel ast.SelectionSet, v *custommodel.MultiEntity) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._MultiCustomIDEntity(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput(ctx context.Context, v any) (*model.MultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) marshalOMultiHello2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋentityresolverᚋgeneratedᚋmodelᚐMultiHello(ctx context.Context, sel ast.SelectionSet, v []*model.MultiHello) graphql.Marshaler {

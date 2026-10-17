@@ -515,7 +515,9 @@ func (f *Federation) GenerateCode(data *codegen.Data) error {
 			}
 
 			for _, r := range e.Resolvers {
-				populateKeyFieldTypes(r, obj, data.Objects, e.Def.Name)
+				if err := populateKeyFieldTypes(r, data, e.Multi); err != nil {
+					return err
+				}
 			}
 
 			// fill in types for requires fields
@@ -640,23 +642,64 @@ func containsUnionField(reqField *Requires) bool {
 	return false
 }
 
-// Fill in types for key fields
+func fieldByName(obj *codegen.Object, name string) *codegen.Field {
+	if obj != nil {
+		for _, field := range obj.Fields {
+			if field.Name == name {
+				return field
+			}
+		}
+	}
+	return nil
+}
+
+// Key values are passed to resolver inputs, whose Go types can differ from
+// the bound output fields even when they share a GraphQL scalar type.
 func populateKeyFieldTypes(
 	resolver *EntityResolver,
-	obj *codegen.Object,
-	allObjects codegen.Objects,
-	name string,
-) {
-	for _, keyField := range resolver.KeyFields {
-		if len(keyField.Field) == 0 {
-			fmt.Println(
-				"skipping @key field " + keyField.Definition.Name + " in " + resolver.ResolverName + " in " + name,
-			)
-			continue
+	data *codegen.Data,
+	multi bool,
+) error {
+	if multi {
+		input := data.Inputs.ByName(resolver.InputTypeName)
+		if input == nil {
+			return fmt.Errorf("input object %s not found", resolver.InputTypeName)
 		}
-		cgField := keyField.Field.TypeReference(obj, allObjects)
-		keyField.Type = cgField.TypeReference
+		for _, keyField := range resolver.KeyFields {
+			field := fieldByName(input, keyField.GoName)
+			if field == nil || field.TypeReference == nil {
+				return fmt.Errorf(
+					"type for key field %s in input object %s not found",
+					keyField.GoName, resolver.InputTypeName,
+				)
+			}
+			keyField.Type = field.TypeReference
+		}
+		return nil
 	}
+
+	field := fieldByName(data.Objects.ByName("Entity"), resolver.ResolverName)
+	if field == nil {
+		return fmt.Errorf("entity resolver %s not found", resolver.ResolverName)
+	}
+	for _, keyField := range resolver.KeyFields {
+		name := keyField.Field.ToGoPrivate()
+		var inputType *config.TypeReference
+		for _, arg := range field.Args {
+			if arg.Name == name {
+				inputType = arg.TypeReference
+				break
+			}
+		}
+		if inputType == nil {
+			return fmt.Errorf(
+				"type for key argument %s in entity resolver %s not found",
+				name, resolver.ResolverName,
+			)
+		}
+		keyField.Type = inputType
+	}
+	return nil
 }
 
 func (f *Federation) buildEntities(schema *ast.Schema, version int) ([]*Entity, error) {

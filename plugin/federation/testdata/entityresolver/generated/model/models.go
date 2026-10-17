@@ -46,6 +46,12 @@ type MultiCollisionByIDsInput struct {
 	ID string `json:"ID"`
 }
 
+type MultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput struct {
+	ID         string  `json:"ID"`
+	OwnerID    string  `json:"OwnerID"`
+	OptionalID *string `json:"OptionalID,omitempty"`
+}
+
 type MultiHello struct {
 	Name string `json:"name"`
 }

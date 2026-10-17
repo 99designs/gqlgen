@@ -89,3 +89,19 @@ type MultiCollision @key(fields: "_id") @key(fields: "id") @entityResolver(multi
     id: ID!
     resolvedBy: String!
 }
+
+type CustomIDEntity @key(fields: "id owner { id } optionalID") {
+    id: ID!
+    owner: CustomIDOwner!
+    optionalID: ID
+}
+
+type MultiCustomIDEntity @key(fields: "id owner { id } optionalID") @entityResolver(multi: true) {
+    id: ID!
+    owner: CustomIDOwner!
+    optionalID: ID
+}
+
+type CustomIDOwner {
+    id: ID!
+}

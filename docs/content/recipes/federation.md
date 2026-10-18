@@ -537,3 +537,45 @@ The generated runtime nulls each failed entity, reports its error against the
 succeeded. Returning any other (non-`BatchErrors`) error preserves the original
 all-or-nothing behavior for the group. This works for every multi entity
 resolver, with or without `preloaded_requires`.
+
+## Entity resolver names
+
+Each `@key` gets a resolver named after the entity and its key fields:
+`@key(fields: "id")` on `Port` gives `FindPortByID`, or `FindManyPortByIDs`
+with its `PortByIDsInput` when the entity sets `multi`.
+
+Different keys can produce the same name, because the Go form of a field name
+drops underscores and case: `_id` and `id` both become `ID`. Such a model
+needs `@goField(name:)` to compile anyway, and gqlgen names the colliding
+resolvers from it:
+
+```graphql
+directive @goField(name: String) on FIELD_DEFINITION
+
+type Port @key(fields: "_id") @key(fields: "id") {
+	_id: String! @goField(name: "LegacyID")
+	id: ID!
+}
+```
+
+This generates `FindPortByLegacyID` and `FindPortByID`. Keys whose names
+don't collide keep their usual names, even when a key field has `@goField`.
+
+When the names would still collide, generation fails with an error that says
+what to change:
+
+- Two keys on one entity, such as `id` and `i { d }`: give one of their key
+  fields a distinct `@goField(name:)`. gqlgen ignores a `fieldName` set in
+  `gqlgen.yml` here.
+- The same `@key` declared twice: remove one.
+- Two entities, such as a single `ManyPort @key(fields: "IDs")` and a multi
+  `Port @key(fields: "id")`: you can't rename either entity, so give both the
+  same `@entityResolver(multi:)` setting.
+- A batch input with the Go name of one of your types: rename your type.
+
+> **Check your resolver bodies when a collision first appears.** Suppose
+> `Port` had only `@key(fields: "_id")`, resolved by `FindPortByID`. Adding
+> `@key(fields: "id")` with `@goField(name: "LegacyID")` on `_id` gives the
+> `_id` key the new resolver `FindPortByLegacyID`, while the existing
+> `FindPortByID` body now serves the `id` key. Move the body to
+> `FindPortByLegacyID`.

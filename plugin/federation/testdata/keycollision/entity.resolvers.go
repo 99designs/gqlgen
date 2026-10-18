@@ -29,6 +29,34 @@ func (r *entityResolver) FindManyCollisionByIDAndIDs(ctx context.Context, reps [
 	return collisions, nil
 }
 
+// FindPortByLegacyID is the resolver for the findPortByLegacyID field.
+func (r *entityResolver) FindPortByLegacyID(ctx context.Context, id string) (*model.Port, error) {
+	return &model.Port{LegacyID: id, ResolvedBy: "_id"}, nil
+}
+
+// FindPortByID is the resolver for the findPortByID field.
+func (r *entityResolver) FindPortByID(ctx context.Context, id string) (*model.Port, error) {
+	return &model.Port{ID: id, ResolvedBy: "id"}, nil
+}
+
+// FindManyShipByLegacyIDs is the resolver for the findManyShipByLegacyIDs field.
+func (r *entityResolver) FindManyShipByLegacyIDs(ctx context.Context, reps []*model.ShipByLegacyIDsInput) ([]*model.Ship, error) {
+	ships := make([]*model.Ship, len(reps))
+	for i, rep := range reps {
+		ships[i] = &model.Ship{LegacyID: rep.ID, ResolvedBy: "_id"}
+	}
+	return ships, nil
+}
+
+// FindManyShipByIDs is the resolver for the findManyShipByIDs field.
+func (r *entityResolver) FindManyShipByIDs(ctx context.Context, reps []*model.ShipByIDsInput) ([]*model.Ship, error) {
+	ships := make([]*model.Ship, len(reps))
+	for i, rep := range reps {
+		ships[i] = &model.Ship{ID: rep.ID, ResolvedBy: "id"}
+	}
+	return ships, nil
+}
+
 // Entity returns generated.EntityResolver implementation.
 func (r *Resolver) Entity() generated.EntityResolver { return &entityResolver{r} }
 

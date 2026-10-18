@@ -138,6 +138,8 @@ func isMulti(typeName string) bool {
 	switch typeName {
 	case "Collision":
 		return true
+	case "Ship":
+		return true
 	default:
 		return false
 	}
@@ -157,6 +159,36 @@ func (ec *executionContext) resolveEntity(
 	}()
 
 	switch typeName {
+	case "Port":
+		resolverName, err := entityResolverNameForPort(ctx, rep)
+		if err != nil {
+			return nil, fmt.Errorf(`finding resolver for Entity "Port": %w`, err)
+		}
+		switch resolverName {
+
+		case "findPortByLegacyID":
+			id0, err := ec.unmarshalNString2string(ctx, rep["_id"])
+			if err != nil {
+				return nil, fmt.Errorf(`unmarshalling param 0 for findPortByLegacyID(): %w`, err)
+			}
+			entity, err := ec.Resolvers.Entity().FindPortByLegacyID(ctx, id0)
+			if err != nil {
+				return nil, fmt.Errorf(`resolving Entity "Port": %w`, err)
+			}
+
+			return entity, nil
+		case "findPortByID":
+			id0, err := ec.unmarshalNID2string(ctx, rep["id"])
+			if err != nil {
+				return nil, fmt.Errorf(`unmarshalling param 0 for findPortByID(): %w`, err)
+			}
+			entity, err := ec.Resolvers.Entity().FindPortByID(ctx, id0)
+			if err != nil {
+				return nil, fmt.Errorf(`resolving Entity "Port": %w`, err)
+			}
+
+			return entity, nil
+		}
 
 	}
 	return nil, fmt.Errorf("%w: %s", ErrUnknownType, typeName)
@@ -205,6 +237,75 @@ func (ec *executionContext) resolveManyEntities(
 			}
 
 			entities, err := ec.Resolvers.Entity().FindManyCollisionByIDAndIDs(ctx, typedReps)
+			entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
+			if err != nil {
+				return err
+			}
+
+			for i, entity := range entities {
+				if i < len(entityErrs) && entityErrs[i] != nil {
+					ec.Error(graphql.WithPathContext(ctx, graphql.NewPathWithIndex(reps[i].index)), entityErrs[i])
+					continue
+				}
+				list[reps[i].index] = entity
+			}
+			return nil
+
+		default:
+			return fmt.Errorf("unknown resolver: %s", resolverName)
+		}
+
+	case "Ship":
+		resolverName, err := entityResolverNameForShip(ctx, reps[0].entity)
+		if err != nil {
+			return fmt.Errorf(`finding resolver for Entity "Ship": %w`, err)
+		}
+		switch resolverName {
+
+		case "findManyShipByLegacyIDs":
+			typedReps := make([]*model.ShipByLegacyIDsInput, len(reps))
+
+			for i, rep := range reps {
+				id0, err := ec.unmarshalNString2string(ctx, rep.entity["_id"])
+				if err != nil {
+					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "id"))
+				}
+
+				typedReps[i] = &model.ShipByLegacyIDsInput{
+					ID: id0,
+				}
+			}
+
+			entities, err := ec.Resolvers.Entity().FindManyShipByLegacyIDs(ctx, typedReps)
+			entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
+			if err != nil {
+				return err
+			}
+
+			for i, entity := range entities {
+				if i < len(entityErrs) && entityErrs[i] != nil {
+					ec.Error(graphql.WithPathContext(ctx, graphql.NewPathWithIndex(reps[i].index)), entityErrs[i])
+					continue
+				}
+				list[reps[i].index] = entity
+			}
+			return nil
+
+		case "findManyShipByIDs":
+			typedReps := make([]*model.ShipByIDsInput, len(reps))
+
+			for i, rep := range reps {
+				id0, err := ec.unmarshalNID2string(ctx, rep.entity["id"])
+				if err != nil {
+					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "id"))
+				}
+
+				typedReps[i] = &model.ShipByIDsInput{
+					ID: id0,
+				}
+			}
+
+			entities, err := ec.Resolvers.Entity().FindManyShipByIDs(ctx, typedReps)
 			entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
 			if err != nil {
 				return err
@@ -282,5 +383,129 @@ func entityResolverNameForCollision(ctx context.Context, rep EntityRepresentatio
 		return "findManyCollisionByIDAndIDs", nil
 	}
 	return "", fmt.Errorf("%w for Collision due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
+}
+
+func entityResolverNameForPort(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
+	for {
+		var (
+			m   EntityRepresentation
+			val any
+			ok  bool
+		)
+		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
+		m = rep
+		val, ok = m["_id"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"_id\" for Port", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for Port", ErrTypeNotFound))
+			break
+		}
+		return "findPortByLegacyID", nil
+	}
+	for {
+		var (
+			m   EntityRepresentation
+			val any
+			ok  bool
+		)
+		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
+		m = rep
+		val, ok = m["id"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"id\" for Port", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for Port", ErrTypeNotFound))
+			break
+		}
+		return "findPortByID", nil
+	}
+	return "", fmt.Errorf("%w for Port due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
+}
+
+func entityResolverNameForShip(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
+	for {
+		var (
+			m   EntityRepresentation
+			val any
+			ok  bool
+		)
+		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
+		m = rep
+		val, ok = m["_id"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"_id\" for Ship", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for Ship", ErrTypeNotFound))
+			break
+		}
+		return "findManyShipByLegacyIDs", nil
+	}
+	for {
+		var (
+			m   EntityRepresentation
+			val any
+			ok  bool
+		)
+		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
+		m = rep
+		val, ok = m["id"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"id\" for Ship", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for Ship", ErrTypeNotFound))
+			break
+		}
+		return "findManyShipByIDs", nil
+	}
+	return "", fmt.Errorf("%w for Ship due to %v", ErrTypeNotFound,
 		errors.Join(entityResolverErrs...).Error())
 }

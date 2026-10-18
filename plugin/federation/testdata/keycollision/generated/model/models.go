@@ -18,5 +18,29 @@ type Inner struct {
 	D string `json:"d"`
 }
 
+type Port struct {
+	LegacyID   string `json:"_id"`
+	ID         string `json:"id"`
+	ResolvedBy string `json:"resolvedBy"`
+}
+
+func (Port) IsEntity() {}
+
 type Query struct {
+}
+
+type Ship struct {
+	LegacyID   string `json:"_id"`
+	ID         string `json:"id"`
+	ResolvedBy string `json:"resolvedBy"`
+}
+
+func (Ship) IsEntity() {}
+
+type ShipByIDsInput struct {
+	ID string `json:"ID"`
+}
+
+type ShipByLegacyIDsInput struct {
+	ID string `json:"ID"`
 }

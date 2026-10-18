@@ -36,7 +36,7 @@ func TestKeyFieldCollisionDisambiguated(t *testing.T) {
 
 	late, err := f.InjectSourcesLate(cfg.Schema)
 	require.NoError(t, err)
-	require.Len(t, f.Entities, 1)
+	require.Equal(t, "Collision", f.Entities[0].Name)
 
 	resolver := f.Entities[0].Resolvers[0]
 	require.Len(t, resolver.KeyFields, 2)

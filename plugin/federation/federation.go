@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"go/types"
+	"slices"
 	"sort"
 	"strconv"
 	"strings"
@@ -405,6 +406,9 @@ func (f *Federation) InjectSourcesEarly() ([]*ast.Source, error) {
 func (f *Federation) InjectSourcesLate(schema *ast.Schema) ([]*ast.Source, error) {
 	builtEntities, err := f.buildEntities(schema, f.version)
 	if err != nil {
+		return nil, err
+	}
+	if err := checkResolverNames(builtEntities, schema); err != nil {
 		return nil, err
 	}
 	f.Entities = builtEntities
@@ -903,13 +907,21 @@ func (f *Federation) isMultiEntity(schemaType *ast.Definition) bool {
 	return f.PackageOptions.EntityResolverMulti
 }
 
+// buildResolvers builds one resolver per @key.
+//
+// Requires: keys are schemaType's @key directives.
+// Ensures:  each resolver is named from its key fields' GraphQL names, as
+// before; resolvers of this entity whose Go names would collide are named
+// from their key fields' @goField names instead; a Go name still shared is a
+// positioned error.
 func buildResolvers(
 	schemaType *ast.Definition,
 	schema *ast.Schema,
 	keys []*ast.Directive,
 	multi bool,
 ) ([]*EntityResolver, error) {
-	resolvers := make([]*EntityResolver, 0)
+	resolvers := make([]*EntityResolver, 0, len(keys))
+	counts := make(map[string]int, len(keys))
 	for _, dir := range keys {
 		if len(dir.Arguments) > 2 {
 			return nil, gqlerror.ErrorPosf(
@@ -918,32 +930,53 @@ func buildResolvers(
 				schemaType.Name,
 			)
 		}
-		keyFields, resolverFields, err := buildKeyFields(
-			schemaType,
-			schema,
-			dir,
-		)
+		keyFields, err := buildKeyFields(schemaType, schema, dir)
 		if err != nil {
 			return nil, err
 		}
-
-		resolverFieldsToGo := schemaType.Name + "By" + strings.Join(resolverFields, "And")
-		var resolverName string
-		if multi {
-			resolverFieldsToGo += "s" // Pluralize for better API readability
-			resolverName = fmt.Sprintf("findMany%s", resolverFieldsToGo)
-		} else {
-			resolverName = fmt.Sprintf("find%s", resolverFieldsToGo)
-		}
-
-		resolvers = append(resolvers, &EntityResolver{
-			ResolverName:   resolverName,
-			KeyFields:      keyFields,
-			InputTypeName:  resolverFieldsToGo + "Input",
-			ReturnTypeName: schemaType.Name,
-		})
+		resolver := &EntityResolver{KeyFields: keyFields, ReturnTypeName: schemaType.Name}
+		resolver.ResolverName, resolver.InputTypeName = resolverNames(
+			schemaType.Name, keyFields, fieldset.Field.ToGo, multi)
+		counts[templates.ToGo(resolver.ResolverName)]++
+		resolvers = append(resolvers, resolver)
 	}
 
+	boundName := func(field fieldset.Field) string {
+		return boundKeyName(schemaType, schema, field)
+	}
+	fields := func(dir *ast.Directive) string {
+		return dir.Arguments.ForName(DirArgFields).Value.Raw
+	}
+	owners := make(map[string]int, len(resolvers))
+	for i, resolver := range resolvers {
+		if counts[templates.ToGo(resolver.ResolverName)] > 1 {
+			resolver.ResolverName, resolver.InputTypeName = resolverNames(
+				schemaType.Name, resolver.KeyFields, boundName, multi)
+		}
+		goName := templates.ToGo(resolver.ResolverName)
+		j, taken := owners[goName]
+		if !taken {
+			owners[goName] = i
+			continue
+		}
+		if slices.EqualFunc(resolvers[j].KeyFields, resolver.KeyFields, sameKeyPath) {
+			return nil, gqlerror.ErrorPosf(
+				keys[i].Position,
+				"@key(fields: %q) is declared twice on %q",
+				fields(keys[i]),
+				schemaType.Name,
+			)
+		}
+		return nil, gqlerror.ErrorPosf(
+			keys[i].Position,
+			"@key(fields: %q) and @key(fields: %q) on %q both generate entity resolver %s; "+
+				"give one of their key fields a distinct @goField(name: ...)",
+			fields(keys[j]),
+			fields(keys[i]),
+			schemaType.Name,
+			resolver.ResolverName,
+		)
+	}
 	return resolvers, nil
 }
 
@@ -970,23 +1003,22 @@ func buildKeyFields(
 	schemaType *ast.Definition,
 	schema *ast.Schema,
 	dir *ast.Directive,
-) ([]*KeyField, []string, error) {
+) ([]*KeyField, error) {
 	fieldsRaw, err := extractFields(dir)
 	if err != nil {
 		// api.generate prefixes plugin errors with "federation: ", so the
 		// messages here omit that prefix to avoid duplicating it.
-		return nil, nil, gqlerror.ErrorPosf(dir.Position, "@key on %q: %s", schemaType.Name, err)
+		return nil, gqlerror.ErrorPosf(dir.Position, "@key on %q: %s", schemaType.Name, err)
 	}
 
 	keyFieldSet := fieldset.New(fieldsRaw, nil)
 
 	keyFields := make([]*KeyField, len(keyFieldSet))
-	resolverFields := []string{}
 	for i, field := range keyFieldSet {
 		def := field.FieldDefinition(schemaType, schema)
 
 		if def == nil {
-			return nil, nil, gqlerror.ErrorPosf(
+			return nil, gqlerror.ErrorPosf(
 				dir.Position,
 				"@key(fields: %q): field %q is not defined on %q",
 				fieldsRaw,
@@ -996,12 +1028,11 @@ func buildKeyFields(
 		}
 
 		keyFields[i] = &KeyField{Definition: def, Field: field}
-		resolverFields = append(resolverFields, keyFields[i].Field.ToGo())
 	}
 
 	assignKeyFieldGoNames(keyFields)
 
-	return keyFields, resolverFields, nil
+	return keyFields, nil
 }
 
 // assignKeyFieldGoNames sets each key field's GoName to a Go identifier that is

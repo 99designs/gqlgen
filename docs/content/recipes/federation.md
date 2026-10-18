@@ -415,6 +415,13 @@ func (r *entityResolver) FindPort(ctx context.Context, rep model.PortRepresentat
 - `@requires` works with the default and explicit strategies; `preloaded` is not
   supported. A type named `<Entity>Representation` must not already exist.
 
+> **Roadmap — the default will change.** `perEntity: true` is a temporary
+> opt-in. A future release plans to make one resolver per entity the
+> **default**, with per-key resolvers kept as the opt-out
+> (`perEntity: false`, see [Entity resolver names](#entity-resolver-names)).
+> A later release plans to remove per-key resolvers. Moving an entity to
+> `perEntity: true` now means it won't change when the default flips.
+
 ## Using @entityResolver
 
 The `@entityResolver` directive enables optimization for entity resolver generation in GraphQL federation.

@@ -558,15 +558,26 @@ type Port @key(fields: "_id") @key(fields: "id") {
 }
 ```
 
-This generates `FindPortByLegacyID` and `FindPortByID`. Keys whose names
-don't collide keep their usual names, even when a key field has `@goField`.
+This generates `FindPortByLegacyID` and `FindPortByID`. A `fieldName` set in
+`gqlgen.yml` works the same way, and `@goField` takes precedence over it:
+
+```yml
+models:
+  Port:
+    fields:
+      _id:
+        fieldName: LegacyID
+```
+
+Keys whose names don't collide keep their usual names, even when a key field
+has one of these. A model you bind yourself counts only through these two
+settings, not through struct tags or field-name matching.
 
 When the names would still collide, generation fails with an error that says
 what to change:
 
 - Two keys on one entity, such as `id` and `i { d }`: give one of their key
-  fields a distinct `@goField(name:)`. gqlgen ignores a `fieldName` set in
-  `gqlgen.yml` here.
+  fields a distinct `@goField(name:)` or `fieldName`.
 - The same `@key` declared twice: remove one.
 - Two entities, such as a single `ManyPort @key(fields: "IDs")` and a multi
   `Port @key(fields: "id")`: you can't rename either entity, so give both the

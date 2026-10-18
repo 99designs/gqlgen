@@ -33,6 +33,11 @@ type Federation struct {
 
 	version int
 
+	// models is cfg.Models, read when naming resolvers in InjectSourcesLate.
+	// It is a reference, not a copy, so api.Option edits made after New are
+	// seen; config.Init writes @goField names into it only later.
+	models config.TypeMap
+
 	// true if @requires is used in the schema
 	usesRequires bool
 }
@@ -75,6 +80,7 @@ func New(version int, cfg *config.Config) (*Federation, error) {
 	return &Federation{
 		version:        version,
 		PackageOptions: options,
+		models:         cfg.Models,
 	}, nil
 }
 
@@ -783,7 +789,7 @@ func (f *Federation) buildEntity(
 		return entity, nil
 	}
 
-	resolvers, err := buildResolvers(schemaType, schema, keys, entity.Multi)
+	resolvers, err := buildResolvers(schemaType, schema, f.models, keys, entity.Multi)
 	if err != nil {
 		return nil, err
 	}
@@ -912,11 +918,12 @@ func (f *Federation) isMultiEntity(schemaType *ast.Definition) bool {
 // Requires: keys are schemaType's @key directives.
 // Ensures:  each resolver is named from its key fields' GraphQL names, as
 // before; resolvers of this entity whose Go names would collide are named
-// from their key fields' @goField names instead; a Go name still shared is a
-// positioned error.
+// from their key fields' bound Go names (see goFieldName) instead; a Go name
+// still shared is a positioned error.
 func buildResolvers(
 	schemaType *ast.Definition,
 	schema *ast.Schema,
+	models config.TypeMap,
 	keys []*ast.Directive,
 	multi bool,
 ) ([]*EntityResolver, error) {
@@ -942,7 +949,7 @@ func buildResolvers(
 	}
 
 	boundName := func(field fieldset.Field) string {
-		return boundKeyName(schemaType, schema, field)
+		return boundKeyName(models, schemaType, schema, field)
 	}
 	fields := func(dir *ast.Directive) string {
 		return dir.Arguments.ForName(DirArgFields).Value.Raw
@@ -970,7 +977,7 @@ func buildResolvers(
 		return nil, gqlerror.ErrorPosf(
 			keys[i].Position,
 			"@key(fields: %q) and @key(fields: %q) on %q both generate entity resolver %s; "+
-				"give one of their key fields a distinct @goField(name: ...)",
+				"give one of their key fields a distinct @goField(name: ...) or gqlgen.yml fieldName",
 			fields(keys[j]),
 			fields(keys[i]),
 			schemaType.Name,

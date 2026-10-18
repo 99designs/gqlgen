@@ -1,6 +1,7 @@
 package federation
 
 import (
+	"maps"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -21,6 +22,7 @@ func TestEntityResolverNames(t *testing.T) {
 		schema    string
 		resolvers []string
 		inputs    []string
+		models    config.TypeMap // gqlgen.yml models
 		err       string
 	}{
 		{
@@ -46,7 +48,29 @@ func TestEntityResolverNames(t *testing.T) {
 				id: ID!
 			}`,
 			err: `@key(fields: "_id") and @key(fields: "id") on "Port" both generate ` +
-				`entity resolver findPortByID; give one of their key fields a distinct @goField(name: ...)`,
+				`entity resolver findPortByID; give one of their key fields a distinct @goField(name: ...) or gqlgen.yml fieldName`,
+		},
+		{
+			name: "leading underscore uses gqlgen.yml fieldName",
+			schema: `type Port @key(fields: "_id") @key(fields: "id") {
+				_id: String!
+				id: ID!
+			}`,
+			models: config.TypeMap{"Port": {Fields: map[string]config.TypeMapField{
+				"_id": {FieldName: "LegacyID"},
+			}}},
+			resolvers: []string{"findPortByLegacyID", "findPortByID"},
+		},
+		{
+			name: "@goField beats gqlgen.yml fieldName",
+			schema: `type Port @key(fields: "_id") @key(fields: "id") {
+				_id: String! @goField(name: "LegacyID")
+				id: ID!
+			}`,
+			models: config.TypeMap{"Port": {Fields: map[string]config.TypeMapField{
+				"_id": {FieldName: "OldID"},
+			}}},
+			resolvers: []string{"findPortByLegacyID", "findPortByID"},
 		},
 		{
 			name: "three collisions",
@@ -85,6 +109,19 @@ func TestEntityResolverNames(t *testing.T) {
 				}
 				type Owner { d: ID! }`,
 			resolvers: []string{"findPortByID", "findPortByInnerD"},
+		},
+		{
+			name: "flat and nested paths with gqlgen.yml fieldName on the nested type",
+			schema: `
+				type Port @key(fields: "id") @key(fields: "i { d }") {
+					id: ID!
+					i: Owner!
+				}
+				type Owner { d: ID! }`,
+			models: config.TypeMap{"Owner": {Fields: map[string]config.TypeMapField{
+				"d": {FieldName: "Code"},
+			}}},
+			resolvers: []string{"findPortByID", "findPortByICode"},
 		},
 		{
 			name:   "repeated key",
@@ -139,10 +176,13 @@ func TestEntityResolverNames(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			f := &Federation{version: 2}
+			cfg := config.DefaultConfig()
+			f, err := New(2, cfg)
+			require.NoError(t, err)
+			// After New, as an api.Option would: the plugin must see it.
+			maps.Copy(cfg.Models, tc.models)
 			early, err := f.InjectSourcesEarly()
 			require.NoError(t, err)
-			cfg := config.DefaultConfig()
 			cfg.Sources = early
 			cfg.Sources = append(cfg.Sources, &ast.Source{
 				Name: "schema.graphql",

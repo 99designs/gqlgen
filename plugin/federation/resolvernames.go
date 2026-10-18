@@ -33,30 +33,40 @@ func resolverNames(
 	return "find" + stem, stem + "Input"
 }
 
-// boundKeyName names a key path after the Go fields it binds to: each
-// segment's @goField(name:), or its GraphQL name in Go form when unset.
+// boundKeyName names a key path after the Go fields it binds to, segment by
+// segment; see goFieldName.
 //
 // Requires: every segment of field is a field of parent or of the type the
 // previous segment returns, as buildKeyFields checks.
-func boundKeyName(parent *ast.Definition, schema *ast.Schema, field fieldset.Field) string {
+func boundKeyName(
+	models config.TypeMap,
+	parent *ast.Definition,
+	schema *ast.Schema,
+	field fieldset.Field,
+) string {
 	var sb strings.Builder
 	def := parent
 	for _, segment := range field {
 		fieldDef := def.Fields.ForName(segment)
-		sb.WriteString(goFieldName(fieldDef))
+		sb.WriteString(goFieldName(models, def.Name, fieldDef))
 		def = schema.Types[fieldDef.Type.Name()]
 	}
 	return sb.String()
 }
 
-// goFieldName returns the field's @goField(name:), or its GraphQL name in Go
-// form when unset.
-func goFieldName(def *ast.FieldDefinition) string {
+// goFieldName returns the Go name a field of typeName binds to: its
+// @goField(name:), else its fieldName in gqlgen.yml, else its GraphQL name in
+// Go form. That is the precedence config.Init applies, which runs only after
+// resolvers are named.
+func goFieldName(models config.TypeMap, typeName string, def *ast.FieldDefinition) string {
 	if dir := def.Directives.ForName(config.DirGoField); dir != nil {
 		if arg := dir.Arguments.ForName(config.DirArgName); arg != nil &&
 			arg.Value.Kind == ast.StringValue {
 			return arg.Value.Raw
 		}
+	}
+	if name := models[typeName].Fields[def.Name].FieldName; name != "" {
+		return name
 	}
 	return templates.ToGo(def.Name)
 }

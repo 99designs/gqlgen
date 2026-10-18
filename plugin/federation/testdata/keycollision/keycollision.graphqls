@@ -3,6 +3,7 @@ extend schema
         import: ["@key"])
 
 directive @entityResolver(multi: Boolean) on OBJECT
+directive @goField(name: String) on FIELD_DEFINITION
 
 type Inner {
     d: String!
@@ -25,4 +26,20 @@ type Inner {
 type Collision @key(fields: "id i { d }") @entityResolver(multi: true) {
     id: ID!
     i: Inner!
+}
+
+# Port and Ship have two keys whose resolver names would both end in ByID.
+# The model needs @goField for _id anyway, and the colliding resolvers are
+# named from it: findPortByLegacyID and findPortByID, and their batch forms.
+# See federation_resolvernames_test.go.
+type Port @key(fields: "_id") @key(fields: "id") {
+    _id: String! @goField(name: "LegacyID")
+    id: ID!
+    resolvedBy: String!
+}
+
+type Ship @key(fields: "_id") @key(fields: "id") @entityResolver(multi: true) {
+    _id: String! @goField(name: "LegacyID")
+    id: ID!
+    resolvedBy: String!
 }

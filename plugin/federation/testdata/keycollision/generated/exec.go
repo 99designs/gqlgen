@@ -43,15 +43,31 @@ type ComplexityRoot struct {
 
 	Entity struct {
 		FindManyCollisionByIDAndIDs func(childComplexity int, reps []*model.CollisionByIDAndIDsInput) int
+		FindManyShipByIDs           func(childComplexity int, reps []*model.ShipByIDsInput) int
+		FindManyShipByLegacyIDs     func(childComplexity int, reps []*model.ShipByLegacyIDsInput) int
+		FindPortByID                func(childComplexity int, id string) int
+		FindPortByLegacyID          func(childComplexity int, id string) int
 	}
 
 	Inner struct {
 		D func(childComplexity int) int
 	}
 
+	Port struct {
+		ID         func(childComplexity int) int
+		LegacyID   func(childComplexity int) int
+		ResolvedBy func(childComplexity int) int
+	}
+
 	Query struct {
 		__resolve__service func(childComplexity int) int
 		__resolve_entities func(childComplexity int, representations []map[string]any) int
+	}
+
+	Ship struct {
+		ID         func(childComplexity int) int
+		LegacyID   func(childComplexity int) int
+		ResolvedBy func(childComplexity int) int
 	}
 
 	_Service struct {
@@ -65,6 +81,10 @@ type ComplexityRoot struct {
 
 type EntityResolver interface {
 	FindManyCollisionByIDAndIDs(ctx context.Context, reps []*model.CollisionByIDAndIDsInput) ([]*model.Collision, error)
+	FindPortByLegacyID(ctx context.Context, id string) (*model.Port, error)
+	FindPortByID(ctx context.Context, id string) (*model.Port, error)
+	FindManyShipByLegacyIDs(ctx context.Context, reps []*model.ShipByLegacyIDsInput) ([]*model.Ship, error)
+	FindManyShipByIDs(ctx context.Context, reps []*model.ShipByIDsInput) ([]*model.Ship, error)
 }
 
 // endregion ************************** generated!.gotpl **************************
@@ -109,6 +129,50 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindManyCollisionByIDAndIDs(childComplexity, args["reps"].([]*model.CollisionByIDAndIDsInput)), true
+	case "Entity.findManyShipByIDs":
+		if e.ComplexityRoot.Entity.FindManyShipByIDs == nil {
+			break
+		}
+
+		args, err := ec.field_Entity_findManyShipByIDs_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Entity.FindManyShipByIDs(childComplexity, args["reps"].([]*model.ShipByIDsInput)), true
+	case "Entity.findManyShipByLegacyIDs":
+		if e.ComplexityRoot.Entity.FindManyShipByLegacyIDs == nil {
+			break
+		}
+
+		args, err := ec.field_Entity_findManyShipByLegacyIDs_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Entity.FindManyShipByLegacyIDs(childComplexity, args["reps"].([]*model.ShipByLegacyIDsInput)), true
+	case "Entity.findPortByID":
+		if e.ComplexityRoot.Entity.FindPortByID == nil {
+			break
+		}
+
+		args, err := ec.field_Entity_findPortByID_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Entity.FindPortByID(childComplexity, args["id"].(string)), true
+	case "Entity.findPortByLegacyID":
+		if e.ComplexityRoot.Entity.FindPortByLegacyID == nil {
+			break
+		}
+
+		args, err := ec.field_Entity_findPortByLegacyID_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Entity.FindPortByLegacyID(childComplexity, args["id"].(string)), true
 
 	case "Inner.d":
 		if e.ComplexityRoot.Inner.D == nil {
@@ -116,6 +180,25 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Inner.D(childComplexity), true
+
+	case "Port.id":
+		if e.ComplexityRoot.Port.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Port.ID(childComplexity), true
+	case "Port._id":
+		if e.ComplexityRoot.Port.LegacyID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Port.LegacyID(childComplexity), true
+	case "Port.resolvedBy":
+		if e.ComplexityRoot.Port.ResolvedBy == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Port.ResolvedBy(childComplexity), true
 
 	case "Query._service":
 		if e.ComplexityRoot.Query.__resolve__service == nil {
@@ -135,6 +218,25 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Query.__resolve_entities(childComplexity, args["representations"].([]map[string]any)), true
 
+	case "Ship.id":
+		if e.ComplexityRoot.Ship.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Ship.ID(childComplexity), true
+	case "Ship._id":
+		if e.ComplexityRoot.Ship.LegacyID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Ship.LegacyID(childComplexity), true
+	case "Ship.resolvedBy":
+		if e.ComplexityRoot.Ship.ResolvedBy == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Ship.ResolvedBy(childComplexity), true
+
 	case "_Service.sdl":
 		if e.ComplexityRoot._Service.SDL == nil {
 			break
@@ -152,6 +254,8 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	inputUnmarshalers := func() *graphql.InputUnmarshalerIndex {
 		return graphql.NewInputUnmarshalerIndex(
 			graphql.NewInputUnmarshaler("CollisionByIDAndIDsInput", ec.unmarshalInputCollisionByIDAndIDsInput),
+			graphql.NewInputUnmarshaler("ShipByIDsInput", ec.unmarshalInputShipByIDsInput),
+			graphql.NewInputUnmarshaler("ShipByLegacyIDsInput", ec.unmarshalInputShipByLegacyIDsInput),
 		)
 	}
 	first := true
@@ -218,6 +322,7 @@ var sources = []*ast.Source{
         import: ["@key"])
 
 directive @entityResolver(multi: Boolean) on OBJECT
+directive @goField(name: String) on FIELD_DEFINITION
 
 type Inner {
     d: String!
@@ -240,6 +345,22 @@ type Inner {
 type Collision @key(fields: "id i { d }") @entityResolver(multi: true) {
     id: ID!
     i: Inner!
+}
+
+# Port and Ship have two keys whose resolver names would both end in ByID.
+# The model needs @goField for _id anyway, and the colliding resolvers are
+# named from it: findPortByLegacyID and findPortByID, and their batch forms.
+# See federation_resolvernames_test.go.
+type Port @key(fields: "_id") @key(fields: "id") {
+    _id: String! @goField(name: "LegacyID")
+    id: ID!
+    resolvedBy: String!
+}
+
+type Ship @key(fields: "_id") @key(fields: "id") @entityResolver(multi: true) {
+    _id: String! @goField(name: "LegacyID")
+    id: ID!
+    resolvedBy: String!
 }
 `, BuiltIn: false},
 	{Name: "../../../federation/directives.graphql", Input: `
@@ -296,16 +417,28 @@ type Collision @key(fields: "id i { d }") @entityResolver(multi: true) {
 `, BuiltIn: true},
 	{Name: "../../../federation/entity.graphql", Input: `
 # a union of all types that use the @key directive
-union _Entity = Collision
+union _Entity = Collision | Port | Ship
 
 input CollisionByIDAndIDsInput {
 	ID: ID!
 	ID2: String!
 }
 
+input ShipByLegacyIDsInput {
+	ID: String!
+}
+
+input ShipByIDsInput {
+	ID: ID!
+}
+
 # fake type to build resolver interfaces for users to implement
 type Entity {
 	findManyCollisionByIDAndIDs(reps: [CollisionByIDAndIDsInput]!): [Collision]
+	findPortByLegacyID(id: String!,): Port!
+	findPortByID(id: ID!,): Port!
+	findManyShipByLegacyIDs(reps: [ShipByLegacyIDsInput]!): [Ship]
+	findManyShipByIDs(reps: [ShipByIDsInput]!): [Ship]
 }
 
 type _Service {
@@ -340,6 +473,30 @@ func (ec *executionContext) childFields_Inner(ctx context.Context, field graphql
 		return ec.fieldContext_Inner_d(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type Inner", field.Name)
+}
+
+func (ec *executionContext) childFields_Port(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "_id":
+		return ec.fieldContext_Port__id(ctx, field)
+	case "id":
+		return ec.fieldContext_Port_id(ctx, field)
+	case "resolvedBy":
+		return ec.fieldContext_Port_resolvedBy(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type Port", field.Name)
+}
+
+func (ec *executionContext) childFields_Ship(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "_id":
+		return ec.fieldContext_Ship__id(ctx, field)
+	case "id":
+		return ec.fieldContext_Ship_id(ctx, field)
+	case "resolvedBy":
+		return ec.fieldContext_Ship_resolvedBy(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type Ship", field.Name)
 }
 
 func (ec *executionContext) childFields__Service(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
@@ -477,6 +634,62 @@ func (ec *executionContext) field_Entity_findManyCollisionByIDAndIDs_args(ctx co
 		return nil, err
 	}
 	args["reps"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Entity_findManyShipByIDs_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "reps",
+		func(ctx context.Context, v any) ([]*model.ShipByIDsInput, error) {
+			return ec.unmarshalNShipByIDsInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋkeycollisionᚋgeneratedᚋmodelᚐShipByIDsInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["reps"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Entity_findManyShipByLegacyIDs_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "reps",
+		func(ctx context.Context, v any) ([]*model.ShipByLegacyIDsInput, error) {
+			return ec.unmarshalNShipByLegacyIDsInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋkeycollisionᚋgeneratedᚋmodelᚐShipByLegacyIDsInput(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["reps"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Entity_findPortByID_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNID2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Entity_findPortByLegacyID_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id",
+		func(ctx context.Context, v any) (string, error) {
+			return ec.unmarshalNString2string(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["id"] = arg0
 	return args, nil
 }
 
@@ -667,6 +880,182 @@ func (ec *executionContext) fieldContext_Entity_findManyCollisionByIDAndIDs(ctx 
 	return fc, nil
 }
 
+func (ec *executionContext) _Entity_findPortByLegacyID(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Entity_findPortByLegacyID(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Entity().FindPortByLegacyID(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.Port) graphql.Marshaler {
+			return ec.marshalNPort2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋkeycollisionᚋgeneratedᚋmodelᚐPort(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Entity_findPortByLegacyID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Entity",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Port(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Entity_findPortByLegacyID_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Entity_findPortByID(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Entity_findPortByID(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Entity().FindPortByID(ctx, fc.Args["id"].(string))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.Port) graphql.Marshaler {
+			return ec.marshalNPort2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋkeycollisionᚋgeneratedᚋmodelᚐPort(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Entity_findPortByID(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Entity",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Port(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Entity_findPortByID_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Entity_findManyShipByLegacyIDs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Entity_findManyShipByLegacyIDs(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Entity().FindManyShipByLegacyIDs(ctx, fc.Args["reps"].([]*model.ShipByLegacyIDsInput))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.Ship) graphql.Marshaler {
+			return ec.marshalOShip2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋkeycollisionᚋgeneratedᚋmodelᚐShip(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Entity_findManyShipByLegacyIDs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Entity",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Ship(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Entity_findManyShipByLegacyIDs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Entity_findManyShipByIDs(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Entity_findManyShipByIDs(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Entity().FindManyShipByIDs(ctx, fc.Args["reps"].([]*model.ShipByIDsInput))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*model.Ship) graphql.Marshaler {
+			return ec.marshalOShip2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋkeycollisionᚋgeneratedᚋmodelᚐShip(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Entity_findManyShipByIDs(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Entity",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Ship(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Entity_findManyShipByIDs_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Inner_d(ctx context.Context, field graphql.CollectedField, obj *model.Inner) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -688,6 +1077,75 @@ func (ec *executionContext) _Inner_d(ctx context.Context, field graphql.Collecte
 }
 func (ec *executionContext) fieldContext_Inner_d(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("Inner", field, false, false, "String")
+}
+
+func (ec *executionContext) _Port__id(ctx context.Context, field graphql.CollectedField, obj *model.Port) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Port__id(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.LegacyID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Port__id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Port", field, false, false, "String")
+}
+
+func (ec *executionContext) _Port_id(ctx context.Context, field graphql.CollectedField, obj *model.Port) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Port_id(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Port_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Port", field, false, false, "ID")
+}
+
+func (ec *executionContext) _Port_resolvedBy(ctx context.Context, field graphql.CollectedField, obj *model.Port) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Port_resolvedBy(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ResolvedBy, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Port_resolvedBy(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Port", field, false, false, "String")
 }
 
 func (ec *executionContext) _Query__entities(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -840,6 +1298,75 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 		},
 	}
 	return fc, nil
+}
+
+func (ec *executionContext) _Ship__id(ctx context.Context, field graphql.CollectedField, obj *model.Ship) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Ship__id(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.LegacyID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Ship__id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Ship", field, false, false, "String")
+}
+
+func (ec *executionContext) _Ship_id(ctx context.Context, field graphql.CollectedField, obj *model.Ship) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Ship_id(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Ship_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Ship", field, false, false, "ID")
+}
+
+func (ec *executionContext) _Ship_resolvedBy(ctx context.Context, field graphql.CollectedField, obj *model.Ship) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Ship_resolvedBy(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ResolvedBy, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Ship_resolvedBy(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Ship", field, false, false, "String")
 }
 
 func (ec *executionContext) __Service_sdl(ctx context.Context, field graphql.CollectedField, obj *fedruntime.Service) (ret graphql.Marshaler) {
@@ -1973,6 +2500,90 @@ func UnmarshalCollisionByIDAndIDsInput(ctx context.Context, raw any) (model.Coll
 	return out, err
 }
 
+func (ec *executionContext) unmarshalInputShipByIDsInput(ctx context.Context, obj any) (model.ShipByIDsInput, error) {
+	var it model.ShipByIDsInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"ID"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "ID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ID"))
+			data, err := ec.unmarshalNID2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalShipByIDsInput unmarshals raw into the ShipByIDsInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalShipByIDsInput(ctx context.Context, raw any) (model.ShipByIDsInput, error) {
+	var out model.ShipByIDsInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "ShipByIDsInput", raw, &out)
+	return out, err
+}
+
+func (ec *executionContext) unmarshalInputShipByLegacyIDsInput(ctx context.Context, obj any) (model.ShipByLegacyIDsInput, error) {
+	var it model.ShipByLegacyIDsInput
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"ID"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "ID":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ID"))
+			data, err := ec.unmarshalNString2string(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalShipByLegacyIDsInput unmarshals raw into the ShipByLegacyIDsInput input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalShipByLegacyIDsInput(ctx context.Context, raw any) (model.ShipByLegacyIDsInput, error) {
+	var out model.ShipByLegacyIDsInput
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "ShipByLegacyIDsInput", raw, &out)
+	return out, err
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -1981,6 +2592,20 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 	switch obj := (obj).(type) {
 	case nil:
 		return graphql.Null
+	case model.Ship:
+		return ec._Ship(ctx, sel, &obj)
+	case *model.Ship:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Ship(ctx, sel, obj)
+	case model.Port:
+		return ec._Port(ctx, sel, &obj)
+	case *model.Port:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Port(ctx, sel, obj)
 	case model.Collision:
 		return ec._Collision(ctx, sel, &obj)
 	case *model.Collision:
@@ -2064,6 +2689,30 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._Entity_findManyCollisionByIDAndIDs(ctx, field)
 				})
+		case "findPortByLegacyID":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Entity_findPortByLegacyID(ctx, field)
+				})
+		case "findPortByID":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Entity_findPortByID(ctx, field)
+				})
+		case "findManyShipByLegacyIDs":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Entity_findManyShipByLegacyIDs(ctx, field)
+				})
+		case "findManyShipByIDs":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Entity_findManyShipByIDs(ctx, field)
+				})
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2094,6 +2743,49 @@ func (ec *executionContext) _Inner(ctx context.Context, sel ast.SelectionSet, ob
 			out.Values[i] = graphql.MarshalString("Inner")
 		case "d":
 			out.Values[i] = ec._Inner_d(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
+var portImplementors = []string{"Port", "_Entity"}
+
+func (ec *executionContext) _Port(ctx context.Context, sel ast.SelectionSet, obj *model.Port) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, portImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Port")
+		case "_id":
+			out.Values[i] = ec._Port__id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "id":
+			out.Values[i] = ec._Port_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resolvedBy":
+			out.Values[i] = ec._Port_resolvedBy(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -2158,6 +2850,49 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			})
 			if out.Values[i] == graphql.RequiredNull {
 				atomic.AddUint32(&out.Invalids, 1)
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
+var shipImplementors = []string{"Ship", "_Entity"}
+
+func (ec *executionContext) _Ship(ctx context.Context, sel ast.SelectionSet, obj *model.Ship) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, shipImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Ship")
+		case "_id":
+			out.Values[i] = ec._Ship__id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "id":
+			out.Values[i] = ec._Ship_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resolvedBy":
+			out.Values[i] = ec._Ship_resolvedBy(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -2635,6 +3370,42 @@ func (ec *executionContext) marshalNInner2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 	return ec._Inner(ctx, sel, v)
 }
 
+func (ec *executionContext) marshalNPort2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋkeycollisionᚋgeneratedᚋmodelᚐPort(ctx context.Context, sel ast.SelectionSet, v *model.Port) graphql.Marshaler {
+	if v == nil {
+		graphql.AddInvalidNullError(ctx, "Port!")
+		return graphql.Null
+	}
+	return ec._Port(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNShipByIDsInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋkeycollisionᚋgeneratedᚋmodelᚐShipByIDsInput(ctx context.Context, v any) ([]*model.ShipByIDsInput, error) {
+	vSlice := graphql.CoerceList(v)
+	var err error
+	res := make([]*model.ShipByIDsInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOShipByIDsInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋkeycollisionᚋgeneratedᚋmodelᚐShipByIDsInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNShipByLegacyIDsInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋkeycollisionᚋgeneratedᚋmodelᚐShipByLegacyIDsInput(ctx context.Context, v any) ([]*model.ShipByLegacyIDsInput, error) {
+	vSlice := graphql.CoerceList(v)
+	var err error
+	res := make([]*model.ShipByLegacyIDsInput, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOShipByLegacyIDsInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋkeycollisionᚋgeneratedᚋmodelᚐShipByLegacyIDsInput(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) (string, error) {
 	res, err := graphql.UnmarshalString(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3043,6 +3814,42 @@ func (ec *executionContext) unmarshalOCollisionByIDAndIDsInput2ᚖgithubᚗcom�
 		return nil, nil
 	}
 	res, err := ec.unmarshalInputCollisionByIDAndIDsInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOShip2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋkeycollisionᚋgeneratedᚋmodelᚐShip(ctx context.Context, sel ast.SelectionSet, v []*model.Ship) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalOShip2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋkeycollisionᚋgeneratedᚋmodelᚐShip(ctx, sel, v[i])
+	})
+
+	return ret
+}
+
+func (ec *executionContext) marshalOShip2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋkeycollisionᚋgeneratedᚋmodelᚐShip(ctx context.Context, sel ast.SelectionSet, v *model.Ship) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Ship(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalOShipByIDsInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋkeycollisionᚋgeneratedᚋmodelᚐShipByIDsInput(ctx context.Context, v any) (*model.ShipByIDsInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputShipByIDsInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOShipByLegacyIDsInput2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋkeycollisionᚋgeneratedᚋmodelᚐShipByLegacyIDsInput(ctx context.Context, v any) (*model.ShipByLegacyIDsInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputShipByLegacyIDsInput(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
 }
 

@@ -43,6 +43,9 @@ type Federation struct {
 
 	// representations are the generated inputs of per-entity resolvers.
 	representations []*representation
+	// representationNames is federation.representation_names: the names some
+	// representations take in place of the default.
+	representationNames map[string]string
 }
 
 type PackageOptions struct {
@@ -58,6 +61,10 @@ type PackageOptions struct {
 	// This can be overriding by @entityResolver(multi: Boolean) directive.
 	// false by default.
 	EntityResolverMulti bool
+	// EntityResolverPerEntity generates one resolver per entity, taking a
+	// representation input, instead of one per @key, for every entity. A
+	// temporary opt-in: it is planned to become the default. false by default.
+	EntityResolverPerEntity bool
 	// PreloadedRequires sets "preloaded" as the package-level default @requires
 	// strategy; individual entities may override it via
 	// @entityResolver(requires: "…"). Under preloaded, the generated multi
@@ -81,19 +88,21 @@ func New(version int, cfg *config.Config) (*Federation, error) {
 		return nil, fmt.Errorf("invalid federation package options: %w", err)
 	}
 	return &Federation{
-		version:        version,
-		PackageOptions: options,
-		models:         cfg.Models,
+		version:             version,
+		PackageOptions:      options,
+		models:              cfg.Models,
+		representationNames: cfg.Federation.RepresentationNames,
 	}, nil
 }
 
 // federation.options keys, recognized in buildPackageOptions and referenced in
 // user-facing errors, so their spelling has a single source of truth.
 const (
-	optionExplicitRequires    = "explicit_requires"
-	optionComputedRequires    = "computed_requires"
-	optionEntityResolverMulti = "entity_resolver_multi"
-	optionPreloadedRequires   = "preloaded_requires"
+	optionExplicitRequires        = "explicit_requires"
+	optionComputedRequires        = "computed_requires"
+	optionEntityResolverMulti     = "entity_resolver_multi"
+	optionPreloadedRequires       = "preloaded_requires"
+	optionEntityResolverPerEntity = "entity_resolver_per_entity"
 )
 
 func buildPackageOptions(cfg *config.Config) (PackageOptions, error) {
@@ -102,6 +111,7 @@ func buildPackageOptions(cfg *config.Config) (PackageOptions, error) {
 	var explicitRequires,
 		computedRequires,
 		entityResolverMulti,
+		entityResolverPerEntity,
 		preloadedRequires bool
 
 	for k, v := range packageOptions {
@@ -112,6 +122,8 @@ func buildPackageOptions(cfg *config.Config) (PackageOptions, error) {
 			computedRequires = v
 		case optionEntityResolverMulti:
 			entityResolverMulti = v
+		case optionEntityResolverPerEntity:
+			entityResolverPerEntity = v
 		case optionPreloadedRequires:
 			preloadedRequires = v
 		default:
@@ -169,10 +181,11 @@ func buildPackageOptions(cfg *config.Config) (PackageOptions, error) {
 	// to ensure
 	// our directive is always called.
 	return PackageOptions{
-		ExplicitRequires:    explicitRequires,
-		ComputedRequires:    computedRequires,
-		EntityResolverMulti: entityResolverMulti,
-		PreloadedRequires:   preloadedRequires,
+		ExplicitRequires:        explicitRequires,
+		ComputedRequires:        computedRequires,
+		EntityResolverMulti:     entityResolverMulti,
+		PreloadedRequires:       preloadedRequires,
+		EntityResolverPerEntity: entityResolverPerEntity,
 	}, nil
 }
 
@@ -192,7 +205,9 @@ func (f *Federation) MutateConfig(cfg *config.Config) error {
 		}
 		cfg.Models[typeName] = entry
 	}
-	setRepresentationFieldNames(f.representations, cfg.Models)
+	if err := configureRepresentationModels(f.representations, cfg.Models); err != nil {
+		return err
+	}
 	cfg.Directives["external"] = config.DirectiveConfig{SkipRuntime: true}
 	cfg.Directives[dirNameRequires] = config.DirectiveConfig{SkipRuntime: true}
 	cfg.Directives["provides"] = config.DirectiveConfig{SkipRuntime: true}
@@ -422,7 +437,8 @@ func (f *Federation) InjectSourcesLate(schema *ast.Schema) ([]*ast.Source, error
 		return nil, err
 	}
 	f.Entities = builtEntities
-	f.representations, err = buildRepresentations(f.Entities, schema, f.models)
+	f.representations, err = buildRepresentations(
+		f.Entities, schema, f.models, f.representationNames)
 	if err != nil {
 		return nil, err
 	}
@@ -443,7 +459,8 @@ func (f *Federation) InjectSourcesLate(schema *ast.Schema) ([]*ast.Source, error
 		}
 
 		if e.PerEntity {
-			resolvers = append(resolvers, perEntityResolverSDL(e))
+			rep := rootRepresentation(f.representations, e)
+			resolvers = append(resolvers, perEntityResolverSDL(e, rep.Name))
 			continue
 		}
 		for _, r := range e.Resolvers {
@@ -787,11 +804,11 @@ func (f *Federation) buildEntity(
 	if err != nil {
 		return nil, err
 	}
-	perEntity, _ := entityResolverBool(schemaType, "perEntity")
+	perEntity := f.PackageOptions.EntityResolverPerEntity
 	if perEntity && requiresStrategy == RequiresPreloaded {
 		return nil, fmt.Errorf(
-			"entity %q: @entityResolver(perEntity: true) cannot be combined with requires: %q",
-			schemaType.Name, RequiresPreloaded,
+			"entity %q: requires: %q is not supported with the %s option",
+			schemaType.Name, RequiresPreloaded, optionEntityResolverPerEntity,
 		)
 	}
 	if err := validateComputedFields(schemaType, requiresStrategy); err != nil {
@@ -841,8 +858,8 @@ func (f *Federation) buildEntity(
 	// interface value does not have.
 	if perEntity && schemaType.Kind == ast.Interface && len(entity.Requires) > 0 {
 		return nil, fmt.Errorf(
-			"entity %q: @entityResolver(perEntity: true) on an interface does not support @requires",
-			schemaType.Name,
+			"entity %q: @requires on an interface entity is not supported with the %s option",
+			schemaType.Name, optionEntityResolverPerEntity,
 		)
 	}
 	if len(entity.Requires) > 0 {
@@ -1044,12 +1061,12 @@ func buildResolvers(
 			"@key(fields: %q) and @key(fields: %q) on %q both generate entity resolver %s; "+
 				"give one of their key fields a distinct @goField(name: ...) or gqlgen.yml fieldName, "+
 				"or, if no two key fields of one type share a Go name, "+
-				"set @entityResolver(perEntity: true) on %q",
+				"set the %s option",
 			fields(keys[j]),
 			fields(keys[i]),
 			schemaType.Name,
 			resolver.ResolverName,
-			schemaType.Name,
+			optionEntityResolverPerEntity,
 		)
 	}
 	return resolvers, nil

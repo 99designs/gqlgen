@@ -1,4 +1,4 @@
-directive @entityResolver(multi: Boolean, perEntity: Boolean) on OBJECT
+directive @entityResolver(multi: Boolean) on OBJECT
 directive @goField(
     batch: Boolean
     forceResolver: Boolean
@@ -101,16 +101,4 @@ type MultiHelloMultipleRequires @key(fields: "name") @entityResolver(multi: true
     key1: String! @external
     key2: String! @external
     key3: String! @requires(fields: "key1 key2")
-}
-
-type PerEntityPlanet @key(fields: "name") @entityResolver(perEntity: true) {
-    name: String!
-    diameter: Int! @external
-    size: Int! @requires(fields: "diameter")
-}
-
-type MultiPerEntityPlanet @key(fields: "name") @entityResolver(perEntity: true, multi: true) {
-    name: String!
-    diameter: Int! @external
-    size: Int! @requires(fields: "diameter")
 }

@@ -157,64 +157,45 @@ func (ec *executionContext) resolveEntity(
 
 	switch typeName {
 	case "Dock":
-		resolverName, err := entityResolverNameForDock(ctx, rep)
+		matchedKey, err := matchedKeyForDock(ctx, rep)
 		if err != nil {
 			return nil, fmt.Errorf(`finding resolver for Entity "Dock": %w`, err)
 		}
-		switch resolverName {
-
-		case "findDockByID":
-			id0, err := ec.unmarshalNID2string(ctx, rep["id"])
-			if err != nil {
-				return nil, fmt.Errorf(`unmarshalling param 0 for findDockByID(): %w`, err)
-			}
-			entity, err := ec.Resolvers.Entity().FindDockByID(ctx, id0)
-			if err != nil {
-				return nil, fmt.Errorf(`resolving Entity "Dock": %w`, err)
-			}
-
-			return entity, nil
+		representation, err := ec.unmarshalNDockRepresentation2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentityᚋgeneratedᚋmodelᚐDockRepresentation(ctx, map[string]any(rep))
+		if err != nil {
+			return nil, fmt.Errorf(`unmarshalling representation for Entity "Dock": %w`, err)
 		}
+		representation.MatchedKey = matchedKey
+		entity, err := ec.Resolvers.Entity().FindDock(ctx, representation)
+		if err != nil {
+			return nil, fmt.Errorf(`resolving Entity "Dock": %w`, err)
+		}
+		return entity, nil
 	case "Node":
-		if _, err := entityResolverNameForNode(ctx, rep); err != nil {
+		matchedKey, err := matchedKeyForNode(ctx, rep)
+		if err != nil {
 			return nil, fmt.Errorf(`finding resolver for Entity "Node": %w`, err)
 		}
 		representation, err := ec.unmarshalNNodeRepresentation2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentityᚋgeneratedᚋmodelᚐNodeRepresentation(ctx, map[string]any(rep))
 		if err != nil {
 			return nil, fmt.Errorf(`unmarshalling representation for Entity "Node": %w`, err)
 		}
+		representation.MatchedKey = matchedKey
 		entity, err := ec.Resolvers.Entity().FindNode(ctx, representation)
 		if err != nil {
 			return nil, fmt.Errorf(`resolving Entity "Node": %w`, err)
 		}
 		return entity, nil
-	case "Plain":
-		resolverName, err := entityResolverNameForPlain(ctx, rep)
-		if err != nil {
-			return nil, fmt.Errorf(`finding resolver for Entity "Plain": %w`, err)
-		}
-		switch resolverName {
-
-		case "findPlainByID":
-			id0, err := ec.unmarshalNID2string(ctx, rep["id"])
-			if err != nil {
-				return nil, fmt.Errorf(`unmarshalling param 0 for findPlainByID(): %w`, err)
-			}
-			entity, err := ec.Resolvers.Entity().FindPlainByID(ctx, id0)
-			if err != nil {
-				return nil, fmt.Errorf(`resolving Entity "Plain": %w`, err)
-			}
-
-			return entity, nil
-		}
 	case "Port":
-		if _, err := entityResolverNameForPort(ctx, rep); err != nil {
+		matchedKey, err := matchedKeyForPort(ctx, rep)
+		if err != nil {
 			return nil, fmt.Errorf(`finding resolver for Entity "Port": %w`, err)
 		}
 		representation, err := ec.unmarshalNPortRepresentation2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentityᚋgeneratedᚋmodelᚐPortRepresentation(ctx, map[string]any(rep))
 		if err != nil {
 			return nil, fmt.Errorf(`unmarshalling representation for Entity "Port": %w`, err)
 		}
+		representation.MatchedKey = matchedKey
 		entity, err := ec.Resolvers.Entity().FindPort(ctx, representation)
 		if err != nil {
 			return nil, fmt.Errorf(`resolving Entity "Port": %w`, err)
@@ -247,15 +228,21 @@ func (ec *executionContext) resolveManyEntities(
 
 	case "Ship":
 		representations := make([]any, len(reps))
+		matchedKeys := make([]string, len(reps))
 		for i, rep := range reps {
-			if _, err := entityResolverNameForShip(ctx, rep.entity); err != nil {
+			matchedKey, err := matchedKeyForShip(ctx, rep.entity)
+			if err != nil {
 				return fmt.Errorf(`finding resolver for Entity "Ship": %w`, err)
 			}
 			representations[i] = map[string]any(rep.entity)
+			matchedKeys[i] = matchedKey
 		}
 		typedReps, err := ec.unmarshalNShipRepresentation2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentityᚋgeneratedᚋmodelᚐShipRepresentationᚄ(ctx, representations)
 		if err != nil {
 			return fmt.Errorf(`unmarshalling representations for Entity "Ship": %w`, err)
+		}
+		for i, typedRep := range typedReps {
+			typedRep.MatchedKey = matchedKeys[i]
 		}
 		entities, err := ec.Resolvers.Entity().FindShip(ctx, typedReps)
 		entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
@@ -276,7 +263,7 @@ func (ec *executionContext) resolveManyEntities(
 	}
 }
 
-func entityResolverNameForDock(ctx context.Context, rep EntityRepresentation) (string, error) {
+func matchedKeyForDock(ctx context.Context, rep EntityRepresentation) (string, error) {
 	// we collect errors because a later entity resolver may work fine
 	// when an entity has multiple keys
 	entityResolverErrs := []error{}
@@ -305,13 +292,13 @@ func entityResolverNameForDock(ctx context.Context, rep EntityRepresentation) (s
 				fmt.Errorf("%w due to all null value KeyFields for Dock", ErrTypeNotFound))
 			break
 		}
-		return "findDockByID", nil
+		return "id", nil
 	}
 	return "", fmt.Errorf("%w for Dock due to %v", ErrTypeNotFound,
 		errors.Join(entityResolverErrs...).Error())
 }
 
-func entityResolverNameForNode(ctx context.Context, rep EntityRepresentation) (string, error) {
+func matchedKeyForNode(ctx context.Context, rep EntityRepresentation) (string, error) {
 	// we collect errors because a later entity resolver may work fine
 	// when an entity has multiple keys
 	entityResolverErrs := []error{}
@@ -340,48 +327,13 @@ func entityResolverNameForNode(ctx context.Context, rep EntityRepresentation) (s
 				fmt.Errorf("%w due to all null value KeyFields for Node", ErrTypeNotFound))
 			break
 		}
-		return "findNodeByID", nil
+		return "id", nil
 	}
 	return "", fmt.Errorf("%w for Node due to %v", ErrTypeNotFound,
 		errors.Join(entityResolverErrs...).Error())
 }
 
-func entityResolverNameForPlain(ctx context.Context, rep EntityRepresentation) (string, error) {
-	// we collect errors because a later entity resolver may work fine
-	// when an entity has multiple keys
-	entityResolverErrs := []error{}
-	for {
-		var (
-			m   EntityRepresentation
-			val any
-			ok  bool
-		)
-		_ = val
-		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
-		allNull := true
-		m = rep
-		val, ok = m["id"]
-		if !ok {
-			entityResolverErrs = append(entityResolverErrs,
-				fmt.Errorf("%w due to missing Key Field \"id\" for Plain", ErrTypeNotFound))
-			break
-		}
-		if allNull {
-			allNull = val == nil
-		}
-		if allNull {
-			entityResolverErrs = append(entityResolverErrs,
-				fmt.Errorf("%w due to all null value KeyFields for Plain", ErrTypeNotFound))
-			break
-		}
-		return "findPlainByID", nil
-	}
-	return "", fmt.Errorf("%w for Plain due to %v", ErrTypeNotFound,
-		errors.Join(entityResolverErrs...).Error())
-}
-
-func entityResolverNameForPort(ctx context.Context, rep EntityRepresentation) (string, error) {
+func matchedKeyForPort(ctx context.Context, rep EntityRepresentation) (string, error) {
 	// we collect errors because a later entity resolver may work fine
 	// when an entity has multiple keys
 	entityResolverErrs := []error{}
@@ -410,7 +362,7 @@ func entityResolverNameForPort(ctx context.Context, rep EntityRepresentation) (s
 				fmt.Errorf("%w due to all null value KeyFields for Port", ErrTypeNotFound))
 			break
 		}
-		return "findPortByID", nil
+		return "_id", nil
 	}
 	for {
 		var (
@@ -437,13 +389,13 @@ func entityResolverNameForPort(ctx context.Context, rep EntityRepresentation) (s
 				fmt.Errorf("%w due to all null value KeyFields for Port", ErrTypeNotFound))
 			break
 		}
-		return "findPortByID", nil
+		return "id", nil
 	}
 	return "", fmt.Errorf("%w for Port due to %v", ErrTypeNotFound,
 		errors.Join(entityResolverErrs...).Error())
 }
 
-func entityResolverNameForShip(ctx context.Context, rep EntityRepresentation) (string, error) {
+func matchedKeyForShip(ctx context.Context, rep EntityRepresentation) (string, error) {
 	// we collect errors because a later entity resolver may work fine
 	// when an entity has multiple keys
 	entityResolverErrs := []error{}
@@ -494,7 +446,7 @@ func entityResolverNameForShip(ctx context.Context, rep EntityRepresentation) (s
 				fmt.Errorf("%w due to all null value KeyFields for Ship", ErrTypeNotFound))
 			break
 		}
-		return "findManyShipByIDAndOwnerIDs", nil
+		return "id owner { id }", nil
 	}
 	for {
 		var (
@@ -521,7 +473,7 @@ func entityResolverNameForShip(ctx context.Context, rep EntityRepresentation) (s
 				fmt.Errorf("%w due to all null value KeyFields for Ship", ErrTypeNotFound))
 			break
 		}
-		return "findManyShipByIDs", nil
+		return "_id", nil
 	}
 	return "", fmt.Errorf("%w for Ship due to %v", ErrTypeNotFound,
 		errors.Join(entityResolverErrs...).Error())

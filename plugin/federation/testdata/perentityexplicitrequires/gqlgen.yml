@@ -1,0 +1,17 @@
+schema:
+  - "testdata/perentityexplicitrequires/schema.graphql"
+exec:
+  filename: testdata/perentityexplicitrequires/generated/exec.go
+federation:
+  filename: testdata/perentityexplicitrequires/generated/federation.go
+  options:
+    explicit_requires: true
+    entity_resolver_per_entity: true
+model:
+  filename: testdata/perentityexplicitrequires/generated/models.go
+resolver:
+  filename: testdata/perentityexplicitrequires/resolver.go
+  layout: follow-schema
+  dir: testdata/perentityexplicitrequires
+  package: perentityexplicitrequires
+omit_complexity: true

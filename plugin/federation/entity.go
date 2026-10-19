@@ -3,6 +3,7 @@ package federation
 import (
 	"go/types"
 	"slices"
+	"strings"
 
 	"github.com/vektah/gqlparser/v2/ast"
 
@@ -69,8 +70,8 @@ type Entity struct {
 	Requires  []*Requires
 	Multi     bool
 	// PerEntity selects one resolver for the entity, taking a representation
-	// input, instead of one resolver per @key. Set by
-	// @entityResolver(perEntity: true).
+	// input, instead of one resolver per @key. Set from the
+	// entity_resolver_per_entity option.
 	PerEntity bool
 	// RepresentationType is the Go type of a per-entity resolver's argument:
 	// one representation, or a list of them for a batch resolver.
@@ -111,6 +112,44 @@ type EntityResolver struct {
 	InputTypeName  string
 	ReturnType     types.Type // The Go generated return type for the entity
 	ReturnTypeName string
+}
+
+// FieldSet returns the resolver's @key field set in a standard form: fields
+// in key order, separated by single spaces, a nested selection in braces after
+// its field, such as "id owner { id name }".
+func (e *EntityResolver) FieldSet() string {
+	paths := make([][]string, len(e.KeyFields))
+	for i, keyField := range e.KeyFields {
+		paths[i] = keyField.Field
+	}
+	return selectionText(paths)
+}
+
+// selectionText prints field paths, such as [owner id], as one selection set,
+// merging paths that share a first field at that field's first appearance.
+//
+// Requires: every path is non-empty.
+func selectionText(paths [][]string) string {
+	var heads []string
+	nested := make(map[string][][]string)
+	for _, path := range paths {
+		head := path[0]
+		if _, seen := nested[head]; !seen {
+			heads = append(heads, head)
+			nested[head] = nil
+		}
+		if len(path) > 1 {
+			nested[head] = append(nested[head], path[1:])
+		}
+	}
+	parts := make([]string, len(heads))
+	for i, head := range heads {
+		parts[i] = head
+		if subs := nested[head]; len(subs) > 0 {
+			parts[i] += " { " + selectionText(subs) + " }"
+		}
+	}
+	return strings.Join(parts, " ")
 }
 
 func (e *EntityResolver) LookupInputType() string {

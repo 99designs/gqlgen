@@ -144,8 +144,6 @@ func isMulti(typeName string) bool {
 		return true
 	case "MultiHelloWithError":
 		return true
-	case "MultiPerEntityPlanet":
-		return true
 	case "MultiPlanetRequiresNested":
 		return true
 	default:
@@ -228,23 +226,6 @@ func (ec *executionContext) resolveEntity(
 
 			return entity, nil
 		}
-	case "PerEntityPlanet":
-		if _, err := entityResolverNameForPerEntityPlanet(ctx, rep); err != nil {
-			return nil, fmt.Errorf(`finding resolver for Entity "PerEntityPlanet": %w`, err)
-		}
-		representation, err := unmarshalNPerEntityPlanetRepresentation2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐPerEntityPlanetRepresentation(ctx, ec, map[string]any(rep))
-		if err != nil {
-			return nil, fmt.Errorf(`unmarshalling representation for Entity "PerEntityPlanet": %w`, err)
-		}
-		entity, err := ec.Resolvers.Entity().FindPerEntityPlanet(ctx, representation)
-		if err != nil {
-			return nil, fmt.Errorf(`resolving Entity "PerEntityPlanet": %w`, err)
-		}
-		entity.Diameter, err = unmarshalNInt2int(ctx, ec, rep["diameter"])
-		if err != nil {
-			return nil, err
-		}
-		return entity, nil
 	case "PlanetMultipleRequires":
 		resolverName, err := entityResolverNameForPlanetMultipleRequires(ctx, rep)
 		if err != nil {
@@ -587,36 +568,6 @@ func (ec *executionContext) resolveManyEntities(
 			return fmt.Errorf("unknown resolver: %s", resolverName)
 		}
 
-	case "MultiPerEntityPlanet":
-		representations := make([]any, len(reps))
-		for i, rep := range reps {
-			if _, err := entityResolverNameForMultiPerEntityPlanet(ctx, rep.entity); err != nil {
-				return fmt.Errorf(`finding resolver for Entity "MultiPerEntityPlanet": %w`, err)
-			}
-			representations[i] = map[string]any(rep.entity)
-		}
-		typedReps, err := unmarshalNMultiPerEntityPlanetRepresentation2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiPerEntityPlanetRepresentationᚄ(ctx, ec, representations)
-		if err != nil {
-			return fmt.Errorf(`unmarshalling representations for Entity "MultiPerEntityPlanet": %w`, err)
-		}
-		entities, err := ec.Resolvers.Entity().FindMultiPerEntityPlanet(ctx, typedReps)
-		entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
-		if err != nil {
-			return err
-		}
-		for i, entity := range entities {
-			if i < len(entityErrs) && entityErrs[i] != nil {
-				ec.Error(graphql.WithPathContext(ctx, graphql.NewPathWithIndex(reps[i].index)), entityErrs[i])
-				continue
-			}
-			entity.Diameter, err = unmarshalNInt2int(ctx, ec, reps[i].entity["diameter"])
-			if err != nil {
-				return err
-			}
-			list[reps[i].index] = entity
-		}
-		return nil
-
 	case "MultiPlanetRequiresNested":
 		resolverName, err := entityResolverNameForMultiPlanetRequiresNested(ctx, reps[0].entity)
 		if err != nil {
@@ -921,41 +872,6 @@ func entityResolverNameForMultiHelloWithError(ctx context.Context, rep EntityRep
 		errors.Join(entityResolverErrs...).Error())
 }
 
-func entityResolverNameForMultiPerEntityPlanet(ctx context.Context, rep EntityRepresentation) (string, error) {
-	// we collect errors because a later entity resolver may work fine
-	// when an entity has multiple keys
-	entityResolverErrs := []error{}
-	for {
-		var (
-			m   EntityRepresentation
-			val any
-			ok  bool
-		)
-		_ = val
-		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
-		allNull := true
-		m = rep
-		val, ok = m["name"]
-		if !ok {
-			entityResolverErrs = append(entityResolverErrs,
-				fmt.Errorf("%w due to missing Key Field \"name\" for MultiPerEntityPlanet", ErrTypeNotFound))
-			break
-		}
-		if allNull {
-			allNull = val == nil
-		}
-		if allNull {
-			entityResolverErrs = append(entityResolverErrs,
-				fmt.Errorf("%w due to all null value KeyFields for MultiPerEntityPlanet", ErrTypeNotFound))
-			break
-		}
-		return "findManyMultiPerEntityPlanetByNames", nil
-	}
-	return "", fmt.Errorf("%w for MultiPerEntityPlanet due to %v", ErrTypeNotFound,
-		errors.Join(entityResolverErrs...).Error())
-}
-
 func entityResolverNameForMultiPlanetRequiresNested(ctx context.Context, rep EntityRepresentation) (string, error) {
 	// we collect errors because a later entity resolver may work fine
 	// when an entity has multiple keys
@@ -988,41 +904,6 @@ func entityResolverNameForMultiPlanetRequiresNested(ctx context.Context, rep Ent
 		return "findManyMultiPlanetRequiresNestedByNames", nil
 	}
 	return "", fmt.Errorf("%w for MultiPlanetRequiresNested due to %v", ErrTypeNotFound,
-		errors.Join(entityResolverErrs...).Error())
-}
-
-func entityResolverNameForPerEntityPlanet(ctx context.Context, rep EntityRepresentation) (string, error) {
-	// we collect errors because a later entity resolver may work fine
-	// when an entity has multiple keys
-	entityResolverErrs := []error{}
-	for {
-		var (
-			m   EntityRepresentation
-			val any
-			ok  bool
-		)
-		_ = val
-		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
-		allNull := true
-		m = rep
-		val, ok = m["name"]
-		if !ok {
-			entityResolverErrs = append(entityResolverErrs,
-				fmt.Errorf("%w due to missing Key Field \"name\" for PerEntityPlanet", ErrTypeNotFound))
-			break
-		}
-		if allNull {
-			allNull = val == nil
-		}
-		if allNull {
-			entityResolverErrs = append(entityResolverErrs,
-				fmt.Errorf("%w due to all null value KeyFields for PerEntityPlanet", ErrTypeNotFound))
-			break
-		}
-		return "findPerEntityPlanetByName", nil
-	}
-	return "", fmt.Errorf("%w for PerEntityPlanet due to %v", ErrTypeNotFound,
 		errors.Join(entityResolverErrs...).Error())
 }
 

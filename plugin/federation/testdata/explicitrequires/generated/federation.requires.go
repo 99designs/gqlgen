@@ -23,32 +23,12 @@ func (ec *executionContext) PopulateMultiHelloRequiresRequires(ctx context.Conte
 	return nil
 }
 
-// PopulateMultiPerEntityPlanetRequires is the requires populator for the MultiPerEntityPlanet entity.
-func (ec *executionContext) PopulateMultiPerEntityPlanetRequires(ctx context.Context, entity *MultiPerEntityPlanet, reps map[string]any) error {
-	diameter, err := reps["diameter"].(json.Number).Int64()
-	if err != nil {
-		return err
-	}
-	entity.Diameter = int(diameter)
-	return nil
-}
-
 // PopulateMultiPlanetRequiresNestedRequires is the requires populator for the MultiPlanetRequiresNested entity.
 func (ec *executionContext) PopulateMultiPlanetRequiresNestedRequires(ctx context.Context, entity *MultiPlanetRequiresNested, reps map[string]any) error {
 	entity.Name = reps["name"].(string)
 	entity.World = &World{
 		Foo: reps["world"].(map[string]any)["foo"].(string),
 	}
-	return nil
-}
-
-// PopulatePerEntityPlanetRequires is the requires populator for the PerEntityPlanet entity.
-func (ec *executionContext) PopulatePerEntityPlanetRequires(ctx context.Context, entity *PerEntityPlanet, reps map[string]any) error {
-	diameter, err := reps["diameter"].(json.Number).Int64()
-	if err != nil {
-		return err
-	}
-	entity.Diameter = int(diameter)
 	return nil
 }
 

@@ -45,8 +45,6 @@ type ComplexityRoot struct {
 		FindManyMultiHelloRequiresByNames          func(childComplexity int, reps []*model.MultiHelloRequiresByNamesInput) int
 		FindManyMultiHelloWithErrorByNames         func(childComplexity int, reps []*model.MultiHelloWithErrorByNamesInput) int
 		FindManyMultiPlanetRequiresNestedByNames   func(childComplexity int, reps []*model.MultiPlanetRequiresNestedByNamesInput) int
-		FindMultiPerEntityPlanet                   func(childComplexity int, reps []*model.MultiPerEntityPlanetRepresentation) int
-		FindPerEntityPlanet                        func(childComplexity int, rep model.PerEntityPlanetRepresentation) int
 		FindPlanetMultipleRequiresByName           func(childComplexity int, name string) int
 		FindPlanetRequiresByName                   func(childComplexity int, name string) int
 		FindPlanetRequiresNestedByName             func(childComplexity int, name string) int
@@ -91,22 +89,10 @@ type ComplexityRoot struct {
 		Name func(childComplexity int) int
 	}
 
-	MultiPerEntityPlanet struct {
-		Diameter func(childComplexity int) int
-		Name     func(childComplexity int) int
-		Size     func(childComplexity int) int
-	}
-
 	MultiPlanetRequiresNested struct {
 		Name  func(childComplexity int) int
 		Size  func(childComplexity int) int
 		World func(childComplexity int) int
-	}
-
-	PerEntityPlanet struct {
-		Diameter func(childComplexity int) int
-		Name     func(childComplexity int) int
-		Size     func(childComplexity int) int
 	}
 
 	PlanetMultipleRequires struct {
@@ -166,9 +152,7 @@ type EntityResolver interface {
 	FindManyMultiHelloMultipleRequiresByNames(ctx context.Context, reps []*model.MultiHelloMultipleRequiresByNamesInput) ([]*model.MultiHelloMultipleRequires, error)
 	FindManyMultiHelloRequiresByNames(ctx context.Context, reps []*model.MultiHelloRequiresByNamesInput) ([]*model.MultiHelloRequires, error)
 	FindManyMultiHelloWithErrorByNames(ctx context.Context, reps []*model.MultiHelloWithErrorByNamesInput) ([]*model.MultiHelloWithError, error)
-	FindMultiPerEntityPlanet(ctx context.Context, reps []*model.MultiPerEntityPlanetRepresentation) ([]*model.MultiPerEntityPlanet, error)
 	FindManyMultiPlanetRequiresNestedByNames(ctx context.Context, reps []*model.MultiPlanetRequiresNestedByNamesInput) ([]*model.MultiPlanetRequiresNested, error)
-	FindPerEntityPlanet(ctx context.Context, rep model.PerEntityPlanetRepresentation) (*model.PerEntityPlanet, error)
 	FindPlanetMultipleRequiresByName(ctx context.Context, name string) (*model.PlanetMultipleRequires, error)
 	FindPlanetRequiresByName(ctx context.Context, name string) (*model.PlanetRequires, error)
 	FindPlanetRequiresNestedByName(ctx context.Context, name string) (*model.PlanetRequiresNested, error)
@@ -284,28 +268,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.Entity.FindManyMultiPlanetRequiresNestedByNames(childComplexity, args["reps"].([]*model.MultiPlanetRequiresNestedByNamesInput)), true
-	case "Entity.findMultiPerEntityPlanet":
-		if e.ComplexityRoot.Entity.FindMultiPerEntityPlanet == nil {
-			break
-		}
-
-		args, err := field_Entity_findMultiPerEntityPlanet_args(ctx, ec, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Entity.FindMultiPerEntityPlanet(childComplexity, args["reps"].([]*model.MultiPerEntityPlanetRepresentation)), true
-	case "Entity.findPerEntityPlanet":
-		if e.ComplexityRoot.Entity.FindPerEntityPlanet == nil {
-			break
-		}
-
-		args, err := field_Entity_findPerEntityPlanet_args(ctx, ec, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.ComplexityRoot.Entity.FindPerEntityPlanet(childComplexity, args["rep"].(model.PerEntityPlanetRepresentation)), true
 	case "Entity.findPlanetMultipleRequiresByName":
 		if e.ComplexityRoot.Entity.FindPlanetMultipleRequiresByName == nil {
 			break
@@ -475,25 +437,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.MultiHelloWithError.Name(childComplexity), true
 
-	case "MultiPerEntityPlanet.diameter":
-		if e.ComplexityRoot.MultiPerEntityPlanet.Diameter == nil {
-			break
-		}
-
-		return e.ComplexityRoot.MultiPerEntityPlanet.Diameter(childComplexity), true
-	case "MultiPerEntityPlanet.name":
-		if e.ComplexityRoot.MultiPerEntityPlanet.Name == nil {
-			break
-		}
-
-		return e.ComplexityRoot.MultiPerEntityPlanet.Name(childComplexity), true
-	case "MultiPerEntityPlanet.size":
-		if e.ComplexityRoot.MultiPerEntityPlanet.Size == nil {
-			break
-		}
-
-		return e.ComplexityRoot.MultiPerEntityPlanet.Size(childComplexity), true
-
 	case "MultiPlanetRequiresNested.name":
 		if e.ComplexityRoot.MultiPlanetRequiresNested.Name == nil {
 			break
@@ -512,25 +455,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.ComplexityRoot.MultiPlanetRequiresNested.World(childComplexity), true
-
-	case "PerEntityPlanet.diameter":
-		if e.ComplexityRoot.PerEntityPlanet.Diameter == nil {
-			break
-		}
-
-		return e.ComplexityRoot.PerEntityPlanet.Diameter(childComplexity), true
-	case "PerEntityPlanet.name":
-		if e.ComplexityRoot.PerEntityPlanet.Name == nil {
-			break
-		}
-
-		return e.ComplexityRoot.PerEntityPlanet.Name(childComplexity), true
-	case "PerEntityPlanet.size":
-		if e.ComplexityRoot.PerEntityPlanet.Size == nil {
-			break
-		}
-
-		return e.ComplexityRoot.PerEntityPlanet.Size(childComplexity), true
 
 	case "PlanetMultipleRequires.density":
 		if e.ComplexityRoot.PlanetMultipleRequires.Density == nil {
@@ -678,9 +602,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 			graphql.NewInputUnmarshaler("MultiHelloMultipleRequiresByNamesInput", graphql.BindUnmarshaler(ec, unmarshalInputMultiHelloMultipleRequiresByNamesInput)),
 			graphql.NewInputUnmarshaler("MultiHelloRequiresByNamesInput", graphql.BindUnmarshaler(ec, unmarshalInputMultiHelloRequiresByNamesInput)),
 			graphql.NewInputUnmarshaler("MultiHelloWithErrorByNamesInput", graphql.BindUnmarshaler(ec, unmarshalInputMultiHelloWithErrorByNamesInput)),
-			graphql.NewInputUnmarshaler("MultiPerEntityPlanetRepresentation", graphql.BindUnmarshaler(ec, unmarshalInputMultiPerEntityPlanetRepresentation)),
 			graphql.NewInputUnmarshaler("MultiPlanetRequiresNestedByNamesInput", graphql.BindUnmarshaler(ec, unmarshalInputMultiPlanetRequiresNestedByNamesInput)),
-			graphql.NewInputUnmarshaler("PerEntityPlanetRepresentation", graphql.BindUnmarshaler(ec, unmarshalInputPerEntityPlanetRepresentation)),
 		)
 	}
 	first := true
@@ -742,7 +664,7 @@ func newExecutionContext(
 }
 
 var sources = []*ast.Source{
-	{Name: "../schema.graphql", Input: `directive @entityResolver(multi: Boolean, perEntity: Boolean) on OBJECT
+	{Name: "../schema.graphql", Input: `directive @entityResolver(multi: Boolean) on OBJECT
 
 type Hello @key(fields: "name") {
     name: String!
@@ -819,18 +741,6 @@ type MultiHelloMultipleRequires @key(fields: "name") @entityResolver(multi: true
     key2: String! @external
     key3: String! @requires(fields: "key1 key2")
 }
-
-type PerEntityPlanet @key(fields: "name") @entityResolver(perEntity: true) {
-    name: String!
-    diameter: Int! @external
-    size: Int! @requires(fields: "diameter")
-}
-
-type MultiPerEntityPlanet @key(fields: "name") @entityResolver(perEntity: true, multi: true) {
-    name: String!
-    diameter: Int! @external
-    size: Int! @requires(fields: "diameter")
-}
 `, BuiltIn: false},
 	{Name: "../../../federation/directives.graphql", Input: `
 	directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE
@@ -844,15 +754,7 @@ type MultiPerEntityPlanet @key(fields: "name") @entityResolver(perEntity: true, 
 `, BuiltIn: true},
 	{Name: "../../../federation/entity.graphql", Input: `
 # a union of all types that use the @key directive
-union _Entity = Hello | HelloMultiSingleKeys | HelloWithErrors | MultiHello | MultiHelloMultipleRequires | MultiHelloRequires | MultiHelloWithError | MultiPerEntityPlanet | MultiPlanetRequiresNested | PerEntityPlanet | PlanetMultipleRequires | PlanetRequires | PlanetRequiresNested | World | WorldName | WorldWithMultipleKeys
-
-input MultiPerEntityPlanetRepresentation {
-	name: String
-}
-
-input PerEntityPlanetRepresentation {
-	name: String
-}
+union _Entity = Hello | HelloMultiSingleKeys | HelloWithErrors | MultiHello | MultiHelloMultipleRequires | MultiHelloRequires | MultiHelloWithError | MultiPlanetRequiresNested | PlanetMultipleRequires | PlanetRequires | PlanetRequiresNested | World | WorldName | WorldWithMultipleKeys
 
 input MultiHelloByNamesInput {
 	Name: String!
@@ -883,9 +785,7 @@ type Entity {
 	findManyMultiHelloMultipleRequiresByNames(reps: [MultiHelloMultipleRequiresByNamesInput]!): [MultiHelloMultipleRequires]
 	findManyMultiHelloRequiresByNames(reps: [MultiHelloRequiresByNamesInput]!): [MultiHelloRequires]
 	findManyMultiHelloWithErrorByNames(reps: [MultiHelloWithErrorByNamesInput]!): [MultiHelloWithError]
-	findMultiPerEntityPlanet(reps: [MultiPerEntityPlanetRepresentation!]!): [MultiPerEntityPlanet]
 	findManyMultiPlanetRequiresNestedByNames(reps: [MultiPlanetRequiresNestedByNamesInput]!): [MultiPlanetRequiresNested]
-	findPerEntityPlanet(rep: PerEntityPlanetRepresentation!): PerEntityPlanet!
 	findPlanetMultipleRequiresByName(name: String!,): PlanetMultipleRequires!
 	findPlanetRequiresByName(name: String!,): PlanetRequires!
 	findPlanetRequiresNestedByName(name: String!,): PlanetRequiresNested!
@@ -981,18 +881,6 @@ func childFields_MultiHelloWithError(ctx context.Context, ec *executionContext, 
 	return nil, fmt.Errorf("no field named %q was found under type MultiHelloWithError", field.Name)
 }
 
-func childFields_MultiPerEntityPlanet(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
-	switch field.Name {
-	case "name":
-		return fieldContext_MultiPerEntityPlanet_name(ctx, ec, field)
-	case "diameter":
-		return fieldContext_MultiPerEntityPlanet_diameter(ctx, ec, field)
-	case "size":
-		return fieldContext_MultiPerEntityPlanet_size(ctx, ec, field)
-	}
-	return nil, fmt.Errorf("no field named %q was found under type MultiPerEntityPlanet", field.Name)
-}
-
 func childFields_MultiPlanetRequiresNested(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
@@ -1003,18 +891,6 @@ func childFields_MultiPlanetRequiresNested(ctx context.Context, ec *executionCon
 		return fieldContext_MultiPlanetRequiresNested_size(ctx, ec, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type MultiPlanetRequiresNested", field.Name)
-}
-
-func childFields_PerEntityPlanet(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
-	switch field.Name {
-	case "name":
-		return fieldContext_PerEntityPlanet_name(ctx, ec, field)
-	case "diameter":
-		return fieldContext_PerEntityPlanet_diameter(ctx, ec, field)
-	case "size":
-		return fieldContext_PerEntityPlanet_size(ctx, ec, field)
-	}
-	return nil, fmt.Errorf("no field named %q was found under type PerEntityPlanet", field.Name)
 }
 
 func childFields_PlanetMultipleRequires(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
@@ -1328,34 +1204,6 @@ func field_Entity_findManyMultiPlanetRequiresNestedByNames_args(ctx context.Cont
 		return nil, err
 	}
 	args["reps"] = arg0
-	return args, nil
-}
-
-func field_Entity_findMultiPerEntityPlanet_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "reps",
-		func(ctx context.Context, v any) ([]*model.MultiPerEntityPlanetRepresentation, error) {
-			return unmarshalNMultiPerEntityPlanetRepresentation2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiPerEntityPlanetRepresentationᚄ(ctx, ec, v)
-		})
-	if err != nil {
-		return nil, err
-	}
-	args["reps"] = arg0
-	return args, nil
-}
-
-func field_Entity_findPerEntityPlanet_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "rep",
-		func(ctx context.Context, v any) (model.PerEntityPlanetRepresentation, error) {
-			return unmarshalNPerEntityPlanetRepresentation2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐPerEntityPlanetRepresentation(ctx, ec, v)
-		})
-	if err != nil {
-		return nil, err
-	}
-	args["rep"] = arg0
 	return args, nil
 }
 
@@ -1869,50 +1717,6 @@ func fieldContext_Entity_findManyMultiHelloWithErrorByNames(ctx context.Context,
 	return fc, nil
 }
 
-func _Entity_findMultiPerEntityPlanet(ctx context.Context, ec *executionContext, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContext_Entity_findMultiPerEntityPlanet(ctx, ec, field)
-		},
-		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Entity().FindMultiPerEntityPlanet(ctx, fc.Args["reps"].([]*model.MultiPerEntityPlanetRepresentation))
-		},
-		nil,
-		func(ctx context.Context, selections ast.SelectionSet, v []*model.MultiPerEntityPlanet) graphql.Marshaler {
-			return marshalOMultiPerEntityPlanet2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiPerEntityPlanet(ctx, ec, selections, v)
-		},
-		true,
-		false,
-	)
-}
-func fieldContext_Entity_findMultiPerEntityPlanet(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Entity",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return childFields_MultiPerEntityPlanet(ctx, ec, field)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = field_Entity_findMultiPerEntityPlanet_args(ctx, ec, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
 func _Entity_findManyMultiPlanetRequiresNestedByNames(ctx context.Context, ec *executionContext, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1951,50 +1755,6 @@ func fieldContext_Entity_findManyMultiPlanetRequiresNestedByNames(ctx context.Co
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = field_Entity_findManyMultiPlanetRequiresNestedByNames_args(ctx, ec, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func _Entity_findPerEntityPlanet(ctx context.Context, ec *executionContext, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContext_Entity_findPerEntityPlanet(ctx, ec, field)
-		},
-		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.Resolvers.Entity().FindPerEntityPlanet(ctx, fc.Args["rep"].(model.PerEntityPlanetRepresentation))
-		},
-		nil,
-		func(ctx context.Context, selections ast.SelectionSet, v *model.PerEntityPlanet) graphql.Marshaler {
-			return marshalNPerEntityPlanet2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐPerEntityPlanet(ctx, ec, selections, v)
-		},
-		true,
-		true,
-	)
-}
-func fieldContext_Entity_findPerEntityPlanet(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Entity",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return childFields_PerEntityPlanet(ctx, ec, field)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = field_Entity_findPerEntityPlanet_args(ctx, ec, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -2631,75 +2391,6 @@ func fieldContext_MultiHelloWithError_name(_ context.Context, ec *executionConte
 	return graphql.NewScalarFieldContext("MultiHelloWithError", field, false, false, "String")
 }
 
-func _MultiPerEntityPlanet_name(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.MultiPerEntityPlanet) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContext_MultiPerEntityPlanet_name(ctx, ec, field)
-		},
-		func(ctx context.Context) (any, error) {
-			return obj.Name, nil
-		},
-		nil,
-		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
-			return marshalNString2string(ctx, ec, selections, v)
-		},
-		true,
-		true,
-	)
-}
-func fieldContext_MultiPerEntityPlanet_name(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("MultiPerEntityPlanet", field, false, false, "String")
-}
-
-func _MultiPerEntityPlanet_diameter(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.MultiPerEntityPlanet) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContext_MultiPerEntityPlanet_diameter(ctx, ec, field)
-		},
-		func(ctx context.Context) (any, error) {
-			return obj.Diameter, nil
-		},
-		nil,
-		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
-			return marshalNInt2int(ctx, ec, selections, v)
-		},
-		true,
-		true,
-	)
-}
-func fieldContext_MultiPerEntityPlanet_diameter(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("MultiPerEntityPlanet", field, false, false, "Int")
-}
-
-func _MultiPerEntityPlanet_size(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.MultiPerEntityPlanet) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContext_MultiPerEntityPlanet_size(ctx, ec, field)
-		},
-		func(ctx context.Context) (any, error) {
-			return obj.Size, nil
-		},
-		nil,
-		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
-			return marshalNInt2int(ctx, ec, selections, v)
-		},
-		true,
-		true,
-	)
-}
-func fieldContext_MultiPerEntityPlanet_size(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("MultiPerEntityPlanet", field, false, false, "Int")
-}
-
 func _MultiPlanetRequiresNested_name(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.MultiPlanetRequiresNested) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -2776,75 +2467,6 @@ func _MultiPlanetRequiresNested_size(ctx context.Context, ec *executionContext, 
 }
 func fieldContext_MultiPlanetRequiresNested_size(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("MultiPlanetRequiresNested", field, false, false, "Int")
-}
-
-func _PerEntityPlanet_name(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.PerEntityPlanet) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContext_PerEntityPlanet_name(ctx, ec, field)
-		},
-		func(ctx context.Context) (any, error) {
-			return obj.Name, nil
-		},
-		nil,
-		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
-			return marshalNString2string(ctx, ec, selections, v)
-		},
-		true,
-		true,
-	)
-}
-func fieldContext_PerEntityPlanet_name(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("PerEntityPlanet", field, false, false, "String")
-}
-
-func _PerEntityPlanet_diameter(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.PerEntityPlanet) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContext_PerEntityPlanet_diameter(ctx, ec, field)
-		},
-		func(ctx context.Context) (any, error) {
-			return obj.Diameter, nil
-		},
-		nil,
-		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
-			return marshalNInt2int(ctx, ec, selections, v)
-		},
-		true,
-		true,
-	)
-}
-func fieldContext_PerEntityPlanet_diameter(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("PerEntityPlanet", field, false, false, "Int")
-}
-
-func _PerEntityPlanet_size(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.PerEntityPlanet) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContext_PerEntityPlanet_size(ctx, ec, field)
-		},
-		func(ctx context.Context) (any, error) {
-			return obj.Size, nil
-		},
-		nil,
-		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
-			return marshalNInt2int(ctx, ec, selections, v)
-		},
-		true,
-		true,
-	)
-}
-func fieldContext_PerEntityPlanet_size(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("PerEntityPlanet", field, false, false, "Int")
 }
 
 func _PlanetMultipleRequires_name(ctx context.Context, ec *executionContext, field graphql.CollectedField, obj *model.PlanetMultipleRequires) (ret graphql.Marshaler) {
@@ -4667,48 +4289,6 @@ func UnmarshalMultiHelloWithErrorByNamesInput(ctx context.Context, raw any) (mod
 	return out, err
 }
 
-func unmarshalInputMultiPerEntityPlanetRepresentation(ctx context.Context, ec *executionContext, obj any) (model.MultiPerEntityPlanetRepresentation, error) {
-	var it model.MultiPerEntityPlanetRepresentation
-	if obj == nil {
-		return it, nil
-	}
-
-	asMap := map[string]any{}
-	for k, v := range obj.(map[string]any) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"name"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "name":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			data, err := unmarshalOString2ᚖstring(ctx, ec, v)
-			if err != nil {
-				return it, err
-			}
-			it.Name = data
-		}
-	}
-	return it, nil
-}
-
-// UnmarshalMultiPerEntityPlanetRepresentation unmarshals raw into the MultiPerEntityPlanetRepresentation input type, using the
-// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
-// object that was not passed as a field argument.
-//
-// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
-// and the returned error says so.
-func UnmarshalMultiPerEntityPlanetRepresentation(ctx context.Context, raw any) (model.MultiPerEntityPlanetRepresentation, error) {
-	var out model.MultiPerEntityPlanetRepresentation
-	err := graphql.UnmarshalNamedInputFromContext(ctx, "MultiPerEntityPlanetRepresentation", raw, &out)
-	return out, err
-}
-
 func unmarshalInputMultiPlanetRequiresNestedByNamesInput(ctx context.Context, ec *executionContext, obj any) (model.MultiPlanetRequiresNestedByNamesInput, error) {
 	var it model.MultiPlanetRequiresNestedByNamesInput
 	if obj == nil {
@@ -4748,48 +4328,6 @@ func unmarshalInputMultiPlanetRequiresNestedByNamesInput(ctx context.Context, ec
 func UnmarshalMultiPlanetRequiresNestedByNamesInput(ctx context.Context, raw any) (model.MultiPlanetRequiresNestedByNamesInput, error) {
 	var out model.MultiPlanetRequiresNestedByNamesInput
 	err := graphql.UnmarshalNamedInputFromContext(ctx, "MultiPlanetRequiresNestedByNamesInput", raw, &out)
-	return out, err
-}
-
-func unmarshalInputPerEntityPlanetRepresentation(ctx context.Context, ec *executionContext, obj any) (model.PerEntityPlanetRepresentation, error) {
-	var it model.PerEntityPlanetRepresentation
-	if obj == nil {
-		return it, nil
-	}
-
-	asMap := map[string]any{}
-	for k, v := range obj.(map[string]any) {
-		asMap[k] = v
-	}
-
-	fieldsInOrder := [...]string{"name"}
-	for _, k := range fieldsInOrder {
-		v, ok := asMap[k]
-		if !ok {
-			continue
-		}
-		switch k {
-		case "name":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
-			data, err := unmarshalOString2ᚖstring(ctx, ec, v)
-			if err != nil {
-				return it, err
-			}
-			it.Name = data
-		}
-	}
-	return it, nil
-}
-
-// UnmarshalPerEntityPlanetRepresentation unmarshals raw into the PerEntityPlanetRepresentation input type, using the
-// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
-// object that was not passed as a field argument.
-//
-// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
-// and the returned error says so.
-func UnmarshalPerEntityPlanetRepresentation(ctx context.Context, raw any) (model.PerEntityPlanetRepresentation, error) {
-	var out model.PerEntityPlanetRepresentation
-	err := graphql.UnmarshalNamedInputFromContext(ctx, "PerEntityPlanetRepresentation", raw, &out)
 	return out, err
 }
 
@@ -4843,13 +4381,6 @@ func __Entity(ctx context.Context, ec *executionContext, sel ast.SelectionSet, o
 			return graphql.Null
 		}
 		return _PlanetMultipleRequires(ctx, ec, sel, obj)
-	case model.PerEntityPlanet:
-		return _PerEntityPlanet(ctx, ec, sel, &obj)
-	case *model.PerEntityPlanet:
-		if obj == nil {
-			return graphql.Null
-		}
-		return _PerEntityPlanet(ctx, ec, sel, obj)
 	case model.MultiPlanetRequiresNested:
 		return _MultiPlanetRequiresNested(ctx, ec, sel, &obj)
 	case *model.MultiPlanetRequiresNested:
@@ -4857,13 +4388,6 @@ func __Entity(ctx context.Context, ec *executionContext, sel ast.SelectionSet, o
 			return graphql.Null
 		}
 		return _MultiPlanetRequiresNested(ctx, ec, sel, obj)
-	case model.MultiPerEntityPlanet:
-		return _MultiPerEntityPlanet(ctx, ec, sel, &obj)
-	case *model.MultiPerEntityPlanet:
-		if obj == nil {
-			return graphql.Null
-		}
-		return _MultiPerEntityPlanet(ctx, ec, sel, obj)
 	case model.MultiHelloWithError:
 		return _MultiHelloWithError(ctx, ec, sel, &obj)
 	case *model.MultiHelloWithError:
@@ -4987,23 +4511,11 @@ func _Entity(ctx context.Context, ec *executionContext, sel ast.SelectionSet) gr
 				func(ctx context.Context) graphql.Marshaler {
 					return _Entity_findManyMultiHelloWithErrorByNames(ctx, ec, field)
 				})
-		case "findMultiPerEntityPlanet":
-			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
-				true, false,
-				func(ctx context.Context) graphql.Marshaler {
-					return _Entity_findMultiPerEntityPlanet(ctx, ec, field)
-				})
 		case "findManyMultiPlanetRequiresNestedByNames":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
 				true, false,
 				func(ctx context.Context) graphql.Marshaler {
 					return _Entity_findManyMultiPlanetRequiresNestedByNames(ctx, ec, field)
-				})
-		case "findPerEntityPlanet":
-			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
-				true, true,
-				func(ctx context.Context) graphql.Marshaler {
-					return _Entity_findPerEntityPlanet(ctx, ec, field)
 				})
 		case "findPlanetMultipleRequiresByName":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
@@ -5330,49 +4842,6 @@ func _MultiHelloWithError(ctx context.Context, ec *executionContext, sel ast.Sel
 	return out
 }
 
-var multiPerEntityPlanetImplementors = []string{"MultiPerEntityPlanet", "_Entity"}
-
-func _MultiPerEntityPlanet(ctx context.Context, ec *executionContext, sel ast.SelectionSet, obj *model.MultiPerEntityPlanet) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, multiPerEntityPlanetImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := graphql.NewDeferredGroup(ctx)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("MultiPerEntityPlanet")
-		case "name":
-			out.Values[i] = _MultiPerEntityPlanet_name(ctx, ec, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "diameter":
-			out.Values[i] = _MultiPerEntityPlanet_diameter(ctx, ec, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "size":
-			out.Values[i] = _MultiPerEntityPlanet_size(ctx, ec, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	if n := len(deferred.Defers); n > 0 {
-		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
-		ec.ProcessDeferredGroup(deferred)
-	}
-
-	return out
-}
-
 var multiPlanetRequiresNestedImplementors = []string{"MultiPlanetRequiresNested", "_Entity"}
 
 func _MultiPlanetRequiresNested(ctx context.Context, ec *executionContext, sel ast.SelectionSet, obj *model.MultiPlanetRequiresNested) graphql.Marshaler {
@@ -5396,49 +4865,6 @@ func _MultiPlanetRequiresNested(ctx context.Context, ec *executionContext, sel a
 			}
 		case "size":
 			out.Values[i] = _MultiPlanetRequiresNested_size(ctx, ec, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	out.Dispatch(ctx)
-	if out.Invalids > 0 {
-		return graphql.Null
-	}
-
-	if n := len(deferred.Defers); n > 0 {
-		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
-		ec.ProcessDeferredGroup(deferred)
-	}
-
-	return out
-}
-
-var perEntityPlanetImplementors = []string{"PerEntityPlanet", "_Entity"}
-
-func _PerEntityPlanet(ctx context.Context, ec *executionContext, sel ast.SelectionSet, obj *model.PerEntityPlanet) graphql.Marshaler {
-	fields := graphql.CollectFields(ec.OperationContext, sel, perEntityPlanetImplementors)
-
-	out := graphql.NewFieldSet(fields)
-	deferred := graphql.NewDeferredGroup(ctx)
-	for i, field := range fields {
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("PerEntityPlanet")
-		case "name":
-			out.Values[i] = _PerEntityPlanet_name(ctx, ec, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "diameter":
-			out.Values[i] = _PerEntityPlanet_diameter(ctx, ec, field, obj)
-			if out.Values[i] == graphql.Null {
-				out.Invalids++
-			}
-		case "size":
-			out.Values[i] = _PerEntityPlanet_size(ctx, ec, field, obj)
 			if out.Values[i] == graphql.Null {
 				out.Invalids++
 			}
@@ -6277,25 +5703,6 @@ func unmarshalNMultiHelloWithErrorByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋ
 	return res, nil
 }
 
-func unmarshalNMultiPerEntityPlanetRepresentation2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiPerEntityPlanetRepresentationᚄ(ctx context.Context, ec *executionContext, v any) ([]*model.MultiPerEntityPlanetRepresentation, error) {
-	vSlice := graphql.CoerceList(v)
-	var err error
-	res := make([]*model.MultiPerEntityPlanetRepresentation, len(vSlice))
-	for i := range vSlice {
-		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
-		res[i], err = unmarshalNMultiPerEntityPlanetRepresentation2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiPerEntityPlanetRepresentation(ctx, ec, vSlice[i])
-		if err != nil {
-			return nil, err
-		}
-	}
-	return res, nil
-}
-
-func unmarshalNMultiPerEntityPlanetRepresentation2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiPerEntityPlanetRepresentation(ctx context.Context, ec *executionContext, v any) (*model.MultiPerEntityPlanetRepresentation, error) {
-	res, err := unmarshalInputMultiPerEntityPlanetRepresentation(ctx, ec, v)
-	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
 func unmarshalNMultiPlanetRequiresNestedByNamesInput2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiPlanetRequiresNestedByNamesInput(ctx context.Context, ec *executionContext, v any) ([]*model.MultiPlanetRequiresNestedByNamesInput, error) {
 	vSlice := graphql.CoerceList(v)
 	var err error
@@ -6308,19 +5715,6 @@ func unmarshalNMultiPlanetRequiresNestedByNamesInput2ᚕᚖgithubᚗcomᚋ99desi
 		}
 	}
 	return res, nil
-}
-
-func marshalNPerEntityPlanet2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐPerEntityPlanet(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v *model.PerEntityPlanet) graphql.Marshaler {
-	if v == nil {
-		graphql.AddInvalidNullError(ctx, "PerEntityPlanet!")
-		return graphql.Null
-	}
-	return _PerEntityPlanet(ctx, ec, sel, v)
-}
-
-func unmarshalNPerEntityPlanetRepresentation2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐPerEntityPlanetRepresentation(ctx context.Context, ec *executionContext, v any) (model.PerEntityPlanetRepresentation, error) {
-	res, err := unmarshalInputPerEntityPlanetRepresentation(ctx, ec, v)
-	return res, graphql.ErrorOnPath(ctx, err)
 }
 
 func marshalNPlanetMultipleRequires2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐPlanetMultipleRequires(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v *model.PlanetMultipleRequires) graphql.Marshaler {
@@ -6741,26 +6135,6 @@ func unmarshalOMultiHelloWithErrorByNamesInput2ᚖgithubᚗcomᚋ99designsᚋgql
 	}
 	res, err := unmarshalInputMultiHelloWithErrorByNamesInput(ctx, ec, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
-}
-
-func marshalOMultiPerEntityPlanet2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiPerEntityPlanet(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v []*model.MultiPerEntityPlanet) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
-		fc := graphql.GetFieldContext(ctx)
-		fc.Result = &v[i]
-		return marshalOMultiPerEntityPlanet2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiPerEntityPlanet(ctx, ec, sel, v[i])
-	})
-
-	return ret
-}
-
-func marshalOMultiPerEntityPlanet2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiPerEntityPlanet(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v *model.MultiPerEntityPlanet) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return _MultiPerEntityPlanet(ctx, ec, sel, v)
 }
 
 func marshalOMultiPlanetRequiresNested2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋusefunctionsyntaxforexecutioncontextᚋgeneratedᚋmodelᚐMultiPlanetRequiresNested(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v []*model.MultiPlanetRequiresNested) graphql.Marshaler {

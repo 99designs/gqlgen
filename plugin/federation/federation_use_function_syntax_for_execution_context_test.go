@@ -51,27 +51,4 @@ func TestFederationWithUseFunctionSyntaxForExecutionContext(t *testing.T) {
 		require.Equal(t, "first name - 1", resp.Entities[0].Name)
 		require.Equal(t, "first name - 2", resp.Entities[1].Name)
 	})
-
-	t.Run("per-entity resolvers then @requires", func(t *testing.T) {
-		type planet struct {
-			Name     string `json:"name"`
-			Diameter int    `json:"diameter"`
-		}
-		for _, typeName := range []string{"PerEntityPlanet", "MultiPerEntityPlanet"} {
-			t.Run(typeName, func(t *testing.T) {
-				var resp struct {
-					Entities []planet `json:"_entities"`
-				}
-
-				err := c.Post(entityQuery([]string{typeName + " {name, diameter}"}), &resp,
-					client.Var("representations", []map[string]any{
-						{"__typename": typeName, "name": "earth", "diameter": 12},
-						{"__typename": typeName, "name": "mars", "diameter": 10},
-					}))
-
-				require.NoError(t, err)
-				require.Equal(t, []planet{{"earth", 12}, {"mars", 10}}, resp.Entities)
-			})
-		}
-	})
 }

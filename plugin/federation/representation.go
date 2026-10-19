@@ -2,6 +2,7 @@ package federation
 
 import (
 	"fmt"
+	"maps"
 	"slices"
 	"strings"
 
@@ -17,9 +18,14 @@ import (
 // "owner { id }" gets its own representation of the nested type, shared by
 // every per-entity entity that selects into that type.
 type representation struct {
-	Name   string // GraphQL input name: owner type + "Representation"
+	// Name is the GraphQL input name: the owner's representation_names entry,
+	// else owner type + "Representation".
+	Name   string
 	Owner  string // the type whose fields this mirrors
 	Fields []*representationField
+	// Root marks an entity's own representation, the resolver's argument,
+	// which reports the key that matched.
+	Root bool
 }
 
 type representationField struct {
@@ -30,8 +36,22 @@ type representationField struct {
 	Type   string // SDL type: the owner's field type made nullable
 }
 
-func representationName(typeName string) string {
-	return typeName + "Representation"
+// representationNamesSetting is the gqlgen.yml setting that names
+// representations, quoted in errors.
+const representationNamesSetting = "federation.representation_names"
+
+// rootRepresentation returns the representation that is entity's resolver
+// argument.
+//
+// Requires: representations come from buildRepresentations, with entity
+// per-entity.
+func rootRepresentation(representations []*representation, entity *Entity) *representation {
+	for _, r := range representations {
+		if r.Root && r.Owner == entity.Name {
+			return r
+		}
+	}
+	return nil
 }
 
 // SDL renders the representation as an input object definition.
@@ -47,8 +67,7 @@ func (r *representation) SDL() string {
 
 // perEntityResolverSDL renders the entity's single resolver field: one
 // representation for a single resolver, a list of them for a batch resolver.
-func perEntityResolverSDL(e *Entity) string {
-	rep := representationName(e.Name)
+func perEntityResolverSDL(e *Entity, rep string) string {
 	if e.Multi {
 		return fmt.Sprintf("\t%s(reps: [%s!]!): [%s]", e.PerEntityResolverName(), rep, e.Name)
 	}
@@ -58,37 +77,41 @@ func perEntityResolverSDL(e *Entity) string {
 // buildRepresentations derives the representation inputs for every per-entity
 // entity from its @key fields.
 //
-// Requires: entities are sorted and their key fields exist in schema.
-// Ensures:  one representation per per-entity entity and per type its keys
-// select into, in first-use order, each listing the selected fields once in
-// key order with their Go names; or an error if a representation's Go name is
-// a schema type's. Two fields sharing a Go name are left to modelgen, which
-// checks every generated struct after its hooks have run.
+// Requires: entities are sorted and their key fields exist in schema; names
+// is federation.representation_names.
+// Ensures:  one representation per per-entity entity (Root) and per type its
+// keys select into, in first-use order, named from names or by default, each
+// listing the selected fields once in key order with their Go names; or an
+// error if a representation's Go name is a schema type's or another
+// representation's, or names has an entry for no representation. Two fields
+// sharing a Go name are left to modelgen, which checks every generated struct
+// after its hooks have run.
 func buildRepresentations(
 	entities []*Entity,
 	schema *ast.Schema,
 	models config.TypeMap,
+	names map[string]string,
 ) ([]*representation, error) {
 	b := representationBuilder{
 		schema:  schema,
 		models:  models,
+		names:   names,
 		goTypes: goTypeNames(schema),
-		byName:  make(map[string]*representation),
+		byGo:    make(map[string]*representation),
+		byOwner: make(map[string]*representation),
 	}
 	for _, entity := range entities {
 		if !entity.PerEntity {
 			continue
 		}
-		root, err := b.representationOf(entity.Def)
-		if err != nil {
+		if err := b.addEntity(entity); err != nil {
 			return nil, fmt.Errorf("entity %q: %w", entity.Name, err)
 		}
-		for _, resolver := range entity.Resolvers {
-			for _, keyField := range resolver.KeyFields {
-				if err := b.add(root, entity.Def, keyField.Field); err != nil {
-					return nil, fmt.Errorf("entity %q: %w", entity.Name, err)
-				}
-			}
+	}
+	for _, owner := range slices.Sorted(maps.Keys(names)) {
+		if b.byOwner[owner] == nil {
+			return nil, fmt.Errorf(
+				"%s: no representation is generated for %q", representationNamesSetting, owner)
 		}
 	}
 	return b.ordered, nil
@@ -97,24 +120,60 @@ func buildRepresentations(
 type representationBuilder struct {
 	schema  *ast.Schema
 	models  config.TypeMap
+	names   map[string]string // representation_names: owner to name
 	goTypes map[string]string // Go name to schema type name
-	byName  map[string]*representation
+	byGo    map[string]*representation
+	byOwner map[string]*representation
 	ordered []*representation
 }
 
+// addEntity records the representations of entity's @key fields.
+func (b *representationBuilder) addEntity(entity *Entity) error {
+	root, err := b.representationOf(entity.Def)
+	if err != nil {
+		return err
+	}
+	root.Root = true
+	for _, resolver := range entity.Resolvers {
+		for _, keyField := range resolver.KeyFields {
+			if err := b.add(root, entity.Def, keyField.Field); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// representationOf returns def's representation, creating it on first use.
 func (b *representationBuilder) representationOf(def *ast.Definition) (*representation, error) {
-	name := representationName(def.Name)
-	if r, ok := b.byName[name]; ok {
+	if r, ok := b.byOwner[def.Name]; ok {
 		return r, nil
 	}
-	if existing, ok := b.goTypes[templates.ToGo(name)]; ok {
+	name, pinned := b.names[def.Name]
+	if !pinned {
+		name = def.Name + "Representation"
+	}
+	goName := templates.ToGo(name)
+	if existing, ok := b.goTypes[goName]; ok {
+		if pinned {
+			return nil, fmt.Errorf(
+				"type %q has the same Go name as representation %s, named in %s; "+
+					"choose another name", existing, name, representationNamesSetting)
+		}
 		return nil, fmt.Errorf(
-			"type %q has the same Go name as representation %s; rename %q",
-			existing, name, existing,
-		)
+			"type %q has the same Go name as representation %s; rename %q, "+
+				"or name the representation of %q in %s",
+			existing, name, existing, def.Name, representationNamesSetting)
+	}
+	if other, ok := b.byGo[goName]; ok {
+		return nil, fmt.Errorf(
+			"the representations of %q and %q both have Go name %s; "+
+				"give one another name in %s",
+			other.Owner, def.Name, goName, representationNamesSetting)
 	}
 	r := &representation{Name: name, Owner: def.Name}
-	b.byName[name] = r
+	b.byGo[goName] = r
+	b.byOwner[def.Name] = r
 	b.ordered = append(b.ordered, r)
 	return r, nil
 }
@@ -129,9 +188,10 @@ func (b *representationBuilder) add(r *representation, def *ast.Definition, path
 	if len(path) > 1 {
 		if fieldType.Elem != nil {
 			return fmt.Errorf(
-				"key path through list field %s.%s is not supported",
+				"key path through list field %s.%s is not supported with the %s option",
 				def.Name,
 				fieldDef.Name,
+				optionEntityResolverPerEntity,
 			)
 		}
 		nestedDef := b.schema.Types[fieldType.NamedType]
@@ -162,9 +222,18 @@ func (b *representationBuilder) add(r *representation, def *ast.Definition, path
 	return nil
 }
 
-// setRepresentationFieldNames records each representation field's Go name in
-// models, so the generated struct has the names buildRepresentations chose.
-func setRepresentationFieldNames(representations []*representation, models config.TypeMap) {
+// matchedKeyField is the Go field of a root representation that reports the
+// @key the representation matched; federation.gotpl sets it.
+const matchedKeyField = "MatchedKey"
+
+// configureRepresentationModels records in models what modelgen needs to
+// generate each representation: its fields' Go names, as
+// buildRepresentations chose them, and, on a root representation, the
+// matchedKeyField extra field alongside any extraFields of the user's.
+//
+// Ensures: nil, or an error if the user's extraFields already define
+// matchedKeyField on a root representation.
+func configureRepresentationModels(representations []*representation, models config.TypeMap) error {
 	for _, r := range representations {
 		entry := models[r.Name]
 		if entry.Fields == nil {
@@ -175,6 +244,21 @@ func setRepresentationFieldNames(representations []*representation, models confi
 			fieldEntry.FieldName = field.GoName
 			entry.Fields[field.Name] = fieldEntry
 		}
+		if r.Root {
+			if _, taken := entry.ExtraFields[matchedKeyField]; taken {
+				return fmt.Errorf(
+					"models.%s.extraFields.%s is reserved: gqlgen sets it to the @key "+
+						"the representation matched", r.Name, matchedKeyField)
+			}
+			if entry.ExtraFields == nil {
+				entry.ExtraFields = make(map[string]config.ModelExtraField, 1)
+			}
+			entry.ExtraFields[matchedKeyField] = config.ModelExtraField{
+				Type:        "string",
+				Description: "The @key fields this representation matched, as gqlgen prints them.",
+			}
+		}
 		models[r.Name] = entry
 	}
+	return nil
 }

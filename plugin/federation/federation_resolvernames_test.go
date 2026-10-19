@@ -50,7 +50,7 @@ func TestEntityResolverNames(t *testing.T) {
 			}`,
 			err: `@key(fields: "_id") and @key(fields: "id") on "Port" both generate ` +
 				`entity resolver findPortByID; give one of their key fields a distinct @goField(name: ...) or gqlgen.yml fieldName, ` +
-				`or, if no two key fields of one type share a Go name, set @entityResolver(perEntity: true) on "Port"`,
+				`or, if no two key fields of one type share a Go name, set the entity_resolver_per_entity option`,
 		},
 		{
 			name: "leading underscore uses gqlgen.yml fieldName",
@@ -165,7 +165,7 @@ func TestEntityResolverNames(t *testing.T) {
 				type ManyPort @key(fields: "IDs") { IDs: ID! }`,
 			err: `entities "ManyPort" and "Port" both generate entity resolver findManyPortByIDs; ` +
 				`giving both the same @entityResolver(multi:) setting, ` +
-				`or setting @entityResolver(perEntity: true) on one of them, avoids this`,
+				`or setting the entity_resolver_per_entity option, avoids this`,
 		},
 		{
 			name: "different entities in the same mode with the same name",
@@ -173,7 +173,7 @@ func TestEntityResolverNames(t *testing.T) {
 				type Port @key(fields: "iDByX") { iDByX: ID! }
 				type PortByID @key(fields: "x") { x: ID! }`,
 			err: `entities "Port" and "PortByID" both generate entity resolver findPortByIDByX; ` +
-				`setting @entityResolver(perEntity: true) on one of them avoids this`,
+				`setting the entity_resolver_per_entity option avoids this`,
 		},
 		{
 			name: "different entities in the same mode",
@@ -182,32 +182,6 @@ func TestEntityResolverNames(t *testing.T) {
 				type ManyPort @key(fields: "IDs") @entityResolver(multi: true) { IDs: ID! }`,
 			resolvers: []string{"findManyManyPortByIDss", "findManyPortByIDs"},
 			inputs:    []string{"ManyPortByIDssInput", "PortByIDsInput"},
-		},
-		{
-			name: "per-entity keys don't need distinct resolver names",
-			schema: `
-				type Port @key(fields: "id") @key(fields: "i { d }") @entityResolver(perEntity: true) {
-					id: ID!
-					i: Owner!
-				}
-				type Owner { d: ID! }`,
-			resolvers: []string{"findPort"},
-		},
-		{
-			name: "per-entity resolver name taken by another entity",
-			schema: `
-				type Port @key(fields: "id") { id: ID! }
-				type PortByID @key(fields: "x") @entityResolver(perEntity: true) { x: ID! }`,
-			err: `entities "Port" and "PortByID" both generate entity resolver findPortByID; ` +
-				`setting @entityResolver(perEntity: true) on "Port" avoids this`,
-		},
-		{
-			name: "per-entity and per-key entities with distinct names",
-			schema: `
-				type Port @key(fields: "id") @entityResolver(perEntity: true, multi: true) { id: ID! }
-				type Ship @key(fields: "id") @entityResolver(multi: true) { id: ID! }`,
-			resolvers: []string{"findPort", "findManyShipByIDs"},
-			inputs:    []string{"ShipByIDsInput"},
 		},
 	}
 
@@ -223,7 +197,7 @@ func TestEntityResolverNames(t *testing.T) {
 			cfg.Sources = early
 			cfg.Sources = append(cfg.Sources, &ast.Source{
 				Name: "schema.graphql",
-				Input: `directive @entityResolver(multi: Boolean, perEntity: Boolean) on OBJECT
+				Input: `directive @entityResolver(multi: Boolean) on OBJECT
 					directive @goField(name: String) on FIELD_DEFINITION
 					type Query { ok: Boolean }` + tc.schema,
 			})
@@ -245,7 +219,7 @@ func TestEntityResolverNames(t *testing.T) {
 				}
 			}
 			for _, entity := range f.Entities {
-				if !entity.Multi || entity.PerEntity {
+				if !entity.Multi {
 					continue
 				}
 				for _, resolver := range entity.Resolvers {

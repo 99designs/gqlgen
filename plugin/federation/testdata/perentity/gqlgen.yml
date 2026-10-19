@@ -5,6 +5,8 @@ exec:
 federation:
   filename: testdata/perentity/generated/federation.go
   version: 2
+  options:
+    entity_resolver_per_entity: true
 model:
   filename: testdata/perentity/generated/model/models.go
   package: model

@@ -13,9 +13,12 @@ import (
 	"github.com/99designs/gqlgen/plugin/federation/testdata/perentity/generated/model"
 )
 
-// FindDockByID is the resolver for the findDockByID field.
-func (r *entityResolver) FindDockByID(ctx context.Context, id string) (*model.Dock, error) {
-	return &model.Dock{ID: id, Berths: 1}, nil
+// FindDock is the resolver for the findDock field.
+func (r *entityResolver) FindDock(ctx context.Context, rep model.DockRepresentation) (*model.Dock, error) {
+	if rep.ID == nil {
+		return nil, errors.New("dock representation has no key")
+	}
+	return &model.Dock{ID: *rep.ID, Berths: 1}, nil
 }
 
 // FindNode is the resolver for the findNode field.
@@ -26,18 +29,13 @@ func (r *entityResolver) FindNode(ctx context.Context, rep model.NodeRepresentat
 	return &model.Dock{ID: *rep.ID, Berths: 2}, nil
 }
 
-// FindPlainByID is the resolver for the findPlainByID field.
-func (r *entityResolver) FindPlainByID(ctx context.Context, id string) (*model.Plain, error) {
-	return &model.Plain{ID: id}, nil
-}
-
 // FindPort is the resolver for the findPort field.
 func (r *entityResolver) FindPort(ctx context.Context, rep model.PortRepresentation) (*model.Port, error) {
-	switch {
-	case rep.LegacyID != nil:
-		return &model.Port{LegacyID: *rep.LegacyID, ResolvedBy: "_id"}, nil
-	case rep.ID != nil:
-		return &model.Port{ID: *rep.ID, ResolvedBy: "id"}, nil
+	switch rep.MatchedKey {
+	case "_id":
+		return &model.Port{LegacyID: *rep.LegacyID, ResolvedBy: rep.MatchedKey}, nil
+	case "id":
+		return &model.Port{ID: *rep.ID, ResolvedBy: rep.MatchedKey}, nil
 	}
 	return nil, errors.New("port representation has no key")
 }
@@ -46,15 +44,15 @@ func (r *entityResolver) FindPort(ctx context.Context, rep model.PortRepresentat
 func (r *entityResolver) FindShip(ctx context.Context, reps []*model.ShipRepresentation) ([]*model.Ship, error) {
 	ships := make([]*model.Ship, len(reps))
 	for i, rep := range reps {
-		switch {
-		case rep.ID != nil && rep.Owner != nil && rep.Owner.ID != nil:
+		switch rep.MatchedKey {
+		case "id owner { id }":
 			ships[i] = &model.Ship{
 				ID:         *rep.ID,
 				Owner:      &model.Owner{ID: *rep.Owner.ID},
-				ResolvedBy: "id owner { id }",
+				ResolvedBy: rep.MatchedKey,
 			}
-		case rep.LegacyID != nil:
-			ships[i] = &model.Ship{LegacyID: *rep.LegacyID, ResolvedBy: "_id"}
+		case "_id":
+			ships[i] = &model.Ship{LegacyID: *rep.LegacyID, ResolvedBy: rep.MatchedKey}
 		default:
 			return nil, errors.New("ship representation has no key")
 		}

@@ -68,8 +68,18 @@
               "type": "boolean",
               "description": "Default engine for entityResolver generation. Can be overridden per entity with @entityResolver(multi: Boolean) directive.",
               "default": false
+            },
+            "entity_resolver_per_entity": {
+              "type": "boolean",
+              "description": "Generate one resolver per entity, taking a representation input, instead of one per @key, for every entity. A temporary opt-in, planned to become the default.",
+              "default": false
             }
           }
+        },
+        "representation_names": {
+          "type": "object",
+          "description": "Names the representation input of a type, keyed by the type's name, in place of <Type>Representation. Used with entity_resolver_per_entity.",
+          "additionalProperties": { "type": "string" }
         },
         "model_template": { "type": "string" }
       }
@@ -81,6 +91,11 @@
         "filename": { "type": "string" },
         "package": { "type": "string" },
         "model_template": { "type": "string" },
+        "representation_names": {
+          "type": "object",
+          "description": "Federation only; see federation.representation_names.",
+          "additionalProperties": { "type": "string" }
+        },
         "version": { "type": "integer" },
         "options": {
           "type": "object",

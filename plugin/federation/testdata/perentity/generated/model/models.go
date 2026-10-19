@@ -18,8 +18,16 @@ func (this Dock) GetID() string { return this.ID }
 
 func (Dock) IsEntity() {}
 
+type DockRepresentation struct {
+	ID *string `json:"id,omitempty"`
+	// The @key fields this representation matched, as gqlgen prints them.
+	MatchedKey string `json:"-"`
+}
+
 type NodeRepresentation struct {
 	ID *string `json:"id,omitempty"`
+	// The @key fields this representation matched, as gqlgen prints them.
+	MatchedKey string `json:"-"`
 }
 
 type Owner struct {
@@ -30,12 +38,6 @@ type Owner struct {
 type OwnerRepresentation struct {
 	ID *string `json:"id,omitempty"`
 }
-
-type Plain struct {
-	ID string `json:"id"`
-}
-
-func (Plain) IsEntity() {}
 
 type Port struct {
 	LegacyID   string `json:"_id"`
@@ -50,6 +52,8 @@ func (Port) IsEntity() {}
 type PortRepresentation struct {
 	LegacyID *string `json:"_id,omitempty"`
 	ID       *string `json:"id,omitempty"`
+	// The @key fields this representation matched, as gqlgen prints them.
+	MatchedKey string `json:"-"`
 }
 
 type Query struct {
@@ -68,4 +72,6 @@ type ShipRepresentation struct {
 	ID       *string              `json:"id,omitempty"`
 	Owner    *OwnerRepresentation `json:"owner,omitempty"`
 	LegacyID *string              `json:"_id,omitempty"`
+	// The @key fields this representation matched, as gqlgen prints them.
+	MatchedKey string `json:"-"`
 }

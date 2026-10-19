@@ -113,22 +113,18 @@ func checkResolverNames(entities []*Entity, schema *ast.Schema) error {
 }
 
 // crossEntityHint suggests settings that give a and b distinct resolver
-// names. A per-entity resolver is named find<Entity>, which can't take the
-// name of both entities' resolvers at once, so perEntity on one of them works
-// unless a third entity has that name.
+// names. Per-entity resolvers are named find<Entity>, so the option avoids any
+// clash between entities whose Go names differ; under it there is nothing
+// left to suggest.
 func crossEntityHint(a, b *Entity) string {
 	switch {
-	case a.PerEntity && b.PerEntity:
-		return ""
 	case a.PerEntity:
-		return fmt.Sprintf("; setting @entityResolver(perEntity: true) on %q avoids this", b.Name)
-	case b.PerEntity:
-		return fmt.Sprintf("; setting @entityResolver(perEntity: true) on %q avoids this", a.Name)
+		return ""
 	case a.Multi != b.Multi:
 		return "; giving both the same @entityResolver(multi:) setting, " +
-			"or setting @entityResolver(perEntity: true) on one of them, avoids this"
+			"or setting the " + optionEntityResolverPerEntity + " option, avoids this"
 	default:
-		return "; setting @entityResolver(perEntity: true) on one of them avoids this"
+		return "; setting the " + optionEntityResolverPerEntity + " option avoids this"
 	}
 }
 

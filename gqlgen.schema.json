@@ -64,6 +64,11 @@
               "description": "Generate resolver functions to compute values for fields using the @requires directive. Requires federation version 2 and call_argument_directives_with_null to be true. Cannot be used together with explicit_requires.",
               "default": false
             },
+            "preloaded_requires": {
+              "type": "boolean",
+              "description": "Populate @requires fields onto the resolver input before the resolver runs. Can be overridden per entity with @entityResolver(requires: String). Needs multi entities, unless entity_resolver_per_entity is set. Cannot be used together with explicit_requires or computed_requires.",
+              "default": false
+            },
             "entity_resolver_multi": {
               "type": "boolean",
               "description": "Default engine for entityResolver generation. Can be overridden per entity with @entityResolver(multi: Boolean) directive.",

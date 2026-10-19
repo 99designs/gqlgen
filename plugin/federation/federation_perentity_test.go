@@ -106,13 +106,6 @@ func TestPerEntityErrors(t *testing.T) {
 		err    string
 	}{
 		{
-			name: "preloaded requires",
-			schema: `type Port @key(fields: "id") @entityResolver(multi: true, requires: "preloaded") {
-				id: ID!
-			}`,
-			err: `entity "Port": requires: "preloaded" is not supported with the entity_resolver_per_entity option`,
-		},
-		{
 			name: "representation name taken",
 			schema: `
 				type Port @key(fields: "id") { id: ID! }
@@ -205,6 +198,36 @@ func TestPerEntityErrors(t *testing.T) {
 				type Owner { id: ID! }`,
 			err: `entity "Ship": key path through list field Ship.owners is not supported ` +
 				`with the entity_resolver_per_entity option`,
+		},
+		{
+			name: "preloaded @requires through a list",
+			schema: `
+				type Ship @key(fields: "id") @entityResolver(requires: "preloaded") {
+					id: ID!
+					owners: [Owner!]! @external
+					crew: Int @requires(fields: "owners { id }")
+				}
+				type Owner { id: ID! }`,
+			err: `entity "Ship": @requires path through list field Ship.owners is not ` +
+				`supported with the entity_resolver_per_entity option`,
+		},
+		{
+			name: "key field of object type",
+			schema: `
+				type Ship @key(fields: "owner") { owner: Owner! }
+				type Owner { id: ID! }`,
+			err: `entity "Ship": key field Ship.owner has object type Owner; select its fields`,
+		},
+		{
+			name: "preloaded @requires field of object type",
+			schema: `
+				type Ship @key(fields: "id") @entityResolver(requires: "preloaded") {
+					id: ID!
+					owner: Owner @external
+					crew: Int @requires(fields: "owner")
+				}
+				type Owner { id: ID! }`,
+			err: `entity "Ship": @requires field Ship.owner has object type Owner; select its fields`,
 		},
 	}
 
@@ -420,6 +443,97 @@ func TestPerEntitySchema(t *testing.T) {
 					got[field] = entry.FieldName
 				}
 				require.Equal(t, want, got, "Go names of %s", name)
+			}
+		})
+	}
+}
+
+// TestPerEntityPreloadedSchema checks which @requires fields a representation
+// carries: under preloaded, every non-computed one, once, beside the keys.
+func TestPerEntityPreloadedSchema(t *testing.T) {
+	cases := []struct {
+		name    string
+		schema  string
+		options map[string]bool // federation.options beside per-entity
+		inputs  map[string][]string
+	}{
+		{
+			name: "default strategy carries keys only",
+			schema: `type Planet @key(fields: "name") {
+				name: String!
+				diameter: Int @external
+				size: Int @requires(fields: "diameter")
+			}`,
+			inputs: map[string][]string{"PlanetRepresentation": {"name: String"}},
+		},
+		{
+			name: "preloaded carries @requires",
+			schema: `type Planet @key(fields: "name") @entityResolver(requires: "preloaded") {
+				name: String!
+				diameter: Int! @external
+				size: Int @requires(fields: "diameter")
+			}`,
+			inputs: map[string][]string{
+				"PlanetRepresentation": {"name: String", "diameter: Int"},
+			},
+		},
+		{
+			name: "preloaded nested @requires",
+			schema: `
+				type Comet @key(fields: "name") @entityResolver(requires: "preloaded") {
+					name: String!
+					orbit: Orbit @external
+					tag: Int @requires(fields: "orbit { period }")
+				}
+				type Orbit { period: Int! radius: Int }`,
+			inputs: map[string][]string{
+				"CometRepresentation": {"name: String", "orbit: OrbitRepresentation"},
+				"OrbitRepresentation": {"period: Int"},
+			},
+		},
+		{
+			name: "preloaded @requires of a key field lists it once",
+			schema: `type Planet @key(fields: "name") @entityResolver(requires: "preloaded") {
+				name: String!
+				size: Int @requires(fields: "name")
+			}`,
+			inputs: map[string][]string{"PlanetRepresentation": {"name: String"}},
+		},
+		{
+			name: "computed @requires stays off the representation",
+			schema: `type Planet @key(fields: "name") @entityResolver(requires: "preloaded") {
+				name: String!
+				diameter: Int @external
+				mass: Int @external
+				size: Int @requires(fields: "diameter") @computedRequires
+				density: Int @requires(fields: "mass")
+			}`,
+			inputs: map[string][]string{
+				"PlanetRepresentation": {"name: String", "mass: Int"},
+			},
+		},
+		{
+			name: "preloaded_requires option on a multi entity without @requires",
+			schema: `type Planet @key(fields: "name") @entityResolver(multi: true) {
+				name: String!
+			}`,
+			options: map[string]bool{optionPreloadedRequires: true},
+			inputs:  map[string][]string{"PlanetRepresentation": {"name: String"}},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, cfg, err := injectFederation(t, tc.schema, func(cfg *config.Config) {
+				perEntity(cfg)
+				maps.Copy(cfg.Federation.Options, tc.options)
+				// The computed case needs it; it changes nothing else here.
+				cfg.CallArgumentDirectivesWithNull = true
+			})
+
+			require.NoError(t, err)
+			for name, fields := range tc.inputs {
+				require.Equal(t, fields, fieldsSDL(cfg.Schema.Types[name]), "fields of %s", name)
 			}
 		})
 	}

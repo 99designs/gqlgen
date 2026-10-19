@@ -13,10 +13,11 @@ import (
 )
 
 // A representation is a generated input object that carries an entity's @key
-// fields to its per-entity resolver. Every field is nullable, so a key the
-// router did not send arrives as nil. A nested key selection such as
-// "owner { id }" gets its own representation of the nested type, shared by
-// every per-entity entity that selects into that type.
+// fields, and with the preloaded strategy its @requires fields, to its
+// per-entity resolver. Every field is nullable, so a field the router did not
+// send arrives as nil. A nested selection such as "owner { id }" gets its own
+// representation of the nested type, shared by every per-entity entity that
+// selects into that type, so it lists the fields all of them select.
 type representation struct {
 	// Name is the GraphQL input name: the owner's representation_names entry,
 	// else owner type + "Representation".
@@ -75,15 +76,17 @@ func perEntityResolverSDL(e *Entity, rep string) string {
 }
 
 // buildRepresentations derives the representation inputs for every per-entity
-// entity from its @key fields.
+// entity from its @key fields and, for a preloaded entity, its non-computed
+// @requires fields.
 //
-// Requires: entities are sorted and their key fields exist in schema; names
-// is federation.representation_names.
+// Requires: entities are sorted and their key and @requires fields exist in
+// schema; names is federation.representation_names.
 // Ensures:  one representation per per-entity entity (Root) and per type its
-// keys select into, in first-use order, named from names or by default, each
-// listing the selected fields once in key order with their Go names; or an
-// error if a representation's Go name is a schema type's or another
-// representation's, or names has an entry for no representation. Two fields
+// selections reach, in first-use order, named from names or by default, each
+// listing the selected fields once, keys first, with their Go names; or an
+// error if a selection passes through a list or ends at an object, a
+// representation's Go name is a schema type's or another representation's,
+// or names has an entry for no representation. Two fields
 // sharing a Go name are left to modelgen, which checks every generated struct
 // after its hooks have run.
 func buildRepresentations(
@@ -127,7 +130,8 @@ type representationBuilder struct {
 	ordered []*representation
 }
 
-// addEntity records the representations of entity's @key fields.
+// addEntity records the representations of entity's @key fields and, when
+// preloaded, of the @requires fields its resolver receives.
 func (b *representationBuilder) addEntity(entity *Entity) error {
 	root, err := b.representationOf(entity.Def)
 	if err != nil {
@@ -136,9 +140,20 @@ func (b *representationBuilder) addEntity(entity *Entity) error {
 	root.Root = true
 	for _, resolver := range entity.Resolvers {
 		for _, keyField := range resolver.KeyFields {
-			if err := b.add(root, entity.Def, keyField.Field); err != nil {
+			if err := b.add(root, entity.Def, keyField.Field, "key"); err != nil {
 				return err
 			}
+		}
+	}
+	if !entity.IsPreloaded() {
+		return nil
+	}
+	for _, req := range entity.Requires {
+		if req.Computed {
+			continue // resolved by its field resolver, not the entity resolver
+		}
+		if err := b.add(root, entity.Def, req.Field, "@requires"); err != nil {
+			return err
 		}
 	}
 	return nil
@@ -178,28 +193,42 @@ func (b *representationBuilder) representationOf(def *ast.Definition) (*represen
 	return r, nil
 }
 
-// add records the key path on r, whose owner is def, creating nested
-// representations for each object the path passes through.
-func (b *representationBuilder) add(r *representation, def *ast.Definition, path []string) error {
+// add records path on r, whose owner is def, creating nested representations
+// for each object the path passes through. kind names the path's directive
+// ("key" or "@requires") in errors.
+func (b *representationBuilder) add(
+	r *representation,
+	def *ast.Definition,
+	path []string,
+	kind string,
+) error {
 	fieldDef := def.Fields.ForName(path[0])
 	fieldType := *fieldDef.Type
 	fieldType.NonNull = false
 
+	typeDef := b.schema.Types[fieldType.Name()]
+
+	if len(path) == 1 && typeDef.Kind != ast.Scalar && typeDef.Kind != ast.Enum {
+		return fmt.Errorf(
+			"%s field %s.%s has %s type %s; select its fields",
+			kind, def.Name, fieldDef.Name, strings.ToLower(string(typeDef.Kind)), typeDef.Name,
+		)
+	}
 	if len(path) > 1 {
 		if fieldType.Elem != nil {
 			return fmt.Errorf(
-				"key path through list field %s.%s is not supported with the %s option",
+				"%s path through list field %s.%s is not supported with the %s option",
+				kind,
 				def.Name,
 				fieldDef.Name,
 				optionEntityResolverPerEntity,
 			)
 		}
-		nestedDef := b.schema.Types[fieldType.NamedType]
-		nested, err := b.representationOf(nestedDef)
+		nested, err := b.representationOf(typeDef)
 		if err != nil {
 			return err
 		}
-		if err := b.add(nested, nestedDef, path[1:]); err != nil {
+		if err := b.add(nested, typeDef, path[1:], kind); err != nil {
 			return err
 		}
 		fieldType.NamedType = nested.Name

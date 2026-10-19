@@ -499,12 +499,13 @@ func (ec *executionContext) resolveManyEntities(
 	{{- $rep := .rep }}
 	{{- $ret := .ret }}
 	{{- $useFunctionSyntax := .useFunctionSyntax }}
+	{{- /* preloaded copies nothing: the representation carried @requires */}}
 	{{- if and $entity.IsExplicitRequires $entity.Requires }}
 		err = ec.Populate{{$entity.Def.Name}}Requires(ctx, {{- if not .usePointers -}}&{{- end -}}entity, {{$rep}})
 		if err != nil {
 			return {{$ret}}fmt.Errorf(`populating requires for Entity "{{$entity.Def.Name}}": %w`, err)
 		}
-	{{- else }}
+	{{- else if not $entity.IsPreloaded }}
 		{{- range $entity.Requires }}
 			{{- if not .Computed }}
 				{{ if $useFunctionSyntax -}}

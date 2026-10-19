@@ -27,7 +27,8 @@ import (
 //     surfaces the raw representation to user code.
 //   - RequiresPreloaded ("preloaded"): unmarshaled onto the resolver's INPUT
 //     representation BEFORE the resolver runs, so a multi resolver sees every
-//     entity's @requires data in one scope (input, before). Multi entities only.
+//     entity's @requires data in one scope (input, before). Multi entities
+//     only, unless per-entity resolvers take the representation.
 //
 // RequiresComputed ("computed") is the outlier: it does not touch the entity
 // resolver at all. It routes @requires to standalone field resolvers via a
@@ -57,7 +58,8 @@ const (
 	RequiresComputed RequiresStrategy = "computed"
 	// RequiresPreloaded unmarshals @requires onto the resolver's input
 	// representation before the resolver runs, so a multi resolver sees every
-	// entity's @requires data at once. Multi entities only.
+	// entity's @requires data at once. Multi entities only, unless per-entity
+	// resolvers take the representation.
 	RequiresPreloaded RequiresStrategy = "preloaded"
 )
 

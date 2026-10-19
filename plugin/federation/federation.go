@@ -72,7 +72,9 @@ type PackageOptions struct {
 	// fields, unmarshaled before the resolver runs, so a multi resolver sees
 	// every entity's @requires data in one scope — enabling a naturally-batched
 	// computation (e.g. one ML-inference call across the whole batch). Multi
-	// entities only. false by default.
+	// entities only, unless EntityResolverPerEntity is set: then the
+	// <Type>Representation of every entity, single or multi, carries them,
+	// nullable, nested paths included. false by default.
 	PreloadedRequires bool
 }
 
@@ -301,7 +303,7 @@ func computedRequiresPrerequisiteError(version int, callArgumentDirectivesWithNu
 	return nil
 }
 
-// injectPreloadedRequiresFields augments each multi entity's generated
+// injectPreloadedRequiresFields augments each per-key multi entity's generated
 // representation input type with that entity's @requires fields, as modelgen
 // ExtraFields. modelgen runs after the federation plugin in the MutateConfig
 // phase, so the fields land on the generated struct; the result is a resolver
@@ -326,7 +328,9 @@ func computedRequiresPrerequisiteError(version int, callArgumentDirectivesWithNu
 func (f *Federation) injectPreloadedRequiresFields(cfg *config.Config) error {
 	binder := cfg.NewBinder()
 	for _, entity := range f.Entities {
-		if !entity.IsPreloaded() || len(entity.Requires) == 0 {
+		// A per-entity entity's representation carries its @requires fields
+		// (buildRepresentations); it has no batch input.
+		if !entity.IsPreloaded() || len(entity.Requires) == 0 || entity.PerEntity {
 			continue
 		}
 		for _, req := range entity.Requires {
@@ -800,16 +804,10 @@ func (f *Federation) buildEntity(
 	}
 
 	multi := f.isMultiEntity(schemaType)
-	requiresStrategy, err := f.resolveRequiresStrategy(schemaType, multi)
+	perEntity := f.PackageOptions.EntityResolverPerEntity
+	requiresStrategy, err := f.resolveRequiresStrategy(schemaType, multi, perEntity)
 	if err != nil {
 		return nil, err
-	}
-	perEntity := f.PackageOptions.EntityResolverPerEntity
-	if perEntity && requiresStrategy == RequiresPreloaded {
-		return nil, fmt.Errorf(
-			"entity %q: requires: %q is not supported with the %s option",
-			schemaType.Name, RequiresPreloaded, optionEntityResolverPerEntity,
-		)
 	}
 	if err := validateComputedFields(schemaType, requiresStrategy); err != nil {
 		return nil, err
@@ -888,15 +886,18 @@ func (o PackageOptions) defaultRequiresStrategy() RequiresStrategy {
 // @entityResolver(requires: "…") argument if present, otherwise the package
 // default. It mirrors isMultiEntity.
 //
-// Requires: multi is the already-resolved @entityResolver(multi) value.
+// Requires: multi is the already-resolved @entityResolver(multi) value;
+// perEntity is the entity_resolver_per_entity option.
 // Ensures:  the returned strategy is one of the four RequiresStrategy values;
-// an unknown directive value, or preloaded on a non-multi entity, is a
-// (clear, actionable) error rather than a silent fallback.
+// an unknown directive value, or preloaded on an entity with neither a batch
+// input nor a representation to carry @requires, is a (clear, actionable)
+// error naming the setting that selected it, rather than a silent fallback.
 func (f *Federation) resolveRequiresStrategy(
 	schemaType *ast.Definition,
-	multi bool,
+	multi, perEntity bool,
 ) (RequiresStrategy, error) {
 	strategy := f.PackageOptions.defaultRequiresStrategy()
+	fromDirective := false
 
 	if dir := schemaType.Directives.ForName(dirNameEntityResolver); dir != nil {
 		if dirArg := dir.Arguments.ForName("requires"); dirArg != nil {
@@ -933,13 +934,18 @@ func (f *Federation) resolveRequiresStrategy(
 				)
 			}
 			strategy = parsed
+			fromDirective = true
 		}
 	}
 
-	if strategy == RequiresPreloaded && !multi {
+	if strategy == RequiresPreloaded && !multi && !perEntity {
+		source := fmt.Sprintf("the %s option", optionPreloadedRequires)
+		if fromDirective {
+			source = fmt.Sprintf("@entityResolver(requires: %q)", RequiresPreloaded)
+		}
 		return "", fmt.Errorf(
-			"entity %q: @entityResolver(requires: %q) requires multi: true",
-			schemaType.Name, RequiresPreloaded,
+			"entity %q: %s requires multi: true or the %s option",
+			schemaType.Name, source, optionEntityResolverPerEntity,
 		)
 	}
 

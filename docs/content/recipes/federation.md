@@ -220,7 +220,7 @@ data reach the resolver?* — so each entity uses **exactly one**:
 | Default | _(none)_ | `"default"` | Unmarshaled onto the returned entity, after the resolver runs. |
 | Explicit | `explicit_requires` | `"explicit"` | A `Populate<Entity>Requires` function you implement, called on the returned entity after the resolver. Supports nested/array fields. |
 | Computed | `computed_requires` | `@computedRequires` (per field) | Delivered to standalone field resolvers via a `federationRequires` argument (Federation 2 only). |
-| Preloaded | `preloaded_requires` | `"preloaded"` | Unmarshaled onto the resolver's *input* representation, before the resolver runs, so a multi resolver sees every entity's `@requires` data at once. Flat scalar/enum fields only; requires `multi`. |
+| Preloaded | `preloaded_requires` | `"preloaded"` | Unmarshaled onto the resolver's *input* representation, before the resolver runs, so a multi resolver sees every entity's `@requires` data at once. Per key, flat scalar/enum fields only, and requires `multi`; with [one resolver per entity](#one-resolver-per-entity), any entity, nested fields included. |
 
 The package option sets the **default** for the whole subgraph. The `requires:`
 argument on `@entityResolver` overrides that default **per entity**, choosing
@@ -430,10 +430,13 @@ func (r *entityResolver) FindPort(ctx context.Context, rep model.PortRepresentat
   `findNode(rep: NodeRepresentation!): Node!`, and serves representations whose
   `__typename` is the interface. `@requires` on such an interface is not
   supported.
-- `@requires` works with the default and explicit strategies; `preloaded` is not
-  supported.
-- A key that selects through a list field, such as `@key(fields: "owners { id }")`,
-  is not supported.
+- With the `preloaded` strategy, `PortRepresentation` also holds the entity's
+  `@requires` fields, other than `@computedRequires` ones, nullable like the
+  keys: a field the router did not send is `nil`. This works for single and
+  multi resolvers, and for nested selections such as `orbit { period }`.
+  gqlgen does not copy them onto the returned entity.
+- A key or `preloaded` `@requires` that selects through a list field, such as
+  `@key(fields: "owners { id }")`, is not supported.
 - When a schema type has a representation's Go name, such as
   `portRepresentation` with `PortRepresentation`, name the representation
   instead, keyed by the type it represents. Its Go name follows from the name,
@@ -447,8 +450,7 @@ func (r *entityResolver) FindPort(ctx context.Context, rep model.PortRepresentat
 
 The option applies to every entity. Generation fails, keeping the whole schema
 on per-key resolvers until the cause changes, when any entity uses `@requires`
-on an interface, `requires: "preloaded"`, or a key through a list field. With
-the `preloaded_requires` package option, every multi entity fails.
+on an interface, or a key or `preloaded` `@requires` through a list field.
 
 ### Migrating
 
@@ -467,7 +469,10 @@ change.
    representation in `reps` has its own `MatchedKey`; return the entities in
    the order of `reps`, and report per-entity errors with a
    `graphql.BatchErrorList`.
-5. Update code and tests that call the per-key methods directly. Tests that go
+5. With `preloaded`, read the `@requires` fields from the representation
+   instead of the `…ByKeysInput` batch input. They are pointers now, so
+   `rep.Category` is `nil` when the router did not send it.
+6. Update code and tests that call the per-key methods directly. Tests that go
    through `_entities` need no change.
 
 `_service { sdl }` does not change: the representations and `findPort` are not
@@ -603,7 +608,10 @@ func (r *entityResolver) FindManyProductByIDs(
 
 Notes and limitations:
 
-- Only **flat scalar and enum** `@requires` fields are supported. gqlgen can
+- Per key, only **flat scalar and enum** `@requires` fields are supported, on
+  multi entities. With [one resolver per entity](#one-resolver-per-entity), the
+  representation carries them instead, for single resolvers too, and nested
+  paths work. Per key, gqlgen can
   only reconstruct scalar leaves of a representation, so a `@requires` naming an
   object or list field, or a nested path such as `@requires(fields: "world { foo }")`,
   is rejected at generation time. Require the scalar leaves instead

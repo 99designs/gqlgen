@@ -206,9 +206,12 @@ const (
 // of the nested representation.
 //
 // Ensures: the schema's types are not modified; or an error if the path
-// names no field, selects an object without its fields, passes through an
-// inline fragment, or, as a key, selects a list, interface or union field,
-// which federation does not allow in @key.
+// names no field, selects an object or interface without its fields, passes
+// through an inline fragment, or, as a key, selects a list or union field,
+// which federation does not allow in @key. A key field of interface type,
+// which federation does not allow either, is accepted, as per-key resolvers
+// serve it; a list fails the key check at runtime, and a union has no fields
+// to select without a fragment.
 func (b *representationBuilder) add(
 	r *representation,
 	def *ast.Definition,
@@ -221,11 +224,10 @@ func (b *representationBuilder) add(
 	}
 	typeDef := b.schema.Types[fieldDef.Type.Name()]
 
-	if kind == keyPath && (fieldDef.Type.Elem != nil ||
-		typeDef.Kind == ast.Interface || typeDef.Kind == ast.Union) {
+	if kind == keyPath && (fieldDef.Type.Elem != nil || typeDef.Kind == ast.Union) {
 		return fmt.Errorf(
-			"key field %s.%s has type %s; federation does not allow list, "+
-				"interface or union fields in @key",
+			"key field %s.%s has type %s; federation does not allow list or "+
+				"union fields in @key",
 			def.Name, fieldDef.Name, fieldDef.Type,
 		)
 	}

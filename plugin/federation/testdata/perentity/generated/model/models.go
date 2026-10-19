@@ -2,11 +2,37 @@
 
 package model
 
+type Holder interface {
+	IsHolder()
+	GetID() string
+}
+
 type Node interface {
 	IsEntity()
 	IsNode()
 	GetID() string
 }
+
+type Berth struct {
+	Holder     Holder `json:"holder"`
+	ResolvedBy string `json:"resolvedBy"`
+}
+
+func (Berth) IsEntity() {}
+
+type BerthRepresentation struct {
+	Holder *HolderRepresentation `json:"holder,omitempty"`
+	// The @key fields this representation matched, as gqlgen prints them.
+	MatchedKey string `json:"-"`
+}
+
+type Captain struct {
+	ID   string  `json:"id"`
+	Name *string `json:"name,omitempty"`
+}
+
+func (Captain) IsHolder()          {}
+func (this Captain) GetID() string { return this.ID }
 
 type Dock struct {
 	ID     string `json:"id"`
@@ -22,6 +48,10 @@ type DockRepresentation struct {
 	ID *string `json:"id,omitempty"`
 	// The @key fields this representation matched, as gqlgen prints them.
 	MatchedKey string `json:"-"`
+}
+
+type HolderRepresentation struct {
+	ID *string `json:"id,omitempty"`
 }
 
 type NodeRepresentation struct {

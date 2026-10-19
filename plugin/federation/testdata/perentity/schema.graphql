@@ -27,6 +27,22 @@ type Owner {
     name: String
 }
 
+# Federation rejects an interface field in @key when composing, but per-key
+# resolvers serve one, so per-entity resolvers do too.
+type Berth @key(fields: "holder { id }") {
+    holder: Holder!
+    resolvedBy: String!
+}
+
+interface Holder {
+    id: ID!
+}
+
+type Captain implements Holder {
+    id: ID!
+    name: String
+}
+
 # The router sends __typename Node for an entity interface, so findNode
 # resolves it to an implementing type.
 interface Node @key(fields: "id") {

@@ -37,16 +37,27 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	Berth struct {
+		Holder     func(childComplexity int) int
+		ResolvedBy func(childComplexity int) int
+	}
+
+	Captain struct {
+		ID   func(childComplexity int) int
+		Name func(childComplexity int) int
+	}
+
 	Dock struct {
 		Berths func(childComplexity int) int
 		ID     func(childComplexity int) int
 	}
 
 	Entity struct {
-		FindDock func(childComplexity int, rep model.DockRepresentation) int
-		FindNode func(childComplexity int, rep model.NodeRepresentation) int
-		FindPort func(childComplexity int, rep model.PortRepresentation) int
-		FindShip func(childComplexity int, reps []*model.ShipRepresentation) int
+		FindBerth func(childComplexity int, rep model.BerthRepresentation) int
+		FindDock  func(childComplexity int, rep model.DockRepresentation) int
+		FindNode  func(childComplexity int, rep model.NodeRepresentation) int
+		FindPort  func(childComplexity int, rep model.PortRepresentation) int
+		FindShip  func(childComplexity int, reps []*model.ShipRepresentation) int
 	}
 
 	Owner struct {
@@ -85,6 +96,7 @@ type ComplexityRoot struct {
 // region    ************************** generated!.gotpl **************************
 
 type EntityResolver interface {
+	FindBerth(ctx context.Context, rep model.BerthRepresentation) (*model.Berth, error)
 	FindDock(ctx context.Context, rep model.DockRepresentation) (*model.Dock, error)
 	FindNode(ctx context.Context, rep model.NodeRepresentation) (model.Node, error)
 	FindPort(ctx context.Context, rep model.PortRepresentation) (*model.Port, error)
@@ -112,6 +124,32 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 	_ = ec
 	switch typeName + "." + field {
 
+	case "Berth.holder":
+		if e.ComplexityRoot.Berth.Holder == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Berth.Holder(childComplexity), true
+	case "Berth.resolvedBy":
+		if e.ComplexityRoot.Berth.ResolvedBy == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Berth.ResolvedBy(childComplexity), true
+
+	case "Captain.id":
+		if e.ComplexityRoot.Captain.ID == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Captain.ID(childComplexity), true
+	case "Captain.name":
+		if e.ComplexityRoot.Captain.Name == nil {
+			break
+		}
+
+		return e.ComplexityRoot.Captain.Name(childComplexity), true
+
 	case "Dock.berths":
 		if e.ComplexityRoot.Dock.Berths == nil {
 			break
@@ -125,6 +163,17 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 
 		return e.ComplexityRoot.Dock.ID(childComplexity), true
 
+	case "Entity.findBerth":
+		if e.ComplexityRoot.Entity.FindBerth == nil {
+			break
+		}
+
+		args, err := ec.field_Entity_findBerth_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.ComplexityRoot.Entity.FindBerth(childComplexity, args["rep"].(model.BerthRepresentation)), true
 	case "Entity.findDock":
 		if e.ComplexityRoot.Entity.FindDock == nil {
 			break
@@ -279,7 +328,9 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	ec := newExecutionContext(opCtx, e, make(chan graphql.DeferredResult))
 	inputUnmarshalers := func() *graphql.InputUnmarshalerIndex {
 		return graphql.NewInputUnmarshalerIndex(
+			graphql.NewInputUnmarshaler("BerthRepresentation", ec.unmarshalInputBerthRepresentation),
 			graphql.NewInputUnmarshaler("DockRepresentation", ec.unmarshalInputDockRepresentation),
+			graphql.NewInputUnmarshaler("HolderRepresentation", ec.unmarshalInputHolderRepresentation),
 			graphql.NewInputUnmarshaler("NodeRepresentation", ec.unmarshalInputNodeRepresentation),
 			graphql.NewInputUnmarshaler("OwnerRepresentation", ec.unmarshalInputOwnerRepresentation),
 			graphql.NewInputUnmarshaler("PortRepresentation", ec.unmarshalInputPortRepresentation),
@@ -374,6 +425,22 @@ type Owner {
     name: String
 }
 
+# Federation rejects an interface field in @key when composing, but per-key
+# resolvers serve one, so per-entity resolvers do too.
+type Berth @key(fields: "holder { id }") {
+    holder: Holder!
+    resolvedBy: String!
+}
+
+interface Holder {
+    id: ID!
+}
+
+type Captain implements Holder {
+    id: ID!
+    name: String
+}
+
 # The router sends __typename Node for an entity interface, so findNode
 # resolves it to an implementing type.
 interface Node @key(fields: "id") {
@@ -443,7 +510,15 @@ type Query {
 `, BuiltIn: true},
 	{Name: "../../../federation/entity.graphql", Input: `
 # a union of all types that use the @key directive
-union _Entity = Dock | Port | Ship
+union _Entity = Berth | Dock | Port | Ship
+
+input BerthRepresentation {
+	holder: HolderRepresentation
+}
+
+input HolderRepresentation {
+	id: ID
+}
 
 input DockRepresentation {
 	id: ID
@@ -470,6 +545,7 @@ input OwnerRepresentation {
 
 # fake type to build resolver interfaces for users to implement
 type Entity {
+	findBerth(rep: BerthRepresentation!): Berth!
 	findDock(rep: DockRepresentation!): Dock!
 	findNode(rep: NodeRepresentation!): Node!
 	findPort(rep: PortRepresentation!): Port!
@@ -491,6 +567,16 @@ var parsedSchema = gqlparser.MustLoadSchema(sources...)
 // childFields_* functions provide shared child field context lookups.
 // Each function is generated once per unique object type, deduplicating the
 // switch statements that were previously inlined in every fieldContext_* function.
+
+func (ec *executionContext) childFields_Berth(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "holder":
+		return ec.fieldContext_Berth_holder(ctx, field)
+	case "resolvedBy":
+		return ec.fieldContext_Berth_resolvedBy(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type Berth", field.Name)
+}
 
 func (ec *executionContext) childFields_Dock(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
@@ -666,6 +752,20 @@ func (ec *executionContext) childFields___Type(ctx context.Context, field graphq
 
 // region    ***************************** args.gotpl *****************************
 
+func (ec *executionContext) field_Entity_findBerth_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "rep",
+		func(ctx context.Context, v any) (model.BerthRepresentation, error) {
+			return ec.unmarshalNBerthRepresentation2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentityᚋgeneratedᚋmodelᚐBerthRepresentation(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["rep"] = arg0
+	return args, nil
+}
+
 func (ec *executionContext) field_Entity_findDock_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
@@ -810,6 +910,107 @@ func (ec *executionContext) field___Type_fields_args(ctx context.Context, rawArg
 
 // region    **************************** field.gotpl *****************************
 
+func (ec *executionContext) _Berth_holder(ctx context.Context, field graphql.CollectedField, obj *model.Berth) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Berth_holder(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Holder, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v model.Holder) graphql.Marshaler {
+			return ec.marshalNHolder2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentityᚋgeneratedᚋmodelᚐHolder(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Berth_holder(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Berth",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("FieldContext.Child cannot be called on type INTERFACE")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Berth_resolvedBy(ctx context.Context, field graphql.CollectedField, obj *model.Berth) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Berth_resolvedBy(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ResolvedBy, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Berth_resolvedBy(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Berth", field, false, false, "String")
+}
+
+func (ec *executionContext) _Captain_id(ctx context.Context, field graphql.CollectedField, obj *model.Captain) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Captain_id(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.ID, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNID2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Captain_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Captain", field, false, false, "ID")
+}
+
+func (ec *executionContext) _Captain_name(ctx context.Context, field graphql.CollectedField, obj *model.Captain) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Captain_name(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *string) graphql.Marshaler {
+			return ec.marshalOString2ᚖstring(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Captain_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Captain", field, false, false, "String")
+}
+
 func (ec *executionContext) _Dock_id(ctx context.Context, field graphql.CollectedField, obj *model.Dock) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -854,6 +1055,50 @@ func (ec *executionContext) _Dock_berths(ctx context.Context, field graphql.Coll
 }
 func (ec *executionContext) fieldContext_Dock_berths(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	return graphql.NewScalarFieldContext("Dock", field, false, false, "Int")
+}
+
+func (ec *executionContext) _Entity_findBerth(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Entity_findBerth(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Entity().FindBerth(ctx, fc.Args["rep"].(model.BerthRepresentation))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v *model.Berth) graphql.Marshaler {
+			return ec.marshalNBerth2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentityᚋgeneratedᚋmodelᚐBerth(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Entity_findBerth(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Entity",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Berth(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Entity_findBerth_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
 }
 
 func (ec *executionContext) _Entity_findDock(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
@@ -2551,6 +2796,48 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputBerthRepresentation(ctx context.Context, obj any) (model.BerthRepresentation, error) {
+	var it model.BerthRepresentation
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"holder"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "holder":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("holder"))
+			data, err := ec.unmarshalOHolderRepresentation2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentityᚋgeneratedᚋmodelᚐHolderRepresentation(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Holder = data
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalBerthRepresentation unmarshals raw into the BerthRepresentation input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalBerthRepresentation(ctx context.Context, raw any) (model.BerthRepresentation, error) {
+	var out model.BerthRepresentation
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "BerthRepresentation", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputDockRepresentation(ctx context.Context, obj any) (model.DockRepresentation, error) {
 	var it model.DockRepresentation
 	if obj == nil {
@@ -2590,6 +2877,48 @@ func (ec *executionContext) unmarshalInputDockRepresentation(ctx context.Context
 func UnmarshalDockRepresentation(ctx context.Context, raw any) (model.DockRepresentation, error) {
 	var out model.DockRepresentation
 	err := graphql.UnmarshalNamedInputFromContext(ctx, "DockRepresentation", raw, &out)
+	return out, err
+}
+
+func (ec *executionContext) unmarshalInputHolderRepresentation(ctx context.Context, obj any) (model.HolderRepresentation, error) {
+	var it model.HolderRepresentation
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"id"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "id":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
+			data, err := ec.unmarshalOID2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.ID = data
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalHolderRepresentation unmarshals raw into the HolderRepresentation input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalHolderRepresentation(ctx context.Context, raw any) (model.HolderRepresentation, error) {
+	var out model.HolderRepresentation
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "HolderRepresentation", raw, &out)
 	return out, err
 }
 
@@ -2786,6 +3115,26 @@ func UnmarshalShipRepresentation(ctx context.Context, raw any) (model.ShipRepres
 
 // region    ************************** interface.gotpl ***************************
 
+func (ec *executionContext) _Holder(ctx context.Context, sel ast.SelectionSet, obj model.Holder) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	case model.Captain:
+		return ec._Captain(ctx, sel, &obj)
+	case *model.Captain:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Captain(ctx, sel, obj)
+	default:
+		if typedObj, ok := obj.(graphql.Marshaler); ok {
+			return typedObj
+		} else {
+			panic(fmt.Errorf("unexpected type %T; non-generated variants of Holder must implement graphql.Marshaler", obj))
+		}
+	}
+}
+
 func (ec *executionContext) _Node(ctx context.Context, sel ast.SelectionSet, obj model.Node) graphql.Marshaler {
 	switch obj := (obj).(type) {
 	case nil:
@@ -2831,6 +3180,13 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 			return graphql.Null
 		}
 		return ec._Port(ctx, sel, obj)
+	case model.Berth:
+		return ec._Berth(ctx, sel, &obj)
+	case *model.Berth:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Berth(ctx, sel, obj)
 	default:
 		if typedObj, ok := obj.(graphql.Marshaler); ok {
 			return typedObj
@@ -2843,6 +3199,82 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
+
+var berthImplementors = []string{"Berth", "_Entity"}
+
+func (ec *executionContext) _Berth(ctx context.Context, sel ast.SelectionSet, obj *model.Berth) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, berthImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Berth")
+		case "holder":
+			out.Values[i] = ec._Berth_holder(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "resolvedBy":
+			out.Values[i] = ec._Berth_resolvedBy(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
+var captainImplementors = []string{"Captain", "Holder"}
+
+func (ec *executionContext) _Captain(ctx context.Context, sel ast.SelectionSet, obj *model.Captain) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, captainImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Captain")
+		case "id":
+			out.Values[i] = ec._Captain_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "name":
+			out.Values[i] = ec._Captain_name(ctx, field, obj)
+			if out.Values[i] == graphql.RequiredNull {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
 
 var dockImplementors = []string{"Dock", "Node", "_Entity"}
 
@@ -2901,6 +3333,12 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Entity")
+		case "findBerth":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, true,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Entity_findBerth(ctx, field)
+				})
 		case "findDock":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
 				true, true,
@@ -3544,6 +3982,19 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNBerth2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentityᚋgeneratedᚋmodelᚐBerth(ctx context.Context, sel ast.SelectionSet, v *model.Berth) graphql.Marshaler {
+	if v == nil {
+		graphql.AddInvalidNullError(ctx, "Berth!")
+		return graphql.Null
+	}
+	return ec._Berth(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNBerthRepresentation2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentityᚋgeneratedᚋmodelᚐBerthRepresentation(ctx context.Context, v any) (model.BerthRepresentation, error) {
+	res, err := ec.unmarshalInputBerthRepresentation(ctx, v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v any) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3583,6 +4034,14 @@ func (ec *executionContext) marshalNFieldSet2string(ctx context.Context, sel ast
 		graphql.AddInvalidNullFromMarshaler(ctx, "FieldSet!")
 	}
 	return res
+}
+
+func (ec *executionContext) marshalNHolder2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentityᚋgeneratedᚋmodelᚐHolder(ctx context.Context, sel ast.SelectionSet, v model.Holder) graphql.Marshaler {
+	if v == nil {
+		graphql.AddInvalidNullError(ctx, "Holder!")
+		return graphql.Null
+	}
+	return ec._Holder(ctx, sel, v)
 }
 
 func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (string, error) {
@@ -4047,6 +4506,14 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	_ = ctx
 	res := graphql.MarshalBoolean(*v)
 	return res
+}
+
+func (ec *executionContext) unmarshalOHolderRepresentation2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentityᚋgeneratedᚋmodelᚐHolderRepresentation(ctx context.Context, v any) (*model.HolderRepresentation, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputHolderRepresentation(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOID2ᚖstring(ctx context.Context, v any) (*string, error) {

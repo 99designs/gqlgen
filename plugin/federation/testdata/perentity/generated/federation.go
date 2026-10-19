@@ -156,6 +156,21 @@ func (ec *executionContext) resolveEntity(
 	}()
 
 	switch typeName {
+	case "Berth":
+		matchedKey, err := matchedKeyForBerth(ctx, rep)
+		if err != nil {
+			return nil, fmt.Errorf(`finding resolver for Entity "Berth": %w`, err)
+		}
+		representation, err := ec.unmarshalNBerthRepresentation2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentityᚋgeneratedᚋmodelᚐBerthRepresentation(ctx, map[string]any(rep))
+		if err != nil {
+			return nil, fmt.Errorf(`unmarshalling representation for Entity "Berth": %w`, err)
+		}
+		representation.MatchedKey = matchedKey
+		entity, err := ec.Resolvers.Entity().FindBerth(ctx, representation)
+		if err != nil {
+			return nil, fmt.Errorf(`resolving Entity "Berth": %w`, err)
+		}
+		return entity, nil
 	case "Dock":
 		matchedKey, err := matchedKeyForDock(ctx, rep)
 		if err != nil {
@@ -261,6 +276,53 @@ func (ec *executionContext) resolveManyEntities(
 	default:
 		return errors.New("unknown type: " + typeName)
 	}
+}
+
+func matchedKeyForBerth(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
+	for {
+		var (
+			m   EntityRepresentation
+			val any
+			ok  bool
+		)
+		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
+		m = rep
+		val, ok = m["holder"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"holder\" for Berth", ErrTypeNotFound))
+			break
+		}
+		if m, ok = val.(map[string]any); !ok {
+			// nested field value is not a map[string]interface so don't use it
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to nested Key Field \"holder\" value not matching map[string]any for Berth", ErrTypeNotFound))
+			break
+		}
+		val, ok = m["id"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"id\" for Berth", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for Berth", ErrTypeNotFound))
+			break
+		}
+		return "holder { id }", nil
+	}
+	return "", fmt.Errorf("%w for Berth due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func matchedKeyForDock(ctx context.Context, rep EntityRepresentation) (string, error) {

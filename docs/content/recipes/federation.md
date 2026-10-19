@@ -438,8 +438,12 @@ func (r *entityResolver) FindPort(ctx context.Context, rep model.PortRepresentat
   not copy them onto the returned entity. A selection with an inline fragment,
   such as `owner { ... on Person { id } }`, is not supported, because inputs
   have no unions.
-- A key that selects a list, interface or union field, such as
-  `@key(fields: "owners { id }")`, is rejected, as federation does not allow it.
+- A key that selects a list or union field, such as
+  `@key(fields: "owners { id }")`, is rejected, as federation does not allow
+  it. A key through an interface field, such as `holder { id }`, is accepted,
+  as per-key resolvers serve it, and gets a representation of the interface's
+  fields; federation does not allow it either, so composition rejects the
+  subgraph.
 - When a schema type has a representation's Go name, such as
   `portRepresentation` with `PortRepresentation`, name the representation
   instead, keyed by the type it represents. Its Go name follows from the name,
@@ -454,8 +458,8 @@ func (r *entityResolver) FindPort(ctx context.Context, rep model.PortRepresentat
 The option applies to every entity. Generation fails, keeping the whole schema
 on per-key resolvers until the cause changes, when any entity has a `preloaded`
 `@requires` with an inline fragment, which per-key `preloaded` does not support
-either, or uses `@requires` on an interface or a key that federation does not
-allow.
+either, or uses `@requires` on an interface or a key through a list or union
+field, which federation does not allow.
 
 ### Migrating
 

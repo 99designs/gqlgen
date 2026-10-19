@@ -197,15 +197,16 @@ func TestPerEntityErrors(t *testing.T) {
 				type Ship @key(fields: "owners { id }") { owners: [Owner!]! }
 				type Owner { id: ID! }`,
 			err: `entity "Ship": key field Ship.owners has type [Owner!]!; federation ` +
-				`does not allow list, interface or union fields in @key`,
+				`does not allow list or union fields in @key`,
 		},
 		{
-			name: "key through an interface field",
+			name: "key field of union type",
 			schema: `
-				type Ship @key(fields: "owner { id }") { owner: Owner! }
-				interface Owner { id: ID! }`,
+				type Ship @key(fields: "owner") { owner: Owner! }
+				type Person { id: ID! }
+				union Owner = Person`,
 			err: `entity "Ship": key field Ship.owner has type Owner!; federation ` +
-				`does not allow list, interface or union fields in @key`,
+				`does not allow list or union fields in @key`,
 		},
 		{
 			name: "preloaded @requires through an inline fragment",
@@ -235,6 +236,13 @@ func TestPerEntityErrors(t *testing.T) {
 				type Ship @key(fields: "owner") { owner: Owner! }
 				type Owner { id: ID! }`,
 			err: `entity "Ship": key field Ship.owner has object type Owner; select its fields`,
+		},
+		{
+			name: "key field of interface type",
+			schema: `
+				type Ship @key(fields: "owner") { owner: Owner! }
+				interface Owner { id: ID! }`,
+			err: `entity "Ship": key field Ship.owner has interface type Owner; select its fields`,
 		},
 		{
 			name: "preloaded @requires field of object type",
@@ -355,6 +363,18 @@ func TestPerEntitySchema(t *testing.T) {
 			resolver: []string{"findShip(reps: [ShipRepresentation!]!): [Ship]"},
 			inputs: map[string][]string{
 				"ShipRepresentation":  {"id: ID", "owner: OwnerRepresentation"},
+				"OwnerRepresentation": {"id: ID"},
+			},
+		},
+		{
+			name: "key through an interface field",
+			schema: `
+				type Ship @key(fields: "owner { id }") { owner: Owner! }
+				interface Owner { id: ID! }
+				type Person implements Owner { id: ID! name: String }`,
+			resolver: []string{"findShip(rep: ShipRepresentation!): Ship!"},
+			inputs: map[string][]string{
+				"ShipRepresentation":  {"owner: OwnerRepresentation"},
 				"OwnerRepresentation": {"id: ID"},
 			},
 		},
@@ -699,6 +719,29 @@ func TestPerEntityResolver(t *testing.T) {
 		require.NoError(t, err)
 		require.Len(t, resp.Entities, 1)
 		require.Equal(t, "o1", resp.Entities[0].Owner.ID)
+	})
+
+	t.Run("key through an interface field", func(t *testing.T) {
+		var resp struct {
+			Entities []struct {
+				Holder struct {
+					Typename string `json:"__typename"`
+					ID       string `json:"id"`
+				} `json:"holder"`
+				ResolvedBy string `json:"resolvedBy"`
+			} `json:"_entities"`
+		}
+
+		err := c.Post(entityQuery([]string{"Berth { holder { __typename id } resolvedBy }"}), &resp,
+			client.Var("representations", []map[string]any{
+				{"__typename": "Berth", "holder": map[string]any{"id": "c1"}},
+			}))
+
+		require.NoError(t, err)
+		require.Len(t, resp.Entities, 1)
+		require.Equal(t, "Captain", resp.Entities[0].Holder.Typename)
+		require.Equal(t, "c1", resp.Entities[0].Holder.ID)
+		require.Equal(t, "holder { id }", resp.Entities[0].ResolvedBy)
 	})
 
 	t.Run("interface resolves to its implementation", func(t *testing.T) {

@@ -13,6 +13,14 @@ import (
 	"github.com/99designs/gqlgen/plugin/federation/testdata/perentity/generated/model"
 )
 
+// FindBerth is the resolver for the findBerth field.
+func (r *entityResolver) FindBerth(ctx context.Context, rep model.BerthRepresentation) (*model.Berth, error) {
+	if rep.Holder == nil || rep.Holder.ID == nil {
+		return nil, errors.New("berth representation has no key")
+	}
+	return &model.Berth{Holder: &model.Captain{ID: *rep.Holder.ID}, ResolvedBy: rep.MatchedKey}, nil
+}
+
 // FindDock is the resolver for the findDock field.
 func (r *entityResolver) FindDock(ctx context.Context, rep model.DockRepresentation) (*model.Dock, error) {
 	if rep.ID == nil {

@@ -40,6 +40,12 @@ type Federation struct {
 
 	// true if @requires is used in the schema
 	usesRequires bool
+
+	// representations are the generated inputs of per-entity resolvers.
+	representations []*representation
+	// representationNames is federation.representation_names: the names some
+	// representations take in place of the default.
+	representationNames map[string]string
 }
 
 type PackageOptions struct {
@@ -55,6 +61,10 @@ type PackageOptions struct {
 	// This can be overriding by @entityResolver(multi: Boolean) directive.
 	// false by default.
 	EntityResolverMulti bool
+	// EntityResolverPerEntity generates one resolver per entity, taking a
+	// representation input, instead of one per @key, for every entity. A
+	// temporary opt-in: it is planned to become the default. false by default.
+	EntityResolverPerEntity bool
 	// PreloadedRequires sets "preloaded" as the package-level default @requires
 	// strategy; individual entities may override it via
 	// @entityResolver(requires: "…"). Under preloaded, the generated multi
@@ -62,7 +72,9 @@ type PackageOptions struct {
 	// fields, unmarshaled before the resolver runs, so a multi resolver sees
 	// every entity's @requires data in one scope — enabling a naturally-batched
 	// computation (e.g. one ML-inference call across the whole batch). Multi
-	// entities only. false by default.
+	// entities only, unless EntityResolverPerEntity is set: then the
+	// <Type>Representation of every entity, single or multi, carries them,
+	// nullable, nested and list paths included. false by default.
 	PreloadedRequires bool
 }
 
@@ -78,19 +90,21 @@ func New(version int, cfg *config.Config) (*Federation, error) {
 		return nil, fmt.Errorf("invalid federation package options: %w", err)
 	}
 	return &Federation{
-		version:        version,
-		PackageOptions: options,
-		models:         cfg.Models,
+		version:             version,
+		PackageOptions:      options,
+		models:              cfg.Models,
+		representationNames: cfg.Federation.RepresentationNames,
 	}, nil
 }
 
 // federation.options keys, recognized in buildPackageOptions and referenced in
 // user-facing errors, so their spelling has a single source of truth.
 const (
-	optionExplicitRequires    = "explicit_requires"
-	optionComputedRequires    = "computed_requires"
-	optionEntityResolverMulti = "entity_resolver_multi"
-	optionPreloadedRequires   = "preloaded_requires"
+	optionExplicitRequires        = "explicit_requires"
+	optionComputedRequires        = "computed_requires"
+	optionEntityResolverMulti     = "entity_resolver_multi"
+	optionPreloadedRequires       = "preloaded_requires"
+	optionEntityResolverPerEntity = "entity_resolver_per_entity"
 )
 
 func buildPackageOptions(cfg *config.Config) (PackageOptions, error) {
@@ -99,6 +113,7 @@ func buildPackageOptions(cfg *config.Config) (PackageOptions, error) {
 	var explicitRequires,
 		computedRequires,
 		entityResolverMulti,
+		entityResolverPerEntity,
 		preloadedRequires bool
 
 	for k, v := range packageOptions {
@@ -109,6 +124,8 @@ func buildPackageOptions(cfg *config.Config) (PackageOptions, error) {
 			computedRequires = v
 		case optionEntityResolverMulti:
 			entityResolverMulti = v
+		case optionEntityResolverPerEntity:
+			entityResolverPerEntity = v
 		case optionPreloadedRequires:
 			preloadedRequires = v
 		default:
@@ -166,10 +183,11 @@ func buildPackageOptions(cfg *config.Config) (PackageOptions, error) {
 	// to ensure
 	// our directive is always called.
 	return PackageOptions{
-		ExplicitRequires:    explicitRequires,
-		ComputedRequires:    computedRequires,
-		EntityResolverMulti: entityResolverMulti,
-		PreloadedRequires:   preloadedRequires,
+		ExplicitRequires:        explicitRequires,
+		ComputedRequires:        computedRequires,
+		EntityResolverMulti:     entityResolverMulti,
+		PreloadedRequires:       preloadedRequires,
+		EntityResolverPerEntity: entityResolverPerEntity,
 	}, nil
 }
 
@@ -188,6 +206,9 @@ func (f *Federation) MutateConfig(cfg *config.Config) error {
 			)
 		}
 		cfg.Models[typeName] = entry
+	}
+	if err := configureRepresentationModels(f.representations, cfg.Models); err != nil {
+		return err
 	}
 	cfg.Directives["external"] = config.DirectiveConfig{SkipRuntime: true}
 	cfg.Directives[dirNameRequires] = config.DirectiveConfig{SkipRuntime: true}
@@ -282,7 +303,7 @@ func computedRequiresPrerequisiteError(version int, callArgumentDirectivesWithNu
 	return nil
 }
 
-// injectPreloadedRequiresFields augments each multi entity's generated
+// injectPreloadedRequiresFields augments each per-key multi entity's generated
 // representation input type with that entity's @requires fields, as modelgen
 // ExtraFields. modelgen runs after the federation plugin in the MutateConfig
 // phase, so the fields land on the generated struct; the result is a resolver
@@ -307,7 +328,9 @@ func computedRequiresPrerequisiteError(version int, callArgumentDirectivesWithNu
 func (f *Federation) injectPreloadedRequiresFields(cfg *config.Config) error {
 	binder := cfg.NewBinder()
 	for _, entity := range f.Entities {
-		if !entity.IsPreloaded() || len(entity.Requires) == 0 {
+		// A per-entity entity's representation carries its @requires fields
+		// (buildRepresentations); it has no batch input.
+		if !entity.IsPreloaded() || len(entity.Requires) == 0 || entity.PerEntity {
 			continue
 		}
 		for _, req := range entity.Requires {
@@ -418,10 +441,18 @@ func (f *Federation) InjectSourcesLate(schema *ast.Schema) ([]*ast.Source, error
 		return nil, err
 	}
 	f.Entities = builtEntities
+	f.representations, err = buildRepresentations(
+		f.Entities, schema, f.models, f.representationNames)
+	if err != nil {
+		return nil, err
+	}
 
 	entityNames := make([]string, 0)
 	resolvers := make([]string, 0)
-	entityResolverInputDefinitions := make([]string, 0)
+	entityResolverInputDefinitions := make([]string, 0, len(f.representations))
+	for _, r := range f.representations {
+		entityResolverInputDefinitions = append(entityResolverInputDefinitions, r.SDL())
+	}
 	for _, e := range f.Entities {
 		if e.Def.Kind != ast.Interface {
 			entityNames = append(entityNames, e.Name)
@@ -431,6 +462,11 @@ func (f *Federation) InjectSourcesLate(schema *ast.Schema) ([]*ast.Source, error
 			)
 		}
 
+		if e.PerEntity {
+			rep := rootRepresentation(f.representations, e)
+			resolvers = append(resolvers, perEntityResolverSDL(e, rep.Name))
+			continue
+		}
 		for _, r := range e.Resolvers {
 			resolverSDL, entityResolverInputSDL := buildResolverSDL(r, e.Multi)
 			resolvers = append(resolvers, resolverSDL)
@@ -525,15 +561,22 @@ func (f *Federation) GenerateCode(data *codegen.Data) error {
 			}
 
 			// Keys are typed from resolver inputs, not the entity's output
-			// fields: the two can bind different Go types to one scalar.
-			for _, r := range e.Resolvers {
-				if e.Multi {
-					err = populateMultiKeyFieldTypes(r, data.Inputs)
-				} else {
-					err = populateSingleKeyFieldTypes(r, data.Objects.ByName("Entity"))
-				}
-				if err != nil {
+			// fields: the two can bind different Go types to one scalar. A
+			// per-entity resolver decodes all its keys as one representation.
+			if e.PerEntity {
+				if err := populateRepresentationType(e, data.Objects.ByName("Entity")); err != nil {
 					return err
+				}
+			} else {
+				for _, r := range e.Resolvers {
+					if e.Multi {
+						err = populateMultiKeyFieldTypes(r, data.Inputs)
+					} else {
+						err = populateSingleKeyFieldTypes(r, data.Objects.ByName("Entity"))
+					}
+					if err != nil {
+						return err
+					}
 				}
 			}
 
@@ -664,6 +707,17 @@ func argByName(field *codegen.Field, name string) *codegen.FieldArgument {
 	return nil
 }
 
+// populateRepresentationType sets entity.RepresentationType from the argument
+// of its per-entity resolver field on the generated Entity object.
+func populateRepresentationType(entity *Entity, entityObj *codegen.Object) error {
+	field := fieldByName(entityObj, entity.PerEntityResolverName())
+	if field == nil || len(field.Args) != 1 || field.Args[0].TypeReference == nil {
+		return fmt.Errorf("per-entity resolver %s not found", entity.PerEntityResolverName())
+	}
+	entity.RepresentationType = field.Args[0].TypeReference
+	return nil
+}
+
 // populateMultiKeyFieldTypes sets a batch resolver's InputType and key types
 // from its input object.
 //
@@ -750,7 +804,8 @@ func (f *Federation) buildEntity(
 	}
 
 	multi := f.isMultiEntity(schemaType)
-	requiresStrategy, err := f.resolveRequiresStrategy(schemaType, multi)
+	perEntity := f.PackageOptions.EntityResolverPerEntity
+	requiresStrategy, err := f.resolveRequiresStrategy(schemaType, multi, perEntity)
 	if err != nil {
 		return nil, err
 	}
@@ -789,12 +844,25 @@ func (f *Federation) buildEntity(
 		return entity, nil
 	}
 
-	resolvers, err := buildResolvers(schemaType, schema, f.models, keys, entity.Multi)
+	resolvers, err := buildResolvers(schemaType, schema, f.models, keys, entity.Multi, perEntity)
 	if err != nil {
 		return nil, err
 	}
 	entity.Resolvers = resolvers
+	// Set only here: an entity returned above has no resolver to replace.
+	entity.PerEntity = perEntity
 	entity.Requires = buildRequires(schemaType, entity.RequiresStrategy)
+	// Delivering @requires sets fields on the resolved entity, which an
+	// interface value does not have. Federation rejects the schema anyway
+	// (REQUIRES_UNSUPPORTED_ON_INTERFACE), so per-key generation is left as
+	// it was.
+	if perEntity && schemaType.Kind == ast.Interface && len(entity.Requires) > 0 {
+		return nil, fmt.Errorf(
+			"entity %q: @requires on an interface entity is not supported with the %s "+
+				"option, and federation does not allow it",
+			schemaType.Name, optionEntityResolverPerEntity,
+		)
+	}
 	if len(entity.Requires) > 0 {
 		f.usesRequires = true
 	}
@@ -821,15 +889,18 @@ func (o PackageOptions) defaultRequiresStrategy() RequiresStrategy {
 // @entityResolver(requires: "…") argument if present, otherwise the package
 // default. It mirrors isMultiEntity.
 //
-// Requires: multi is the already-resolved @entityResolver(multi) value.
+// Requires: multi is the already-resolved @entityResolver(multi) value;
+// perEntity is the entity_resolver_per_entity option.
 // Ensures:  the returned strategy is one of the four RequiresStrategy values;
-// an unknown directive value, or preloaded on a non-multi entity, is a
-// (clear, actionable) error rather than a silent fallback.
+// an unknown directive value, or preloaded on an entity with neither a batch
+// input nor a representation to carry @requires, is a (clear, actionable)
+// error naming the setting that selected it, rather than a silent fallback.
 func (f *Federation) resolveRequiresStrategy(
 	schemaType *ast.Definition,
-	multi bool,
+	multi, perEntity bool,
 ) (RequiresStrategy, error) {
 	strategy := f.PackageOptions.defaultRequiresStrategy()
+	fromDirective := false
 
 	if dir := schemaType.Directives.ForName(dirNameEntityResolver); dir != nil {
 		if dirArg := dir.Arguments.ForName("requires"); dirArg != nil {
@@ -866,13 +937,18 @@ func (f *Federation) resolveRequiresStrategy(
 				)
 			}
 			strategy = parsed
+			fromDirective = true
 		}
 	}
 
-	if strategy == RequiresPreloaded && !multi {
+	if strategy == RequiresPreloaded && !multi && !perEntity {
+		source := fmt.Sprintf("the %s option", optionPreloadedRequires)
+		if fromDirective {
+			source = fmt.Sprintf("@entityResolver(requires: %q)", RequiresPreloaded)
+		}
 		return "", fmt.Errorf(
-			"entity %q: @entityResolver(requires: %q) requires multi: true",
-			schemaType.Name, RequiresPreloaded,
+			"entity %q: %s requires multi: true or the %s option",
+			schemaType.Name, source, optionEntityResolverPerEntity,
 		)
 	}
 
@@ -899,18 +975,29 @@ func parseRequiresStrategy(v any) (RequiresStrategy, bool) {
 // isMultiEntity returns @entityResolver(multi) value, if directive is not defined,
 // then global configuration parameter will be used.
 func (f *Federation) isMultiEntity(schemaType *ast.Definition) bool {
+	if multi, ok := entityResolverBool(schemaType, "multi"); ok {
+		return multi
+	}
+	return f.PackageOptions.EntityResolverMulti
+}
+
+// entityResolverBool returns the named boolean @entityResolver argument and
+// whether it is set.
+func entityResolverBool(schemaType *ast.Definition, name string) (value, ok bool) {
 	dir := schemaType.Directives.ForName(dirNameEntityResolver)
 	if dir == nil {
-		return f.PackageOptions.EntityResolverMulti
+		return false, false
 	}
-
-	if dirArg := dir.Arguments.ForName("multi"); dirArg != nil {
-		if dirVal, err := dirArg.Value.Value(nil); err == nil {
-			return dirVal.(bool)
-		}
+	arg := dir.Arguments.ForName(name)
+	if arg == nil {
+		return false, false
 	}
-
-	return f.PackageOptions.EntityResolverMulti
+	v, err := arg.Value.Value(nil)
+	if err != nil {
+		return false, false
+	}
+	value, ok = v.(bool)
+	return value, ok
 }
 
 // buildResolvers builds one resolver per @key.
@@ -919,13 +1006,14 @@ func (f *Federation) isMultiEntity(schemaType *ast.Definition) bool {
 // Ensures:  each resolver is named from its key fields' GraphQL names, as
 // before; resolvers of this entity whose Go names would collide are named
 // from their key fields' bound Go names (see goFieldName) instead; a Go name
-// still shared is a positioned error.
+// still shared is a positioned error. A per-entity entity generates none of
+// these names, so they are left as built and never collide.
 func buildResolvers(
 	schemaType *ast.Definition,
 	schema *ast.Schema,
 	models config.TypeMap,
 	keys []*ast.Directive,
-	multi bool,
+	multi, perEntity bool,
 ) ([]*EntityResolver, error) {
 	resolvers := make([]*EntityResolver, 0, len(keys))
 	counts := make(map[string]int, len(keys))
@@ -946,6 +1034,9 @@ func buildResolvers(
 			schemaType.Name, keyFields, fieldset.Field.ToGo, multi)
 		counts[templates.ToGo(resolver.ResolverName)]++
 		resolvers = append(resolvers, resolver)
+	}
+	if perEntity {
+		return resolvers, nil
 	}
 
 	boundName := func(field fieldset.Field) string {
@@ -977,11 +1068,14 @@ func buildResolvers(
 		return nil, gqlerror.ErrorPosf(
 			keys[i].Position,
 			"@key(fields: %q) and @key(fields: %q) on %q both generate entity resolver %s; "+
-				"give one of their key fields a distinct @goField(name: ...) or gqlgen.yml fieldName",
+				"give one of their key fields a distinct @goField(name: ...) or gqlgen.yml fieldName, "+
+				"or, if no two key fields of one type share a Go name, "+
+				"set the %s option",
 			fields(keys[j]),
 			fields(keys[i]),
 			schemaType.Name,
 			resolver.ResolverName,
+			optionEntityResolverPerEntity,
 		)
 	}
 	return resolvers, nil

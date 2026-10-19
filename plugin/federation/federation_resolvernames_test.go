@@ -2,6 +2,7 @@ package federation
 
 import (
 	"maps"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -48,7 +49,8 @@ func TestEntityResolverNames(t *testing.T) {
 				id: ID!
 			}`,
 			err: `@key(fields: "_id") and @key(fields: "id") on "Port" both generate ` +
-				`entity resolver findPortByID; give one of their key fields a distinct @goField(name: ...) or gqlgen.yml fieldName`,
+				`entity resolver findPortByID; give one of their key fields a distinct @goField(name: ...) or gqlgen.yml fieldName, ` +
+				`or, if no two key fields of one type share a Go name, set the entity_resolver_per_entity option`,
 		},
 		{
 			name: "leading underscore uses gqlgen.yml fieldName",
@@ -162,7 +164,16 @@ func TestEntityResolverNames(t *testing.T) {
 				type Port @key(fields: "id") @entityResolver(multi: true) { id: ID! }
 				type ManyPort @key(fields: "IDs") { IDs: ID! }`,
 			err: `entities "ManyPort" and "Port" both generate entity resolver findManyPortByIDs; ` +
-				`giving both the same @entityResolver(multi:) setting avoids this`,
+				`giving both the same @entityResolver(multi:) setting, ` +
+				`or setting the entity_resolver_per_entity option, avoids this`,
+		},
+		{
+			name: "different entities in the same mode with the same name",
+			schema: `
+				type Port @key(fields: "iDByX") { iDByX: ID! }
+				type PortByID @key(fields: "x") { x: ID! }`,
+			err: `entities "Port" and "PortByID" both generate entity resolver findPortByIDByX; ` +
+				`setting the entity_resolver_per_entity option avoids this`,
 		},
 		{
 			name: "different entities in the same mode",
@@ -202,14 +213,19 @@ func TestEntityResolverNames(t *testing.T) {
 			require.NoError(t, cfg.LoadSchema())
 
 			var resolvers, inputs []string
+			for _, field := range cfg.Schema.Types["Entity"].Fields {
+				if !strings.HasPrefix(field.Name, "__") {
+					resolvers = append(resolvers, field.Name)
+				}
+			}
 			for _, entity := range f.Entities {
+				if !entity.Multi {
+					continue
+				}
 				for _, resolver := range entity.Resolvers {
-					resolvers = append(resolvers, resolver.ResolverName)
-					if entity.Multi {
-						inputs = append(inputs, resolver.InputTypeName)
-						require.NotNil(t, cfg.Schema.Types[resolver.InputTypeName],
-							"input %s missing from schema", resolver.InputTypeName)
-					}
+					inputs = append(inputs, resolver.InputTypeName)
+					require.NotNil(t, cfg.Schema.Types[resolver.InputTypeName],
+						"input %s missing from schema", resolver.InputTypeName)
 				}
 			}
 			require.Equal(t, tc.resolvers, resolvers)

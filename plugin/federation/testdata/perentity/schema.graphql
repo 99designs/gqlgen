@@ -1,0 +1,59 @@
+extend schema
+  @link(url: "https://specs.apollo.dev/federation/v2.7",
+        import: ["@key", "@external", "@requires"])
+
+directive @entityResolver(multi: Boolean) on OBJECT
+directive @goField(name: String) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
+
+# _id and id produce the same Go name, so the model needs @goField; the single
+# per-entity resolver needs no per-key names at all.
+type Port @key(fields: "_id") @key(fields: "id") {
+    _id: String! @goField(name: "LegacyID")
+    id: ID!
+    size: Int! @external
+    label: String! @requires(fields: "size")
+    resolvedBy: String!
+}
+
+type Ship @key(fields: "id owner { id }") @key(fields: "_id") @entityResolver(multi: true) {
+    _id: String! @goField(name: "LegacyID")
+    id: ID!
+    owner: Owner!
+    resolvedBy: String!
+}
+
+type Owner {
+    id: ID!
+    name: String
+}
+
+# Federation rejects an interface field in @key when composing, but per-key
+# resolvers serve one, so per-entity resolvers do too.
+type Berth @key(fields: "holder { id }") {
+    holder: Holder!
+    resolvedBy: String!
+}
+
+interface Holder {
+    id: ID!
+}
+
+type Captain implements Holder {
+    id: ID!
+    name: String
+}
+
+# The router sends __typename Node for an entity interface, so findNode
+# resolves it to an implementing type.
+interface Node @key(fields: "id") {
+    id: ID!
+}
+
+type Dock implements Node @key(fields: "id") {
+    id: ID!
+    berths: Int!
+}
+
+type Query {
+    ok: Boolean
+}

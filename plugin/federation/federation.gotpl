@@ -161,7 +161,29 @@ func (ec *executionContext) resolveEntity(
 
 		switch typeName {
 			{{ range $_, $entity := .Entities }}
-				{{- if and .Resolvers (not .Multi) -}}
+				{{- if and .Resolvers (not .Multi) .PerEntity -}}
+				case "{{.Def.Name}}":
+					matchedKey, err := matchedKeyFor{{.Def.Name}}(ctx, rep)
+					if err != nil {
+						return nil, fmt.Errorf(`finding resolver for Entity "{{.Def.Name}}": %w`, err)
+					}
+					{{ if $useFunctionSyntaxForExecutionContext -}}
+					representation, err := {{.RepresentationType.UnmarshalFunc}}(ctx, ec, map[string]any(rep))
+					{{- else -}}
+					representation, err := ec.{{.RepresentationType.UnmarshalFunc}}(ctx, map[string]any(rep))
+					{{- end }}
+					if err != nil {
+						return nil, fmt.Errorf(`unmarshalling representation for Entity "{{.Def.Name}}": %w`, err)
+					}
+					representation.MatchedKey = matchedKey
+					entity, err := ec.Resolvers.Entity().{{.PerEntityResolverName | go}}(ctx, representation)
+					if err != nil {
+						return nil, fmt.Errorf(`resolving Entity "{{.Def.Name}}": %w`, err)
+					}
+					{{- template "perEntityRequires" (dict "entity" . "rep" "rep" "ret" "nil, " "usePointers" $usePointers "useFunctionSyntax" $useFunctionSyntaxForExecutionContext) }}
+					return entity, nil
+				{{ end }}
+				{{- if and .Resolvers (not .Multi) (not .PerEntity) -}}
 				case "{{.Def.Name}}":
 					resolverName, err := entityResolverNameFor{{.Def.Name}}(ctx, rep)
 					if err != nil {
@@ -230,7 +252,45 @@ func (ec *executionContext) resolveManyEntities(
 
 		switch typeName {
 			{{ range $_, $entity := .Entities }}
-				{{ if and .Resolvers .Multi -}}
+				{{ if and .Resolvers .Multi .PerEntity -}}
+				case "{{.Def.Name}}":
+					representations := make([]any, len(reps))
+					matchedKeys := make([]string, len(reps))
+					for i, rep := range reps {
+						matchedKey, err := matchedKeyFor{{.Def.Name}}(ctx, rep.entity)
+						if err != nil {
+							return fmt.Errorf(`finding resolver for Entity "{{.Def.Name}}": %w`, err)
+						}
+						representations[i] = map[string]any(rep.entity)
+						matchedKeys[i] = matchedKey
+					}
+					{{ if $useFunctionSyntaxForExecutionContext -}}
+					typedReps, err := {{.RepresentationType.UnmarshalFunc}}(ctx, ec, representations)
+					{{- else -}}
+					typedReps, err := ec.{{.RepresentationType.UnmarshalFunc}}(ctx, representations)
+					{{- end }}
+					if err != nil {
+						return fmt.Errorf(`unmarshalling representations for Entity "{{.Def.Name}}": %w`, err)
+					}
+					for i, typedRep := range typedReps {
+						typedRep.MatchedKey = matchedKeys[i]
+					}
+					entities, err := ec.Resolvers.Entity().{{.PerEntityResolverName | go}}(ctx, typedReps)
+					entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
+					if err != nil {
+						return err
+					}
+					for i, entity := range entities {
+						if i < len(entityErrs) && entityErrs[i] != nil {
+							ec.Error(graphql.WithPathContext(ctx, graphql.NewPathWithIndex(reps[i].index)), entityErrs[i])
+							continue
+						}
+						{{- template "perEntityRequires" (dict "entity" . "rep" "reps[i].entity" "ret" "" "usePointers" $usePointers "useFunctionSyntax" $useFunctionSyntaxForExecutionContext) }}
+						list[reps[i].index] = entity
+					}
+					return nil
+				{{ end }}
+				{{ if and .Resolvers .Multi (not .PerEntity) -}}
 				case "{{.Def.Name}}":
 				resolverName, err := entityResolverNameFor{{.Def.Name}}(ctx, reps[0].entity)
 					if err != nil {
@@ -374,7 +434,8 @@ func (ec *executionContext) resolveManyEntities(
 {{ range $_, $entity := .Entities }}
 	{{- if .Resolvers }}
 
-		func entityResolverNameFor{{$entity.Name}}(ctx context.Context, rep EntityRepresentation) (string, error) {
+		{{/* A per-entity entity's resolver names are not disambiguated, so it reports the matched key instead. */ -}}
+		func {{ if $entity.PerEntity }}matchedKeyFor{{ else }}entityResolverNameFor{{ end }}{{$entity.Name}}(ctx context.Context, rep EntityRepresentation) (string, error) {
 			// we collect errors because a later entity resolver may work fine
 			// when an entity has multiple keys
 			entityResolverErrs := []error{}
@@ -417,7 +478,7 @@ func (ec *executionContext) resolveManyEntities(
 							fmt.Errorf("%w due to all null value KeyFields for {{$entity.Name}}", ErrTypeNotFound))
 						break
 					}
-					return "{{.ResolverName}}", nil
+					return {{ if $entity.PerEntity }}{{ .FieldSet | quote }}{{ else }}"{{.ResolverName}}"{{ end }}, nil
 				}
 			{{- end }}
 			return "", fmt.Errorf("%w for {{$entity.Name}} due to %v", ErrTypeNotFound,
@@ -427,3 +488,35 @@ func (ec *executionContext) resolveManyEntities(
 {{- end }}
 
 {{end}}
+
+{{- /*
+	perEntityRequires delivers @requires onto the entity a per-entity resolver
+	returned. rep is the Go expression holding the representation; ret is what
+	precedes the error in a return statement ("nil, " in resolveEntity).
+*/ -}}
+{{ define "perEntityRequires" }}
+	{{- $entity := .entity }}
+	{{- $rep := .rep }}
+	{{- $ret := .ret }}
+	{{- $useFunctionSyntax := .useFunctionSyntax }}
+	{{- /* preloaded copies nothing: the representation carried @requires */}}
+	{{- if and $entity.IsExplicitRequires $entity.Requires }}
+		err = ec.Populate{{$entity.Def.Name}}Requires(ctx, {{- if not .usePointers -}}&{{- end -}}entity, {{$rep}})
+		if err != nil {
+			return {{$ret}}fmt.Errorf(`populating requires for Entity "{{$entity.Def.Name}}": %w`, err)
+		}
+	{{- else if not $entity.IsPreloaded }}
+		{{- range $entity.Requires }}
+			{{- if not .Computed }}
+				{{ if $useFunctionSyntax -}}
+				entity.{{.Field.JoinGo `.`}}, err = {{.Type.UnmarshalFunc}}(ctx, ec, {{$rep}}["{{.Field.Join `"].(map[string]any)["`}}"])
+				{{- else -}}
+				entity.{{.Field.JoinGo `.`}}, err = ec.{{.Type.UnmarshalFunc}}(ctx, {{$rep}}["{{.Field.Join `"].(map[string]any)["`}}"])
+				{{- end }}
+				if err != nil {
+					return {{$ret}}err
+				}
+			{{- end }}
+		{{- end }}
+	{{- end }}
+{{- end }}

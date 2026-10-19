@@ -220,7 +220,7 @@ data reach the resolver?* — so each entity uses **exactly one**:
 | Default | _(none)_ | `"default"` | Unmarshaled onto the returned entity, after the resolver runs. |
 | Explicit | `explicit_requires` | `"explicit"` | A `Populate<Entity>Requires` function you implement, called on the returned entity after the resolver. Supports nested/array fields. |
 | Computed | `computed_requires` | `@computedRequires` (per field) | Delivered to standalone field resolvers via a `federationRequires` argument (Federation 2 only). |
-| Preloaded | `preloaded_requires` | `"preloaded"` | Unmarshaled onto the resolver's *input* representation, before the resolver runs, so a multi resolver sees every entity's `@requires` data at once. Flat scalar/enum fields only; requires `multi`. |
+| Preloaded | `preloaded_requires` | `"preloaded"` | Unmarshaled onto the resolver's *input* representation, before the resolver runs, so a multi resolver sees every entity's `@requires` data at once. Per key, flat scalar/enum fields only, and requires `multi`; with [one resolver per entity](#one-resolver-per-entity), any entity, nested and list fields included. |
 
 The package option sets the **default** for the whole subgraph. The `requires:`
 argument on `@entityResolver` overrides that default **per entity**, choosing
@@ -373,6 +373,129 @@ func (ec *executionContext) PopulateTodoRequires(ctx context.Context, entity *mo
 }
 ```
 
+## One resolver per entity
+
+By default gqlgen generates one entity resolver per `@key`. With the
+`entity_resolver_per_entity` package option it generates a single resolver for
+each entity, which receives the keys the router sent as one representation:
+
+```yml
+federation:
+  filename: graph/federation.go
+  package: graph
+  version: 2
+  options:
+    entity_resolver_per_entity: true
+```
+
+```graphql
+type Port @key(fields: "_id") @key(fields: "id") {
+  _id: String! @goField(name: "LegacyID")
+  id: ID!
+}
+```
+
+```go
+func (r *entityResolver) FindPort(ctx context.Context, rep model.PortRepresentation) (*model.Port, error) {
+	switch rep.MatchedKey {
+	case "_id":
+		return r.portByLegacyID(ctx, *rep.LegacyID)
+	case "id":
+		return r.portByID(ctx, *rep.ID)
+	}
+	return nil, fmt.Errorf("unexpected key %q", rep.MatchedKey)
+}
+```
+
+- `PortRepresentation` is a generated input holding every key field of `Port`,
+  all nullable: a key the router did not send is `nil`. A nested key such as
+  `owner { id }` gets a representation of the nested type (`OwnerRepresentation`),
+  shared by every entity whose keys select into it.
+- `MatchedKey` holds the fields of the `@key` the representation matched: the
+  first key, in declaration order, whose fields are all present and not all
+  null. gqlgen prints it in a standard form: single spaces, and a nested
+  selection in braces, such as `"id owner { id }"`. gqlgen rejects a
+  representation that matches no key, so a resolver is never called without one.
+- Representation fields take the entity's Go field names, so `@goField(name: ...)`
+  or `fieldName` config on `Port` also applies to `PortRepresentation`. A
+  `fieldName` set on `PortRepresentation` itself takes precedence. As for any
+  generated model, generation fails if two fields of one representation have
+  the same Go name, such as `_id` and `id` without `@goField`.
+- With `multi: true` the resolver takes `reps []*model.PortRepresentation`, and
+  each representation in a batch can use a different key.
+- The resolver name comes from the entity name alone (`findPort`), so keys whose
+  per-key resolver names collide, such as `id` and `i { d }`, need no distinct
+  names (compare [Entity resolver names](#entity-resolver-names)).
+- An interface entity gets a resolver that returns the interface, such as
+  `findNode(rep: NodeRepresentation!): Node!`, and serves representations whose
+  `__typename` is the interface. `@requires` on such an interface is rejected,
+  as federation does not allow it.
+- With the `preloaded` strategy, `PortRepresentation` also holds the entity's
+  `@requires` fields, other than `@computedRequires` ones, nullable like the
+  keys: a field the router did not send is `nil`. This works for single and
+  multi resolvers, for nested selections such as `orbit { period }`, and for
+  lists: `ships { tonnage }` gives `ships: [ShipRepresentation!]`. gqlgen does
+  not copy them onto the returned entity. A selection with an inline fragment,
+  such as `owner { ... on Person { id } }`, is not supported, because inputs
+  have no unions.
+- A key that selects a list or union field, such as
+  `@key(fields: "owners { id }")`, is rejected, as federation does not allow
+  it. A key through an interface field, such as `holder { id }`, is accepted,
+  as per-key resolvers serve it, and gets a representation of the interface's
+  fields; federation does not allow it either, so composition rejects the
+  subgraph.
+- When a schema type has a representation's Go name, such as
+  `portRepresentation` with `PortRepresentation`, name the representation
+  instead, keyed by the type it represents. Its Go name follows from the name,
+  and its `models` settings, such as `fieldName`, move to that name:
+
+  ```yml
+  federation:
+    representation_names:
+      Port: PortKey
+  ```
+
+The option applies to every entity. Generation fails, keeping the whole schema
+on per-key resolvers until the cause changes, when any entity has a `preloaded`
+`@requires` with an inline fragment, which per-key `preloaded` does not support
+either, or uses `@requires` on an interface or a key through a list or union
+field, which federation does not allow.
+
+### Migrating
+
+The option moves every entity at once; the router and supergraph need no
+change.
+
+1. Set `entity_resolver_per_entity: true`.
+2. Run `gqlgen generate`. For each entity, its per-key resolvers, such as
+   `FindPortByID` and `FindPortByLegacyID`, become one stub, such as `FindPort`,
+   and their bodies move to the `!!! WARNING !!!` comment at the end of the
+   resolver file.
+3. Move those bodies into helpers now: the comment holds only what the latest
+   run removed, so the next `gqlgen generate` deletes them.
+4. Implement `FindPort` by switching on `rep.MatchedKey` and calling the helper
+   for that key, as in the preceding example. With `multi: true`, each
+   representation in `reps` has its own `MatchedKey`; return the entities in
+   the order of `reps`, and report per-entity errors with a
+   `graphql.BatchErrorList`.
+5. With `preloaded`, read the `@requires` fields from the representation
+   instead of the `…ByKeysInput` batch input. They are pointers now, so
+   `rep.Category` is `nil` when the router did not send it.
+6. Update code and tests that call the per-key methods directly. Tests that go
+   through `_entities` need no change.
+
+`_service { sdl }` does not change: the representations and `findPort` are not
+part of it. Explicit `@requires` keeps its `Populate<Entity>Requires` function.
+To undo, remove the option, regenerate, and call the helpers from the per-key
+stubs.
+
+> **Roadmap — the default will change.** The option is a temporary opt-in. A
+> future release plans to make one resolver per entity the **default**, with
+> `entity_resolver_per_entity: false` keeping per-key resolvers (see
+> [Entity resolver names](#entity-resolver-names)). A later release plans to
+> remove per-key resolvers. Setting the option now means your schema won't
+> change when the default flips.
+
 ## Using @entityResolver
 
 The `@entityResolver` directive enables optimization for entity resolver generation in GraphQL federation.
@@ -399,6 +522,9 @@ federation:
   options:
     entity_resolver_multi: true
 ```
+
+To generate one resolver per entity instead, see
+[One resolver per entity](#one-resolver-per-entity).
 
 > **Roadmap — the default will change.** A future major version plans to make
 > `multi` the **default** (single-entity resolution becomes "multi with N = 1")
@@ -491,7 +617,10 @@ func (r *entityResolver) FindManyProductByIDs(
 
 Notes and limitations:
 
-- Only **flat scalar and enum** `@requires` fields are supported. gqlgen can
+- Per key, only **flat scalar and enum** `@requires` fields are supported, on
+  multi entities. With [one resolver per entity](#one-resolver-per-entity), the
+  representation carries them instead, for single resolvers too, and nested
+  and list paths work. Per key, gqlgen can
   only reconstruct scalar leaves of a representation, so a `@requires` naming an
   object or list field, or a nested path such as `@requires(fields: "world { foo }")`,
   is rejected at generation time. Require the scalar leaves instead
@@ -577,11 +706,15 @@ When the names would still collide, generation fails with an error that says
 what to change:
 
 - Two keys on one entity, such as `id` and `i { d }`: give one of their key
-  fields a distinct `@goField(name:)` or `fieldName`.
+  fields a distinct `@goField(name:)` or `fieldName`. If no two key fields of
+  one type share a Go name, you can instead use
+  [one resolver per entity](#one-resolver-per-entity). `_id` and `id` share
+  the Go name `ID`, so they need `@goField` or `fieldName` either way.
 - The same `@key` declared twice: remove one.
 - Two entities, such as a single `ManyPort @key(fields: "IDs")` and a multi
   `Port @key(fields: "id")`: you can't rename either entity, so give both the
-  same `@entityResolver(multi:)` setting.
+  same `@entityResolver(multi:)` setting, or use
+  [one resolver per entity](#one-resolver-per-entity).
 - A batch input with the Go name of one of your types: rename your type.
 
 > **Check your resolver bodies when a collision first appears.** Suppose

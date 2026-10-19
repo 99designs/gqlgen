@@ -17,6 +17,21 @@ type CometRepresentation struct {
 	MatchedKey string `json:"-"`
 }
 
+type Fleet struct {
+	Name    string  `json:"name"`
+	Ships   []*Ship `json:"ships"`
+	Tonnage int     `json:"tonnage"`
+}
+
+func (Fleet) IsEntity() {}
+
+type FleetRepresentation struct {
+	Name  *string               `json:"name,omitempty"`
+	Ships []*ShipRepresentation `json:"ships,omitempty"`
+	// The @key fields this representation matched, as gqlgen prints them.
+	MatchedKey string `json:"-"`
+}
+
 type MultiPlanet struct {
 	Name     string `json:"name"`
 	Diameter int    `json:"diameter"`
@@ -57,4 +72,12 @@ type PlanetRepresentation struct {
 }
 
 type Query struct {
+}
+
+type Ship struct {
+	Tonnage int `json:"tonnage"`
+}
+
+type ShipRepresentation struct {
+	Tonnage *int `json:"tonnage,omitempty"`
 }

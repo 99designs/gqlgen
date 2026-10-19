@@ -46,6 +46,27 @@ func TestPerEntityPreloaded(t *testing.T) {
 		})
 	}
 
+	t.Run("@requires through a list, sent or not", func(t *testing.T) {
+		type fleet struct {
+			Name    string `json:"name"`
+			Tonnage int    `json:"tonnage"`
+		}
+		var resp struct {
+			Entities []fleet `json:"_entities"`
+		}
+
+		err := c.Post(entityQuery([]string{"Fleet {name, tonnage}"}), &resp,
+			client.Var("representations", []map[string]any{
+				{"__typename": "Fleet", "name": "red", "ships": []map[string]any{
+					{"tonnage": 3}, {"tonnage": 4},
+				}},
+				{"__typename": "Fleet", "name": "empty"},
+			}))
+
+		require.NoError(t, err)
+		require.Equal(t, []fleet{{"red", 7}, {"empty", 0}}, resp.Entities)
+	})
+
 	t.Run("nested @requires, sent or not", func(t *testing.T) {
 		type comet struct {
 			Name   string `json:"name"`

@@ -135,6 +135,8 @@ func (ec *executionContext) resolveEntityGroup(
 
 func isMulti(typeName string) bool {
 	switch typeName {
+	case "Fleet":
+		return true
 	case "MultiPlanet":
 		return true
 	default:
@@ -207,6 +209,38 @@ func (ec *executionContext) resolveManyEntities(
 
 	switch typeName {
 
+	case "Fleet":
+		representations := make([]any, len(reps))
+		matchedKeys := make([]string, len(reps))
+		for i, rep := range reps {
+			matchedKey, err := matchedKeyForFleet(ctx, rep.entity)
+			if err != nil {
+				return fmt.Errorf(`finding resolver for Entity "Fleet": %w`, err)
+			}
+			representations[i] = map[string]any(rep.entity)
+			matchedKeys[i] = matchedKey
+		}
+		typedReps, err := ec.unmarshalNFleetRepresentation2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentitypreloadedᚋgeneratedᚐFleetRepresentationᚄ(ctx, representations)
+		if err != nil {
+			return fmt.Errorf(`unmarshalling representations for Entity "Fleet": %w`, err)
+		}
+		for i, typedRep := range typedReps {
+			typedRep.MatchedKey = matchedKeys[i]
+		}
+		entities, err := ec.Resolvers.Entity().FindFleet(ctx, typedReps)
+		entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
+		if err != nil {
+			return err
+		}
+		for i, entity := range entities {
+			if i < len(entityErrs) && entityErrs[i] != nil {
+				ec.Error(graphql.WithPathContext(ctx, graphql.NewPathWithIndex(reps[i].index)), entityErrs[i])
+				continue
+			}
+			list[reps[i].index] = entity
+		}
+		return nil
+
 	case "MultiPlanet":
 		representations := make([]any, len(reps))
 		matchedKeys := make([]string, len(reps))
@@ -276,6 +310,41 @@ func matchedKeyForComet(ctx context.Context, rep EntityRepresentation) (string, 
 		return "name", nil
 	}
 	return "", fmt.Errorf("%w for Comet due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
+}
+
+func matchedKeyForFleet(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
+	for {
+		var (
+			m   EntityRepresentation
+			val any
+			ok  bool
+		)
+		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
+		m = rep
+		val, ok = m["name"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"name\" for Fleet", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for Fleet", ErrTypeNotFound))
+			break
+		}
+		return "name", nil
+	}
+	return "", fmt.Errorf("%w for Fleet due to %v", ErrTypeNotFound,
 		errors.Join(entityResolverErrs...).Error())
 }
 

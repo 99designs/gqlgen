@@ -74,7 +74,7 @@ type PackageOptions struct {
 	// computation (e.g. one ML-inference call across the whole batch). Multi
 	// entities only, unless EntityResolverPerEntity is set: then the
 	// <Type>Representation of every entity, single or multi, carries them,
-	// nullable, nested paths included. false by default.
+	// nullable, nested and list paths included. false by default.
 	PreloadedRequires bool
 }
 
@@ -853,10 +853,13 @@ func (f *Federation) buildEntity(
 	entity.PerEntity = perEntity
 	entity.Requires = buildRequires(schemaType, entity.RequiresStrategy)
 	// Delivering @requires sets fields on the resolved entity, which an
-	// interface value does not have.
+	// interface value does not have. Federation rejects the schema anyway
+	// (REQUIRES_UNSUPPORTED_ON_INTERFACE), so per-key generation is left as
+	// it was.
 	if perEntity && schemaType.Kind == ast.Interface && len(entity.Requires) > 0 {
 		return nil, fmt.Errorf(
-			"entity %q: @requires on an interface entity is not supported with the %s option",
+			"entity %q: @requires on an interface entity is not supported with the %s "+
+				"option, and federation does not allow it",
 			schemaType.Name, optionEntityResolverPerEntity,
 		)
 	}

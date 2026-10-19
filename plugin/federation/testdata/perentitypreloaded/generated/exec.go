@@ -43,6 +43,7 @@ type ComplexityRoot struct {
 
 type EntityResolver interface {
 	FindComet(ctx context.Context, rep CometRepresentation) (*Comet, error)
+	FindFleet(ctx context.Context, reps []*FleetRepresentation) ([]*Fleet, error)
 	FindMultiPlanet(ctx context.Context, reps []*MultiPlanetRepresentation) ([]*MultiPlanet, error)
 	FindPlanet(ctx context.Context, rep PlanetRepresentation) (*Planet, error)
 }
@@ -72,9 +73,11 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	inputUnmarshalers := func() *graphql.InputUnmarshalerIndex {
 		return graphql.NewInputUnmarshalerIndex(
 			graphql.NewInputUnmarshaler("CometRepresentation", ec.unmarshalInputCometRepresentation),
+			graphql.NewInputUnmarshaler("FleetRepresentation", ec.unmarshalInputFleetRepresentation),
 			graphql.NewInputUnmarshaler("MultiPlanetRepresentation", ec.unmarshalInputMultiPlanetRepresentation),
 			graphql.NewInputUnmarshaler("OrbitRepresentation", ec.unmarshalInputOrbitRepresentation),
 			graphql.NewInputUnmarshaler("PlanetRepresentation", ec.unmarshalInputPlanetRepresentation),
+			graphql.NewInputUnmarshaler("ShipRepresentation", ec.unmarshalInputShipRepresentation),
 		)
 	}
 	first := true
@@ -160,6 +163,16 @@ type Orbit {
     period: Int
     radius: Int
 }
+
+type Fleet @key(fields: "name") @entityResolver(multi: true) {
+    name: String!
+    ships: [Ship!]! @external
+    tonnage: Int! @requires(fields: "ships { tonnage }")
+}
+
+type Ship {
+    tonnage: Int!
+}
 `, BuiltIn: false},
 	{Name: "../../../federation/directives.graphql", Input: `
 	directive @key(fields: _FieldSet!) repeatable on OBJECT | INTERFACE
@@ -173,7 +186,7 @@ type Orbit {
 `, BuiltIn: true},
 	{Name: "../../../federation/entity.graphql", Input: `
 # a union of all types that use the @key directive
-union _Entity = Comet | MultiPlanet | Planet
+union _Entity = Comet | Fleet | MultiPlanet | Planet
 
 input CometRepresentation {
 	name: String
@@ -182,6 +195,15 @@ input CometRepresentation {
 
 input OrbitRepresentation {
 	period: Int
+}
+
+input FleetRepresentation {
+	name: String
+	ships: [ShipRepresentation!]
+}
+
+input ShipRepresentation {
+	tonnage: Int
 }
 
 input MultiPlanetRepresentation {
@@ -197,6 +219,7 @@ input PlanetRepresentation {
 # fake type to build resolver interfaces for users to implement
 type Entity {
 	findComet(rep: CometRepresentation!): Comet!
+	findFleet(reps: [FleetRepresentation!]!): [Fleet]
 	findMultiPlanet(reps: [MultiPlanetRepresentation!]!): [MultiPlanet]
 	findPlanet(rep: PlanetRepresentation!): Planet!
 }
@@ -227,6 +250,18 @@ func (ec *executionContext) childFields_Comet(ctx context.Context, field graphql
 		return ec.fieldContext_Comet_period(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type Comet", field.Name)
+}
+
+func (ec *executionContext) childFields_Fleet(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "name":
+		return ec.fieldContext_Fleet_name(ctx, field)
+	case "ships":
+		return ec.fieldContext_Fleet_ships(ctx, field)
+	case "tonnage":
+		return ec.fieldContext_Fleet_tonnage(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type Fleet", field.Name)
 }
 
 func (ec *executionContext) childFields_MultiPlanet(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
@@ -261,6 +296,14 @@ func (ec *executionContext) childFields_Planet(ctx context.Context, field graphq
 		return ec.fieldContext_Planet_size(ctx, field)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type Planet", field.Name)
+}
+
+func (ec *executionContext) childFields_Ship(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+	switch field.Name {
+	case "tonnage":
+		return ec.fieldContext_Ship_tonnage(ctx, field)
+	}
+	return nil, fmt.Errorf("no field named %q was found under type Ship", field.Name)
 }
 
 func (ec *executionContext) childFields__Service(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
@@ -398,6 +441,20 @@ func (ec *executionContext) field_Entity_findComet_args(ctx context.Context, raw
 		return nil, err
 	}
 	args["rep"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Entity_findFleet_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "reps",
+		func(ctx context.Context, v any) ([]*FleetRepresentation, error) {
+			return ec.unmarshalNFleetRepresentation2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentitypreloadedᚋgeneratedᚐFleetRepresentationᚄ(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["reps"] = arg0
 	return args, nil
 }
 
@@ -639,6 +696,50 @@ func (ec *executionContext) fieldContext_Entity_findComet(ctx context.Context, f
 	return fc, nil
 }
 
+func (ec *executionContext) _Entity_findFleet(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Entity_findFleet(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.Resolvers.Entity().FindFleet(ctx, fc.Args["reps"].([]*FleetRepresentation))
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*Fleet) graphql.Marshaler {
+			return ec.marshalOFleet2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentitypreloadedᚋgeneratedᚐFleet(ctx, selections, v)
+		},
+		true,
+		false,
+	)
+}
+func (ec *executionContext) fieldContext_Entity_findFleet(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Entity",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Fleet(ctx, field)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Entity_findFleet_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Entity_findMultiPlanet(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -725,6 +826,84 @@ func (ec *executionContext) fieldContext_Entity_findPlanet(ctx context.Context, 
 		return fc, err
 	}
 	return fc, nil
+}
+
+func (ec *executionContext) _Fleet_name(ctx context.Context, field graphql.CollectedField, obj *Fleet) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Fleet_name(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Name, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v string) graphql.Marshaler {
+			return ec.marshalNString2string(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Fleet_name(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Fleet", field, false, false, "String")
+}
+
+func (ec *executionContext) _Fleet_ships(ctx context.Context, field graphql.CollectedField, obj *Fleet) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Fleet_ships(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Ships, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v []*Ship) graphql.Marshaler {
+			return ec.marshalNShip2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentitypreloadedᚋgeneratedᚐShipᚄ(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Fleet_ships(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Fleet",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.childFields_Ship(ctx, field)
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _Fleet_tonnage(ctx context.Context, field graphql.CollectedField, obj *Fleet) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Fleet_tonnage(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Tonnage, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Fleet_tonnage(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Fleet", field, false, false, "Int")
 }
 
 func (ec *executionContext) _MultiPlanet_name(ctx context.Context, field graphql.CollectedField, obj *MultiPlanet) (ret graphql.Marshaler) {
@@ -1061,6 +1240,29 @@ func (ec *executionContext) fieldContext_Query___schema(_ context.Context, field
 		},
 	}
 	return fc, nil
+}
+
+func (ec *executionContext) _Ship_tonnage(ctx context.Context, field graphql.CollectedField, obj *Ship) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return ec.fieldContext_Ship_tonnage(ctx, field)
+		},
+		func(ctx context.Context) (any, error) {
+			return obj.Tonnage, nil
+		},
+		nil,
+		func(ctx context.Context, selections ast.SelectionSet, v int) graphql.Marshaler {
+			return ec.marshalNInt2int(ctx, selections, v)
+		},
+		true,
+		true,
+	)
+}
+func (ec *executionContext) fieldContext_Ship_tonnage(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	return graphql.NewScalarFieldContext("Ship", field, false, false, "Int")
 }
 
 func (ec *executionContext) __Service_sdl(ctx context.Context, field graphql.CollectedField, obj *fedruntime.Service) (ret graphql.Marshaler) {
@@ -2194,6 +2396,55 @@ func UnmarshalCometRepresentation(ctx context.Context, raw any) (CometRepresenta
 	return out, err
 }
 
+func (ec *executionContext) unmarshalInputFleetRepresentation(ctx context.Context, obj any) (FleetRepresentation, error) {
+	var it FleetRepresentation
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"name", "ships"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "name":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("name"))
+			data, err := ec.unmarshalOString2ᚖstring(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Name = data
+		case "ships":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ships"))
+			data, err := ec.unmarshalOShipRepresentation2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentitypreloadedᚋgeneratedᚐShipRepresentationᚄ(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Ships = data
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalFleetRepresentation unmarshals raw into the FleetRepresentation input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalFleetRepresentation(ctx context.Context, raw any) (FleetRepresentation, error) {
+	var out FleetRepresentation
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "FleetRepresentation", raw, &out)
+	return out, err
+}
+
 func (ec *executionContext) unmarshalInputMultiPlanetRepresentation(ctx context.Context, obj any) (MultiPlanetRepresentation, error) {
 	var it MultiPlanetRepresentation
 	if obj == nil {
@@ -2334,6 +2585,48 @@ func UnmarshalPlanetRepresentation(ctx context.Context, raw any) (PlanetRepresen
 	return out, err
 }
 
+func (ec *executionContext) unmarshalInputShipRepresentation(ctx context.Context, obj any) (ShipRepresentation, error) {
+	var it ShipRepresentation
+	if obj == nil {
+		return it, nil
+	}
+
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"tonnage"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "tonnage":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("tonnage"))
+			data, err := ec.unmarshalOInt2ᚖint(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Tonnage = data
+		}
+	}
+	return it, nil
+}
+
+// UnmarshalShipRepresentation unmarshals raw into the ShipRepresentation input type, using the
+// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+// object that was not passed as a field argument.
+//
+// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+// and the returned error says so.
+func UnmarshalShipRepresentation(ctx context.Context, raw any) (ShipRepresentation, error) {
+	var out ShipRepresentation
+	err := graphql.UnmarshalNamedInputFromContext(ctx, "ShipRepresentation", raw, &out)
+	return out, err
+}
+
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -2356,6 +2649,13 @@ func (ec *executionContext) __Entity(ctx context.Context, sel ast.SelectionSet, 
 			return graphql.Null
 		}
 		return ec._MultiPlanet(ctx, sel, obj)
+	case Fleet:
+		return ec._Fleet(ctx, sel, &obj)
+	case *Fleet:
+		if obj == nil {
+			return graphql.Null
+		}
+		return ec._Fleet(ctx, sel, obj)
 	case Comet:
 		return ec._Comet(ctx, sel, &obj)
 	case *Comet:
@@ -2444,6 +2744,12 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._Entity_findComet(ctx, field)
 				})
+		case "findFleet":
+			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
+				true, false,
+				func(ctx context.Context) graphql.Marshaler {
+					return ec._Entity_findFleet(ctx, field)
+				})
 		case "findMultiPlanet":
 			out.ResolveRootConcurrently(innerCtx, ec.OperationContext, i,
 				true, false,
@@ -2456,6 +2762,49 @@ func (ec *executionContext) _Entity(ctx context.Context, sel ast.SelectionSet) g
 				func(ctx context.Context) graphql.Marshaler {
 					return ec._Entity_findPlanet(ctx, field)
 				})
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
+var fleetImplementors = []string{"Fleet", "_Entity"}
+
+func (ec *executionContext) _Fleet(ctx context.Context, sel ast.SelectionSet, obj *Fleet) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, fleetImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Fleet")
+		case "name":
+			out.Values[i] = ec._Fleet_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "ships":
+			out.Values[i] = ec._Fleet_ships(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "tonnage":
+			out.Values[i] = ec._Fleet_tonnage(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -2641,6 +2990,39 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			})
 			if out.Values[i] == graphql.RequiredNull {
 				atomic.AddUint32(&out.Invalids, 1)
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	if n := len(deferred.Defers); n > 0 {
+		atomic.AddInt32(&ec.Deferred, int32(min(n, math.MaxInt32)))
+		ec.ProcessDeferredGroup(deferred)
+	}
+
+	return out
+}
+
+var shipImplementors = []string{"Ship"}
+
+func (ec *executionContext) _Ship(ctx context.Context, sel ast.SelectionSet, obj *Ship) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, shipImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := graphql.NewDeferredGroup(ctx)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Ship")
+		case "tonnage":
+			out.Values[i] = ec._Ship_tonnage(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
 			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
@@ -3081,6 +3463,25 @@ func (ec *executionContext) unmarshalNCometRepresentation2githubᚗcomᚋ99desig
 	return res, graphql.ErrorOnPath(ctx, err)
 }
 
+func (ec *executionContext) unmarshalNFleetRepresentation2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentitypreloadedᚋgeneratedᚐFleetRepresentationᚄ(ctx context.Context, v any) ([]*FleetRepresentation, error) {
+	vSlice := graphql.CoerceList(v)
+	var err error
+	res := make([]*FleetRepresentation, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNFleetRepresentation2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentitypreloadedᚋgeneratedᚐFleetRepresentation(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) unmarshalNFleetRepresentation2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentitypreloadedᚋgeneratedᚐFleetRepresentation(ctx context.Context, v any) (*FleetRepresentation, error) {
+	res, err := ec.unmarshalInputFleetRepresentation(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
 func (ec *executionContext) unmarshalNInt2int(ctx context.Context, v any) (int, error) {
 	res, err := graphql.UnmarshalInt(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -3125,6 +3526,35 @@ func (ec *executionContext) marshalNPlanet2ᚖgithubᚗcomᚋ99designsᚋgqlgen�
 func (ec *executionContext) unmarshalNPlanetRepresentation2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentitypreloadedᚋgeneratedᚐPlanetRepresentation(ctx context.Context, v any) (PlanetRepresentation, error) {
 	res, err := ec.unmarshalInputPlanetRepresentation(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalNShip2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentitypreloadedᚋgeneratedᚐShipᚄ(ctx context.Context, sel ast.SelectionSet, v []*Ship) graphql.Marshaler {
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalNShip2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentitypreloadedᚋgeneratedᚐShip(ctx, sel, v[i])
+	})
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) marshalNShip2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentitypreloadedᚋgeneratedᚐShip(ctx context.Context, sel ast.SelectionSet, v *Ship) graphql.Marshaler {
+	if v == nil {
+		graphql.AddInvalidNullError(ctx, "Ship!")
+		return graphql.Null
+	}
+	return ec._Ship(ctx, sel, v)
+}
+
+func (ec *executionContext) unmarshalNShipRepresentation2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentitypreloadedᚋgeneratedᚐShipRepresentation(ctx context.Context, v any) (*ShipRepresentation, error) {
+	res, err := ec.unmarshalInputShipRepresentation(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v any) (string, error) {
@@ -3380,6 +3810,26 @@ func (ec *executionContext) marshalOBoolean2ᚖbool(ctx context.Context, sel ast
 	return res
 }
 
+func (ec *executionContext) marshalOFleet2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentitypreloadedᚋgeneratedᚐFleet(ctx context.Context, sel ast.SelectionSet, v []*Fleet) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
+		fc := graphql.GetFieldContext(ctx)
+		fc.Result = &v[i]
+		return ec.marshalOFleet2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentitypreloadedᚋgeneratedᚐFleet(ctx, sel, v[i])
+	})
+
+	return ret
+}
+
+func (ec *executionContext) marshalOFleet2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentitypreloadedᚋgeneratedᚐFleet(ctx context.Context, sel ast.SelectionSet, v *Fleet) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	return ec._Fleet(ctx, sel, v)
+}
+
 func (ec *executionContext) unmarshalOInt2ᚖint(ctx context.Context, v any) (*int, error) {
 	if v == nil {
 		return nil, nil
@@ -3431,6 +3881,23 @@ func (ec *executionContext) unmarshalOOrbitRepresentation2ᚖgithubᚗcomᚋ99de
 	}
 	res, err := ec.unmarshalInputOrbitRepresentation(ctx, v)
 	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) unmarshalOShipRepresentation2ᚕᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentitypreloadedᚋgeneratedᚐShipRepresentationᚄ(ctx context.Context, v any) ([]*ShipRepresentation, error) {
+	if v == nil {
+		return nil, nil
+	}
+	vSlice := graphql.CoerceList(v)
+	var err error
+	res := make([]*ShipRepresentation, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalNShipRepresentation2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentitypreloadedᚋgeneratedᚐShipRepresentation(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
 }
 
 func (ec *executionContext) unmarshalOString2string(ctx context.Context, v any) (string, error) {

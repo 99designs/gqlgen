@@ -20,6 +20,18 @@ func (r *entityResolver) FindComet(ctx context.Context, rep generated.CometRepre
 	return comet, nil
 }
 
+// FindFleet is the resolver for the findFleet field.
+func (r *entityResolver) FindFleet(ctx context.Context, reps []*generated.FleetRepresentation) ([]*generated.Fleet, error) {
+	fleets := make([]*generated.Fleet, len(reps))
+	for i, rep := range reps {
+		fleets[i] = &generated.Fleet{Name: *rep.Name}
+		for _, ship := range rep.Ships {
+			fleets[i].Tonnage += *ship.Tonnage
+		}
+	}
+	return fleets, nil
+}
+
 // FindMultiPlanet is the resolver for the findMultiPlanet field.
 func (r *entityResolver) FindMultiPlanet(ctx context.Context, reps []*generated.MultiPlanetRepresentation) ([]*generated.MultiPlanet, error) {
 	planets := make([]*generated.MultiPlanet, len(reps))

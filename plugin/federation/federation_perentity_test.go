@@ -147,7 +147,7 @@ func TestPerEntityErrors(t *testing.T) {
 					label: String! @requires(fields: "size")
 				}`,
 			err: `entity "Node": @requires on an interface entity is not supported ` +
-				`with the entity_resolver_per_entity option`,
+				`with the entity_resolver_per_entity option, and federation does not allow it`,
 		},
 		{
 			name: "named representation Go name taken",
@@ -196,20 +196,38 @@ func TestPerEntityErrors(t *testing.T) {
 			schema: `
 				type Ship @key(fields: "owners { id }") { owners: [Owner!]! }
 				type Owner { id: ID! }`,
-			err: `entity "Ship": key path through list field Ship.owners is not supported ` +
-				`with the entity_resolver_per_entity option`,
+			err: `entity "Ship": key field Ship.owners has type [Owner!]!; federation ` +
+				`does not allow list, interface or union fields in @key`,
 		},
 		{
-			name: "preloaded @requires through a list",
+			name: "key through an interface field",
+			schema: `
+				type Ship @key(fields: "owner { id }") { owner: Owner! }
+				interface Owner { id: ID! }`,
+			err: `entity "Ship": key field Ship.owner has type Owner!; federation ` +
+				`does not allow list, interface or union fields in @key`,
+		},
+		{
+			name: "preloaded @requires through an inline fragment",
 			schema: `
 				type Ship @key(fields: "id") @entityResolver(requires: "preloaded") {
 					id: ID!
-					owners: [Owner!]! @external
-					crew: Int @requires(fields: "owners { id }")
+					owner: Owner @external
+					crew: Int @requires(fields: "owner { ... on Person { id } }")
 				}
-				type Owner { id: ID! }`,
-			err: `entity "Ship": @requires path through list field Ship.owners is not ` +
-				`supported with the entity_resolver_per_entity option`,
+				type Person { id: ID! }
+				union Owner = Person`,
+			err: `entity "Ship": @requires path through inline fragment "... on Person" on ` +
+				`Ship.owner is not supported with the entity_resolver_per_entity option`,
+		},
+		{
+			name: "preloaded @requires of no field",
+			schema: `
+				type Ship @key(fields: "id") @entityResolver(requires: "preloaded") {
+					id: ID!
+					crew: Int @requires(fields: "nope")
+				}`,
+			err: `entity "Ship": @requires field "nope" is not a field of Ship`,
 		},
 		{
 			name: "key field of object type",
@@ -454,8 +472,8 @@ func TestPerEntityPreloadedSchema(t *testing.T) {
 	cases := []struct {
 		name    string
 		schema  string
-		options map[string]bool // federation.options beside per-entity
-		inputs  map[string][]string
+		options map[string]bool     // federation.options beside per-entity
+		types   map[string][]string // fields of each named definition
 	}{
 		{
 			name: "default strategy carries keys only",
@@ -464,7 +482,7 @@ func TestPerEntityPreloadedSchema(t *testing.T) {
 				diameter: Int @external
 				size: Int @requires(fields: "diameter")
 			}`,
-			inputs: map[string][]string{"PlanetRepresentation": {"name: String"}},
+			types: map[string][]string{"PlanetRepresentation": {"name: String"}},
 		},
 		{
 			name: "preloaded carries @requires",
@@ -473,7 +491,7 @@ func TestPerEntityPreloadedSchema(t *testing.T) {
 				diameter: Int! @external
 				size: Int @requires(fields: "diameter")
 			}`,
-			inputs: map[string][]string{
+			types: map[string][]string{
 				"PlanetRepresentation": {"name: String", "diameter: Int"},
 			},
 		},
@@ -486,9 +504,23 @@ func TestPerEntityPreloadedSchema(t *testing.T) {
 					tag: Int @requires(fields: "orbit { period }")
 				}
 				type Orbit { period: Int! radius: Int }`,
-			inputs: map[string][]string{
+			types: map[string][]string{
 				"CometRepresentation": {"name: String", "orbit: OrbitRepresentation"},
 				"OrbitRepresentation": {"period: Int"},
+			},
+		},
+		{
+			name: "preloaded @requires through a list",
+			schema: `
+				type Ship @key(fields: "id") @entityResolver(requires: "preloaded") {
+					id: ID!
+					owners: [Owner!]! @external
+					crew: Int @requires(fields: "owners { id }")
+				}
+				type Owner { id: ID! name: String }`,
+			types: map[string][]string{
+				"ShipRepresentation":  {"id: ID", "owners: [OwnerRepresentation!]"},
+				"OwnerRepresentation": {"id: ID"},
 			},
 		},
 		{
@@ -497,7 +529,7 @@ func TestPerEntityPreloadedSchema(t *testing.T) {
 				name: String!
 				size: Int @requires(fields: "name")
 			}`,
-			inputs: map[string][]string{"PlanetRepresentation": {"name: String"}},
+			types: map[string][]string{"PlanetRepresentation": {"name: String"}},
 		},
 		{
 			name: "computed @requires stays off the representation",
@@ -508,7 +540,7 @@ func TestPerEntityPreloadedSchema(t *testing.T) {
 				size: Int @requires(fields: "diameter") @computedRequires
 				density: Int @requires(fields: "mass")
 			}`,
-			inputs: map[string][]string{
+			types: map[string][]string{
 				"PlanetRepresentation": {"name: String", "mass: Int"},
 			},
 		},
@@ -518,7 +550,7 @@ func TestPerEntityPreloadedSchema(t *testing.T) {
 				name: String!
 			}`,
 			options: map[string]bool{optionPreloadedRequires: true},
-			inputs:  map[string][]string{"PlanetRepresentation": {"name: String"}},
+			types:   map[string][]string{"PlanetRepresentation": {"name: String"}},
 		},
 	}
 
@@ -532,11 +564,39 @@ func TestPerEntityPreloadedSchema(t *testing.T) {
 			})
 
 			require.NoError(t, err)
-			for name, fields := range tc.inputs {
+			for name, fields := range tc.types {
 				require.Equal(t, fields, fieldsSDL(cfg.Schema.Types[name]), "fields of %s", name)
 			}
 		})
 	}
+}
+
+// TestPerEntityRepresentationLeavesSchema checks that a representation's list
+// field is a copy: renaming its element type must not rename the entity's.
+func TestPerEntityRepresentationLeavesSchema(t *testing.T) {
+	cfg := config.DefaultConfig()
+	perEntity(cfg)
+	f, err := New(2, cfg)
+	require.NoError(t, err)
+	early, err := f.InjectSourcesEarly()
+	require.NoError(t, err)
+	cfg.Sources = early
+	cfg.Sources = append(cfg.Sources, &ast.Source{Name: "schema.graphql", Input: `
+		directive @entityResolver(requires: String) on OBJECT
+		type Query { ok: Boolean }
+		type Ship @key(fields: "id") @entityResolver(requires: "preloaded") {
+			id: ID!
+			owners: [Owner!]! @external
+			crew: Int @requires(fields: "owners { id }")
+		}
+		type Owner { id: ID! }`})
+	require.NoError(t, cfg.LoadSchema())
+
+	_, err = f.InjectSourcesLate(cfg.Schema)
+
+	require.NoError(t, err)
+	owners := cfg.Schema.Types["Ship"].Fields.ForName("owners")
+	require.Equal(t, "[Owner!]!", owners.Type.String())
 }
 
 func TestPerEntityMatchedKeyField(t *testing.T) {

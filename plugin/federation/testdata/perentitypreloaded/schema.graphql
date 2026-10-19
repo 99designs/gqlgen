@@ -22,3 +22,13 @@ type Orbit {
     period: Int
     radius: Int
 }
+
+type Fleet @key(fields: "name") @entityResolver(multi: true) {
+    name: String!
+    ships: [Ship!]! @external
+    tonnage: Int! @requires(fields: "ships { tonnage }")
+}
+
+type Ship {
+    tonnage: Int!
+}

@@ -128,23 +128,6 @@ func TestPerEntityErrors(t *testing.T) {
 				`representation OwnerRepresentation; rename "ownerRepresentation"`,
 		},
 		{
-			name: "key fields with the same Go name",
-			schema: `type Port @key(fields: "_id") @key(fields: "id") @entityResolver(perEntity: true) {
-				_id: String!
-				id: ID!
-			}`,
-			err: `entity "Port": Port._id and Port.id both have Go name ID in PortRepresentation; ` +
-				`give one a distinct @goField(name: ...) or gqlgen.yml fieldName`,
-		},
-		{
-			name: "@goField name taken by another key field",
-			schema: `type Port @key(fields: "_id") @key(fields: "legacyID") @entityResolver(perEntity: true) {
-				_id: String! @goField(name: "LegacyID")
-				legacyID: ID!
-			}`,
-			err: `entity "Port": Port._id and Port.legacyID both have Go name LegacyID in PortRepresentation`,
-		},
-		{
 			name: "interface with @requires",
 			schema: `
 				interface Node @key(fields: "id") @entityResolver(perEntity: true) {
@@ -270,6 +253,20 @@ func TestPerEntitySchema(t *testing.T) {
 			inputs: map[string][]string{
 				"ShipRepresentation":  {"id: ID", "owner: OwnerRepresentation"},
 				"OwnerRepresentation": {"id: ID"},
+			},
+		},
+		{
+			name: "keys sharing fields list them once",
+			schema: `
+				type Ship @key(fields: "id owner { id }") @key(fields: "id owner { name }")
+					@entityResolver(perEntity: true) {
+					id: ID!
+					owner: Owner!
+				}
+				type Owner { id: ID! name: String! }`,
+			inputs: map[string][]string{
+				"ShipRepresentation":  {"id: ID", "owner: OwnerRepresentation"},
+				"OwnerRepresentation": {"id: ID", "name: String"},
 			},
 		},
 		{

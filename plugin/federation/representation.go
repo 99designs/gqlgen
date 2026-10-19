@@ -2,6 +2,7 @@ package federation
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/ast"
@@ -61,7 +62,8 @@ func perEntityResolverSDL(e *Entity) string {
 // Ensures:  one representation per per-entity entity and per type its keys
 // select into, in first-use order, each listing the selected fields once in
 // key order with their Go names; or an error if a representation's Go name is
-// a schema type's, or two of its fields share a Go name.
+// a schema type's. Two fields sharing a Go name are left to modelgen, which
+// checks every generated struct after its hooks have run.
 func buildRepresentations(
 	entities []*Entity,
 	schema *ast.Schema,
@@ -143,22 +145,14 @@ func (b *representationBuilder) add(r *representation, def *ast.Definition, path
 		fieldType.NamedType = nested.Name
 	}
 
+	if slices.ContainsFunc(r.Fields, func(field *representationField) bool {
+		return field.Name == fieldDef.Name
+	}) {
+		return nil // another key selected it, perhaps with other nested fields
+	}
 	goName := b.models[r.Name].Fields[fieldDef.Name].FieldName
 	if goName == "" {
 		goName = goFieldName(b.models, def.Name, fieldDef)
-	}
-	for _, field := range r.Fields {
-		if field.Name == fieldDef.Name {
-			return nil
-		}
-		// Exact, not by ToGo: modelgen uses a Go name as written.
-		if field.GoName == goName {
-			return fmt.Errorf(
-				"%s.%s and %s.%s both have Go name %s in %s; give one a distinct "+
-					"@goField(name: ...) or gqlgen.yml fieldName",
-				def.Name, field.Name, def.Name, fieldDef.Name, goName, r.Name,
-			)
-		}
 	}
 	r.Fields = append(r.Fields, &representationField{
 		Name:   fieldDef.Name,
@@ -169,7 +163,7 @@ func (b *representationBuilder) add(r *representation, def *ast.Definition, path
 }
 
 // setRepresentationFieldNames records each representation field's Go name in
-// models, so the generated struct has the names buildRepresentations checked.
+// models, so the generated struct has the names buildRepresentations chose.
 func setRepresentationFieldNames(representations []*representation, models config.TypeMap) {
 	for _, r := range representations {
 		entry := models[r.Name]

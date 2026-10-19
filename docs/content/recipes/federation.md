@@ -406,9 +406,9 @@ func (r *entityResolver) FindPort(ctx context.Context, rep model.PortRepresentat
   shared by every entity whose keys select into it.
 - Representation fields take the entity's Go field names, so `@goField(name: ...)`
   or `fieldName` config on `Port` also applies to `PortRepresentation`. A
-  `fieldName` set on `PortRepresentation` itself takes precedence. Generation
-  fails if two fields of one representation have the same Go name, such as `_id`
-  and `id` without `@goField`, since the entity's model would have them as well.
+  `fieldName` set on `PortRepresentation` itself takes precedence. As for any
+  generated model, generation fails if two fields of one representation have
+  the same Go name, such as `_id` and `id` without `@goField`.
 - With `multi: true` the resolver takes `reps []*model.PortRepresentation`, and
   each representation in a batch can use a different key.
 - The resolver name comes from the entity name alone (`findPort`), so keys whose

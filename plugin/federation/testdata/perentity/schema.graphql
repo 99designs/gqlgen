@@ -2,7 +2,7 @@ extend schema
   @link(url: "https://specs.apollo.dev/federation/v2.7",
         import: ["@key", "@external", "@requires"])
 
-directive @entityResolver(multi: Boolean, requires: String, perEntity: Boolean) on OBJECT
+directive @entityResolver(multi: Boolean, requires: String, perEntity: Boolean) on OBJECT | INTERFACE
 directive @goField(name: String) on FIELD_DEFINITION | INPUT_FIELD_DEFINITION
 
 # _id and id produce the same Go name, so the model needs @goField; the single
@@ -25,6 +25,17 @@ type Ship @key(fields: "id owner { id }") @key(fields: "_id") @entityResolver(pe
 type Owner {
     id: ID!
     name: String
+}
+
+# The router sends __typename Node for an entity interface, so findNode
+# resolves it to an implementing type.
+interface Node @key(fields: "id") @entityResolver(perEntity: true) {
+    id: ID!
+}
+
+type Dock implements Node @key(fields: "id") {
+    id: ID!
+    berths: Int!
 }
 
 type Plain @key(fields: "id") {

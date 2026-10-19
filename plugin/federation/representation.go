@@ -7,6 +7,7 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 
 	"github.com/99designs/gqlgen/codegen/config"
+	"github.com/99designs/gqlgen/codegen/templates"
 )
 
 // A representation is a generated input object that carries an entity's @key
@@ -22,7 +23,10 @@ type representation struct {
 
 type representationField struct {
 	Name string // the owner's GraphQL field name
-	Type string // SDL type: the owner's field type made nullable
+	// GoName is the representation's own fieldName in gqlgen.yml, else the
+	// Go name of the owner's field (goFieldName).
+	GoName string
+	Type   string // SDL type: the owner's field type made nullable
 }
 
 func representationName(typeName string) string {
@@ -56,9 +60,19 @@ func perEntityResolverSDL(e *Entity) string {
 // Requires: entities are sorted and their key fields exist in schema.
 // Ensures:  one representation per per-entity entity and per type its keys
 // select into, in first-use order, each listing the selected fields once in
-// key order; an error if a representation name is already a schema type.
-func buildRepresentations(entities []*Entity, schema *ast.Schema) ([]*representation, error) {
-	b := representationBuilder{schema: schema, byName: make(map[string]*representation)}
+// key order with their Go names; or an error if a representation's Go name is
+// a schema type's, or two of its fields share a Go name.
+func buildRepresentations(
+	entities []*Entity,
+	schema *ast.Schema,
+	models config.TypeMap,
+) ([]*representation, error) {
+	b := representationBuilder{
+		schema:  schema,
+		models:  models,
+		goTypes: goTypeNames(schema),
+		byName:  make(map[string]*representation),
+	}
 	for _, entity := range entities {
 		if !entity.PerEntity {
 			continue
@@ -80,6 +94,8 @@ func buildRepresentations(entities []*Entity, schema *ast.Schema) ([]*representa
 
 type representationBuilder struct {
 	schema  *ast.Schema
+	models  config.TypeMap
+	goTypes map[string]string // Go name to schema type name
 	byName  map[string]*representation
 	ordered []*representation
 }
@@ -89,8 +105,11 @@ func (b *representationBuilder) representationOf(def *ast.Definition) (*represen
 	if r, ok := b.byName[name]; ok {
 		return r, nil
 	}
-	if b.schema.Types[name] != nil {
-		return nil, fmt.Errorf("type %s already exists", name)
+	if existing, ok := b.goTypes[templates.ToGo(name)]; ok {
+		return nil, fmt.Errorf(
+			"type %q has the same Go name as representation %s; rename %q",
+			existing, name, existing,
+		)
 	}
 	r := &representation{Name: name, Owner: def.Name}
 	b.byName[name] = r
@@ -124,40 +143,44 @@ func (b *representationBuilder) add(r *representation, def *ast.Definition, path
 		fieldType.NamedType = nested.Name
 	}
 
+	goName := b.models[r.Name].Fields[fieldDef.Name].FieldName
+	if goName == "" {
+		goName = goFieldName(b.models, def.Name, fieldDef)
+	}
 	for _, field := range r.Fields {
 		if field.Name == fieldDef.Name {
 			return nil
 		}
+		// Exact, not by ToGo: modelgen uses a Go name as written.
+		if field.GoName == goName {
+			return fmt.Errorf(
+				"%s.%s and %s.%s both have Go name %s in %s; give one a distinct "+
+					"@goField(name: ...) or gqlgen.yml fieldName",
+				def.Name, field.Name, def.Name, fieldDef.Name, goName, r.Name,
+			)
+		}
 	}
-	r.Fields = append(r.Fields, &representationField{Name: fieldDef.Name, Type: fieldType.String()})
+	r.Fields = append(r.Fields, &representationField{
+		Name:   fieldDef.Name,
+		GoName: goName,
+		Type:   fieldType.String(),
+	})
 	return nil
 }
 
-// copyRepresentationFieldNames gives each representation field the Go name its
-// owner's field has, so a key such as _id with @goField(name: "LegacyID")
-// lands on LegacyID in both structs, and colliding keys stay distinct.
-//
-// Requires: models already holds @goField and fieldName overrides (config.Init).
-// Ensures:  a representation field gets its owner's FieldName unless the user
-// set one on the representation itself; nothing else changes.
-func copyRepresentationFieldNames(representations []*representation, models config.TypeMap) {
+// setRepresentationFieldNames records each representation field's Go name in
+// models, so the generated struct has the names buildRepresentations checked.
+func setRepresentationFieldNames(representations []*representation, models config.TypeMap) {
 	for _, r := range representations {
-		for _, field := range r.Fields {
-			name := models[r.Owner].Fields[field.Name].FieldName
-			if name == "" {
-				continue
-			}
-			entry := models[r.Name]
-			if entry.Fields[field.Name].FieldName != "" {
-				continue
-			}
-			if entry.Fields == nil {
-				entry.Fields = make(map[string]config.TypeMapField)
-			}
-			fieldEntry := entry.Fields[field.Name]
-			fieldEntry.FieldName = name
-			entry.Fields[field.Name] = fieldEntry
-			models[r.Name] = entry
+		entry := models[r.Name]
+		if entry.Fields == nil {
+			entry.Fields = make(map[string]config.TypeMapField, len(r.Fields))
 		}
+		for _, field := range r.Fields {
+			fieldEntry := entry.Fields[field.Name]
+			fieldEntry.FieldName = field.GoName
+			entry.Fields[field.Name] = fieldEntry
+		}
+		models[r.Name] = entry
 	}
 }

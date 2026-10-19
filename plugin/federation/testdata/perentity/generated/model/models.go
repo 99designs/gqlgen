@@ -2,6 +2,26 @@
 
 package model
 
+type Node interface {
+	IsEntity()
+	IsNode()
+	GetID() string
+}
+
+type Dock struct {
+	ID     string `json:"id"`
+	Berths int    `json:"berths"`
+}
+
+func (Dock) IsNode()            {}
+func (this Dock) GetID() string { return this.ID }
+
+func (Dock) IsEntity() {}
+
+type NodeRepresentation struct {
+	ID *string `json:"id,omitempty"`
+}
+
 type Owner struct {
 	ID   string  `json:"id"`
 	Name *string `json:"name,omitempty"`

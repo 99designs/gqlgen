@@ -7,6 +7,7 @@ package usefunctionsyntaxforexecutioncontext
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/99designs/gqlgen/plugin/federation/testdata/usefunctionsyntaxforexecutioncontext/generated"
@@ -84,7 +85,14 @@ func (r *entityResolver) FindManyMultiHelloWithErrorByNames(ctx context.Context,
 
 // FindMultiPerEntityPlanet is the resolver for the findMultiPerEntityPlanet field.
 func (r *entityResolver) FindMultiPerEntityPlanet(ctx context.Context, reps []*model.MultiPerEntityPlanetRepresentation) ([]*model.MultiPerEntityPlanet, error) {
-	panic(fmt.Errorf("not implemented: FindMultiPerEntityPlanet - findMultiPerEntityPlanet"))
+	planets := make([]*model.MultiPerEntityPlanet, len(reps))
+	for i, rep := range reps {
+		if rep.Name == nil {
+			return nil, errors.New("planet representation has no name")
+		}
+		planets[i] = &model.MultiPerEntityPlanet{Name: *rep.Name}
+	}
+	return planets, nil
 }
 
 // FindManyMultiPlanetRequiresNestedByNames is the resolver for the findManyMultiPlanetRequiresNestedByNames field.
@@ -118,7 +126,10 @@ func (r *entityResolver) FindManyMultiPlanetRequiresNestedByNames(ctx context.Co
 
 // FindPerEntityPlanet is the resolver for the findPerEntityPlanet field.
 func (r *entityResolver) FindPerEntityPlanet(ctx context.Context, rep model.PerEntityPlanetRepresentation) (*model.PerEntityPlanet, error) {
-	panic(fmt.Errorf("not implemented: FindPerEntityPlanet - findPerEntityPlanet"))
+	if rep.Name == nil {
+		return nil, errors.New("planet representation has no name")
+	}
+	return &model.PerEntityPlanet{Name: *rep.Name}, nil
 }
 
 // FindPlanetMultipleRequiresByName is the resolver for the findPlanetMultipleRequiresByName field.

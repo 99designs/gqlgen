@@ -25,7 +25,12 @@ func (ec *executionContext) PopulateMultiHelloRequiresRequires(ctx context.Conte
 
 // PopulateMultiPerEntityPlanetRequires is the requires populator for the MultiPerEntityPlanet entity.
 func (ec *executionContext) PopulateMultiPerEntityPlanetRequires(ctx context.Context, entity *MultiPerEntityPlanet, reps map[string]any) error {
-	panic(fmt.Errorf("not implemented: PopulateMultiPerEntityPlanetRequires"))
+	diameter, err := reps["diameter"].(json.Number).Int64()
+	if err != nil {
+		return err
+	}
+	entity.Diameter = int(diameter)
+	return nil
 }
 
 // PopulateMultiPlanetRequiresNestedRequires is the requires populator for the MultiPlanetRequiresNested entity.
@@ -39,7 +44,12 @@ func (ec *executionContext) PopulateMultiPlanetRequiresNestedRequires(ctx contex
 
 // PopulatePerEntityPlanetRequires is the requires populator for the PerEntityPlanet entity.
 func (ec *executionContext) PopulatePerEntityPlanetRequires(ctx context.Context, entity *PerEntityPlanet, reps map[string]any) error {
-	panic(fmt.Errorf("not implemented: PopulatePerEntityPlanetRequires"))
+	diameter, err := reps["diameter"].(json.Number).Int64()
+	if err != nil {
+		return err
+	}
+	entity.Diameter = int(diameter)
+	return nil
 }
 
 // PopulatePersonRequires is the requires populator for the Person entity.

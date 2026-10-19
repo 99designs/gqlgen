@@ -192,7 +192,7 @@ func (f *Federation) MutateConfig(cfg *config.Config) error {
 		}
 		cfg.Models[typeName] = entry
 	}
-	copyRepresentationFieldNames(f.representations, cfg.Models)
+	setRepresentationFieldNames(f.representations, cfg.Models)
 	cfg.Directives["external"] = config.DirectiveConfig{SkipRuntime: true}
 	cfg.Directives[dirNameRequires] = config.DirectiveConfig{SkipRuntime: true}
 	cfg.Directives["provides"] = config.DirectiveConfig{SkipRuntime: true}
@@ -422,7 +422,7 @@ func (f *Federation) InjectSourcesLate(schema *ast.Schema) ([]*ast.Source, error
 		return nil, err
 	}
 	f.Entities = builtEntities
-	f.representations, err = buildRepresentations(f.Entities, schema)
+	f.representations, err = buildRepresentations(f.Entities, schema, f.models)
 	if err != nil {
 		return nil, err
 	}
@@ -837,6 +837,14 @@ func (f *Federation) buildEntity(
 	// Set only here: an entity returned above has no resolver to replace.
 	entity.PerEntity = perEntity
 	entity.Requires = buildRequires(schemaType, entity.RequiresStrategy)
+	// Delivering @requires sets fields on the resolved entity, which an
+	// interface value does not have.
+	if perEntity && schemaType.Kind == ast.Interface && len(entity.Requires) > 0 {
+		return nil, fmt.Errorf(
+			"entity %q: @entityResolver(perEntity: true) on an interface does not support @requires",
+			schemaType.Name,
+		)
+	}
 	if len(entity.Requires) > 0 {
 		f.usesRequires = true
 	}
@@ -1035,7 +1043,8 @@ func buildResolvers(
 			keys[i].Position,
 			"@key(fields: %q) and @key(fields: %q) on %q both generate entity resolver %s; "+
 				"give one of their key fields a distinct @goField(name: ...) or gqlgen.yml fieldName, "+
-				"or set @entityResolver(perEntity: true) on %q",
+				"or, if no two key fields of one type share a Go name, "+
+				"set @entityResolver(perEntity: true) on %q",
 			fields(keys[j]),
 			fields(keys[i]),
 			schemaType.Name,

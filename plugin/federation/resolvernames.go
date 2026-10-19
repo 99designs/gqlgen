@@ -84,23 +84,16 @@ func sameKeyPath(a, b *KeyField) bool {
 // two entities' generated resolvers share, or that a per-key batch input
 // shares with a schema type.
 func checkResolverNames(entities []*Entity, schema *ast.Schema) error {
-	types := make(map[string]string, len(schema.Types))
-	for name := range schema.Types {
-		types[templates.ToGo(name)] = name
-	}
+	types := goTypeNames(schema)
 
 	owners := make(map[string]*Entity)
 	for _, entity := range entities {
 		for _, resolver := range generatedResolvers(entity) {
 			goName := templates.ToGo(resolver.name)
 			if other, ok := owners[goName]; ok {
-				hint := ""
-				if !other.PerEntity && !entity.PerEntity && other.Multi != entity.Multi {
-					hint = "; giving both the same @entityResolver(multi:) setting avoids this"
-				}
 				return fmt.Errorf(
 					"entities %q and %q both generate entity resolver %s%s",
-					other.Name, entity.Name, resolver.name, hint,
+					other.Name, entity.Name, resolver.name, crossEntityHint(other, entity),
 				)
 			}
 			owners[goName] = entity
@@ -117,6 +110,36 @@ func checkResolverNames(entities []*Entity, schema *ast.Schema) error {
 		}
 	}
 	return nil
+}
+
+// crossEntityHint suggests settings that give a and b distinct resolver
+// names. A per-entity resolver is named find<Entity>, which can't take the
+// name of both entities' resolvers at once, so perEntity on one of them works
+// unless a third entity has that name.
+func crossEntityHint(a, b *Entity) string {
+	switch {
+	case a.PerEntity && b.PerEntity:
+		return ""
+	case a.PerEntity:
+		return fmt.Sprintf("; setting @entityResolver(perEntity: true) on %q avoids this", b.Name)
+	case b.PerEntity:
+		return fmt.Sprintf("; setting @entityResolver(perEntity: true) on %q avoids this", a.Name)
+	case a.Multi != b.Multi:
+		return "; giving both the same @entityResolver(multi:) setting, " +
+			"or setting @entityResolver(perEntity: true) on one of them, avoids this"
+	default:
+		return "; setting @entityResolver(perEntity: true) on one of them avoids this"
+	}
+}
+
+// goTypeNames maps the Go name of each schema type to its name. Generated
+// types are compared by Go name, since that is what must be unique.
+func goTypeNames(schema *ast.Schema) map[string]string {
+	types := make(map[string]string, len(schema.Types))
+	for name := range schema.Types {
+		types[templates.ToGo(name)] = name
+	}
+	return types
 }
 
 // generatedResolver is a field gqlgen generates on the Entity type, with the

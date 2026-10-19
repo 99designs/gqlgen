@@ -156,6 +156,38 @@ func (ec *executionContext) resolveEntity(
 	}()
 
 	switch typeName {
+	case "Dock":
+		resolverName, err := entityResolverNameForDock(ctx, rep)
+		if err != nil {
+			return nil, fmt.Errorf(`finding resolver for Entity "Dock": %w`, err)
+		}
+		switch resolverName {
+
+		case "findDockByID":
+			id0, err := ec.unmarshalNID2string(ctx, rep["id"])
+			if err != nil {
+				return nil, fmt.Errorf(`unmarshalling param 0 for findDockByID(): %w`, err)
+			}
+			entity, err := ec.Resolvers.Entity().FindDockByID(ctx, id0)
+			if err != nil {
+				return nil, fmt.Errorf(`resolving Entity "Dock": %w`, err)
+			}
+
+			return entity, nil
+		}
+	case "Node":
+		if _, err := entityResolverNameForNode(ctx, rep); err != nil {
+			return nil, fmt.Errorf(`finding resolver for Entity "Node": %w`, err)
+		}
+		representation, err := ec.unmarshalNNodeRepresentation2githubᚗcomᚋ99designsᚋgqlgenᚋpluginᚋfederationᚋtestdataᚋperentityᚋgeneratedᚋmodelᚐNodeRepresentation(ctx, map[string]any(rep))
+		if err != nil {
+			return nil, fmt.Errorf(`unmarshalling representation for Entity "Node": %w`, err)
+		}
+		entity, err := ec.Resolvers.Entity().FindNode(ctx, representation)
+		if err != nil {
+			return nil, fmt.Errorf(`resolving Entity "Node": %w`, err)
+		}
+		return entity, nil
 	case "Plain":
 		resolverName, err := entityResolverNameForPlain(ctx, rep)
 		if err != nil {
@@ -242,6 +274,76 @@ func (ec *executionContext) resolveManyEntities(
 	default:
 		return errors.New("unknown type: " + typeName)
 	}
+}
+
+func entityResolverNameForDock(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
+	for {
+		var (
+			m   EntityRepresentation
+			val any
+			ok  bool
+		)
+		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
+		m = rep
+		val, ok = m["id"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"id\" for Dock", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for Dock", ErrTypeNotFound))
+			break
+		}
+		return "findDockByID", nil
+	}
+	return "", fmt.Errorf("%w for Dock due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
+}
+
+func entityResolverNameForNode(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
+	for {
+		var (
+			m   EntityRepresentation
+			val any
+			ok  bool
+		)
+		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use use it
+		allNull := true
+		m = rep
+		val, ok = m["id"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"id\" for Node", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for Node", ErrTypeNotFound))
+			break
+		}
+		return "findNodeByID", nil
+	}
+	return "", fmt.Errorf("%w for Node due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
 }
 
 func entityResolverNameForPlain(ctx context.Context, rep EntityRepresentation) (string, error) {

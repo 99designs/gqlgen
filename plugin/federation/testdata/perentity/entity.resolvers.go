@@ -13,6 +13,19 @@ import (
 	"github.com/99designs/gqlgen/plugin/federation/testdata/perentity/generated/model"
 )
 
+// FindDockByID is the resolver for the findDockByID field.
+func (r *entityResolver) FindDockByID(ctx context.Context, id string) (*model.Dock, error) {
+	return &model.Dock{ID: id, Berths: 1}, nil
+}
+
+// FindNode is the resolver for the findNode field.
+func (r *entityResolver) FindNode(ctx context.Context, rep model.NodeRepresentation) (model.Node, error) {
+	if rep.ID == nil {
+		return nil, errors.New("node representation has no key")
+	}
+	return &model.Dock{ID: *rep.ID, Berths: 2}, nil
+}
+
 // FindPlainByID is the resolver for the findPlainByID field.
 func (r *entityResolver) FindPlainByID(ctx context.Context, id string) (*model.Plain, error) {
 	return &model.Plain{ID: id}, nil

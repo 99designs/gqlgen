@@ -405,15 +405,26 @@ func (r *entityResolver) FindPort(ctx context.Context, rep model.PortRepresentat
   `owner { id }` gets a representation of the nested type (`OwnerRepresentation`),
   shared by every entity whose keys select into it.
 - Representation fields take the entity's Go field names, so `@goField(name: ...)`
-  or `fieldName` config on `Port` also applies to `PortRepresentation`.
+  or `fieldName` config on `Port` also applies to `PortRepresentation`. A
+  `fieldName` set on `PortRepresentation` itself takes precedence. Generation
+  fails if two fields of one representation have the same Go name, such as `_id`
+  and `id` without `@goField`, since the entity's model would have them as well.
 - With `multi: true` the resolver takes `reps []*model.PortRepresentation`, and
   each representation in a batch can use a different key.
 - The resolver name comes from the entity name alone (`findPort`), so keys whose
-  Go names collide, such as `_id` and `id`, need no distinct names (compare
-  [Entity resolver names](#entity-resolver-names)). Generation fails if another
-  entity's resolver already has that name.
+  per-key resolver names collide, such as `id` and `i { d }`, need no distinct
+  names (compare [Entity resolver names](#entity-resolver-names)). Generation
+  fails if another entity's resolver already has that name.
+- An interface entity gets a resolver that returns the interface, such as
+  `findNode(rep: NodeRepresentation!): Node!`, and serves representations whose
+  `__typename` is the interface. Declare the directive `on OBJECT | INTERFACE`.
+  `@requires` on such an interface is not supported.
 - `@requires` works with the default and explicit strategies; `preloaded` is not
-  supported. A type named `<Entity>Representation` must not already exist.
+  supported.
+- A key that selects through a list field, such as `@key(fields: "owners { id }")`,
+  is not supported.
+- No schema type may share a Go name with a representation, such as
+  `portRepresentation` with `PortRepresentation`.
 
 > **Roadmap — the default will change.** `perEntity: true` is a temporary
 > opt-in. A future release plans to make one resolver per entity the
@@ -626,12 +637,15 @@ When the names would still collide, generation fails with an error that says
 what to change:
 
 - Two keys on one entity, such as `id` and `i { d }`: give one of their key
-  fields a distinct `@goField(name:)` or `fieldName`, or give the entity
-  [one resolver per entity](#one-resolver-per-entity).
+  fields a distinct `@goField(name:)` or `fieldName`. If no two key fields of
+  one type share a Go name, you can instead give the entity
+  [one resolver per entity](#one-resolver-per-entity). `_id` and `id` share
+  the Go name `ID`, so they need `@goField` or `fieldName` either way.
 - The same `@key` declared twice: remove one.
 - Two entities, such as a single `ManyPort @key(fields: "IDs")` and a multi
   `Port @key(fields: "id")`: you can't rename either entity, so give both the
-  same `@entityResolver(multi:)` setting.
+  same `@entityResolver(multi:)` setting, or give one of them
+  [one resolver per entity](#one-resolver-per-entity).
 - A batch input with the Go name of one of your types: rename your type.
 
 > **Check your resolver bodies when a collision first appears.** Suppose

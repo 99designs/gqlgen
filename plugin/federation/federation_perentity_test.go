@@ -2,6 +2,7 @@
 package federation
 
 import (
+	"maps"
 	"strings"
 	"testing"
 
@@ -16,21 +17,28 @@ import (
 	"github.com/99designs/gqlgen/plugin/federation/testdata/perentity/generated"
 )
 
-// injectFederation loads schema with the federation sources injected, as
-// api.Generate does, and returns the error from the late injection, which is
-// the step under test. Not parallel-safe: LoadSchema writes package-level
-// caches in internal/code.
-func injectFederation(t *testing.T, schema string) (*Federation, *ast.Schema, error) {
+// injectFederation runs the plugin's schema and config steps on schema, as
+// api.Generate does, with models as the gqlgen.yml models, and returns the
+// error from the late injection, which is the step under test. Not
+// parallel-safe: LoadSchema writes package-level caches in internal/code.
+func injectFederation(
+	t *testing.T,
+	schema string,
+	models config.TypeMap,
+) (*Federation, *config.Config, error) {
 	t.Helper()
 
-	f := &Federation{version: 2}
+	cfg := config.DefaultConfig()
+	maps.Copy(cfg.Models, models)
+	f, err := New(2, cfg)
+	require.NoError(t, err)
 	early, err := f.InjectSourcesEarly()
 	require.NoError(t, err)
-	cfg := config.DefaultConfig()
 	cfg.Sources = early
 	cfg.Sources = append(cfg.Sources, &ast.Source{
 		Name: "schema.graphql",
-		Input: `directive @entityResolver(multi: Boolean, requires: String, perEntity: Boolean) on OBJECT
+		Input: `directive @entityResolver(multi: Boolean, requires: String, perEntity: Boolean) on OBJECT | INTERFACE
+			directive @goField(name: String) on FIELD_DEFINITION
 			type Query { ok: Boolean }
 			` + schema,
 	})
@@ -42,7 +50,8 @@ func injectFederation(t *testing.T, schema string) (*Federation, *ast.Schema, er
 	}
 	cfg.Sources = append(cfg.Sources, late...)
 	require.NoError(t, cfg.LoadSchema())
-	return f, cfg.Schema, nil
+	require.NoError(t, f.MutateConfig(cfg))
+	return f, cfg, nil
 }
 
 func TestPerEntityOptIn(t *testing.T) {
@@ -70,7 +79,7 @@ func TestPerEntityOptIn(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			f, _, err := injectFederation(t, tc.schema)
+			f, _, err := injectFederation(t, tc.schema, nil)
 
 			require.NoError(t, err)
 			require.Len(t, f.Entities, 1)
@@ -79,18 +88,93 @@ func TestPerEntityOptIn(t *testing.T) {
 	}
 }
 
-func TestPerEntityRejectsPreloaded(t *testing.T) {
-	_, _, err := injectFederation(t, `
-		type Port @key(fields: "id")
-			@entityResolver(perEntity: true, multi: true, requires: "preloaded") {
-			id: ID!
-		}`)
+func TestPerEntityErrors(t *testing.T) {
+	cases := []struct {
+		name   string
+		schema string
+		err    string
+	}{
+		{
+			name: "preloaded requires",
+			schema: `type Port @key(fields: "id")
+				@entityResolver(perEntity: true, multi: true, requires: "preloaded") {
+				id: ID!
+			}`,
+			err: `entity "Port": @entityResolver(perEntity: true) cannot be combined`,
+		},
+		{
+			name: "representation name taken",
+			schema: `
+				type Port @key(fields: "id") @entityResolver(perEntity: true) { id: ID! }
+				input PortRepresentation { other: String }`,
+			err: `entity "Port": type "PortRepresentation" has the same Go name as ` +
+				`representation PortRepresentation; rename "PortRepresentation"`,
+		},
+		{
+			name: "representation Go name taken",
+			schema: `
+				type Port @key(fields: "id") @entityResolver(perEntity: true) { id: ID! }
+				input portRepresentation { other: String }`,
+			err: `entity "Port": type "portRepresentation" has the same Go name as ` +
+				`representation PortRepresentation; rename "portRepresentation"`,
+		},
+		{
+			name: "nested representation Go name taken",
+			schema: `
+				type Ship @key(fields: "owner { id }") @entityResolver(perEntity: true) { owner: Owner! }
+				type Owner { id: ID! }
+				input ownerRepresentation { other: String }`,
+			err: `entity "Ship": type "ownerRepresentation" has the same Go name as ` +
+				`representation OwnerRepresentation; rename "ownerRepresentation"`,
+		},
+		{
+			name: "key fields with the same Go name",
+			schema: `type Port @key(fields: "_id") @key(fields: "id") @entityResolver(perEntity: true) {
+				_id: String!
+				id: ID!
+			}`,
+			err: `entity "Port": Port._id and Port.id both have Go name ID in PortRepresentation; ` +
+				`give one a distinct @goField(name: ...) or gqlgen.yml fieldName`,
+		},
+		{
+			name: "@goField name taken by another key field",
+			schema: `type Port @key(fields: "_id") @key(fields: "legacyID") @entityResolver(perEntity: true) {
+				_id: String! @goField(name: "LegacyID")
+				legacyID: ID!
+			}`,
+			err: `entity "Port": Port._id and Port.legacyID both have Go name LegacyID in PortRepresentation`,
+		},
+		{
+			name: "interface with @requires",
+			schema: `
+				interface Node @key(fields: "id") @entityResolver(perEntity: true) {
+					id: ID!
+					size: Int! @external
+					label: String! @requires(fields: "size")
+				}
+				type Dock implements Node @key(fields: "id") {
+					id: ID!
+					size: Int! @external
+					label: String! @requires(fields: "size")
+				}`,
+			err: `entity "Node": @entityResolver(perEntity: true) on an interface does not support @requires`,
+		},
+		{
+			name: "key through a list",
+			schema: `
+				type Ship @key(fields: "owners { id }") @entityResolver(perEntity: true) { owners: [Owner!]! }
+				type Owner { id: ID! }`,
+			err: `entity "Ship": key path through list field Ship.owners is not supported`,
+		},
+	}
 
-	require.ErrorContains(
-		t,
-		err,
-		`entity "Port": @entityResolver(perEntity: true) cannot be combined`,
-	)
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			_, _, err := injectFederation(t, tc.schema, nil)
+
+			require.ErrorContains(t, err, tc.err)
+		})
+	}
 }
 
 // fieldsSDL renders a definition's fields, with their arguments, as SDL.
@@ -117,17 +201,62 @@ func TestPerEntitySchema(t *testing.T) {
 	cases := []struct {
 		name     string
 		schema   string
+		models   config.TypeMap // gqlgen.yml models
 		resolver []string
 		inputs   map[string][]string
+		goNames  map[string]map[string]string // representation field Go names
 	}{
 		{
 			name: "single resolver for colliding keys",
 			schema: `type Port @key(fields: "_id") @key(fields: "id") @entityResolver(perEntity: true) {
-				_id: String!
+				_id: String! @goField(name: "LegacyID")
 				id: ID!
 			}`,
 			resolver: []string{"findPort(rep: PortRepresentation!): Port!"},
 			inputs:   map[string][]string{"PortRepresentation": {"_id: String", "id: ID"}},
+			goNames: map[string]map[string]string{
+				"PortRepresentation": {"_id": "LegacyID", "id": "ID"},
+			},
+		},
+		{
+			name: "single resolver for keys whose paths join to one name",
+			schema: `
+				type Port @key(fields: "id") @key(fields: "i { d }") @entityResolver(perEntity: true) {
+					id: ID!
+					i: Owner!
+				}
+				type Owner { d: ID! }`,
+			resolver: []string{"findPort(rep: PortRepresentation!): Port!"},
+			inputs: map[string][]string{
+				"PortRepresentation":  {"id: ID", "i: OwnerRepresentation"},
+				"OwnerRepresentation": {"d: ID"},
+			},
+		},
+		{
+			name: "gqlgen.yml fieldName on the owner",
+			schema: `type Port @key(fields: "_id") @key(fields: "id") @entityResolver(perEntity: true) {
+				_id: String!
+				id: ID!
+			}`,
+			models: config.TypeMap{"Port": {Fields: map[string]config.TypeMapField{
+				"_id": {FieldName: "LegacyID"},
+			}}},
+			goNames: map[string]map[string]string{
+				"PortRepresentation": {"_id": "LegacyID", "id": "ID"},
+			},
+		},
+		{
+			name: "gqlgen.yml fieldName on the representation wins",
+			schema: `
+				type Ship @key(fields: "owner { id }") @entityResolver(perEntity: true) { owner: Owner! }
+				type Owner { id: ID! @goField(name: "OwnerKey") }`,
+			models: config.TypeMap{"OwnerRepresentation": {Fields: map[string]config.TypeMapField{
+				"id": {FieldName: "ChosenByUser"},
+			}}},
+			goNames: map[string]map[string]string{
+				"ShipRepresentation":  {"owner": "Owner"},
+				"OwnerRepresentation": {"id": "ChosenByUser"},
+			},
 		},
 		{
 			name: "batch resolver with nested key",
@@ -160,6 +289,17 @@ func TestPerEntitySchema(t *testing.T) {
 			},
 		},
 		{
+			name: "interface",
+			schema: `
+				interface Node @key(fields: "id") @entityResolver(perEntity: true) { id: ID! }
+				type Dock implements Node @key(fields: "id") { id: ID! }`,
+			resolver: []string{
+				"findDockByID(id: ID!): Dock!",
+				"findNode(rep: NodeRepresentation!): Node!",
+			},
+			inputs: map[string][]string{"NodeRepresentation": {"id: ID"}},
+		},
+		{
 			name: "per-key entities are unchanged",
 			schema: `
 				type Port @key(fields: "id") @entityResolver(perEntity: true) { id: ID! }
@@ -174,56 +314,27 @@ func TestPerEntitySchema(t *testing.T) {
 
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, schema, err := injectFederation(t, tc.schema)
+			_, cfg, err := injectFederation(t, tc.schema, tc.models)
 
 			require.NoError(t, err)
-			require.Equal(t, tc.resolver, fieldsSDL(schema.Types["Entity"]))
+			if tc.resolver != nil {
+				require.Equal(t, tc.resolver, fieldsSDL(cfg.Schema.Types["Entity"]))
+			}
 			for name, fields := range tc.inputs {
-				require.NotNil(t, schema.Types[name], "input %s missing from schema", name)
-				require.Equal(t, ast.InputObject, schema.Types[name].Kind)
-				require.Equal(t, fields, fieldsSDL(schema.Types[name]), "fields of %s", name)
+				def := cfg.Schema.Types[name]
+				require.NotNil(t, def, "input %s missing from schema", name)
+				require.Equal(t, ast.InputObject, def.Kind)
+				require.Equal(t, fields, fieldsSDL(def), "fields of %s", name)
+			}
+			for name, want := range tc.goNames {
+				got := make(map[string]string)
+				for field, entry := range cfg.Models[name].Fields {
+					got[field] = entry.FieldName
+				}
+				require.Equal(t, want, got, "Go names of %s", name)
 			}
 		})
 	}
-}
-
-func TestPerEntityRejectsExistingRepresentationName(t *testing.T) {
-	_, _, err := injectFederation(t, `
-		type Port @key(fields: "id") @entityResolver(perEntity: true) { id: ID! }
-		input PortRepresentation { other: String }`)
-
-	require.ErrorContains(t, err, `entity "Port": type PortRepresentation already exists`)
-}
-
-func TestCopyRepresentationFieldNames(t *testing.T) {
-	models := config.TypeMap{
-		"Port": {Fields: map[string]config.TypeMapField{
-			"_id": {FieldName: "LegacyID"},
-		}},
-		"Owner": {Fields: map[string]config.TypeMapField{
-			"id": {FieldName: "OwnerKey"},
-		}},
-		"OwnerRepresentation": {Fields: map[string]config.TypeMapField{
-			"id": {FieldName: "ChosenByUser"},
-		}},
-	}
-	representations := []*representation{
-		{Name: "PortRepresentation", Owner: "Port", Fields: []*representationField{
-			{Name: "_id", Type: "String"},
-			{Name: "id", Type: "ID"},
-		}},
-		{Name: "OwnerRepresentation", Owner: "Owner", Fields: []*representationField{
-			{Name: "id", Type: "ID"},
-		}},
-	}
-
-	copyRepresentationFieldNames(representations, models)
-
-	require.Equal(t, map[string]config.TypeMapField{
-		"_id": {FieldName: "LegacyID"},
-	}, models["PortRepresentation"].Fields, "copies the owner's name; leaves unnamed fields alone")
-	require.Equal(t, "ChosenByUser", models["OwnerRepresentation"].Fields["id"].FieldName,
-		"keeps a name the user set on the representation")
 }
 
 func TestPerEntityResolver(t *testing.T) {
@@ -310,6 +421,29 @@ func TestPerEntityResolver(t *testing.T) {
 		require.Equal(t, "o1", resp.Entities[0].Owner.ID)
 	})
 
+	t.Run("interface resolves to its implementation", func(t *testing.T) {
+		type dock struct {
+			Typename string `json:"__typename"`
+			ID       string `json:"id"`
+			Berths   int    `json:"berths"`
+		}
+		var resp struct {
+			Entities []dock `json:"_entities"`
+		}
+
+		err := c.Post(entityQuery([]string{"Node { __typename id }", "Dock { berths }"}), &resp,
+			client.Var("representations", []map[string]any{
+				{"__typename": "Node", "id": "n1"},
+				{"__typename": "Dock", "id": "d1"},
+			}))
+
+		require.NoError(t, err)
+		require.Equal(t, []dock{
+			{Typename: "Dock", ID: "n1", Berths: 2},
+			{Typename: "Dock", ID: "d1", Berths: 1},
+		}, resp.Entities, "findNode serves Node; findDockByID serves Dock")
+	})
+
 	t.Run("representation without a key", func(t *testing.T) {
 		var resp map[string]any
 
@@ -321,10 +455,10 @@ func TestPerEntityResolver(t *testing.T) {
 }
 
 func TestPerEntityIgnoredWithoutResolvers(t *testing.T) {
-	_, schema, err := injectFederation(t, `
-		type Port @key(fields: "id") @entityResolver(perEntity: true) { id: ID! @external }`)
+	_, cfg, err := injectFederation(t, `
+		type Port @key(fields: "id") @entityResolver(perEntity: true) { id: ID! @external }`, nil)
 
 	require.NoError(t, err)
-	require.Nil(t, schema.Types["Entity"], "an all-external entity gets no resolver")
-	require.Nil(t, schema.Types["PortRepresentation"])
+	require.Nil(t, cfg.Schema.Types["Entity"], "an all-external entity gets no resolver")
+	require.Nil(t, cfg.Schema.Types["PortRepresentation"])
 }

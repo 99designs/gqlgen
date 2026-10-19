@@ -114,11 +114,14 @@ type FieldSet struct {
 	takeValueMu sync.Mutex
 	Values      []Marshaler
 	Invalids    uint32
-	delayed     []delayedResult
 	// callerCounted is set once any task is scheduled with Concurrently, whose
 	// caller counts Invalids itself. Written only before Dispatch. Part of the
 	// compatibility fallback in FieldSetView.payloadInvalid; remove with it.
+	//
+	// It sits in the padding after Invalids: placed last it pushes FieldSet
+	// from the 112-byte size class to 128, and each object allocates two.
 	callerCounted bool
+	delayed       []delayedResult
 }
 
 type delayedResult struct {

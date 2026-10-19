@@ -1,0 +1,5 @@
+# This schema has no query type, to which gqlgen adds an empty one while it generates
+# the code. It is generated once per exec mode, as the schema of the tablemode test server.
+type Mutation {
+  ping: Int
+}

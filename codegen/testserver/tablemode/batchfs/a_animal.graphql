@@ -1,0 +1,14 @@
+# This schema is generated once per exec mode in the follow-schema layout, with Cat in
+# another file than Animal, whose list marshals the batch parents of both implementations.
+type Query {
+  animals: [Animal!]!
+}
+
+interface Animal {
+  id: ID!
+}
+
+type Dog implements Animal {
+  id: ID!
+  batchProp: String!
+}

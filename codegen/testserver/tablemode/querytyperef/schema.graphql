@@ -1,0 +1,16 @@
+# This schema declares Mutation as its only root operation type, next to a type called
+# Query that is not a root, which gqlgen replaces with an empty query type while it
+# generates the code. A field of Mutation returns that type. It is generated once per
+# exec mode.
+schema {
+  mutation: Mutation
+}
+
+type Query {
+  x: Int
+}
+
+type Mutation {
+  ping: Int
+  q: Query
+}

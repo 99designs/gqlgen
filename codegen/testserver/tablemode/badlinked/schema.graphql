@@ -1,0 +1,23 @@
+# This schema is generated once per exec mode with the plugin of gen, which puts
+# directives where their definitions do not allow them: @trimArg, declared on arguments
+# only, on pluginMisplaced, @onObject and @onInput on the fields pluginObjectOnField and
+# pluginInputObjectOnField, @onField on the scalar Tagged, and @onObject on the input
+# field MarkInput.v. Each of the last ones replaces the value.
+directive @trimArg on ARGUMENT_DEFINITION
+directive @onObject on OBJECT
+directive @onInput on INPUT_OBJECT
+directive @onField on FIELD_DEFINITION
+
+scalar Tagged
+
+input MarkInput {
+  v: String
+}
+
+type Query {
+  pluginMisplaced: String
+  pluginObjectOnField: String
+  pluginInputObjectOnField: String
+  pluginTyped: Tagged
+  pluginInput(in: MarkInput): String
+}

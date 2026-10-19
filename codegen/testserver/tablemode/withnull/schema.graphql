@@ -1,0 +1,7 @@
+# This schema is generated with call_argument_directives_with_null, once per exec mode,
+# as the schema of the tablemode test server.
+directive @fromContext on ARGUMENT_DEFINITION
+
+type Query {
+  posts(authorID: ID @fromContext): String
+}

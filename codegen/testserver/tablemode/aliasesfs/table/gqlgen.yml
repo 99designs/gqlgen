@@ -1,0 +1,14 @@
+schema:
+  - ../*.graphql
+skip_validation: true
+exec:
+  layout: follow-schema
+  dir: .
+  package: table
+models:
+  AInput:
+    model: github.com/99designs/gqlgen/codegen/testserver/tablemode/aliases/a/model.Input
+  BInput:
+    model: github.com/99designs/gqlgen/codegen/testserver/tablemode/aliases/b/model.Input
+  Holder:
+    model: github.com/99designs/gqlgen/codegen/testserver/tablemode/aliasesfs/holder.Holder

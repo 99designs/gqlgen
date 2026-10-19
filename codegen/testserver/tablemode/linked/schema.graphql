@@ -1,0 +1,27 @@
+# This schema declares its root operation types, next to an ordinary object type called
+# Subscription. It is generated once per exec mode with the plugin of gen, which makes
+# pluginRequired non-null, so that the tables are linked to the changed schema. String
+# carries @upper, which runs around every field of type String.
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+directive @upper on SCALAR | FIELD_DEFINITION
+
+extend scalar String @upper
+
+type Query {
+  pluginRequired: String
+  plan(id: ID!): Subscription
+  name: String
+}
+
+type Subscription {
+  name: String
+  fail: String
+}
+
+type Mutation {
+  ping: Int
+}

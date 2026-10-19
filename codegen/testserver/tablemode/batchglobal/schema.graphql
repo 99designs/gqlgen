@@ -1,0 +1,22 @@
+# This schema is generated once per exec mode with resolver.batch, which makes every
+# resolver of an object a batch resolver: User.posts, which the config makes a resolver,
+# and Post.author, which the model has no field for.
+type Query {
+  users: [User!]!
+}
+
+type User {
+  id: ID!
+  name: String!
+  posts: [Post!]!
+}
+
+type Post {
+  id: ID!
+  title: String!
+  author: Author!
+}
+
+type Author {
+  id: ID!
+}

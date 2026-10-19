@@ -1,0 +1,382 @@
+# This schema is generated twice, once per exec mode, so that tests can check that
+# table mode answers every request exactly like the functions mode does.
+
+directive @goModel(
+  model: String
+  models: [String!]
+) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+directive @goField(
+  forceResolver: Boolean
+  name: String
+  omittable: Boolean
+  type: String
+  batch: Boolean
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+directive @defer(if: Boolean = true, label: String) on FRAGMENT_SPREAD | INLINE_FRAGMENT
+
+directive @upper on FIELD_DEFINITION
+directive @auth(role: Role! = ADMIN) on OBJECT | FIELD_DEFINITION
+directive @length(min: Int!, max: Int) on INPUT_FIELD_DEFINITION | ARGUMENT_DEFINITION
+directive @nullify on INPUT_FIELD_DEFINITION | ARGUMENT_DEFINITION
+directive @validReview on INPUT_OBJECT
+directive @trace(label: String) on FIELD
+directive @logQuery on QUERY
+directive @logMutation on MUTATION
+directive @logSubscription on SUBSCRIPTION
+# @explode panics, to compare how the modes recover from a directive that panics.
+directive @explode on FIELD_DEFINITION
+# @trimArg trims the strings in the raw arguments it receives before the argument is
+# unmarshaled.
+directive @trimArg on ARGUMENT_DEFINITION
+# @missing has no implementation in the DirectiveRoot.
+directive @missing on FIELD_DEFINITION | ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | INPUT_OBJECT
+# @tagged is applied to a scalar and an enum, so that it runs around the fields and the
+# input fields of those types. One of its arguments carries a directive of its own, and
+# the other a Float default with more than six decimals.
+directive @tagged(
+  note: String @argNote
+  ratio: Float = 0.1234567
+) on SCALAR | ENUM | INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+directive @argNote on ARGUMENT_DEFINITION
+# @note records its text, whose definition has a default. The applications below set it
+# to null.
+directive @note(text: String = "default") on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | INPUT_OBJECT | SCALAR
+# @order adds its name to the raw arguments it receives and records the names so far, so
+# that the recording shows the order the argument directives run in.
+directive @order(name: String!) on ARGUMENT_DEFINITION
+# @nulled records whether its arguments are nil. Their types are non-null and their
+# definitions have defaults, which an application below sets to null.
+directive @nulled(names: [String!]! = ["a"], data: Map! = {}) on FIELD_DEFINITION
+# @probe records the object it receives. Its arguments have the names of the variables
+# that hold the objects of directives in the code of the functions mode, of nil and true,
+# and the name that the functions mode gives the variable of rawArgs. on comes after true,
+# which its value is written as.
+directive @probe(
+  rawArgs: String
+  asMap: String
+  it: String
+  rawArgsArg: String
+  nil: String
+  true: Boolean
+  on: Boolean
+) on ARGUMENT_DEFINITION | INPUT_OBJECT
+# @retype returns a string in place of the value, so that the errors name the Go type
+# that was expected.
+directive @retype on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
+scalar Time
+scalar Money
+scalar Map
+scalar Code
+scalar Label @tagged(note: "label")
+# Fragile is marshaled by a function of the models package, which panics for "boom".
+scalar Fragile
+# Noted is bound to graphql.String.
+scalar Noted @note(text: null)
+# Bytes is bound to []byte by functions of the models package.
+scalar Bytes
+# Tag is bound to a named string that marshals itself.
+scalar Tag
+
+enum Role {
+  ADMIN
+  USER
+  GUEST
+}
+
+enum Episode {
+  NEWHOPE
+  EMPIRE
+  JEDI
+}
+
+enum Mood @tagged(note: "mood") {
+  HAPPY
+  SAD
+}
+
+enum LengthUnit {
+  METER
+  FOOT
+}
+
+interface Node {
+  id: ID!
+}
+
+interface Character implements Node {
+  id: ID!
+  name: String!
+  friends: [Character!]!
+  appearsIn: [Episode!]!
+}
+
+type Human implements Character & Node {
+  id: ID!
+  name: String! @upper
+  friends: [Character!]!
+  appearsIn: [Episode!]!
+  height(unit: LengthUnit = METER): Float!
+  mass: Float
+  # massIn is bound to a Go field, which does not take the argument.
+  massIn(unit: LengthUnit = METER): Float
+  starships: [Starship!]!
+  secret: String @auth(role: ADMIN)
+  nickname: String
+  tags: [String]
+  wallet: Money
+  code: Code!
+  # greet is bound to a method that takes b before a.
+  greet(a: Money!, b: Money!): String!
+  # words is bound to a named slice type that marshals itself.
+  words: [String!]!
+  # greetOrder is bound to a method that takes b before a.
+  greetOrder(a: String! @order(name: "a"), b: String! @order(name: "b")): String!
+  # tagList is bound to a named slice of a type that marshals itself, which marshals
+  # itself too.
+  tagList: [Tag!]!
+  # counts is bound to a named map type that marshals itself.
+  counts: [Int!]
+  # wordsPtr is bound to a pointer to a named slice type that marshals itself.
+  wordsPtr: [String!]
+  # matrixA and matrixB are lists of lists bound to the same named type that marshals
+  # itself.
+  matrixA: [[String!]!]!
+  matrixB: [[Int!]!]!
+}
+
+type Droid implements Character & Node @auth(role: USER) {
+  id: ID!
+  name: String!
+  friends: [Character!]!
+  appearsIn: [Episode!]!
+  primaryFunction: String!
+  serial: Int
+  # lastSeen is resolved by a batch resolver, which fails for all the droids it resolves
+  # together with R2-D2.
+  lastSeen: String @goField(batch: true)
+}
+
+type Starship {
+  id: ID!
+  name: String!
+  length(unit: LengthUnit = METER): Float!
+  history: [[Int!]!]!
+  # The batch resolvers of Starship resolve the starships of a list together. crew is
+  # null for a starship of unknown length, rating fails for it, and miscount returns one
+  # result too many.
+  crew: Int @goField(batch: true)
+  rating(scale: Int = 5): Float! @goField(batch: true)
+  miscount: Int @goField(batch: true)
+  # query returns the query type, which resolves to an empty value of the type without
+  # calling its batch resolver.
+  query: Query! @goField(batch: true)
+}
+
+union SearchResult = Human | Droid | Starship
+
+type Review {
+  stars: Int!
+  commentary: String
+  time: Time
+  tags: [String!]!
+  episode: Episode
+  code: Code
+}
+
+type NullChain {
+  required: String!
+  optional: String
+  child: NullChain
+  requiredChild: NullChain!
+}
+
+type Summary {
+  label: String!
+  count: Int!
+  extra: Map
+  query: Query!
+}
+
+input ReviewInput @validReview {
+  stars: Int!
+  commentary: String @length(min: 1, max: 20)
+  time: Time
+  tags: [String!] = ["fresh"]
+  nested: NestedInput
+  note: String @nullify
+  episode: Episode = JEDI
+  wallet: Money
+  code: Code
+}
+
+input NestedInput {
+  value: String! = "default"
+  numbers: [Int!]
+  deeper: NestedInput
+}
+
+# Bag is bound to map[string]any and to the named map type models.Bag, which the field of
+# BagHolder has: the functions mode converts it to the first model.
+type Bag
+  @goModel(
+    models: [
+      "map[string]any"
+      "github.com/99designs/gqlgen/codegen/testserver/tablemode/models.Bag"
+    ]
+  ) {
+  name: String
+}
+
+type BagHolder {
+  bag: Bag
+}
+
+input MapInput @goModel(model: "map[string]any") {
+  name: String = "unnamed"
+  size: Int
+  role: Role
+}
+
+input ResolvedInput {
+  label: String!
+  shout: String @goField(forceResolver: true)
+}
+
+input TagInput {
+  label: Label!
+  mood: Mood
+  ratio: Float = 0.0000001
+  negative: Float = -0.0
+  # words is bound to a named slice type that unmarshals itself.
+  words: [String!]
+}
+
+# MissingInput and its field run @missing inside a directive that records what @missing
+# returns.
+input MissingInput @missing @validReview {
+  value: String @missing @length(min: 0)
+}
+
+input ProbeInput @probe(asMap: "m", it: "i") {
+  v: String
+}
+
+input NoteInput @note(text: null) {
+  v: String @note(text: null)
+  s: Noted
+}
+
+input RetypeInput {
+  extra: Map @retype
+  blob: Bytes @retype
+}
+
+# ShapesInput holds the named slice and map types that unmarshal themselves.
+input ShapesInput {
+  tagList: [Tag!]
+  counts: [Int!]
+  wordsPtr: [String!]
+}
+
+input OmittableInput {
+  value: String @goField(omittable: true)
+  count: Int @goField(omittable: true)
+}
+
+type Query {
+  hero(episode: Episode): Character
+  human(id: ID!): Human
+  droid(id: ID!): Droid
+  node(id: ID!): Node
+  search(text: String! @length(min: 1)): [SearchResult!]!
+  starship(id: ID!): Starship
+  reviews(episode: Episode!, since: Time): [Review!]!
+  echoReview(input: ReviewInput!): Review!
+  echoReviews(inputs: [ReviewInput!]): [Review!]
+  echoMap(input: MapInput): Map!
+  echoResolved(input: ResolvedInput!): String!
+  echoOmittable(input: OmittableInput!): String!
+  echoNullified(value: String @nullify): String!
+  money(amount: Money!): Money!
+  roles: [Role!]!
+  withDefaults(
+    a: Int = 1
+    b: String = "x"
+    c: [Episode!] = [EMPIRE]
+    d: NestedInput = { value: "v", numbers: [1, 2] }
+  ): String!
+  nullChain: NullChain
+  failing: String!
+  failingOptional: String
+  panicking: String
+  summary: Summary!
+  secretNumber: Int @auth(role: ADMIN)
+  tag(input: TagInput!, eps: Float = 0.0000001): Label!
+  fragile(value: String!): Fragile
+  fragileRequired(value: String!): Fragile!
+  fragiles(values: [String!]!): [Fragile!]
+  # special returns NaN, +Inf or -Inf for those kinds, which the Float marshaler rejects.
+  special(kind: String!): Float
+  specialRequired(kind: String!): Float!
+  exploding: String @explode
+  # decodeInputs decodes raw into each input type through the index of input
+  # unmarshalers, as a resolver that calls the generated UnmarshalXInput does.
+  decodeInputs(raw: Map!): String!
+  trimmed(text: String! @trimArg): String!
+  # The application of @tagged sets ratio, whose definition has a default, to null.
+  nulledRatio: String @tagged(note: "null ratio", ratio: null)
+  # The application of @nulled sets its non-null arguments to null.
+  nulledNonNull: String @nulled(names: null, data: null)
+  bagHolder: BagHolder
+  probed(
+    x: String @probe(rawArgs: "r", rawArgsArg: "ra", nil: "n", true: false, on: true)
+    input: ProbeInput
+  ): String
+  missingField: Int @missing
+  missingArg(x: String @missing @length(min: 0)): String
+  missingInput(input: MissingInput): String
+  # The generator of this test server runs a plugin that puts @auth on pluginGuarded and
+  # @trimArg on the argument of pluginTrimmed, after the schema is loaded.
+  pluginGuarded: String
+  pluginTrimmed(text: String!): String!
+  # The plugin makes pluginRequired non-null and removes pluginRemoved.
+  pluginRequired: String
+  pluginRemoved: String
+  noted(x: String @note(text: null), input: NoteInput): String
+  retyped(blob: Bytes @retype): String
+  retypedInput(input: RetypeInput!): String
+  retypedField: Bytes @retype
+  shapes(input: ShapesInput!): String
+  # stubbed fails with the error of a directive without an implementation.
+  stubbed: String @upper
+  # fleet holds a null after its second element, where the elements must not be null.
+  fleet: [Starship!]
+  # fleets holds lists of starships, whose inner lists group the parents of the batch
+  # resolvers.
+  fleets: [[Starship!]!]!
+}
+
+type Tick {
+  n: Int!
+  label: String! @upper
+  # fail fails for the tick numbered as the failAt of the subscription.
+  fail: String
+}
+
+# The fields of Subscription send at most five events, so that random arguments do not
+# make long streams.
+type Subscription {
+  ticks(count: Int! = 3, failAt: Int, nullAt: Int): Tick
+  requiredTicks(count: Int! = 2, nullAt: Int): Tick!
+  tickBatches(count: Int! = 2): [Tick!]
+  failingStream: Int
+  # panickingStream panics in its resolver.
+  panickingStream: Int
+  secretTicks: Int @auth(role: ADMIN)
+}
+
+type Mutation {
+  createReview(episode: Episode!, review: ReviewInput!): Review
+  setRole(role: Role!): Role!
+}

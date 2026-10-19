@@ -1,0 +1,5 @@
+# Cat is declared in another file than Animal and Dog on purpose.
+type Cat implements Animal {
+  id: ID!
+  batchProp: String!
+}

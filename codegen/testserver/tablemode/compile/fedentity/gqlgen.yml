@@ -1,0 +1,10 @@
+schema:
+  - schema.graphql
+skip_validation: true
+exec:
+  filename: generated.go
+  package: fedentity
+federation:
+  filename: federation.go
+  package: fedentity
+  version: 2

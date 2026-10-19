@@ -1,0 +1,9 @@
+schema:
+  - schema.graphql
+skip_validation: true
+exec:
+  filename: generated.go
+  package: funcpair
+models:
+  Date:
+    model: github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/models.Date

@@ -1,0 +1,13 @@
+# Tags is a map that implements Node by a value receiver, which the functions mode does not
+# compile.
+type Query {
+  node: Node
+}
+
+interface Node {
+  id: Int
+}
+
+type Tags implements Node {
+  id: Int
+}

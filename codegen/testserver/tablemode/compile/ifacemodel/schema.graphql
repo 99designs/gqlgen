@@ -1,0 +1,30 @@
+# Node is bound to three Go types: Holder.item is bound to the implementation Member, and
+# Holder.named to the other interface NamedNode, which the functions mode compiles.
+directive @goModel(
+  model: String
+  models: [String!]
+) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+
+type Query {
+  holder: Holder
+}
+
+type Holder {
+  item: Node
+  named: Node
+}
+
+interface Node
+  @goModel(
+    models: [
+      "github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/models.Node"
+      "github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/models.NamedNode"
+      "github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/models.Member"
+    ]
+  ) {
+  id: Int
+}
+
+type Member implements Node {
+  id: Int
+}

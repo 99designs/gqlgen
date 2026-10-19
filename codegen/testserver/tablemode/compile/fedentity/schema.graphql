@@ -1,0 +1,15 @@
+extend schema @link(url: "https://specs.apollo.dev/federation/v2.3", import: ["@key"])
+
+type Query {
+  hello: Hello
+}
+
+# Hello is an entity that this service does not resolve, so the federation plugin adds no
+# type Entity, and makes the type Entity of the schema a root, as it does its own.
+type Hello @key(fields: "name", resolvable: false) {
+  name: String!
+}
+
+type Entity {
+  note: String
+}

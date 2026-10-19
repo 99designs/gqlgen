@@ -1,0 +1,23 @@
+# The plugins of TestTableModeRejectsPluginChanges and TestTableModeFollowsPluginChanges
+# change what this schema says.
+directive @guard on FIELD_DEFINITION
+directive @note on ARGUMENT_DEFINITION
+# @generatorOnly is left to the generator by skip_runtime.
+directive @generatorOnly on FIELD_DEFINITION
+
+type Query {
+  user: User
+  guarded: Int
+  noted(x: String @note): String
+  named: Int @generatorOnly
+  raw(in: Raw): Int
+}
+
+type User {
+  id: Int
+}
+
+# Raw is bound to a Go type that unmarshals itself.
+input Raw {
+  a: Int = 1
+}

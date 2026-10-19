@@ -1,0 +1,48 @@
+# The types are bound to the Go types of packages that have the names of parameters,
+# variables and imports of the generated code: Level of schema, Filter of data, Range of
+# field, Thing of field too, Viewer of args, Grade of obj, Mirror of reflect, Tag of it and
+# Profile of sel. Thing is reached only through the interface Node.
+scalar Level
+scalar Grade
+scalar Mirror
+
+directive @level(min: Level) on FIELD_DEFINITION
+directive @graded(grade: Grade) on FIELD_DEFINITION
+
+type Query {
+  find(filter: Filter): Int @level(min: "a")
+  viewer: Viewer
+  rank(grade: Grade, mirror: Mirror, tag: Tag): Int @graded(grade: "a")
+  profile: Profile
+  node: Node
+}
+
+interface Node {
+  id: Int
+}
+
+type Thing implements Node {
+  id: Int
+}
+
+input Tag {
+  name: String
+}
+
+type Profile {
+  name: String
+}
+
+type Viewer {
+  name: String
+}
+
+input Filter {
+  q: String
+  range: Range
+}
+
+input Range {
+  from: Int
+  to: Int
+}

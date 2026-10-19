@@ -1,0 +1,11 @@
+type Holder {
+  b(in: BInput): String
+}
+
+input AInput @retypeInput {
+  x: Int
+}
+
+input BInput @retypeInput {
+  y: Int
+}

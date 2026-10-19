@@ -1,0 +1,12 @@
+schema:
+  - schema.graphql
+skip_validation: true
+exec:
+  filename: generated.go
+  package: plugins
+directives:
+  generatorOnly:
+    skip_runtime: true
+models:
+  Raw:
+    model: github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/models.RawInput

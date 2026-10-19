@@ -1,0 +1,17 @@
+# The configuration makes User.friends a batch resolver, and the schema turns that off
+# again.
+directive @goField(
+  forceResolver: Boolean
+  name: String
+  omittable: Boolean
+  batch: Boolean
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
+type Query {
+  user: User
+}
+
+type User {
+  id: Int
+  friends: [User!]! @goField(batch: false)
+}

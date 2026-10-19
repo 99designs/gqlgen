@@ -1,0 +1,30 @@
+schema:
+  - schema.graphql
+skip_validation: true
+exec:
+  filename: generated.go
+  package: shadowed
+models:
+  Level:
+    model: github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/schema.Level
+  Node:
+    model: github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/models.Node
+  Thing:
+    model: github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/field.Thing
+  Grade:
+    model: github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/objpkg.Grade
+  Mirror:
+    model: github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/reflect.Mirror
+  Tag:
+    model: github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/it.Tag
+  Profile:
+    model: github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/sel.Profile
+  Viewer:
+    model: github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/args.Viewer
+  Range:
+    model: github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/field.Range
+  Filter:
+    model: github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/data.Filter
+    fields:
+      q:
+        resolver: true

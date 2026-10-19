@@ -1,0 +1,8 @@
+schema:
+  - schema.graphql
+skip_validation: true
+exec:
+  filename: generated.go
+  package: omittable
+autobind:
+  - github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/models

@@ -1,0 +1,12 @@
+# The plugin of TestTableModePluginCalls calls the marshalers and unmarshaler of
+# Hello.name and the marshaler of Query.hello, after the federation plugin calls the
+# unmarshalers of the keys.
+extend schema @link(url: "https://specs.apollo.dev/federation/v2.3", import: ["@key"])
+
+type Query {
+  hello: Hello
+}
+
+type Hello @key(fields: "name") {
+  name: String!
+}

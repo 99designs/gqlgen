@@ -1,0 +1,13 @@
+schema:
+  - schema.graphql
+skip_validation: true
+exec:
+  filename: generated.go
+  package: nilableimpl
+autobind:
+  - github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/models
+models:
+  Tags:
+    fields:
+      id:
+        resolver: true

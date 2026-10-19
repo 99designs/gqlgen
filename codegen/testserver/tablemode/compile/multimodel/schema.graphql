@@ -1,0 +1,37 @@
+# Account and Filter are bound to two Go types each. The fields and arguments that take
+# the second one do not compile in the functions mode, which marshals and unmarshals the
+# first one.
+directive @goModel(
+  model: String
+  models: [String!]
+) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+
+type Query {
+  viewer: Viewer
+}
+
+type Viewer {
+  account: Account
+  accounts: [Account!]!
+  search(filter: Filter, filters: [[Filter!]]): Int
+}
+
+type Account
+  @goModel(
+    models: [
+      "github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/models.Account"
+      "github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/models.AccountView"
+    ]
+  ) {
+  id: Int
+}
+
+input Filter
+  @goModel(
+    models: [
+      "github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/models.Filter"
+      "github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/models.FilterView"
+    ]
+  ) {
+  id: Int
+}

@@ -1,0 +1,11 @@
+schema:
+  - ../schema.graphql
+skip_validation: true
+exec:
+  filename: generated.go
+  package: functions
+models:
+  AInput:
+    model: github.com/99designs/gqlgen/codegen/testserver/tablemode/aliases/a/model.Input
+  BInput:
+    model: github.com/99designs/gqlgen/codegen/testserver/tablemode/aliases/b/model.Input

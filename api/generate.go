@@ -173,6 +173,10 @@ func generate(
 	if err != nil {
 		return fmt.Errorf("merging type systems failed: %w", err)
 	}
+	generateExecutor, err := prepareExecutor(data)
+	if err != nil {
+		return fmt.Errorf("merging type systems failed: %w", err)
+	}
 
 	for _, p := range plugins {
 		if mut, ok := p.(plugin.CodeGenerator); ok {
@@ -183,15 +187,8 @@ func generate(
 		}
 	}
 
-	// Use incremental generation if options provided, otherwise full generation
-	if incrementalOpts != nil {
-		if err = codegen.GenerateCodeIncremental(data, *incrementalOpts); err != nil {
-			return fmt.Errorf("generating core failed: %w", err)
-		}
-	} else {
-		if err = codegen.GenerateCode(data); err != nil {
-			return fmt.Errorf("generating core failed: %w", err)
-		}
+	if err = generateExecutor(incrementalOpts); err != nil {
+		return fmt.Errorf("generating core failed: %w", err)
 	}
 
 	if !cfg.SkipModTidy {

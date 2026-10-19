@@ -1,0 +1,118 @@
+{{- /* Table mode builds the tables of the objects and inputs of the file, and keeps the
+   function of the subscription type. */}}
+{{- template "tableGroups" $ }}
+{{- range $object := .Objects }}
+{{- template "tableSubscription" (dict "Data" $ "Object" $object) }}
+{{- end }}
+
+{{- /* tableGroups builds the tables of the objects and inputs of the file, a group of
+   them per function, and writes the function of each table after the group. */}}
+{{- define "tableGroups" }}
+{{- $data := . }}
+{{- range $group := $data.TableInitGroups }}
+
+func (t *tables) init{{ $data.TableObjectVar (index $group 0) | ucFirst }}() {
+	{{- range $o := $group }}
+	{{- if eq $o.Kind "INPUT_OBJECT" }}
+	{{- template "tableInput" (dict "Data" $data "Input" $o) }}
+	{{- else }}
+	{{- template "tableObject" (dict "Data" $data "Object" $o) }}
+	{{- end }}
+	{{- end }}
+}
+{{- range $o := $group }}
+{{- if eq $o.Kind "INPUT_OBJECT" }}
+{{- template "tableInputSet" (dict "Data" $data "Input" $o) }}
+{{- else }}
+{{- template "tableObjectResolve" (dict "Data" $data "Object" $o) }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{- define "tableObject" }}
+{{- $data := .Data }}
+{{- $object := .Object }}
+	t.{{ $data.TableObjectVar $object }}.Init(t.schema, {{ $object.Name | quote }}, {{ $data.TableFunc $object }}, []tableField{
+	{{- range $field := $object.Fields }}
+		{{- $entry := dict "Data" $data "Field" $field }}
+		{ {{- template "tableFieldEntry" $entry -}} , {{ $data.TableOutEntry $field.TypeReference }}
+		{{- if $object.Stream }}, Stream: tableimpl.{{ if $field.UsesSubscriptionContext }}Event{{ end }}StreamOf[{{ $field.TypeReference.GO | ref }}](){{ end }}},
+	{{- end }}
+	})
+{{- end }}
+
+{{- /* tableObjectResolve writes the tableimpl.Resolve of an object, which resolves its fields
+   by their index in the table: one function for the object rather than a closure per
+   field, as what the compiler spends on a package grows with the number of its
+   functions. */}}
+{{- define "tableObjectResolve" }}
+{{- $data := .Data }}
+{{- $object := .Object }}
+{{- /* The object is asserted to its Go type once, before the switch, rather than in each
+   case. */}}
+{{- /* The parameters have names that a package of the Go types the function refers to
+   is unlikely to have, which they would hide. */}}
+{{- $param := "_" }}
+{{- if $data.TableReadsObject $object }}{{ $param = "o" }}{{ end }}
+
+func {{ $data.TableFunc $object }}(ctx context.Context, ec *executionContext, {{ $param }} any, fieldIndex int, fieldArgs map[string]any) (any, error) {
+	{{- if $data.TableReadsObject $object }}
+	obj := o.({{ $object.Reference | ref }})
+	{{- end }}
+	switch fieldIndex {
+	{{- range $i, $field := $object.Fields }}
+	{{- if not ($data.TableBatch $field) }}
+	case {{ $i }}:
+		{{- with $data.TableCaseBody $field }}
+		{{ . }}
+		{{- else }}
+		{{- template "fieldDefinition" $field }}
+		{{- end }}
+	{{- end }}
+	{{- end }}
+	}
+	return nil, tableimpl.NoField(fieldIndex)
+}
+{{- end }}
+
+{{- /* tableFieldEntry writes the entries of a field that every field has: its name and
+   what ties it to Go. The runtime reads the rest, such as its type and directives, from
+   the schema. */}}
+{{- define "tableFieldEntry" -}}
+{{- $data := .Data }}
+{{- $field := .Field -}}
+Name: {{ $field.Name | quote }}
+{{- if $field.IsResolver }}, IsResolver: true
+{{- if $data.TableBatch $field }}, ResolveBatch: func(ctx context.Context, ec *executionContext, o any, collectedField graphql.CollectedField) (any, error) {
+	return ec.resolveBatch_{{ $field.Object.Name }}_{{ $field.Name }}(ctx, collectedField, o.({{ $field.Object.Reference | ref }}))
+}
+{{- end }}
+{{- else }}
+{{- if $field.IsConcurrent }}, Concurrent: true{{ end }}
+{{- if $field.IsMethod }}, IsMethod: true{{ end }}
+{{- end }}
+{{- if $field.Arguments }}, Args: {{ $data.TableFieldArgs $field }}
+{{- end }}
+{{- end }}
+
+{{- define "tableSubscription" }}
+{{- $data := .Data }}
+{{- $object := .Object }}
+{{- if $object.Stream }}
+
+{{- /* The subscription keeps the function of the functions mode, which the generated
+   Exec, the subscription middleware and the marshaler of the root type call. */}}
+{{- if $object.HasSubscriptionContextField }}
+
+func _{{ $object.Name }}(ctx context.Context, {{ $data.ECFuncParam }}sel ast.SelectionSet) func(ctx context.Context) (context.Context, graphql.Marshaler) {
+	return ec.tables.{{ $data.TableObjectVar $object }}.SubscribeWithEventContext(ctx, ec, sel)
+}
+{{- else }}
+
+func _{{ $object.Name }}(ctx context.Context, {{ $data.ECFuncParam }}sel ast.SelectionSet) func(ctx context.Context) graphql.Marshaler {
+	return ec.tables.{{ $data.TableObjectVar $object }}.Subscribe(ctx, ec, sel)
+}
+{{- end }}
+{{- end }}
+{{- end }}

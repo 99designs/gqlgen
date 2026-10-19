@@ -1,0 +1,261 @@
+{{- range $type := .ReferencedTypes }}
+	{{ with $type.UnmarshalFunc }}
+		{{- /* In table mode a combinator of the runtime is a field of the tables. */}}
+		{{- if $.GeneratesUnmarshaler $type }}
+		func {{$.FuncReceiver}}{{ . }}(ctx context.Context, {{$.ECFuncParam}}v any) ({{ $type.GO | ref }}, error) {
+			{{- if and $type.IsNilable (not $type.GQL.NonNull) (not $type.IsPtrToPtr) }}
+				if v == nil { return nil, nil }
+			{{- end }}
+			{{- if or $type.IsPtrToSlice $type.IsPtrToIntf }}
+				res, err := {{ $.UnmarshalCall $type.Elem }}(ctx, {{$.ECArg}}v)
+				return &res, graphql.ErrorOnPath(ctx, err)
+			{{- else if $type.IsSlice }}
+				vSlice := graphql.CoerceList(v)
+				var err error
+				res := make([]{{$type.GO.Elem | ref}}, len(vSlice))
+				for i := range vSlice {
+					ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+					res[i], err = {{ $.UnmarshalCall $type.Elem }}(ctx, {{$.ECArg}}vSlice[i])
+					if err != nil {
+						return nil, err
+					}
+				}
+				return res, nil
+			{{- else if and $type.IsPtrToPtr (not $type.Unmarshaler) (not $type.IsMarshaler) }}
+				var pres {{ $type.Elem.GO | ref }}
+				if v != nil {
+					res, err := {{ $.UnmarshalCall $type.Elem }}(ctx, {{$.ECArg}}v)
+					if err != nil {
+						return nil, graphql.ErrorOnPath(ctx, err)
+					}
+					pres = res
+				}
+				return &pres, nil
+			{{- else }}
+				{{- if $type.Unmarshaler }}
+					{{- if $type.HasEnumValues }}
+						tmp, err := {{ $type.Unmarshaler | call }}(v)
+						res := {{ ($type.EnumUnmarshalVar $.FunctionSyntax) }}[tmp]
+					{{- else if $type.CastType }}
+						{{- if $type.IsContext }}
+							tmp, err := {{ $type.Unmarshaler | call }}(ctx, v)
+						{{- else }}
+							tmp, err := {{ $type.Unmarshaler | call }}(v)
+						{{- end }}
+						{{- if and $type.IsNilable $type.Elem }}
+							res := {{ $type.Elem.GO | ref }}(tmp)
+						{{- else}}
+							res := {{ $type.GO | ref }}(tmp)
+						{{- end }}
+					{{- else}}
+						{{- if $type.IsContext }}
+							res, err := {{ $type.Unmarshaler | call }}(ctx, v)
+						{{- else }}
+							res, err := {{ $type.Unmarshaler | call }}(v)
+						{{- end }}
+					{{- end }}
+					{{- if and $type.IsTargetNilable (not $type.IsNilable) }}
+						return *res, graphql.ErrorOnPath(ctx, err)
+					{{- else if and (not $type.IsTargetNilable) $type.IsNilable }}
+						return &res, graphql.ErrorOnPath(ctx, err)
+					{{- else}}
+						return res, graphql.ErrorOnPath(ctx, err)
+					{{- end }}
+				{{- else if $type.IsMarshaler }}
+					{{- if and $type.IsNilable $type.Elem }}
+						var res = new({{ $type.Elem.GO | ref }})
+					{{- else}}
+						var res {{ $type.GO | ref }}
+					{{- end }}
+					{{- if $type.IsContext }}
+						err := res.UnmarshalGQLContext(ctx, v)
+					{{- else }}
+						err := res.UnmarshalGQL(v)
+					{{- end }}
+						return res, graphql.ErrorOnPath(ctx, err)
+				{{- else }}
+					{{- template "unmarshalInputCall" (dict "Data" $ "Type" $type) }}
+					{{- if and $type.IsNilable (not $type.IsMap) (not $type.PointersInUnmarshalInput) }}
+						return &res, graphql.ErrorOnPath(ctx, err)
+					{{- else if and (not $type.IsNilable) $type.PointersInUnmarshalInput }}
+						return *res, graphql.ErrorOnPath(ctx, err)
+					{{- else }}
+						return res, graphql.ErrorOnPath(ctx, err)
+					{{- end }}
+				{{- end }}
+			{{- end }}
+		}
+		{{- end }}
+	{{- end }}
+
+	{{ with $type.MarshalFunc }}
+		{{- /* eventCtx: the Subscription root marshaler returns a per-event context tuple when the
+		   subscription_context_field option is on. Computed once here; reused below. */ -}}
+		{{- $eventCtx := and (eq $type.Definition.Name "Subscription") $.Config.SubscriptionContextField -}}
+		{{- if $.GeneratesMarshaler $type }}
+		func {{$.FuncReceiver}}{{ . }}(ctx context.Context, {{$.ECFuncParam}}sel ast.SelectionSet, v {{ $type.GO | ref }}) {{- if $eventCtx }}(context.Context, {{- end}}graphql.Marshaler{{- if $eventCtx }}){{- end}} {
+			{{- if or $type.IsPtrToSlice $type.IsPtrToIntf }}
+				if v == nil {
+					return {{- if $eventCtx }} ctx,{{- end}} graphql.Null
+				}
+				return {{ $.MarshalCall $type.Elem }}(ctx, {{$.ECArg}}sel, *v)
+			{{- else if $type.IsSlice }}
+				{{- if not $type.GQL.NonNull }}
+					if v == nil {
+						return {{- if $eventCtx }} ctx,{{- end}} graphql.Null
+					}
+				{{- end }}
+				{{- /* $type.Elem.Definition follows through list wrappers, so a nested list such as
+				   [[Thing!]!]! reports the element kind of Thing. Only the innermost list holds
+				   parents of that type; registering an outer list would store a [][]T under
+				   Thing's name. */ -}}
+				{{- if and (not $type.Elem.IsSlice) ($.HasBatchFields $type.Elem.Definition.Name) }}
+				{{- if $type.Elem.IsNilable }}
+				ctx = graphql.WithBatchParents(ctx, {{ $type.Elem.Definition.Name | quote }}, v, nil)
+				{{- else }}
+				ctx = graphql.WithBatchParentValues(ctx, {{ $type.Elem.Definition.Name | quote }}, v)
+				{{- end }}
+				{{- end }}
+				{{- /* BatchImplementors is already filtered to the concrete types that resolve a
+				   field through a batch resolver, so a non-empty result guarantees the type
+				   switch below has at least one case. */ -}}
+				{{- if not $type.Elem.IsSlice }}
+				{{- $batchImpls := $.BatchImplementors $type.Elem.Definition.Name }}
+				{{- if $batchImpls }}
+				{
+					{{- range $impl := $batchImpls }}
+					{{- if $impl.CanBeNil }}
+					var batchItems{{ $impl.Name }} []{{ $impl.Type | ref }}
+					batchIdxMap{{ $impl.Name }} := map[int]int{}
+					{{- end }}
+					{{- end }}
+					for i, item := range v {
+						switch concrete := item.(type) {
+						{{- range $impl := $batchImpls }}
+						case {{ $impl.Type | ref }}:
+							batchIdxMap{{ $impl.Name }}[i] = len(batchItems{{ $impl.Name }})
+							{{- if $impl.CanBeNil }}
+							batchItems{{ $impl.Name }} = append(batchItems{{ $impl.Name }}, concrete)
+							{{- else if $impl.TakeRef }}
+							batchItems{{ $impl.Name }} = append(batchItems{{ $impl.Name }}, &concrete)
+							{{- else }}
+							batchItems{{ $impl.Name }} = append(batchItems{{ $impl.Name }}, concrete)
+							{{- end }}
+						{{- end }}
+						}
+					}
+					{{- range $impl := $batchImpls }}
+					{{- if $impl.CanBeNil }}
+					if len(batchItems{{ $impl.Name }}) > 0 {
+						ctx = graphql.WithBatchParents(ctx, {{ $impl.Name | quote }}, batchItems{{ $impl.Name }}, batchIdxMap{{ $impl.Name }})
+					}
+					{{- end }}
+					{{- end }}
+				}
+				{{- end }}
+				{{- end }}
+				{{- if not $type.IsScalar }}
+					ret := graphql.MarshalSliceConcurrently(ctx, len(v), {{ $.Config.Exec.WorkerLimit }}, {{ $.Config.OmitPanicHandler }}, func(ctx context.Context, i int) graphql.Marshaler {
+						fc := graphql.GetFieldContext(ctx)
+						fc.Result = &v[i]
+						return {{ $.MarshalCall $type.Elem }}(ctx, {{$.ECArg}}sel, v[i])
+					})
+				{{- else }}
+					ret := make(graphql.Array, len(v))
+					for i := range v {
+						ret[i] = {{ $.MarshalCall $type.Elem }}(ctx, {{$.ECArg}}sel, v[i])
+					}
+				{{- end }}
+				{{ if $type.Elem.GQL.NonNull }}
+					for _, e := range ret {
+						if e == graphql.Null {
+							return {{- if $eventCtx }} ctx,{{- end}} graphql.Null
+						}
+					}
+				{{ end }}
+				return ret
+			{{- else if and $type.IsPtrToPtr (not $type.Unmarshaler) (not $type.IsMarshaler) }}
+				if v == nil {
+					return {{- if $eventCtx }} ctx,{{- end}} graphql.Null
+				}
+				return {{ $.MarshalCall $type.Elem }}(ctx, {{$.ECArg}}sel, *v)
+			{{- else }}
+				{{- if $type.IsNilable }}
+					if v == nil {
+						{{- if $type.GQL.NonNull }}
+							graphql.AddInvalidNullError(ctx, {{ $type.GQL.String | quote }})
+						{{- end }}
+						return {{- if $eventCtx }} ctx,{{- end}} graphql.Null
+					}
+				{{- end }}
+				{{- if $type.IsMarshaler }}
+					{{- if $type.IsContext }}
+						return graphql.WrapContextMarshaler(ctx, v)
+					{{- else }}
+						return v
+					{{- end }}
+				{{- else if $type.Marshaler }}
+					_ = sel
+					{{- if and (not $type.GQL.NonNull) (not $type.IsContext) }}
+					_ = ctx
+					{{- end }}
+					{{- $v := "v" }}
+					{{- if and $type.IsTargetNilable (not $type.IsNilable) }}
+						{{- $v = "&v" }}
+					{{- else if and (not $type.IsTargetNilable) $type.IsNilable }}
+						{{- $v = "*v" }}
+					{{- end }}
+					{{- if $type.HasEnumValues }}
+						{{- $v = printf "%v[%v]" ($type.EnumMarshalVar $.FunctionSyntax) $v }}
+					{{- else if $type.CastType }}
+						{{- $v = printf "%v(%v)" ($type.CastType | ref) $v}}
+					{{- end }}
+					res := {{ $type.Marshaler | call }}({{ $v }})
+					{{- if $type.GQL.NonNull }}
+						if res == graphql.Null {
+							graphql.AddInvalidNullFromMarshaler(ctx, {{ $type.GQL.String | quote }})
+						}
+					{{- end }}
+					{{- if $type.IsContext }}
+						return graphql.WrapContextMarshaler(ctx, res)
+					{{- else }}
+						return res
+					{{- end }}
+				{{- else if $type.IsRoot }}
+					{{- if eq $type.Definition.Name "Subscription" }}
+						res := {{$.ECDot}}_{{$type.Definition.Name}}(ctx, {{$.ECArg}}sel)
+						return res(ctx)
+					{{- else }}
+						return {{ $.ObjectMarshal $type.Definition.Name "sel" "" }}
+					{{- end }}
+				{{- else }}
+					{{- $v := "v" }}
+					{{- if not $type.IsNilable }}{{ $v = "&v" }}{{ end }}
+					{{- template "objectMarshalReturn" (dict "Data" $ "Type" $type "V" $v) }}
+				{{- end }}
+			{{- end }}
+		}
+		{{- end }}
+	{{- end }}
+
+	{{- if and $type.HasEnumValues (not $type.IsSlice) }}
+	{{- $enum := $type.GO }}
+	{{- if $type.IsNilable }}
+		{{- $enum = $type.GO.Elem }}
+	{{- end }}
+	var (
+		{{ ($type.EnumUnmarshalVar $.FunctionSyntax) }} = map[string]{{ $enum | ref }}{
+		{{- range $value := $type.EnumValues }}
+			"{{ $value.Definition.Name }}": {{ $value.Object | obj }},
+		{{- end }}
+		}
+		{{ ($type.EnumMarshalVar $.FunctionSyntax) }} = map[{{ $enum | ref }}]string{
+		{{- range $value := $type.EnumValues }}
+			 {{ $value.Object | obj }}: "{{ $value.Definition.Name }}",
+		{{- end }}
+		}
+	 )
+	{{- end }}
+{{- end }}
+
+{{- template "typeChecks" . }}

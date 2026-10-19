@@ -1,0 +1,27 @@
+{{- range $interface := .Interfaces }}
+
+func {{$.FuncReceiver}}_{{$interface.Name}}(ctx context.Context, {{$.ECFuncParam}}sel ast.SelectionSet, obj {{$interface.Type | ref}}) graphql.Marshaler {
+	switch obj := (obj).(type) {
+	case nil:
+		return graphql.Null
+	{{- range $implementor := $interface.Implementors }}
+		case {{$implementor.Type | ref}}:
+			{{- if $implementor.CanBeNil }}
+				if obj == nil {
+					return graphql.Null
+				}
+			{{- end }}
+			{{- $obj := "obj" }}
+			{{- if $implementor.TakeRef }}{{ $obj = "&obj" }}{{ end }}
+			{{- template "implementorMarshalReturn" (dict "Data" $ "Implementor" $implementor "Obj" $obj) }}
+	{{- end }}
+	default:
+		if typedObj, ok := obj.(graphql.Marshaler); ok {
+			return typedObj
+		} else {
+			panic(fmt.Errorf("unexpected type %T; non-generated variants of {{$interface.Name}} must implement graphql.Marshaler", obj))
+		}
+	}
+}
+
+{{- end }}

@@ -1,0 +1,45 @@
+{{/* Context object: codegen.Data */}}
+{{ reserveImport "context"  }}
+{{ reserveImport "fmt"  }}
+{{ reserveImport "io"  }}
+{{ reserveImport "strconv"  }}
+{{ reserveImport "time"  }}
+{{ reserveImport "sync"  }}
+{{ reserveImport "sync/atomic" }}
+{{ reserveImport "errors"  }}
+{{ reserveImport "bytes"  }}
+{{ reserveImport "embed"  }}
+{{ reserveImport "math"  }}
+
+{{ reserveImport "golang.org/x/sync/semaphore"}}
+{{ reserveImport "github.com/vektah/gqlparser/v2" "gqlparser" }}
+{{ reserveImport "github.com/vektah/gqlparser/v2/ast" }}
+{{ reserveImport "github.com/99designs/gqlgen/graphql" }}
+{{- template "generatedImports" . }}
+{{ reserveImport "github.com/99designs/gqlgen/graphql/introspection" }}
+
+{{ range $object := .Objects -}}
+	{{ if $object.HasResolvers }}
+		type {{ucFirst $object.Name}}Resolver interface {
+		{{ range $field := $object.Fields -}}
+			{{- if $field.IsBatch }}
+				{{- $field.GoFieldName}}{{ $field.ShortBatchResolverDeclaration }}
+			{{- else if $field.IsResolver }}
+				{{- $field.GoFieldName}}{{ $field.ShortResolverDeclaration }}
+			{{- end }}
+		{{ end }}
+		}
+	{{- end }}
+{{- end }}
+
+{{ range $object := .Inputs -}}
+	{{ if $object.HasResolvers }}
+		type {{$object.Name}}Resolver interface {
+		{{ range $field := $object.Fields -}}
+			{{- if $field.IsResolver }}
+				{{- $field.GoFieldName}}{{ $field.ShortResolverDeclaration }}
+			{{- end }}
+		{{ end }}
+		}
+	{{- end }}
+{{- end }}

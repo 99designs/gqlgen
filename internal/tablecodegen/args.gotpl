@@ -1,0 +1,79 @@
+{{ range $name, $args := .Args }}
+func {{$.FuncReceiver}}{{ $name }}(ctx context.Context, {{$.ECFuncParam}}rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+
+	{{- range $i, $arg := . }}
+		{{ if $arg.ImplDirectives }}
+			arg{{$i}}, err := {{$.ECDot}}{{ $name }}{{$arg.Name | go}}(ctx, {{$.ECArg}}rawArgs)
+		{{- else -}}
+			arg{{$i}}, err := graphql.ProcessArgField(ctx, rawArgs, {{$arg.Name|quote}},
+				func(ctx context.Context, v any) ({{ $arg.TypeReference.GO | ref }}, error) {
+					return {{ $.UnmarshalCall $arg.TypeReference }}(ctx, {{$.ECArg}}v)
+				})
+		{{- end }}
+		if err != nil {
+			return nil, err
+		}
+		args[{{$arg.Name|quote}}] = arg{{$i}}
+	{{- end }}
+	return args, nil
+}
+
+	{{- range $i, $arg := . }}
+		{{ if not $arg.ImplDirectives -}}
+			{{- continue -}}
+		{{- end }}
+		func {{$.FuncReceiver}}{{ $name }}{{$arg.Name | go}}(
+			ctx context.Context,
+			{{$.ECFuncParam}}rawArgs map[string]any,
+		) ({{ $arg.TypeReference.GO | ref}}, error) {
+			{{- if not .CallArgumentDirectivesWithNull}}
+				{{- /*
+				We won't call the directive if the argument is null.
+				Set call_argument_directives_with_null to true to call directives
+				even if the argument is null.
+				*/ -}}
+				if _, ok := rawArgs[{{$arg.Name|quote}}]; !ok {
+					{{ $arg.ZeroVal }}
+					return zeroVal, nil
+				}
+			{{end}}
+			ctx = graphql.WithPathContext(ctx, graphql.NewPathWithField({{$arg.Name|quote}}))
+			{{- if $arg.ImplDirectives }}
+				directive0 := func(ctx context.Context) (any, error) {
+					tmp, ok := rawArgs[{{$arg.Name|quote}}]
+					if !ok {
+						{{ $arg.ZeroVal }}
+						return zeroVal, nil
+					}
+					return {{ $.UnmarshalCall $arg.TypeReference }}(ctx, {{$.ECArg}}tmp)
+				}
+				{{ template "implDirectives" ($.ImplDirectivesCtx $arg) }}
+				tmp, err := directive{{$arg.ImplDirectives|len}}(ctx)
+				if err != nil {
+					{{ $arg.ZeroVal }}
+					return zeroVal, graphql.ErrorOnPath(ctx, err)
+				}
+				if data, ok := tmp.({{ $arg.TypeReference.GO | ref }}) ; ok {
+					return data, nil
+				{{- if $arg.TypeReference.IsNilable }}
+					} else if tmp == nil {
+						{{ $arg.ZeroVal }}
+						return zeroVal, nil
+				{{- end }}
+				} else {
+					{{ $arg.ZeroVal }}
+					return zeroVal, graphql.ErrorOnPath(ctx, fmt.Errorf(`unexpected type %T from directive, should be {{ $arg.TypeReference.GO }}`, tmp))
+				}
+			{{- else }}
+				if tmp, ok := rawArgs[{{$arg.Name|quote}}]; ok {
+					return {{ $.UnmarshalCall $arg.TypeReference }}(ctx, {{$.ECArg}}tmp)
+				}
+
+				{{ $arg.ZeroVal }}
+				return zeroVal, nil
+			{{- end }}
+		}
+	{{end}}
+{{ end }}

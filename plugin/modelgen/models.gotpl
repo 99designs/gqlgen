@@ -12,6 +12,7 @@
 {{ reserveImport "github.com/99designs/gqlgen/graphql" }}
 {{ reserveImport "github.com/99designs/gqlgen/graphql/introspection" }}
 
+{{- /* checkGoNames (gonames.go) mirrors the fields and methods declared below. */ -}}
 {{- range $model := .Interfaces }}
 	{{ with .Description }} {{.|prefixLines "// "}} {{ end }}
 	type {{ goModelName .Name }} interface {
@@ -41,15 +42,13 @@
 		{{- end }}
 	}
 
-	{{ range .Implements }}
-		func ({{ goModelName $model.Name }}) Is{{ goModelName . }}() {}
-		{{- with getInterfaceByName . }}
-			{{- range .Fields }}
-				{{- with .Description }}
-					{{.|prefixLines "// "}}
-				{{- end}}
-				{{ generateGetter $model . }}
-			{{- end }}
+	{{ range .Implementations }}
+		func ({{ goModelName $model.Name }}) Is{{ goModelName .Interface }}() {}
+		{{- range .Getters }}
+			{{- with .Description }}
+				{{.|prefixLines "// "}}
+			{{- end}}
+			{{ getter $model . (.Type | ref) }}
 		{{- end }}
 	{{ end }}
 {{- end}}

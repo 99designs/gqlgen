@@ -3,7 +3,6 @@ package graphql
 import (
 	"context"
 	"sync"
-	"sync/atomic"
 
 	"golang.org/x/sync/semaphore"
 )
@@ -16,6 +15,14 @@ import (
 // FieldContext.Result and perform the actual marshaling.
 //
 // workerLimit of 0 means unlimited concurrency.
+//
+// Every element of the returned Array is set, because Array.MarshalGQL
+// marshals each one. An element that could not be marshalled holds Null, as
+// one whose resolver returned an error would: one whose marshalElement
+// panicked (recovered unless omitPanicHandler), or, with a workerLimit, one
+// not yet started when ctx is cancelled, reported once as ctx.Err(). A
+// nullable element thus reports null in place, and for non-null elements the
+// caller's non-null check nulls the whole list.
 func MarshalSliceConcurrently(
 	ctx context.Context,
 	length int,
@@ -43,7 +50,7 @@ func MarshalSliceConcurrently(
 				defer func() {
 					if r := recover(); r != nil {
 						AddError(childCtx, Recover(childCtx, r))
-						ret = nil
+						ret[0] = Null
 					}
 				}()
 				ret[0] = marshalElement(childCtx, 0)
@@ -58,10 +65,6 @@ func MarshalSliceConcurrently(
 	if workerLimit > 0 {
 		sm = semaphore.NewWeighted(workerLimit)
 	}
-
-	// retNilFlag is used to signal from any goroutine that the result should
-	// be nil (e.g. on panic). We use atomic to avoid data races.
-	var retNilFlag atomic.Bool
 
 	for i := range length {
 		fc := &FieldContext{
@@ -78,7 +81,7 @@ func MarshalSliceConcurrently(
 				defer func() {
 					if r := recover(); r != nil {
 						AddError(childCtx, Recover(childCtx, r))
-						retNilFlag.Store(true)
+						ret[i] = Null
 					}
 				}()
 			}
@@ -88,7 +91,10 @@ func MarshalSliceConcurrently(
 		if sm != nil {
 			if err := sm.Acquire(ctx, 1); err != nil {
 				AddError(childCtx, ctx.Err())
-				retNilFlag.Store(true)
+				// No worker owns these slots, so they are safe to write here.
+				for j := i; j < length; j++ {
+					ret[j] = Null
+				}
 				break
 			}
 		}
@@ -98,9 +104,5 @@ func MarshalSliceConcurrently(
 	}
 
 	wg.Wait()
-
-	if retNilFlag.Load() {
-		return nil
-	}
 	return ret
 }

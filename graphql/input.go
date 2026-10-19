@@ -20,6 +20,8 @@ var errEmptyInputContext = errors.New("graphql: the input context is empty")
 type InputUnmarshaler struct {
 	name string        // GraphQL input object name, e.g. "SearchFilters"
 	fn   reflect.Value // func(context.Context, any) (T, error)
+	// untyped is set instead of fn by NewUntypedInputUnmarshaler.
+	untyped func(ctx context.Context, obj any) (any, error)
 
 	// goType is what unmarshal returns, T or *T. Only the deprecated type-keyed lookup
 	// needs it; it can go when input_deprecated.go does.
@@ -39,6 +41,19 @@ func NewInputUnmarshaler[T any](
 		goType: reflect.TypeFor[T](),
 		fn:     reflect.ValueOf(unmarshal),
 	}
+}
+
+// NewUntypedInputUnmarshaler is NewInputUnmarshaler for an unmarshaler that returns its
+// result as any, a value of goType: T or *T. Code generated in table mode builds its
+// unmarshalers with it from its tables when a request needs them, as
+// instantiating NewInputUnmarshaler for each input object makes large schemas slow to
+// compile.
+func NewUntypedInputUnmarshaler(
+	name string,
+	goType reflect.Type,
+	unmarshal func(ctx context.Context, obj any) (any, error),
+) InputUnmarshaler {
+	return InputUnmarshaler{name: name, goType: goType, untyped: unmarshal}
 }
 
 // InputUnmarshalerIndex resolves a GraphQL input object name to the unmarshaler
@@ -150,6 +165,19 @@ func (u InputUnmarshaler) unmarshal(ctx context.Context, raw, v any) error {
 	rv := reflect.ValueOf(v)
 	if rv.Kind() != reflect.Pointer || rv.IsNil() {
 		return errors.New("graphql: input must be a non-nil pointer")
+	}
+
+	if u.untyped != nil {
+		res, err := u.untyped(ctx, raw)
+		if err != nil {
+			return err
+		}
+		result := reflect.ValueOf(res)
+		if !result.IsValid() {
+			// A nil result is the nil of goType that a typed unmarshaler would return.
+			result = reflect.Zero(u.goType)
+		}
+		return assignUnmarshaled(rv.Elem(), result)
 	}
 
 	// reflect.ValueOf(nil) is the zero Value, which Call rejects. A null input object is

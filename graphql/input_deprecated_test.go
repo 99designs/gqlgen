@@ -41,6 +41,24 @@ func TestUnmarshalInputFromContextReadsTheIndex(t *testing.T) {
 	assert.Equal(t, inputTestObject{Name: "bob"}, got)
 }
 
+// An untyped unmarshaler is found by the type that it records for its results.
+func TestUnmarshalInputFromContextReadsUntypedUnmarshalers(t *testing.T) {
+	ctx := WithInputUnmarshalerIndex(context.Background(), NewInputUnmarshalerIndex(
+		NewUntypedInputUnmarshaler(
+			"TestObject",
+			reflect.TypeFor[inputTestObject](),
+			func(ctx context.Context, obj any) (any, error) {
+				return unmarshalInputTestObject(ctx, obj)
+			},
+		),
+	))
+
+	var got inputTestObject
+	require.NoError(t, UnmarshalInputFromContext(ctx, map[string]any{"name": "bob"}, &got))
+
+	assert.Equal(t, inputTestObject{Name: "bob"}, got)
+}
+
 // Selecting by Go type cannot distinguish inputs that share one. Reporting that beats
 // silently returning whichever unmarshaler happened to be registered last.
 func TestUnmarshalInputFromContextReportsSharedGoType(t *testing.T) {

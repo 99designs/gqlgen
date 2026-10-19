@@ -67,7 +67,7 @@ func TestPerEntityPreloaded(t *testing.T) {
 		require.Equal(t, []fleet{{"red", 7}, {"empty", 0}}, resp.Entities)
 	})
 
-	t.Run("nested @requires, sent or not", func(t *testing.T) {
+	t.Run("nested @requires, sent, null or not sent", func(t *testing.T) {
 		type comet struct {
 			Name   string `json:"name"`
 			Period *int   `json:"period"`
@@ -80,10 +80,14 @@ func TestPerEntityPreloaded(t *testing.T) {
 			client.Var("representations", []map[string]any{
 				{"__typename": "Comet", "name": "halley", "orbit": map[string]any{"period": 76}},
 				{"__typename": "Comet", "name": "unknown"},
+				{"__typename": "Comet", "name": "lost", "orbit": nil},
+				{"__typename": "Comet", "name": "vague", "orbit": map[string]any{"period": nil}},
 			}))
 
 		require.NoError(t, err)
 		period := 76
-		require.Equal(t, []comet{{"halley", &period}, {"unknown", nil}}, resp.Entities)
+		require.Equal(t, []comet{
+			{"halley", &period}, {"unknown", nil}, {"lost", nil}, {"vague", nil},
+		}, resp.Entities)
 	})
 }

@@ -192,6 +192,49 @@ func TestResolveRootConcurrently(t *testing.T) {
 		})
 	}
 
+	// Synchronous root fields count the value RootResolverMiddleware returns,
+	// since that is what lands in the slot and is marshalled. Concurrent root
+	// fields must too, or a middleware that nulls a non-null field leaves the
+	// object unbubbled.
+	middlewareCases := map[string]struct {
+		resolve      func(context.Context) Marshaler
+		middleware   Marshaler
+		wantJSON     string
+		wantInvalids uint32
+	}{
+		"middleware nulls a resolved non-null field": {
+			resolve:      marshalString("bob"),
+			middleware:   Null,
+			wantJSON:     `{"name":null}`,
+			wantInvalids: 1,
+		},
+		"middleware replaces a null non-null field": {
+			resolve:    func(context.Context) Marshaler { return Null },
+			middleware: MarshalString("substitute"),
+			wantJSON:   `{"name":"substitute"}`,
+		},
+	}
+	for name, tc := range middlewareCases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			ctx, oc := newResolveConcurrentlyTestContext()
+			oc.RootResolverMiddleware = func(ctx context.Context, next RootResolver) Marshaler {
+				next(ctx)
+				return tc.middleware
+			}
+			out := NewFieldSet([]CollectedField{collectedField("name")})
+
+			out.ResolveRootConcurrently(ctx, oc, 0, true, true, tc.resolve)
+			out.Dispatch(ctx)
+
+			assert.Equal(t, tc.wantInvalids, out.Invalids)
+			var b bytes.Buffer
+			out.MarshalGQL(&b)
+			assert.JSONEq(t, tc.wantJSON, b.String())
+		})
+	}
+
 	t.Run("runs the resolver under the root middleware with the given context", func(t *testing.T) {
 		t.Parallel()
 
@@ -221,36 +264,64 @@ func TestResolveRootConcurrently(t *testing.T) {
 	})
 }
 
-// A recovered panic reports an error and leaves no marshaler behind. That
-// second half is a latent crash rather than a design: the field set holds a
-// nil Marshaler, Invalids is untouched because the increment was skipped by
-// the unwinding, so nothing bubbles the object to null, and marshalling the
-// object dereferences the nil.
+// A recovered panic must leave behind what a resolver returning an error
+// would have: the field null, counted against Invalids when the field is
+// non-null so the enclosing object bubbles to null. A deferred field is held
+// to the same on the deferred field set, whose slot its incremental payload
+// marshals. Left nil instead, the slot would crash the object marshaller,
+// which writes every entry, or vanish from the payload, which skips nils.
 //
-// The panic guard here is the outer one. A panic inside a resolver is caught
-// by ResolveField, which returns Null; this guard only sees panics raised
-// before that one is armed, which in generated code means argument coercion
-// and custom scalar unmarshalers.
-//
-// This test characterizes the behaviour rather than endorsing it. A fix that
-// substitutes a sentinel for the nil should make the final assertion fail.
-func TestResolveConcurrentlyLeavesANilMarshalerAfterARecoveredPanic(t *testing.T) {
+// This guard is the safety net at the goroutine boundary rather than the
+// first line of defence: generated code recovers resolver panics in
+// ResolveField and argument coercion panics in its fieldContext functions,
+// so none reach it today. It keeps a panic that escapes them from crashing
+// the process out of a Dispatch goroutine.
+func TestResolveConcurrentlyNullsAFieldAfterARecoveredPanic(t *testing.T) {
 	t.Parallel()
 
-	ctx, oc := newResolveConcurrentlyTestContext()
-	out := NewFieldSet([]CollectedField{collectedField("name")})
-	deferred := NewDeferredGroup(ctx)
+	cases := map[string]struct {
+		deferred     bool
+		nonNull      bool
+		wantInvalids uint32
+	}{
+		"non-null field":          {nonNull: true, wantInvalids: 1},
+		"nullable field":          {},
+		"deferred non-null field": {deferred: true, nonNull: true, wantInvalids: 1},
+		"deferred nullable field": {deferred: true},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
 
-	out.ResolveConcurrently(oc, &deferred, 0, true, true,
-		func(context.Context) Marshaler { panic("boom") })
-	out.Dispatch(ctx)
+			ctx, oc := newResolveConcurrentlyTestContext()
+			var labels []string
+			if tc.deferred {
+				labels = []string{"label"}
+			}
+			out := NewFieldSet([]CollectedField{collectedField("name", labels...)})
+			deferred := NewDeferredGroup(ctx)
 
-	assert.Equal(t, "input: internal system error\n", GetErrors(ctx).Error())
-	assert.Nil(t, out.Values[0], "the panicking field is left without a marshaler")
-	assert.Zero(t, out.Invalids, "the invalids increment is skipped by the unwinding")
+			out.ResolveConcurrently(oc, &deferred, 0, true, tc.nonNull,
+				func(context.Context) Marshaler { panic("boom") })
+			out.Dispatch(ctx)
+			deferred.FieldSet.Dispatch(ctx)
 
-	assert.Panics(t, func() { out.MarshalGQL(&bytes.Buffer{}) },
-		"marshalling the object dereferences the nil marshaler")
+			resolved, payload := out, Marshaler(out)
+			if tc.deferred {
+				resolved, payload = deferred.FieldSet, deferred.Defers["label"]
+				assert.Zero(t, out.Invalids, "a deferred field is absent, not invalid")
+			}
+
+			assert.Equal(t, "input: internal system error\n", GetErrors(ctx).Error())
+			require.Len(t, resolved.Values, 1)
+			assert.Same(t, Null, resolved.Values[0], "the panicking field resolves to null")
+			assert.Equal(t, tc.wantInvalids, resolved.Invalids)
+
+			var b bytes.Buffer
+			payload.MarshalGQL(&b)
+			assert.JSONEq(t, `{"name":null}`, b.String())
+		})
+	}
 }
 
 // The root helper reaches the same guard through RootResolverMiddleware, so a

@@ -18,6 +18,11 @@ import (
 // returned an error: the initial response stands, the incremental payload
 // reports the field as null alongside an error, and the delivery ends. The
 // value may not vanish from the payload.
+//
+// The resolver's panic is recovered by ResolveField's own guard, so this pins
+// that guard's contract on the @defer path. The safety net ResolveConcurrently
+// arms around it is unreachable from generated code and is covered by
+// TestResolveConcurrentlyNullsAFieldAfterARecoveredPanic in package graphql.
 func TestDeferPanickingResolver(t *testing.T) {
 	t.Parallel()
 

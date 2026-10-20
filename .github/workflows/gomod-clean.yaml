@@ -30,3 +30,4 @@ jobs:
       with:
         go-version: ${{ matrix.go }}
     - run: .github/workflows/check-fmt
+    - run: .github/workflows/check-nested-gomod

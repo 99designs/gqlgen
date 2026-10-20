@@ -1,6 +1,6 @@
 module batchfieldexplicit
 
-go 1.26.2
+go 1.26.0
 
 tool github.com/99designs/gqlgen
 

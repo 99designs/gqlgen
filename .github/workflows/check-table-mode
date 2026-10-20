@@ -1,0 +1,59 @@
+#!/bin/bash
+# check-table-mode regenerates the examples, the integration server, the test servers of
+# codegen and those of the federation plugin in table mode, with gqlgen built with the
+# gqlgen_table tag, then type-checks the examples, runs their tests and those of the test
+# servers and the federation plugin, and runs the integration spec and the federation spec
+# against the table-mode servers. It rewrites the generated code in the working tree, so it
+# is meant for CI.
+
+set -euo pipefail
+export GO111MODULE=on
+# The go:generate lines run gqlgen with go run, and the tests of the federation plugin
+# generate code in the test binary: GOFLAGS builds both with the tag, which makes gqlgen
+# generate in table mode.
+export GOFLAGS="${GOFLAGS:+$GOFLAGS }-tags=gqlgen_table"
+
+# The test servers run their own tests in table mode too. tablemode compares both modes on
+# packages of its own, so it is left as it is.
+dirs=$(grep -rl --include='*.go' -E 'go:generate go run .*(testdata/gqlgen.go|github.com/99designs/gqlgen$)' _examples integration plugin/federation codegen/testserver |
+	xargs -n1 dirname | grep -v '^codegen/testserver/tablemode' | sort -u)
+for d in $dirs; do
+	echo "### generating $d in table mode"
+	(cd "$d" && go generate .)
+done
+# The directories are checked once all are generated, since a test server can contain
+# another one, as execbehavior does.
+for d in $dirs; do
+	# mini-habr keeps its go:generate in tools/ and generates into the sibling graph/.
+	if ! grep -rqs --include='*.go' 'tableimpl.Object\[' "$d" "$(dirname "$d")/graph"; then
+		echo "$d was not generated in table mode"
+		exit 1
+	fi
+	# Only the functions mode declares the field contexts: a directory with several
+	# configs, such as that of the federation plugin, has no executor of it left.
+	if grep -rqsE --include='*.go' '^func .*fieldContext_' "$d" "$(dirname "$d")/graph"; then
+		echo "$d still has an executor of the functions mode"
+		exit 1
+	fi
+done
+
+echo "### testing the examples"
+for m in _examples _examples/large-project-structure/main _examples/mini-habr-with-subscriptions _examples/websocket-initfunc/server _examples/multi-entity-tests/*/; do
+	(cd "$m" && go vet ./... && go test -race ./...)
+done
+
+echo "### testing the federation plugin"
+# The tests generate code from the configs of its testdata, in table mode with the tag.
+go test -race ./plugin/federation/...
+
+echo "### testing the test servers"
+# TestLayouts of codegen/testserver compares the code that the functions mode generates in
+# the single-file and follow-schema layouts, which table mode splits into files differently.
+# shellcheck disable=SC2046 # the packages are separate words
+go test -race $(go list ./codegen/testserver/... | grep -v -e /tablemode -e '/codegen/testserver$')
+
+echo "### running the integration spec against the table-mode server"
+.github/workflows/check-integration
+
+echo "### running the federation spec against the table-mode subgraphs"
+.github/workflows/check-federation

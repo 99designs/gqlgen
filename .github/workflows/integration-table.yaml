@@ -1,0 +1,40 @@
+name: Integration (table mode)
+# The tests of integration.yaml against the executors that table mode generates: see
+# check-table-mode.
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    types: [opened, synchronize]
+env:
+  GOTOOLCHAIN: local
+# When a new revision is pushed to a PR, cancel all in-progress CI runs for that
+# PR. See https://docs.github.com/en/actions/using-jobs/using-concurrency
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+jobs:
+  integration:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        go: ["1.26", "1.27"]
+        node: [24]
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: "false"
+    - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      with:
+        go-version: ${{ matrix.go }}
+    - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+      with:
+        node-version: ${{ matrix.node }}
+    - run: go mod download
+    - run: cd integration ; npm ci
+    - run: cd _examples/federation ; npm install
+    - run: .github/workflows/check-table-mode

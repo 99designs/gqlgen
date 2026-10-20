@@ -138,7 +138,12 @@ func (p *RawParams) AddUpload(upload Upload, key, path string) *gqlerror.Error {
 		return gqlerror.Errorf("invalid operations paths for key %s", key)
 	}
 
-	var ptr any = p.Variables
+	// A nil map must become an untyped nil here, otherwise the ptr == nil check below never fires
+	// and the first assignment panics on the nil map.
+	var ptr any
+	if p.Variables != nil {
+		ptr = p.Variables
+	}
 	parts := strings.Split(path, ".")
 
 	// skip the first part (variables) because we started there

@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/textproto"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -226,6 +227,45 @@ func TestFileUpload(t *testing.T) {
 			contentType: "text/plain",
 		},
 	}
+
+	t.Run("known small content length stays in memory", func(t *testing.T) {
+		multipartForm.MaxMemory = 32 << 20
+		multipartForm.MaxUploadSize = 32 << 20
+		es.ExecFunc = func(ctx context.Context) graphql.ResponseHandler {
+			upload, ok := graphql.GetOperationContext(ctx).Variables["file"].(graphql.Upload)
+			require.True(t, ok)
+			_, isFile := upload.File.(*os.File)
+			require.False(t, isFile)
+			return graphql.OneShot(&graphql.Response{Data: []byte(`{"singleUpload":"test"}`)})
+		}
+
+		req := createUploadRequest(t, validOperations, validMap, validFiles)
+		resp := httptest.NewRecorder()
+		h.ServeHTTP(resp, req)
+		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+	})
+
+	t.Run("unknown content length is stored on disk", func(t *testing.T) {
+		multipartForm.MaxMemory = 32 << 20
+		multipartForm.MaxUploadSize = 32 << 20
+		es.ExecFunc = func(ctx context.Context) graphql.ResponseHandler {
+			upload, ok := graphql.GetOperationContext(ctx).Variables["file"].(graphql.Upload)
+			require.True(t, ok)
+			_, isFile := upload.File.(*os.File)
+			require.True(t, isFile)
+			body, err := io.ReadAll(upload.File)
+			require.NoError(t, err)
+			require.Equal(t, "test1", string(body))
+			return graphql.OneShot(&graphql.Response{Data: []byte(`{"singleUpload":"test"}`)})
+		}
+
+		req := createUploadRequest(t, validOperations, validMap, validFiles)
+		req.ContentLength = -1
+
+		resp := httptest.NewRecorder()
+		h.ServeHTTP(resp, req)
+		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+	})
 
 	t.Run("failed invalid multipart", func(t *testing.T) {
 		req := &http.Request{

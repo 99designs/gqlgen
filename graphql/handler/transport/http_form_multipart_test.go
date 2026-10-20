@@ -352,3 +352,58 @@ func createUploadRequest(t *testing.T, operations, mapData string, files []file)
 	req.Header.Set("Content-Type", bodyWriter.FormDataContentType())
 	return req
 }
+
+// TestFileUploadChunkedContentLength is a regression for
+// https://github.com/99designs/gqlgen/issues/4366. A multipart request sent
+// with Transfer-Encoding: chunked arrives with r.ContentLength == -1.
+// Previously the handler compared ContentLength < maxMemory, which was always
+// true for -1, so a chunked upload took the io.ReadAll fast path regardless of
+// MaxMemory. After the fix an unknown length no longer takes the in-memory
+// shortcut: a small-MaxMemory handler can still accept the upload (because the
+// spill-to-tempfile path is used) and the file contents arrive intact at the
+// resolver.
+func TestFileUploadChunkedContentLength(t *testing.T) {
+	es := &graphql.ExecutableSchemaMock{
+		SchemaFunc: func() *ast.Schema {
+			return gqlparser.MustLoadSchema(&ast.Source{Input: `
+				type Mutation {
+					singleUpload(file: Upload!): String!
+				}
+				scalar Upload
+			`})
+		},
+	}
+
+	h := handler.New(es)
+	// Set MaxMemory very small so a bug that bypasses the bound is observable
+	// (the chunked path would otherwise read the whole part into memory).
+	h.AddTransport(&transport.MultipartForm{MaxMemory: 4})
+
+	content := "this file is larger than four bytes"
+	es.ExecFunc = func(ctx context.Context) graphql.ResponseHandler {
+		up, ok := graphql.GetOperationContext(ctx).Variables["file"].(graphql.Upload)
+		require.True(t, ok, "variable 'file' should be a graphql.Upload")
+		require.Equal(t, "a-test-file.txt", up.Filename)
+		require.Equal(t, "text/plain", up.ContentType)
+		body, err := io.ReadAll(up.File)
+		require.NoError(t, err)
+		require.Equal(t, content, string(body),
+			"chunked upload must deliver the full file contents to the resolver")
+		return graphql.OneShot(&graphql.Response{Data: []byte(`{"singleUpload":"ok"}`)})
+	}
+
+	operations := `{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) }", "variables": { "file": null } }`
+	mapData := `{ "0": ["variables.file"] }`
+	files := []file{
+		{mapKey: "0", name: "a-test-file.txt", content: content, contentType: "text/plain"},
+	}
+	req := createUploadRequest(t, operations, mapData, files)
+	// Simulate Transfer-Encoding: chunked. net/http sets ContentLength=-1 for
+	// chunked requests, which is the state the previous code mishandled.
+	req.ContentLength = -1
+	req.Header.Del("Content-Length")
+
+	resp := httptest.NewRecorder()
+	h.ServeHTTP(resp, req)
+	require.Equal(t, http.StatusOK, resp.Code, "body: %s", resp.Body.String())
+}

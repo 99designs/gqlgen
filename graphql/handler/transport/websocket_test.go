@@ -977,7 +977,7 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 	}
 
 	t.Run("client receives ping and responds with pong", func(t *testing.T) {
-		_, srv := initialize(transport.Websocket{PingPongInterval: 20 * time.Millisecond})
+		_, srv := initialize(transport.Websocket{PingPongInterval: 50 * time.Millisecond})
 		defer srv.Close()
 
 		c := wsConnectWithSubprotocol(srv.URL, graphqltransportwsSubprotocol)
@@ -995,12 +995,12 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 	})
 
 	t.Run("client sends ping and expects pong", func(t *testing.T) {
-		_, srv := initialize(transport.Websocket{PingPongInterval: 10 * time.Millisecond})
+		_, srv := initialize(transport.Websocket{PingPongInterval: 50 * time.Millisecond})
 		defer srv.Close()
 	})
 
 	t.Run("client sends ping and expects pong", func(t *testing.T) {
-		_, srv := initialize(transport.Websocket{PingPongInterval: 10 * time.Millisecond})
+		_, srv := initialize(transport.Websocket{PingPongInterval: 50 * time.Millisecond})
 		defer srv.Close()
 
 		c := wsConnectWithSubprotocol(srv.URL, graphqltransportwsSubprotocol)
@@ -1022,8 +1022,12 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 			h := testserver.New()
 			closeFuncCalled := make(chan bool, 1)
 			h.AddTransport(transport.Websocket{
-				MissingPongOk:    false, // default value but being explicit for test clarity.
-				PingPongInterval: 5 * time.Millisecond,
+				MissingPongOk: false, // default value but being explicit for test clarity.
+				// The server sets a read deadline of 2*PingPongInterval when the
+				// connection starts, so the first ping must be written before then
+				// or the client sees EOF instead of a ping. Keep the interval large
+				// enough to survive scheduler delays on slow CI runners (Windows).
+				PingPongInterval: 50 * time.Millisecond,
 				CloseFunc: func(_ context.Context, _closeCode int) {
 					closeFuncCalled <- true
 				},
@@ -1046,9 +1050,9 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 			select {
 			case res := <-closeFuncCalled:
 				assert.True(t, res)
-			case <-time.NewTimer(time.Millisecond * 20).C:
-				// with a 5ms interval 10ms should be the timeout, double that to make the test less
-				// likely to flake under load
+			case <-time.NewTimer(time.Second).C:
+				// The close should happen ~100ms (2*PingPongInterval) after connect;
+				// this is only an upper bound, so make it generous.
 				assert.Fail(t, "The close handler was not called in time")
 			}
 		},
@@ -1061,7 +1065,7 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 			closeFuncCalled := make(chan bool, 1)
 			h.AddTransport(transport.Websocket{
 				MissingPongOk:    true,
-				PingPongInterval: 10 * time.Millisecond,
+				PingPongInterval: 50 * time.Millisecond,
 				CloseFunc: func(_ context.Context, _closeCode int) {
 					closeFuncCalled <- true
 				},
@@ -1084,7 +1088,8 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 			select {
 			case <-closeFuncCalled:
 				assert.Fail(t, "The close handler was called even with MissingPongOk = true")
-			case _, ok := <-time.NewTimer(time.Millisecond * 20).C:
+			// Wait past 2*PingPongInterval, when a !MissingPongOk server would close.
+			case _, ok := <-time.NewTimer(150 * time.Millisecond).C:
 				assert.True(t, ok)
 			}
 		},
@@ -1120,7 +1125,7 @@ func TestWebsocketWithPingPongInterval(t *testing.T) {
 	t.Run(
 		"pong only messages are sent when configured with graphql-transport-ws",
 		func(t *testing.T) {
-			h, srv := initialize(transport.Websocket{PongOnlyInterval: 10 * time.Millisecond})
+			h, srv := initialize(transport.Websocket{PongOnlyInterval: 50 * time.Millisecond})
 			defer srv.Close()
 
 			c := wsConnectWithSubprotocol(srv.URL, graphqltransportwsSubprotocol)

@@ -207,7 +207,14 @@ func (f *Federation) MutateConfig(cfg *config.Config) error {
 		}
 		cfg.Models[typeName] = entry
 	}
-	if err := configureRepresentationModels(f.representations, cfg.Models); err != nil {
+	if err := configureRepresentationModels(
+		f.representations,
+		cfg.Models,
+		cfg.Model.ImportPath(),
+	); err != nil {
+		return err
+	}
+	if err := writeMatchedKeys(f.Entities, cfg); err != nil {
 		return err
 	}
 	cfg.Directives["external"] = config.DirectiveConfig{SkipRuntime: true}
@@ -446,6 +453,9 @@ func (f *Federation) InjectSourcesLate(schema *ast.Schema) ([]*ast.Source, error
 	if err != nil {
 		return nil, err
 	}
+	if err := checkMatchedKeyNames(f.Entities, schema, f.representations); err != nil {
+		return nil, err
+	}
 
 	entityNames := make([]string, 0)
 	resolvers := make([]string, 0)
@@ -564,7 +574,8 @@ func (f *Federation) GenerateCode(data *codegen.Data) error {
 			// fields: the two can bind different Go types to one scalar. A
 			// per-entity resolver decodes all its keys as one representation.
 			if e.PerEntity {
-				if err := populateRepresentationType(e, data.Objects.ByName("Entity")); err != nil {
+				if err := populateRepresentationType(
+					e, data.Objects.ByName("Entity"), data.Config.Model.ImportPath()); err != nil {
 					return err
 				}
 			} else {
@@ -708,13 +719,21 @@ func argByName(field *codegen.Field, name string) *codegen.FieldArgument {
 }
 
 // populateRepresentationType sets entity.RepresentationType from the argument
-// of its per-entity resolver field on the generated Entity object.
-func populateRepresentationType(entity *Entity, entityObj *codegen.Object) error {
+// of its per-entity resolver field on the generated Entity object, and
+// entity.MatchedKeyType from that representation's MatchedKey field, whose
+// type modelgen declares in the model package modelPkg.
+func populateRepresentationType(entity *Entity, entityObj *codegen.Object, modelPkg string) error {
 	field := fieldByName(entityObj, entity.PerEntityResolverName())
 	if field == nil || len(field.Args) != 1 || field.Args[0].TypeReference == nil {
 		return fmt.Errorf("per-entity resolver %s not found", entity.PerEntityResolverName())
 	}
 	entity.RepresentationType = field.Args[0].TypeReference
+	keyType, err := representationMatchedKeyType(
+		entity.RepresentationType.Target, modelPkg, entity.MatchedKeyTypeName())
+	if err != nil {
+		return err
+	}
+	entity.MatchedKeyType = keyType
 	return nil
 }
 
@@ -1035,13 +1054,17 @@ func buildResolvers(
 		counts[templates.ToGo(resolver.ResolverName)]++
 		resolvers = append(resolvers, resolver)
 	}
-	if perEntity {
-		return resolvers, nil
-	}
-
 	boundName := func(field fieldset.Field) string {
 		return boundKeyName(models, schemaType, schema, field)
 	}
+	if perEntity {
+		typeName := matchedKeyTypeName(schemaType.Name)
+		for i, name := range matchedKeyConstNames(typeName, resolvers, boundName) {
+			resolvers[i].MatchedKeyConst = name
+		}
+		return resolvers, nil
+	}
+
 	fields := func(dir *ast.Directive) string {
 		return dir.Arguments.ForName(DirArgFields).Value.Raw
 	}
@@ -1149,14 +1172,19 @@ func buildKeyFields(
 func assignKeyFieldGoNames(keyFields []*KeyField) {
 	used := make(map[string]bool, len(keyFields))
 	for _, keyField := range keyFields {
-		base := keyField.Field.ToGo()
-		name := base
-		for i := 2; used[name]; i++ {
-			name = base + strconv.Itoa(i)
-		}
-		used[name] = true
-		keyField.GoName = name
+		keyField.GoName = claimName(used, keyField.Field.ToGo())
 	}
+}
+
+// claimName returns base, or when used has it, base with the smallest integer
+// suffix >= 2 that used does not have, and records the result in used.
+func claimName(used map[string]bool, base string) string {
+	name := base
+	for i := 2; used[name]; i++ {
+		name = base + strconv.Itoa(i)
+	}
+	used[name] = true
+	return name
 }
 
 // validateComputedFields rejects unusable @computedRequires placements up front:

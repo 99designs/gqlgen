@@ -18,7 +18,7 @@ func (r *entityResolver) FindBerth(ctx context.Context, rep model.BerthRepresent
 	if rep.Holder == nil || rep.Holder.ID == nil {
 		return nil, errors.New("berth representation has no key")
 	}
-	return &model.Berth{Holder: &model.Captain{ID: *rep.Holder.ID}, ResolvedBy: rep.MatchedKey}, nil
+	return &model.Berth{Holder: &model.Captain{ID: *rep.Holder.ID}, ResolvedBy: string(rep.MatchedKey)}, nil
 }
 
 // FindDock is the resolver for the findDock field.
@@ -40,10 +40,10 @@ func (r *entityResolver) FindNode(ctx context.Context, rep model.NodeRepresentat
 // FindPort is the resolver for the findPort field.
 func (r *entityResolver) FindPort(ctx context.Context, rep model.PortRepresentation) (*model.Port, error) {
 	switch rep.MatchedKey {
-	case "_id":
-		return &model.Port{LegacyID: *rep.LegacyID, ResolvedBy: rep.MatchedKey}, nil
-	case "id":
-		return &model.Port{ID: *rep.ID, ResolvedBy: rep.MatchedKey}, nil
+	case model.PortMatchedKeyLegacyID:
+		return &model.Port{LegacyID: *rep.LegacyID, ResolvedBy: string(rep.MatchedKey)}, nil
+	case model.PortMatchedKeyID:
+		return &model.Port{ID: *rep.ID, ResolvedBy: string(rep.MatchedKey)}, nil
 	}
 	return nil, errors.New("port representation has no key")
 }
@@ -52,15 +52,16 @@ func (r *entityResolver) FindPort(ctx context.Context, rep model.PortRepresentat
 func (r *entityResolver) FindShip(ctx context.Context, reps []*model.ShipRepresentation) ([]*model.Ship, error) {
 	ships := make([]*model.Ship, len(reps))
 	for i, rep := range reps {
+		// String literals still compare against the typed key.
 		switch rep.MatchedKey {
 		case "id owner { id }":
 			ships[i] = &model.Ship{
 				ID:         *rep.ID,
 				Owner:      &model.Owner{ID: *rep.Owner.ID},
-				ResolvedBy: rep.MatchedKey,
+				ResolvedBy: string(rep.MatchedKey),
 			}
 		case "_id":
-			ships[i] = &model.Ship{LegacyID: *rep.LegacyID, ResolvedBy: rep.MatchedKey}
+			ships[i] = &model.Ship{LegacyID: *rep.LegacyID, ResolvedBy: string(rep.MatchedKey)}
 		default:
 			return nil, errors.New("ship representation has no key")
 		}

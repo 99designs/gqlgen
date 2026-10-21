@@ -1,0 +1,15 @@
+{{- /* Declares each per-entity entity's MatchedKey type; see matchedkey.go. */ -}}
+{{ range $entity := . }}
+	// {{ .MatchedKeyTypeName }} is the @key a {{ .Name }} representation matched, which
+	// its MatchedKey field reports: one of the constants below, each holding
+	// the key's fields as gqlgen prints them.
+	type {{ .MatchedKeyTypeName }} string
+
+	{{ with .Resolvers -}}
+	const (
+		{{- range . }}
+			{{ .MatchedKeyConst }} {{ $entity.MatchedKeyTypeName }} = {{ .FieldSet | quote }}
+		{{- end }}
+	)
+	{{- end }}
+{{ end }}

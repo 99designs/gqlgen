@@ -2,7 +2,12 @@
 package federation
 
 import (
+	"go/token"
+	"go/types"
+	"io/fs"
 	"maps"
+	"os"
+	"path/filepath"
 	"slices"
 	"strings"
 	"testing"
@@ -12,8 +17,10 @@ import (
 
 	"github.com/99designs/gqlgen/client"
 	"github.com/99designs/gqlgen/codegen/config"
+	"github.com/99designs/gqlgen/codegen/templates"
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/99designs/gqlgen/internal/code"
 	"github.com/99designs/gqlgen/plugin/federation/testdata/perentity"
 	"github.com/99designs/gqlgen/plugin/federation/testdata/perentity/generated"
 )
@@ -31,6 +38,13 @@ func injectFederation(
 	t.Helper()
 
 	cfg := config.DefaultConfig()
+	// MutateConfig writes federation_keys.go beside the models, with the
+	// package cache cfg.Init would create.
+	cfg.Model = config.PackageConfig{
+		Filename: filepath.Join(t.TempDir(), "models_gen.go"),
+		Package:  "model",
+	}
+	cfg.Packages = code.NewPackages()
 	if configure != nil {
 		configure(cfg)
 	}
@@ -243,6 +257,39 @@ func TestPerEntityErrors(t *testing.T) {
 				type Ship @key(fields: "owner") { owner: Owner! }
 				interface Owner { id: ID! }`,
 			err: `entity "Ship": key field Ship.owner has interface type Owner; select its fields`,
+		},
+		{
+			name: "MatchedKey type name taken by a type",
+			schema: `
+				type Port @key(fields: "id") { id: ID! }
+				type PortMatchedKey { id: ID! }`,
+			err: `type "PortMatchedKey" has the same Go name as PortMatchedKey, ` +
+				`the MatchedKey type of entity "Port"; rename "PortMatchedKey"`,
+		},
+		{
+			name: "MatchedKey constant name taken by a type",
+			schema: `
+				type Port @key(fields: "id") { id: ID! }
+				scalar PortMatchedKeyID`,
+			err: `type "PortMatchedKeyID" has the same Go name as PortMatchedKeyID, ` +
+				`the MatchedKey constant of @key(fields: "id") on "Port"; rename "PortMatchedKeyID"`,
+		},
+		{
+			name: "MatchedKey constant name taken by an enum value",
+			schema: `
+				type Port @key(fields: "id") { id: ID! }
+				enum PortMatched { KEY_ID }`,
+			err: `enum value PortMatched.KEY_ID has the same Go name as PortMatchedKeyID, ` +
+				`the MatchedKey constant of @key(fields: "id") on "Port"; ` +
+				`rename PortMatched.KEY_ID`,
+		},
+		{
+			name:   "MatchedKey type name taken by a representation",
+			schema: `type Port @key(fields: "id") { id: ID! }`,
+			names:  map[string]string{"Port": "PortMatchedKey"},
+			err: `representation PortMatchedKey has the same Go name as PortMatchedKey, ` +
+				`the MatchedKey type of entity "Port"; give the representation of "Port" ` +
+				`another name in federation.representation_names`,
 		},
 		{
 			name: "preloaded @requires field of object type",
@@ -630,11 +677,210 @@ func TestPerEntityMatchedKeyField(t *testing.T) {
 	})
 
 	require.NoError(t, err)
-	require.ElementsMatch(t, []string{"MatchedKey", "Note"},
-		slices.Collect(maps.Keys(cfg.Models["ShipRepresentation"].ExtraFields)),
+	extra := cfg.Models["ShipRepresentation"].ExtraFields
+	require.ElementsMatch(t, []string{"MatchedKey", "Note"}, slices.Collect(maps.Keys(extra)),
 		"a root representation gets MatchedKey beside the user's extra fields")
+	require.Equal(t, cfg.Model.ImportPath()+".ShipMatchedKey", extra["MatchedKey"].Type,
+		"MatchedKey has the entity's key type, declared in the model package")
 	require.Empty(t, cfg.Models["OwnerRepresentation"].ExtraFields,
 		"a nested representation never matches a key itself")
+}
+
+func TestPerEntityMatchedKeyConsts(t *testing.T) {
+	cases := []struct {
+		name   string
+		schema string
+		models config.TypeMap // gqlgen.yml models
+		want   []string       // MatchedKeyConst per @key, in order
+	}{
+		{
+			name:   "one key",
+			schema: `type Port @key(fields: "id") { id: ID! }`,
+			want:   []string{"PortMatchedKeyID"},
+		},
+		{
+			name: "@goField names the constant",
+			schema: `type Port @key(fields: "_id") @key(fields: "id") {
+				_id: String! @goField(name: "LegacyID")
+				id: ID!
+			}`,
+			want: []string{"PortMatchedKeyLegacyID", "PortMatchedKeyID"},
+		},
+		{
+			name:   "gqlgen.yml fieldName names the constant",
+			schema: `type Port @key(fields: "code") { code: String! }`,
+			models: config.TypeMap{"Port": {Fields: map[string]config.TypeMapField{
+				"code": {FieldName: "PortCode"},
+			}}},
+			want: []string{"PortMatchedKeyPortCode"},
+		},
+		{
+			name: "compound and nested keys",
+			schema: `
+				type Ship @key(fields: "id owner { id }") @key(fields: "name") {
+					id: ID!
+					owner: Owner!
+					name: String!
+				}
+				type Owner { id: ID! }`,
+			want: []string{"ShipMatchedKeyIDAndOwnerID", "ShipMatchedKeyName"},
+		},
+		{
+			name: "keys whose names collide get a suffix",
+			schema: `
+				type Port @key(fields: "id") @key(fields: "i { d }") {
+					id: ID!
+					i: Owner!
+				}
+				type Owner { d: ID! }`,
+			want: []string{"PortMatchedKeyID", "PortMatchedKeyID2"},
+		},
+		{
+			name: "interface entity",
+			schema: `interface Node @key(fields: "id") { id: ID! }
+				type Thing implements Node @key(fields: "id") { id: ID! }`,
+			want: []string{"NodeMatchedKeyID"},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			f, _, err := injectFederation(t, tc.schema, func(cfg *config.Config) {
+				perEntity(cfg)
+				maps.Copy(cfg.Models, tc.models)
+			})
+
+			require.NoError(t, err)
+			entity := f.Entities[0]
+			var got []string
+			for _, resolver := range entity.Resolvers {
+				got = append(got, resolver.MatchedKeyConst)
+			}
+			require.Equal(t, tc.want, got)
+		})
+	}
+}
+
+func TestPerEntityMatchedKeysFile(t *testing.T) {
+	generated := templates.GeneratedCodeHeader + "\n\npackage model\n"
+	cases := []struct {
+		name      string
+		perEntity bool
+		existing  string // federation_keys.go before generating; "" for none
+		want      string // federation_keys.go after; "" for none
+	}{
+		{
+			name:      "declares each entity's type and constants",
+			perEntity: true,
+			want: templates.GeneratedCodeHeader + `
+
+package model
+
+// PortMatchedKey is the @key a Port representation matched, which
+// its MatchedKey field reports: one of the constants below, each holding
+// the key's fields as gqlgen prints them.
+type PortMatchedKey string
+
+const (
+	PortMatchedKeyLegacyID     PortMatchedKey = "_id"
+	PortMatchedKeyIDAndOwnerID PortMatchedKey = "id owner { id }"
+)
+`,
+		},
+		{
+			name:     "removes the file gqlgen generated when no entity is per-entity",
+			existing: generated,
+		},
+		{
+			name:     "keeps a hand-written file",
+			existing: "package model\n",
+			want:     "package model\n",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			var filename string
+			_, _, err := injectFederation(t, `
+				type Port @key(fields: "_id") @key(fields: "id owner { id }") {
+					_id: String! @goField(name: "LegacyID")
+					id: ID!
+					owner: Owner!
+				}
+				type Owner { id: ID! }`, func(cfg *config.Config) {
+				if tc.perEntity {
+					perEntity(cfg)
+				}
+				filename = filepath.Join(filepath.Dir(cfg.Model.Filename), "federation_keys.go")
+				if tc.existing != "" {
+					require.NoError(t, os.WriteFile(filename, []byte(tc.existing), 0o600))
+				}
+			})
+
+			require.NoError(t, err)
+			got, err := os.ReadFile(filename)
+			if tc.want == "" {
+				require.ErrorIs(t, err, fs.ErrNotExist)
+				return
+			}
+			require.NoError(t, err)
+			require.Equal(t, tc.want, string(got))
+		})
+	}
+}
+
+func TestRepresentationMatchedKeyType(t *testing.T) {
+	pkg := types.NewPackage("example.com/model", "model")
+	keyType := types.NewNamed(
+		types.NewTypeName(token.NoPos, pkg, "PortMatchedKey", nil), types.Typ[types.String], nil)
+	otherKeyType := types.NewNamed(types.NewTypeName(token.NoPos,
+		types.NewPackage("example.com/other", "other"), "PortMatchedKey", nil),
+		types.Typ[types.String], nil)
+	representation := func(fields ...*types.Var) types.Type {
+		return types.NewNamed(types.NewTypeName(token.NoPos, pkg, "PortRepresentation", nil),
+			types.NewStruct(fields, nil), nil)
+	}
+	matchedKey := func(typ types.Type) *types.Var {
+		return types.NewField(token.NoPos, pkg, "MatchedKey", typ, false)
+	}
+	cases := []struct {
+		name string
+		rep  types.Type
+		err  string
+	}{
+		{name: "generated field", rep: representation(matchedKey(keyType))},
+		{
+			name: "no field",
+			rep:  representation(),
+			err:  "representation example.com/model.PortRepresentation has no MatchedKey field",
+		},
+		{
+			name: "bound struct with a string field",
+			rep:  representation(matchedKey(types.Typ[types.String])),
+			err: "example.com/model.PortRepresentation.MatchedKey has type string; " +
+				"declare it as the generated example.com/model.PortMatchedKey",
+		},
+		{
+			name: "same name in another package",
+			rep:  representation(matchedKey(otherKeyType)),
+			err: "example.com/model.PortRepresentation.MatchedKey has type " +
+				"example.com/other.PortMatchedKey; " +
+				"declare it as the generated example.com/model.PortMatchedKey",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			got, err := representationMatchedKeyType(tc.rep, "example.com/model", "PortMatchedKey")
+
+			if tc.err != "" {
+				require.EqualError(t, err, tc.err)
+				return
+			}
+			require.NoError(t, err)
+			require.Same(t, keyType, got)
+		})
+	}
 }
 
 func TestPerEntityResolver(t *testing.T) {

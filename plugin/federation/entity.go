@@ -78,6 +78,9 @@ type Entity struct {
 	// RepresentationType is the Go type of a per-entity resolver's argument:
 	// one representation, or a list of them for a batch resolver.
 	RepresentationType *config.TypeReference
+	// MatchedKeyType is the type of the representation's MatchedKey field,
+	// the generated MatchedKeyTypeName; set with RepresentationType.
+	MatchedKeyType *types.Named
 	// RequiresStrategy is how this entity's @requires fields are delivered to
 	// the resolver. Resolved per entity in buildEntity.
 	RequiresStrategy RequiresStrategy
@@ -92,6 +95,26 @@ type Entity struct {
 // resolver; the Go method name is its ToGo form.
 func (e *Entity) PerEntityResolverName() string {
 	return "find" + e.Name
+}
+
+// MatchedKeyTypeName is the Go type, declared in the model package, of the
+// MatchedKey field on a per-entity entity's representation. Each resolver's
+// MatchedKeyConst is a constant of it.
+func (e *Entity) MatchedKeyTypeName() string {
+	return matchedKeyTypeName(e.Name)
+}
+
+// MatchedKeyConstRef is how the file being rendered refers to resolver's
+// MatchedKey constant, qualified when it is in another package.
+//
+// Requires: e is per-entity, resolver is one of its Resolvers, and
+// MatchedKeyType is set.
+func (e *Entity) MatchedKeyConstRef(resolver *EntityResolver) string {
+	qualifier := templates.CurrentImports.Lookup(e.MatchedKeyType.Obj().Pkg().Path())
+	if qualifier == "" {
+		return resolver.MatchedKeyConst
+	}
+	return qualifier + "." + resolver.MatchedKeyConst
 }
 
 // IsDefaultRequires reports whether @requires uses the default (post-resolver
@@ -114,6 +137,9 @@ type EntityResolver struct {
 	InputTypeName  string
 	ReturnType     types.Type // The Go generated return type for the entity
 	ReturnTypeName string
+	// MatchedKeyConst is the constant of the entity's MatchedKeyTypeName that
+	// names this key, holding FieldSet(); set only for per-entity entities.
+	MatchedKeyConst string
 }
 
 // FieldSet returns the resolver's @key field set in a standard form: fields

@@ -22,8 +22,9 @@ func (Berth) IsEntity() {}
 
 type BerthRepresentation struct {
 	Holder *HolderRepresentation `json:"holder,omitempty"`
-	// The @key fields this representation matched, as gqlgen prints them.
-	MatchedKey string `json:"-"`
+	// The @key this representation matched: one of the BerthMatchedKey constants.
+	// gqlgen sets it from the fields the router sent; the router does not send it.
+	MatchedKey BerthMatchedKey `json:"-"`
 }
 
 type Captain struct {
@@ -46,8 +47,9 @@ func (Dock) IsEntity() {}
 
 type DockRepresentation struct {
 	ID *string `json:"id,omitempty"`
-	// The @key fields this representation matched, as gqlgen prints them.
-	MatchedKey string `json:"-"`
+	// The @key this representation matched: one of the DockMatchedKey constants.
+	// gqlgen sets it from the fields the router sent; the router does not send it.
+	MatchedKey DockMatchedKey `json:"-"`
 }
 
 type HolderRepresentation struct {
@@ -56,8 +58,9 @@ type HolderRepresentation struct {
 
 type NodeRepresentation struct {
 	ID *string `json:"id,omitempty"`
-	// The @key fields this representation matched, as gqlgen prints them.
-	MatchedKey string `json:"-"`
+	// The @key this representation matched: one of the NodeMatchedKey constants.
+	// gqlgen sets it from the fields the router sent; the router does not send it.
+	MatchedKey NodeMatchedKey `json:"-"`
 }
 
 type Owner struct {
@@ -82,8 +85,9 @@ func (Port) IsEntity() {}
 type PortRepresentation struct {
 	LegacyID *string `json:"_id,omitempty"`
 	ID       *string `json:"id,omitempty"`
-	// The @key fields this representation matched, as gqlgen prints them.
-	MatchedKey string `json:"-"`
+	// The @key this representation matched: one of the PortMatchedKey constants.
+	// gqlgen sets it from the fields the router sent; the router does not send it.
+	MatchedKey PortMatchedKey `json:"-"`
 }
 
 type Query struct {
@@ -102,6 +106,7 @@ type ShipRepresentation struct {
 	ID       *string              `json:"id,omitempty"`
 	Owner    *OwnerRepresentation `json:"owner,omitempty"`
 	LegacyID *string              `json:"_id,omitempty"`
-	// The @key fields this representation matched, as gqlgen prints them.
-	MatchedKey string `json:"-"`
+	// The @key this representation matched: one of the ShipMatchedKey constants.
+	// gqlgen sets it from the fields the router sent; the router does not send it.
+	MatchedKey ShipMatchedKey `json:"-"`
 }

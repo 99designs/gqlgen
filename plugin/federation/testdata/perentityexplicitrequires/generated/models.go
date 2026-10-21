@@ -12,8 +12,9 @@ func (MultiPlanet) IsEntity() {}
 
 type MultiPlanetRepresentation struct {
 	Name *string `json:"name,omitempty"`
-	// The @key fields this representation matched, as gqlgen prints them.
-	MatchedKey string `json:"-"`
+	// The @key this representation matched: one of the MultiPlanetMatchedKey constants.
+	// gqlgen sets it from the fields the router sent; the router does not send it.
+	MatchedKey MultiPlanetMatchedKey `json:"-"`
 }
 
 type Planet struct {
@@ -26,8 +27,9 @@ func (Planet) IsEntity() {}
 
 type PlanetRepresentation struct {
 	Name *string `json:"name,omitempty"`
-	// The @key fields this representation matched, as gqlgen prints them.
-	MatchedKey string `json:"-"`
+	// The @key this representation matched: one of the PlanetMatchedKey constants.
+	// gqlgen sets it from the fields the router sent; the router does not send it.
+	MatchedKey PlanetMatchedKey `json:"-"`
 }
 
 type Query struct {

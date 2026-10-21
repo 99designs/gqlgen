@@ -13,8 +13,8 @@ func (Comet) IsEntity() {}
 type CometRepresentation struct {
 	Name  *string              `json:"name,omitempty"`
 	Orbit *OrbitRepresentation `json:"orbit,omitempty"`
-	// The @key fields this representation matched, as gqlgen prints them.
-	MatchedKey string `json:"-"`
+	// The @key this representation matched: one of the CometMatchedKey constants.
+	MatchedKey CometMatchedKey `json:"-"`
 }
 
 type Fleet struct {
@@ -28,8 +28,8 @@ func (Fleet) IsEntity() {}
 type FleetRepresentation struct {
 	Name  *string               `json:"name,omitempty"`
 	Ships []*ShipRepresentation `json:"ships,omitempty"`
-	// The @key fields this representation matched, as gqlgen prints them.
-	MatchedKey string `json:"-"`
+	// The @key this representation matched: one of the FleetMatchedKey constants.
+	MatchedKey FleetMatchedKey `json:"-"`
 }
 
 type MultiPlanet struct {
@@ -43,8 +43,8 @@ func (MultiPlanet) IsEntity() {}
 type MultiPlanetRepresentation struct {
 	Name     *string `json:"name,omitempty"`
 	Diameter *int    `json:"diameter,omitempty"`
-	// The @key fields this representation matched, as gqlgen prints them.
-	MatchedKey string `json:"-"`
+	// The @key this representation matched: one of the MultiPlanetMatchedKey constants.
+	MatchedKey MultiPlanetMatchedKey `json:"-"`
 }
 
 type Orbit struct {
@@ -67,8 +67,8 @@ func (Planet) IsEntity() {}
 type PlanetRepresentation struct {
 	Name     *string `json:"name,omitempty"`
 	Diameter *int    `json:"diameter,omitempty"`
-	// The @key fields this representation matched, as gqlgen prints them.
-	MatchedKey string `json:"-"`
+	// The @key this representation matched: one of the PlanetMatchedKey constants.
+	MatchedKey PlanetMatchedKey `json:"-"`
 }
 
 type Query struct {

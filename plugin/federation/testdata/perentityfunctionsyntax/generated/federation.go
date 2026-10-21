@@ -11,6 +11,7 @@ import (
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/plugin/federation/fedruntime"
+	"github.com/99designs/gqlgen/plugin/federation/testdata/perentityfunctionsyntax/generated/model"
 )
 
 var (
@@ -198,7 +199,7 @@ func (ec *executionContext) resolveManyEntities(
 
 	case "MultiPlanet":
 		representations := make([]any, len(reps))
-		matchedKeys := make([]string, len(reps))
+		matchedKeys := make([]model.MultiPlanetMatchedKey, len(reps))
 		for i, rep := range reps {
 			matchedKey, err := matchedKeyForMultiPlanet(ctx, rep.entity)
 			if err != nil {
@@ -237,7 +238,7 @@ func (ec *executionContext) resolveManyEntities(
 	}
 }
 
-func matchedKeyForMultiPlanet(ctx context.Context, rep EntityRepresentation) (string, error) {
+func matchedKeyForMultiPlanet(ctx context.Context, rep EntityRepresentation) (model.MultiPlanetMatchedKey, error) {
 	// we collect errors because a later entity resolver may work fine
 	// when an entity has multiple keys
 	entityResolverErrs := []error{}
@@ -266,13 +267,13 @@ func matchedKeyForMultiPlanet(ctx context.Context, rep EntityRepresentation) (st
 				fmt.Errorf("%w due to all null value KeyFields for MultiPlanet", ErrTypeNotFound))
 			break
 		}
-		return "name", nil
+		return model.MultiPlanetMatchedKeyName, nil
 	}
 	return "", fmt.Errorf("%w for MultiPlanet due to %v", ErrTypeNotFound,
 		errors.Join(entityResolverErrs...).Error())
 }
 
-func matchedKeyForPlanet(ctx context.Context, rep EntityRepresentation) (string, error) {
+func matchedKeyForPlanet(ctx context.Context, rep EntityRepresentation) (model.PlanetMatchedKey, error) {
 	// we collect errors because a later entity resolver may work fine
 	// when an entity has multiple keys
 	entityResolverErrs := []error{}
@@ -301,7 +302,7 @@ func matchedKeyForPlanet(ctx context.Context, rep EntityRepresentation) (string,
 				fmt.Errorf("%w due to all null value KeyFields for Planet", ErrTypeNotFound))
 			break
 		}
-		return "name", nil
+		return model.PlanetMatchedKeyName, nil
 	}
 	return "", fmt.Errorf("%w for Planet due to %v", ErrTypeNotFound,
 		errors.Join(entityResolverErrs...).Error())

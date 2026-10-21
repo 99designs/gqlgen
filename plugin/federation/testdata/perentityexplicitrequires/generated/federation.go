@@ -198,7 +198,7 @@ func (ec *executionContext) resolveManyEntities(
 
 	case "MultiPlanet":
 		representations := make([]any, len(reps))
-		matchedKeys := make([]string, len(reps))
+		matchedKeys := make([]MultiPlanetMatchedKey, len(reps))
 		for i, rep := range reps {
 			matchedKey, err := matchedKeyForMultiPlanet(ctx, rep.entity)
 			if err != nil {
@@ -237,7 +237,7 @@ func (ec *executionContext) resolveManyEntities(
 	}
 }
 
-func matchedKeyForMultiPlanet(ctx context.Context, rep EntityRepresentation) (string, error) {
+func matchedKeyForMultiPlanet(ctx context.Context, rep EntityRepresentation) (MultiPlanetMatchedKey, error) {
 	// we collect errors because a later entity resolver may work fine
 	// when an entity has multiple keys
 	entityResolverErrs := []error{}
@@ -266,13 +266,13 @@ func matchedKeyForMultiPlanet(ctx context.Context, rep EntityRepresentation) (st
 				fmt.Errorf("%w due to all null value KeyFields for MultiPlanet", ErrTypeNotFound))
 			break
 		}
-		return "name", nil
+		return MultiPlanetMatchedKeyName, nil
 	}
 	return "", fmt.Errorf("%w for MultiPlanet due to %v", ErrTypeNotFound,
 		errors.Join(entityResolverErrs...).Error())
 }
 
-func matchedKeyForPlanet(ctx context.Context, rep EntityRepresentation) (string, error) {
+func matchedKeyForPlanet(ctx context.Context, rep EntityRepresentation) (PlanetMatchedKey, error) {
 	// we collect errors because a later entity resolver may work fine
 	// when an entity has multiple keys
 	entityResolverErrs := []error{}
@@ -301,7 +301,7 @@ func matchedKeyForPlanet(ctx context.Context, rep EntityRepresentation) (string,
 				fmt.Errorf("%w due to all null value KeyFields for Planet", ErrTypeNotFound))
 			break
 		}
-		return "name", nil
+		return PlanetMatchedKeyName, nil
 	}
 	return "", fmt.Errorf("%w for Planet due to %v", ErrTypeNotFound,
 		errors.Join(entityResolverErrs...).Error())

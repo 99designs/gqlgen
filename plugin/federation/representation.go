@@ -282,11 +282,16 @@ const matchedKeyField = "MatchedKey"
 // configureRepresentationModels records in models what modelgen needs to
 // generate each representation: its fields' Go names, as
 // buildRepresentations chose them, and, on a root representation, the
-// matchedKeyField extra field alongside any extraFields of the user's.
+// matchedKeyField extra field alongside any extraFields of the user's, typed
+// as its entity's MatchedKey type in the model package modelPkg.
 //
 // Ensures: nil, or an error if the user's extraFields already define
 // matchedKeyField on a root representation.
-func configureRepresentationModels(representations []*representation, models config.TypeMap) error {
+func configureRepresentationModels(
+	representations []*representation,
+	models config.TypeMap,
+	modelPkg string,
+) error {
 	for _, r := range representations {
 		entry := models[r.Name]
 		if entry.Fields == nil {
@@ -306,9 +311,10 @@ func configureRepresentationModels(representations []*representation, models con
 			if entry.ExtraFields == nil {
 				entry.ExtraFields = make(map[string]config.ModelExtraField, 1)
 			}
+			keyType := matchedKeyTypeName(r.Owner)
 			entry.ExtraFields[matchedKeyField] = config.ModelExtraField{
-				Type:        "string",
-				Description: "The @key fields this representation matched, as gqlgen prints them.",
+				Type:        modelPkg + "." + keyType,
+				Description: "The @key this representation matched: one of the " + keyType + " constants.",
 			}
 		}
 		models[r.Name] = entry

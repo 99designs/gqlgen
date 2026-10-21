@@ -398,9 +398,9 @@ type Port @key(fields: "_id") @key(fields: "id") {
 ```go
 func (r *entityResolver) FindPort(ctx context.Context, rep model.PortRepresentation) (*model.Port, error) {
 	switch rep.MatchedKey {
-	case "_id":
+	case model.PortMatchedKeyLegacyID:
 		return r.portByLegacyID(ctx, *rep.LegacyID)
-	case "id":
+	case model.PortMatchedKeyID:
 		return r.portByID(ctx, *rep.ID)
 	}
 	return nil, fmt.Errorf("unexpected key %q", rep.MatchedKey)
@@ -416,6 +416,28 @@ func (r *entityResolver) FindPort(ctx context.Context, rep model.PortRepresentat
   null. gqlgen prints it in a standard form: single spaces, and a nested
   selection in braces, such as `"id owner { id }"`. gqlgen rejects a
   representation that matches no key, so a resolver is never called without one.
+- `MatchedKey` has a generated type, `PortMatchedKey`, with one constant per
+  `@key`, declared in `federation_keys.go` beside the generated models:
+
+  ```go
+  type PortMatchedKey string
+
+  const (
+  	PortMatchedKeyLegacyID PortMatchedKey = "_id"
+  	PortMatchedKeyID       PortMatchedKey = "id"
+  )
+  ```
+
+  Switching on the constants turns a misspelled or removed key into a compile
+  error. A linter such as `exhaustive` can also report a key the switch
+  misses. gqlgen names each constant after the Go names of its key fields,
+  joined with `And`, such as `ShipMatchedKeyIDAndOwnerID` for
+  `"id owner { id }"`. When two keys give one name, such as `id` and
+  `i { d }`, the later key gets a number: `PortMatchedKeyID2`. Generation
+  fails if a schema type, an enum value or a representation takes the Go name
+  of one of these declarations. Where code needs a `string`, convert:
+  `string(rep.MatchedKey)`. A representation bound to your own struct
+  must declare `MatchedKey` with the generated type.
 - Representation fields take the entity's Go field names, so `@goField(name: ...)`
   or `fieldName` config on `Port` also applies to `PortRepresentation`. A
   `fieldName` set on `PortRepresentation` itself takes precedence. As for any
@@ -473,8 +495,9 @@ change.
    resolver file.
 3. Move those bodies into helpers now: the comment holds only what the latest
    run removed, so the next `gqlgen generate` deletes them.
-4. Implement `FindPort` by switching on `rep.MatchedKey` and calling the helper
-   for that key, as in the preceding example. With `multi: true`, each
+4. Implement `FindPort` by switching on `rep.MatchedKey`, using the
+   `PortMatchedKey` constants, and calling the helper for that key, as in the
+   preceding example. With `multi: true`, each
    representation in `reps` has its own `MatchedKey`; return the entities in
    the order of `reps`, and report per-entity errors with a
    `graphql.BatchErrorList`.
@@ -488,6 +511,18 @@ change.
 part of it. Explicit `@requires` keeps its `Populate<Entity>Requires` function.
 To undo, remove the option, regenerate, and call the helpers from the per-key
 stubs.
+
+### Upgrading from v0.17.96 or v0.17.97
+
+Those releases typed `MatchedKey` as `string`. It now has the generated
+`<Entity>MatchedKey` type, so after regenerating:
+
+- `switch` cases and comparisons against string literals, such as
+  `case "_id":`, still compile. Replace them with the constants to have the
+  compiler check them.
+- Code that uses `MatchedKey` as a `string`, assigning it to a `string`
+  variable, passing it to a `string` parameter or indexing a `map[string]…`
+  with it, needs `string(rep.MatchedKey)`.
 
 > **Roadmap — the default will change.** The option is a temporary opt-in. A
 > future release plans to make one resolver per entity the **default**, with

@@ -255,7 +255,7 @@ func (ec *executionContext) resolveManyEntities(
 				{{ if and .Resolvers .Multi .PerEntity -}}
 				case "{{.Def.Name}}":
 					representations := make([]any, len(reps))
-					matchedKeys := make([]string, len(reps))
+					matchedKeys := make([]{{ .MatchedKeyType | ref }}, len(reps))
 					for i, rep := range reps {
 						matchedKey, err := matchedKeyFor{{.Def.Name}}(ctx, rep.entity)
 						if err != nil {
@@ -435,7 +435,7 @@ func (ec *executionContext) resolveManyEntities(
 	{{- if .Resolvers }}
 
 		{{/* A per-entity entity's resolver names are not disambiguated, so it reports the matched key instead. */ -}}
-		func {{ if $entity.PerEntity }}matchedKeyFor{{ else }}entityResolverNameFor{{ end }}{{$entity.Name}}(ctx context.Context, rep EntityRepresentation) (string, error) {
+		func {{ if $entity.PerEntity }}matchedKeyFor{{ else }}entityResolverNameFor{{ end }}{{$entity.Name}}(ctx context.Context, rep EntityRepresentation) ({{ if $entity.PerEntity }}{{ $entity.MatchedKeyType | ref }}{{ else }}string{{ end }}, error) {
 			// we collect errors because a later entity resolver may work fine
 			// when an entity has multiple keys
 			entityResolverErrs := []error{}
@@ -478,7 +478,7 @@ func (ec *executionContext) resolveManyEntities(
 							fmt.Errorf("%w due to all null value KeyFields for {{$entity.Name}}", ErrTypeNotFound))
 						break
 					}
-					return {{ if $entity.PerEntity }}{{ .FieldSet | quote }}{{ else }}"{{.ResolverName}}"{{ end }}, nil
+					return {{ if $entity.PerEntity }}{{ $entity.MatchedKeyConstRef . }}{{ else }}"{{.ResolverName}}"{{ end }}, nil
 				}
 			{{- end }}
 			return "", fmt.Errorf("%w for {{$entity.Name}} due to %v", ErrTypeNotFound,

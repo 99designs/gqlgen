@@ -416,6 +416,8 @@ func (r *entityResolver) FindPort(ctx context.Context, rep model.PortRepresentat
   null. gqlgen prints it in a standard form: single spaces, and a nested
   selection in braces, such as `"id owner { id }"`. gqlgen rejects a
   representation that matches no key, so a resolver is never called without one.
+  `MatchedKey` exists only in Go: gqlgen sets it, the router doesn't send it,
+  and neither the GraphQL input nor the JSON encoding includes it.
 - `MatchedKey` has a generated type, `PortMatchedKey`, with one constant per
   `@key`, declared in `federation_keys.go` beside the generated models:
 

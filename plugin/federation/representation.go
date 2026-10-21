@@ -313,8 +313,9 @@ func configureRepresentationModels(
 			}
 			keyType := matchedKeyTypeName(r.Owner)
 			entry.ExtraFields[matchedKeyField] = config.ModelExtraField{
-				Type:        modelPkg + "." + keyType,
-				Description: "The @key this representation matched: one of the " + keyType + " constants.",
+				Type: modelPkg + "." + keyType,
+				Description: "The @key this representation matched: one of the " + keyType + " constants.\n" +
+					"gqlgen sets it from the fields the router sent; the router does not send it.",
 			}
 		}
 		models[r.Name] = entry

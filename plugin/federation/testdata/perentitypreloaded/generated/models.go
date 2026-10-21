@@ -14,6 +14,7 @@ type CometRepresentation struct {
 	Name  *string              `json:"name,omitempty"`
 	Orbit *OrbitRepresentation `json:"orbit,omitempty"`
 	// The @key this representation matched: one of the CometMatchedKey constants.
+	// gqlgen sets it from the fields the router sent; the router does not send it.
 	MatchedKey CometMatchedKey `json:"-"`
 }
 
@@ -29,6 +30,7 @@ type FleetRepresentation struct {
 	Name  *string               `json:"name,omitempty"`
 	Ships []*ShipRepresentation `json:"ships,omitempty"`
 	// The @key this representation matched: one of the FleetMatchedKey constants.
+	// gqlgen sets it from the fields the router sent; the router does not send it.
 	MatchedKey FleetMatchedKey `json:"-"`
 }
 
@@ -44,6 +46,7 @@ type MultiPlanetRepresentation struct {
 	Name     *string `json:"name,omitempty"`
 	Diameter *int    `json:"diameter,omitempty"`
 	// The @key this representation matched: one of the MultiPlanetMatchedKey constants.
+	// gqlgen sets it from the fields the router sent; the router does not send it.
 	MatchedKey MultiPlanetMatchedKey `json:"-"`
 }
 
@@ -68,6 +71,7 @@ type PlanetRepresentation struct {
 	Name     *string `json:"name,omitempty"`
 	Diameter *int    `json:"diameter,omitempty"`
 	// The @key this representation matched: one of the PlanetMatchedKey constants.
+	// gqlgen sets it from the fields the router sent; the router does not send it.
 	MatchedKey PlanetMatchedKey `json:"-"`
 }
 

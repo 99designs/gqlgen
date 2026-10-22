@@ -4,6 +4,7 @@ import (
 	"errors"
 	"maps"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -175,7 +176,8 @@ func TestGenerateValidatesOutput(t *testing.T) {
 //
 // The go command rejects a file path pattern outside the main module, so a directory in another
 // module has to be built by import path. Inside the main module it has to be built by file path,
-// because an import path pattern skips testdata directories.
+// because an import path pattern skips testdata directories. Beneath testdata in another module
+// the packages have to be named one by one for the same reason.
 func TestValidateModules(t *testing.T) {
 	const brokenModel = "package model\n\nvar _ ThisTypeDoesNotExist\n"
 	const replaceShared = "require example.com/shared v0.0.0\n\n" +
@@ -189,6 +191,8 @@ func TestValidateModules(t *testing.T) {
 		files map[string]string
 		// modelFile is the model filename, relative to main/.
 		modelFile string
+		// vendor runs go mod vendor in main/ before validation.
+		vendor bool
 		// wantErr is a substring of the expected error, or empty if validation must pass.
 		wantErr string
 	}{
@@ -209,6 +213,57 @@ func TestValidateModules(t *testing.T) {
 			},
 			modelFile: "../shared/model/models_gen.go",
 			wantErr:   "ThisTypeDoesNotExist",
+		},
+		{
+			// An import path pattern would skip testdata and pass having built nothing.
+			name: "replaced module testdata does not compile",
+			files: map[string]string{
+				"main/go.mod":                    "module example.com/main\n\ngo 1.21\n\n" + replaceShared,
+				"shared/testdata/model/model.go": brokenModel,
+			},
+			modelFile: "../shared/testdata/model/models_gen.go",
+			wantErr:   "ThisTypeDoesNotExist",
+		},
+		{
+			name: "replaced module testdata subpackage does not compile",
+			files: map[string]string{
+				"main/go.mod":                      "module example.com/main\n\ngo 1.21\n\n" + replaceShared,
+				"shared/testdata/model/model.go":   "package model\n",
+				"shared/testdata/model/sub/sub.go": brokenModel,
+			},
+			modelFile: "../shared/testdata/model/models_gen.go",
+			wantErr:   "ThisTypeDoesNotExist",
+		},
+		{
+			// Beneath testdata the packages are named one by one, so the directories that a
+			// pattern passes over must be left out, or go build fails on them.
+			name: "replaced module testdata leaves out what a pattern skips",
+			files: map[string]string{
+				"main/go.mod":                           "module example.com/main\n\ngo 1.21\n\n" + replaceShared,
+				"shared/testdata/model/model.go":        "package model\n",
+				"shared/testdata/model/docs/README.md":  "no Go files\n",
+				"shared/testdata/model/tests/x_test.go": "package tests\n",
+				"shared/testdata/model/gen/gen.go":      "//go:build ignore\n\n" + brokenModel,
+				"shared/testdata/model/testdata/x/x.go": brokenModel,
+				"shared/testdata/model/_skip/skip.go":   brokenModel,
+				"shared/testdata/model/inner/go.mod":    "module example.com/inner\n\ngo 1.21\n",
+				"shared/testdata/model/inner/inner.go":  brokenModel,
+			},
+			modelFile: "../shared/testdata/model/models_gen.go",
+		},
+		{
+			// go mod vendor copies only the packages that the main module imports, so model/sub
+			// is missing from vendor/ and naming it rather than using a pattern would fail.
+			name: "vendored replaced module",
+			files: map[string]string{
+				"main/go.mod": "module example.com/main\n\ngo 1.21\n\n" + replaceShared,
+				"main/main.go": "package main\n\nimport _ \"example.com/shared/model\"\n\n" +
+					"func main() {}\n",
+				"shared/model/model.go":   "package model\n",
+				"shared/model/sub/sub.go": "package sub\n",
+			},
+			modelFile: "../shared/model/models_gen.go",
+			vendor:    true,
 		},
 		{
 			// A go.mod below the main module starts another module, even though its
@@ -262,6 +317,10 @@ func TestValidateModules(t *testing.T) {
 			}
 			t.Setenv("GOWORK", gowork)
 			t.Chdir(filepath.Join(root, "main"))
+			if tt.vendor {
+				out, err := exec.Command("go", "mod", "vendor").CombinedOutput()
+				require.NoError(t, err, string(out))
+			}
 
 			cfg := &config.Config{
 				Exec: config.ExecConfig{

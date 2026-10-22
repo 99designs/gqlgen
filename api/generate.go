@@ -1,9 +1,14 @@
 package api
 
 import (
+	"errors"
 	"fmt"
+	"go/build"
+	"io/fs"
+	"os"
 	"path/filepath"
 	"regexp"
+	"slices"
 	"strings"
 	"syscall"
 
@@ -209,14 +214,23 @@ func generate(
 }
 
 func validate(cfg *config.Config) error {
-	// go build runs in the working directory, so the module found there is the main module.
-	mainModule := code.ModulePathForDir(".")
-	roots := []string{validationRoot(cfg.Exec.Dir(), mainModule)}
+	dirs := []string{cfg.Exec.Dir()}
 	if cfg.Model.IsDefined() {
-		roots = append(roots, validationRoot(cfg.Model.Dir(), mainModule))
+		dirs = append(dirs, cfg.Model.Dir())
 	}
 	if cfg.Resolver.IsDefined() {
-		roots = append(roots, validationRoot(cfg.Resolver.Dir(), mainModule))
+		dirs = append(dirs, cfg.Resolver.Dir())
+	}
+
+	// go build runs in the working directory, so the module found there is the main module.
+	mainModule := code.ModulePathForDir(".")
+	var roots []string
+	for _, dir := range dirs {
+		dirRoots, err := validationRoots(dir, mainModule)
+		if err != nil {
+			return err
+		}
+		roots = append(roots, dirRoots...)
 	}
 
 	// Use go build for validation instead of packages.Load with NeedTypes.
@@ -233,18 +247,69 @@ func validate(cfg *config.Config) error {
 // Used by go build, go test, etc. (e.g., "go build ./...")
 const subpackagesWildcard = "/..."
 
-// validationRoot returns the go build pattern that validate compiles for the output directory
-// dir: dir itself and every package beneath it.
+// validationRoots returns the go build arguments that validate compiles for the output
+// directory dir: dir itself and every package beneath it.
 //
 // Within the main module that is a file path pattern, see buildPattern. The go command refuses
 // a file path pattern outside the main module, though, so a directory that belongs to another
 // module, such as one wired in with a replace directive or a go.work file, is addressed by its
 // import path instead, which resolves through the module graph.
-func validationRoot(dir, mainModule string) string {
-	if module := code.ModulePathForDir(dir); module != "" && module != mainModule {
-		return code.ImportPathForDir(dir) + subpackagesWildcard
+//
+// An import path pattern matches nothing when dir lies beneath a directory that the go command
+// skips, such as testdata, so the packages there are listed one by one instead. Anywhere else
+// the pattern is kept: it only matches packages that the module graph provides, where naming a
+// package explicitly fails if, for example, it is missing from the vendor directory.
+func validationRoots(dir, mainModule string) ([]string, error) {
+	module := code.ModulePathForDir(dir)
+	if module == "" || module == mainModule {
+		return []string{buildPattern(dir)}, nil
 	}
-	return buildPattern(dir)
+	importPath := code.ImportPathForDir(dir)
+	elems := strings.Split(strings.TrimPrefix(importPath, module), "/")
+	if !slices.ContainsFunc(elems, skippedByPattern) {
+		return []string{importPath + subpackagesWildcard}, nil
+	}
+	return packageImportPaths(dir)
+}
+
+// skippedByPattern reports whether the go command passes over a directory with the given name
+// when it expands "...": testdata, and names starting with "." or "_".
+func skippedByPattern(name string) bool {
+	return name == "testdata" || strings.HasPrefix(name, ".") || strings.HasPrefix(name, "_")
+}
+
+// packageImportPaths returns the import paths of the packages that the file path pattern
+// dir/... matches: dir and every directory beneath it with Go files that build on this
+// platform. Like the pattern, it leaves out the directories below dir that skippedByPattern
+// reports, and other modules.
+func packageImportPaths(dir string) ([]string, error) {
+	var importPaths []string
+	err := filepath.WalkDir(dir, func(path string, d fs.DirEntry, err error) error {
+		if err != nil || !d.IsDir() {
+			return err
+		}
+		if path != dir {
+			if skippedByPattern(d.Name()) {
+				return filepath.SkipDir
+			}
+			if _, err := os.Stat(filepath.Join(path, "go.mod")); err == nil {
+				return filepath.SkipDir
+			}
+		}
+		// The pattern passes over a directory without buildable non-test Go files, but naming
+		// one makes go build fail. Any other problem is left for go build to report.
+		pkg, err := build.ImportDir(path, 0)
+		var noGo *build.NoGoError
+		if errors.As(err, &noGo) || (err == nil && len(pkg.GoFiles)+len(pkg.CgoFiles) == 0) {
+			return nil
+		}
+		importPaths = append(importPaths, code.ImportPathForDir(path))
+		return nil
+	})
+	if err != nil {
+		return nil, fmt.Errorf("listing packages in %s: %w", dir, err)
+	}
+	return importPaths, nil
 }
 
 // buildPattern returns a go build pattern matching dir and every package beneath it.

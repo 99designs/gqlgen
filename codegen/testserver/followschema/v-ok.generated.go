@@ -28,7 +28,7 @@ func (ec *executionContext) _VOkCaseNil_value(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_VOkCaseNil_value(ctx, field)
+			return ec.fieldContextByID(ctx, field, 217 /* VOkCaseNil.value */)
 		},
 		func(ctx context.Context) (any, error) {
 			v, ok := obj.Value()
@@ -46,9 +46,6 @@ func (ec *executionContext) _VOkCaseNil_value(ctx context.Context, field graphql
 		true,
 		false,
 	)
-}
-func (ec *executionContext) fieldContext_VOkCaseNil_value(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("VOkCaseNil", field, true, false, "String")
 }
 
 func (ec *executionContext) _VOkCaseValue_value(ctx context.Context, field graphql.CollectedField, obj *VOkCaseValue) (ret graphql.Marshaler) {
@@ -57,7 +54,7 @@ func (ec *executionContext) _VOkCaseValue_value(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_VOkCaseValue_value(ctx, field)
+			return ec.fieldContextByID(ctx, field, 218 /* VOkCaseValue.value */)
 		},
 		func(ctx context.Context) (any, error) {
 			v, ok := obj.Value()
@@ -75,9 +72,6 @@ func (ec *executionContext) _VOkCaseValue_value(ctx context.Context, field graph
 		true,
 		false,
 	)
-}
-func (ec *executionContext) fieldContext_VOkCaseValue_value(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("VOkCaseValue", field, true, false, "String")
 }
 
 // endregion **************************** field.gotpl *****************************

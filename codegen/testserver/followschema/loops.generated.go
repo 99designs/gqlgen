@@ -28,7 +28,7 @@ func (ec *executionContext) _LoopA_b(ctx context.Context, field graphql.Collecte
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_LoopA_b(ctx, field)
+			return ec.fieldContextByID(ctx, field, 60 /* LoopA.b */)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.B, nil
@@ -43,18 +43,6 @@ func (ec *executionContext) _LoopA_b(ctx context.Context, field graphql.Collecte
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_LoopA_b(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "LoopA",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_LoopB(ctx, field)
-		},
-	}
-	return fc, nil
-}
 
 func (ec *executionContext) _LoopB_a(ctx context.Context, field graphql.CollectedField, obj *LoopB) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -62,7 +50,7 @@ func (ec *executionContext) _LoopB_a(ctx context.Context, field graphql.Collecte
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_LoopB_a(ctx, field)
+			return ec.fieldContextByID(ctx, field, 61 /* LoopB.a */)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.A, nil
@@ -76,18 +64,6 @@ func (ec *executionContext) _LoopB_a(ctx context.Context, field graphql.Collecte
 		true,
 		true,
 	)
-}
-func (ec *executionContext) fieldContext_LoopB_a(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "LoopB",
-		Field:      field,
-		IsMethod:   false,
-		IsResolver: false,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.childFields_LoopA(ctx, field)
-		},
-	}
-	return fc, nil
 }
 
 // endregion **************************** field.gotpl *****************************

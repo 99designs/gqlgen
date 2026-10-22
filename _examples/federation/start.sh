@@ -4,12 +4,14 @@ function cleanup {
     kill "$ACCOUNTS_PID"
     kill "$PRODUCTS_PID"
     kill "$REVIEWS_PID"
+    kill "$V1_PID"
 }
 trap cleanup EXIT
 
 go build -o /tmp/srv-accounts ./accounts
 go build -o /tmp/srv-products ./products
 go build -o /tmp/srv-reviews ./reviews
+go build -o /tmp/srv-federation-v1 ./v1
 
 /tmp/srv-accounts &
 ACCOUNTS_PID=$!
@@ -19,6 +21,9 @@ PRODUCTS_PID=$!
 
 /tmp/srv-reviews &
 REVIEWS_PID=$!
+
+/tmp/srv-federation-v1 &
+V1_PID=$!
 
 sleep 1
 

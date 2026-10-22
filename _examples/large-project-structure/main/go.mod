@@ -3,7 +3,7 @@ module github.com/99designs/gqlgen/_examples/large-project-structure/main
 go 1.26.0
 
 require (
-	github.com/99designs/gqlgen v0.17.95
+	github.com/99designs/gqlgen v0.17.97
 	github.com/99designs/gqlgen/_examples/large-project-structure/integration v0.0.0-00010101000000-000000000000
 	github.com/99designs/gqlgen/_examples/large-project-structure/shared v0.0.0
 	github.com/vektah/gqlparser/v2 v2.5.64

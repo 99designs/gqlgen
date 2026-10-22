@@ -3,7 +3,7 @@ module github.com/gqlgen/_examples/websocket-initfunc/server
 go 1.26.0
 
 require (
-	github.com/99designs/gqlgen v0.17.95
+	github.com/99designs/gqlgen v0.17.97
 	github.com/coder/websocket v1.8.15
 	github.com/go-chi/chi/v5 v5.5.0
 	github.com/rs/cors v1.11.1

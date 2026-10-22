@@ -6,7 +6,7 @@ require (
 	github.com/99designs/gqlgen v0.17.95
 	github.com/99designs/gqlgen/_examples/large-project-structure/integration v0.0.0-00010101000000-000000000000
 	github.com/99designs/gqlgen/_examples/large-project-structure/shared v0.0.0
-	github.com/vektah/gqlparser/v2 v2.5.63
+	github.com/vektah/gqlparser/v2 v2.5.64
 )
 
 replace github.com/99designs/gqlgen/_examples/large-project-structure/shared => ../shared
@@ -16,7 +16,7 @@ replace github.com/99designs/gqlgen/_examples/large-project-structure/integratio
 replace github.com/99designs/gqlgen => ../../../
 
 require (
-	github.com/agnivade/levenshtein v1.2.1 // indirect
+	github.com/agnivade/levenshtein v1.2.2 // indirect
 	github.com/coder/websocket v1.8.15 // indirect
 	github.com/go-viper/mapstructure/v2 v2.5.0 // indirect
 	github.com/goccy/go-yaml v1.19.2 // indirect

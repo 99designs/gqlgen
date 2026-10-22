@@ -8,9 +8,11 @@ import (
 
 type (
 	Directive struct {
-		Name         string
-		description  string
-		Locations    []string
+		Name        string
+		description string
+		Locations   []string
+		// Args holds every argument, including deprecated ones. Introspection
+		// reports VisibleArgs instead.
 		Args         []InputValue
 		IsRepeatable bool
 	}
@@ -25,6 +27,8 @@ type (
 		Name        string
 		description string
 		Type        *Type
+		// Args holds every argument, including deprecated ones. Introspection
+		// reports VisibleArgs instead.
 		Args        []InputValue
 		deprecation *ast.Directive
 	}
@@ -121,4 +125,32 @@ func (f *Directive) Description() *string {
 		return nil
 	}
 	return &f.description
+}
+
+// VisibleArgs returns the arguments that __Directive.args reports: all of Args
+// when includeDeprecated is true, otherwise only those not marked @deprecated.
+func (f *Directive) VisibleArgs(includeDeprecated bool) []InputValue {
+	return visibleInputValues(f.Args, includeDeprecated)
+}
+
+// VisibleArgs returns the arguments that __Field.args reports: all of Args when
+// includeDeprecated is true, otherwise only those not marked @deprecated.
+func (f *Field) VisibleArgs(includeDeprecated bool) []InputValue {
+	return visibleInputValues(f.Args, includeDeprecated)
+}
+
+// visibleInputValues filters out deprecated values unless includeDeprecated is
+// set, which is how the spec defines every includeDeprecated argument. It
+// returns values itself when nothing is filtered.
+func visibleInputValues(values []InputValue, includeDeprecated bool) []InputValue {
+	if includeDeprecated {
+		return values
+	}
+	visible := make([]InputValue, 0, len(values))
+	for _, v := range values {
+		if !v.IsDeprecated() {
+			visible = append(visible, v)
+		}
+	}
+	return visible
 }

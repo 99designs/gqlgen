@@ -50,7 +50,7 @@ func BuildDependencyGraph(schema *ast.Schema) *DependencyGraph {
 		if typ.BuiltIn || typ.Position == nil || typ.Position.Src == nil {
 			continue
 		}
-		if deps := g.extractTypeDependencies(typ); len(deps) > 0 {
+		if deps := g.extractTypeDependencies(schema, typ); len(deps) > 0 {
 			g.TypeDependencies[typ.Name] = deps
 		}
 	}
@@ -70,8 +70,12 @@ func BuildDependencyGraph(schema *ast.Schema) *DependencyGraph {
 	return g
 }
 
-// extractTypeDependencies finds all types referenced by the given type definition
-func (g *DependencyGraph) extractTypeDependencies(typ *ast.Definition) []string {
+// extractTypeDependencies finds the types the given type definition references,
+// leaving out gqlparser's built-in types, which no schema file defines.
+func (g *DependencyGraph) extractTypeDependencies(
+	schema *ast.Schema,
+	typ *ast.Definition,
+) []string {
 	deps := make(map[string]bool)
 
 	for _, iface := range typ.Interfaces {
@@ -89,7 +93,7 @@ func (g *DependencyGraph) extractTypeDependencies(typ *ast.Definition) []string 
 
 	result := make([]string, 0, len(deps))
 	for dep := range deps {
-		if !isBuiltInScalar(dep) {
+		if def := schema.Types[dep]; def == nil || !def.BuiltIn {
 			result = append(result, dep)
 		}
 	}
@@ -105,14 +109,6 @@ func (g *DependencyGraph) extractTypeRef(t *ast.Type, deps map[string]bool) {
 	} else {
 		deps[t.NamedType] = true
 	}
-}
-
-func isBuiltInScalar(name string) bool {
-	switch name {
-	case "Int", "Float", "String", "Boolean", "ID":
-		return true
-	}
-	return false
 }
 
 // GetAffectedSchemas returns all schema files that need regeneration when

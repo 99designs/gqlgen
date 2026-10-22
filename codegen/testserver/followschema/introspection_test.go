@@ -91,42 +91,45 @@ func TestIntrospection(t *testing.T) {
 		})
 
 		t.Run("deprecated directive on field arguments", func(t *testing.T) {
+			type arg struct {
+				Name              string
+				DeprecationReason *string
+			}
 			var resp struct {
 				Type struct {
 					Fields []struct {
-						Name string
-						Args []struct {
-							Name              string
-							DeprecationReason *string
-						}
+						Name    string
+						Args    []arg
+						AllArgs []arg
 					}
 				} `json:"__type"`
 			}
 
-			err := c.Post(
-				`{ __type(name:"Query") { fields { name args { name deprecationReason }}}}`,
-				&resp,
-			)
+			err := c.Post(`{ __type(name:"Query") { fields {
+				name
+				args { name deprecationReason }
+				allArgs: args(includeDeprecated: true) { name deprecationReason }
+			}}}`, &resp)
 			require.NoError(t, err)
 
-			var args []struct {
-				Name              string
-				DeprecationReason *string
-			}
+			var args, allArgs []arg
 			for _, f := range resp.Type.Fields {
 				if f.Name == "fieldWithDeprecatedArg" {
-					args = f.Args
+					args, allArgs = f.Args, f.AllArgs
 					break
 				}
 			}
 
-			require.Len(t, args, 2)
-			require.Equal(t, "oldArg", args[0].Name)
-			require.NotNil(t, args[0].DeprecationReason)
-			require.Equal(t, "old arg", *args[0].DeprecationReason)
+			require.Equal(t, []arg{{Name: "newArg"}}, args,
+				"args leaves out deprecated arguments by default")
 
-			require.Equal(t, "newArg", args[1].Name)
-			require.Nil(t, args[1].DeprecationReason)
+			require.Len(t, allArgs, 2)
+			require.Equal(t, "oldArg", allArgs[0].Name)
+			require.NotNil(t, allArgs[0].DeprecationReason)
+			require.Equal(t, "old arg", *allArgs[0].DeprecationReason)
+
+			require.Equal(t, "newArg", allArgs[1].Name)
+			require.Nil(t, allArgs[1].DeprecationReason)
 		})
 	})
 

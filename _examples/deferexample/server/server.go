@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/coder/websocket"
-	"github.com/rs/cors"
+	"github.com/jub0bs/cors"
 
 	"github.com/99designs/gqlgen/_examples/deferexample"
 	"github.com/99designs/gqlgen/graphql/handler"
@@ -24,11 +24,13 @@ func main() {
 		port = defaultPort
 	}
 
-	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowCredentials: true,
-		Debug:            false,
+	cors, err := cors.NewMiddleware(cors.Config{
+		Origins:        []string{"*"},
+		RequestHeaders: []string{"Accept", "Content-Type", "X-Requested-With"},
 	})
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	srv := handler.New(
 		deferexample.NewExecutableSchema(
@@ -53,7 +55,7 @@ func main() {
 	srv.Use(extension.Introspection{})
 
 	http.Handle("/", playground.Handler("Todo", "/query"))
-	http.Handle("/query", c.Handler(srv))
+	http.Handle("/query", cors.Wrap(srv))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))

@@ -9,7 +9,7 @@
     },
     "devDependencies": {
         "@apollo/client": "^4.3.2",
-        "@graphql-codegen/cli": "^7.4.5",
+        "@graphql-codegen/cli": "^7.4.6",
         "@graphql-codegen/client-preset": "^6.2.2",
         "@graphql-codegen/introspection": "^6.1.0",
         "@graphql-codegen/schema-ast": "^6.1.1",

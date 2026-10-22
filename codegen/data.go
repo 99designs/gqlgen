@@ -473,35 +473,28 @@ func BuildData(cfg *config.Config, plugins ...any) (*Data, error) {
 	return &s, nil
 }
 
+// injectIntrospectionRoots adds __type and __schema to the query object. The query
+// type carries gqlparser's definitions of them (see Config.LoadSchema), and
+// buildObject skips every field starting with "__", so they are built here from
+// those definitions rather than from a copy that could drift from gqlparser's.
 func (b *builder) injectIntrospectionRoots(s *Data) error {
 	obj := s.Objects.ByName(b.Schema.Query.Name)
 	if obj == nil {
 		return errors.New("root query type must be defined")
 	}
 
-	__type, err := b.buildField(obj, &ast.FieldDefinition{
-		Name: "__type",
-		Type: ast.NamedType("__Type", nil),
-		Arguments: []*ast.ArgumentDefinition{
-			{
-				Name: "name",
-				Type: ast.NonNullNamedType("String", nil),
-			},
-		},
-	})
-	if err != nil {
-		return err
-	}
+	for _, name := range []string{"__type", "__schema"} {
+		def := b.Schema.Query.Fields.ForName(name)
+		if def == nil {
+			return fmt.Errorf("gqlparser did not add %s to the query type", name)
+		}
 
-	__schema, err := b.buildField(obj, &ast.FieldDefinition{
-		Name: "__schema",
-		Type: ast.NamedType("__Schema", nil),
-	})
-	if err != nil {
-		return err
+		field, err := b.buildField(obj, def)
+		if err != nil {
+			return err
+		}
+		obj.Fields = append(obj.Fields, field)
 	}
-
-	obj.Fields = append(obj.Fields, __type, __schema)
 
 	return nil
 }

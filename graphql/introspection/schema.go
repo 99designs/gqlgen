@@ -70,6 +70,7 @@ func (s *Schema) directiveFromDef(d *ast.DirectiveDefinition) Directive {
 			description:  arg.Description,
 			DefaultValue: defaultValue(arg.DefaultValue),
 			Type:         WrapTypeFromType(s.schema, arg.Type),
+			deprecation:  arg.Directives.ForName("deprecated"),
 		}
 	}
 

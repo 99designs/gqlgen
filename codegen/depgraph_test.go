@@ -58,6 +58,8 @@ func TestBuildDependencyGraph(t *testing.T) {
 	// Verify type dependencies (User -> Post, Post -> User + Comment)
 	require.Contains(t, graph.TypeDependencies["User"], "Post")
 	require.Contains(t, graph.TypeDependencies["Post"], "User")
+	require.NotContains(t, graph.TypeDependencies, "Comment",
+		"Comment only references the built-in scalars ID and String")
 	require.Contains(t, graph.TypeDependencies["Post"], "Comment")
 
 	// Verify schema dependencies (cross-schema references)
@@ -311,17 +313,5 @@ func TestGetTypesForSchemas(t *testing.T) {
 			types := graph.GetTypesForSchemas(tt.schemas)
 			require.Equal(t, tt.expected, types)
 		})
-	}
-}
-
-func TestIsBuiltInScalar(t *testing.T) {
-	builtIns := []string{"Int", "Float", "String", "Boolean", "ID"}
-	for _, name := range builtIns {
-		require.True(t, isBuiltInScalar(name), "%s should be a built-in scalar", name)
-	}
-
-	nonBuiltIns := []string{"User", "Post", "DateTime", "JSON", ""}
-	for _, name := range nonBuiltIns {
-		require.False(t, isBuiltInScalar(name), "%s should not be a built-in scalar", name)
 	}
 }

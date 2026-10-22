@@ -514,8 +514,8 @@ func field___Directive_args_args(ctx context.Context, ec *executionContext, rawA
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated",
-		func(ctx context.Context, v any) (*bool, error) {
-			return unmarshalOBoolean2ᚖbool(ctx, ec, v)
+		func(ctx context.Context, v any) (bool, error) {
+			return unmarshalOBoolean2bool(ctx, ec, v)
 		})
 	if err != nil {
 		return nil, err
@@ -528,8 +528,8 @@ func field___Field_args_args(ctx context.Context, ec *executionContext, rawArgs 
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated",
-		func(ctx context.Context, v any) (*bool, error) {
-			return unmarshalOBoolean2ᚖbool(ctx, ec, v)
+		func(ctx context.Context, v any) (bool, error) {
+			return unmarshalOBoolean2bool(ctx, ec, v)
 		})
 	if err != nil {
 		return nil, err
@@ -553,6 +553,20 @@ func field___Type_enumValues_args(ctx context.Context, ec *executionContext, raw
 }
 
 func field___Type_fields_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated",
+		func(ctx context.Context, v any) (bool, error) {
+			return unmarshalOBoolean2bool(ctx, ec, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["includeDeprecated"] = arg0
+	return args, nil
+}
+
+func field___Type_inputFields_args(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "includeDeprecated",
@@ -929,10 +943,10 @@ func _Query___schema(ctx context.Context, ec *executionContext, field graphql.Co
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v *introspection.Schema) graphql.Marshaler {
-			return marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, ec, selections, v)
+			return marshalN__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx, ec, selections, v)
 		},
 		true,
-		false,
+		true,
 	)
 }
 func fieldContext_Query___schema(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
@@ -1072,7 +1086,8 @@ func ___Directive_args(ctx context.Context, ec *executionContext, field graphql.
 			return fieldContext___Directive_args(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
-			return obj.Args, nil
+			fc := graphql.GetFieldContext(ctx)
+			return obj.VisibleArgs(fc.Args["includeDeprecated"].(bool)), nil
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
@@ -1086,7 +1101,7 @@ func fieldContext___Directive_args(ctx context.Context, ec *executionContext, fi
 	fc = &graphql.FieldContext{
 		Object:     "__Directive",
 		Field:      field,
-		IsMethod:   false,
+		IsMethod:   true,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return childFields___InputValue(ctx, ec, field)
@@ -1253,7 +1268,8 @@ func ___Field_args(ctx context.Context, ec *executionContext, field graphql.Coll
 			return fieldContext___Field_args(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
-			return obj.Args, nil
+			fc := graphql.GetFieldContext(ctx)
+			return obj.VisibleArgs(fc.Args["includeDeprecated"].(bool)), nil
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
@@ -1267,7 +1283,7 @@ func fieldContext___Field_args(ctx context.Context, ec *executionContext, field 
 	fc = &graphql.FieldContext{
 		Object:     "__Field",
 		Field:      field,
-		IsMethod:   false,
+		IsMethod:   true,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return childFields___InputValue(ctx, ec, field)
@@ -1948,7 +1964,8 @@ func ___Type_inputFields(ctx context.Context, ec *executionContext, field graphq
 			return fieldContext___Type_inputFields(ctx, ec, field)
 		},
 		func(ctx context.Context) (any, error) {
-			return obj.InputFields(), nil
+			fc := graphql.GetFieldContext(ctx)
+			return obj.VisibleInputFields(fc.Args["includeDeprecated"].(bool)), nil
 		},
 		nil,
 		func(ctx context.Context, selections ast.SelectionSet, v []introspection.InputValue) graphql.Marshaler {
@@ -1958,7 +1975,7 @@ func ___Type_inputFields(ctx context.Context, ec *executionContext, field graphq
 		false,
 	)
 }
-func fieldContext___Type_inputFields(_ context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func fieldContext___Type_inputFields(ctx context.Context, ec *executionContext, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "__Type",
 		Field:      field,
@@ -1967,6 +1984,17 @@ func fieldContext___Type_inputFields(_ context.Context, ec *executionContext, fi
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
 			return childFields___InputValue(ctx, ec, field)
 		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = field___Type_inputFields_args(ctx, ec, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
 	}
 	return fc, nil
 }
@@ -2325,7 +2353,7 @@ func _Query(ctx context.Context, ec *executionContext, sel ast.SelectionSet) gra
 			out.Values[i] = ec.OperationContext.RootResolverMiddleware(innerCtx, func(ctx context.Context) (res graphql.Marshaler) {
 				return _Query___schema(ctx, ec, field)
 			})
-			if out.Values[i] == graphql.RequiredNull {
+			if out.Values[i] == graphql.Null {
 				atomic.AddUint32(&out.Invalids, 1)
 			}
 		default:
@@ -2981,6 +3009,14 @@ func marshalN__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintro
 	return ret
 }
 
+func marshalN__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v *introspection.Schema) graphql.Marshaler {
+	if v == nil {
+		graphql.AddInvalidNullError(ctx, "__Schema!")
+		return graphql.Null
+	}
+	return ___Schema(ctx, ec, sel, v)
+}
+
 func marshalN__Type2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐType(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v introspection.Type) graphql.Marshaler {
 	return ___Type(ctx, ec, sel, &v)
 }
@@ -3165,13 +3201,6 @@ func marshalO__InputValue2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintro
 	}
 
 	return ret
-}
-
-func marshalO__Schema2ᚖgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐSchema(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v *introspection.Schema) graphql.Marshaler {
-	if v == nil {
-		return graphql.Null
-	}
-	return ___Schema(ctx, ec, sel, v)
 }
 
 func marshalO__Type2ᚕgithubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚋintrospectionᚐTypeᚄ(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v []introspection.Type) graphql.Marshaler {

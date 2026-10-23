@@ -299,6 +299,35 @@ func TestCollectFields(t *testing.T) {
 		require.Equal(t, collected[0].Name, collected[1].Name)
 	})
 
+	t.Run("merge same field from two interfaces the object implements", func(t *testing.T) {
+		ctx := testContext(ast.SelectionSet{
+			&ast.Field{
+				Name:             "fieldA",
+				ObjectDefinition: &ast.Definition{Name: "InterfaceA", Kind: ast.Interface},
+				SelectionSet:     ast.SelectionSet{&ast.Field{Name: "id"}},
+			},
+			&ast.InlineFragment{
+				TypeCondition: "InterfaceB",
+				SelectionSet: ast.SelectionSet{
+					&ast.Field{
+						Name:             "fieldA",
+						ObjectDefinition: &ast.Definition{Name: "InterfaceB", Kind: ast.Interface},
+						SelectionSet:     ast.SelectionSet{&ast.Field{Name: "name"}},
+					},
+				},
+			},
+		})
+		resCtx := GetFieldContext(ctx)
+		collected := CollectFields(
+			GetOperationContext(ctx),
+			resCtx.Field.Selections,
+			[]string{"ExampleType", "InterfaceA", "InterfaceB"},
+		)
+		require.Len(t, collected, 1)
+		require.Len(t, collected[0].Selections, 2)
+		require.Len(t, CollectFields(GetOperationContext(ctx), resCtx.Field.Selections, nil), 2)
+	})
+
 	t.Run("collect inline fragments with same field name and different alias", func(t *testing.T) {
 		ctx := testContext(ast.SelectionSet{
 			&ast.InlineFragment{

@@ -40,6 +40,12 @@ gqlgen built without the tag generates the executor in the default mode again, w
 works: keep the tag in every command that runs gqlgen for a package that uses table mode, and
 drop it to go back to the default mode.
 
+Run gqlgen with `go run`, as above, rather than with `go tool gqlgen`. `go tool` builds the
+tool without build tags: it does not accept `-tags`, and it ignores `-tags` in `GOFLAGS`, so
+`go tool gqlgen` generates the executor in the default mode without an error. `go get -tool`
+does not record build tags either, as the `tool` directive of `go.mod` has no place for them.
+Replace `go tool gqlgen` and `//go:generate go tool gqlgen` with the `go run` commands above.
+
 As the runtime reads the schema that the generated package embeds, regenerate the code when
 you change the schema or upgrade gqlgen or gqlparser. Tables that no longer match the schema,
 such as after a field or an argument was added or removed, make `NewExecutableSchema` panic.

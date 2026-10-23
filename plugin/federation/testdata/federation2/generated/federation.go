@@ -210,7 +210,7 @@ func entityResolverNameForExternalExtension(ctx context.Context, rep EntityRepre
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["upc"]

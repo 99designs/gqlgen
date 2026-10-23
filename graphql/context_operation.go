@@ -34,7 +34,7 @@ type OperationContext struct {
 
 func (c *OperationContext) Validate(ctx context.Context) error {
 	if c.Doc == nil {
-		return errors.New("field 'Doc'is required")
+		return errors.New("field 'Doc' is required")
 	}
 	if c.RawQuery == "" {
 		return errors.New("field 'RawQuery' is required")

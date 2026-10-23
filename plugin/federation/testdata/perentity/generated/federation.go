@@ -291,7 +291,7 @@ func matchedKeyForBerth(ctx context.Context, rep EntityRepresentation) (model.Be
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["holder"]
@@ -338,7 +338,7 @@ func matchedKeyForDock(ctx context.Context, rep EntityRepresentation) (model.Doc
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["id"]
@@ -373,7 +373,7 @@ func matchedKeyForNode(ctx context.Context, rep EntityRepresentation) (model.Nod
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["id"]
@@ -408,7 +408,7 @@ func matchedKeyForPort(ctx context.Context, rep EntityRepresentation) (model.Por
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["_id"]
@@ -435,7 +435,7 @@ func matchedKeyForPort(ctx context.Context, rep EntityRepresentation) (model.Por
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["id"]
@@ -470,7 +470,7 @@ func matchedKeyForShip(ctx context.Context, rep EntityRepresentation) (model.Shi
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["id"]
@@ -519,7 +519,7 @@ func matchedKeyForShip(ctx context.Context, rep EntityRepresentation) (model.Shi
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["_id"]

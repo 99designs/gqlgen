@@ -1,0 +1,17 @@
+schema:
+  - "testdata/aliasbinding/schema.graphql"
+
+exec:
+  filename: testdata/aliasbinding/generated/exec.go
+model:
+  filename: testdata/aliasbinding/generated/models_gen.go
+resolver:
+  filename: testdata/aliasbinding/generated/resolver.go
+
+models:
+  Access:
+    model: github.com/99designs/gqlgen/codegen/testdata/aliasbinding/alias.Access
+  Direct:
+    model: github.com/99designs/gqlgen/codegen/testdata/aliasbinding/model.Direct
+  Aliased:
+    model: github.com/99designs/gqlgen/codegen/testdata/aliasbinding/alias.Aliased

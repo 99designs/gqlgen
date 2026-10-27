@@ -3,8 +3,10 @@ package codegen
 import (
 	"errors"
 	"fmt"
+	"maps"
 	"os"
 	"path/filepath"
+	"slices"
 	"sort"
 	"strings"
 
@@ -368,7 +370,11 @@ func BuildData(cfg *config.Config, plugins ...any) (*Data, error) {
 		Plugins:       plugins,
 	}
 
-	for _, schemaType := range b.Schema.Types {
+	// Walk the types in name order: references that share a uniqueness key (such as a
+	// type alias and its target) are resolved last-wins in buildTypes, so map order
+	// would make the generated code differ between runs.
+	for _, typeName := range slices.Sorted(maps.Keys(b.Schema.Types)) {
+		schemaType := b.Schema.Types[typeName]
 		switch schemaType.Kind {
 		case ast.Object:
 			obj, err := b.buildObject(schemaType)

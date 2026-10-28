@@ -15,7 +15,7 @@
         "@graphql-codegen/schema-ast": "^6.1.1",
         "graphql": "^16.14.2",
         "graphql-sse": "^2.6.2",
-        "graphql-ws": "^6.3.0",
+        "graphql-ws": "^6.4.1",
         "typescript": "^7.0.2",
         "urql": "^5.0.4",
         "vitest": "^5.0.4"

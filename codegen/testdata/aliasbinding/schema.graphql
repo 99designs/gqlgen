@@ -1,0 +1,17 @@
+type Query {
+  direct: Direct!
+  aliased: Aliased!
+}
+
+type Direct {
+  access: [Access!]!
+}
+
+type Aliased {
+  access: [Access!]!
+}
+
+enum Access {
+  CLIENTS
+  BILLING
+}

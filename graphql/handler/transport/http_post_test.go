@@ -1,6 +1,7 @@
 package transport_test
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -9,6 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/99designs/gqlgen/graphql"
 	"github.com/99designs/gqlgen/graphql/handler/testserver"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
@@ -336,6 +338,29 @@ func TestPOST(t *testing.T) {
 		resp := doReq(h, http.MethodPost, "/graphql", `{"query":"{ name }"}`)
 		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 		assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
+	})
+	t.Run("use custom write func", func(t *testing.T) {
+		srv := testserver.New()
+		called := false
+		srv.AddTransport(transport.POST{
+			WriteResponseFunc: func(ctx context.Context, w http.ResponseWriter, resp *graphql.Response) {
+				called = true
+				w.WriteHeader(123) // non-200 to test setting custom http status code
+				w.Write([]byte(`response`))
+			},
+		})
+
+		resp := doRequest(
+			srv,
+			http.MethodPost,
+			"/graphql",
+			`{"query":"{ name }"}`,
+			"application/json",
+			"application/json",
+		)
+		assert.Equal(t, 123, resp.Code)
+		assert.True(t, called)
+		assert.Equal(t, "resp", resp.Body.String())
 	})
 }
 

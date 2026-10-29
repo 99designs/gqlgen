@@ -2,6 +2,7 @@ package transport
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"io"
 	"mime"
@@ -24,7 +25,18 @@ type POST struct {
 	// as the response content type
 	// when the Accept header is empty or 'application/*' or '*/*'.
 	UseGrapQLResponseJsonByDefault bool
+
+	// WriteResponseFunc, if set, writes the response of an executed operation instead of
+	// the default JSON write. Use it to pick a different status code or body encoding.
+	// It is not called for requests that fail before execution (unreadable body,
+	// invalid JSON, parse, validation, complexity or APQ errors) - those keep the
+	// status code the transport picked for them.
+	WriteResponseFunc WriteResponseFunc
 }
+
+// WriteResponseFunc writes the response of an executed operation.
+// The implementation owns both the status code and the body.
+type WriteResponseFunc func(ctx context.Context, w http.ResponseWriter, resp *graphql.Response)
 
 var _ graphql.Transport = POST{}
 
@@ -126,5 +138,10 @@ func (h POST) Do(w http.ResponseWriter, r *http.Request, exec graphql.GraphExecu
 
 	var responses graphql.ResponseHandler
 	responses, ctx = exec.DispatchOperation(ctx, rc)
-	writeJson(w, responses(ctx))
+	resp := responses(ctx)
+	if h.WriteResponseFunc != nil {
+		h.WriteResponseFunc(ctx, w, resp)
+	} else {
+		writeJson(w, resp)
+	}
 }

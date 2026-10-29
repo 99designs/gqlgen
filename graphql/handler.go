@@ -152,16 +152,30 @@ func (p *RawParams) AddUpload(upload Upload, key, path string) *gqlerror.Error {
 			)
 		}
 		if index, parseNbrErr := strconv.Atoi(p); parseNbrErr == nil {
+			arr, ok := ptr.([]any)
+			if !ok || index < 0 || index >= len(arr) {
+				return gqlerror.Errorf(
+					"invalid upload path segment %q for key %s: expected array index within bounds",
+					p, key,
+				)
+			}
 			if last {
-				ptr.([]any)[index] = upload
+				arr[index] = upload
 			} else {
-				ptr = ptr.([]any)[index]
+				ptr = arr[index]
 			}
 		} else {
+			m, ok := ptr.(map[string]any)
+			if !ok {
+				return gqlerror.Errorf(
+					"invalid upload path segment %q for key %s: expected object",
+					p, key,
+				)
+			}
 			if last {
-				ptr.(map[string]any)[p] = upload
+				m[p] = upload
 			} else {
-				ptr = ptr.(map[string]any)[p]
+				ptr = m[p]
 			}
 		}
 	}

@@ -250,7 +250,7 @@ func matchedKeyForMultiPlanet(ctx context.Context, rep EntityRepresentation) (mo
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["name"]
@@ -285,7 +285,7 @@ func matchedKeyForPlanet(ctx context.Context, rep EntityRepresentation) (model.P
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["name"]

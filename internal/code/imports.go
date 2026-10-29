@@ -56,10 +56,10 @@ type goModuleSearchResult struct {
 
 var goModuleRootCache = map[string]goModuleSearchResult{}
 
-// goModuleRoot returns the root of the current go module if there is a go.mod file in the directory
+// goModuleRoot returns the go module that dir belongs to if there is a go.mod file in the directory
 // tree
 // If not, it returns false
-func goModuleRoot(dir string) (string, bool) {
+func goModuleRoot(dir string) (goModuleSearchResult, bool) {
 	dir, err := filepath.Abs(dir)
 	if err != nil {
 		panic(err)
@@ -126,9 +126,9 @@ func goModuleRoot(dir string) (string, bool) {
 
 	res := goModuleRootCache[dir]
 	if res.moduleName == "" {
-		return "", false
+		return goModuleSearchResult{}, false
 	}
-	return res.path, true
+	return res, true
 }
 
 func extractModuleName(content []byte) string {
@@ -160,9 +160,9 @@ func ImportPathForDir(dir string) (res string) {
 	}
 	dir = filepath.ToSlash(dir)
 
-	modDir, ok := goModuleRoot(dir)
+	mod, ok := goModuleRoot(dir)
 	if ok {
-		return modDir
+		return mod.path
 	}
 
 	for _, gopath := range gopaths {
@@ -172,6 +172,13 @@ func ImportPathForDir(dir string) (res string) {
 	}
 
 	return ""
+}
+
+// ModulePathForDir returns the path of the go module that dir belongs to, as declared by the
+// nearest go.mod file in dir or above it. It returns "" if there is no such file.
+func ModulePathForDir(dir string) string {
+	mod, _ := goModuleRoot(dir)
+	return mod.moduleName
 }
 
 var modregex = regexp.MustCompile(`module (\S*)`)

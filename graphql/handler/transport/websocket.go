@@ -108,6 +108,10 @@ var (
 	_ error             = WebsocketError{}
 )
 
+func (t Websocket) String() string {
+	return "Websocket"
+}
+
 func (t Websocket) Supports(r *http.Request) bool {
 	return r.Header.Get("Upgrade") != ""
 }

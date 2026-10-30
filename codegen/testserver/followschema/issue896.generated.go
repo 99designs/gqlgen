@@ -28,7 +28,7 @@ func (ec *executionContext) _CheckIssue896_id(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_CheckIssue896_id(ctx, field)
+			return ec.fieldContextByID(ctx, field, 15 /* CheckIssue896.id */)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -42,9 +42,6 @@ func (ec *executionContext) _CheckIssue896_id(ctx context.Context, field graphql
 		true,
 		false,
 	)
-}
-func (ec *executionContext) fieldContext_CheckIssue896_id(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("CheckIssue896", field, false, false, "Int")
 }
 
 // endregion **************************** field.gotpl *****************************

@@ -28,7 +28,7 @@ func (ec *executionContext) _Slices_test1(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Slices_test1(ctx, field)
+			return ec.fieldContextByID(ctx, field, 200 /* Slices.test1 */)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Test1, nil
@@ -43,9 +43,6 @@ func (ec *executionContext) _Slices_test1(ctx context.Context, field graphql.Col
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Slices_test1(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Slices", field, false, false, "String")
-}
 
 func (ec *executionContext) _Slices_test2(ctx context.Context, field graphql.CollectedField, obj *Slices) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -53,7 +50,7 @@ func (ec *executionContext) _Slices_test2(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Slices_test2(ctx, field)
+			return ec.fieldContextByID(ctx, field, 201 /* Slices.test2 */)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Test2, nil
@@ -68,9 +65,6 @@ func (ec *executionContext) _Slices_test2(ctx context.Context, field graphql.Col
 		false,
 	)
 }
-func (ec *executionContext) fieldContext_Slices_test2(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Slices", field, false, false, "String")
-}
 
 func (ec *executionContext) _Slices_test3(ctx context.Context, field graphql.CollectedField, obj *Slices) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -78,7 +72,7 @@ func (ec *executionContext) _Slices_test3(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Slices_test3(ctx, field)
+			return ec.fieldContextByID(ctx, field, 202 /* Slices.test3 */)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Test3, nil
@@ -93,9 +87,6 @@ func (ec *executionContext) _Slices_test3(ctx context.Context, field graphql.Col
 		true,
 	)
 }
-func (ec *executionContext) fieldContext_Slices_test3(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Slices", field, false, false, "String")
-}
 
 func (ec *executionContext) _Slices_test4(ctx context.Context, field graphql.CollectedField, obj *Slices) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
@@ -103,7 +94,7 @@ func (ec *executionContext) _Slices_test4(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContext_Slices_test4(ctx, field)
+			return ec.fieldContextByID(ctx, field, 203 /* Slices.test4 */)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Test4, nil
@@ -117,9 +108,6 @@ func (ec *executionContext) _Slices_test4(ctx context.Context, field graphql.Col
 		true,
 		true,
 	)
-}
-func (ec *executionContext) fieldContext_Slices_test4(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	return graphql.NewScalarFieldContext("Slices", field, false, false, "String")
 }
 
 // endregion **************************** field.gotpl *****************************

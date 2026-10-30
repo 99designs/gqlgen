@@ -140,7 +140,7 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/gqlgen/_examples/websocket-initfunc/server/graph"
 	"github.com/gqlgen/_examples/websocket-initfunc/server/graph/generated"
-	"github.com/rs/cors"
+	"github.com/jub0bs/cors"
 )
 
 func webSocketInit(ctx context.Context, initPayload transport.InitPayload) (context.Context, *transport.InitPayload, error) {
@@ -176,11 +176,13 @@ func main() {
 
 	// CORS setup, allow any for now
 	// https://gqlgen.com/recipes/cors/
-	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"*"},
-		AllowCredentials: true,
-		Debug:            false,
+	cors, err := cors.NewMiddleware(cors.Config{
+		Origins:        []string{"*"},
+		RequestHeaders: []string{"Accept", "Content-Type", "X-Requested-With"},
 	})
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	srv := handler.New(generated.NewExecutableSchema(generated.Config{Resolvers: &graph.Resolver{}}))
 	srv.AddTransport(transport.Websocket{
@@ -196,7 +198,7 @@ func main() {
 	srv.Use(extension.Introspection{})
 
 	router.Handle("/", playground.Handler("My GraphQL App", "/app"))
-	router.Handle("/app", c.Handler(srv))
+	router.Handle("/app", cors.Wrap(srv))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, router))

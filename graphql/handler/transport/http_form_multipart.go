@@ -127,7 +127,8 @@ func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.G
 		delete(uploadsMap, key)
 
 		var upload graphql.Upload
-		if r.ContentLength < f.maxMemory() {
+		// -1 means the length is unknown. That is not a small body.
+		if r.ContentLength >= 0 && r.ContentLength < f.maxMemory() {
 			fileBytes, err := io.ReadAll(part)
 			if err != nil {
 				w.WriteHeader(http.StatusUnprocessableEntity)

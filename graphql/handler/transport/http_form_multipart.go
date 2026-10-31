@@ -22,6 +22,11 @@ type MultipartForm struct {
 	// temporary files.
 	MaxMemory int64
 
+	// UseDiskForUnknownLength stores file parts on disk when Content-Length is
+	// unknown. By default, these file parts are stored in memory and may use more
+	// than MaxMemory, up to MaxUploadSize.
+	UseDiskForUnknownLength bool
+
 	// Map of all headers that are added to graphql response. If not
 	// set, only one header: Content-Type: application/json will be set.
 	ResponseHeaders map[string][]string
@@ -127,7 +132,11 @@ func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.G
 		delete(uploadsMap, key)
 
 		var upload graphql.Upload
-		if r.ContentLength < f.maxMemory() {
+		useMemory := r.ContentLength < f.maxMemory()
+		if r.ContentLength < 0 && f.UseDiskForUnknownLength {
+			useMemory = false
+		}
+		if useMemory {
 			fileBytes, err := io.ReadAll(part)
 			if err != nil {
 				w.WriteHeader(http.StatusUnprocessableEntity)

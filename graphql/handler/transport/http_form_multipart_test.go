@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"net/textproto"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -213,6 +214,51 @@ func TestFileUpload(t *testing.T) {
 
 		t.Run("payload bigger than UploadMaxMemory, persisted to disk", func(t *testing.T) {
 			test(2)
+		})
+	})
+
+	t.Run("unknown content length storage", func(t *testing.T) {
+		defer func() {
+			multipartForm.UseDiskForUnknownLength = false
+		}()
+
+		test := func(useDisk bool) {
+			multipartForm.UseDiskForUnknownLength = useDisk
+			es.ExecFunc = func(ctx context.Context) graphql.ResponseHandler {
+				upload, ok := graphql.GetOperationContext(ctx).Variables["file"].(graphql.Upload)
+				require.True(t, ok)
+				_, onDisk := upload.File.(*os.File)
+				require.Equal(t, useDisk, onDisk)
+				return graphql.OneShot(
+					&graphql.Response{Data: []byte(`{"singleUpload":"test"}`)},
+				)
+			}
+
+			operations := `{ "query": "mutation ($file: Upload!) { singleUpload(file: $file) }", "variables": { "file": null } }`
+			mapData := `{ "0": ["variables.file"] }`
+			files := []file{
+				{
+					mapKey:      "0",
+					name:        "a.txt",
+					content:     "test1",
+					contentType: "text/plain",
+				},
+			}
+			req := createUploadRequest(t, operations, mapData, files)
+			req.ContentLength = -1
+
+			resp := httptest.NewRecorder()
+			h.ServeHTTP(resp, req)
+			require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+			require.JSONEq(t, `{"data":{"singleUpload":"test"}}`, resp.Body.String())
+		}
+
+		t.Run("stored in memory by default", func(t *testing.T) {
+			test(false)
+		})
+
+		t.Run("stored on disk when configured", func(t *testing.T) {
+			test(true)
 		})
 	})
 

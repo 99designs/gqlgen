@@ -228,6 +228,41 @@ func TestCalculate(t *testing.T) {
 		requireComplexity(t, query, 27, WithFixedScalarValue(2))
 	})
 
+	t.Run("does not count introspection meta fields", func(t *testing.T) {
+		requireComplexity(t, `
+		{
+			__typename
+		}
+		`, 0)
+
+		requireComplexity(t, `
+		{
+			__schema {
+				queryType {
+					name
+				}
+			}
+		}
+		`, 0)
+
+		requireComplexity(t, `
+		{
+			__type(name: "Item") {
+				name
+			}
+		}
+		`, 0)
+
+		requireComplexity(t, `
+		{
+			scalar
+			... on Query {
+				__typename
+			}
+		}
+		`, 1)
+	})
+
 	t.Run("ignore specified", func(t *testing.T) {
 		const query = `
 		{

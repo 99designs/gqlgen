@@ -43,11 +43,15 @@ func (cw complexityWalker) selectionSetComplexity(
 	for _, selection := range selectionSet {
 		switch s := selection.(type) {
 		case *ast.Field:
-			fieldDefinition := cw.schema.Types[s.Definition.Type.Name()]
-
-			if fieldDefinition.Name == "__Schema" {
+			// Introspection meta fields (the only fields the GraphQL spec allows
+			// to start with "__") are free: they read from the schema, not from
+			// resolvers, so they should neither count against complexity limits
+			// nor need ignore entries.
+			if s.Name == "__typename" || s.Name == "__schema" || s.Name == "__type" {
 				continue
 			}
+
+			fieldDefinition := cw.schema.Types[s.Definition.Type.Name()]
 
 			if _, ok := cw.opts.ignoreFields[s.ObjectDefinition.Name+"."+s.Name]; ok {
 				continue

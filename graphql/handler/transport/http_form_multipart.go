@@ -63,6 +63,7 @@ func (f MultipartForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.G
 
 	var err error
 	if r.ContentLength > f.maxUploadSize() {
+		w.WriteHeader(http.StatusRequestEntityTooLarge)
 		writeJsonError(w, "failed to parse multipart form, request body too large")
 		return
 	}

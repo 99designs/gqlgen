@@ -305,7 +305,7 @@ func TestFileUpload(t *testing.T) {
 
 		resp := httptest.NewRecorder()
 		h.ServeHTTP(resp, req)
-		require.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+		require.Equal(t, http.StatusRequestEntityTooLarge, resp.Code, resp.Body.String())
 		require.JSONEq(
 			t,
 			`{"errors":[{"message":"failed to parse multipart form, request body too large"}],"data":null}`,

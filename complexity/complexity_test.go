@@ -2,7 +2,9 @@ package complexity
 
 import (
 	"context"
+	"fmt"
 	"math"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -141,6 +143,59 @@ func TestCalculate(t *testing.T) {
 		requireComplexity(t, query, 1)
 	})
 
+	t.Run("adds fragments spread more than once", func(t *testing.T) {
+		const query = `
+		{
+			object {
+				...ItemFields
+			}
+			list(size: 3) {
+				...ItemFields
+			}
+		}
+
+		fragment ItemFields on Item {
+			scalar
+			...Names
+		}
+
+		fragment Names on Item {
+			name
+			list(size: 2) {
+				name
+			}
+		}
+		`
+		const inlined = `
+		{
+			object {
+				scalar
+				name
+				list(size: 2) {
+					name
+				}
+			}
+			list(size: 3) {
+				scalar
+				name
+				list(size: 2) {
+					name
+				}
+			}
+		}
+		`
+		// Names = name 1 + list 2*1 = 3
+		// ItemFields = scalar 1 + Names 3 = 4
+		// object = 1 + 4, list = 3*4
+		requireComplexity(t, query, 17)
+		requireComplexity(t, inlined, 17)
+		requireComplexity(t, query, 33, WithFixedScalarValue(2))
+		requireComplexity(t, inlined, 33, WithFixedScalarValue(2))
+		ignore := map[string]struct{}{"Item.name": {}}
+		requireComplexity(t, query, 9, WithIgnoreFields(ignore))
+		requireComplexity(t, inlined, 9, WithIgnoreFields(ignore))
+	})
+
 	t.Run("uses custom complexity", func(t *testing.T) {
 		const query = `
 		{
@@ -247,4 +302,42 @@ func TestCalculate(t *testing.T) {
 		}
 		requireComplexity(t, query, 12, WithIgnoreFields(ignore))
 	})
+}
+
+func TestCalculateWalksEachFragmentOnce(t *testing.T) {
+	// Each fragment F<n> spreads F<n-1> twice, so F0 is reached 2^depth times.
+	const depth = 29
+	var b strings.Builder
+	fmt.Fprintf(&b, "query ($size: Int) { object { ...F%d } }\n", depth)
+	b.WriteString("fragment F0 on Item { list(size: $size) { scalar } }\n")
+	for i := 1; i <= depth; i++ {
+		fmt.Fprintf(&b, "fragment F%d on Item { ...F%d ...F%d }\n", i, i-1, i-1)
+	}
+	query := gqlparser.MustLoadQueryWithRules(schema, b.String(), rules.NewDefaultRules())
+
+	calls := 0
+	es := &graphql.ExecutableSchemaMock{
+		ComplexityFunc: func(ctx context.Context, typeName, field string, childComplexity int, args map[string]any) (int, bool) {
+			calls++
+			if calls > 100 {
+				// Stop early instead of walking all 2^depth spreads.
+				t.Fatalf("Complexity called %d times, fragments are walked more than once", calls)
+			}
+			if typeName+"."+field == "Item.list" {
+				return int(args["size"].(int64)) * childComplexity, true
+			}
+			return 0, false
+		},
+		SchemaFunc: func() *ast.Schema {
+			return schema
+		},
+	}
+
+	vars := map[string]any{"size": int64(3)}
+	actualComplexity := Calculate(context.TODO(), es, query.Operations[0], vars)
+
+	// object = 1 + 2^depth * (list 3 * scalar 1)
+	require.Equal(t, 1+3<<depth, actualComplexity)
+	// One call each for object, list and scalar.
+	require.Equal(t, 3, calls)
 }

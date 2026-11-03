@@ -33,9 +33,12 @@ type complexityWalker struct {
 	schema *ast.Schema
 	vars   map[string]any
 	opts   complexityOptions
+	// fragments caches the complexity of each named fragment, so a fragment spread many times
+	// is walked once. Re-walking it at every spread grows exponentially when fragments nest.
+	fragments map[string]int
 }
 
-func (cw complexityWalker) selectionSetComplexity(
+func (cw *complexityWalker) selectionSetComplexity(
 	ctx context.Context,
 	selectionSet ast.SelectionSet,
 ) int {
@@ -83,10 +86,15 @@ func (cw complexityWalker) selectionSetComplexity(
 			complexity = safeAdd(complexity, fieldComplexity)
 
 		case *ast.FragmentSpread:
-			complexity = safeAdd(
-				complexity,
-				cw.selectionSetComplexity(ctx, s.Definition.SelectionSet),
-			)
+			fragmentComplexity, ok := cw.fragments[s.Name]
+			if !ok {
+				fragmentComplexity = cw.selectionSetComplexity(ctx, s.Definition.SelectionSet)
+				if cw.fragments == nil {
+					cw.fragments = map[string]int{}
+				}
+				cw.fragments[s.Name] = fragmentComplexity
+			}
+			complexity = safeAdd(complexity, fragmentComplexity)
 
 		case *ast.InlineFragment:
 			complexity = safeAdd(complexity, cw.selectionSetComplexity(ctx, s.SelectionSet))
@@ -95,7 +103,7 @@ func (cw complexityWalker) selectionSetComplexity(
 	return complexity
 }
 
-func (cw complexityWalker) interfaceFieldComplexity(
+func (cw *complexityWalker) interfaceFieldComplexity(
 	ctx context.Context,
 	def *ast.Definition,
 	fieldKind ast.DefinitionKind,
@@ -116,7 +124,7 @@ func (cw complexityWalker) interfaceFieldComplexity(
 	return maxComplexity
 }
 
-func (cw complexityWalker) fieldComplexity(
+func (cw *complexityWalker) fieldComplexity(
 	ctx context.Context,
 	def *ast.Definition,
 	fieldKind ast.DefinitionKind,

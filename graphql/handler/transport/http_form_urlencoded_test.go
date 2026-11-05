@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"strings"
 	"testing"
 
@@ -43,6 +44,42 @@ func TestUrlEncodedForm(t *testing.T) {
 		assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 	})
 
+	t.Run("success urlencoded with operation name", func(t *testing.T) {
+		resp := doRequest(
+			h,
+			http.MethodPost,
+			"/graphql",
+			url.Values{
+				"query":         {"query A { name } query B { name }"},
+				"operationName": {"A"},
+			}.Encode(),
+			"",
+			"application/x-www-form-urlencoded",
+		)
+		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
+		assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
+	})
+
+	t.Run("invalid variable urlencoded", func(t *testing.T) {
+		resp := doRequest(
+			h,
+			http.MethodPost,
+			"/graphql",
+			url.Values{
+				"query":     {"query($id: Int!) { find(id: $id) }"},
+				"variables": {`{"id":false}`},
+			}.Encode(),
+			"",
+			"application/x-www-form-urlencoded",
+		)
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
+		assert.JSONEq(
+			t,
+			`{"errors":[{"message":"cannot use bool as Int","path":["variable","id"],"extensions":{"code":"GRAPHQL_VALIDATION_FAILED"}}],"data":null}`,
+			resp.Body.String(),
+		)
+	})
+
 	t.Run("success plain", func(t *testing.T) {
 		resp := doRequest(
 			h,
@@ -53,6 +90,19 @@ func TestUrlEncodedForm(t *testing.T) {
 			"application/x-www-form-urlencoded",
 		)
 		assert.Equal(t, http.StatusOK, resp.Code)
+		assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
+	})
+
+	t.Run("success raw document", func(t *testing.T) {
+		resp := doRequest(
+			h,
+			http.MethodPost,
+			"/graphql",
+			`query Q { name }`,
+			"",
+			"application/x-www-form-urlencoded",
+		)
+		assert.Equal(t, http.StatusOK, resp.Code, resp.Body.String())
 		assert.JSONEq(t, `{"data":{"name":"test"}}`, resp.Body.String())
 	})
 
@@ -106,6 +156,48 @@ func TestUrlEncodedForm(t *testing.T) {
 		assert.JSONEq(
 			t,
 			`{"errors":[{"message":"Expected Name, found \u003cInvalid\u003e","locations":[{"line":1,"column":6}],"extensions":{"code":"GRAPHQL_PARSE_FAILED"}}],"data":null}`,
+			resp.Body.String(),
+		)
+	})
+
+	t.Run("decode failure urlencoded variables", func(t *testing.T) {
+		resp := doRequest(
+			h,
+			http.MethodPost,
+			"/graphql",
+			url.Values{
+				"query":     {"{ name }"},
+				"variables": {"notjson"},
+			}.Encode(),
+			"",
+			"application/x-www-form-urlencoded",
+		)
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
+		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
+		assert.JSONEq(
+			t,
+			`{"errors":[{"message":"could not cleanup body: variables could not be decoded: invalid character 'o' in literal null (expecting 'u')"}],"data":null}`,
+			resp.Body.String(),
+		)
+	})
+
+	t.Run("decode failure urlencoded extensions", func(t *testing.T) {
+		resp := doRequest(
+			h,
+			http.MethodPost,
+			"/graphql",
+			url.Values{
+				"query":      {"{ name }"},
+				"extensions": {"notjson"},
+			}.Encode(),
+			"",
+			"application/x-www-form-urlencoded",
+		)
+		assert.Equal(t, http.StatusUnprocessableEntity, resp.Code, resp.Body.String())
+		assert.Equal(t, "application/json", resp.Header().Get("Content-Type"))
+		assert.JSONEq(
+			t,
+			`{"errors":[{"message":"could not cleanup body: extensions could not be decoded: invalid character 'o' in literal null (expecting 'u')"}],"data":null}`,
 			resp.Body.String(),
 		)
 	})

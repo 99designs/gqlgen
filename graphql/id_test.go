@@ -169,4 +169,47 @@ func TestUnMarshalUintID(t *testing.T) {
 	result, err = UnmarshalUintID(uint64(12))
 	assert.Equal(t, uint(12), result)
 	require.NoError(t, err)
+
+	t.Run("can't unmarshal negative numbers", func(t *testing.T) {
+		cases := []struct {
+			name string
+			v    any
+		}{
+			{"negative int", -1},
+			{"negative int32", int32(-1)},
+			{"negative int64", int64(-1)},
+			{"negative json.Number", json.Number("-1")},
+			{"negative string", "-1"},
+		}
+		for _, tc := range cases {
+			t.Run(tc.name, func(t *testing.T) {
+				var uintSignErr *UintSignError
+
+				res, err := UnmarshalUintID(tc.v)
+				require.EqualError(t, err, "-1 is an invalid unsigned integer: includes sign")
+				require.ErrorAs(t, err, &uintSignErr)
+				assert.Equal(t, uint(0), res)
+			})
+		}
+	})
+
+	t.Run("can't unmarshal non-integers", func(t *testing.T) {
+		cases := []struct {
+			name string
+			v    any
+			err  string
+		}{
+			{"nil", nil, "<nil> is not an uint"},
+			{"bool", true, "bool is not an uint"},
+			{"float64", 1.5, "float64 is not an uint"},
+			{"string", "abc", `strconv.ParseUint: parsing "abc": invalid syntax`},
+		}
+		for _, tc := range cases {
+			t.Run(tc.name, func(t *testing.T) {
+				res, err := UnmarshalUintID(tc.v)
+				require.EqualError(t, err, tc.err)
+				assert.Equal(t, uint(0), res)
+			})
+		}
+	})
 }

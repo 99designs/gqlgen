@@ -62,7 +62,7 @@ func UnmarshalUint64(v any) (uint64, error) {
 
 func interfaceToUnsignedNumber[N number](v any) (N, error) {
 	switch v := v.(type) {
-	case int, int64:
+	case int, int8, int16, int32, int64:
 		if reflect.ValueOf(v).Int() < 0 {
 			return 0, newUintSignError(strconv.FormatInt(reflect.ValueOf(v).Int(), 10))
 		}

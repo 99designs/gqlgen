@@ -32,6 +32,7 @@ func TestUint(t *testing.T) {
 			err  string
 		}{
 			{"negative int", -1, "-1 is an invalid unsigned integer: includes sign"},
+			{"negative int32", int32(-1), "-1 is an invalid unsigned integer: includes sign"},
 			{"negative int64", int64(-1), "-1 is an invalid unsigned integer: includes sign"},
 			{
 				"negative json.Number",

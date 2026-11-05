@@ -60,24 +60,9 @@ func MarshalUintID(i uint) Marshaler {
 }
 
 func UnmarshalUintID(v any) (uint, error) {
-	switch v := v.(type) {
-	case string:
-		result, err := strconv.ParseUint(v, 10, 64)
-		return uint(result), err
-	case int:
-		return uint(v), nil
-	case int64:
-		return uint(v), nil
-	case int32:
-		return uint(v), nil
-	case uint32:
-		return uint(v), nil
-	case uint64:
-		return uint(v), nil
-	case json.Number:
-		result, err := strconv.ParseUint(string(v), 10, 64)
-		return uint(result), err
-	default:
+	// Unlike UnmarshalUint, a null UintID is rejected rather than read as 0.
+	if v == nil {
 		return 0, fmt.Errorf("%T is not an uint", v)
 	}
+	return interfaceToUnsignedNumber[uint](v)
 }

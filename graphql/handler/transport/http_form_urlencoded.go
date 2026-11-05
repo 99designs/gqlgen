@@ -1,6 +1,7 @@
 package transport
 
 import (
+	"fmt"
 	"io"
 	"mime"
 	"net/http"
@@ -77,31 +78,44 @@ func (h UrlEncodedForm) Do(w http.ResponseWriter, r *http.Request, exec graphql.
 }
 
 func (h UrlEncodedForm) parseBody(bodyString string) (*graphql.RawParams, error) {
-	switch {
-	case strings.Contains(bodyString, "\"query\":"):
+	if strings.Contains(bodyString, "\"query\":") {
 		// body is json
 		return h.parseJson(bodyString)
-	case strings.HasPrefix(bodyString, "query=%7B"):
-		// body is urlencoded
-		return h.parseEncoded(bodyString)
-	default:
-		// body is plain text
-		params := &graphql.RawParams{}
-		params.Query = strings.TrimPrefix(bodyString, "query=")
-
-		return params, nil
 	}
+
+	// Bodies that do not decode to a form with a query field (raw GraphQL
+	// documents, or malformed escapes) fall back to the plain text handling.
+	if form, err := url.ParseQuery(bodyString); err == nil && form.Has("query") {
+		// body is urlencoded
+		return h.parseForm(form)
+	}
+
+	// body is plain text
+	params := &graphql.RawParams{}
+	params.Query = strings.TrimPrefix(bodyString, "query=")
+
+	return params, nil
 }
 
-func (h UrlEncodedForm) parseEncoded(bodyString string) (*graphql.RawParams, error) {
-	params := &graphql.RawParams{}
-
-	query, err := url.QueryUnescape(bodyString)
-	if err != nil {
-		return nil, err
+// parseForm reads the request parameters from the query, operationName,
+// variables and extensions form fields, decoding the last two as JSON.
+func (h UrlEncodedForm) parseForm(form url.Values) (*graphql.RawParams, error) {
+	params := &graphql.RawParams{
+		Query:         form.Get("query"),
+		OperationName: form.Get("operationName"),
 	}
 
-	params.Query = strings.TrimPrefix(query, "query=")
+	if variables := form.Get("variables"); variables != "" {
+		if err := jsonDecode(strings.NewReader(variables), &params.Variables); err != nil {
+			return nil, fmt.Errorf("variables could not be decoded: %w", err)
+		}
+	}
+
+	if extensions := form.Get("extensions"); extensions != "" {
+		if err := jsonDecode(strings.NewReader(extensions), &params.Extensions); err != nil {
+			return nil, fmt.Errorf("extensions could not be decoded: %w", err)
+		}
+	}
 
 	return params, nil
 }

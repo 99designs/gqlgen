@@ -10,14 +10,17 @@ require (
 	github.com/go-viper/mapstructure/v2 v2.5.0
 	github.com/goccy/go-yaml v1.19.2
 	github.com/google/uuid v1.6.0
-	github.com/rs/cors v1.11.1
+	github.com/jub0bs/cors v1.3.0
 	github.com/stretchr/testify v1.12.1
 	github.com/vektah/dataloaden v0.3.0
 	github.com/vektah/gqlparser/v2 v2.5.64
 	golang.org/x/sync v0.24.0
 )
 
-require go.yaml.in/yaml/v3 v3.0.5 // indirect
+require (
+	go.yaml.in/yaml/v3 v3.0.5 // indirect
+	golang.org/x/net v0.62.0 // indirect
+)
 
 require (
 	github.com/agnivade/levenshtein v1.2.2 // indirect

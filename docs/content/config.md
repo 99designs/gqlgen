@@ -132,6 +132,12 @@ resolver:
 # GC pressure. Default: false (enable for large projects)
 # use_buffer_pooling: false
 
+# Optional: validate enum results before writing the response (default: false).
+# Invalid results produce a field error and null, with normal non-null propagation.
+# Applies to generated and custom-bound enums; regenerate after enabling.
+# Enabling buffers each enum result and invokes custom marshalers during completion.
+# validate_enum_outputs: false
+
 # Optional: set to skip generation of JSON Marshalers and Unmarshalers for enums
 # omit_enum_json_marshalers: false
 

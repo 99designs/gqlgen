@@ -6,6 +6,7 @@ import (
 	"go/token"
 	"go/types"
 	"slices"
+	"strconv"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/ast"
@@ -303,6 +304,23 @@ func (ref *TypeReference) IsStruct() bool {
 
 func (ref *TypeReference) IsScalar() bool {
 	return ref.Definition.Kind == ast.Scalar
+}
+
+// IsEnum reports whether the reference names a GraphQL enum.
+func (ref *TypeReference) IsEnum() bool {
+	return ref.Definition.Kind == ast.Enum
+}
+
+// EnumOutputMarshaler wraps enum results in eager validation when enabled.
+func (ref *TypeReference) EnumOutputMarshaler(marshaler string, validate bool) string {
+	if !validate || !ref.IsEnum() {
+		return marshaler
+	}
+	args := []string{"ctx", strconv.Quote(ref.Definition.Name), marshaler}
+	for _, value := range ref.Definition.EnumValues {
+		args = append(args, strconv.Quote(value.Name))
+	}
+	return "graphql.MarshalEnum(" + strings.Join(args, ", ") + ")"
 }
 
 func (ref *TypeReference) IsMap() bool {

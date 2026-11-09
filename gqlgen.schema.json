@@ -315,6 +315,11 @@
       "type": "boolean",
       "default": false
     },
+    "validate_enum_outputs": {
+      "type": "boolean",
+      "description": "Validate enum results before writing the response, reporting field errors and propagating null for invalid values. Defaults to false.",
+      "default": false
+    },
     "omit_enum_json_marshalers": {
       "description": "Turn on to omit JSON marshaler/unmarshaler generation for enums",
       "type": "boolean",

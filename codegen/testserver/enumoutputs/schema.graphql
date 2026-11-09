@@ -1,0 +1,21 @@
+enum Status { OK FAIL }
+enum Bound { ONE TWO }
+enum Custom { OK FAIL }
+enum Contextual { OK FAIL }
+type Record {
+  nullable: Status
+  required: Status!
+  items: [Status]
+  requiredItems: [Status!]
+  requiredList: [Status!]!
+  nested: [[Status!]!]
+  bound: Bound
+  custom: Custom
+  requiredContextual: Contextual!
+  contextualItems: [Contextual!]
+  contextual: Contextual
+}
+type Query {
+  record: Record
+  requiredRecord: Record!
+}

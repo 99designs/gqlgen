@@ -1,0 +1,25 @@
+schema:
+  - schema.graphql
+skip_validation: true
+use_function_syntax_for_execution_context: false
+exec:
+  package: generated
+  filename: generated-legacy/schema.go
+model:
+  package: model
+  filename: model/models_gen.go
+resolver:
+  package: generated
+  filename: generated-legacy/resolver.go
+models:
+  Bound:
+    model: github.com/99designs/gqlgen/codegen/testserver/enumoutputs/model.Bound
+    enum_values:
+      ONE:
+        value: github.com/99designs/gqlgen/codegen/testserver/enumoutputs/model.One
+      TWO:
+        value: github.com/99designs/gqlgen/codegen/testserver/enumoutputs/model.Two
+  Custom:
+    model: github.com/99designs/gqlgen/codegen/testserver/enumoutputs/model.Custom
+  Contextual:
+    model: github.com/99designs/gqlgen/codegen/testserver/enumoutputs/model.Contextual

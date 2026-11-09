@@ -88,6 +88,7 @@
 	{{ with $type.MarshalFunc }}
 		{{- /* eventCtx: the Subscription root marshaler returns a per-event context tuple when the
 		   subscription_context_field option is on. Computed once here; reused below. */ -}}
+		{{- $validateEnum := and $.Config.ValidateEnumOutputs $type.IsEnum -}}
 		{{- $eventCtx := and (eq $type.Definition.Name "Subscription") $.Config.SubscriptionContextField -}}
 		func {{$.FuncReceiver}}{{ . }}(ctx context.Context, {{$.ECFuncParam}}sel ast.SelectionSet, v {{ $type.GO | ref }}) {{- if $eventCtx }}(context.Context, {{- end}}graphql.Marshaler{{- if $eventCtx }}){{- end}} {
 			{{- if or $type.IsPtrToSlice $type.IsPtrToIntf }}
@@ -186,9 +187,9 @@
 				{{- end }}
 				{{- if $type.IsMarshaler }}
 					{{- if $type.IsContext }}
-						return graphql.WrapContextMarshaler(ctx, v)
+						return {{ $type.EnumOutputMarshaler "graphql.WrapContextMarshaler(ctx, v)" $.Config.ValidateEnumOutputs }}
 					{{- else }}
-						return v
+						return {{ $type.EnumOutputMarshaler "v" $.Config.ValidateEnumOutputs }}
 					{{- end }}
 				{{- else if $type.Marshaler }}
 					_ = sel
@@ -207,15 +208,15 @@
 						{{- $v = printf "%v(%v)" ($type.CastType | ref) $v}}
 					{{- end }}
 					res := {{ $type.Marshaler | call }}({{ $v }})
-					{{- if $type.GQL.NonNull }}
+					{{- if and $type.GQL.NonNull (not $validateEnum) }}
 						if res == graphql.Null {
 							graphql.AddInvalidNullFromMarshaler(ctx, {{ $type.GQL.String | quote }})
 						}
 					{{- end }}
 					{{- if $type.IsContext }}
-						return graphql.WrapContextMarshaler(ctx, res)
+						return {{ $type.EnumOutputMarshaler "graphql.WrapContextMarshaler(ctx, res)" $.Config.ValidateEnumOutputs }}
 					{{- else }}
-						return res
+						return {{ $type.EnumOutputMarshaler "res" $.Config.ValidateEnumOutputs }}
 					{{- end }}
 				{{- else if $type.IsRoot }}
 					{{- if eq $type.Definition.Name "Subscription" }}

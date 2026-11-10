@@ -16,6 +16,23 @@ and the generators' dependencies stay out of the root `go.mod`.
 Each one is recorded as a `tool` directive in `go.mod`, so the exact version is
 locked by `go.sum` rather than resolved from the network at generate time.
 
+## Helper programs
+
+| Program              | Used by                                                                     |
+| -------------------- | --------------------------------------------------------------------------- |
+| `apollo-sandbox-sri` | Run by hand to refresh the Apollo Sandbox SRI hash in `graphql/playground`  |
+| `changelogabsref`    | `bin/update_gqlparser.sh`, to turn gqlparser release notes into the PR body |
+
+`changelogabsref` reads a GoReleaser release body on stdin and prints only
+its changelog, with commit SHAs dropped and `#123` rewritten as
+`[owner/repo#123](https://github.com/owner/repo/pull/123)`. Otherwise a gqlgen
+PR body would link gqlparser's PR numbers to gqlgen's own PRs:
+
+```sh
+gh release view v2.5.63 -R vektah/gqlparser --json body --jq .body |
+    go run -C bin/_tools ./changelogabsref https://github.com/vektah/gqlparser
+```
+
 ## Running a pinned tool
 
 Invoke it from the package that owns the generated file, pointing `-modfile` at

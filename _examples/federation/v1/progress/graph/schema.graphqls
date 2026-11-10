@@ -1,0 +1,19 @@
+scalar Date
+
+extend type User @key(fields: "id") {
+  id: ID! @external
+  username: String! @external
+  progress(since: Date): [VideoProgress!]!
+  greeting: String! @requires(fields: "username")
+}
+
+extend type Video @key(fields: "id") {
+  id: ID! @external
+  title: String! @external
+}
+
+type VideoProgress {
+  video: Video! @provides(fields: "title")
+  percent: Float!
+  completedOn: Date
+}

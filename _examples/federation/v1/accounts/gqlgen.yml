@@ -1,0 +1,31 @@
+schema:
+  - graph/*.graphqls
+
+exec:
+  filename: graph/generated.go
+  package: graph
+
+federation:
+  filename: graph/federation.go
+  package: graph
+  version: 1
+
+model:
+  filename: graph/model/models_gen.go
+  package: model
+
+resolver:
+  layout: follow-schema
+  dir: graph
+  package: graph
+
+autobind:
+  - "github.com/99designs/gqlgen/_examples/federation/v1/accounts/graph/model"
+
+models:
+  Date:
+    model: github.com/99designs/gqlgen/graphql.String
+  User:
+    fields:
+      avatarURL:
+        resolver: true

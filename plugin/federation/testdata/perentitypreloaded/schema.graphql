@@ -1,0 +1,34 @@
+directive @entityResolver(multi: Boolean) on OBJECT
+
+type Planet @key(fields: "name") {
+    name: String!
+    diameter: Int! @external
+    size: Int! @requires(fields: "diameter")
+}
+
+type MultiPlanet @key(fields: "name") @entityResolver(multi: true) {
+    name: String!
+    diameter: Int! @external
+    size: Int! @requires(fields: "diameter")
+}
+
+type Comet @key(fields: "name") {
+    name: String!
+    orbit: Orbit @external
+    period: Int @requires(fields: "orbit { period }")
+}
+
+type Orbit {
+    period: Int
+    radius: Int
+}
+
+type Fleet @key(fields: "name") @entityResolver(multi: true) {
+    name: String!
+    ships: [Ship!]! @external
+    tonnage: Int! @requires(fields: "ships { tonnage }")
+}
+
+type Ship {
+    tonnage: Int!
+}

@@ -18,7 +18,7 @@ import (
 type TreeBuilder struct {
 	Trace    *generated.Trace
 	rootNode generated.Trace_Node
-	nodes    map[string]NodeMap // nodes is used to store a pointer map using the node path (e.g. todo[0].id) to itself as well as it's parent
+	nodes    map[string]NodeMap // nodes is used to store a pointer map using the node path (e.g. todo[0].id) to itself as well as its parent
 
 	startTime *time.Time
 	stopped   bool

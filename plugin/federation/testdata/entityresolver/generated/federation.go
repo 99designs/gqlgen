@@ -136,6 +136,8 @@ func (ec *executionContext) resolveEntityGroup(
 
 func isMulti(typeName string) bool {
 	switch typeName {
+	case "MultiCustomIDEntity":
+		return true
 	case "MultiHello":
 		return true
 	case "MultiHelloMultipleRequires":
@@ -165,6 +167,33 @@ func (ec *executionContext) resolveEntity(
 	}()
 
 	switch typeName {
+	case "CustomIDEntity":
+		resolverName, err := entityResolverNameForCustomIDEntity(ctx, rep)
+		if err != nil {
+			return nil, fmt.Errorf(`finding resolver for Entity "CustomIDEntity": %w`, err)
+		}
+		switch resolverName {
+
+		case "findCustomIDEntityByIDAndOwnerIDAndOptionalID":
+			id0, err := ec.unmarshalNID2string(ctx, rep["id"])
+			if err != nil {
+				return nil, fmt.Errorf(`unmarshalling param 0 for findCustomIDEntityByIDAndOwnerIDAndOptionalID(): %w`, err)
+			}
+			id1, err := ec.unmarshalNID2string(ctx, rep["owner"].(map[string]any)["id"])
+			if err != nil {
+				return nil, fmt.Errorf(`unmarshalling param 1 for findCustomIDEntityByIDAndOwnerIDAndOptionalID(): %w`, err)
+			}
+			id2, err := ec.unmarshalOID2ᚖstring(ctx, rep["optionalID"])
+			if err != nil {
+				return nil, fmt.Errorf(`unmarshalling param 2 for findCustomIDEntityByIDAndOwnerIDAndOptionalID(): %w`, err)
+			}
+			entity, err := ec.Resolvers.Entity().FindCustomIDEntityByIDAndOwnerIDAndOptionalID(ctx, id0, id1, id2)
+			if err != nil {
+				return nil, fmt.Errorf(`resolving Entity "CustomIDEntity": %w`, err)
+			}
+
+			return entity, nil
+		}
 	case "Hello":
 		resolverName, err := entityResolverNameForHello(ctx, rep)
 		if err != nil {
@@ -396,6 +425,56 @@ func (ec *executionContext) resolveManyEntities(
 
 	switch typeName {
 
+	case "MultiCustomIDEntity":
+		resolverName, err := entityResolverNameForMultiCustomIDEntity(ctx, reps[0].entity)
+		if err != nil {
+			return fmt.Errorf(`finding resolver for Entity "MultiCustomIDEntity": %w`, err)
+		}
+		switch resolverName {
+
+		case "findManyMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDs":
+			typedReps := make([]*model.MultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput, len(reps))
+
+			for i, rep := range reps {
+				id0, err := ec.unmarshalNID2string(ctx, rep.entity["id"])
+				if err != nil {
+					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "id"))
+				}
+				id1, err := ec.unmarshalNID2string(ctx, rep.entity["owner"].(map[string]any)["id"])
+				if err != nil {
+					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "ownerID"))
+				}
+				id2, err := ec.unmarshalOID2ᚖstring(ctx, rep.entity["optionalID"])
+				if err != nil {
+					return errors.New(fmt.Sprintf("Field %s undefined in schema.", "optionalID"))
+				}
+
+				typedReps[i] = &model.MultiCustomIDEntityByIDAndOwnerIDAndOptionalIDsInput{
+					ID:         id0,
+					OwnerID:    id1,
+					OptionalID: id2,
+				}
+			}
+
+			entities, err := ec.Resolvers.Entity().FindManyMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDs(ctx, typedReps)
+			entityErrs, err := fedruntime.SplitEntityBatchErrors(err)
+			if err != nil {
+				return err
+			}
+
+			for i, entity := range entities {
+				if i < len(entityErrs) && entityErrs[i] != nil {
+					ec.Error(graphql.WithPathContext(ctx, graphql.NewPathWithIndex(reps[i].index)), entityErrs[i])
+					continue
+				}
+				list[reps[i].index] = entity
+			}
+			return nil
+
+		default:
+			return fmt.Errorf("unknown resolver: %s", resolverName)
+		}
+
 	case "MultiHello":
 		resolverName, err := entityResolverNameForMultiHello(ctx, reps[0].entity)
 		if err != nil {
@@ -617,6 +696,73 @@ func (ec *executionContext) resolveManyEntities(
 	}
 }
 
+func entityResolverNameForCustomIDEntity(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
+	for {
+		var (
+			m   EntityRepresentation
+			val any
+			ok  bool
+		)
+		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use it
+		allNull := true
+		m = rep
+		val, ok = m["id"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"id\" for CustomIDEntity", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		m = rep
+		val, ok = m["owner"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"owner\" for CustomIDEntity", ErrTypeNotFound))
+			break
+		}
+		if m, ok = val.(map[string]any); !ok {
+			// nested field value is not a map[string]interface so don't use it
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to nested Key Field \"owner\" value not matching map[string]any for CustomIDEntity", ErrTypeNotFound))
+			break
+		}
+		val, ok = m["id"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"id\" for CustomIDEntity", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		m = rep
+		val, ok = m["optionalID"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"optionalID\" for CustomIDEntity", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for CustomIDEntity", ErrTypeNotFound))
+			break
+		}
+		return "findCustomIDEntityByIDAndOwnerIDAndOptionalID", nil
+	}
+	return "", fmt.Errorf("%w for CustomIDEntity due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
+}
+
 func entityResolverNameForHello(ctx context.Context, rep EntityRepresentation) (string, error) {
 	// we collect errors because a later entity resolver may work fine
 	// when an entity has multiple keys
@@ -629,7 +775,7 @@ func entityResolverNameForHello(ctx context.Context, rep EntityRepresentation) (
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["name"]
@@ -664,7 +810,7 @@ func entityResolverNameForHelloMultiSingleKeys(ctx context.Context, rep EntityRe
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["key1"]
@@ -709,7 +855,7 @@ func entityResolverNameForHelloWithErrors(ctx context.Context, rep EntityReprese
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["name"]
@@ -732,6 +878,73 @@ func entityResolverNameForHelloWithErrors(ctx context.Context, rep EntityReprese
 		errors.Join(entityResolverErrs...).Error())
 }
 
+func entityResolverNameForMultiCustomIDEntity(ctx context.Context, rep EntityRepresentation) (string, error) {
+	// we collect errors because a later entity resolver may work fine
+	// when an entity has multiple keys
+	entityResolverErrs := []error{}
+	for {
+		var (
+			m   EntityRepresentation
+			val any
+			ok  bool
+		)
+		_ = val
+		// if all of the KeyFields values for this resolver are null,
+		// we shouldn't use it
+		allNull := true
+		m = rep
+		val, ok = m["id"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"id\" for MultiCustomIDEntity", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		m = rep
+		val, ok = m["owner"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"owner\" for MultiCustomIDEntity", ErrTypeNotFound))
+			break
+		}
+		if m, ok = val.(map[string]any); !ok {
+			// nested field value is not a map[string]interface so don't use it
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to nested Key Field \"owner\" value not matching map[string]any for MultiCustomIDEntity", ErrTypeNotFound))
+			break
+		}
+		val, ok = m["id"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"id\" for MultiCustomIDEntity", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		m = rep
+		val, ok = m["optionalID"]
+		if !ok {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to missing Key Field \"optionalID\" for MultiCustomIDEntity", ErrTypeNotFound))
+			break
+		}
+		if allNull {
+			allNull = val == nil
+		}
+		if allNull {
+			entityResolverErrs = append(entityResolverErrs,
+				fmt.Errorf("%w due to all null value KeyFields for MultiCustomIDEntity", ErrTypeNotFound))
+			break
+		}
+		return "findManyMultiCustomIDEntityByIDAndOwnerIDAndOptionalIDs", nil
+	}
+	return "", fmt.Errorf("%w for MultiCustomIDEntity due to %v", ErrTypeNotFound,
+		errors.Join(entityResolverErrs...).Error())
+}
+
 func entityResolverNameForMultiHello(ctx context.Context, rep EntityRepresentation) (string, error) {
 	// we collect errors because a later entity resolver may work fine
 	// when an entity has multiple keys
@@ -744,7 +957,7 @@ func entityResolverNameForMultiHello(ctx context.Context, rep EntityRepresentati
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["name"]
@@ -779,7 +992,7 @@ func entityResolverNameForMultiHelloMultipleRequires(ctx context.Context, rep En
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["name"]
@@ -814,7 +1027,7 @@ func entityResolverNameForMultiHelloRequires(ctx context.Context, rep EntityRepr
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["name"]
@@ -849,7 +1062,7 @@ func entityResolverNameForMultiHelloWithError(ctx context.Context, rep EntityRep
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["name"]
@@ -884,7 +1097,7 @@ func entityResolverNameForMultiPlanetRequiresNested(ctx context.Context, rep Ent
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["name"]
@@ -919,7 +1132,7 @@ func entityResolverNameForPlanetMultipleRequires(ctx context.Context, rep Entity
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["name"]
@@ -954,7 +1167,7 @@ func entityResolverNameForPlanetRequires(ctx context.Context, rep EntityRepresen
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["name"]
@@ -989,7 +1202,7 @@ func entityResolverNameForPlanetRequiresNested(ctx context.Context, rep EntityRe
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["name"]
@@ -1024,7 +1237,7 @@ func entityResolverNameForWorld(ctx context.Context, rep EntityRepresentation) (
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["hello"]
@@ -1081,7 +1294,7 @@ func entityResolverNameForWorldName(ctx context.Context, rep EntityRepresentatio
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["name"]
@@ -1116,7 +1329,7 @@ func entityResolverNameForWorldWithMultipleKeys(ctx context.Context, rep EntityR
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["hello"]
@@ -1165,7 +1378,7 @@ func entityResolverNameForWorldWithMultipleKeys(ctx context.Context, rep EntityR
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["bar"]

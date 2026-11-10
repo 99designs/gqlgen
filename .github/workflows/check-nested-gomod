@@ -1,0 +1,29 @@
+#!/bin/bash
+# Fail if any nested go.mod declares a newer go version than the root go.mod.
+#
+# The release workflow installs exactly the root go.mod's version with
+# GOTOOLCHAIN=local and runs `go generate` across the nested modules, so a nested
+# module that needs a newer go breaks the release even though CI, which tests
+# against the latest patch release, stays green.
+set -euo pipefail
+
+go_directive() {
+	awk '$1 == "go" { print $2; exit }' "$1"
+}
+
+root=$(go_directive go.mod)
+status=0
+while IFS= read -r mod; do
+	want=$(go_directive "$mod")
+	[[ -z $want ]] && continue
+	# sort -V orders 1.26 < 1.26rc1 < 1.26.0 < 1.26.2, matching go/version.
+	if [[ $want != "$root" && $(printf '%s\n%s\n' "$root" "$want" | sort -V | tail -n1) == "$want" ]]; then
+		echo "$mod: go $want is newer than the root go.mod's go $root"
+		status=1
+	fi
+done < <(git ls-files -- '*/go.mod')
+
+if [[ $status -ne 0 ]]; then
+	echo "lower the go directive with: (cd <dir> && go mod edit -go=$root && go mod tidy)"
+fi
+exit $status

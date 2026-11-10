@@ -268,6 +268,7 @@ func TestResolveRequiresStrategy(t *testing.T) {
 	cases := map[string]struct {
 		def         *ast.Definition
 		multi       bool
+		perEntity   bool
 		pkg         PackageOptions
 		want        RequiresStrategy
 		wantErr     bool
@@ -298,9 +299,21 @@ func TestResolveRequiresStrategy(t *testing.T) {
 			want:  RequiresPreloaded,
 		},
 		"preloaded without multi is an error": {
-			def:     entityResolverDef(requiresArg("preloaded")),
-			multi:   false,
-			wantErr: true,
+			def:         entityResolverDef(requiresArg("preloaded")),
+			multi:       false,
+			wantErr:     true,
+			errContains: `@entityResolver(requires: "preloaded") requires multi: true`,
+		},
+		"preloaded from the package option names the option": {
+			def:         &ast.Definition{Name: "T"},
+			pkg:         PackageOptions{PreloadedRequires: true},
+			wantErr:     true,
+			errContains: "the preloaded_requires option requires multi: true",
+		},
+		"preloaded per entity needs no multi": {
+			def:       entityResolverDef(requiresArg("preloaded")),
+			perEntity: true,
+			want:      RequiresPreloaded,
 		},
 		"unknown strategy is an error": {
 			def:     entityResolverDef(requiresArg("bogus")),
@@ -313,7 +326,7 @@ func TestResolveRequiresStrategy(t *testing.T) {
 			t.Parallel()
 
 			f := &Federation{PackageOptions: tc.pkg}
-			got, err := f.resolveRequiresStrategy(tc.def, tc.multi)
+			got, err := f.resolveRequiresStrategy(tc.def, tc.multi, tc.perEntity)
 			if tc.wantErr {
 				require.Error(t, err)
 				if tc.errContains != "" {

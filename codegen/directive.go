@@ -2,6 +2,7 @@ package codegen
 
 import (
 	"fmt"
+	"maps"
 	"slices"
 	"strings"
 
@@ -53,7 +54,10 @@ func locationDirectives(
 func (b *builder) buildDirectives() (map[string]*Directive, error) {
 	directives := make(map[string]*Directive, len(b.Schema.Directives))
 
-	for name, dir := range b.Schema.Directives {
+	// Name order keeps the bound argument references, and so the generated code,
+	// stable between runs.
+	for _, name := range slices.Sorted(maps.Keys(b.Schema.Directives)) {
+		dir := b.Schema.Directives[name]
 		if _, ok := directives[name]; ok {
 			return nil, fmt.Errorf("directive with name %s already exists", name)
 		}

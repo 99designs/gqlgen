@@ -16,6 +16,7 @@ import (
 	"github.com/goccy/go-yaml"
 	"github.com/vektah/gqlparser/v2"
 	"github.com/vektah/gqlparser/v2/ast"
+	"github.com/vektah/gqlparser/v2/validator"
 	"golang.org/x/tools/go/packages"
 
 	"github.com/99designs/gqlgen/codegen/templates"
@@ -255,17 +256,14 @@ func ReadConfig(cfgFile io.Reader) (cfg *Config, err error) {
 // CompleteConfig fills in the schema and other values to a config loaded from
 // YAML.
 func CompleteConfig(config *Config) error {
-	defaultDirectives := map[string]DirectiveConfig{
-		"skip":        {SkipRuntime: true},
-		"include":     {SkipRuntime: true},
-		"deprecated":  {SkipRuntime: true},
-		"specifiedBy": {SkipRuntime: true},
-		"oneOf":       {SkipRuntime: true},
-	}
-
-	for key, value := range defaultDirectives {
-		if _, defined := config.Directives[key]; !defined {
-			config.Directives[key] = value
+	// Generated code never needs to call a directive the gqlparser prelude declares:
+	// the executor implements skip, include and defer, and introspection reads
+	// deprecated, specifiedBy and oneOf. SkipRuntime also keeps them out of
+	// DirectiveRoot when a schema file redeclares one. TestPreludeDirectivesAreReviewed
+	// lists the directives this reasoning has been checked against.
+	for _, dir := range validator.PreludeDocument().Directives {
+		if _, defined := config.Directives[dir.Name]; !defined {
+			config.Directives[dir.Name] = DirectiveConfig{SkipRuntime: true}
 		}
 	}
 
@@ -1093,16 +1091,22 @@ func (c *Config) lookupAutobindType(p *packages.Package, schemaType *ast.Definit
 
 func (c *Config) injectBuiltins() {
 	builtins := TypeMap{
+		// args and inputFields bind to methods so their includeDeprecated argument
+		// is honored; the Args and InputFields names they replace stay for
+		// generated code written before them.
 		"__Directive": {
-			Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.Directive"},
+			Model:  StringList{"github.com/99designs/gqlgen/graphql/introspection.Directive"},
+			Fields: map[string]TypeMapField{"args": {FieldName: "VisibleArgs"}},
 		},
 		"__DirectiveLocation": {Model: StringList{"github.com/99designs/gqlgen/graphql.String"}},
 		"__Type": {
-			Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.Type"},
+			Model:  StringList{"github.com/99designs/gqlgen/graphql/introspection.Type"},
+			Fields: map[string]TypeMapField{"inputFields": {FieldName: "VisibleInputFields"}},
 		},
 		"__TypeKind": {Model: StringList{"github.com/99designs/gqlgen/graphql.String"}},
 		"__Field": {
-			Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.Field"},
+			Model:  StringList{"github.com/99designs/gqlgen/graphql/introspection.Field"},
+			Fields: map[string]TypeMapField{"args": {FieldName: "VisibleArgs"}},
 		},
 		"__EnumValue": {
 			Model: StringList{"github.com/99designs/gqlgen/graphql/introspection.EnumValue"},
@@ -1182,9 +1186,11 @@ func (c *Config) LoadSchema() error {
 	}
 
 	if schema.Query == nil {
+		// gqlparser adds the introspection fields only to a query type it found.
 		schema.Query = &ast.Definition{
-			Kind: ast.Object,
-			Name: "Query",
+			Kind:   ast.Object,
+			Name:   "Query",
+			Fields: validator.QueryIntrospectionFields(),
 		}
 		schema.Types["Query"] = schema.Query
 	}

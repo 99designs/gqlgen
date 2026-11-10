@@ -15,6 +15,10 @@ type PackageConfig struct {
 	Version       int             `yaml:"version,omitempty"`
 	ModelTemplate string          `yaml:"model_template,omitempty"`
 	Options       map[string]bool `yaml:"options,omitempty"`
+	// RepresentationNames is federation-only: it names the representation
+	// input of a type, keyed by the type's name, in place of
+	// <Type>Representation. Used with the entity_resolver_per_entity option.
+	RepresentationNames map[string]string `yaml:"representation_names,omitempty"`
 }
 
 func (c *PackageConfig) ImportPath() string {

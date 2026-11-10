@@ -398,7 +398,7 @@ func entityResolverNameForExternalExtension(ctx context.Context, rep EntityRepre
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["upc"]
@@ -433,7 +433,7 @@ func entityResolverNameForHello(ctx context.Context, rep EntityRepresentation) (
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["name"]
@@ -468,7 +468,7 @@ func entityResolverNameForMultiHelloMultiKey(ctx context.Context, rep EntityRepr
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["name"]
@@ -495,7 +495,7 @@ func entityResolverNameForMultiHelloMultiKey(ctx context.Context, rep EntityRepr
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["key2"]
@@ -530,7 +530,7 @@ func entityResolverNameForNestedKey(ctx context.Context, rep EntityRepresentatio
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["id"]
@@ -587,7 +587,7 @@ func entityResolverNameForVeryNestedKey(ctx context.Context, rep EntityRepresent
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["id"]
@@ -722,7 +722,7 @@ func entityResolverNameForWorld(ctx context.Context, rep EntityRepresentation) (
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["foo"]
@@ -749,7 +749,7 @@ func entityResolverNameForWorld(ctx context.Context, rep EntityRepresentation) (
 		)
 		_ = val
 		// if all of the KeyFields values for this resolver are null,
-		// we shouldn't use use it
+		// we shouldn't use it
 		allNull := true
 		m = rep
 		val, ok = m["bar"]

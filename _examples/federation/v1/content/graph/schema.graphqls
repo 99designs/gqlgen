@@ -1,0 +1,37 @@
+scalar Date
+
+interface Content {
+  id: ID!
+  title: String!
+}
+
+type Video implements Content @key(fields: "id") {
+  id: ID!
+  title: String!
+  durationSeconds: Int!
+  publishedOn: Date
+}
+
+type Article implements Content @key(fields: "id") {
+  id: ID!
+  title: String!
+  wordCount: Int!
+}
+
+union SearchResult = Video | Article
+
+enum ContentKind {
+  VIDEO
+  ARTICLE
+  EXERCISE @deprecated(reason: "Exercises are no longer searchable.")
+}
+
+extend type Query {
+  content(id: ID!): Content
+  search(
+    query: String!
+    kinds: [ContentKind!]
+    first: Int
+    limit: Int = 10 @deprecated(reason: "Use first.")
+  ): [SearchResult!]!
+}

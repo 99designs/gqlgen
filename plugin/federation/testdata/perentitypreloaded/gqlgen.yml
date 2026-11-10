@@ -1,0 +1,17 @@
+schema:
+  - "testdata/perentitypreloaded/schema.graphql"
+exec:
+  filename: testdata/perentitypreloaded/generated/exec.go
+federation:
+  filename: testdata/perentitypreloaded/generated/federation.go
+  options:
+    preloaded_requires: true
+    entity_resolver_per_entity: true
+model:
+  filename: testdata/perentitypreloaded/generated/models.go
+resolver:
+  filename: testdata/perentitypreloaded/resolver.go
+  layout: follow-schema
+  dir: testdata/perentitypreloaded
+  package: perentitypreloaded
+omit_complexity: true

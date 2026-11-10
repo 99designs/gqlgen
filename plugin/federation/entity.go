@@ -3,6 +3,7 @@ package federation
 import (
 	"go/types"
 	"slices"
+	"strings"
 
 	"github.com/vektah/gqlparser/v2/ast"
 
@@ -26,7 +27,8 @@ import (
 //     surfaces the raw representation to user code.
 //   - RequiresPreloaded ("preloaded"): unmarshaled onto the resolver's INPUT
 //     representation BEFORE the resolver runs, so a multi resolver sees every
-//     entity's @requires data in one scope (input, before). Multi entities only.
+//     entity's @requires data in one scope (input, before). Multi entities
+//     only, unless per-entity resolvers take the representation.
 //
 // RequiresComputed ("computed") is the outlier: it does not touch the entity
 // resolver at all. It routes @requires to standalone field resolvers via a
@@ -56,7 +58,8 @@ const (
 	RequiresComputed RequiresStrategy = "computed"
 	// RequiresPreloaded unmarshals @requires onto the resolver's input
 	// representation before the resolver runs, so a multi resolver sees every
-	// entity's @requires data at once. Multi entities only.
+	// entity's @requires data at once. Multi entities only, unless per-entity
+	// resolvers take the representation.
 	RequiresPreloaded RequiresStrategy = "preloaded"
 )
 
@@ -68,6 +71,16 @@ type Entity struct {
 	Resolvers []*EntityResolver
 	Requires  []*Requires
 	Multi     bool
+	// PerEntity selects one resolver for the entity, taking a representation
+	// input, instead of one resolver per @key. Set from the
+	// entity_resolver_per_entity option.
+	PerEntity bool
+	// RepresentationType is the Go type of a per-entity resolver's argument:
+	// one representation, or a list of them for a batch resolver.
+	RepresentationType *config.TypeReference
+	// MatchedKeyType is the type of the representation's MatchedKey field,
+	// the generated MatchedKeyTypeName; set with RepresentationType.
+	MatchedKeyType *types.Named
 	// RequiresStrategy is how this entity's @requires fields are delivered to
 	// the resolver. Resolved per entity in buildEntity.
 	RequiresStrategy RequiresStrategy
@@ -76,6 +89,32 @@ type Entity struct {
 	// with full type information, populated in GenerateCode for use in the
 	// federation template to wrap entity resolver calls.
 	ImplDirectives []*codegen.Directive
+}
+
+// PerEntityResolverName is the GraphQL field name of the entity's per-entity
+// resolver; the Go method name is its ToGo form.
+func (e *Entity) PerEntityResolverName() string {
+	return "find" + e.Name
+}
+
+// MatchedKeyTypeName is the Go type, declared in the model package, of the
+// MatchedKey field on a per-entity entity's representation. Each resolver's
+// MatchedKeyConst is a constant of it.
+func (e *Entity) MatchedKeyTypeName() string {
+	return matchedKeyTypeName(e.Name)
+}
+
+// MatchedKeyConstRef is how the file being rendered refers to resolver's
+// MatchedKey constant, qualified when it is in another package.
+//
+// Requires: e is per-entity, resolver is one of its Resolvers, and
+// MatchedKeyType is set.
+func (e *Entity) MatchedKeyConstRef(resolver *EntityResolver) string {
+	qualifier := templates.CurrentImports.Lookup(e.MatchedKeyType.Obj().Pkg().Path())
+	if qualifier == "" {
+		return resolver.MatchedKeyConst
+	}
+	return qualifier + "." + resolver.MatchedKeyConst
 }
 
 // IsDefaultRequires reports whether @requires uses the default (post-resolver
@@ -98,6 +137,47 @@ type EntityResolver struct {
 	InputTypeName  string
 	ReturnType     types.Type // The Go generated return type for the entity
 	ReturnTypeName string
+	// MatchedKeyConst is the constant of the entity's MatchedKeyTypeName that
+	// names this key, holding FieldSet(); set only for per-entity entities.
+	MatchedKeyConst string
+}
+
+// FieldSet returns the resolver's @key field set in a standard form: fields
+// in key order, separated by single spaces, a nested selection in braces after
+// its field, such as "id owner { id name }".
+func (e *EntityResolver) FieldSet() string {
+	paths := make([][]string, len(e.KeyFields))
+	for i, keyField := range e.KeyFields {
+		paths[i] = keyField.Field
+	}
+	return selectionText(paths)
+}
+
+// selectionText prints field paths, such as [owner id], as one selection set,
+// merging paths that share a first field at that field's first appearance.
+//
+// Requires: every path is non-empty.
+func selectionText(paths [][]string) string {
+	var heads []string
+	nested := make(map[string][][]string)
+	for _, path := range paths {
+		head := path[0]
+		if _, seen := nested[head]; !seen {
+			heads = append(heads, head)
+			nested[head] = nil
+		}
+		if len(path) > 1 {
+			nested[head] = append(nested[head], path[1:])
+		}
+	}
+	parts := make([]string, len(heads))
+	for i, head := range heads {
+		parts[i] = head
+		if subs := nested[head]; len(subs) > 0 {
+			parts[i] += " { " + selectionText(subs) + " }"
+		}
+	}
+	return strings.Join(parts, " ")
 }
 
 func (e *EntityResolver) LookupInputType() string {
@@ -128,6 +208,11 @@ type KeyField struct {
 	// Using a single stored name keeps the SDL input field, the modelgen struct
 	// field, and the template's struct literal in agreement.
 	GoName string
+}
+
+// ArgName is the argument name this key takes on a single entity resolver.
+func (k *KeyField) ArgName() string {
+	return k.Field.ToGoPrivate()
 }
 
 // Requires represents an @requires clause

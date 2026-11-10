@@ -118,122 +118,12 @@ func TestMarshalSliceConcurrently(t *testing.T) {
 		assert.LessOrEqual(t, maxConcurrent.Load(), int32(workerLimit))
 	})
 
-	t.Run("panic recovery sets result to nil", func(t *testing.T) {
-		ctx := withTestResponseContext(context.Background())
-		ret := MarshalSliceConcurrently(
-			ctx,
-			1,
-			0,
-			false,
-			func(ctx context.Context, i int) Marshaler {
-				panic("test panic")
-			},
-		)
-		assert.Nil(t, ret)
-	})
-
-	t.Run("panic recovery in concurrent mode sets result to nil", func(t *testing.T) {
-		ctx := withTestResponseContext(context.Background())
-		ret := MarshalSliceConcurrently(
-			ctx,
-			3,
-			0,
-			false,
-			func(ctx context.Context, i int) Marshaler {
-				if i == 1 {
-					panic("test panic")
-				}
-				return MarshalString("ok")
-			},
-		)
-		assert.Nil(t, ret)
-	})
-
 	t.Run("omit panic handler does not recover", func(t *testing.T) {
 		ctx := withTestResponseContext(context.Background())
 		assert.Panics(t, func() {
 			MarshalSliceConcurrently(ctx, 1, 0, true, func(ctx context.Context, i int) Marshaler {
 				panic("test panic")
 			})
-		})
-	})
-
-	t.Run("context cancellation with worker limit does not deadlock", func(t *testing.T) {
-		ctx := withTestResponseContext(context.Background())
-		ctx, cancel := context.WithCancel(ctx)
-
-		done := make(chan Array, 1)
-		go func() {
-			ret := MarshalSliceConcurrently(
-				ctx,
-				100,
-				1,
-				false,
-				func(ctx context.Context, i int) Marshaler {
-					if i == 2 {
-						// Cancel context mid-flight to trigger the deadlock scenario
-						cancel()
-						// Small delay to let cancellation propagate
-						time.Sleep(10 * time.Millisecond)
-					}
-					return MarshalString(fmt.Sprintf("item-%d", i))
-				},
-			)
-			done <- ret
-		}()
-
-		select {
-		case ret := <-done:
-			// Should return nil because remaining elements were skipped
-			// after context cancellation caused semaphore Acquire to fail.
-			assert.Nil(t, ret)
-		case <-time.After(5 * time.Second):
-			t.Fatal("deadlock detected: MarshalSliceConcurrently did not return within timeout")
-		}
-		cancel() // cleanup
-	})
-
-	t.Run("context already cancelled with worker limit", func(t *testing.T) {
-		ctx := withTestResponseContext(context.Background())
-		ctx, cancel := context.WithCancel(ctx)
-		cancel() // Cancel before calling
-
-		done := make(chan Array, 1)
-		go func() {
-			done <- MarshalSliceConcurrently(ctx, 10, 1, false, func(ctx context.Context, i int) Marshaler {
-				return MarshalString("should not reach")
-			})
-		}()
-
-		select {
-		case ret := <-done:
-			// Should return nil without deadlock since the context was
-			// already cancelled and no elements could be marshaled.
-			assert.Nil(t, ret)
-		case <-time.After(5 * time.Second):
-			t.Fatal("deadlock detected with pre-cancelled context")
-		}
-	})
-
-	t.Run("cancelled context does not panic on MarshalGQL", func(t *testing.T) {
-		ctx := withTestResponseContext(context.Background())
-		ctx, cancel := context.WithCancel(ctx)
-		cancel()
-
-		ret := MarshalSliceConcurrently(
-			ctx,
-			3,
-			1,
-			false,
-			func(ctx context.Context, i int) Marshaler {
-				return MarshalString("ok")
-			},
-		)
-
-		assert.Nil(t, ret)
-		assert.NotPanics(t, func() {
-			var buf bytes.Buffer
-			ret.MarshalGQL(&buf)
 		})
 	})
 
@@ -255,4 +145,101 @@ func TestMarshalSliceConcurrently(t *testing.T) {
 		)
 		require.Len(t, ret, 5)
 	})
+}
+
+// An element that is not marshalled, because its marshaller panicked or the
+// context was cancelled before a worker could start it, holds Null: the same
+// value an element whose resolver returned an error holds. A nullable element
+// therefore reports null in place, and the generated non-null check nulls the
+// list when elements are non-null. The rest of the list is kept.
+func TestMarshalSliceConcurrentlyNullsElementsItCouldNotMarshal(t *testing.T) {
+	t.Parallel()
+
+	cases := map[string]struct {
+		length      int
+		workerLimit int64
+		cancelFirst bool
+		marshal     func(cancel context.CancelFunc, i int) Marshaler
+		wantJSON    string
+		wantErrors  []string
+	}{
+		"single element panics": {
+			length: 1,
+			marshal: func(_ context.CancelFunc, _ int) Marshaler {
+				panic("test panic")
+			},
+			wantJSON:   `[null]`,
+			wantErrors: []string{"input: [0] internal system error"},
+		},
+		"one of several elements panics": {
+			length: 3,
+			marshal: func(_ context.CancelFunc, i int) Marshaler {
+				if i == 1 {
+					panic("test panic")
+				}
+				return MarshalString("ok")
+			},
+			wantJSON:   `["ok", null, "ok"]`,
+			wantErrors: []string{"input: [1] internal system error"},
+		},
+		"context cancelled while a worker holds the only slot": {
+			length:      5,
+			workerLimit: 1,
+			marshal: func(cancel context.CancelFunc, i int) Marshaler {
+				// The worker still holds the semaphore, so the next Acquire
+				// observes the cancellation rather than racing it.
+				if i == 2 {
+					cancel()
+				}
+				return MarshalString(fmt.Sprintf("item-%d", i))
+			},
+			wantJSON:   `["item-0", "item-1", "item-2", null, null]`,
+			wantErrors: []string{"input: [3] context canceled"},
+		},
+		"context cancelled before the first worker": {
+			length:      3,
+			workerLimit: 1,
+			cancelFirst: true,
+			marshal: func(_ context.CancelFunc, _ int) Marshaler {
+				return MarshalString("should not reach")
+			},
+			wantJSON:   `[null, null, null]`,
+			wantErrors: []string{"input: [0] context canceled"},
+		},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+
+			ctx, cancel := context.WithCancel(withTestResponseContext(context.Background()))
+			defer cancel()
+			if tc.cancelFirst {
+				cancel()
+			}
+
+			done := make(chan Array, 1)
+			go func() {
+				done <- MarshalSliceConcurrently(ctx, tc.length, tc.workerLimit, false,
+					func(_ context.Context, i int) Marshaler { return tc.marshal(cancel, i) })
+			}()
+
+			var ret Array
+			select {
+			case ret = <-done:
+			case <-time.After(5 * time.Second):
+				t.Fatal("deadlock: MarshalSliceConcurrently did not return")
+			}
+
+			require.Len(t, ret, tc.length, "every element keeps its slot")
+			var b bytes.Buffer
+			ret.MarshalGQL(&b)
+			assert.JSONEq(t, tc.wantJSON, b.String())
+
+			var gotErrors []string
+			for _, err := range GetErrors(ctx) {
+				gotErrors = append(gotErrors, err.Message)
+			}
+			assert.Equal(t, tc.wantErrors, gotErrors)
+		})
+	}
 }

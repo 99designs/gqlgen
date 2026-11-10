@@ -92,8 +92,9 @@ func (ec *ExecutionContextState[R, D, C]) ProcessDeferredGroup(dg DeferredGroup)
 				Result: view,
 				Errors: errs,
 			}
-			// null fields should bubble up
-			if dg.FieldSet.Invalids > 0 {
+			// An invalid non-null field nulls its label's payload, the
+			// incremental form of bubbling null to the parent.
+			if view.payloadInvalid() {
 				ds.Result = Null
 			}
 			select {

@@ -1,0 +1,17 @@
+schema:
+  - "testdata/perentityfunctionsyntax/schema.graphql"
+use_function_syntax_for_execution_context: true
+exec:
+  filename: testdata/perentityfunctionsyntax/generated/exec.go
+federation:
+  filename: testdata/perentityfunctionsyntax/generated/federation.go
+  options:
+    entity_resolver_per_entity: true
+model:
+  filename: testdata/perentityfunctionsyntax/generated/model/models.go
+  package: model
+resolver:
+  filename: testdata/perentityfunctionsyntax/resolver.go
+  layout: follow-schema
+  dir: testdata/perentityfunctionsyntax
+  package: perentityfunctionsyntax

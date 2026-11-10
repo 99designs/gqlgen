@@ -12,3 +12,10 @@ resolver:
   layout: follow-schema
   dir: testdata/entityresolver
   package: entityresolver
+models:
+  CustomIDEntity:
+    model: github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/custommodel.Entity
+  MultiCustomIDEntity:
+    model: github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/custommodel.MultiEntity
+  CustomIDOwner:
+    model: github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/custommodel.Owner

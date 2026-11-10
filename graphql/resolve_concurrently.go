@@ -1,18 +1,16 @@
 package graphql
 
-import (
-	"context"
-	"sync/atomic"
-)
+import "context"
 
 // ResolveConcurrently schedules the concurrent resolution of field i of m,
 // covering the panic guard, the invalids bookkeeping and the @defer group
 // accounting the generated executor needs per field.
 //
 // When recoverFromPanic is true a panic raised by resolve is reported through
-// oc and the field is left with a nil marshaler. nonNull picks the sentinel
-// that marks the enclosing object invalid: Null for non-null fields,
-// RequiredNull for nullable ones.
+// oc and the field resolves to Null, counted against m.Invalids when the
+// field is non-null. nonNull picks the field's invalid result, the value that
+// marks the enclosing object invalid: Null for non-null fields, RequiredNull
+// for nullable ones.
 //
 // A field carrying a @defer directive is scheduled on deferred.FieldSet rather
 // than on m, and registered in deferred.Defers under each of its labels so the
@@ -38,9 +36,13 @@ func (m *FieldSet) ResolveConcurrently(
 		fs := deferred.FieldSet
 		fs.AddField(field)
 		fieldIndex := len(fs.Values) - 1
-		fs.Concurrently(fieldIndex, func(ctx context.Context) Marshaler {
-			return fs.resolveAndCount(ctx, oc, recoverFromPanic, nonNull, resolve)
-		})
+		fs.concurrentlyCounting(
+			fieldIndex,
+			invalidResultFor(nonNull),
+			func(ctx context.Context) Marshaler {
+				return recoverToNull(ctx, oc, recoverFromPanic, resolve)
+			},
+		)
 
 		for _, deferrable := range field.Deferrables {
 			view, ok := deferred.Defers[deferrable.Label]
@@ -58,8 +60,8 @@ func (m *FieldSet) ResolveConcurrently(
 		return
 	}
 
-	m.Concurrently(i, func(ctx context.Context) Marshaler {
-		return m.resolveAndCount(ctx, oc, recoverFromPanic, nonNull, resolve)
+	m.concurrentlyCounting(i, invalidResultFor(nonNull), func(ctx context.Context) Marshaler {
+		return recoverToNull(ctx, oc, recoverFromPanic, resolve)
 	})
 }
 
@@ -70,6 +72,9 @@ func (m *FieldSet) ResolveConcurrently(
 // ctx must be the context carrying this field's RootFieldContext. The context
 // Dispatch hands to the callback is deliberately ignored so that every root
 // field runs under its own RootFieldContext.
+//
+// The value counted against m.Invalids is the one the middleware returns, as
+// for a synchronous root field: it is the value stored and marshalled.
 func (m *FieldSet) ResolveRootConcurrently(
 	ctx context.Context,
 	oc *OperationContext,
@@ -78,38 +83,39 @@ func (m *FieldSet) ResolveRootConcurrently(
 	nonNull bool,
 	resolve func(ctx context.Context) Marshaler,
 ) {
-	m.Concurrently(i, func(context.Context) Marshaler {
+	m.concurrentlyCounting(i, invalidResultFor(nonNull), func(context.Context) Marshaler {
 		return oc.RootResolverMiddleware(ctx, func(ctx context.Context) Marshaler {
-			return m.resolveAndCount(ctx, oc, recoverFromPanic, nonNull, resolve)
+			return recoverToNull(ctx, oc, recoverFromPanic, resolve)
 		})
 	})
 }
 
-// resolveAndCount runs resolve, counting the result against m.Invalids when it
-// is the sentinel that makes the enclosing object invalid.
-func (m *FieldSet) resolveAndCount(
+// invalidResultFor returns the value that, resolved for a field, marks its
+// enclosing object invalid.
+func invalidResultFor(nonNull bool) Marshaler {
+	if nonNull {
+		return Null
+	}
+	return RequiredNull
+}
+
+// recoverToNull runs resolve. When recoverFromPanic is true a panic is
+// reported through oc and resolves to Null, which is what a resolver
+// returning an error leaves and what ResolveField's own guard returns; the
+// field set then counts it like any other result.
+func recoverToNull(
 	ctx context.Context,
 	oc *OperationContext,
 	recoverFromPanic bool,
-	nonNull bool,
 	resolve func(ctx context.Context) Marshaler,
 ) (res Marshaler) {
 	if recoverFromPanic {
 		defer func() {
 			if r := recover(); r != nil {
 				oc.Error(ctx, oc.Recover(ctx, r))
+				res = Null
 			}
 		}()
 	}
-
-	invalid := Marshaler(RequiredNull)
-	if nonNull {
-		invalid = Null
-	}
-
-	res = resolve(ctx)
-	if res == invalid {
-		atomic.AddUint32(&m.Invalids, 1)
-	}
-	return res
+	return resolve(ctx)
 }

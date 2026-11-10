@@ -1,6 +1,7 @@
 package graphql
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"sync/atomic"
@@ -171,6 +172,10 @@ func TestExecutionContextState_ProcessDeferredGroup_IncrementsPendingAndPropagat
 	assert.Nil(t, result.Errors)
 }
 
+// The task is scheduled with Concurrently and keeps its own Invalids count,
+// as code generated before ResolveConcurrently does. Its payload must still
+// null, or that code would silently stop bubbling deferred non-null errors.
+// Remove with the compatibility fallback in FieldSetView.payloadInvalid.
 func TestExecutionContextState_ProcessDeferredGroup_NullsOnInvalidAndIsolatesErrors(t *testing.T) {
 	deferredResults := make(chan DeferredResult, 1)
 	ec := newTestExecutionContextState(
@@ -208,4 +213,43 @@ func TestExecutionContextState_ProcessDeferredGroup_NullsOnInvalidAndIsolatesErr
 	parentErrors := GetErrors(ctx)
 	require.Len(t, parentErrors, 1)
 	assert.Equal(t, "parent error", parentErrors[0].Message)
+}
+
+// Each @defer label is its own incremental payload, so an invalid non-null
+// field under one label nulls that label's payload and no other. The valid
+// label is delivered after the invalid one, the order in which a count shared
+// by the whole group would null both.
+func TestExecutionContextState_ProcessDeferredGroup_NullsOnlyTheInvalidLabel(t *testing.T) {
+	t.Parallel()
+
+	ctx, oc := newResolveConcurrentlyTestContext()
+	deferredResults := make(chan DeferredResult, 2)
+	ec := newTestExecutionContextState(oc, nil, makeSchemaWithType("Foo"), deferredResults)
+
+	out := NewFieldSet([]CollectedField{
+		collectedField("valid", "labelA"),
+		collectedField("invalid", "labelB"),
+	})
+	deferred := NewDeferredGroup(ctx)
+	release := make(chan struct{})
+	out.ResolveConcurrently(oc, &deferred, 0, true, true, func(context.Context) Marshaler {
+		<-release
+		return MarshalString("ok")
+	})
+	out.ResolveConcurrently(oc, &deferred, 1, true, true,
+		func(context.Context) Marshaler { return Null })
+
+	ec.ProcessDeferredGroup(deferred)
+
+	invalid := receiveDeferredResult(t, deferredResults)
+	close(release)
+	valid := receiveDeferredResult(t, deferredResults)
+
+	assert.Equal(t, "labelB", invalid.Label)
+	assert.Same(t, Null, invalid.Result, "the invalid label's payload is null")
+
+	assert.Equal(t, "labelA", valid.Label)
+	var b bytes.Buffer
+	valid.Result.MarshalGQL(&b)
+	assert.JSONEq(t, `{"valid":"ok"}`, b.String(), "the valid label's payload is delivered")
 }

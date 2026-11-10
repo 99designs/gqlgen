@@ -1,0 +1,13 @@
+directive @entityResolver(multi: Boolean) on OBJECT
+
+type Planet @key(fields: "name") {
+    name: String!
+    diameter: Int! @external
+    size: Int! @requires(fields: "diameter")
+}
+
+type MultiPlanet @key(fields: "name") @entityResolver(multi: true) {
+    name: String!
+    diameter: Int! @external
+    size: Int! @requires(fields: "diameter")
+}

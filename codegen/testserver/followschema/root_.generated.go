@@ -43,7 +43,6 @@ type ResolverRoot interface {
 
 type DirectiveRoot struct {
 	Custom            func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
-	Defer             func(ctx context.Context, obj any, next graphql.Resolver, ifArg *bool, label *string) (res any, err error)
 	Directive1        func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
 	Directive2        func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
 	Directive3        func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)

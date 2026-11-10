@@ -3,6 +3,7 @@ package federation
 
 import (
 	"encoding/json"
+	"maps"
 	"strconv"
 	"strings"
 	"testing"
@@ -15,6 +16,98 @@ import (
 	"github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver"
 	"github.com/99designs/gqlgen/plugin/federation/testdata/entityresolver/generated"
 )
+
+func TestEntityResolverCustomOutputID(t *testing.T) {
+	srv := handler.New(generated.NewExecutableSchema(generated.Config{
+		Resolvers: &entityresolver.Resolver{},
+	}))
+	srv.AddTransport(transport.POST{})
+	c := client.New(srv)
+
+	type owner struct{ ID string }
+	type entity struct {
+		ID         string
+		Owner      owner
+		OptionalID *string
+	}
+
+	cases := []struct {
+		name string
+		rep  map[string]any
+		want entity
+	}{
+		{
+			name: "null optional ID",
+			rep: map[string]any{
+				"id":         "42",
+				"owner":      map[string]any{"id": "owner:first"},
+				"optionalID": nil,
+			},
+			want: entity{ID: "42", Owner: owner{ID: "owner:first"}},
+		},
+		{
+			name: "opaque strings",
+			rep: map[string]any{
+				"id":         "opaque:asset",
+				"owner":      map[string]any{"id": "owner:second"},
+				"optionalID": "revision:third",
+			},
+			want: entity{
+				ID:         "opaque:asset",
+				Owner:      owner{ID: "owner:second"},
+				OptionalID: new("revision:third"),
+			},
+		},
+		{
+			name: "numeric JSON IDs",
+			rep:  map[string]any{"id": 7, "owner": map[string]any{"id": 8}, "optionalID": 9},
+			want: entity{ID: "7", Owner: owner{ID: "8"}, OptionalID: new("9")},
+		},
+	}
+
+	entityTypes := []struct {
+		name         string
+		malformedErr string
+	}{
+		{name: "CustomIDEntity", malformedErr: "is not a string"},
+		// The batch template replaces decode errors with this message.
+		{name: "MultiCustomIDEntity", malformedErr: "Field id undefined in schema."},
+	}
+
+	for _, et := range entityTypes {
+		query := entityQuery([]string{et.name + " { id owner { id } optionalID }"})
+
+		for _, tc := range cases {
+			t.Run(et.name+"/"+tc.name, func(t *testing.T) {
+				rep := maps.Clone(tc.rep)
+				rep["__typename"] = et.name
+				var resp struct {
+					Entities []entity `json:"_entities"`
+				}
+
+				err := c.Post(query, &resp,
+					client.Var("representations", []map[string]any{rep}))
+
+				require.NoError(t, err)
+				require.Equal(t, []entity{tc.want}, resp.Entities)
+			})
+		}
+
+		t.Run(et.name+"/malformed ID", func(t *testing.T) {
+			rep := map[string]any{
+				"__typename": et.name,
+				"id":         map[string]any{"bad": true},
+				"owner":      map[string]any{"id": "owner:first"},
+				"optionalID": nil,
+			}
+			var resp map[string]any
+
+			err := c.Post(query, &resp, client.Var("representations", []map[string]any{rep}))
+
+			require.ErrorContains(t, err, et.malformedErr)
+		})
+	}
+}
 
 func TestEntityResolver(t *testing.T) {
 	srv := handler.New(

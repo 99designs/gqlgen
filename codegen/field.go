@@ -158,6 +158,12 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		f.GoFieldType = GoFieldMethod
 		f.GoReceiverName = "ec"
 		f.GoFieldName = "IntrospectSchema"
+		// __schema is non-null, but IntrospectSchema returns *introspection.Schema.
+		tr, err := b.Binder.TypeReference(f.Type, nil)
+		if err != nil {
+			return err
+		}
+		f.TypeReference = b.Binder.ReplaceWithPointer(tr)
 		return nil
 	case f.Name == "__type":
 		f.GoFieldType = GoFieldMethod

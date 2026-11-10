@@ -86,8 +86,7 @@ func (this CDImplemented) GetC() bool   { return this.C }
 
 func (CDImplemented) IsA() {}
 
-func (CDImplemented) IsD() {}
-
+func (CDImplemented) IsD()               {}
 func (this CDImplemented) GetB() int     { return this.B }
 func (this CDImplemented) GetD() *string { return this.D }
 

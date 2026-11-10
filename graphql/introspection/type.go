@@ -96,6 +96,8 @@ func (t *Type) Fields(includeDeprecated bool) []Field {
 	return fields
 }
 
+// InputFields returns every input field of an input object type, including
+// deprecated ones. Introspection reports VisibleInputFields instead.
 func (t *Type) InputFields() []InputValue {
 	if t.def == nil || t.def.Kind != ast.InputObject {
 		return []InputValue{}
@@ -112,6 +114,13 @@ func (t *Type) InputFields() []InputValue {
 		})
 	}
 	return res
+}
+
+// VisibleInputFields returns the input fields that __Type.inputFields reports:
+// all of InputFields when includeDeprecated is true, otherwise only those not
+// marked @deprecated.
+func (t *Type) VisibleInputFields(includeDeprecated bool) []InputValue {
+	return visibleInputValues(t.InputFields(), includeDeprecated)
 }
 
 func defaultValue(value *ast.Value) *string {

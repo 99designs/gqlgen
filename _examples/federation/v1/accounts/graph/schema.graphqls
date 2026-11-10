@@ -1,0 +1,23 @@
+type User @key(fields: "id") {
+  id: ID!
+  username: String!
+  avatarURL(size: Int, px: Int @deprecated(reason: "Use size.")): String
+}
+
+input CreateStudentsInput {
+  usernames: [String!]!
+  classroomID: ID
+  listKey: String @deprecated(reason: "Use classroomID.")
+}
+
+type Query {
+  me: User
+  user(id: ID!): User
+}
+
+type Mutation {
+  createStudents(
+    input: CreateStudentsInput!
+    notify: Boolean @deprecated(reason: "Students are always notified.")
+  ): [User!]!
+}

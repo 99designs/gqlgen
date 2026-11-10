@@ -88,4 +88,24 @@ func TestAddUploadToOperations(t *testing.T) {
 		require.Equal(t, (*gqlerror.Error)(nil), err)
 		require.Equal(t, expected, request)
 	})
+
+	t.Run("fail missing single variable", func(t *testing.T) {
+		file, _ := os.Open("path/to/file")
+		params := &RawParams{}
+
+		upload := Upload{File: file}
+		err := params.AddUpload(upload, key, "variables.file")
+		require.EqualError(t, err, "input: path is missing \"variables.\" prefix, key: 0, path: variables.file")
+	})
+
+	t.Run("fail empty nested variable", func(t *testing.T) {
+		request := &RawParams{
+			Variables: map[string]any{
+				"files": []any{},
+			},
+		}
+
+		err := request.AddUpload(Upload{}, key, "variables.files.0")
+		require.EqualError(t, err, "input: invalid operations path for key 0, path: variables.files.0")
+	})
 }

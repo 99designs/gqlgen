@@ -103,7 +103,12 @@ func (p *RawParams) AddUpload(upload Upload, key, path string) *gqlerror.Error {
 		return gqlerror.Errorf("invalid operations paths for key %s", key)
 	}
 
-	var ptr any = p.Variables
+	// A nil map must become an untyped nil here, otherwise the ptr == nil check below never fires
+	// and the first assignment panics on the nil map.
+	var ptr any
+	if p.Variables != nil {
+		ptr = p.Variables
+	}
 	parts := strings.Split(path, ".")
 
 	// skip the first part (variables) because we started there
@@ -113,16 +118,24 @@ func (p *RawParams) AddUpload(upload Upload, key, path string) *gqlerror.Error {
 			return gqlerror.Errorf("path is missing \"variables.\" prefix, key: %s, path: %s", key, path)
 		}
 		if index, parseNbrErr := strconv.Atoi(p); parseNbrErr == nil {
+			values, ok := ptr.([]any)
+			if !ok || index < 0 || index >= len(values) {
+				return gqlerror.Errorf("invalid operations path for key %s, path: %s", key, path)
+			}
 			if last {
-				ptr.([]any)[index] = upload
+				values[index] = upload
 			} else {
-				ptr = ptr.([]any)[index]
+				ptr = values[index]
 			}
 		} else {
+			values, ok := ptr.(map[string]any)
+			if !ok {
+				return gqlerror.Errorf("invalid operations path for key %s, path: %s", key, path)
+			}
 			if last {
-				ptr.(map[string]any)[p] = upload
+				values[p] = upload
 			} else {
-				ptr = ptr.(map[string]any)[p]
+				ptr = values[p]
 			}
 		}
 	}

@@ -93,6 +93,21 @@ func TestAddUploadToOperations(t *testing.T) {
 		require.Equal(t, (*gqlerror.Error)(nil), err)
 		require.Equal(t, expected, request)
 	})
+
+	t.Run("fail empty nested variable", func(t *testing.T) {
+		request := &RawParams{
+			Variables: map[string]any{
+				"files": []any{},
+			},
+		}
+
+		err := request.AddUpload(Upload{}, key, "variables.files.0")
+		require.EqualError(
+			t,
+			err,
+			"input: invalid operations path for key 0, path: variables.files.0",
+		)
+	})
 }
 
 func TestHeadersNotMarshalled(t *testing.T) {

@@ -31,6 +31,25 @@ func TestAddUploadToOperations(t *testing.T) {
 		)
 	})
 
+	t.Run("fail single-segment path with nil variables", func(t *testing.T) {
+		file, _ := os.Open("path/to/file")
+		params := &RawParams{}
+
+		upload := Upload{
+			File:        file,
+			Filename:    "a.txt",
+			Size:        int64(5),
+			ContentType: "text/plain",
+		}
+		path := "variables.file"
+		err := params.AddUpload(upload, key, path)
+		require.EqualError(
+			t,
+			err,
+			"input: path is missing \"variables.\" prefix, key: 0, path: variables.file",
+		)
+	})
+
 	t.Run("valid variable", func(t *testing.T) {
 		file, _ := os.Open("path/to/file")
 		request := &RawParams{

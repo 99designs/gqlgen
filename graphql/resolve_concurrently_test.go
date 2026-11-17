@@ -388,3 +388,40 @@ func TestNewDeferredGroup(t *testing.T) {
 	assert.NotNil(t, deferred.Defers, "the map is ready for a deferred field to register in")
 	assert.Empty(t, deferred.Defers)
 }
+
+// Generated code builds a group holding only its Context. ResolveConcurrently
+// builds the rest for the first deferred field and leaves the group empty
+// otherwise, which keeps objects without a @defer free of its allocations.
+func TestResolveConcurrentlyBuildsAContextOnlyGroupOnDemand(t *testing.T) {
+	t.Parallel()
+
+	t.Run("a field without @defer leaves the group empty", func(t *testing.T) {
+		t.Parallel()
+
+		ctx, oc := newResolveConcurrentlyTestContext()
+		out := NewFieldSet([]CollectedField{collectedField("name")})
+		deferred := DeferredGroup{Context: ctx}
+
+		out.ResolveConcurrently(oc, &deferred, 0, true, true, marshalString("bob"))
+
+		assert.Nil(t, deferred.FieldSet)
+		assert.Nil(t, deferred.Defers)
+	})
+
+	t.Run("a deferred field builds the group", func(t *testing.T) {
+		t.Parallel()
+
+		ctx, oc := newResolveConcurrentlyTestContext()
+		out := NewFieldSet([]CollectedField{collectedField("name", "label")})
+		deferred := DeferredGroup{Context: ctx}
+
+		out.ResolveConcurrently(oc, &deferred, 0, true, true, marshalString("bob"))
+		require.NotNil(t, deferred.FieldSet)
+		require.Len(t, deferred.Defers, 1)
+		deferred.FieldSet.Dispatch(ctx)
+
+		var b bytes.Buffer
+		deferred.Defers["label"].MarshalGQL(&b)
+		assert.JSONEq(t, `{"name":"bob"}`, b.String())
+	})
+}

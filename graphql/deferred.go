@@ -11,6 +11,13 @@ type Deferrable struct {
 	Label string
 }
 
+// DeferredGroup collects the @defer'd fields of one object.
+//
+// A group holding only Context is also ready to use, and is what generated
+// code builds: [FieldSet.ResolveConcurrently] creates FieldSet and Defers for
+// the first deferred field, and ProcessDeferredGroup derives Path from
+// Context. Most objects defer nothing, and building those eagerly, as
+// [NewDeferredGroup] does, costs three allocations per resolved object.
 type DeferredGroup struct {
 	Path     ast.Path
 	FieldSet *FieldSet

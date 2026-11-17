@@ -253,3 +253,24 @@ func TestExecutionContextState_ProcessDeferredGroup_NullsOnlyTheInvalidLabel(t *
 	valid.Result.MarshalGQL(&b)
 	assert.JSONEq(t, `{"valid":"ok"}`, b.String(), "the valid label's payload is delivered")
 }
+
+// A group built by generated code holds only its Context, so the path its
+// payloads are placed at is derived from that Context.
+func TestExecutionContextState_ProcessDeferredGroup_DerivesPathFromContext(t *testing.T) {
+	t.Parallel()
+
+	ctx, oc := newResolveConcurrentlyTestContext()
+	ctx = WithFieldContext(ctx, &FieldContext{Field: collectedField("todos")})
+	deferredResults := make(chan DeferredResult, 1)
+	ec := newTestExecutionContextState(oc, nil, makeSchemaWithType("Foo"), deferredResults)
+
+	out := NewFieldSet([]CollectedField{collectedField("name", "label")})
+	deferred := DeferredGroup{Context: ctx}
+	out.ResolveConcurrently(oc, &deferred, 0, true, true, marshalString("bob"))
+
+	ec.ProcessDeferredGroup(deferred)
+
+	res := receiveDeferredResult(t, deferredResults)
+	assert.Equal(t, "label", res.Label)
+	assert.Equal(t, ast.Path{ast.PathName("todos")}, res.Path)
+}

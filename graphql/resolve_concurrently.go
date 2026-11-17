@@ -31,6 +31,12 @@ func (m *FieldSet) ResolveConcurrently(
 ) {
 	field := m.fields[i]
 	if field.IsDeferred() {
+		if deferred.FieldSet == nil {
+			deferred.FieldSet = NewFieldSet(nil)
+		}
+		if deferred.Defers == nil {
+			deferred.Defers = make(map[string]*FieldSetView)
+		}
 		// Bind the field set rather than the group: capturing deferred in the
 		// closure below would push the caller's group onto the heap.
 		fs := deferred.FieldSet

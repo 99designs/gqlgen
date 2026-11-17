@@ -3,7 +3,6 @@ package graphql
 import (
 	"context"
 	"io"
-	"iter"
 	"slices"
 	"sync"
 	"sync/atomic"
@@ -84,28 +83,12 @@ func (v *FieldSetView) AddIndices(indices ...int) {
 // indices select. It must not be called before every index has been resolved —
 // in normal use that means waiting for the onComplete callback registered via
 // SetOnComplete.
+//
+// The values are taken out of the underlying [FieldSet] via
+// [FieldSet.takeValues], so a second call from this view — or from any other
+// view sharing an index — writes nothing for the consumed indices.
 func (v *FieldSetView) MarshalGQL(writer io.Writer) {
-	marshalFieldSet(writer, v.consumeFieldValues())
-}
-
-// consumeFieldValues yields each (field, value) pair for the view's indices
-// and nils the corresponding entries on the underlying [FieldSet] via
-// [FieldSet.takeValues]. A second call from this view — or from any other
-// view sharing the same index — yields nothing for the consumed indices.
-func (v *FieldSetView) consumeFieldValues() iter.Seq2[*CollectedField, Marshaler] {
-	return func(yield func(*CollectedField, Marshaler) bool) {
-		values := v.fieldSet.takeValues(v.indices)
-		for i, value := range values {
-			if value == nil {
-				continue
-			}
-
-			field := &v.fieldSet.fields[v.indices[i]]
-			if !yield(field, value) {
-				return
-			}
-		}
-	}
+	marshalFieldSet(writer, v.fieldSet.fields, v.indices, v.fieldSet.takeValues(v.indices))
 }
 
 type FieldSet struct {
@@ -217,24 +200,29 @@ func (m *FieldSet) executeDelayed(ctx context.Context, delayed *delayedResult) {
 }
 
 func (m *FieldSet) MarshalGQL(writer io.Writer) {
-	marshalFieldSet(writer, m.allFieldValues())
+	marshalFieldSet(writer, m.fields, nil, m.Values)
 }
 
-func (m *FieldSet) allFieldValues() iter.Seq2[*CollectedField, Marshaler] {
-	return func(yield func(*CollectedField, Marshaler) bool) {
-		for i, field := range m.fields {
-			if !yield(&field, m.Values[i]) {
-				return
-			}
-		}
-	}
-}
-
-func marshalFieldSet(writer io.Writer, fieldValues iter.Seq2[*CollectedField, Marshaler]) {
+// marshalFieldSet writes values as a JSON object, skipping repeated aliases.
+// With indices nil, value i belongs to fields[i] and every value is written.
+// Otherwise it belongs to fields[indices[i]] and a nil value, taken by another
+// view, is skipped.
+//
+// It works on the slices directly rather than on an iterator: the loop body
+// of a range over a function value is a closure, which moves writtenFields
+// and the bookkeeping around it to the heap for every object written.
+func marshalFieldSet(writer io.Writer, fields []CollectedField, indices []int, values []Marshaler) {
 	writer.Write(openBrace)
-	writtenFields := make(map[string]struct{})
+	writtenFields := make(map[string]struct{}, len(values))
 	isFirst := true
-	for field, marshaler := range fieldValues {
+	for i, marshaler := range values {
+		field := &fields[i]
+		if indices != nil {
+			if marshaler == nil {
+				continue
+			}
+			field = &fields[indices[i]]
+		}
 		if _, ok := writtenFields[field.Alias]; ok {
 			continue
 		}

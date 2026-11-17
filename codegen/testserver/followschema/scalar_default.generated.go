@@ -65,7 +65,7 @@ func (ec *executionContext) _EmbeddedDefaultScalar(ctx context.Context, sel ast.
 	fields := graphql.CollectFields(ec.OperationContext, sel, embeddedDefaultScalarImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferred := graphql.NewDeferredGroup(ctx)
+	deferred := graphql.DeferredGroup{Context: ctx}
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":

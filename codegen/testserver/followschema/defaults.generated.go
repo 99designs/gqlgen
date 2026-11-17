@@ -536,7 +536,7 @@ func (ec *executionContext) _DefaultParametersMirror(ctx context.Context, sel as
 	fields := graphql.CollectFields(ec.OperationContext, sel, defaultParametersMirrorImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferred := graphql.NewDeferredGroup(ctx)
+	deferred := graphql.DeferredGroup{Context: ctx}
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
@@ -577,7 +577,7 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 	})
 
 	out := graphql.NewFieldSet(fields)
-	deferred := graphql.NewDeferredGroup(ctx)
+	deferred := graphql.DeferredGroup{Context: ctx}
 	for i, field := range fields {
 		innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{
 			Object: field.Name,

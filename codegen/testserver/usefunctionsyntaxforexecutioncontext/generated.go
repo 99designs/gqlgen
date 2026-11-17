@@ -2656,7 +2656,7 @@ func _Admin(ctx context.Context, ec *executionContext, sel ast.SelectionSet, obj
 	fields := graphql.CollectFields(ec.OperationContext, sel, adminImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferred := graphql.NewDeferredGroup(ctx)
+	deferred := graphql.DeferredGroup{Context: ctx}
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
@@ -2707,7 +2707,7 @@ func _Mutation(ctx context.Context, ec *executionContext, sel ast.SelectionSet) 
 	})
 
 	out := graphql.NewFieldSet(fields)
-	deferred := graphql.NewDeferredGroup(ctx)
+	deferred := graphql.DeferredGroup{Context: ctx}
 	for i, field := range fields {
 		innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{
 			Object: field.Name,
@@ -2754,7 +2754,7 @@ func _MutationResponse(ctx context.Context, ec *executionContext, sel ast.Select
 	fields := graphql.CollectFields(ec.OperationContext, sel, mutationResponseImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferred := graphql.NewDeferredGroup(ctx)
+	deferred := graphql.DeferredGroup{Context: ctx}
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
@@ -2795,7 +2795,7 @@ func _Query(ctx context.Context, ec *executionContext, sel ast.SelectionSet) gra
 	})
 
 	out := graphql.NewFieldSet(fields)
-	deferred := graphql.NewDeferredGroup(ctx)
+	deferred := graphql.DeferredGroup{Context: ctx}
 	for i, field := range fields {
 		innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{
 			Object: field.Name,
@@ -2880,7 +2880,7 @@ func _User(ctx context.Context, ec *executionContext, sel ast.SelectionSet, obj 
 	fields := graphql.CollectFields(ec.OperationContext, sel, userImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferred := graphql.NewDeferredGroup(ctx)
+	deferred := graphql.DeferredGroup{Context: ctx}
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
@@ -2938,7 +2938,7 @@ func ___Directive(ctx context.Context, ec *executionContext, sel ast.SelectionSe
 	fields := graphql.CollectFields(ec.OperationContext, sel, __DirectiveImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferred := graphql.NewDeferredGroup(ctx)
+	deferred := graphql.DeferredGroup{Context: ctx}
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
@@ -2991,7 +2991,7 @@ func ___EnumValue(ctx context.Context, ec *executionContext, sel ast.SelectionSe
 	fields := graphql.CollectFields(ec.OperationContext, sel, __EnumValueImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferred := graphql.NewDeferredGroup(ctx)
+	deferred := graphql.DeferredGroup{Context: ctx}
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
@@ -3039,7 +3039,7 @@ func ___Field(ctx context.Context, ec *executionContext, sel ast.SelectionSet, o
 	fields := graphql.CollectFields(ec.OperationContext, sel, __FieldImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferred := graphql.NewDeferredGroup(ctx)
+	deferred := graphql.DeferredGroup{Context: ctx}
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
@@ -3097,7 +3097,7 @@ func ___InputValue(ctx context.Context, ec *executionContext, sel ast.SelectionS
 	fields := graphql.CollectFields(ec.OperationContext, sel, __InputValueImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferred := graphql.NewDeferredGroup(ctx)
+	deferred := graphql.DeferredGroup{Context: ctx}
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
@@ -3155,7 +3155,7 @@ func ___Schema(ctx context.Context, ec *executionContext, sel ast.SelectionSet, 
 	fields := graphql.CollectFields(ec.OperationContext, sel, __SchemaImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferred := graphql.NewDeferredGroup(ctx)
+	deferred := graphql.DeferredGroup{Context: ctx}
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
@@ -3213,7 +3213,7 @@ func ___Type(ctx context.Context, ec *executionContext, sel ast.SelectionSet, ob
 	fields := graphql.CollectFields(ec.OperationContext, sel, __TypeImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferred := graphql.NewDeferredGroup(ctx)
+	deferred := graphql.DeferredGroup{Context: ctx}
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":

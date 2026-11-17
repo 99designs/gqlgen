@@ -69,6 +69,9 @@ func (ec *ExecutionContextState[R, D, C]) ProcessDeferredGroup(dg DeferredGroup)
 	if len(dg.Defers) == 0 {
 		return
 	}
+	if dg.Path == nil {
+		dg.Path = GetPath(dg.Context)
+	}
 
 	atomic.AddInt32(&ec.PendingDeferred, int32(len(dg.Defers)))
 	ctx := WithFreshResponseContext(dg.Context)

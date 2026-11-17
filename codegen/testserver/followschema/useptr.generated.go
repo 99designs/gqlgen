@@ -118,7 +118,7 @@ func (ec *executionContext) _A(ctx context.Context, sel ast.SelectionSet, obj *A
 	fields := graphql.CollectFields(ec.OperationContext, sel, aImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferred := graphql.NewDeferredGroup(ctx)
+	deferred := graphql.DeferredGroup{Context: ctx}
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
@@ -151,7 +151,7 @@ func (ec *executionContext) _B(ctx context.Context, sel ast.SelectionSet, obj *B
 	fields := graphql.CollectFields(ec.OperationContext, sel, bImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferred := graphql.NewDeferredGroup(ctx)
+	deferred := graphql.DeferredGroup{Context: ctx}
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":

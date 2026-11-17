@@ -409,7 +409,7 @@ func (ec *executionContext) _MapNested(ctx context.Context, sel ast.SelectionSet
 	fields := graphql.CollectFields(ec.OperationContext, sel, mapNestedImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferred := graphql.NewDeferredGroup(ctx)
+	deferred := graphql.DeferredGroup{Context: ctx}
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":
@@ -442,7 +442,7 @@ func (ec *executionContext) _MapStringInterfaceType(ctx context.Context, sel ast
 	fields := graphql.CollectFields(ec.OperationContext, sel, mapStringInterfaceTypeImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferred := graphql.NewDeferredGroup(ctx)
+	deferred := graphql.DeferredGroup{Context: ctx}
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":

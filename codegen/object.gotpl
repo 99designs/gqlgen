@@ -60,7 +60,12 @@ func {{$.FuncReceiver}}_{{$object.Name}}(ctx context.Context, {{$.ECFuncParam}}s
 	{{end}}
 
 	out := graphql.NewFieldSet(fields)
-	deferred := graphql.NewDeferredGroup(ctx)
+	{{- /*
+	   Only Context rather than graphql.NewDeferredGroup: most objects defer
+	   nothing, and ResolveConcurrently builds the rest of the group when the
+	   first @defer'd field needs it.
+	*/}}
+	deferred := graphql.DeferredGroup{Context: ctx}
 	for i, field := range fields {
 		{{- if $object.Root }}
 			innerCtx := graphql.WithRootFieldContext(ctx, &graphql.RootFieldContext{

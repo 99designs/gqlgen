@@ -120,7 +120,7 @@ func (ec *executionContext) _FieldsOrderPayload(ctx context.Context, sel ast.Sel
 	fields := graphql.CollectFields(ec.OperationContext, sel, fieldsOrderPayloadImplementors)
 
 	out := graphql.NewFieldSet(fields)
-	deferred := graphql.NewDeferredGroup(ctx)
+	deferred := graphql.DeferredGroup{Context: ctx}
 	for i, field := range fields {
 		switch field.Name {
 		case "__typename":

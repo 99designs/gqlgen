@@ -1,0 +1,17 @@
+schema:
+  - "testdata/interfaceimplements/schema.graphql"
+
+exec:
+  filename: testdata/interfaceimplements/generated/exec.go
+model:
+  filename: testdata/interfaceimplements/generated/models_gen.go
+resolver:
+  filename: testdata/interfaceimplements/generated/resolver.go
+
+models:
+  Node:
+    model: github.com/99designs/gqlgen/codegen/testdata/interfaceimplements/model.Node
+  Captioned:
+    model: github.com/99designs/gqlgen/codegen/testdata/interfaceimplements/model.Captioned
+  Post:
+    model: github.com/99designs/gqlgen/codegen/testdata/interfaceimplements/model.Post

@@ -1,0 +1,17 @@
+interface Node {
+  id: ID!
+}
+
+interface Captioned implements Node {
+  id: ID!
+  caption: String!
+}
+
+type Post implements Node & Captioned {
+  id: ID!
+  caption: String!
+}
+
+type Query {
+  node(id: ID!): Node
+}

@@ -80,7 +80,10 @@ func (b *builder) buildInterface(typ *ast.Definition) (*Interface, error) {
 		}
 
 		// then check if the pointer receiver can be nil, eg can we type switch on case *Thing:
-		if types.Implements(types.NewPointer(implementorType), interfaceType) {
+		// skipped when the implementor is itself bound to a Go interface (an interface
+		// implementing this one): a pointer to an interface never holds the value, though
+		// it satisfies an empty interface as every type does.
+		if !types.IsInterface(obj) && types.Implements(types.NewPointer(implementorType), interfaceType) {
 			i.Implementors = append(i.Implementors, InterfaceImplementor{
 				Definition: implementor,
 				Type:       types.NewPointer(obj),

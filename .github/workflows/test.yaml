@@ -74,7 +74,7 @@ jobs:
       run: |
         echo "### mikepenz/action-junit-report! :rocket:" >> $GITHUB_STEP_SUMMARY
     - name: Publish Test Report
-      uses: mikepenz/action-junit-report@6ef3fdcfcd5f0b5d14df3e659ef19b8c6820f93d # v6.6.1
+      uses: mikepenz/action-junit-report@a16be3a69023e9bd7e748ede768b3282ea7b30ce # v6.7.1
       if: success() || failure() # always run even if the previous step fails
       with:
         report_paths: |

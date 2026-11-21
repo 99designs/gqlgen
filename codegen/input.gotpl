@@ -46,19 +46,21 @@
 					if err != nil {
 						return {{$it}}, graphql.ErrorOnPath(ctx, err)
 					}
-					if data, ok := tmp.({{ $field.TypeReference.GO | ref }}) ; ok {
+					if data, ok := tmp.({{ $field.TypeReference.GO | ref }}) ; ok{{ if and $field.InputSetter $field.TypeReference.IsNilable }} || tmp == nil{{ end }} {
 						{{- if $field.IsResolver }}
 							if err = ec.Resolvers.{{ $field.ShortInvocation }}; err != nil {
 								return {{$it}}, err
 							}
 						{{- else }}
-							{{- if $field.TypeReference.IsOmittable }}
+							{{- if $field.InputSetter }}
+								{{- template "callInputSetter" $field }}
+							{{- else if $field.TypeReference.IsOmittable }}
 								{{ $lhs }} = graphql.OmittableOf(data)
 							{{- else }}
 								{{ $lhs }} = data
 							{{- end }}
 						{{- end }}
-					{{- if $field.TypeReference.IsNilable }}
+					{{- if and $field.TypeReference.IsNilable (not $field.InputSetter) }}
 						{{- if not $field.IsResolver }}
 						} else if tmp == nil {
 							{{- if $field.TypeReference.IsOmittable }}
@@ -86,7 +88,9 @@
 						if err != nil {
 							return {{$it}}, err
 						}
-						{{- if $field.TypeReference.IsOmittable }}
+						{{- if $field.InputSetter }}
+							{{- template "callInputSetter" $field }}
+						{{- else if $field.TypeReference.IsOmittable }}
 							{{ $lhs }} = graphql.OmittableOf(data)
 						{{- else }}
 							{{ $lhs }} = data
@@ -132,3 +136,14 @@
 	{{- end }}
 {{ end }}
 
+{{ define "callInputSetter" -}}
+	{{- if or .InputSetter.Dereference .InputSetter.Clear }}
+		if data != nil {
+			it.{{ .InputSetter.Set }}({{ if .InputSetter.Dereference }}*{{ end }}data)
+		} {{ if .InputSetter.Clear }}else {
+			it.{{ .InputSetter.Clear }}()
+		}{{ end }}
+	{{- else }}
+		it.{{ .InputSetter.Set }}(data)
+	{{- end }}
+{{- end }}

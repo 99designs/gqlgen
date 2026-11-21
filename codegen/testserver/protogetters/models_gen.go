@@ -2,5 +2,8 @@
 
 package protogetters
 
+type Mutation struct {
+}
+
 type Query struct {
 }

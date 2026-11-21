@@ -2,7 +2,7 @@ package models
 
 // User simulates a protobuf editions message with getter and haser methods
 type User struct {
-	id    string
+	ID    string // Open protobuf fields can have a getter without a setter.
 	name  *string
 	email *string
 	age   int32
@@ -11,7 +11,7 @@ type User struct {
 // NewUser creates a new User
 func NewUser(id string, name, email *string, age int32) *User {
 	return &User{
-		id:    id,
+		ID:    id,
 		name:  name,
 		email: email,
 		age:   age,
@@ -20,7 +20,7 @@ func NewUser(id string, name, email *string, age int32) *User {
 
 // GetId is a protobuf-style getter
 func (u *User) GetId() string {
-	return u.id
+	return u.ID
 }
 
 // GetName is a protobuf-style getter
@@ -53,3 +53,9 @@ func (u *User) HasEmail() bool {
 func (u *User) GetAge() int32 {
 	return u.age
 }
+
+func (u *User) SetName(name string)   { u.name = &name }
+func (u *User) ClearName()            { u.name = nil }
+func (u *User) SetEmail(email string) { u.email = &email }
+func (u *User) ClearEmail()           { u.email = nil }
+func (u *User) SetAge(age int32)      { u.age = age }

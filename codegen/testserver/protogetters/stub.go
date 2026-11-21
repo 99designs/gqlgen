@@ -9,13 +9,25 @@ import (
 )
 
 type Stub struct {
+	MutationResolver struct {
+		UpdateUser func(ctx context.Context, input models.User) (*models.User, error)
+	}
 	QueryResolver struct {
 		User func(ctx context.Context, id string) (*models.User, error)
 	}
 }
 
+func (r *Stub) Mutation() MutationResolver {
+	return &stubMutation{r}
+}
 func (r *Stub) Query() QueryResolver {
 	return &stubQuery{r}
+}
+
+type stubMutation struct{ *Stub }
+
+func (r *stubMutation) UpdateUser(ctx context.Context, input models.User) (*models.User, error) {
+	return r.MutationResolver.UpdateUser(ctx, input)
 }
 
 type stubQuery struct{ *Stub }

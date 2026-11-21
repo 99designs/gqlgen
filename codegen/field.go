@@ -40,7 +40,8 @@ type Field struct {
 	Directives       []*Directive
 	HasHaser         bool   // Whether a haser method is available (e.g., HasName())
 	HaserMethodName  string // Name of the haser method
-	Batch            bool   // Enable batch resolver for this field
+	InputSetter      *InputSetter
+	Batch            bool // Enable batch resolver for this field
 	// SubscriptionContextField mirrors the global subscription_context_field config
 	// option, resolved once at build time so UsesSubscriptionContext and the methods
 	// that depend on it stay nullary instead of threading the flag through the call chain.
@@ -196,18 +197,12 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 		f.GoFieldName = b.Config.Models[obj.Name].Fields[f.Name].FieldName
 	}
 
-	// Check for protobuf-style haser method (only if enabled and field is nullable)
-	// Use the original field name, not the bound method/field name
-	// (e.g., for field "name" bound to "GetName()", look for "HasName" not "HasGetName")
-	// Check for protobuf-style haser method (only if enabled and field is nullable)
-	// Use the original field name, not the bound method/field name
-	// (e.g., for field "name" bound to "GetName()", look for "HasName" not "HasGetName")
 	autoBindGetterHaser := b.Config.AutobindGetterHaser
 	if val := b.Config.Models[obj.Name].Fields[f.Name].AutoBindGetterHaser; val != nil {
 		autoBindGetterHaser = *val
 	}
 
-	if autoBindGetterHaser && !f.Type.NonNull {
+	if autoBindGetterHaser && !obj.IsInputType() && !f.Type.NonNull {
 		haser, _ := b.findBindHaserMethod(obj.Type, f.GoFieldName)
 		if haser != nil {
 			f.HasHaser = true
@@ -218,6 +213,20 @@ func (b *builder) bindField(obj *Object, f *Field) (errret error) {
 	target, err := b.findBindTarget(obj.Type, f.GoFieldName, autoBindGetterHaser)
 	if err != nil {
 		return err
+	}
+
+	if getter, ok := target.(*types.Func); ok && autoBindGetterHaser && obj.IsInputType() {
+		if bound, err := b.bindInputSetter(f, getter); bound || err != nil {
+			return err
+		}
+		// A getter alone cannot receive input. Fall back to a writable field or an input resolver.
+		target, err = b.findBindTarget(obj.Type, f.GoFieldName, false)
+		if err != nil {
+			return err
+		}
+		if _, isMethod := target.(*types.Func); isMethod {
+			target = nil
+		}
 	}
 
 	pos := b.Binder.ObjectPosition(target)

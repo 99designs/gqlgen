@@ -22,3 +22,5 @@ models:
     fields:
       user:
         resolver: true
+  UserInput:
+    model: github.com/99designs/gqlgen/codegen/testserver/protogetters/models.User

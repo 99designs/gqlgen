@@ -8,3 +8,16 @@ type User {
   email: String
   age: Int!
 }
+
+type Mutation {
+  updateUser(input: UserInput!): User!
+}
+
+directive @filterEmail on INPUT_FIELD_DEFINITION
+
+input UserInput {
+  id: ID!
+  name: String
+  email: String @filterEmail
+  age: Int! = 18
+}

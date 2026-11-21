@@ -157,7 +157,7 @@
       "items": { "type": "string" }
     },
     "autobind_getter_haser": {
-      "description": "Enable getter/haser methods for autobind",
+      "description": "Bind protobuf-style getters and hasers on outputs and setters and clearers on inputs",
       "type": "boolean",
       "default": false
     },
@@ -192,7 +192,7 @@
                 },
                 "autoBindGetterHaser": {
                   "type": "boolean",
-                  "description": "Enable getter/haser auto-binding for this field"
+                  "description": "Bind protobuf-style accessors for this field"
                 },
                 "batch": {
                   "type": "boolean",

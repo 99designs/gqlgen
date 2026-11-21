@@ -177,7 +177,9 @@ call_argument_directives_with_null: true
 autobind:
 #  - "{{.}}/graph/model"
 
-# Optional: turn on to allow binding to getters and hasers (useful for editions protos)
+# Optional: bind protobuf-style Get and Has methods on output fields. On input
+# fields, gqlgen calls the matching Set method. For nullable inputs, null calls
+# Clear when available. A field with no supplied value or GraphQL default stays unset.
 # autobind_getter_haser: true
 
 # This section declares type mapping between the GraphQL and go type systems

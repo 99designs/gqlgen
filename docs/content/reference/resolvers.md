@@ -133,6 +133,13 @@ models:
 Here even though the graphQL type and Go struct have different field names, there is a Go struct tag field on ```longState```
 that matches and thus ```state``` will be bound to ```LongState```.
 
+Only the tag's name is compared: anything after a comma is an option and is ignored, so
+a tag written for encoding/json such as
+```go
+LongState string `json:"state,omitempty,omitzero"`
+```
+still binds ```state```. gqlgen's own generated models carry `omitempty` and `omitzero`
+on their json tags, so this is the common case when `struct_tag: json` is set.
 
 The second way you can bind fields is by adding a line into the config file such as:
 ```go

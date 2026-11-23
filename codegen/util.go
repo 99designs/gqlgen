@@ -48,9 +48,18 @@ func findGoInterface(def types.Type) (*types.Interface, error) {
 	return underlying, nil
 }
 
+// equalFieldName reports whether source and target name the same field, ignoring
+// underscores and case.
+//
+// source may be a struct tag value, which encoding/json lets carry options after
+// the name ("name,omitempty"). The name is everything before the first comma, so
+// reading it that way ignores every option rather than only the ones gqlgen
+// happens to emit: modelgen writes "omitzero" and "omitempty,omitzero" too, and
+// matching those literally made a tagged field unbindable. Go field names, the
+// other kind of source, cannot contain a comma, so the split cannot affect them.
 func equalFieldName(source, target string) bool {
+	source, _, _ = strings.Cut(source, ",")
 	source = strings.ReplaceAll(source, "_", "")
-	source = strings.ReplaceAll(source, ",omitempty", "")
 	target = strings.ReplaceAll(target, "_", "")
 	return strings.EqualFold(source, target)
 }

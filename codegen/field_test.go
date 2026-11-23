@@ -166,6 +166,15 @@ func TestEqualFieldName(t *testing.T) {
 		{Name: "different words", Source: "foo", Target: "bar", Expected: false},
 		{Name: "separated with underscore", Source: "the_test", Target: "TheTest", Expected: true},
 		{Name: "empty values", Source: "", Target: "", Expected: true},
+		{Name: "tag with omitempty", Source: "test,omitempty", Target: "Test", Expected: true},
+		{Name: "tag with omitzero", Source: "test,omitzero", Target: "Test", Expected: true},
+		{
+			Name:     "tag with omitempty and omitzero",
+			Source:   "the_test,omitempty,omitzero",
+			Target:   "TheTest",
+			Expected: true,
+		},
+		{Name: "tag options do not match another field", Source: "test,omitzero", Target: "Other", Expected: false},
 	}
 
 	for _, tc := range tt {

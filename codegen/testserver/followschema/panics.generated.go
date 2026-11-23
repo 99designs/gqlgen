@@ -62,7 +62,7 @@ func (ec *executionContext) _Panics_fieldScalarMarshal(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 87 /* Panics.fieldScalarMarshal */)
+			return graphql.NewFieldContext(field, "Panics", childFields_MarshalPanic, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Panics().FieldScalarMarshal(ctx, obj)
@@ -84,7 +84,7 @@ func (ec *executionContext) _Panics_fieldFuncMarshal(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextWithArgsByID(ctx, field, 88 /* Panics.fieldFuncMarshal */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, (*executionContext).field_Panics_fieldFuncMarshal_args, "Panics", childFields_MarshalPanic, true, false, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -107,7 +107,7 @@ func (ec *executionContext) _Panics_argUnmarshal(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextWithArgsByID(ctx, field, 89 /* Panics.argUnmarshal */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, (*executionContext).field_Panics_argUnmarshal_args, "Panics", childFields_Boolean, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)

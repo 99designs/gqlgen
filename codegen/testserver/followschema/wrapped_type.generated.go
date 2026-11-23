@@ -64,7 +64,7 @@ func (ec *executionContext) _WrappedMap_get(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextWithArgsByID(ctx, field, 224 /* WrappedMap.get */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, (*executionContext).field_WrappedMap_get_args, "WrappedMap", childFields_String, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -87,7 +87,7 @@ func (ec *executionContext) _WrappedSlice_get(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextWithArgsByID(ctx, field, 225 /* WrappedSlice.get */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, (*executionContext).field_WrappedSlice_get_args, "WrappedSlice", childFields_String, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -110,7 +110,7 @@ func (ec *executionContext) _WrappedStruct_name(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 226 /* WrappedStruct.name */)
+			return graphql.NewFieldContext(field, "WrappedStruct", childFields_WrappedScalar, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -132,7 +132,7 @@ func (ec *executionContext) _WrappedStruct_desc(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 227 /* WrappedStruct.desc */)
+			return graphql.NewFieldContext(field, "WrappedStruct", childFields_WrappedScalar, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Desc, nil

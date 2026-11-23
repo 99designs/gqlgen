@@ -28,7 +28,7 @@ func (ec *executionContext) _PtrToPtrInner_key(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 99 /* PtrToPtrInner.key */)
+			return graphql.NewFieldContext(field, "PtrToPtrInner", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Key, nil
@@ -50,7 +50,7 @@ func (ec *executionContext) _PtrToPtrInner_value(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 100 /* PtrToPtrInner.value */)
+			return graphql.NewFieldContext(field, "PtrToPtrInner", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Value, nil
@@ -72,7 +72,7 @@ func (ec *executionContext) _PtrToPtrOuter_name(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 101 /* PtrToPtrOuter.name */)
+			return graphql.NewFieldContext(field, "PtrToPtrOuter", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -94,7 +94,7 @@ func (ec *executionContext) _PtrToPtrOuter_inner(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 102 /* PtrToPtrOuter.inner */)
+			return graphql.NewFieldContext(field, "PtrToPtrOuter", ec.childFields_PtrToPtrInner, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Inner, nil
@@ -116,7 +116,7 @@ func (ec *executionContext) _PtrToPtrOuter_stupidInner(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 103 /* PtrToPtrOuter.stupidInner */)
+			return graphql.NewFieldContext(field, "PtrToPtrOuter", ec.childFields_PtrToPtrInner, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.StupidInner, nil

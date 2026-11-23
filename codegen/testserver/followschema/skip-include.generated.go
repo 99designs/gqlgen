@@ -28,7 +28,7 @@ func (ec *executionContext) _SkipIncludeTestType_a(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 198 /* SkipIncludeTestType.a */)
+			return graphql.NewFieldContext(field, "SkipIncludeTestType", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.A, nil
@@ -50,7 +50,7 @@ func (ec *executionContext) _SkipIncludeTestType_b(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 199 /* SkipIncludeTestType.b */)
+			return graphql.NewFieldContext(field, "SkipIncludeTestType", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.B, nil

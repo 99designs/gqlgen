@@ -34,7 +34,7 @@ func (ec *executionContext) _DeferModel_id(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 30 /* DeferModel.id */)
+			return graphql.NewFieldContext(field, "DeferModel", childFields_ID, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -56,7 +56,7 @@ func (ec *executionContext) _DeferModel_name(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 31 /* DeferModel.name */)
+			return graphql.NewFieldContext(field, "DeferModel", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -78,7 +78,7 @@ func (ec *executionContext) _DeferModel_otherResolvedValue(ctx context.Context, 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 32 /* DeferModel.otherResolvedValue */)
+			return graphql.NewFieldContext(field, "DeferModel", childFields_String, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.DeferModel().OtherResolvedValue(ctx, obj)
@@ -100,7 +100,7 @@ func (ec *executionContext) _DeferModel_values(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 33 /* DeferModel.values */)
+			return graphql.NewFieldContext(field, "DeferModel", childFields_String, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.DeferModel().Values(ctx, obj)

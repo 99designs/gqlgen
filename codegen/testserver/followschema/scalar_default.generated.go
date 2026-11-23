@@ -28,7 +28,7 @@ func (ec *executionContext) _EmbeddedDefaultScalar_value(ctx context.Context, fi
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 40 /* EmbeddedDefaultScalar.value */)
+			return graphql.NewFieldContext(field, "EmbeddedDefaultScalar", childFields_DefaultScalarImplementation, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Value, nil

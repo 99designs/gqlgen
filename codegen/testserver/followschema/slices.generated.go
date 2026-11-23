@@ -28,7 +28,7 @@ func (ec *executionContext) _Slices_test1(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 200 /* Slices.test1 */)
+			return graphql.NewFieldContext(field, "Slices", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Test1, nil
@@ -50,7 +50,7 @@ func (ec *executionContext) _Slices_test2(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 201 /* Slices.test2 */)
+			return graphql.NewFieldContext(field, "Slices", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Test2, nil
@@ -72,7 +72,7 @@ func (ec *executionContext) _Slices_test3(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 202 /* Slices.test3 */)
+			return graphql.NewFieldContext(field, "Slices", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Test3, nil
@@ -94,7 +94,7 @@ func (ec *executionContext) _Slices_test4(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 203 /* Slices.test4 */)
+			return graphql.NewFieldContext(field, "Slices", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Test4, nil

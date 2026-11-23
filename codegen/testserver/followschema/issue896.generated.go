@@ -28,7 +28,7 @@ func (ec *executionContext) _CheckIssue896_id(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 15 /* CheckIssue896.id */)
+			return graphql.NewFieldContext(field, "CheckIssue896", childFields_Int, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil

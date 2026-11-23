@@ -29,7 +29,7 @@ func (ec *executionContext) __Service_sdl(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 6 /* _Service.sdl */)
+			return graphql.NewFieldContext(field, "_Service", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.SDL, nil

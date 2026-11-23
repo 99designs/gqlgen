@@ -28,7 +28,7 @@ func (ec *executionContext) _EmbeddedCase1_exportedEmbeddedPointerExportedMethod
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 37 /* EmbeddedCase1.exportedEmbeddedPointerExportedMethod */)
+			return graphql.NewFieldContext(field, "EmbeddedCase1", childFields_String, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ExportedEmbeddedPointerExportedMethod(), nil
@@ -50,7 +50,7 @@ func (ec *executionContext) _EmbeddedCase2_unexportedEmbeddedPointerExportedMeth
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 38 /* EmbeddedCase2.unexportedEmbeddedPointerExportedMethod */)
+			return graphql.NewFieldContext(field, "EmbeddedCase2", childFields_String, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.UnexportedEmbeddedPointerExportedMethod(), nil
@@ -72,7 +72,7 @@ func (ec *executionContext) _EmbeddedCase3_unexportedEmbeddedInterfaceExportedMe
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 39 /* EmbeddedCase3.unexportedEmbeddedInterfaceExportedMethod */)
+			return graphql.NewFieldContext(field, "EmbeddedCase3", childFields_String, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.UnexportedEmbeddedInterfaceExportedMethod(), nil

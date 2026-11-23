@@ -7,7 +7,7 @@ func {{$.FuncReceiver}}_{{$object.Name}}_{{$field.Name}}(ctx context.Context, {{
 	{{- end }}
 
 	{{- if $field.TypeReference.IsRoot }}
-		fc, err := {{$.ECDot}}{{ $field.FieldContextConstructor }}(ctx, {{$.ECArg}}field, {{ $field.FieldContextID }})
+		fc, err := {{ $.FieldContextCall $field false }}
 		if err != nil {
 			return {{- if $field.UsesSubscriptionContext }} ctx,{{- end}} {{ $null }}
 		}
@@ -33,7 +33,7 @@ func {{$.FuncReceiver}}_{{$object.Name}}_{{$field.Name}}(ctx context.Context, {{
 			ctx,
 			ec.OperationContext,
 			field,
-			func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) { return {{$.ECDot}}{{ $field.FieldContextConstructor }}(ctx, {{$.ECArg}}field, {{ $field.FieldContextID }}) },
+			func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) { return {{ $.FieldContextCall $field false }} },
 			func(ctx context.Context) (any, error) {
 				{{- template "fieldDefinition" $field }}
 			},

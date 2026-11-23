@@ -28,7 +28,7 @@ func (ec *executionContext) _PtrToAnyContainer_ptrToAny(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 97 /* PtrToAnyContainer.ptrToAny */)
+			return graphql.NewFieldContext(field, "PtrToAnyContainer", childFields_Any, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.PtrToAny, nil
@@ -50,7 +50,7 @@ func (ec *executionContext) _PtrToAnyContainer_binding(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 98 /* PtrToAnyContainer.binding */)
+			return graphql.NewFieldContext(field, "PtrToAnyContainer", childFields_Any, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Binding(), nil

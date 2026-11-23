@@ -37,7 +37,7 @@ func (ec *executionContext) _Primitive_value(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 92 /* Primitive.value */)
+			return graphql.NewFieldContext(field, "Primitive", childFields_Int, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Primitive().Value(ctx, obj)
@@ -59,7 +59,7 @@ func (ec *executionContext) _Primitive_squared(ctx context.Context, field graphq
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 93 /* Primitive.squared */)
+			return graphql.NewFieldContext(field, "Primitive", childFields_Int, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Squared(), nil
@@ -81,7 +81,7 @@ func (ec *executionContext) _PrimitiveString_value(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 94 /* PrimitiveString.value */)
+			return graphql.NewFieldContext(field, "PrimitiveString", childFields_String, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.PrimitiveString().Value(ctx, obj)
@@ -103,7 +103,7 @@ func (ec *executionContext) _PrimitiveString_doubled(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 95 /* PrimitiveString.doubled */)
+			return graphql.NewFieldContext(field, "PrimitiveString", childFields_String, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Doubled(), nil
@@ -125,7 +125,7 @@ func (ec *executionContext) _PrimitiveString_len(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 96 /* PrimitiveString.len */)
+			return graphql.NewFieldContext(field, "PrimitiveString", childFields_Int, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.PrimitiveString().Len(ctx, obj)

@@ -36,7 +36,7 @@ func (ec *executionContext) _Error_id(ctx context.Context, field graphql.Collect
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 43 /* Error.id */)
+			return graphql.NewFieldContext(field, "Error", childFields_ID, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -58,7 +58,7 @@ func (ec *executionContext) _Error_errorOnNonRequiredField(ctx context.Context, 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 44 /* Error.errorOnNonRequiredField */)
+			return graphql.NewFieldContext(field, "Error", childFields_String, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ErrorOnNonRequiredField()
@@ -80,7 +80,7 @@ func (ec *executionContext) _Error_errorOnRequiredField(ctx context.Context, fie
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 45 /* Error.errorOnRequiredField */)
+			return graphql.NewFieldContext(field, "Error", childFields_String, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ErrorOnRequiredField()
@@ -102,7 +102,7 @@ func (ec *executionContext) _Error_nilOnRequiredField(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 46 /* Error.nilOnRequiredField */)
+			return graphql.NewFieldContext(field, "Error", childFields_String, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.NilOnRequiredField(), nil
@@ -124,7 +124,7 @@ func (ec *executionContext) _Errors_a(ctx context.Context, field graphql.Collect
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 47 /* Errors.a */)
+			return graphql.NewFieldContext(field, "Errors", ec.childFields_Error, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Errors().A(ctx, obj)
@@ -146,7 +146,7 @@ func (ec *executionContext) _Errors_b(ctx context.Context, field graphql.Collect
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 48 /* Errors.b */)
+			return graphql.NewFieldContext(field, "Errors", ec.childFields_Error, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Errors().B(ctx, obj)
@@ -168,7 +168,7 @@ func (ec *executionContext) _Errors_c(ctx context.Context, field graphql.Collect
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 49 /* Errors.c */)
+			return graphql.NewFieldContext(field, "Errors", ec.childFields_Error, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Errors().C(ctx, obj)
@@ -190,7 +190,7 @@ func (ec *executionContext) _Errors_d(ctx context.Context, field graphql.Collect
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 50 /* Errors.d */)
+			return graphql.NewFieldContext(field, "Errors", ec.childFields_Error, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Errors().D(ctx, obj)
@@ -212,7 +212,7 @@ func (ec *executionContext) _Errors_e(ctx context.Context, field graphql.Collect
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 51 /* Errors.e */)
+			return graphql.NewFieldContext(field, "Errors", ec.childFields_Error, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Errors().E(ctx, obj)

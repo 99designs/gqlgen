@@ -152,7 +152,7 @@ func (ec *executionContext) _ObjectDirectives_text(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 77 /* ObjectDirectives.text */)
+			return graphql.NewFieldContext(field, "ObjectDirectives", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Text, nil
@@ -200,7 +200,7 @@ func (ec *executionContext) _ObjectDirectives_nullableText(ctx context.Context, 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 78 /* ObjectDirectives.nullableText */)
+			return graphql.NewFieldContext(field, "ObjectDirectives", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.NullableText, nil
@@ -233,7 +233,7 @@ func (ec *executionContext) _ObjectDirectives_order(ctx context.Context, field g
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 79 /* ObjectDirectives.order */)
+			return graphql.NewFieldContext(field, "ObjectDirectives", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Order, nil
@@ -255,7 +255,7 @@ func (ec *executionContext) _ObjectDirectivesWithCustomGoModel_nullableText(ctx 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 80 /* ObjectDirectivesWithCustomGoModel.nullableText */)
+			return graphql.NewFieldContext(field, "ObjectDirectivesWithCustomGoModel", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.NullableText, nil

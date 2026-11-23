@@ -28,7 +28,7 @@ func (ec *executionContext) _LoopA_b(ctx context.Context, field graphql.Collecte
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 60 /* LoopA.b */)
+			return graphql.NewFieldContext(field, "LoopA", ec.childFields_LoopB, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.B, nil
@@ -50,7 +50,7 @@ func (ec *executionContext) _LoopB_a(ctx context.Context, field graphql.Collecte
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 61 /* LoopB.a */)
+			return graphql.NewFieldContext(field, "LoopB", ec.childFields_LoopA, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.A, nil

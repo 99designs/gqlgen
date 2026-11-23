@@ -140,7 +140,7 @@ func _Article_id(ctx context.Context, ec *executionContext, field graphql.Collec
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 0 /* Article.id */)
+			return graphql.NewFieldContext(field, "Article", childFields_ID, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -160,7 +160,7 @@ func _Article_headline(ctx context.Context, ec *executionContext, field graphql.
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 1 /* Article.headline */)
+			return graphql.NewFieldContext(field, "Article", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Headline, nil
@@ -180,7 +180,9 @@ func _Article_author(ctx context.Context, ec *executionContext, field graphql.Co
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 2 /* Article.author */)
+			return graphql.NewFieldContext(field, "Article", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_Author(ctx, ec, field)
+			}, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Author, nil
@@ -200,7 +202,9 @@ func _Article_assignee(ctx context.Context, ec *executionContext, field graphql.
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 3 /* Article.assignee */)
+			return graphql.NewFieldContext(field, "Article", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_User(ctx, ec, field)
+			}, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Assignee, nil
@@ -220,7 +224,7 @@ func _Author_id(ctx context.Context, ec *executionContext, field graphql.Collect
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 4 /* Author.id */)
+			return graphql.NewFieldContext(field, "Author", childFields_ID, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -240,7 +244,7 @@ func _Author_name(ctx context.Context, ec *executionContext, field graphql.Colle
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 5 /* Author.name */)
+			return graphql.NewFieldContext(field, "Author", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -260,7 +264,7 @@ func _Author_email(ctx context.Context, ec *executionContext, field graphql.Coll
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 6 /* Author.email */)
+			return graphql.NewFieldContext(field, "Author", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Email, nil
@@ -280,7 +284,7 @@ func _Book_id(ctx context.Context, ec *executionContext, field graphql.Collected
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 7 /* Book.id */)
+			return graphql.NewFieldContext(field, "Book", childFields_ID, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -300,7 +304,7 @@ func _Book_title(ctx context.Context, ec *executionContext, field graphql.Collec
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 8 /* Book.title */)
+			return graphql.NewFieldContext(field, "Book", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Title, nil
@@ -320,7 +324,9 @@ func _Book_author(ctx context.Context, ec *executionContext, field graphql.Colle
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 9 /* Book.author */)
+			return graphql.NewFieldContext(field, "Book", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_Author(ctx, ec, field)
+			}, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Author, nil
@@ -340,7 +346,9 @@ func _Book_reviewer(ctx context.Context, ec *executionContext, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 10 /* Book.reviewer */)
+			return graphql.NewFieldContext(field, "Book", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_User(ctx, ec, field)
+			}, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Reviewer, nil
@@ -360,7 +368,9 @@ func _Book_editor(ctx context.Context, ec *executionContext, field graphql.Colle
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 11 /* Book.editor */)
+			return graphql.NewFieldContext(field, "Book", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_User(ctx, ec, field)
+			}, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Editor, nil
@@ -380,7 +390,7 @@ func _Comment_id(ctx context.Context, ec *executionContext, field graphql.Collec
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 12 /* Comment.id */)
+			return graphql.NewFieldContext(field, "Comment", childFields_ID, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -400,7 +410,7 @@ func _Comment_text(ctx context.Context, ec *executionContext, field graphql.Coll
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 13 /* Comment.text */)
+			return graphql.NewFieldContext(field, "Comment", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Text, nil
@@ -420,7 +430,9 @@ func _Comment_commenter(ctx context.Context, ec *executionContext, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 14 /* Comment.commenter */)
+			return graphql.NewFieldContext(field, "Comment", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_User(ctx, ec, field)
+			}, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Commenter, nil
@@ -440,7 +452,7 @@ func _Invoice_id(ctx context.Context, ec *executionContext, field graphql.Collec
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 15 /* Invoice.id */)
+			return graphql.NewFieldContext(field, "Invoice", childFields_ID, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -460,7 +472,7 @@ func _Invoice_total(ctx context.Context, ec *executionContext, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 16 /* Invoice.total */)
+			return graphql.NewFieldContext(field, "Invoice", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Total, nil
@@ -480,7 +492,9 @@ func _Invoice_createdBy(ctx context.Context, ec *executionContext, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 17 /* Invoice.createdBy */)
+			return graphql.NewFieldContext(field, "Invoice", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_User(ctx, ec, field)
+			}, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Invoice().CreatedBy(ctx, obj)
@@ -500,7 +514,9 @@ func _Invoice_approvedBy(ctx context.Context, ec *executionContext, field graphq
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 18 /* Invoice.approvedBy */)
+			return graphql.NewFieldContext(field, "Invoice", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_User(ctx, ec, field)
+			}, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.Invoice().ApprovedBy(ctx, obj)
@@ -520,7 +536,11 @@ func _Query_book(ctx context.Context, ec *executionContext, field graphql.Collec
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 19 /* Query.book */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Query_book_args(ctx, ec, rawArgs)
+			}, "Query", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_Book(ctx, ec, field)
+			}, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -541,7 +561,11 @@ func _Query_article(ctx context.Context, ec *executionContext, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 20 /* Query.article */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Query_article_args(ctx, ec, rawArgs)
+			}, "Query", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_Article(ctx, ec, field)
+			}, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -562,7 +586,11 @@ func _Query_review(ctx context.Context, ec *executionContext, field graphql.Coll
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 21 /* Query.review */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Query_review_args(ctx, ec, rawArgs)
+			}, "Query", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_Review(ctx, ec, field)
+			}, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -583,7 +611,11 @@ func _Query_comment(ctx context.Context, ec *executionContext, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 22 /* Query.comment */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Query_comment_args(ctx, ec, rawArgs)
+			}, "Query", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_Comment(ctx, ec, field)
+			}, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -604,7 +636,11 @@ func _Query_task(ctx context.Context, ec *executionContext, field graphql.Collec
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 23 /* Query.task */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Query_task_args(ctx, ec, rawArgs)
+			}, "Query", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_Task(ctx, ec, field)
+			}, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -625,7 +661,11 @@ func _Query_invoice(ctx context.Context, ec *executionContext, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 24 /* Query.invoice */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Query_invoice_args(ctx, ec, rawArgs)
+			}, "Query", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_Invoice(ctx, ec, field)
+			}, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -646,7 +686,11 @@ func _Query___type(ctx context.Context, ec *executionContext, field graphql.Coll
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 25 /* Query.__type */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Query___type_args(ctx, ec, rawArgs)
+			}, "Query", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields___Type(ctx, ec, field)
+			}, true, false, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -667,7 +711,9 @@ func _Query___schema(ctx context.Context, ec *executionContext, field graphql.Co
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 26 /* Query.__schema */)
+			return graphql.NewFieldContext(field, "Query", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields___Schema(ctx, ec, field)
+			}, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.IntrospectSchema()
@@ -687,7 +733,7 @@ func _Review_id(ctx context.Context, ec *executionContext, field graphql.Collect
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 27 /* Review.id */)
+			return graphql.NewFieldContext(field, "Review", childFields_ID, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -707,7 +753,7 @@ func _Review_body(ctx context.Context, ec *executionContext, field graphql.Colle
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 28 /* Review.body */)
+			return graphql.NewFieldContext(field, "Review", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Body, nil
@@ -727,7 +773,9 @@ func _Review_author(ctx context.Context, ec *executionContext, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 29 /* Review.author */)
+			return graphql.NewFieldContext(field, "Review", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_Author(ctx, ec, field)
+			}, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Author, nil
@@ -747,7 +795,9 @@ func _Review_moderator(ctx context.Context, ec *executionContext, field graphql.
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 30 /* Review.moderator */)
+			return graphql.NewFieldContext(field, "Review", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_User(ctx, ec, field)
+			}, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Moderator, nil
@@ -767,7 +817,7 @@ func _Task_id(ctx context.Context, ec *executionContext, field graphql.Collected
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 31 /* Task.id */)
+			return graphql.NewFieldContext(field, "Task", childFields_ID, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -787,7 +837,7 @@ func _Task_title(ctx context.Context, ec *executionContext, field graphql.Collec
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 32 /* Task.title */)
+			return graphql.NewFieldContext(field, "Task", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Title, nil
@@ -807,7 +857,9 @@ func _Task_assignee(ctx context.Context, ec *executionContext, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 33 /* Task.assignee */)
+			return graphql.NewFieldContext(field, "Task", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_User(ctx, ec, field)
+			}, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Assignee, nil
@@ -827,7 +879,9 @@ func _Task_reporter(ctx context.Context, ec *executionContext, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 34 /* Task.reporter */)
+			return graphql.NewFieldContext(field, "Task", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_User(ctx, ec, field)
+			}, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Reporter, nil
@@ -847,7 +901,7 @@ func _User_id(ctx context.Context, ec *executionContext, field graphql.Collected
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 35 /* User.id */)
+			return graphql.NewFieldContext(field, "User", childFields_ID, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -867,7 +921,7 @@ func _User_name(ctx context.Context, ec *executionContext, field graphql.Collect
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 36 /* User.name */)
+			return graphql.NewFieldContext(field, "User", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -887,7 +941,7 @@ func _User_email(ctx context.Context, ec *executionContext, field graphql.Collec
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 37 /* User.email */)
+			return graphql.NewFieldContext(field, "User", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Email, nil
@@ -907,7 +961,7 @@ func _User_phone(ctx context.Context, ec *executionContext, field graphql.Collec
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 38 /* User.phone */)
+			return graphql.NewFieldContext(field, "User", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Phone, nil
@@ -927,7 +981,7 @@ func _User_avatar(ctx context.Context, ec *executionContext, field graphql.Colle
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 39 /* User.avatar */)
+			return graphql.NewFieldContext(field, "User", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Avatar, nil
@@ -947,7 +1001,7 @@ func _User_role(ctx context.Context, ec *executionContext, field graphql.Collect
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 40 /* User.role */)
+			return graphql.NewFieldContext(field, "User", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Role, nil
@@ -967,7 +1021,7 @@ func _User_status(ctx context.Context, ec *executionContext, field graphql.Colle
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 41 /* User.status */)
+			return graphql.NewFieldContext(field, "User", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Status, nil
@@ -987,7 +1041,7 @@ func _User_language(ctx context.Context, ec *executionContext, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 42 /* User.language */)
+			return graphql.NewFieldContext(field, "User", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Language, nil
@@ -1007,7 +1061,7 @@ func _User_timezone(ctx context.Context, ec *executionContext, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 43 /* User.timezone */)
+			return graphql.NewFieldContext(field, "User", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Timezone, nil
@@ -1027,7 +1081,7 @@ func _User_createdAt(ctx context.Context, ec *executionContext, field graphql.Co
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 44 /* User.createdAt */)
+			return graphql.NewFieldContext(field, "User", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.CreatedAt, nil

@@ -33,7 +33,7 @@ func (ec *executionContext) _BackedByInterface_id(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 9 /* BackedByInterface.id */)
+			return graphql.NewFieldContext(field, "BackedByInterface", childFields_String, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.Resolvers.BackedByInterface().ID(ctx, obj)
@@ -55,7 +55,7 @@ func (ec *executionContext) _BackedByInterface_thisShouldBind(ctx context.Contex
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 10 /* BackedByInterface.thisShouldBind */)
+			return graphql.NewFieldContext(field, "BackedByInterface", childFields_String, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ThisShouldBind(), nil
@@ -77,7 +77,7 @@ func (ec *executionContext) _BackedByInterface_thisShouldBindWithError(ctx conte
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 11 /* BackedByInterface.thisShouldBindWithError */)
+			return graphql.NewFieldContext(field, "BackedByInterface", childFields_String, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ThisShouldBindWithError()
@@ -99,7 +99,7 @@ func (ec *executionContext) _Cat_species(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 12 /* Cat.species */)
+			return graphql.NewFieldContext(field, "Cat", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Species, nil
@@ -121,7 +121,7 @@ func (ec *executionContext) _Cat_size(ctx context.Context, field graphql.Collect
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 13 /* Cat.size */)
+			return graphql.NewFieldContext(field, "Cat", ec.childFields_Size, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Size, nil
@@ -143,7 +143,7 @@ func (ec *executionContext) _Cat_catBreed(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 14 /* Cat.catBreed */)
+			return graphql.NewFieldContext(field, "Cat", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.CatBreed, nil
@@ -165,7 +165,7 @@ func (ec *executionContext) _Circle_radius(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 16 /* Circle.radius */)
+			return graphql.NewFieldContext(field, "Circle", childFields_Float, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Radius, nil
@@ -187,7 +187,7 @@ func (ec *executionContext) _Circle_area(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 17 /* Circle.area */)
+			return graphql.NewFieldContext(field, "Circle", childFields_Float, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Area(), nil
@@ -209,7 +209,7 @@ func (ec *executionContext) _Circle_coordinates(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 18 /* Circle.coordinates */)
+			return graphql.NewFieldContext(field, "Circle", ec.childFields_Coordinates, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Coordinates, nil
@@ -231,7 +231,7 @@ func (ec *executionContext) _ConcreteNodeA_id(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 19 /* ConcreteNodeA.id */)
+			return graphql.NewFieldContext(field, "ConcreteNodeA", childFields_ID, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID, nil
@@ -253,7 +253,7 @@ func (ec *executionContext) _ConcreteNodeA_child(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 20 /* ConcreteNodeA.child */)
+			return graphql.NewFieldContext(field, "ConcreteNodeA", childFields_Node, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Child()
@@ -275,7 +275,7 @@ func (ec *executionContext) _ConcreteNodeA_name(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 21 /* ConcreteNodeA.name */)
+			return graphql.NewFieldContext(field, "ConcreteNodeA", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -297,7 +297,7 @@ func (ec *executionContext) _ConcreteNodeInterface_id(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 22 /* ConcreteNodeInterface.id */)
+			return graphql.NewFieldContext(field, "ConcreteNodeInterface", childFields_ID, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ID(), nil
@@ -319,7 +319,7 @@ func (ec *executionContext) _ConcreteNodeInterface_child(ctx context.Context, fi
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 23 /* ConcreteNodeInterface.child */)
+			return graphql.NewFieldContext(field, "ConcreteNodeInterface", childFields_Node, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Child()
@@ -341,7 +341,7 @@ func (ec *executionContext) _Coordinates_x(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 26 /* Coordinates.x */)
+			return graphql.NewFieldContext(field, "Coordinates", childFields_Float, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.X, nil
@@ -363,7 +363,7 @@ func (ec *executionContext) _Coordinates_y(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 27 /* Coordinates.y */)
+			return graphql.NewFieldContext(field, "Coordinates", childFields_Float, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Y, nil
@@ -385,7 +385,7 @@ func (ec *executionContext) _Dog_species(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 34 /* Dog.species */)
+			return graphql.NewFieldContext(field, "Dog", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Species, nil
@@ -407,7 +407,7 @@ func (ec *executionContext) _Dog_size(ctx context.Context, field graphql.Collect
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 35 /* Dog.size */)
+			return graphql.NewFieldContext(field, "Dog", ec.childFields_Size, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Size, nil
@@ -429,7 +429,7 @@ func (ec *executionContext) _Dog_dogBreed(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 36 /* Dog.dogBreed */)
+			return graphql.NewFieldContext(field, "Dog", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.DogBreed, nil
@@ -451,7 +451,7 @@ func (ec *executionContext) _Horse_species(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 54 /* Horse.species */)
+			return graphql.NewFieldContext(field, "Horse", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Species, nil
@@ -473,7 +473,7 @@ func (ec *executionContext) _Horse_size(ctx context.Context, field graphql.Colle
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 55 /* Horse.size */)
+			return graphql.NewFieldContext(field, "Horse", ec.childFields_Size, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Size, nil
@@ -495,7 +495,7 @@ func (ec *executionContext) _Horse_horseBreed(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 56 /* Horse.horseBreed */)
+			return graphql.NewFieldContext(field, "Horse", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.HorseBreed, nil
@@ -517,7 +517,7 @@ func (ec *executionContext) _Rectangle_length(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 192 /* Rectangle.length */)
+			return graphql.NewFieldContext(field, "Rectangle", childFields_Float, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Length, nil
@@ -539,7 +539,7 @@ func (ec *executionContext) _Rectangle_width(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 193 /* Rectangle.width */)
+			return graphql.NewFieldContext(field, "Rectangle", childFields_Float, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Width, nil
@@ -561,7 +561,7 @@ func (ec *executionContext) _Rectangle_area(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 194 /* Rectangle.area */)
+			return graphql.NewFieldContext(field, "Rectangle", childFields_Float, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Area(), nil
@@ -583,7 +583,7 @@ func (ec *executionContext) _Rectangle_coordinates(ctx context.Context, field gr
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 195 /* Rectangle.coordinates */)
+			return graphql.NewFieldContext(field, "Rectangle", ec.childFields_Coordinates, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Coordinates, nil
@@ -605,7 +605,7 @@ func (ec *executionContext) _Size_height(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 196 /* Size.height */)
+			return graphql.NewFieldContext(field, "Size", childFields_Int, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Height, nil
@@ -627,7 +627,7 @@ func (ec *executionContext) _Size_weight(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 197 /* Size.weight */)
+			return graphql.NewFieldContext(field, "Size", childFields_Int, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Weight, nil

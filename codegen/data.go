@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/ast"
@@ -282,40 +283,50 @@ func (d *Data) ECArg() string {
 	return ""
 }
 
-// ECFuncValue returns the prefix that turns a generated function name into a function value.
-// With receiver syntax the value is a method expression, which takes ec as its first
-// parameter; ECFuncValueParams and ECFuncValueArgs follow that order.
-//
-//	function syntax:  ""
-//	receiver syntax:  "(*executionContext)."
-func (d *Data) ECFuncValue() string {
-	if d.Config.UseFunctionSyntaxForExecutionContext {
-		return ""
+// FieldContextCall returns the call that builds f's graphql.FieldContext and returns it
+// with an error. A field without arguments calls graphql.NewFieldContext, or with child set
+// graphql.NewChildFieldContext, the non-inlined form for the FieldContext.Child
+// dispatchers. A field with arguments calls graphql.NewFieldContextWithArgs, which also
+// parses them.
+func (d *Data) FieldContextCall(f *Field, child bool) string {
+	common := strconv.Quote(f.Object.Name) + ", " + d.childFieldsValue(f) + ", " +
+		strconv.FormatBool(f.IsMethod() || f.IsResolver) + ", " + strconv.FormatBool(f.IsResolver)
+	if len(f.Args) == 0 {
+		if child {
+			return "graphql.NewChildFieldContext(field, " + common + ")"
+		}
+		return "graphql.NewFieldContext(field, " + common + ")"
 	}
-	return "(*executionContext)."
+	recoverFromPanic := strconv.FormatBool(!d.Config.OmitPanicHandler)
+	return "graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, " +
+		d.fieldArgsValue(f) + ", " + common + ", " + recoverFromPanic + ")"
 }
 
-// ECFuncValueParams returns the leading parameters of a function type that holds an
-// ECFuncValue.
-//
-//	function syntax:  "ctx context.Context, ec *executionContext, "
-//	receiver syntax:  "ec *executionContext, ctx context.Context, "
-func (d *Data) ECFuncValueParams() string {
+// fieldArgsValue returns f's generated args function as a value taking the execution
+// context first, which is what graphql.NewFieldContextWithArgs calls. With the method
+// syntax that is the method expression; with the function syntax the generated function
+// takes ctx first, so it is wrapped in a literal that captures nothing.
+func (d *Data) fieldArgsValue(f *Field) string {
 	if d.Config.UseFunctionSyntaxForExecutionContext {
-		return "ctx context.Context, ec *executionContext, "
+		return "func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) { return " +
+			f.ArgsFunc() + "(ctx, ec, rawArgs) }"
 	}
-	return "ec *executionContext, ctx context.Context, "
+	return "(*executionContext)." + f.ArgsFunc()
 }
 
-// ECFuncValueArgs returns the leading arguments of a call through an ECFuncValue.
-//
-//	function syntax:  "ctx, ec, "
-//	receiver syntax:  "ec, ctx, "
-func (d *Data) ECFuncValueArgs() string {
-	if d.Config.UseFunctionSyntaxForExecutionContext {
-		return "ctx, ec, "
+// childFieldsValue returns the expression for the graphql.FieldContext.Child of f. Fields
+// returning an object get its childFields_* dispatcher bound to ec; every other kind gets
+// the shared package-level value, so building their FieldContext allocates no closure.
+func (d *Data) childFieldsValue(f *Field) string {
+	name := "childFields_" + f.ChildFieldContextTypeName()
+	if f.TypeReference == nil || f.TypeReference.Definition == nil ||
+		f.TypeReference.Definition.Kind != ast.Object {
+		return name
 	}
-	return "ec, ctx, "
+	if d.Config.UseFunctionSyntaxForExecutionContext {
+		return "func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) { return " + name + "(ctx, ec, field) }"
+	}
+	return "ec." + name
 }
 
 // ImplDirectivesField is the subset of Field and FieldArgument needed by the
@@ -474,7 +485,6 @@ func BuildData(cfg *config.Config, plugins ...any) (*Data, error) {
 	sort.Slice(s.Objects, func(i, j int) bool {
 		return s.Objects[i].Name < s.Objects[j].Name
 	})
-	s.Objects.assignFieldContextIndexes()
 
 	sort.Slice(s.Inputs, func(i, j int) bool {
 		return s.Inputs[i].Name < s.Inputs[j].Name

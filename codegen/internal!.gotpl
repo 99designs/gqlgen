@@ -187,7 +187,6 @@ func (e *executableSchema) ExecWithEventContext(ctx context.Context) graphql.Res
 
 type executionContext struct {
 	*graphql.ExecutionContextState[ResolverRoot, DirectiveRoot, ComplexityRoot]
-	fieldContextDescs []fieldContextDesc
 }
 
 func newExecutionContext(
@@ -202,7 +201,6 @@ func newExecutionContext(
 			parsedSchema,
 			deferredResults,
 		),
-		fieldContextDescs: fieldContextDescs,
 	}
 }
 
@@ -227,95 +225,26 @@ var sources = []*ast.Source{
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
-// fieldContextDesc is the request-independent part of a field's graphql.FieldContext.
-type fieldContextDesc struct {
-	object     string
-	child      func({{$.ECFuncValueParams}}field graphql.CollectedField) (*graphql.FieldContext, error)
-	args       func({{$.ECFuncValueParams}}rawArgs map[string]any) (map[string]any, error)
-	isMethod   bool
-	isResolver bool
-}
-
-// fieldContextDescs holds one row per schema field, indexed by integer literals at call
-// sites.
-var fieldContextDescs = []fieldContextDesc{
-{{- $firstRow := true }}
-{{- range $object := .Objects }}{{- if $object.Fields }}
-{{- if not $firstRow }}
-{{ end }}{{ $firstRow = false }}
-{{- range $field := $object.Fields }}
-	{{ $field.FieldContextIndex }}: {object: {{ quote $object.Name }}, child: {{$.ECFuncValue}}childFields_{{ $field.ChildFieldContextTypeName }}
-		{{- if $field.Args }}, args: {{$.ECFuncValue}}{{ $field.ArgsFunc }}{{ end }}
-		{{- if or $field.IsMethod $field.IsResolver }}, isMethod: true{{ end }}
-		{{- if $field.IsResolver }}, isResolver: true{{ end }}}, // {{ $object.Name }}.{{ $field.Name }}
-{{- end }}
-{{- end }}{{- end }}
-}
-
-// fieldContextByID builds the FieldContext of a field without arguments. It is kept
-// small enough to inline, so field resolution gets no extra stack frame.
-func {{$.FuncReceiver}}fieldContextByID(ctx context.Context, {{$.ECFuncParam}}field graphql.CollectedField, id int) (*graphql.FieldContext, error) {
-	d := &ec.fieldContextDescs[id]
-	return &graphql.FieldContext{
-		Object:     d.object,
-		Field:      field,
-		IsMethod:   d.isMethod,
-		IsResolver: d.isResolver,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return d.child({{$.ECFuncValueArgs}}field)
-		},
-	}, nil
-}
-
-// fieldContextWithArgsByID builds the FieldContext of a field with arguments and parses
-// them into Args.
-func {{$.FuncReceiver}}fieldContextWithArgsByID(ctx context.Context, {{$.ECFuncParam}}field graphql.CollectedField, id int) (fc *graphql.FieldContext, err error) {
-	fc, _ = {{$.ECDot}}fieldContextByID(ctx, {{$.ECArg}}field, id)
-	{{- if not $.Config.OmitPanicHandler }}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	{{- end }}
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.fieldContextDescs[id].args({{$.ECFuncValueArgs}}field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-// childFieldContextByID is the FieldContext constructor shared by the childFields_*
-// dispatchers. They are off the hot path, so a single non-inlined call keeps
-// fieldContextByID out of each of their cases.
-func {{$.FuncReceiver}}childFieldContextByID(ctx context.Context, {{$.ECFuncParam}}field graphql.CollectedField, id int) (*graphql.FieldContext, error) {
-	if ec.fieldContextDescs[id].args != nil {
-		return {{$.ECDot}}fieldContextWithArgsByID(ctx, {{$.ECArg}}field, id)
-	}
-	return {{$.ECDot}}fieldContextByID(ctx, {{$.ECArg}}field, id)
-}
-
-// childFields_* functions are the FieldContext.Child dispatchers, generated once per type
-// that fields return rather than once per field.
+// childFields_* are the FieldContext.Child values, one per type that fields return rather
+// than one per field: a shared value for scalars, enums, interfaces and unions, and a
+// dispatcher over the type's fields for objects.
 {{- range $ct := .ChildFieldTypes }}
+{{- if not $ct.Definition.Fields }}
+var childFields_{{ $ct.TypeName }} = graphql.NoChildFields("{{ $ct.TypeName }}")
+{{- else if ne $ct.Definition.Kind "OBJECT" }}
+var childFields_{{ $ct.TypeName }} = graphql.AbstractChildFields("{{ $ct.Definition.Kind }}")
+{{- else }}
 
 func {{$.FuncReceiver}}childFields_{{ $ct.TypeName }}(ctx context.Context, {{$.ECFuncParam}}field graphql.CollectedField) (*graphql.FieldContext, error) {
-	{{- if not $ct.Definition.Fields }}
-	return nil, errors.New("field of type {{ $ct.TypeName }} does not have child fields")
-	{{- else if ne $ct.Definition.Kind "OBJECT" }}
-	return nil, errors.New("FieldContext.Child cannot be called on type {{ $ct.Definition.Kind }}")
-	{{- else }}
 	switch field.Name {
 	{{- range $f := $ct.Object.Fields }}
 	case "{{ $f.Name }}":
-		return {{$.ECDot}}childFieldContextByID(ctx, {{$.ECArg}}field, {{ $f.FieldContextID }})
+		return {{ $.FieldContextCall $f true }}
 	{{- end }}
 	}
 	return nil, fmt.Errorf("no field named %q was found under type {{ $ct.TypeName }}", field.Name)
-	{{- end }}
 }
+{{- end }}
 {{- end }}
 
 {{ template "globalMiddleware" . }}

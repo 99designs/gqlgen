@@ -257,7 +257,7 @@ func (ec *executionContext) _Content_Post_foo(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 24 /* Content_Post.foo */)
+			return graphql.NewFieldContext(field, "Content_Post", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Foo, nil
@@ -279,7 +279,7 @@ func (ec *executionContext) _Content_User_foo(ctx context.Context, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 25 /* Content_User.foo */)
+			return graphql.NewFieldContext(field, "Content_User", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Foo, nil
@@ -301,7 +301,7 @@ func (ec *executionContext) _ValidType_differentCase(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 219 /* ValidType.differentCase */)
+			return graphql.NewFieldContext(field, "ValidType", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.DifferentCase, nil
@@ -323,7 +323,7 @@ func (ec *executionContext) _ValidType_different_case(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 220 /* ValidType.different_case */)
+			return graphql.NewFieldContext(field, "ValidType", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.DifferentCaseOld, nil
@@ -345,7 +345,7 @@ func (ec *executionContext) _ValidType_validInputKeywords(ctx context.Context, f
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextWithArgsByID(ctx, field, 221 /* ValidType.validInputKeywords */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, (*executionContext).field_ValidType_validInputKeywords_args, "ValidType", childFields_Boolean, false, false, true)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ValidInputKeywords, nil
@@ -367,7 +367,7 @@ func (ec *executionContext) _ValidType_validArgs(ctx context.Context, field grap
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextWithArgsByID(ctx, field, 222 /* ValidType.validArgs */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, (*executionContext).field_ValidType_validArgs_args, "ValidType", childFields_Boolean, false, false, true)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.ValidArgs, nil

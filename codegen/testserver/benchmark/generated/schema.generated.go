@@ -102,7 +102,7 @@ func (ec *executionContext) _PageInfo_hasNextPage(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 0 /* PageInfo.hasNextPage */)
+			return graphql.NewFieldContext(field, "PageInfo", childFields_Boolean, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.HasNextPage, nil
@@ -122,7 +122,7 @@ func (ec *executionContext) _PageInfo_hasPreviousPage(ctx context.Context, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 1 /* PageInfo.hasPreviousPage */)
+			return graphql.NewFieldContext(field, "PageInfo", childFields_Boolean, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.HasPreviousPage, nil
@@ -142,7 +142,7 @@ func (ec *executionContext) _PageInfo_startCursor(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 2 /* PageInfo.startCursor */)
+			return graphql.NewFieldContext(field, "PageInfo", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.StartCursor, nil
@@ -162,7 +162,7 @@ func (ec *executionContext) _PageInfo_endCursor(ctx context.Context, field graph
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 3 /* PageInfo.endCursor */)
+			return graphql.NewFieldContext(field, "PageInfo", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.EndCursor, nil
@@ -182,7 +182,7 @@ func (ec *executionContext) _Query_users(ctx context.Context, field graphql.Coll
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextWithArgsByID(ctx, field, 4 /* Query.users */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, (*executionContext).field_Query_users_args, "Query", ec.childFields_UserConnection, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -203,7 +203,7 @@ func (ec *executionContext) _Query___type(ctx context.Context, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextWithArgsByID(ctx, field, 5 /* Query.__type */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, (*executionContext).field_Query___type_args, "Query", ec.childFields___Type, true, false, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -224,7 +224,7 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 6 /* Query.__schema */)
+			return graphql.NewFieldContext(field, "Query", ec.childFields___Schema, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.IntrospectSchema()
@@ -244,7 +244,7 @@ func (ec *executionContext) _User_firstName(ctx context.Context, field graphql.C
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 7 /* User.firstName */)
+			return graphql.NewFieldContext(field, "User", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.FirstName, nil
@@ -264,7 +264,7 @@ func (ec *executionContext) _User_lastName(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 8 /* User.lastName */)
+			return graphql.NewFieldContext(field, "User", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.LastName, nil
@@ -284,7 +284,7 @@ func (ec *executionContext) _User_email(ctx context.Context, field graphql.Colle
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 9 /* User.email */)
+			return graphql.NewFieldContext(field, "User", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Email, nil
@@ -304,7 +304,7 @@ func (ec *executionContext) _UserConnection_edges(ctx context.Context, field gra
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 10 /* UserConnection.edges */)
+			return graphql.NewFieldContext(field, "UserConnection", ec.childFields_UserEdge, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Edges, nil
@@ -324,7 +324,7 @@ func (ec *executionContext) _UserConnection_pageInfo(ctx context.Context, field 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 11 /* UserConnection.pageInfo */)
+			return graphql.NewFieldContext(field, "UserConnection", ec.childFields_PageInfo, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.PageInfo, nil
@@ -344,7 +344,7 @@ func (ec *executionContext) _UserConnection_totalCount(ctx context.Context, fiel
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 12 /* UserConnection.totalCount */)
+			return graphql.NewFieldContext(field, "UserConnection", childFields_Int, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.TotalCount, nil
@@ -364,7 +364,7 @@ func (ec *executionContext) _UserEdge_cursor(ctx context.Context, field graphql.
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 13 /* UserEdge.cursor */)
+			return graphql.NewFieldContext(field, "UserEdge", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Cursor, nil
@@ -384,7 +384,7 @@ func (ec *executionContext) _UserEdge_node(ctx context.Context, field graphql.Co
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return ec.fieldContextByID(ctx, field, 14 /* UserEdge.node */)
+			return graphql.NewFieldContext(field, "UserEdge", ec.childFields_User, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Node, nil

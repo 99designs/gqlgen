@@ -5,7 +5,6 @@ package generated
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"math"
 	"strconv"
@@ -646,7 +645,6 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 
 type executionContext struct {
 	*graphql.ExecutionContextState[ResolverRoot, DirectiveRoot, ComplexityRoot]
-	fieldContextDescs []fieldContextDesc
 }
 
 func newExecutionContext(
@@ -661,7 +659,6 @@ func newExecutionContext(
 			parsedSchema,
 			deferredResults,
 		),
-		fieldContextDescs: fieldContextDescs,
 	}
 }
 
@@ -809,190 +806,17 @@ extend type Query {
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
-// fieldContextDesc is the request-independent part of a field's graphql.FieldContext.
-type fieldContextDesc struct {
-	object     string
-	child      func(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error)
-	args       func(ctx context.Context, ec *executionContext, rawArgs map[string]any) (map[string]any, error)
-	isMethod   bool
-	isResolver bool
-}
-
-// fieldContextDescs holds one row per schema field, indexed by integer literals at call
-// sites.
-var fieldContextDescs = []fieldContextDesc{
-	0:  {object: "Entity", child: childFields_Hello, args: field_Entity_findHelloByName_args, isMethod: true, isResolver: true},                                                // Entity.findHelloByName
-	1:  {object: "Entity", child: childFields_HelloMultiSingleKeys, args: field_Entity_findHelloMultiSingleKeysByKey1AndKey2_args, isMethod: true, isResolver: true},           // Entity.findHelloMultiSingleKeysByKey1AndKey2
-	2:  {object: "Entity", child: childFields_HelloWithErrors, args: field_Entity_findHelloWithErrorsByName_args, isMethod: true, isResolver: true},                            // Entity.findHelloWithErrorsByName
-	3:  {object: "Entity", child: childFields_MultiHello, args: field_Entity_findManyMultiHelloByNames_args, isMethod: true, isResolver: true},                                 // Entity.findManyMultiHelloByNames
-	4:  {object: "Entity", child: childFields_MultiHelloMultipleRequires, args: field_Entity_findManyMultiHelloMultipleRequiresByNames_args, isMethod: true, isResolver: true}, // Entity.findManyMultiHelloMultipleRequiresByNames
-	5:  {object: "Entity", child: childFields_MultiHelloRequires, args: field_Entity_findManyMultiHelloRequiresByNames_args, isMethod: true, isResolver: true},                 // Entity.findManyMultiHelloRequiresByNames
-	6:  {object: "Entity", child: childFields_MultiHelloWithError, args: field_Entity_findManyMultiHelloWithErrorByNames_args, isMethod: true, isResolver: true},               // Entity.findManyMultiHelloWithErrorByNames
-	7:  {object: "Entity", child: childFields_MultiPlanetRequiresNested, args: field_Entity_findManyMultiPlanetRequiresNestedByNames_args, isMethod: true, isResolver: true},   // Entity.findManyMultiPlanetRequiresNestedByNames
-	8:  {object: "Entity", child: childFields_PlanetMultipleRequires, args: field_Entity_findPlanetMultipleRequiresByName_args, isMethod: true, isResolver: true},              // Entity.findPlanetMultipleRequiresByName
-	9:  {object: "Entity", child: childFields_PlanetRequires, args: field_Entity_findPlanetRequiresByName_args, isMethod: true, isResolver: true},                              // Entity.findPlanetRequiresByName
-	10: {object: "Entity", child: childFields_PlanetRequiresNested, args: field_Entity_findPlanetRequiresNestedByName_args, isMethod: true, isResolver: true},                  // Entity.findPlanetRequiresNestedByName
-	11: {object: "Entity", child: childFields_World, args: field_Entity_findWorldByHelloNameAndFoo_args, isMethod: true, isResolver: true},                                     // Entity.findWorldByHelloNameAndFoo
-	12: {object: "Entity", child: childFields_WorldName, args: field_Entity_findWorldNameByName_args, isMethod: true, isResolver: true},                                        // Entity.findWorldNameByName
-	13: {object: "Entity", child: childFields_WorldWithMultipleKeys, args: field_Entity_findWorldWithMultipleKeysByHelloNameAndFoo_args, isMethod: true, isResolver: true},     // Entity.findWorldWithMultipleKeysByHelloNameAndFoo
-	14: {object: "Entity", child: childFields_WorldWithMultipleKeys, args: field_Entity_findWorldWithMultipleKeysByBar_args, isMethod: true, isResolver: true},                 // Entity.findWorldWithMultipleKeysByBar
-
-	15: {object: "Hello", child: childFields_String}, // Hello.name
-	16: {object: "Hello", child: childFields_String}, // Hello.secondary
-
-	17: {object: "HelloMultiSingleKeys", child: childFields_String}, // HelloMultiSingleKeys.key1
-	18: {object: "HelloMultiSingleKeys", child: childFields_String}, // HelloMultiSingleKeys.key2
-
-	19: {object: "HelloWithErrors", child: childFields_String}, // HelloWithErrors.name
-
-	20: {object: "MultiHello", child: childFields_String}, // MultiHello.name
-
-	21: {object: "MultiHelloMultipleRequires", child: childFields_String}, // MultiHelloMultipleRequires.name
-	22: {object: "MultiHelloMultipleRequires", child: childFields_String}, // MultiHelloMultipleRequires.key1
-	23: {object: "MultiHelloMultipleRequires", child: childFields_String}, // MultiHelloMultipleRequires.key2
-	24: {object: "MultiHelloMultipleRequires", child: childFields_String}, // MultiHelloMultipleRequires.key3
-
-	25: {object: "MultiHelloRequires", child: childFields_String}, // MultiHelloRequires.name
-	26: {object: "MultiHelloRequires", child: childFields_String}, // MultiHelloRequires.key1
-	27: {object: "MultiHelloRequires", child: childFields_String}, // MultiHelloRequires.key2
-
-	28: {object: "MultiHelloWithError", child: childFields_String}, // MultiHelloWithError.name
-
-	29: {object: "MultiPlanetRequiresNested", child: childFields_String}, // MultiPlanetRequiresNested.name
-	30: {object: "MultiPlanetRequiresNested", child: childFields_World},  // MultiPlanetRequiresNested.world
-	31: {object: "MultiPlanetRequiresNested", child: childFields_Int},    // MultiPlanetRequiresNested.size
-
-	32: {object: "PlanetMultipleRequires", child: childFields_String}, // PlanetMultipleRequires.name
-	33: {object: "PlanetMultipleRequires", child: childFields_Int},    // PlanetMultipleRequires.diameter
-	34: {object: "PlanetMultipleRequires", child: childFields_Int},    // PlanetMultipleRequires.density
-	35: {object: "PlanetMultipleRequires", child: childFields_Int},    // PlanetMultipleRequires.weight
-
-	36: {object: "PlanetRequires", child: childFields_String}, // PlanetRequires.name
-	37: {object: "PlanetRequires", child: childFields_Int},    // PlanetRequires.size
-	38: {object: "PlanetRequires", child: childFields_Int},    // PlanetRequires.diameter
-
-	39: {object: "PlanetRequiresNested", child: childFields_String}, // PlanetRequiresNested.name
-	40: {object: "PlanetRequiresNested", child: childFields_World},  // PlanetRequiresNested.world
-	41: {object: "PlanetRequiresNested", child: childFields_Int},    // PlanetRequiresNested.size
-
-	42: {object: "Query", child: childFields__Entity, args: field_Query__entities_args, isMethod: true}, // Query._entities
-	43: {object: "Query", child: childFields__Service, isMethod: true},                                  // Query._service
-	44: {object: "Query", child: childFields___Type, args: field_Query___type_args, isMethod: true},     // Query.__type
-	45: {object: "Query", child: childFields___Schema, isMethod: true},                                  // Query.__schema
-
-	46: {object: "World", child: childFields_String}, // World.foo
-	47: {object: "World", child: childFields_Int},    // World.bar
-	48: {object: "World", child: childFields_Hello},  // World.hello
-
-	49: {object: "WorldName", child: childFields_String}, // WorldName.name
-
-	50: {object: "WorldWithMultipleKeys", child: childFields_String}, // WorldWithMultipleKeys.foo
-	51: {object: "WorldWithMultipleKeys", child: childFields_Int},    // WorldWithMultipleKeys.bar
-	52: {object: "WorldWithMultipleKeys", child: childFields_Hello},  // WorldWithMultipleKeys.hello
-
-	53: {object: "_Service", child: childFields_String}, // _Service.sdl
-
-	54: {object: "__Directive", child: childFields_String},                                                          // __Directive.name
-	55: {object: "__Directive", child: childFields_String, isMethod: true},                                          // __Directive.description
-	56: {object: "__Directive", child: childFields_Boolean},                                                         // __Directive.isRepeatable
-	57: {object: "__Directive", child: childFields___DirectiveLocation},                                             // __Directive.locations
-	58: {object: "__Directive", child: childFields___InputValue, args: field___Directive_args_args, isMethod: true}, // __Directive.args
-
-	59: {object: "__EnumValue", child: childFields_String},                  // __EnumValue.name
-	60: {object: "__EnumValue", child: childFields_String, isMethod: true},  // __EnumValue.description
-	61: {object: "__EnumValue", child: childFields_Boolean, isMethod: true}, // __EnumValue.isDeprecated
-	62: {object: "__EnumValue", child: childFields_String, isMethod: true},  // __EnumValue.deprecationReason
-
-	63: {object: "__Field", child: childFields_String},                                                      // __Field.name
-	64: {object: "__Field", child: childFields_String, isMethod: true},                                      // __Field.description
-	65: {object: "__Field", child: childFields___InputValue, args: field___Field_args_args, isMethod: true}, // __Field.args
-	66: {object: "__Field", child: childFields___Type},                                                      // __Field.type
-	67: {object: "__Field", child: childFields_Boolean, isMethod: true},                                     // __Field.isDeprecated
-	68: {object: "__Field", child: childFields_String, isMethod: true},                                      // __Field.deprecationReason
-
-	69: {object: "__InputValue", child: childFields_String},                  // __InputValue.name
-	70: {object: "__InputValue", child: childFields_String, isMethod: true},  // __InputValue.description
-	71: {object: "__InputValue", child: childFields___Type},                  // __InputValue.type
-	72: {object: "__InputValue", child: childFields_String},                  // __InputValue.defaultValue
-	73: {object: "__InputValue", child: childFields_Boolean, isMethod: true}, // __InputValue.isDeprecated
-	74: {object: "__InputValue", child: childFields_String, isMethod: true},  // __InputValue.deprecationReason
-
-	75: {object: "__Schema", child: childFields_String, isMethod: true},      // __Schema.description
-	76: {object: "__Schema", child: childFields___Type, isMethod: true},      // __Schema.types
-	77: {object: "__Schema", child: childFields___Type, isMethod: true},      // __Schema.queryType
-	78: {object: "__Schema", child: childFields___Type, isMethod: true},      // __Schema.mutationType
-	79: {object: "__Schema", child: childFields___Type, isMethod: true},      // __Schema.subscriptionType
-	80: {object: "__Schema", child: childFields___Directive, isMethod: true}, // __Schema.directives
-
-	81: {object: "__Type", child: childFields___TypeKind, isMethod: true},                                        // __Type.kind
-	82: {object: "__Type", child: childFields_String, isMethod: true},                                            // __Type.name
-	83: {object: "__Type", child: childFields_String, isMethod: true},                                            // __Type.description
-	84: {object: "__Type", child: childFields_String, isMethod: true},                                            // __Type.specifiedByURL
-	85: {object: "__Type", child: childFields___Field, args: field___Type_fields_args, isMethod: true},           // __Type.fields
-	86: {object: "__Type", child: childFields___Type, isMethod: true},                                            // __Type.interfaces
-	87: {object: "__Type", child: childFields___Type, isMethod: true},                                            // __Type.possibleTypes
-	88: {object: "__Type", child: childFields___EnumValue, args: field___Type_enumValues_args, isMethod: true},   // __Type.enumValues
-	89: {object: "__Type", child: childFields___InputValue, args: field___Type_inputFields_args, isMethod: true}, // __Type.inputFields
-	90: {object: "__Type", child: childFields___Type, isMethod: true},                                            // __Type.ofType
-	91: {object: "__Type", child: childFields_Boolean, isMethod: true},                                           // __Type.isOneOf
-}
-
-// fieldContextByID builds the FieldContext of a field without arguments. It is kept
-// small enough to inline, so field resolution gets no extra stack frame.
-func fieldContextByID(ctx context.Context, ec *executionContext, field graphql.CollectedField, id int) (*graphql.FieldContext, error) {
-	d := &ec.fieldContextDescs[id]
-	return &graphql.FieldContext{
-		Object:     d.object,
-		Field:      field,
-		IsMethod:   d.isMethod,
-		IsResolver: d.isResolver,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return d.child(ctx, ec, field)
-		},
-	}, nil
-}
-
-// fieldContextWithArgsByID builds the FieldContext of a field with arguments and parses
-// them into Args.
-func fieldContextWithArgsByID(ctx context.Context, ec *executionContext, field graphql.CollectedField, id int) (fc *graphql.FieldContext, err error) {
-	fc, _ = fieldContextByID(ctx, ec, field, id)
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.fieldContextDescs[id].args(ctx, ec, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-// childFieldContextByID is the FieldContext constructor shared by the childFields_*
-// dispatchers. They are off the hot path, so a single non-inlined call keeps
-// fieldContextByID out of each of their cases.
-func childFieldContextByID(ctx context.Context, ec *executionContext, field graphql.CollectedField, id int) (*graphql.FieldContext, error) {
-	if ec.fieldContextDescs[id].args != nil {
-		return fieldContextWithArgsByID(ctx, ec, field, id)
-	}
-	return fieldContextByID(ctx, ec, field, id)
-}
-
-// childFields_* functions are the FieldContext.Child dispatchers, generated once per type
-// that fields return rather than once per field.
-
-func childFields_Boolean(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
-	return nil, errors.New("field of type Boolean does not have child fields")
-}
+// childFields_* are the FieldContext.Child values, one per type that fields return rather
+// than one per field: a shared value for scalars, enums, interfaces and unions, and a
+// dispatcher over the type's fields for objects.
+var childFields_Boolean = graphql.NoChildFields("Boolean")
 
 func childFields_Hello(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
-		return childFieldContextByID(ctx, ec, field, 15 /* Hello.name */)
+		return graphql.NewChildFieldContext(field, "Hello", childFields_String, false, false)
 	case "secondary":
-		return childFieldContextByID(ctx, ec, field, 16 /* Hello.secondary */)
+		return graphql.NewChildFieldContext(field, "Hello", childFields_String, false, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type Hello", field.Name)
 }
@@ -1000,9 +824,9 @@ func childFields_Hello(ctx context.Context, ec *executionContext, field graphql.
 func childFields_HelloMultiSingleKeys(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "key1":
-		return childFieldContextByID(ctx, ec, field, 17 /* HelloMultiSingleKeys.key1 */)
+		return graphql.NewChildFieldContext(field, "HelloMultiSingleKeys", childFields_String, false, false)
 	case "key2":
-		return childFieldContextByID(ctx, ec, field, 18 /* HelloMultiSingleKeys.key2 */)
+		return graphql.NewChildFieldContext(field, "HelloMultiSingleKeys", childFields_String, false, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type HelloMultiSingleKeys", field.Name)
 }
@@ -1010,19 +834,17 @@ func childFields_HelloMultiSingleKeys(ctx context.Context, ec *executionContext,
 func childFields_HelloWithErrors(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
-		return childFieldContextByID(ctx, ec, field, 19 /* HelloWithErrors.name */)
+		return graphql.NewChildFieldContext(field, "HelloWithErrors", childFields_String, false, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type HelloWithErrors", field.Name)
 }
 
-func childFields_Int(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
-	return nil, errors.New("field of type Int does not have child fields")
-}
+var childFields_Int = graphql.NoChildFields("Int")
 
 func childFields_MultiHello(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
-		return childFieldContextByID(ctx, ec, field, 20 /* MultiHello.name */)
+		return graphql.NewChildFieldContext(field, "MultiHello", childFields_String, false, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type MultiHello", field.Name)
 }
@@ -1030,13 +852,13 @@ func childFields_MultiHello(ctx context.Context, ec *executionContext, field gra
 func childFields_MultiHelloMultipleRequires(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
-		return childFieldContextByID(ctx, ec, field, 21 /* MultiHelloMultipleRequires.name */)
+		return graphql.NewChildFieldContext(field, "MultiHelloMultipleRequires", childFields_String, false, false)
 	case "key1":
-		return childFieldContextByID(ctx, ec, field, 22 /* MultiHelloMultipleRequires.key1 */)
+		return graphql.NewChildFieldContext(field, "MultiHelloMultipleRequires", childFields_String, false, false)
 	case "key2":
-		return childFieldContextByID(ctx, ec, field, 23 /* MultiHelloMultipleRequires.key2 */)
+		return graphql.NewChildFieldContext(field, "MultiHelloMultipleRequires", childFields_String, false, false)
 	case "key3":
-		return childFieldContextByID(ctx, ec, field, 24 /* MultiHelloMultipleRequires.key3 */)
+		return graphql.NewChildFieldContext(field, "MultiHelloMultipleRequires", childFields_String, false, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type MultiHelloMultipleRequires", field.Name)
 }
@@ -1044,11 +866,11 @@ func childFields_MultiHelloMultipleRequires(ctx context.Context, ec *executionCo
 func childFields_MultiHelloRequires(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
-		return childFieldContextByID(ctx, ec, field, 25 /* MultiHelloRequires.name */)
+		return graphql.NewChildFieldContext(field, "MultiHelloRequires", childFields_String, false, false)
 	case "key1":
-		return childFieldContextByID(ctx, ec, field, 26 /* MultiHelloRequires.key1 */)
+		return graphql.NewChildFieldContext(field, "MultiHelloRequires", childFields_String, false, false)
 	case "key2":
-		return childFieldContextByID(ctx, ec, field, 27 /* MultiHelloRequires.key2 */)
+		return graphql.NewChildFieldContext(field, "MultiHelloRequires", childFields_String, false, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type MultiHelloRequires", field.Name)
 }
@@ -1056,7 +878,7 @@ func childFields_MultiHelloRequires(ctx context.Context, ec *executionContext, f
 func childFields_MultiHelloWithError(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
-		return childFieldContextByID(ctx, ec, field, 28 /* MultiHelloWithError.name */)
+		return graphql.NewChildFieldContext(field, "MultiHelloWithError", childFields_String, false, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type MultiHelloWithError", field.Name)
 }
@@ -1064,11 +886,13 @@ func childFields_MultiHelloWithError(ctx context.Context, ec *executionContext, 
 func childFields_MultiPlanetRequiresNested(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
-		return childFieldContextByID(ctx, ec, field, 29 /* MultiPlanetRequiresNested.name */)
+		return graphql.NewChildFieldContext(field, "MultiPlanetRequiresNested", childFields_String, false, false)
 	case "world":
-		return childFieldContextByID(ctx, ec, field, 30 /* MultiPlanetRequiresNested.world */)
+		return graphql.NewChildFieldContext(field, "MultiPlanetRequiresNested", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields_World(ctx, ec, field)
+		}, false, false)
 	case "size":
-		return childFieldContextByID(ctx, ec, field, 31 /* MultiPlanetRequiresNested.size */)
+		return graphql.NewChildFieldContext(field, "MultiPlanetRequiresNested", childFields_Int, false, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type MultiPlanetRequiresNested", field.Name)
 }
@@ -1076,13 +900,13 @@ func childFields_MultiPlanetRequiresNested(ctx context.Context, ec *executionCon
 func childFields_PlanetMultipleRequires(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
-		return childFieldContextByID(ctx, ec, field, 32 /* PlanetMultipleRequires.name */)
+		return graphql.NewChildFieldContext(field, "PlanetMultipleRequires", childFields_String, false, false)
 	case "diameter":
-		return childFieldContextByID(ctx, ec, field, 33 /* PlanetMultipleRequires.diameter */)
+		return graphql.NewChildFieldContext(field, "PlanetMultipleRequires", childFields_Int, false, false)
 	case "density":
-		return childFieldContextByID(ctx, ec, field, 34 /* PlanetMultipleRequires.density */)
+		return graphql.NewChildFieldContext(field, "PlanetMultipleRequires", childFields_Int, false, false)
 	case "weight":
-		return childFieldContextByID(ctx, ec, field, 35 /* PlanetMultipleRequires.weight */)
+		return graphql.NewChildFieldContext(field, "PlanetMultipleRequires", childFields_Int, false, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type PlanetMultipleRequires", field.Name)
 }
@@ -1090,11 +914,11 @@ func childFields_PlanetMultipleRequires(ctx context.Context, ec *executionContex
 func childFields_PlanetRequires(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
-		return childFieldContextByID(ctx, ec, field, 36 /* PlanetRequires.name */)
+		return graphql.NewChildFieldContext(field, "PlanetRequires", childFields_String, false, false)
 	case "size":
-		return childFieldContextByID(ctx, ec, field, 37 /* PlanetRequires.size */)
+		return graphql.NewChildFieldContext(field, "PlanetRequires", childFields_Int, false, false)
 	case "diameter":
-		return childFieldContextByID(ctx, ec, field, 38 /* PlanetRequires.diameter */)
+		return graphql.NewChildFieldContext(field, "PlanetRequires", childFields_Int, false, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type PlanetRequires", field.Name)
 }
@@ -1102,27 +926,29 @@ func childFields_PlanetRequires(ctx context.Context, ec *executionContext, field
 func childFields_PlanetRequiresNested(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
-		return childFieldContextByID(ctx, ec, field, 39 /* PlanetRequiresNested.name */)
+		return graphql.NewChildFieldContext(field, "PlanetRequiresNested", childFields_String, false, false)
 	case "world":
-		return childFieldContextByID(ctx, ec, field, 40 /* PlanetRequiresNested.world */)
+		return graphql.NewChildFieldContext(field, "PlanetRequiresNested", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields_World(ctx, ec, field)
+		}, false, false)
 	case "size":
-		return childFieldContextByID(ctx, ec, field, 41 /* PlanetRequiresNested.size */)
+		return graphql.NewChildFieldContext(field, "PlanetRequiresNested", childFields_Int, false, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type PlanetRequiresNested", field.Name)
 }
 
-func childFields_String(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
-	return nil, errors.New("field of type String does not have child fields")
-}
+var childFields_String = graphql.NoChildFields("String")
 
 func childFields_World(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "foo":
-		return childFieldContextByID(ctx, ec, field, 46 /* World.foo */)
+		return graphql.NewChildFieldContext(field, "World", childFields_String, false, false)
 	case "bar":
-		return childFieldContextByID(ctx, ec, field, 47 /* World.bar */)
+		return graphql.NewChildFieldContext(field, "World", childFields_Int, false, false)
 	case "hello":
-		return childFieldContextByID(ctx, ec, field, 48 /* World.hello */)
+		return graphql.NewChildFieldContext(field, "World", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields_Hello(ctx, ec, field)
+		}, false, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type World", field.Name)
 }
@@ -1130,7 +956,7 @@ func childFields_World(ctx context.Context, ec *executionContext, field graphql.
 func childFields_WorldName(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
-		return childFieldContextByID(ctx, ec, field, 49 /* WorldName.name */)
+		return graphql.NewChildFieldContext(field, "WorldName", childFields_String, false, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type WorldName", field.Name)
 }
@@ -1138,23 +964,23 @@ func childFields_WorldName(ctx context.Context, ec *executionContext, field grap
 func childFields_WorldWithMultipleKeys(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "foo":
-		return childFieldContextByID(ctx, ec, field, 50 /* WorldWithMultipleKeys.foo */)
+		return graphql.NewChildFieldContext(field, "WorldWithMultipleKeys", childFields_String, false, false)
 	case "bar":
-		return childFieldContextByID(ctx, ec, field, 51 /* WorldWithMultipleKeys.bar */)
+		return graphql.NewChildFieldContext(field, "WorldWithMultipleKeys", childFields_Int, false, false)
 	case "hello":
-		return childFieldContextByID(ctx, ec, field, 52 /* WorldWithMultipleKeys.hello */)
+		return graphql.NewChildFieldContext(field, "WorldWithMultipleKeys", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields_Hello(ctx, ec, field)
+		}, false, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type WorldWithMultipleKeys", field.Name)
 }
 
-func childFields__Entity(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
-	return nil, errors.New("field of type _Entity does not have child fields")
-}
+var childFields__Entity = graphql.NoChildFields("_Entity")
 
 func childFields__Service(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "sdl":
-		return childFieldContextByID(ctx, ec, field, 53 /* _Service.sdl */)
+		return graphql.NewChildFieldContext(field, "_Service", childFields_String, false, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type _Service", field.Name)
 }
@@ -1162,33 +988,35 @@ func childFields__Service(ctx context.Context, ec *executionContext, field graph
 func childFields___Directive(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
-		return childFieldContextByID(ctx, ec, field, 54 /* __Directive.name */)
+		return graphql.NewChildFieldContext(field, "__Directive", childFields_String, false, false)
 	case "description":
-		return childFieldContextByID(ctx, ec, field, 55 /* __Directive.description */)
+		return graphql.NewChildFieldContext(field, "__Directive", childFields_String, true, false)
 	case "isRepeatable":
-		return childFieldContextByID(ctx, ec, field, 56 /* __Directive.isRepeatable */)
+		return graphql.NewChildFieldContext(field, "__Directive", childFields_Boolean, false, false)
 	case "locations":
-		return childFieldContextByID(ctx, ec, field, 57 /* __Directive.locations */)
+		return graphql.NewChildFieldContext(field, "__Directive", childFields___DirectiveLocation, false, false)
 	case "args":
-		return childFieldContextByID(ctx, ec, field, 58 /* __Directive.args */)
+		return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+			return field___Directive_args_args(ctx, ec, rawArgs)
+		}, "__Directive", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___InputValue(ctx, ec, field)
+		}, true, false, true)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type __Directive", field.Name)
 }
 
-func childFields___DirectiveLocation(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
-	return nil, errors.New("field of type __DirectiveLocation does not have child fields")
-}
+var childFields___DirectiveLocation = graphql.NoChildFields("__DirectiveLocation")
 
 func childFields___EnumValue(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
-		return childFieldContextByID(ctx, ec, field, 59 /* __EnumValue.name */)
+		return graphql.NewChildFieldContext(field, "__EnumValue", childFields_String, false, false)
 	case "description":
-		return childFieldContextByID(ctx, ec, field, 60 /* __EnumValue.description */)
+		return graphql.NewChildFieldContext(field, "__EnumValue", childFields_String, true, false)
 	case "isDeprecated":
-		return childFieldContextByID(ctx, ec, field, 61 /* __EnumValue.isDeprecated */)
+		return graphql.NewChildFieldContext(field, "__EnumValue", childFields_Boolean, true, false)
 	case "deprecationReason":
-		return childFieldContextByID(ctx, ec, field, 62 /* __EnumValue.deprecationReason */)
+		return graphql.NewChildFieldContext(field, "__EnumValue", childFields_String, true, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type __EnumValue", field.Name)
 }
@@ -1196,17 +1024,23 @@ func childFields___EnumValue(ctx context.Context, ec *executionContext, field gr
 func childFields___Field(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
-		return childFieldContextByID(ctx, ec, field, 63 /* __Field.name */)
+		return graphql.NewChildFieldContext(field, "__Field", childFields_String, false, false)
 	case "description":
-		return childFieldContextByID(ctx, ec, field, 64 /* __Field.description */)
+		return graphql.NewChildFieldContext(field, "__Field", childFields_String, true, false)
 	case "args":
-		return childFieldContextByID(ctx, ec, field, 65 /* __Field.args */)
+		return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+			return field___Field_args_args(ctx, ec, rawArgs)
+		}, "__Field", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___InputValue(ctx, ec, field)
+		}, true, false, true)
 	case "type":
-		return childFieldContextByID(ctx, ec, field, 66 /* __Field.type */)
+		return graphql.NewChildFieldContext(field, "__Field", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___Type(ctx, ec, field)
+		}, false, false)
 	case "isDeprecated":
-		return childFieldContextByID(ctx, ec, field, 67 /* __Field.isDeprecated */)
+		return graphql.NewChildFieldContext(field, "__Field", childFields_Boolean, true, false)
 	case "deprecationReason":
-		return childFieldContextByID(ctx, ec, field, 68 /* __Field.deprecationReason */)
+		return graphql.NewChildFieldContext(field, "__Field", childFields_String, true, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type __Field", field.Name)
 }
@@ -1214,17 +1048,19 @@ func childFields___Field(ctx context.Context, ec *executionContext, field graphq
 func childFields___InputValue(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
-		return childFieldContextByID(ctx, ec, field, 69 /* __InputValue.name */)
+		return graphql.NewChildFieldContext(field, "__InputValue", childFields_String, false, false)
 	case "description":
-		return childFieldContextByID(ctx, ec, field, 70 /* __InputValue.description */)
+		return graphql.NewChildFieldContext(field, "__InputValue", childFields_String, true, false)
 	case "type":
-		return childFieldContextByID(ctx, ec, field, 71 /* __InputValue.type */)
+		return graphql.NewChildFieldContext(field, "__InputValue", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___Type(ctx, ec, field)
+		}, false, false)
 	case "defaultValue":
-		return childFieldContextByID(ctx, ec, field, 72 /* __InputValue.defaultValue */)
+		return graphql.NewChildFieldContext(field, "__InputValue", childFields_String, false, false)
 	case "isDeprecated":
-		return childFieldContextByID(ctx, ec, field, 73 /* __InputValue.isDeprecated */)
+		return graphql.NewChildFieldContext(field, "__InputValue", childFields_Boolean, true, false)
 	case "deprecationReason":
-		return childFieldContextByID(ctx, ec, field, 74 /* __InputValue.deprecationReason */)
+		return graphql.NewChildFieldContext(field, "__InputValue", childFields_String, true, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type __InputValue", field.Name)
 }
@@ -1232,17 +1068,27 @@ func childFields___InputValue(ctx context.Context, ec *executionContext, field g
 func childFields___Schema(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "description":
-		return childFieldContextByID(ctx, ec, field, 75 /* __Schema.description */)
+		return graphql.NewChildFieldContext(field, "__Schema", childFields_String, true, false)
 	case "types":
-		return childFieldContextByID(ctx, ec, field, 76 /* __Schema.types */)
+		return graphql.NewChildFieldContext(field, "__Schema", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___Type(ctx, ec, field)
+		}, true, false)
 	case "queryType":
-		return childFieldContextByID(ctx, ec, field, 77 /* __Schema.queryType */)
+		return graphql.NewChildFieldContext(field, "__Schema", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___Type(ctx, ec, field)
+		}, true, false)
 	case "mutationType":
-		return childFieldContextByID(ctx, ec, field, 78 /* __Schema.mutationType */)
+		return graphql.NewChildFieldContext(field, "__Schema", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___Type(ctx, ec, field)
+		}, true, false)
 	case "subscriptionType":
-		return childFieldContextByID(ctx, ec, field, 79 /* __Schema.subscriptionType */)
+		return graphql.NewChildFieldContext(field, "__Schema", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___Type(ctx, ec, field)
+		}, true, false)
 	case "directives":
-		return childFieldContextByID(ctx, ec, field, 80 /* __Schema.directives */)
+		return graphql.NewChildFieldContext(field, "__Schema", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___Directive(ctx, ec, field)
+		}, true, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
 }
@@ -1250,34 +1096,50 @@ func childFields___Schema(ctx context.Context, ec *executionContext, field graph
 func childFields___Type(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "kind":
-		return childFieldContextByID(ctx, ec, field, 81 /* __Type.kind */)
+		return graphql.NewChildFieldContext(field, "__Type", childFields___TypeKind, true, false)
 	case "name":
-		return childFieldContextByID(ctx, ec, field, 82 /* __Type.name */)
+		return graphql.NewChildFieldContext(field, "__Type", childFields_String, true, false)
 	case "description":
-		return childFieldContextByID(ctx, ec, field, 83 /* __Type.description */)
+		return graphql.NewChildFieldContext(field, "__Type", childFields_String, true, false)
 	case "specifiedByURL":
-		return childFieldContextByID(ctx, ec, field, 84 /* __Type.specifiedByURL */)
+		return graphql.NewChildFieldContext(field, "__Type", childFields_String, true, false)
 	case "fields":
-		return childFieldContextByID(ctx, ec, field, 85 /* __Type.fields */)
+		return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+			return field___Type_fields_args(ctx, ec, rawArgs)
+		}, "__Type", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___Field(ctx, ec, field)
+		}, true, false, true)
 	case "interfaces":
-		return childFieldContextByID(ctx, ec, field, 86 /* __Type.interfaces */)
+		return graphql.NewChildFieldContext(field, "__Type", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___Type(ctx, ec, field)
+		}, true, false)
 	case "possibleTypes":
-		return childFieldContextByID(ctx, ec, field, 87 /* __Type.possibleTypes */)
+		return graphql.NewChildFieldContext(field, "__Type", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___Type(ctx, ec, field)
+		}, true, false)
 	case "enumValues":
-		return childFieldContextByID(ctx, ec, field, 88 /* __Type.enumValues */)
+		return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+			return field___Type_enumValues_args(ctx, ec, rawArgs)
+		}, "__Type", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___EnumValue(ctx, ec, field)
+		}, true, false, true)
 	case "inputFields":
-		return childFieldContextByID(ctx, ec, field, 89 /* __Type.inputFields */)
+		return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+			return field___Type_inputFields_args(ctx, ec, rawArgs)
+		}, "__Type", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___InputValue(ctx, ec, field)
+		}, true, false, true)
 	case "ofType":
-		return childFieldContextByID(ctx, ec, field, 90 /* __Type.ofType */)
+		return graphql.NewChildFieldContext(field, "__Type", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___Type(ctx, ec, field)
+		}, true, false)
 	case "isOneOf":
-		return childFieldContextByID(ctx, ec, field, 91 /* __Type.isOneOf */)
+		return graphql.NewChildFieldContext(field, "__Type", childFields_Boolean, true, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 }
 
-func childFields___TypeKind(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
-	return nil, errors.New("field of type __TypeKind does not have child fields")
-}
+var childFields___TypeKind = graphql.NoChildFields("__TypeKind")
 
 // endregion ************************** internal!.gotpl ***************************
 
@@ -1625,7 +1487,11 @@ func _Entity_findHelloByName(ctx context.Context, ec *executionContext, field gr
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 0 /* Entity.findHelloByName */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Entity_findHelloByName_args(ctx, ec, rawArgs)
+			}, "Entity", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_Hello(ctx, ec, field)
+			}, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -1646,7 +1512,11 @@ func _Entity_findHelloMultiSingleKeysByKey1AndKey2(ctx context.Context, ec *exec
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 1 /* Entity.findHelloMultiSingleKeysByKey1AndKey2 */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Entity_findHelloMultiSingleKeysByKey1AndKey2_args(ctx, ec, rawArgs)
+			}, "Entity", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_HelloMultiSingleKeys(ctx, ec, field)
+			}, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -1667,7 +1537,11 @@ func _Entity_findHelloWithErrorsByName(ctx context.Context, ec *executionContext
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 2 /* Entity.findHelloWithErrorsByName */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Entity_findHelloWithErrorsByName_args(ctx, ec, rawArgs)
+			}, "Entity", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_HelloWithErrors(ctx, ec, field)
+			}, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -1688,7 +1562,11 @@ func _Entity_findManyMultiHelloByNames(ctx context.Context, ec *executionContext
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 3 /* Entity.findManyMultiHelloByNames */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Entity_findManyMultiHelloByNames_args(ctx, ec, rawArgs)
+			}, "Entity", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_MultiHello(ctx, ec, field)
+			}, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -1709,7 +1587,11 @@ func _Entity_findManyMultiHelloMultipleRequiresByNames(ctx context.Context, ec *
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 4 /* Entity.findManyMultiHelloMultipleRequiresByNames */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Entity_findManyMultiHelloMultipleRequiresByNames_args(ctx, ec, rawArgs)
+			}, "Entity", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_MultiHelloMultipleRequires(ctx, ec, field)
+			}, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -1730,7 +1612,11 @@ func _Entity_findManyMultiHelloRequiresByNames(ctx context.Context, ec *executio
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 5 /* Entity.findManyMultiHelloRequiresByNames */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Entity_findManyMultiHelloRequiresByNames_args(ctx, ec, rawArgs)
+			}, "Entity", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_MultiHelloRequires(ctx, ec, field)
+			}, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -1751,7 +1637,11 @@ func _Entity_findManyMultiHelloWithErrorByNames(ctx context.Context, ec *executi
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 6 /* Entity.findManyMultiHelloWithErrorByNames */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Entity_findManyMultiHelloWithErrorByNames_args(ctx, ec, rawArgs)
+			}, "Entity", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_MultiHelloWithError(ctx, ec, field)
+			}, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -1772,7 +1662,11 @@ func _Entity_findManyMultiPlanetRequiresNestedByNames(ctx context.Context, ec *e
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 7 /* Entity.findManyMultiPlanetRequiresNestedByNames */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Entity_findManyMultiPlanetRequiresNestedByNames_args(ctx, ec, rawArgs)
+			}, "Entity", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_MultiPlanetRequiresNested(ctx, ec, field)
+			}, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -1793,7 +1687,11 @@ func _Entity_findPlanetMultipleRequiresByName(ctx context.Context, ec *execution
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 8 /* Entity.findPlanetMultipleRequiresByName */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Entity_findPlanetMultipleRequiresByName_args(ctx, ec, rawArgs)
+			}, "Entity", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_PlanetMultipleRequires(ctx, ec, field)
+			}, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -1814,7 +1712,11 @@ func _Entity_findPlanetRequiresByName(ctx context.Context, ec *executionContext,
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 9 /* Entity.findPlanetRequiresByName */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Entity_findPlanetRequiresByName_args(ctx, ec, rawArgs)
+			}, "Entity", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_PlanetRequires(ctx, ec, field)
+			}, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -1835,7 +1737,11 @@ func _Entity_findPlanetRequiresNestedByName(ctx context.Context, ec *executionCo
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 10 /* Entity.findPlanetRequiresNestedByName */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Entity_findPlanetRequiresNestedByName_args(ctx, ec, rawArgs)
+			}, "Entity", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_PlanetRequiresNested(ctx, ec, field)
+			}, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -1856,7 +1762,11 @@ func _Entity_findWorldByHelloNameAndFoo(ctx context.Context, ec *executionContex
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 11 /* Entity.findWorldByHelloNameAndFoo */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Entity_findWorldByHelloNameAndFoo_args(ctx, ec, rawArgs)
+			}, "Entity", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_World(ctx, ec, field)
+			}, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -1877,7 +1787,11 @@ func _Entity_findWorldNameByName(ctx context.Context, ec *executionContext, fiel
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 12 /* Entity.findWorldNameByName */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Entity_findWorldNameByName_args(ctx, ec, rawArgs)
+			}, "Entity", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_WorldName(ctx, ec, field)
+			}, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -1898,7 +1812,11 @@ func _Entity_findWorldWithMultipleKeysByHelloNameAndFoo(ctx context.Context, ec 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 13 /* Entity.findWorldWithMultipleKeysByHelloNameAndFoo */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Entity_findWorldWithMultipleKeysByHelloNameAndFoo_args(ctx, ec, rawArgs)
+			}, "Entity", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_WorldWithMultipleKeys(ctx, ec, field)
+			}, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -1919,7 +1837,11 @@ func _Entity_findWorldWithMultipleKeysByBar(ctx context.Context, ec *executionCo
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 14 /* Entity.findWorldWithMultipleKeysByBar */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Entity_findWorldWithMultipleKeysByBar_args(ctx, ec, rawArgs)
+			}, "Entity", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_WorldWithMultipleKeys(ctx, ec, field)
+			}, true, true, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -1940,7 +1862,7 @@ func _Hello_name(ctx context.Context, ec *executionContext, field graphql.Collec
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 15 /* Hello.name */)
+			return graphql.NewFieldContext(field, "Hello", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -1960,7 +1882,7 @@ func _Hello_secondary(ctx context.Context, ec *executionContext, field graphql.C
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 16 /* Hello.secondary */)
+			return graphql.NewFieldContext(field, "Hello", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Secondary, nil
@@ -1980,7 +1902,7 @@ func _HelloMultiSingleKeys_key1(ctx context.Context, ec *executionContext, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 17 /* HelloMultiSingleKeys.key1 */)
+			return graphql.NewFieldContext(field, "HelloMultiSingleKeys", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Key1, nil
@@ -2000,7 +1922,7 @@ func _HelloMultiSingleKeys_key2(ctx context.Context, ec *executionContext, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 18 /* HelloMultiSingleKeys.key2 */)
+			return graphql.NewFieldContext(field, "HelloMultiSingleKeys", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Key2, nil
@@ -2020,7 +1942,7 @@ func _HelloWithErrors_name(ctx context.Context, ec *executionContext, field grap
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 19 /* HelloWithErrors.name */)
+			return graphql.NewFieldContext(field, "HelloWithErrors", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -2040,7 +1962,7 @@ func _MultiHello_name(ctx context.Context, ec *executionContext, field graphql.C
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 20 /* MultiHello.name */)
+			return graphql.NewFieldContext(field, "MultiHello", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -2060,7 +1982,7 @@ func _MultiHelloMultipleRequires_name(ctx context.Context, ec *executionContext,
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 21 /* MultiHelloMultipleRequires.name */)
+			return graphql.NewFieldContext(field, "MultiHelloMultipleRequires", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -2080,7 +2002,7 @@ func _MultiHelloMultipleRequires_key1(ctx context.Context, ec *executionContext,
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 22 /* MultiHelloMultipleRequires.key1 */)
+			return graphql.NewFieldContext(field, "MultiHelloMultipleRequires", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Key1, nil
@@ -2100,7 +2022,7 @@ func _MultiHelloMultipleRequires_key2(ctx context.Context, ec *executionContext,
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 23 /* MultiHelloMultipleRequires.key2 */)
+			return graphql.NewFieldContext(field, "MultiHelloMultipleRequires", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Key2, nil
@@ -2120,7 +2042,7 @@ func _MultiHelloMultipleRequires_key3(ctx context.Context, ec *executionContext,
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 24 /* MultiHelloMultipleRequires.key3 */)
+			return graphql.NewFieldContext(field, "MultiHelloMultipleRequires", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Key3, nil
@@ -2140,7 +2062,7 @@ func _MultiHelloRequires_name(ctx context.Context, ec *executionContext, field g
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 25 /* MultiHelloRequires.name */)
+			return graphql.NewFieldContext(field, "MultiHelloRequires", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -2160,7 +2082,7 @@ func _MultiHelloRequires_key1(ctx context.Context, ec *executionContext, field g
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 26 /* MultiHelloRequires.key1 */)
+			return graphql.NewFieldContext(field, "MultiHelloRequires", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Key1, nil
@@ -2180,7 +2102,7 @@ func _MultiHelloRequires_key2(ctx context.Context, ec *executionContext, field g
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 27 /* MultiHelloRequires.key2 */)
+			return graphql.NewFieldContext(field, "MultiHelloRequires", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Key2, nil
@@ -2200,7 +2122,7 @@ func _MultiHelloWithError_name(ctx context.Context, ec *executionContext, field 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 28 /* MultiHelloWithError.name */)
+			return graphql.NewFieldContext(field, "MultiHelloWithError", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -2220,7 +2142,7 @@ func _MultiPlanetRequiresNested_name(ctx context.Context, ec *executionContext, 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 29 /* MultiPlanetRequiresNested.name */)
+			return graphql.NewFieldContext(field, "MultiPlanetRequiresNested", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -2240,7 +2162,9 @@ func _MultiPlanetRequiresNested_world(ctx context.Context, ec *executionContext,
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 30 /* MultiPlanetRequiresNested.world */)
+			return graphql.NewFieldContext(field, "MultiPlanetRequiresNested", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_World(ctx, ec, field)
+			}, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.World, nil
@@ -2260,7 +2184,7 @@ func _MultiPlanetRequiresNested_size(ctx context.Context, ec *executionContext, 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 31 /* MultiPlanetRequiresNested.size */)
+			return graphql.NewFieldContext(field, "MultiPlanetRequiresNested", childFields_Int, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Size, nil
@@ -2280,7 +2204,7 @@ func _PlanetMultipleRequires_name(ctx context.Context, ec *executionContext, fie
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 32 /* PlanetMultipleRequires.name */)
+			return graphql.NewFieldContext(field, "PlanetMultipleRequires", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -2300,7 +2224,7 @@ func _PlanetMultipleRequires_diameter(ctx context.Context, ec *executionContext,
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 33 /* PlanetMultipleRequires.diameter */)
+			return graphql.NewFieldContext(field, "PlanetMultipleRequires", childFields_Int, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Diameter, nil
@@ -2320,7 +2244,7 @@ func _PlanetMultipleRequires_density(ctx context.Context, ec *executionContext, 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 34 /* PlanetMultipleRequires.density */)
+			return graphql.NewFieldContext(field, "PlanetMultipleRequires", childFields_Int, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Density, nil
@@ -2340,7 +2264,7 @@ func _PlanetMultipleRequires_weight(ctx context.Context, ec *executionContext, f
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 35 /* PlanetMultipleRequires.weight */)
+			return graphql.NewFieldContext(field, "PlanetMultipleRequires", childFields_Int, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Weight, nil
@@ -2360,7 +2284,7 @@ func _PlanetRequires_name(ctx context.Context, ec *executionContext, field graph
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 36 /* PlanetRequires.name */)
+			return graphql.NewFieldContext(field, "PlanetRequires", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -2380,7 +2304,7 @@ func _PlanetRequires_size(ctx context.Context, ec *executionContext, field graph
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 37 /* PlanetRequires.size */)
+			return graphql.NewFieldContext(field, "PlanetRequires", childFields_Int, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Size, nil
@@ -2400,7 +2324,7 @@ func _PlanetRequires_diameter(ctx context.Context, ec *executionContext, field g
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 38 /* PlanetRequires.diameter */)
+			return graphql.NewFieldContext(field, "PlanetRequires", childFields_Int, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Diameter, nil
@@ -2420,7 +2344,7 @@ func _PlanetRequiresNested_name(ctx context.Context, ec *executionContext, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 39 /* PlanetRequiresNested.name */)
+			return graphql.NewFieldContext(field, "PlanetRequiresNested", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -2440,7 +2364,9 @@ func _PlanetRequiresNested_world(ctx context.Context, ec *executionContext, fiel
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 40 /* PlanetRequiresNested.world */)
+			return graphql.NewFieldContext(field, "PlanetRequiresNested", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_World(ctx, ec, field)
+			}, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.World, nil
@@ -2460,7 +2386,7 @@ func _PlanetRequiresNested_size(ctx context.Context, ec *executionContext, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 41 /* PlanetRequiresNested.size */)
+			return graphql.NewFieldContext(field, "PlanetRequiresNested", childFields_Int, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Size, nil
@@ -2480,7 +2406,9 @@ func _Query__entities(ctx context.Context, ec *executionContext, field graphql.C
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 42 /* Query._entities */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Query__entities_args(ctx, ec, rawArgs)
+			}, "Query", childFields__Entity, true, false, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -2501,7 +2429,9 @@ func _Query__service(ctx context.Context, ec *executionContext, field graphql.Co
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 43 /* Query._service */)
+			return graphql.NewFieldContext(field, "Query", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields__Service(ctx, ec, field)
+			}, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.__resolve__service(ctx)
@@ -2521,7 +2451,11 @@ func _Query___type(ctx context.Context, ec *executionContext, field graphql.Coll
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 44 /* Query.__type */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field_Query___type_args(ctx, ec, rawArgs)
+			}, "Query", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields___Type(ctx, ec, field)
+			}, true, false, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -2542,7 +2476,9 @@ func _Query___schema(ctx context.Context, ec *executionContext, field graphql.Co
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 45 /* Query.__schema */)
+			return graphql.NewFieldContext(field, "Query", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields___Schema(ctx, ec, field)
+			}, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return ec.IntrospectSchema()
@@ -2562,7 +2498,7 @@ func _World_foo(ctx context.Context, ec *executionContext, field graphql.Collect
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 46 /* World.foo */)
+			return graphql.NewFieldContext(field, "World", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Foo, nil
@@ -2582,7 +2518,7 @@ func _World_bar(ctx context.Context, ec *executionContext, field graphql.Collect
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 47 /* World.bar */)
+			return graphql.NewFieldContext(field, "World", childFields_Int, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Bar, nil
@@ -2602,7 +2538,9 @@ func _World_hello(ctx context.Context, ec *executionContext, field graphql.Colle
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 48 /* World.hello */)
+			return graphql.NewFieldContext(field, "World", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_Hello(ctx, ec, field)
+			}, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Hello, nil
@@ -2622,7 +2560,7 @@ func _WorldName_name(ctx context.Context, ec *executionContext, field graphql.Co
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 49 /* WorldName.name */)
+			return graphql.NewFieldContext(field, "WorldName", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -2642,7 +2580,7 @@ func _WorldWithMultipleKeys_foo(ctx context.Context, ec *executionContext, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 50 /* WorldWithMultipleKeys.foo */)
+			return graphql.NewFieldContext(field, "WorldWithMultipleKeys", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Foo, nil
@@ -2662,7 +2600,7 @@ func _WorldWithMultipleKeys_bar(ctx context.Context, ec *executionContext, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 51 /* WorldWithMultipleKeys.bar */)
+			return graphql.NewFieldContext(field, "WorldWithMultipleKeys", childFields_Int, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Bar, nil
@@ -2682,7 +2620,9 @@ func _WorldWithMultipleKeys_hello(ctx context.Context, ec *executionContext, fie
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 52 /* WorldWithMultipleKeys.hello */)
+			return graphql.NewFieldContext(field, "WorldWithMultipleKeys", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields_Hello(ctx, ec, field)
+			}, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Hello, nil
@@ -2702,7 +2642,7 @@ func __Service_sdl(ctx context.Context, ec *executionContext, field graphql.Coll
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 53 /* _Service.sdl */)
+			return graphql.NewFieldContext(field, "_Service", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.SDL, nil
@@ -2722,7 +2662,7 @@ func ___Directive_name(ctx context.Context, ec *executionContext, field graphql.
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 54 /* __Directive.name */)
+			return graphql.NewFieldContext(field, "__Directive", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -2742,7 +2682,7 @@ func ___Directive_description(ctx context.Context, ec *executionContext, field g
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 55 /* __Directive.description */)
+			return graphql.NewFieldContext(field, "__Directive", childFields_String, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Description(), nil
@@ -2762,7 +2702,7 @@ func ___Directive_isRepeatable(ctx context.Context, ec *executionContext, field 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 56 /* __Directive.isRepeatable */)
+			return graphql.NewFieldContext(field, "__Directive", childFields_Boolean, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.IsRepeatable, nil
@@ -2782,7 +2722,7 @@ func ___Directive_locations(ctx context.Context, ec *executionContext, field gra
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 57 /* __Directive.locations */)
+			return graphql.NewFieldContext(field, "__Directive", childFields___DirectiveLocation, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Locations, nil
@@ -2802,7 +2742,11 @@ func ___Directive_args(ctx context.Context, ec *executionContext, field graphql.
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 58 /* __Directive.args */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field___Directive_args_args(ctx, ec, rawArgs)
+			}, "__Directive", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields___InputValue(ctx, ec, field)
+			}, true, false, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -2823,7 +2767,7 @@ func ___EnumValue_name(ctx context.Context, ec *executionContext, field graphql.
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 59 /* __EnumValue.name */)
+			return graphql.NewFieldContext(field, "__EnumValue", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -2843,7 +2787,7 @@ func ___EnumValue_description(ctx context.Context, ec *executionContext, field g
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 60 /* __EnumValue.description */)
+			return graphql.NewFieldContext(field, "__EnumValue", childFields_String, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Description(), nil
@@ -2863,7 +2807,7 @@ func ___EnumValue_isDeprecated(ctx context.Context, ec *executionContext, field 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 61 /* __EnumValue.isDeprecated */)
+			return graphql.NewFieldContext(field, "__EnumValue", childFields_Boolean, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.IsDeprecated(), nil
@@ -2883,7 +2827,7 @@ func ___EnumValue_deprecationReason(ctx context.Context, ec *executionContext, f
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 62 /* __EnumValue.deprecationReason */)
+			return graphql.NewFieldContext(field, "__EnumValue", childFields_String, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.DeprecationReason(), nil
@@ -2903,7 +2847,7 @@ func ___Field_name(ctx context.Context, ec *executionContext, field graphql.Coll
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 63 /* __Field.name */)
+			return graphql.NewFieldContext(field, "__Field", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -2923,7 +2867,7 @@ func ___Field_description(ctx context.Context, ec *executionContext, field graph
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 64 /* __Field.description */)
+			return graphql.NewFieldContext(field, "__Field", childFields_String, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Description(), nil
@@ -2943,7 +2887,11 @@ func ___Field_args(ctx context.Context, ec *executionContext, field graphql.Coll
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 65 /* __Field.args */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field___Field_args_args(ctx, ec, rawArgs)
+			}, "__Field", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields___InputValue(ctx, ec, field)
+			}, true, false, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -2964,7 +2912,9 @@ func ___Field_type(ctx context.Context, ec *executionContext, field graphql.Coll
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 66 /* __Field.type */)
+			return graphql.NewFieldContext(field, "__Field", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields___Type(ctx, ec, field)
+			}, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Type, nil
@@ -2984,7 +2934,7 @@ func ___Field_isDeprecated(ctx context.Context, ec *executionContext, field grap
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 67 /* __Field.isDeprecated */)
+			return graphql.NewFieldContext(field, "__Field", childFields_Boolean, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.IsDeprecated(), nil
@@ -3004,7 +2954,7 @@ func ___Field_deprecationReason(ctx context.Context, ec *executionContext, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 68 /* __Field.deprecationReason */)
+			return graphql.NewFieldContext(field, "__Field", childFields_String, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.DeprecationReason(), nil
@@ -3024,7 +2974,7 @@ func ___InputValue_name(ctx context.Context, ec *executionContext, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 69 /* __InputValue.name */)
+			return graphql.NewFieldContext(field, "__InputValue", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name, nil
@@ -3044,7 +2994,7 @@ func ___InputValue_description(ctx context.Context, ec *executionContext, field 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 70 /* __InputValue.description */)
+			return graphql.NewFieldContext(field, "__InputValue", childFields_String, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Description(), nil
@@ -3064,7 +3014,9 @@ func ___InputValue_type(ctx context.Context, ec *executionContext, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 71 /* __InputValue.type */)
+			return graphql.NewFieldContext(field, "__InputValue", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields___Type(ctx, ec, field)
+			}, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Type, nil
@@ -3084,7 +3036,7 @@ func ___InputValue_defaultValue(ctx context.Context, ec *executionContext, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 72 /* __InputValue.defaultValue */)
+			return graphql.NewFieldContext(field, "__InputValue", childFields_String, false, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.DefaultValue, nil
@@ -3104,7 +3056,7 @@ func ___InputValue_isDeprecated(ctx context.Context, ec *executionContext, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 73 /* __InputValue.isDeprecated */)
+			return graphql.NewFieldContext(field, "__InputValue", childFields_Boolean, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.IsDeprecated(), nil
@@ -3124,7 +3076,7 @@ func ___InputValue_deprecationReason(ctx context.Context, ec *executionContext, 
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 74 /* __InputValue.deprecationReason */)
+			return graphql.NewFieldContext(field, "__InputValue", childFields_String, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.DeprecationReason(), nil
@@ -3144,7 +3096,7 @@ func ___Schema_description(ctx context.Context, ec *executionContext, field grap
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 75 /* __Schema.description */)
+			return graphql.NewFieldContext(field, "__Schema", childFields_String, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Description(), nil
@@ -3164,7 +3116,9 @@ func ___Schema_types(ctx context.Context, ec *executionContext, field graphql.Co
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 76 /* __Schema.types */)
+			return graphql.NewFieldContext(field, "__Schema", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields___Type(ctx, ec, field)
+			}, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Types(), nil
@@ -3184,7 +3138,9 @@ func ___Schema_queryType(ctx context.Context, ec *executionContext, field graphq
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 77 /* __Schema.queryType */)
+			return graphql.NewFieldContext(field, "__Schema", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields___Type(ctx, ec, field)
+			}, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.QueryType(), nil
@@ -3204,7 +3160,9 @@ func ___Schema_mutationType(ctx context.Context, ec *executionContext, field gra
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 78 /* __Schema.mutationType */)
+			return graphql.NewFieldContext(field, "__Schema", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields___Type(ctx, ec, field)
+			}, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.MutationType(), nil
@@ -3224,7 +3182,9 @@ func ___Schema_subscriptionType(ctx context.Context, ec *executionContext, field
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 79 /* __Schema.subscriptionType */)
+			return graphql.NewFieldContext(field, "__Schema", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields___Type(ctx, ec, field)
+			}, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.SubscriptionType(), nil
@@ -3244,7 +3204,9 @@ func ___Schema_directives(ctx context.Context, ec *executionContext, field graph
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 80 /* __Schema.directives */)
+			return graphql.NewFieldContext(field, "__Schema", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields___Directive(ctx, ec, field)
+			}, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Directives(), nil
@@ -3264,7 +3226,7 @@ func ___Type_kind(ctx context.Context, ec *executionContext, field graphql.Colle
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 81 /* __Type.kind */)
+			return graphql.NewFieldContext(field, "__Type", childFields___TypeKind, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Kind(), nil
@@ -3284,7 +3246,7 @@ func ___Type_name(ctx context.Context, ec *executionContext, field graphql.Colle
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 82 /* __Type.name */)
+			return graphql.NewFieldContext(field, "__Type", childFields_String, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Name(), nil
@@ -3304,7 +3266,7 @@ func ___Type_description(ctx context.Context, ec *executionContext, field graphq
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 83 /* __Type.description */)
+			return graphql.NewFieldContext(field, "__Type", childFields_String, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Description(), nil
@@ -3324,7 +3286,7 @@ func ___Type_specifiedByURL(ctx context.Context, ec *executionContext, field gra
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 84 /* __Type.specifiedByURL */)
+			return graphql.NewFieldContext(field, "__Type", childFields_String, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.SpecifiedByURL(), nil
@@ -3344,7 +3306,11 @@ func ___Type_fields(ctx context.Context, ec *executionContext, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 85 /* __Type.fields */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field___Type_fields_args(ctx, ec, rawArgs)
+			}, "__Type", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields___Field(ctx, ec, field)
+			}, true, false, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -3365,7 +3331,9 @@ func ___Type_interfaces(ctx context.Context, ec *executionContext, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 86 /* __Type.interfaces */)
+			return graphql.NewFieldContext(field, "__Type", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields___Type(ctx, ec, field)
+			}, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.Interfaces(), nil
@@ -3385,7 +3353,9 @@ func ___Type_possibleTypes(ctx context.Context, ec *executionContext, field grap
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 87 /* __Type.possibleTypes */)
+			return graphql.NewFieldContext(field, "__Type", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields___Type(ctx, ec, field)
+			}, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.PossibleTypes(), nil
@@ -3405,7 +3375,11 @@ func ___Type_enumValues(ctx context.Context, ec *executionContext, field graphql
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 88 /* __Type.enumValues */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field___Type_enumValues_args(ctx, ec, rawArgs)
+			}, "__Type", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields___EnumValue(ctx, ec, field)
+			}, true, false, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -3426,7 +3400,11 @@ func ___Type_inputFields(ctx context.Context, ec *executionContext, field graphq
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextWithArgsByID(ctx, ec, field, 89 /* __Type.inputFields */)
+			return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+				return field___Type_inputFields_args(ctx, ec, rawArgs)
+			}, "__Type", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields___InputValue(ctx, ec, field)
+			}, true, false, true)
 		},
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
@@ -3447,7 +3425,9 @@ func ___Type_ofType(ctx context.Context, ec *executionContext, field graphql.Col
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 90 /* __Type.ofType */)
+			return graphql.NewFieldContext(field, "__Type", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+				return childFields___Type(ctx, ec, field)
+			}, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.OfType(), nil
@@ -3467,7 +3447,7 @@ func ___Type_isOneOf(ctx context.Context, ec *executionContext, field graphql.Co
 		ec.OperationContext,
 		field,
 		func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return fieldContextByID(ctx, ec, field, 91 /* __Type.isOneOf */)
+			return graphql.NewFieldContext(field, "__Type", childFields_Boolean, true, false)
 		},
 		func(ctx context.Context) (any, error) {
 			return obj.IsOneOf(), nil

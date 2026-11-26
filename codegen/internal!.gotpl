@@ -225,20 +225,26 @@ var sources = []*ast.Source{
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
-// childFields_* functions provide shared child field context lookups.
-// Each function is generated once per unique object type, deduplicating the
-// switch statements that were previously inlined in every fieldContext_* function.
-{{- range $ct := .UniqueChildFieldTypes }}
+// childFields_* are the FieldContext.Child values, one per type that fields return rather
+// than one per field: a shared value for scalars, enums, interfaces and unions, and a
+// dispatcher over the type's fields for objects.
+{{- range $ct := .ChildFieldTypes }}
+{{- if not $ct.Definition.Fields }}
+var childFields_{{ $ct.TypeName }} = graphql.NoChildFields("{{ $ct.TypeName }}")
+{{- else if ne $ct.Definition.Kind "OBJECT" }}
+var childFields_{{ $ct.TypeName }} = graphql.AbstractChildFields("{{ $ct.Definition.Kind }}")
+{{- else }}
 
 func {{$.FuncReceiver}}childFields_{{ $ct.TypeName }}(ctx context.Context, {{$.ECFuncParam}}field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
-	{{- range $f := $ct.Definition.Fields }}
+	{{- range $f := $ct.Object.Fields }}
 	case "{{ $f.Name }}":
-		return {{$.ECDot}}fieldContext_{{ $ct.TypeName }}_{{ $f.Name }}(ctx, {{$.ECArg}}field)
+		return {{ $.FieldContextCall $f true }}
 	{{- end }}
 	}
 	return nil, fmt.Errorf("no field named %q was found under type {{ $ct.TypeName }}", field.Name)
 }
+{{- end }}
 {{- end }}
 
 {{ template "globalMiddleware" . }}

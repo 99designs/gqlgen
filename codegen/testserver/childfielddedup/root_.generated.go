@@ -127,20 +127,24 @@ var sources = []*ast.Source{
 }
 var parsedSchema = gqlparser.MustLoadSchema(sources...)
 
-// childFields_* functions provide shared child field context lookups.
-// Each function is generated once per unique object type, deduplicating the
-// switch statements that were previously inlined in every fieldContext_* function.
+// childFields_* are the FieldContext.Child values, one per type that fields return rather
+// than one per field: a shared value for scalars, enums, interfaces and unions, and a
+// dispatcher over the type's fields for objects.
 
 func childFields_Article(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "id":
-		return fieldContext_Article_id(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Article", childFields_ID, false, false)
 	case "headline":
-		return fieldContext_Article_headline(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Article", childFields_String, false, false)
 	case "author":
-		return fieldContext_Article_author(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Article", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields_Author(ctx, ec, field)
+		}, false, false)
 	case "assignee":
-		return fieldContext_Article_assignee(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Article", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields_User(ctx, ec, field)
+		}, false, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type Article", field.Name)
 }
@@ -148,11 +152,11 @@ func childFields_Article(ctx context.Context, ec *executionContext, field graphq
 func childFields_Author(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "id":
-		return fieldContext_Author_id(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Author", childFields_ID, false, false)
 	case "name":
-		return fieldContext_Author_name(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Author", childFields_String, false, false)
 	case "email":
-		return fieldContext_Author_email(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Author", childFields_String, false, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type Author", field.Name)
 }
@@ -160,41 +164,57 @@ func childFields_Author(ctx context.Context, ec *executionContext, field graphql
 func childFields_Book(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "id":
-		return fieldContext_Book_id(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Book", childFields_ID, false, false)
 	case "title":
-		return fieldContext_Book_title(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Book", childFields_String, false, false)
 	case "author":
-		return fieldContext_Book_author(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Book", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields_Author(ctx, ec, field)
+		}, false, false)
 	case "reviewer":
-		return fieldContext_Book_reviewer(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Book", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields_User(ctx, ec, field)
+		}, false, false)
 	case "editor":
-		return fieldContext_Book_editor(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Book", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields_User(ctx, ec, field)
+		}, false, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type Book", field.Name)
 }
 
+var childFields_Boolean = graphql.NoChildFields("Boolean")
+
 func childFields_Comment(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "id":
-		return fieldContext_Comment_id(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Comment", childFields_ID, false, false)
 	case "text":
-		return fieldContext_Comment_text(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Comment", childFields_String, false, false)
 	case "commenter":
-		return fieldContext_Comment_commenter(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Comment", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields_User(ctx, ec, field)
+		}, false, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type Comment", field.Name)
 }
 
+var childFields_ID = graphql.NoChildFields("ID")
+
 func childFields_Invoice(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "id":
-		return fieldContext_Invoice_id(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Invoice", childFields_ID, false, false)
 	case "total":
-		return fieldContext_Invoice_total(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Invoice", childFields_String, false, false)
 	case "createdBy":
-		return fieldContext_Invoice_createdBy(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Invoice", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields_User(ctx, ec, field)
+		}, true, true)
 	case "approvedBy":
-		return fieldContext_Invoice_approvedBy(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Invoice", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields_User(ctx, ec, field)
+		}, true, true)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type Invoice", field.Name)
 }
@@ -202,27 +222,37 @@ func childFields_Invoice(ctx context.Context, ec *executionContext, field graphq
 func childFields_Review(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "id":
-		return fieldContext_Review_id(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Review", childFields_ID, false, false)
 	case "body":
-		return fieldContext_Review_body(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Review", childFields_String, false, false)
 	case "author":
-		return fieldContext_Review_author(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Review", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields_Author(ctx, ec, field)
+		}, false, false)
 	case "moderator":
-		return fieldContext_Review_moderator(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Review", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields_User(ctx, ec, field)
+		}, false, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type Review", field.Name)
 }
 
+var childFields_String = graphql.NoChildFields("String")
+
 func childFields_Task(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "id":
-		return fieldContext_Task_id(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Task", childFields_ID, false, false)
 	case "title":
-		return fieldContext_Task_title(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Task", childFields_String, false, false)
 	case "assignee":
-		return fieldContext_Task_assignee(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Task", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields_User(ctx, ec, field)
+		}, false, false)
 	case "reporter":
-		return fieldContext_Task_reporter(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "Task", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields_User(ctx, ec, field)
+		}, false, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type Task", field.Name)
 }
@@ -230,25 +260,25 @@ func childFields_Task(ctx context.Context, ec *executionContext, field graphql.C
 func childFields_User(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "id":
-		return fieldContext_User_id(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "User", childFields_ID, false, false)
 	case "name":
-		return fieldContext_User_name(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "User", childFields_String, false, false)
 	case "email":
-		return fieldContext_User_email(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "User", childFields_String, false, false)
 	case "phone":
-		return fieldContext_User_phone(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "User", childFields_String, false, false)
 	case "avatar":
-		return fieldContext_User_avatar(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "User", childFields_String, false, false)
 	case "role":
-		return fieldContext_User_role(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "User", childFields_String, false, false)
 	case "status":
-		return fieldContext_User_status(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "User", childFields_String, false, false)
 	case "language":
-		return fieldContext_User_language(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "User", childFields_String, false, false)
 	case "timezone":
-		return fieldContext_User_timezone(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "User", childFields_String, false, false)
 	case "createdAt":
-		return fieldContext_User_createdAt(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "User", childFields_String, false, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type User", field.Name)
 }
@@ -256,29 +286,35 @@ func childFields_User(ctx context.Context, ec *executionContext, field graphql.C
 func childFields___Directive(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
-		return fieldContext___Directive_name(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__Directive", childFields_String, false, false)
 	case "description":
-		return fieldContext___Directive_description(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__Directive", childFields_String, true, false)
 	case "isRepeatable":
-		return fieldContext___Directive_isRepeatable(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__Directive", childFields_Boolean, false, false)
 	case "locations":
-		return fieldContext___Directive_locations(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__Directive", childFields___DirectiveLocation, false, false)
 	case "args":
-		return fieldContext___Directive_args(ctx, ec, field)
+		return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+			return field___Directive_args_args(ctx, ec, rawArgs)
+		}, "__Directive", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___InputValue(ctx, ec, field)
+		}, true, false, true)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type __Directive", field.Name)
 }
 
+var childFields___DirectiveLocation = graphql.NoChildFields("__DirectiveLocation")
+
 func childFields___EnumValue(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
-		return fieldContext___EnumValue_name(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__EnumValue", childFields_String, false, false)
 	case "description":
-		return fieldContext___EnumValue_description(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__EnumValue", childFields_String, true, false)
 	case "isDeprecated":
-		return fieldContext___EnumValue_isDeprecated(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__EnumValue", childFields_Boolean, true, false)
 	case "deprecationReason":
-		return fieldContext___EnumValue_deprecationReason(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__EnumValue", childFields_String, true, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type __EnumValue", field.Name)
 }
@@ -286,17 +322,23 @@ func childFields___EnumValue(ctx context.Context, ec *executionContext, field gr
 func childFields___Field(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
-		return fieldContext___Field_name(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__Field", childFields_String, false, false)
 	case "description":
-		return fieldContext___Field_description(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__Field", childFields_String, true, false)
 	case "args":
-		return fieldContext___Field_args(ctx, ec, field)
+		return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+			return field___Field_args_args(ctx, ec, rawArgs)
+		}, "__Field", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___InputValue(ctx, ec, field)
+		}, true, false, true)
 	case "type":
-		return fieldContext___Field_type(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__Field", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___Type(ctx, ec, field)
+		}, false, false)
 	case "isDeprecated":
-		return fieldContext___Field_isDeprecated(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__Field", childFields_Boolean, true, false)
 	case "deprecationReason":
-		return fieldContext___Field_deprecationReason(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__Field", childFields_String, true, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type __Field", field.Name)
 }
@@ -304,17 +346,19 @@ func childFields___Field(ctx context.Context, ec *executionContext, field graphq
 func childFields___InputValue(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "name":
-		return fieldContext___InputValue_name(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__InputValue", childFields_String, false, false)
 	case "description":
-		return fieldContext___InputValue_description(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__InputValue", childFields_String, true, false)
 	case "type":
-		return fieldContext___InputValue_type(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__InputValue", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___Type(ctx, ec, field)
+		}, false, false)
 	case "defaultValue":
-		return fieldContext___InputValue_defaultValue(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__InputValue", childFields_String, false, false)
 	case "isDeprecated":
-		return fieldContext___InputValue_isDeprecated(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__InputValue", childFields_Boolean, true, false)
 	case "deprecationReason":
-		return fieldContext___InputValue_deprecationReason(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__InputValue", childFields_String, true, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type __InputValue", field.Name)
 }
@@ -322,17 +366,27 @@ func childFields___InputValue(ctx context.Context, ec *executionContext, field g
 func childFields___Schema(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "description":
-		return fieldContext___Schema_description(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__Schema", childFields_String, true, false)
 	case "types":
-		return fieldContext___Schema_types(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__Schema", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___Type(ctx, ec, field)
+		}, true, false)
 	case "queryType":
-		return fieldContext___Schema_queryType(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__Schema", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___Type(ctx, ec, field)
+		}, true, false)
 	case "mutationType":
-		return fieldContext___Schema_mutationType(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__Schema", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___Type(ctx, ec, field)
+		}, true, false)
 	case "subscriptionType":
-		return fieldContext___Schema_subscriptionType(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__Schema", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___Type(ctx, ec, field)
+		}, true, false)
 	case "directives":
-		return fieldContext___Schema_directives(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__Schema", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___Directive(ctx, ec, field)
+		}, true, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type __Schema", field.Name)
 }
@@ -340,27 +394,47 @@ func childFields___Schema(ctx context.Context, ec *executionContext, field graph
 func childFields___Type(ctx context.Context, ec *executionContext, field graphql.CollectedField) (*graphql.FieldContext, error) {
 	switch field.Name {
 	case "kind":
-		return fieldContext___Type_kind(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__Type", childFields___TypeKind, true, false)
 	case "name":
-		return fieldContext___Type_name(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__Type", childFields_String, true, false)
 	case "description":
-		return fieldContext___Type_description(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__Type", childFields_String, true, false)
 	case "specifiedByURL":
-		return fieldContext___Type_specifiedByURL(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__Type", childFields_String, true, false)
 	case "fields":
-		return fieldContext___Type_fields(ctx, ec, field)
+		return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+			return field___Type_fields_args(ctx, ec, rawArgs)
+		}, "__Type", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___Field(ctx, ec, field)
+		}, true, false, true)
 	case "interfaces":
-		return fieldContext___Type_interfaces(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__Type", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___Type(ctx, ec, field)
+		}, true, false)
 	case "possibleTypes":
-		return fieldContext___Type_possibleTypes(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__Type", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___Type(ctx, ec, field)
+		}, true, false)
 	case "enumValues":
-		return fieldContext___Type_enumValues(ctx, ec, field)
+		return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+			return field___Type_enumValues_args(ctx, ec, rawArgs)
+		}, "__Type", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___EnumValue(ctx, ec, field)
+		}, true, false, true)
 	case "inputFields":
-		return fieldContext___Type_inputFields(ctx, ec, field)
+		return graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+			return field___Type_inputFields_args(ctx, ec, rawArgs)
+		}, "__Type", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___InputValue(ctx, ec, field)
+		}, true, false, true)
 	case "ofType":
-		return fieldContext___Type_ofType(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__Type", func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return childFields___Type(ctx, ec, field)
+		}, true, false)
 	case "isOneOf":
-		return fieldContext___Type_isOneOf(ctx, ec, field)
+		return graphql.NewChildFieldContext(field, "__Type", childFields_Boolean, true, false)
 	}
 	return nil, fmt.Errorf("no field named %q was found under type __Type", field.Name)
 }
+
+var childFields___TypeKind = graphql.NoChildFields("__TypeKind")

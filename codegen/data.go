@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"slices"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/vektah/gqlparser/v2/ast"
@@ -127,19 +128,23 @@ func (d *Data) BatchImplementors(name string) []InterfaceImplementor {
 	return impls
 }
 
-// ChildFieldType represents a unique object type referenced as a return type
-// from fields across all objects. Used to generate shared childFields_*
-// functions that deduplicate the repeated switch statements in fieldContext_*.
+// ChildFieldType represents a unique type referenced as a return type from fields across
+// all objects. Each one gets a shared childFields_* function that serves as the
+// FieldContext.Child dispatcher of every field returning that type.
 type ChildFieldType struct {
 	TypeName   string
 	Definition *ast.Definition
+	// Object is the generated object of an OBJECT type; nil for other kinds.
+	Object *Object
 }
 
-// UniqueChildFieldTypes collects all unique OBJECT types that appear as return
-// types from fields. Each type appears once, enabling generation of a shared
-// childFields_* lookup function instead of inlining the switch in every
-// fieldContext_* function.
-func (d *Data) UniqueChildFieldTypes() []*ChildFieldType {
+// ChildFieldTypes collects all unique types that appear as return types from fields,
+// sorted by name.
+func (d *Data) ChildFieldTypes() []*ChildFieldType {
+	objects := make(map[string]*Object, len(d.Objects))
+	for _, obj := range d.Objects {
+		objects[obj.Name] = obj
+	}
 	seen := map[string]bool{}
 	var result []*ChildFieldType
 	for _, obj := range d.Objects {
@@ -148,9 +153,6 @@ func (d *Data) UniqueChildFieldTypes() []*ChildFieldType {
 				continue
 			}
 			def := field.TypeReference.Definition
-			if def.Kind != ast.Object || len(def.Fields) == 0 {
-				continue
-			}
 			if seen[def.Name] {
 				continue
 			}
@@ -158,12 +160,27 @@ func (d *Data) UniqueChildFieldTypes() []*ChildFieldType {
 			result = append(result, &ChildFieldType{
 				TypeName:   def.Name,
 				Definition: def,
+				Object:     objects[def.Name],
 			})
 		}
 	}
 	sort.Slice(result, func(i, j int) bool {
 		return result[i].TypeName < result[j].TypeName
 	})
+	return result
+}
+
+// UniqueChildFieldTypes collects all unique OBJECT types with fields that appear as return
+// types from fields, sorted by name.
+//
+// Deprecated: the templates no longer use it; ChildFieldTypes returns every child type.
+func (d *Data) UniqueChildFieldTypes() []*ChildFieldType {
+	var result []*ChildFieldType
+	for _, ct := range d.ChildFieldTypes() {
+		if ct.Definition.Kind == ast.Object && len(ct.Definition.Fields) > 0 {
+			result = append(result, ct)
+		}
+	}
 	return result
 }
 
@@ -264,6 +281,52 @@ func (d *Data) ECArg() string {
 		return "ec, "
 	}
 	return ""
+}
+
+// FieldContextCall returns the call that builds f's graphql.FieldContext and returns it
+// with an error. A field without arguments calls graphql.NewFieldContext, or with child set
+// graphql.NewChildFieldContext, the non-inlined form for the FieldContext.Child
+// dispatchers. A field with arguments calls graphql.NewFieldContextWithArgs, which also
+// parses them.
+func (d *Data) FieldContextCall(f *Field, child bool) string {
+	common := strconv.Quote(f.Object.Name) + ", " + d.childFieldsValue(f) + ", " +
+		strconv.FormatBool(f.IsMethod() || f.IsResolver) + ", " + strconv.FormatBool(f.IsResolver)
+	if len(f.Args) == 0 {
+		if child {
+			return "graphql.NewChildFieldContext(field, " + common + ")"
+		}
+		return "graphql.NewFieldContext(field, " + common + ")"
+	}
+	recoverFromPanic := strconv.FormatBool(!d.Config.OmitPanicHandler)
+	return "graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, " +
+		d.fieldArgsValue(f) + ", " + common + ", " + recoverFromPanic + ")"
+}
+
+// fieldArgsValue returns f's generated args function as a value taking the execution
+// context first, which is what graphql.NewFieldContextWithArgs calls. With the method
+// syntax that is the method expression; with the function syntax the generated function
+// takes ctx first, so it is wrapped in a literal that captures nothing.
+func (d *Data) fieldArgsValue(f *Field) string {
+	if d.Config.UseFunctionSyntaxForExecutionContext {
+		return "func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error) { return " +
+			f.ArgsFunc() + "(ctx, ec, rawArgs) }"
+	}
+	return "(*executionContext)." + f.ArgsFunc()
+}
+
+// childFieldsValue returns the expression for the graphql.FieldContext.Child of f. Fields
+// returning an object get its childFields_* dispatcher bound to ec; every other kind gets
+// the shared package-level value, so building their FieldContext allocates no closure.
+func (d *Data) childFieldsValue(f *Field) string {
+	name := "childFields_" + f.ChildFieldContextTypeName()
+	if f.TypeReference == nil || f.TypeReference.Definition == nil ||
+		f.TypeReference.Definition.Kind != ast.Object {
+		return name
+	}
+	if d.Config.UseFunctionSyntaxForExecutionContext {
+		return "func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) { return " + name + "(ctx, ec, field) }"
+	}
+	return "ec." + name
 }
 
 // ImplDirectivesField is the subset of Field and FieldArgument needed by the

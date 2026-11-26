@@ -97,6 +97,7 @@ func TestUniqueChildFieldTypes(t *testing.T) {
 	d := Data{
 		Objects: Objects{
 			{
+				Definition: &ast.Definition{Name: "Query"},
 				Fields: []*Field{
 					{TypeReference: &config.TypeReference{Definition: userDef}},
 					// scalar, should be excluded
@@ -130,6 +131,47 @@ func TestUniqueChildFieldTypes_Empty(t *testing.T) {
 	assert.Empty(t, d.UniqueChildFieldTypes())
 }
 
+func TestChildFieldTypes(t *testing.T) {
+	userDef := &ast.Definition{
+		Kind:   ast.Object,
+		Name:   "User",
+		Fields: ast.FieldList{{Name: "id"}},
+	}
+	stringDef := &ast.Definition{
+		Kind: ast.Scalar,
+		Name: "String",
+	}
+	userObj := &Object{Definition: userDef}
+
+	d := Data{
+		Objects: Objects{
+			{
+				Definition: &ast.Definition{Name: "Query"},
+				Fields: []*Field{
+					{TypeReference: &config.TypeReference{Definition: userDef}},
+					{TypeReference: &config.TypeReference{Definition: stringDef}},
+					// duplicate, should be deduped
+					{TypeReference: &config.TypeReference{Definition: userDef}},
+					// nil ref, should be skipped
+					{TypeReference: nil},
+				},
+			},
+			userObj,
+		},
+	}
+
+	result := d.ChildFieldTypes()
+
+	// every kind is included, sorted alphabetically
+	require.Len(t, result, 2)
+	assert.Equal(t, "String", result[0].TypeName)
+	assert.Equal(t, stringDef, result[0].Definition)
+	assert.Nil(t, result[0].Object)
+	assert.Equal(t, "User", result[1].TypeName)
+	assert.Equal(t, userDef, result[1].Definition)
+	assert.Same(t, userObj, result[1].Object)
+}
+
 func TestDataECHelpers(t *testing.T) {
 	receiver := &Data{Config: &config.Config{UseFunctionSyntaxForExecutionContext: false}}
 	assert.Equal(t, "(ec *executionContext) ", receiver.FuncReceiver())
@@ -142,6 +184,105 @@ func TestDataECHelpers(t *testing.T) {
 	assert.Equal(t, "ec *executionContext, ", function.ECFuncParam())
 	assert.Empty(t, function.ECDot())
 	assert.Equal(t, "ec, ", function.ECArg())
+}
+
+func TestFieldContextCall(t *testing.T) {
+	stringDef := &ast.Definition{Kind: ast.Scalar, Name: "String"}
+	userDef := &ast.Definition{Kind: ast.Object, Name: "User", Fields: ast.FieldList{{Name: "id"}}}
+	nodeDef := &ast.Definition{
+		Kind:   ast.Interface,
+		Name:   "Node",
+		Fields: ast.FieldList{{Name: "id"}},
+	}
+	query := &Object{Definition: &ast.Definition{Name: "Query"}}
+	newField := func(name string, def *ast.Definition, mutate func(*Field)) *Field {
+		f := &Field{
+			FieldDefinition: &ast.FieldDefinition{Name: name},
+			TypeReference:   &config.TypeReference{Definition: def},
+			Object:          query,
+		}
+		if mutate != nil {
+			mutate(f)
+		}
+		return f
+	}
+	withArgs := func(f *Field) {
+		f.Args = []*FieldArgument{{}}
+		f.GoFieldType = GoFieldMethod
+	}
+
+	const (
+		childSig = "func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error)"
+		argsSig  = "func(ec *executionContext, ctx context.Context, rawArgs map[string]any) (map[string]any, error)"
+	)
+	tests := []struct {
+		name   string
+		config config.Config
+		field  *Field
+		child  bool
+		want   string
+	}{
+		{
+			name:  "scalar shares the package-level child",
+			field: newField("name", stringDef, nil),
+			want:  `graphql.NewFieldContext(field, "Query", childFields_String, false, false)`,
+		},
+		{
+			name:  "abstract type shares the package-level child",
+			field: newField("node", nodeDef, nil),
+			want:  `graphql.NewFieldContext(field, "Query", childFields_Node, false, false)`,
+		},
+		{
+			name:  "object binds its dispatcher to ec",
+			field: newField("user", userDef, func(f *Field) { f.GoFieldType = GoFieldMethod }),
+			want:  `graphql.NewFieldContext(field, "Query", ec.childFields_User, true, false)`,
+		},
+		{
+			name:  "resolver counts as a method",
+			field: newField("user", userDef, func(f *Field) { f.IsResolver = true }),
+			want:  `graphql.NewFieldContext(field, "Query", ec.childFields_User, true, true)`,
+		},
+		{
+			name:  "dispatcher case uses the non-inlined constructor",
+			field: newField("name", stringDef, nil),
+			child: true,
+			want:  `graphql.NewChildFieldContext(field, "Query", childFields_String, false, false)`,
+		},
+		{
+			name:  "arguments are parsed through the method expression",
+			field: newField("user", userDef, withArgs),
+			child: true,
+			want: `graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, ` +
+				`(*executionContext).field_Query_user_args, "Query", ec.childFields_User, true, false, true)`,
+		},
+		{
+			name:   "OmitPanicHandler turns recovery off",
+			config: config.Config{OmitPanicHandler: true},
+			field:  newField("name", stringDef, withArgs),
+			want: `graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, ` +
+				`(*executionContext).field_Query_name_args, "Query", childFields_String, true, false, false)`,
+		},
+		{
+			name:   "function syntax wraps the object dispatcher",
+			config: config.Config{UseFunctionSyntaxForExecutionContext: true},
+			field:  newField("user", userDef, nil),
+			want: `graphql.NewFieldContext(field, "Query", ` + childSig +
+				` { return childFields_User(ctx, ec, field) }, false, false)`,
+		},
+		{
+			name:   "function syntax wraps the args function",
+			config: config.Config{UseFunctionSyntaxForExecutionContext: true},
+			field:  newField("name", stringDef, withArgs),
+			want: `graphql.NewFieldContextWithArgs(ctx, ec.OperationContext, ec, field, ` + argsSig +
+				` { return field_Query_name_args(ctx, ec, rawArgs) }, "Query", childFields_String, true, false, true)`,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			d := &Data{Config: &tt.config}
+			assert.Equal(t, tt.want, d.FieldContextCall(tt.field, tt.child))
+		})
+	}
 }
 
 // implDirectivesFieldStub satisfies ImplDirectivesField for testing purposes.

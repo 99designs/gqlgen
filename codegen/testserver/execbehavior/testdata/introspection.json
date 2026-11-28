@@ -1,0 +1,1456 @@
+{
+  "details": {
+    "data": {
+      "input": {
+        "inputFields": [
+          {
+            "defaultValue": "\"anonymous\"",
+            "deprecationReason": null,
+            "description": "The name.",
+            "isDeprecated": false,
+            "name": "name"
+          },
+          {
+            "defaultValue": null,
+            "deprecationReason": "Use name.",
+            "description": null,
+            "isDeprecated": true,
+            "name": "oldName"
+          }
+        ],
+        "isOneOf": false
+      },
+      "oneOf": {
+        "inputFields": [
+          {
+            "name": "byName"
+          },
+          {
+            "name": "byId"
+          }
+        ],
+        "isOneOf": true
+      }
+    }
+  },
+  "full": {
+    "data": {
+      "__schema": {
+        "description": null,
+        "directives": [
+          {
+            "args": [
+              {
+                "defaultValue": "true",
+                "deprecationReason": null,
+                "description": "Deferred when true or undefined.",
+                "isDeprecated": false,
+                "name": "if",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              },
+              {
+                "defaultValue": null,
+                "deprecationReason": null,
+                "description": "Unique name",
+                "isDeprecated": false,
+                "name": "label",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            ],
+            "description": "Directs the executor to defer this fragment when the `if` argument is true or undefined.",
+            "isRepeatable": false,
+            "locations": [
+              "FRAGMENT_SPREAD",
+              "INLINE_FRAGMENT"
+            ],
+            "name": "defer"
+          },
+          {
+            "args": [
+              {
+                "defaultValue": "\"No longer supported\"",
+                "deprecationReason": null,
+                "description": "Explains why this element was deprecated, usually also including a suggestion for how to access supported similar data. Formatted using the Markdown syntax, as specified by [CommonMark](https://commonmark.org/).",
+                "isDeprecated": false,
+                "name": "reason",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            ],
+            "description": "Marks an element of a GraphQL schema as no longer supported.",
+            "isRepeatable": false,
+            "locations": [
+              "FIELD_DEFINITION",
+              "ARGUMENT_DEFINITION",
+              "INPUT_FIELD_DEFINITION",
+              "ENUM_VALUE",
+              "DIRECTIVE_DEFINITION"
+            ],
+            "name": "deprecated"
+          },
+          {
+            "args": [
+              {
+                "defaultValue": null,
+                "deprecationReason": null,
+                "description": "Included when true.",
+                "isDeprecated": false,
+                "name": "if",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  }
+                }
+              }
+            ],
+            "description": "Directs the executor to include this field or fragment only when the `if` argument is true.",
+            "isRepeatable": false,
+            "locations": [
+              "FIELD",
+              "FRAGMENT_SPREAD",
+              "INLINE_FRAGMENT"
+            ],
+            "name": "include"
+          },
+          {
+            "args": [],
+            "description": "Indicates exactly one field must be supplied and this field must not be `null`.",
+            "isRepeatable": false,
+            "locations": [
+              "INPUT_OBJECT"
+            ],
+            "name": "oneOf"
+          },
+          {
+            "args": [
+              {
+                "defaultValue": null,
+                "deprecationReason": null,
+                "description": "Skipped when true.",
+                "isDeprecated": false,
+                "name": "if",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  }
+                }
+              }
+            ],
+            "description": "Directs the executor to skip this field or fragment when the `if` argument is true.",
+            "isRepeatable": false,
+            "locations": [
+              "FIELD",
+              "FRAGMENT_SPREAD",
+              "INLINE_FRAGMENT"
+            ],
+            "name": "skip"
+          },
+          {
+            "args": [
+              {
+                "defaultValue": null,
+                "deprecationReason": null,
+                "description": "The URL that specifies the behavior of this scalar.",
+                "isDeprecated": false,
+                "name": "url",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              }
+            ],
+            "description": "Exposes a URL that specifies the behavior of this scalar.",
+            "isRepeatable": false,
+            "locations": [
+              "SCALAR"
+            ],
+            "name": "specifiedBy"
+          },
+          {
+            "args": [
+              {
+                "defaultValue": null,
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "name",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              }
+            ],
+            "description": "A directive that may be repeated.",
+            "isRepeatable": true,
+            "locations": [
+              "OBJECT",
+              "FIELD_DEFINITION"
+            ],
+            "name": "tag"
+          }
+        ],
+        "mutationType": {
+          "name": "Mutation"
+        },
+        "queryType": {
+          "name": "Query"
+        },
+        "subscriptionType": {
+          "name": "Subscription"
+        },
+        "types": [
+          {
+            "description": "The `Boolean` scalar type represents `true` or `false`.",
+            "enumValues": [],
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "kind": "SCALAR",
+            "name": "Boolean",
+            "possibleTypes": [],
+            "specifiedByURL": null
+          },
+          {
+            "description": "An object with descriptions and deprecations.",
+            "enumValues": [],
+            "fields": [
+              {
+                "args": [
+                  {
+                    "defaultValue": "FULL",
+                    "deprecationReason": null,
+                    "description": "How to format it.",
+                    "isDeprecated": false,
+                    "name": "format",
+                    "type": {
+                      "kind": "ENUM",
+                      "name": "NameFormat",
+                      "ofType": null
+                    }
+                  },
+                  {
+                    "defaultValue": null,
+                    "deprecationReason": "Use format.",
+                    "description": null,
+                    "isDeprecated": true,
+                    "name": "legacyFormat",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "String",
+                      "ofType": null
+                    }
+                  }
+                ],
+                "deprecationReason": null,
+                "description": "The current name.",
+                "isDeprecated": false,
+                "name": "name",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": "Use name.",
+                "description": null,
+                "isDeprecated": true,
+                "name": "oldName",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "link",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Url",
+                  "ofType": null
+                }
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "kind": "OBJECT",
+            "name": "Described",
+            "possibleTypes": [],
+            "specifiedByURL": null
+          },
+          {
+            "description": null,
+            "enumValues": [],
+            "fields": [],
+            "inputFields": [
+              {
+                "defaultValue": "\"anonymous\"",
+                "deprecationReason": null,
+                "description": "The name.",
+                "isDeprecated": false,
+                "name": "name",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              {
+                "defaultValue": null,
+                "deprecationReason": "Use name.",
+                "description": null,
+                "isDeprecated": true,
+                "name": "oldName",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            ],
+            "interfaces": [],
+            "kind": "INPUT_OBJECT",
+            "name": "DescribedInput",
+            "possibleTypes": [],
+            "specifiedByURL": null
+          },
+          {
+            "description": "The `Float` scalar type represents signed double-precision fractional values as specified by [IEEE 754](http://en.wikipedia.org/wiki/IEEE_floating_point).",
+            "enumValues": [],
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "kind": "SCALAR",
+            "name": "Float",
+            "possibleTypes": [],
+            "specifiedByURL": null
+          },
+          {
+            "description": "The `ID` scalar type represents a unique identifier, often used to refetch an object or as key for a cache. The ID type appears in a JSON response as a String; however, it is not intended to be human-readable. When expected as an input type, any string (such as \"4\") or integer (such as 4) input value will be accepted as an ID.",
+            "enumValues": [],
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "kind": "SCALAR",
+            "name": "ID",
+            "possibleTypes": [],
+            "specifiedByURL": null
+          },
+          {
+            "description": "The `Int` scalar type represents non-fractional signed whole numeric values. Int can represent values between -(2^31) and 2^31 - 1.",
+            "enumValues": [],
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "kind": "SCALAR",
+            "name": "Int",
+            "possibleTypes": [],
+            "specifiedByURL": null
+          },
+          {
+            "description": "How to format a name.",
+            "enumValues": [
+              {
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "FULL"
+              },
+              {
+                "deprecationReason": "Too short.",
+                "description": null,
+                "isDeprecated": true,
+                "name": "SHORT"
+              }
+            ],
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "kind": "ENUM",
+            "name": "NameFormat",
+            "possibleTypes": [],
+            "specifiedByURL": null
+          },
+          {
+            "description": "Exactly one of the fields.",
+            "enumValues": [],
+            "fields": [],
+            "inputFields": [
+              {
+                "defaultValue": null,
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "byName",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              {
+                "defaultValue": null,
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "byId",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "ID",
+                  "ofType": null
+                }
+              }
+            ],
+            "interfaces": [],
+            "kind": "INPUT_OBJECT",
+            "name": "OneOfInput",
+            "possibleTypes": [],
+            "specifiedByURL": null
+          },
+          {
+            "description": null,
+            "enumValues": [],
+            "fields": [
+              {
+                "args": [
+                  {
+                    "defaultValue": null,
+                    "deprecationReason": null,
+                    "description": null,
+                    "isDeprecated": false,
+                    "name": "input",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "DescribedInput",
+                      "ofType": null
+                    }
+                  },
+                  {
+                    "defaultValue": null,
+                    "deprecationReason": null,
+                    "description": null,
+                    "isDeprecated": false,
+                    "name": "choice",
+                    "type": {
+                      "kind": "INPUT_OBJECT",
+                      "name": "OneOfInput",
+                      "ofType": null
+                    }
+                  }
+                ],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "described",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "Described",
+                  "ofType": null
+                }
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "kind": "OBJECT",
+            "name": "Query",
+            "possibleTypes": [],
+            "specifiedByURL": null
+          },
+          {
+            "description": "The `String`scalar type represents textual data, represented as UTF-8 character sequences. The String type is most often used by GraphQL to represent free-form human-readable text.",
+            "enumValues": [],
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "kind": "SCALAR",
+            "name": "String",
+            "possibleTypes": [],
+            "specifiedByURL": null
+          },
+          {
+            "description": "A scalar with a specification.",
+            "enumValues": [],
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "kind": "SCALAR",
+            "name": "Url",
+            "possibleTypes": [],
+            "specifiedByURL": "https://url.spec.whatwg.org/"
+          },
+          {
+            "description": "A Directive provides a way to describe alternate runtime execution and type validation behavior in a GraphQL document.\n\nIn some cases, you need to provide options to alter GraphQL's execution behavior in ways field arguments will not suffice, such as conditionally including or skipping a field. Directives provide this by describing additional information to the executor.",
+            "enumValues": [],
+            "fields": [
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "name",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "description",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "isRepeatable",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  }
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "locations",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "ENUM",
+                        "name": "__DirectiveLocation",
+                        "ofType": null
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "defaultValue": "false",
+                    "deprecationReason": null,
+                    "description": null,
+                    "isDeprecated": false,
+                    "name": "includeDeprecated",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Boolean",
+                      "ofType": null
+                    }
+                  }
+                ],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "args",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "OBJECT",
+                        "name": "__InputValue",
+                        "ofType": null
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "kind": "OBJECT",
+            "name": "__Directive",
+            "possibleTypes": [],
+            "specifiedByURL": null
+          },
+          {
+            "description": "A Directive can be adjacent to many parts of the GraphQL language, a __DirectiveLocation describes one such possible adjacencies.",
+            "enumValues": [
+              {
+                "deprecationReason": null,
+                "description": "Location adjacent to a query operation.",
+                "isDeprecated": false,
+                "name": "QUERY"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Location adjacent to a mutation operation.",
+                "isDeprecated": false,
+                "name": "MUTATION"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Location adjacent to a subscription operation.",
+                "isDeprecated": false,
+                "name": "SUBSCRIPTION"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Location adjacent to a field.",
+                "isDeprecated": false,
+                "name": "FIELD"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Location adjacent to a fragment definition.",
+                "isDeprecated": false,
+                "name": "FRAGMENT_DEFINITION"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Location adjacent to a fragment spread.",
+                "isDeprecated": false,
+                "name": "FRAGMENT_SPREAD"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Location adjacent to an inline fragment.",
+                "isDeprecated": false,
+                "name": "INLINE_FRAGMENT"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Location adjacent to a variable definition.",
+                "isDeprecated": false,
+                "name": "VARIABLE_DEFINITION"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Location adjacent to a schema definition.",
+                "isDeprecated": false,
+                "name": "SCHEMA"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Location adjacent to a scalar definition.",
+                "isDeprecated": false,
+                "name": "SCALAR"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Location adjacent to an object type definition.",
+                "isDeprecated": false,
+                "name": "OBJECT"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Location adjacent to a field definition.",
+                "isDeprecated": false,
+                "name": "FIELD_DEFINITION"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Location adjacent to an argument definition.",
+                "isDeprecated": false,
+                "name": "ARGUMENT_DEFINITION"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Location adjacent to an interface definition.",
+                "isDeprecated": false,
+                "name": "INTERFACE"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Location adjacent to a union definition.",
+                "isDeprecated": false,
+                "name": "UNION"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Location adjacent to an enum definition.",
+                "isDeprecated": false,
+                "name": "ENUM"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Location adjacent to an enum value definition.",
+                "isDeprecated": false,
+                "name": "ENUM_VALUE"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Location adjacent to an input object type definition.",
+                "isDeprecated": false,
+                "name": "INPUT_OBJECT"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Location adjacent to an input object field definition.",
+                "isDeprecated": false,
+                "name": "INPUT_FIELD_DEFINITION"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Location adjacent to a directive definition.",
+                "isDeprecated": false,
+                "name": "DIRECTIVE_DEFINITION"
+              }
+            ],
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "kind": "ENUM",
+            "name": "__DirectiveLocation",
+            "possibleTypes": [],
+            "specifiedByURL": null
+          },
+          {
+            "description": "One possible value for a given Enum. Enum values are unique values, not a placeholder for a string or numeric value. However an Enum value is returned in a JSON response as a string.",
+            "enumValues": [],
+            "fields": [
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "name",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "description",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "isDeprecated",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  }
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "deprecationReason",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "kind": "OBJECT",
+            "name": "__EnumValue",
+            "possibleTypes": [],
+            "specifiedByURL": null
+          },
+          {
+            "description": "Object and Interface types are described by a list of Fields, each of which has a name, potentially a list of arguments, and a return type.",
+            "enumValues": [],
+            "fields": [
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "name",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "description",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "defaultValue": "false",
+                    "deprecationReason": null,
+                    "description": null,
+                    "isDeprecated": false,
+                    "name": "includeDeprecated",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Boolean",
+                      "ofType": null
+                    }
+                  }
+                ],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "args",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "OBJECT",
+                        "name": "__InputValue",
+                        "ofType": null
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "type",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "__Type",
+                    "ofType": null
+                  }
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "isDeprecated",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  }
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "deprecationReason",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "kind": "OBJECT",
+            "name": "__Field",
+            "possibleTypes": [],
+            "specifiedByURL": null
+          },
+          {
+            "description": "Arguments provided to Fields or Directives and the input fields of an InputObject are represented as Input Values which describe their type and optionally a default value.",
+            "enumValues": [],
+            "fields": [
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "name",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "String",
+                    "ofType": null
+                  }
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "description",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "type",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "__Type",
+                    "ofType": null
+                  }
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": "A GraphQL-formatted string representing the default value for this input value.",
+                "isDeprecated": false,
+                "name": "defaultValue",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "isDeprecated",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "SCALAR",
+                    "name": "Boolean",
+                    "ofType": null
+                  }
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "deprecationReason",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "kind": "OBJECT",
+            "name": "__InputValue",
+            "possibleTypes": [],
+            "specifiedByURL": null
+          },
+          {
+            "description": "A GraphQL Schema defines the capabilities of a GraphQL server. It exposes all available types and directives on the server, as well as the entry points for query, mutation, and subscription operations.",
+            "enumValues": [],
+            "fields": [
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "description",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": "A list of all types supported by this server.",
+                "isDeprecated": false,
+                "name": "types",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "OBJECT",
+                        "name": "__Type",
+                        "ofType": null
+                      }
+                    }
+                  }
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": "The type that query operations will be rooted at.",
+                "isDeprecated": false,
+                "name": "queryType",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "OBJECT",
+                    "name": "__Type",
+                    "ofType": null
+                  }
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": "If this server supports mutation, the type that mutation operations will be rooted at.",
+                "isDeprecated": false,
+                "name": "mutationType",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "__Type",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": "If this server support subscription, the type that subscription operations will be rooted at.",
+                "isDeprecated": false,
+                "name": "subscriptionType",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "__Type",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": "A list of all directives supported by this server.",
+                "isDeprecated": false,
+                "name": "directives",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "LIST",
+                    "name": null,
+                    "ofType": {
+                      "kind": "NON_NULL",
+                      "name": null,
+                      "ofType": {
+                        "kind": "OBJECT",
+                        "name": "__Directive",
+                        "ofType": null
+                      }
+                    }
+                  }
+                }
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "kind": "OBJECT",
+            "name": "__Schema",
+            "possibleTypes": [],
+            "specifiedByURL": null
+          },
+          {
+            "description": "The fundamental unit of any GraphQL Schema is the type. There are many kinds of types in GraphQL as represented by the `__TypeKind` enum.\n\nDepending on the kind of a type, certain fields describe information about that type. Scalar types provide no information beyond a name, description and optional `specifiedByURL`, while Enum types provide their values. Object and Interface types provide the fields they describe. Abstract types, Union and Interface, provide the Object types possible at runtime. List and NonNull types compose other types.",
+            "enumValues": [],
+            "fields": [
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "kind",
+                "type": {
+                  "kind": "NON_NULL",
+                  "name": null,
+                  "ofType": {
+                    "kind": "ENUM",
+                    "name": "__TypeKind",
+                    "ofType": null
+                  }
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "name",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "description",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "specifiedByURL",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "String",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [
+                  {
+                    "defaultValue": "false",
+                    "deprecationReason": null,
+                    "description": null,
+                    "isDeprecated": false,
+                    "name": "includeDeprecated",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Boolean",
+                      "ofType": null
+                    }
+                  }
+                ],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "fields",
+                "type": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "OBJECT",
+                      "name": "__Field",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "interfaces",
+                "type": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "OBJECT",
+                      "name": "__Type",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "possibleTypes",
+                "type": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "OBJECT",
+                      "name": "__Type",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "defaultValue": "false",
+                    "deprecationReason": null,
+                    "description": null,
+                    "isDeprecated": false,
+                    "name": "includeDeprecated",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Boolean",
+                      "ofType": null
+                    }
+                  }
+                ],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "enumValues",
+                "type": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "OBJECT",
+                      "name": "__EnumValue",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              {
+                "args": [
+                  {
+                    "defaultValue": "false",
+                    "deprecationReason": null,
+                    "description": null,
+                    "isDeprecated": false,
+                    "name": "includeDeprecated",
+                    "type": {
+                      "kind": "SCALAR",
+                      "name": "Boolean",
+                      "ofType": null
+                    }
+                  }
+                ],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "inputFields",
+                "type": {
+                  "kind": "LIST",
+                  "name": null,
+                  "ofType": {
+                    "kind": "NON_NULL",
+                    "name": null,
+                    "ofType": {
+                      "kind": "OBJECT",
+                      "name": "__InputValue",
+                      "ofType": null
+                    }
+                  }
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "ofType",
+                "type": {
+                  "kind": "OBJECT",
+                  "name": "__Type",
+                  "ofType": null
+                }
+              },
+              {
+                "args": [],
+                "deprecationReason": null,
+                "description": null,
+                "isDeprecated": false,
+                "name": "isOneOf",
+                "type": {
+                  "kind": "SCALAR",
+                  "name": "Boolean",
+                  "ofType": null
+                }
+              }
+            ],
+            "inputFields": [],
+            "interfaces": [],
+            "kind": "OBJECT",
+            "name": "__Type",
+            "possibleTypes": [],
+            "specifiedByURL": null
+          },
+          {
+            "description": "An enum describing what kind of type a given `__Type` is.",
+            "enumValues": [
+              {
+                "deprecationReason": null,
+                "description": "Indicates this type is a scalar.",
+                "isDeprecated": false,
+                "name": "SCALAR"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Indicates this type is an object. `fields` and `interfaces` are valid fields.",
+                "isDeprecated": false,
+                "name": "OBJECT"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Indicates this type is an interface. `fields`, `interfaces`, and `possibleTypes` are valid fields.",
+                "isDeprecated": false,
+                "name": "INTERFACE"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Indicates this type is a union. `possibleTypes` is a valid field.",
+                "isDeprecated": false,
+                "name": "UNION"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Indicates this type is an enum. `enumValues` is a valid field.",
+                "isDeprecated": false,
+                "name": "ENUM"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Indicates this type is an input object. `inputFields` is a valid field.",
+                "isDeprecated": false,
+                "name": "INPUT_OBJECT"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Indicates this type is a list. `ofType` is a valid field.",
+                "isDeprecated": false,
+                "name": "LIST"
+              },
+              {
+                "deprecationReason": null,
+                "description": "Indicates this type is a non-null. `ofType` is a valid field.",
+                "isDeprecated": false,
+                "name": "NON_NULL"
+              }
+            ],
+            "fields": [],
+            "inputFields": [],
+            "interfaces": [],
+            "kind": "ENUM",
+            "name": "__TypeKind",
+            "possibleTypes": [],
+            "specifiedByURL": null
+          }
+        ]
+      }
+    }
+  }
+}

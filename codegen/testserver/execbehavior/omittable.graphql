@@ -1,0 +1,18 @@
+# Input fields marked omittable are unmarshaled into graphql.Omittable, which tells an
+# absent field from an explicit null.
+directive @goField(
+  forceResolver: Boolean
+  name: String
+  omittable: Boolean
+  type: String
+) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+
+input OmittableInput {
+  text: String @goField(omittable: true)
+  count: Int @goField(omittable: true)
+  list: [String!] @goField(omittable: true)
+}
+
+extend type Query {
+  omittable(input: OmittableInput!): String!
+}

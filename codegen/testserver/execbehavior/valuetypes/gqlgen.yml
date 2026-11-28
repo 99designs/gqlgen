@@ -1,0 +1,24 @@
+schema:
+  - "*.graphql"
+skip_validation: true
+omit_slice_element_pointers: true
+resolvers_always_return_pointers: false
+struct_fields_always_pointers: false
+exec:
+  filename: generated.go
+  package: valuetypes
+model:
+  filename: models-gen.go
+  package: valuetypes
+omit_complexity: true
+autobind:
+  - github.com/99designs/gqlgen/codegen/testserver/execbehavior/valuetypes
+
+models:
+  Level:
+    model: github.com/99designs/gqlgen/codegen/testserver/execbehavior/valuetypes.Level
+    enum_values:
+      LOW:
+        value: github.com/99designs/gqlgen/codegen/testserver/execbehavior/valuetypes.LevelLow
+      HIGH:
+        value: github.com/99designs/gqlgen/codegen/testserver/execbehavior/valuetypes.LevelHigh

@@ -1,0 +1,60 @@
+schema:
+  - "*.graphql"
+skip_validation: true
+exec:
+  filename: generated.go
+  package: execbehavior
+  worker_limit: 2
+model:
+  filename: models-gen.go
+  package: execbehavior
+autobind:
+  - github.com/99designs/gqlgen/codegen/testserver/execbehavior
+
+directives:
+  generationOnly:
+    skip_runtime: true
+
+models:
+  MapNote:
+    model: map[string]any
+  Coordinates:
+    model: github.com/99designs/gqlgen/codegen/testserver/execbehavior.Coordinates
+  Maybe:
+    model: github.com/99designs/gqlgen/codegen/testserver/execbehavior.Maybe
+  CtxMaybe:
+    model: github.com/99designs/gqlgen/codegen/testserver/execbehavior.CtxMaybe
+  MarkedChild:
+    fields:
+      resolvedValue:
+        resolver: true
+      node:
+        resolver: true
+  LimitedItem:
+    fields:
+      slow:
+        resolver: true
+  ArgObject:
+    fields:
+      echo:
+        resolver: true
+  ErrorProbe:
+    fields:
+      failing:
+        resolver: true
+      failingNonNull:
+        resolver: true
+      withExtensions:
+        resolver: true
+      multiple:
+        resolver: true
+      valueAndError:
+        resolver: true
+  DeferItem:
+    fields:
+      slow:
+        resolver: true
+      failing:
+        resolver: true
+      nonNullFailing:
+        resolver: true

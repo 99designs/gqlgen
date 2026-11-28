@@ -1,0 +1,12 @@
+# With return_pointers_in_unmarshalinput an INPUT_OBJECT directive receives and may
+# return a pointer to the input, including a nil one.
+directive @inputCheck on INPUT_OBJECT
+
+input CheckedInput @inputCheck {
+  mode: String!
+  value: String!
+}
+
+extend type Query {
+  checkedInput(input: CheckedInput): String!
+}

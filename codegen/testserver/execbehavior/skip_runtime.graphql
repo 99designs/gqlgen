@@ -1,0 +1,11 @@
+# A directive configured with skip_runtime is only for code generation: it has no
+# implementation in DirectiveRoot and does not run, wherever the schema applies it.
+directive @generationOnly on FIELD_DEFINITION | ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | INPUT_OBJECT
+
+input GenerationOnlyInput @generationOnly {
+  value: String! @generationOnly
+}
+
+extend type Query {
+  generationOnly(arg: String! @generationOnly, input: GenerationOnlyInput!): String! @generationOnly
+}

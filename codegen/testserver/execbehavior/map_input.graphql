@@ -1,0 +1,11 @@
+# An input bound to a map holds what a directive returns for a field as it is: a nil
+# from the directive is nil in the map, not a nil of the field's Go type.
+#
+# Uses @returnValue from wrong_type.graphql.
+input MapNote {
+  note: String @returnValue(kind: "nil")
+}
+
+extend type Query {
+  mapNote(input: MapNote!): String
+}

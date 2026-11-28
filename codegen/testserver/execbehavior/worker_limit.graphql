@@ -1,0 +1,9 @@
+# exec.worker_limit caps how many elements of a list are marshaled at the same time.
+type LimitedItem {
+  id: Int!
+  slow: Int!
+}
+
+extend type Query {
+  limitedItems(count: Int!): [LimitedItem!]!
+}

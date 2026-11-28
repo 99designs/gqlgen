@@ -1,0 +1,12 @@
+# An INPUT_OBJECT directive runs after the fields of the input are set. It receives
+# the raw input object and may pass the input on, fail, or replace it.
+directive @inputCheck on INPUT_OBJECT
+
+input CheckedInput @inputCheck {
+  mode: String!
+  value: String!
+}
+
+extend type Query {
+  checkedInput(input: CheckedInput!): String!
+}

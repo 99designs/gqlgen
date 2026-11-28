@@ -2,6 +2,11 @@
 
 package returnpointersinunmarshalinput
 
+type CheckedInput struct {
+	Mode  string `json:"mode"`
+	Value string `json:"value"`
+}
+
 type LegacyFilters struct {
 	Name *string `json:"name,omitempty"`
 }

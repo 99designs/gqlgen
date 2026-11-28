@@ -1,0 +1,14 @@
+# With call_argument_directives_with_null the directives of an argument also run when
+# the argument is absent or null, and receive nil.
+directive @fill(value: String!) on ARGUMENT_DEFINITION
+
+# Tag is bound to an interface type. A directive that takes it receives nil for the
+# absent argument, as for an argument of a pointer type.
+scalar Tag
+directive @tag(tag: Tag) on FIELD_DEFINITION
+
+type Query {
+  echo(arg: String @fill(value: "filled")): String
+  tagged: String @tag
+  taggedWith: String @tag(tag: "given")
+}

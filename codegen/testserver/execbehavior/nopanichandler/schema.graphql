@@ -1,0 +1,25 @@
+# With omit_panic_handler the generated executor does not recover panics, so a panic in
+# a field fails the whole request instead of nulling the field.
+type Query {
+  ping: String!
+  panicking: String
+  panickingObject: PanicObject
+  panickingList: [PanicObject!]
+}
+
+type PanicObject {
+  name: String!
+  boom: String
+}
+
+type Mutation {
+  panicking: String
+}
+
+# Subscription fields without @subscriptionContext. A panic in the resolver fails the
+# request like it does for the other operations.
+type Subscription {
+  count: Int!
+  failing: Int!
+  panicking: Int
+}

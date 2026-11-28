@@ -8,8 +8,9 @@ import (
 
 type Stub struct {
 	QueryResolver struct {
-		Search func(ctx context.Context, filters SearchFilters) (string, error)
-		Legacy func(ctx context.Context, filters LegacyFilters) (string, error)
+		Search       func(ctx context.Context, filters SearchFilters) (string, error)
+		Legacy       func(ctx context.Context, filters LegacyFilters) (string, error)
+		CheckedInput func(ctx context.Context, input *CheckedInput) (string, error)
 	}
 }
 
@@ -24,4 +25,7 @@ func (r *stubQuery) Search(ctx context.Context, filters SearchFilters) (string, 
 }
 func (r *stubQuery) Legacy(ctx context.Context, filters LegacyFilters) (string, error) {
 	return r.QueryResolver.Legacy(ctx, filters)
+}
+func (r *stubQuery) CheckedInput(ctx context.Context, input *CheckedInput) (string, error) {
+	return r.QueryResolver.CheckedInput(ctx, input)
 }

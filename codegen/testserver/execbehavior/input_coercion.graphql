@@ -1,0 +1,16 @@
+# Input values are coerced as the spec says: a single value given for a list becomes a
+# list of one. Errors in nested input values name the full path to the value.
+#
+# Uses Strict from arguments.graphql.
+input CoerceInput {
+  numbers: [Int!]
+  items: [CoerceItem!]
+}
+
+input CoerceItem {
+  value: Strict!
+}
+
+extend type Query {
+  coerce(input: CoerceInput, numbers: [Int!], nested: [[Int!]]): String
+}

@@ -1,0 +1,13 @@
+schema:
+  - "*.graphql"
+skip_validation: true
+omit_panic_handler: true
+exec:
+  filename: generated.go
+  package: nopanichandler
+model:
+  filename: models-gen.go
+  package: nopanichandler
+omit_complexity: true
+autobind:
+  - github.com/99designs/gqlgen/codegen/testserver/execbehavior/nopanichandler

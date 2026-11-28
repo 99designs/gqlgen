@@ -1,0 +1,22 @@
+# A field may return a root operation type. Such a field has no resolver: the executor
+# marshals an empty value of the root type, whose fields then resolve as usual.
+type Viewer {
+  name: String!
+  query: Query!
+  optionalQuery: Query
+  mutation: Mutation
+}
+
+type Mutation {
+  touch: String!
+}
+
+type ValueViewer {
+  name: String!
+  query: Query!
+}
+
+extend type Query {
+  viewer: Viewer!
+  valueViewer: ValueViewer!
+}

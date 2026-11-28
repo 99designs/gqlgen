@@ -1,0 +1,27 @@
+# FieldContext.Child builds the field context of a field selected under the current
+# one. It only works when the current field returns an object type.
+#
+# Uses MarkedNode from mark_non_null.graphql.
+type ChildProbe {
+  scalar: String
+  enumValue: ProbeEnum
+  union: ProbeUnion
+  iface: MarkedNode
+  object: ChildProbeObject
+  list: [ChildProbeObject!]
+}
+
+type ChildProbeObject {
+  id: ID!
+  nested(limit: Int = 3): String
+}
+
+union ProbeUnion = ChildProbeObject
+
+enum ProbeEnum {
+  A
+}
+
+extend type Query {
+  childProbe: ChildProbe
+}

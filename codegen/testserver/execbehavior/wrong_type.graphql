@@ -1,0 +1,21 @@
+# Directives and middleware may replace the value of a field, an argument or an input
+# field. A value of another Go type is an error, except that a field may resolve to a
+# graphql.Marshaler.
+directive @returnValue(kind: String!) on FIELD_DEFINITION | ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
+type WrongTypes {
+  intAsString: String @returnValue(kind: "int")
+  nonNullIntAsString: String! @returnValue(kind: "int")
+  marshaler: String! @returnValue(kind: "marshaler")
+  replacedByMiddleware: String
+}
+
+input WrongTypeInput {
+  value: String @returnValue(kind: "int")
+}
+
+extend type Query {
+  wrongTypes: WrongTypes
+  wrongTypeArg(value: String @returnValue(kind: "int")): String
+  wrongTypeInput(input: WrongTypeInput!): String
+}

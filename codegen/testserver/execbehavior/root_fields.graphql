@@ -1,0 +1,7 @@
+# Root fields run inside the root field middleware, with a RootFieldContext, and the
+# fields of a mutation run one after the other.
+#
+# Extends Mutation from root_typed_field.graphql.
+extend type Mutation {
+  appendLog(entry: String!): [String!]!
+}

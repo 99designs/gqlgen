@@ -1,0 +1,12 @@
+# Scalars bound to marshal and unmarshal functions, one pair of which takes the context.
+# The marshalers return null for the empty string, which non-null fields report as an
+# error, and the unmarshaler that takes the context fails for "bad".
+scalar Maybe
+scalar CtxMaybe
+
+extend type Query {
+  maybe(v: String!): Maybe
+  maybeNonNull(v: String!): Maybe!
+  ctxMaybe(v: CtxMaybe): CtxMaybe
+  ctxMaybeNonNull(v: CtxMaybe!): CtxMaybe!
+}

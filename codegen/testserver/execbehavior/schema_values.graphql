@@ -1,0 +1,19 @@
+# Default values and the arguments of schema directives are written in the schema, but
+# each request gets values of its own, and an absent or null argument of a directive
+# reaches it as nil.
+#
+# Uses Map from named_input.graphql.
+scalar Any
+
+directive @anyArg(value: Any) on FIELD_DEFINITION
+
+input DefaultMapInput {
+  meta: Map = { a: 1 }
+}
+
+extend type Query {
+  anyArgAbsent: String @anyArg
+  anyArgNull: String @anyArg(value: null)
+  anyArgMap: String @anyArg(value: { a: 1 })
+  defaultMap(input: DefaultMapInput!): String
+}

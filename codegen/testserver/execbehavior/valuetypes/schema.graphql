@@ -1,0 +1,38 @@
+# Generated with omit_slice_element_pointers, and with resolvers_always_return_pointers
+# and struct_fields_always_pointers off, so that lists hold values, resolvers return
+# values and nullable struct fields are values where Go allows it. Level is bound to Go
+# constants with enum_values.
+enum Level {
+  LOW
+  HIGH
+}
+
+type Item {
+  name: String!
+  note: String
+  level: Level!
+  levels: [Level!]!
+  tags: [String!]
+  child: Item
+  owner: Owner
+  mainOwner: Owner!
+}
+
+type Owner {
+  name: String!
+}
+
+input ItemInput {
+  name: String!
+  note: String
+  level: Level = LOW
+  tags: [String!]
+}
+
+type Query {
+  items: [Item!]!
+  item(name: String!): Item
+  itemValue(name: String!): Item!
+  echo(input: [ItemInput!]!): [Item!]!
+  levels(in: [Level!]!): [Level!]!
+}

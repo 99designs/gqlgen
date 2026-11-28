@@ -11,8 +11,33 @@ import (
 
 	"github.com/vektah/gqlparser/v2/ast"
 
+	aliasesfunctions "github.com/99designs/gqlgen/codegen/testserver/tablemode/aliases/functions"
+	aliasestable "github.com/99designs/gqlgen/codegen/testserver/tablemode/aliases/table"
+	batchfsfunctions "github.com/99designs/gqlgen/codegen/testserver/tablemode/batchfs/functions"
+	batchfstable "github.com/99designs/gqlgen/codegen/testserver/tablemode/batchfs/table"
+	batchglobalfunctions "github.com/99designs/gqlgen/codegen/testserver/tablemode/batchglobal/functions"
+	batchglobaltable "github.com/99designs/gqlgen/codegen/testserver/tablemode/batchglobal/table"
+	batchvaluesfunctions "github.com/99designs/gqlgen/codegen/testserver/tablemode/batchvalues/functions"
+	batchvaluestable "github.com/99designs/gqlgen/codegen/testserver/tablemode/batchvalues/table"
+	caseargsfunctions "github.com/99designs/gqlgen/codegen/testserver/tablemode/caseargs/functions"
+	caseargstable "github.com/99designs/gqlgen/codegen/testserver/tablemode/caseargs/table"
+	defaultsfunctions "github.com/99designs/gqlgen/codegen/testserver/tablemode/defaults/functions"
+	defaultstable "github.com/99designs/gqlgen/codegen/testserver/tablemode/defaults/table"
+	federationfunctions "github.com/99designs/gqlgen/codegen/testserver/tablemode/federation/functions"
+	federationtable "github.com/99designs/gqlgen/codegen/testserver/tablemode/federation/table"
 	"github.com/99designs/gqlgen/codegen/testserver/tablemode/functions"
+	introspectedfunctions "github.com/99designs/gqlgen/codegen/testserver/tablemode/introspected/functions"
+	introspectedtable "github.com/99designs/gqlgen/codegen/testserver/tablemode/introspected/table"
+	linkedfunctions "github.com/99designs/gqlgen/codegen/testserver/tablemode/linked/functions"
+	linkedtable "github.com/99designs/gqlgen/codegen/testserver/tablemode/linked/table"
+	noqueryfunctions "github.com/99designs/gqlgen/codegen/testserver/tablemode/noquery/functions"
+	noquerytable "github.com/99designs/gqlgen/codegen/testserver/tablemode/noquery/table"
+	querytypefunctions "github.com/99designs/gqlgen/codegen/testserver/tablemode/querytype/functions"
+	querytypetable "github.com/99designs/gqlgen/codegen/testserver/tablemode/querytype/table"
 	"github.com/99designs/gqlgen/codegen/testserver/tablemode/table"
+	withnullfunctions "github.com/99designs/gqlgen/codegen/testserver/tablemode/withnull/functions"
+	withnulltable "github.com/99designs/gqlgen/codegen/testserver/tablemode/withnull/table"
+	"github.com/99designs/gqlgen/graphql"
 )
 
 // TestRandomRequests sends operations built at random from the schema to both
@@ -37,26 +62,74 @@ func FuzzRandomRequests(f *testing.F) {
 	f.Fuzz(compareRandomRequest)
 }
 
+// TestRandomRequestsOtherSchemas is TestRandomRequests on the other schemas of this test
+// server. It leaves out aliasesfs and aliasesfs2, whose errors name the Go types of inputs
+// differently in the modes, as TestInputTypeNamesInErrors pins, and defers no fragment on
+// batchfs, where the deferred response that a field of a batch resolver comes in depends
+// on timing in both modes.
+func TestRandomRequestsOtherSchemas(t *testing.T) {
+	n := 300
+	if testing.Short() {
+		n = 30
+	}
+	for _, s := range []struct {
+		name             string
+		functions, table func() graphql.ExecutableSchema
+		noDefer          bool
+	}{
+		{"aliases", aliasesfunctions.NewSchema, aliasestable.NewSchema, false},
+		{"batchfs", batchfsfunctions.NewSchema, batchfstable.NewSchema, true},
+		{"batchglobal", batchglobalfunctions.NewSchema, batchglobaltable.NewSchema, false},
+		{"batchvalues", batchvaluesfunctions.NewSchema, batchvaluestable.NewSchema, false},
+		{"caseargs", caseargsfunctions.NewSchema, caseargstable.NewSchema, false},
+		{"defaults", defaultsfunctions.NewSchema, defaultstable.NewSchema, false},
+		{"federation", federationfunctions.NewSchema, federationtable.NewSchema, false},
+		{"introspected", introspectedfunctions.NewSchema, introspectedtable.NewSchema, false},
+		{"linked", linkedfunctions.NewSchema, linkedtable.NewSchema, false},
+		{"noquery", noqueryfunctions.NewSchema, noquerytable.NewSchema, false},
+		{"querytype", querytypefunctions.NewSchema, querytypetable.NewSchema, false},
+		{"withnull", withnullfunctions.NewSchema, withnulltable.NewSchema, false},
+	} {
+		t.Run(s.name, func(t *testing.T) {
+			for seed := range uint64(n) {
+				t.Run(fmt.Sprintf("seed%d", seed), func(t *testing.T) {
+					compareRequest(t, s.functions(), s.table(), seed, s.noDefer)
+				})
+			}
+		})
+	}
+}
+
 func compareRandomRequest(t *testing.T, seed uint64) {
 	t.Helper()
 	// The subtest carries the seed, so that a failure anywhere under it names the seed.
 	t.Run(fmt.Sprintf("seed%d", seed), func(t *testing.T) {
-		functionsSchema := functions.NewSchema()
-		tableSchema := table.NewSchema()
-
-		g := &generator{
-			schema: tableSchema.Schema(),
-			rand:   rand.New(rand.NewPCG(seed, seed)),
-			vars:   map[string]any{},
-		}
-		req := g.request()
-		want := run(t, functionsSchema, req)
-		got := run(t, tableSchema, req)
-		if want != got {
-			t.Fatalf("query: %s\nvariables: %v\nfunctions: %s\ntable:     %s",
-				req.query, req.variables, want, got)
-		}
+		compareRequest(t, functions.NewSchema(), table.NewSchema(), seed, false)
 	})
+}
+
+// compareRequest sends the random request of seed to both executable schemas and requires
+// the same responses.
+func compareRequest(
+	t *testing.T,
+	functionsSchema, tableSchema graphql.ExecutableSchema,
+	seed uint64,
+	noDefer bool,
+) {
+	t.Helper()
+	g := &generator{
+		schema:  tableSchema.Schema(),
+		rand:    rand.New(rand.NewPCG(seed, seed)),
+		vars:    map[string]any{},
+		noDefer: noDefer,
+	}
+	req := g.request()
+	want := run(t, functionsSchema, req)
+	got := run(t, tableSchema, req)
+	if want != got {
+		t.Fatalf("query: %s\nvariables: %v\nfunctions: %s\ntable:     %s",
+			req.query, req.variables, want, got)
+	}
 }
 
 // generator builds a random operation from a schema.
@@ -74,18 +147,29 @@ type generator struct {
 	// noVars says that values may not come from variables: inside an argument that is a
 	// variable as a whole, as the value of a variable cannot hold another one.
 	noVars bool
+	// noDefer says that no fragment is deferred.
+	noDefer bool
 }
 
 func (g *generator) chance(p float64) bool { return g.rand.Float64() < p }
+
+// declares reports whether the schema declares the directive name, which the main schema
+// does for the directives that the generator puts on operations and fields.
+func (g *generator) declares(name string) bool { return g.schema.Directives[name] != nil }
 
 func pick[T any](g *generator, items []T) T { return items[g.rand.IntN(len(items))] }
 
 func (g *generator) request() request {
 	op, root, directive := "query", g.schema.Query, "@logQuery"
+	// The schemas other than the main one may have no subscription or mutation type, or no
+	// query type, in which case a mutation is sent. The conditions follow the chances, so
+	// that the main schema draws the same numbers as it did before.
 	switch {
-	case g.chance(0.1):
+	case g.chance(0.1) && g.schema.Subscription != nil:
 		op, root, directive = "subscription", g.schema.Subscription, "@logSubscription"
-	case g.chance(0.15):
+	case g.chance(0.15) && g.schema.Mutation != nil:
+		op, root, directive = "mutation", g.schema.Mutation, "@logMutation"
+	case root == nil:
 		op, root, directive = "mutation", g.schema.Mutation, "@logMutation"
 	}
 	var sel string
@@ -105,7 +189,7 @@ func (g *generator) request() request {
 	if len(g.varDefs) > 0 {
 		b.WriteString("(" + strings.Join(g.varDefs, ", ") + ")")
 	}
-	if g.chance(0.2) {
+	if g.chance(0.2) && g.declares(strings.TrimPrefix(directive, "@")) {
 		b.WriteString(" " + directive)
 	}
 	b.WriteString(" " + sel)
@@ -170,11 +254,14 @@ func (g *generator) selection(def *ast.Definition, depth int) string {
 	var parts []string
 	switch def.Kind {
 	case ast.Object:
-		fields := g.fields(def)
-		count := 1 + g.rand.IntN(min(4, len(fields)))
-		for _, f := range fields[:count] {
-			if part := g.field(f, depth); part != "" {
-				parts = append(parts, part)
+		// An object type may have no field to select, such as the empty query type that
+		// gqlgen adds to a schema without one.
+		if fields := g.fields(def); len(fields) > 0 {
+			count := 1 + g.rand.IntN(min(4, len(fields)))
+			for _, f := range fields[:count] {
+				if part := g.field(f, depth); part != "" {
+					parts = append(parts, part)
+				}
 			}
 		}
 		if len(parts) == 0 || g.chance(0.1) {
@@ -187,7 +274,9 @@ func (g *generator) selection(def *ast.Definition, depth int) string {
 	case ast.Interface, ast.Union:
 		parts = append(parts, "__typename")
 		if def.Kind == ast.Interface && g.chance(0.5) {
-			parts = append(parts, g.field(def.Fields.ForName("id"), depth))
+			if id := def.Fields.ForName("id"); id != nil {
+				parts = append(parts, g.field(id, depth))
+			}
 		}
 		for _, impl := range g.schema.GetPossibleTypes(def) {
 			if !g.chance(0.6) {
@@ -201,7 +290,7 @@ func (g *generator) selection(def *ast.Definition, depth int) string {
 			switch {
 			case depth > 0 && g.chance(0.05):
 				dirs = " @defer(if: false)"
-			case depth > 0 && !g.deferred && g.chance(0.15):
+			case depth > 0 && !g.deferred && g.chance(0.15) && !g.noDefer:
 				g.deferred = true
 				g.labels++
 				dirs = fmt.Sprintf(" @defer(label: %q)", "d"+strconv.Itoa(g.labels))
@@ -263,9 +352,9 @@ func (g *generator) field(f *ast.FieldDefinition, depth int) string {
 		b.WriteString(" @include(if: " + g.boolVar() + ")")
 	case r < 0.18:
 		b.WriteString(" @include(if: true)")
-	case r < 0.28:
+	case r < 0.28 && g.declares("trace"):
 		b.WriteString(` @trace(label: "t")`)
-	case r < 0.3:
+	case r >= 0.28 && r < 0.3 && g.declares("trace"):
 		label := g.variable(ast.NamedType("String", nil), `"v"`, "v")
 		b.WriteString(" @trace(label: " + label + ")")
 	}

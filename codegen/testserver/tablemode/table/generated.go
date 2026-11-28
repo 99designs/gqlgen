@@ -57,7 +57,7 @@ type DirectiveRoot struct {
 	Nulled          func(ctx context.Context, obj any, next graphql.Resolver, names []string, data map[string]any) (res any, err error)
 	Nullify         func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
 	Order           func(ctx context.Context, obj any, next graphql.Resolver, name string) (res any, err error)
-	Probe           func(ctx context.Context, obj any, next graphql.Resolver, rawArgs *string, asMap *string, it *string, rawArgsArg *string, nil *string, true *bool, on *bool) (res any, err error)
+	Probe           func(ctx context.Context, obj any, next graphql.Resolver, rawArgs *string, asMap *string, it *string, nil *string, true *bool, on *bool) (res any, err error)
 	Retype          func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
 	Tagged          func(ctx context.Context, obj any, next graphql.Resolver, note *string, ratio *float64) (res any, err error)
 	Trace           func(ctx context.Context, obj any, next graphql.Resolver, label *string) (res any, err error)
@@ -1371,14 +1371,13 @@ directive @order(name: String!) on ARGUMENT_DEFINITION
 # definitions have defaults, which an application below sets to null.
 directive @nulled(names: [String!]! = ["a"], data: Map! = {}) on FIELD_DEFINITION
 # @probe records the object it receives. Its arguments have the names of the variables
-# that hold the objects of directives in the code of the functions mode, of nil and true,
-# and the name that the functions mode gives the variable of rawArgs. on comes after true,
+# that hold the objects of directives in the generated code (rawArgs, asMap and it) and of
+# nil and true, which it writes for absent arguments and literals. on comes after true,
 # which its value is written as.
 directive @probe(
   rawArgs: String
   asMap: String
   it: String
-  rawArgsArg: String
   nil: String
   true: Boolean
   on: Boolean
@@ -1653,7 +1652,7 @@ type Query {
   nulledNonNull: String @nulled(names: null, data: null)
   bagHolder: BagHolder
   probed(
-    x: String @probe(rawArgs: "r", rawArgsArg: "ra", nil: "n", true: false, on: true)
+    x: String @probe(rawArgs: "r", nil: "n", true: false, on: true)
     input: ProbeInput
   ): String
   missingField: Int @missing
@@ -1745,7 +1744,7 @@ directive @note(text: String = "default") on ARGUMENT_DEFINITION | INPUT_FIELD_D
 directive @nulled(names: [String!]! = ["a"], data: Map! = {}) on FIELD_DEFINITION
 directive @nullify on INPUT_FIELD_DEFINITION | ARGUMENT_DEFINITION
 directive @order(name: String!) on ARGUMENT_DEFINITION
-directive @probe(rawArgs: String, asMap: String, it: String, rawArgsArg: String, nil: String, true: Boolean, on: Boolean) on ARGUMENT_DEFINITION | INPUT_OBJECT
+directive @probe(rawArgs: String, asMap: String, it: String, nil: String, true: Boolean, on: Boolean) on ARGUMENT_DEFINITION | INPUT_OBJECT
 directive @retype on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 directive @tagged(note: String @argNote, ratio: Float = 0.1234567) on SCALAR | ENUM | INPUT_FIELD_DEFINITION | FIELD_DEFINITION
 directive @trace(label: String) on FIELD
@@ -1888,7 +1887,7 @@ type Query {
 	nulledRatio: String @tagged(note: "null ratio", ratio: null)
 	nulledNonNull: String @nulled(names: null, data: null)
 	bagHolder: BagHolder
-	probed(x: String @probe(rawArgs: "r", rawArgsArg: "ra", nil: "n", true: false, on: true), input: ProbeInput): String
+	probed(x: String @probe(rawArgs: "r", nil: "n", true: false, on: true), input: ProbeInput): String
 	missingField: Int @missing
 	missingArg(x: String @missing @length(min: 0)): String
 	missingInput(input: MissingInput): String
@@ -2130,8 +2129,8 @@ func newTables(schemaToLink *ast.Schema) *tables {
 	t.directiveOrder.Init(t.schema, "order", []tableArg{{Name: "name", In: t.unmarshalNString2string.In}}, func(ctx context.Context, ec *executionContext, directiveObj any, n graphql.Resolver, directiveArgs map[string]any) (any, error) {
 		return ec.Directives.Order(ctx, directiveObj, n, directiveArgs["name"].(string))
 	}, func(ec *executionContext) bool { return ec.Directives.Order != nil })
-	t.directiveProbe.Init(t.schema, "probe", []tableArg{{Name: "rawArgs", In: t.unmarshalOString2ᚖstring.In}, {Name: "asMap", In: t.unmarshalOString2ᚖstring.In}, {Name: "it", In: t.unmarshalOString2ᚖstring.In}, {Name: "rawArgsArg", In: t.unmarshalOString2ᚖstring.In}, {Name: "nil", In: t.unmarshalOString2ᚖstring.In}, {Name: "true", In: t.unmarshalOBoolean2ᚖbool.In}, {Name: "on", In: t.unmarshalOBoolean2ᚖbool.In}}, func(ctx context.Context, ec *executionContext, directiveObj any, n graphql.Resolver, directiveArgs map[string]any) (any, error) {
-		return ec.Directives.Probe(ctx, directiveObj, n, directiveArgs["rawArgs"].(*string), directiveArgs["asMap"].(*string), directiveArgs["it"].(*string), directiveArgs["rawArgsArg"].(*string), directiveArgs["nil"].(*string), directiveArgs["true"].(*bool), directiveArgs["on"].(*bool))
+	t.directiveProbe.Init(t.schema, "probe", []tableArg{{Name: "rawArgs", In: t.unmarshalOString2ᚖstring.In}, {Name: "asMap", In: t.unmarshalOString2ᚖstring.In}, {Name: "it", In: t.unmarshalOString2ᚖstring.In}, {Name: "nil", In: t.unmarshalOString2ᚖstring.In}, {Name: "true", In: t.unmarshalOBoolean2ᚖbool.In}, {Name: "on", In: t.unmarshalOBoolean2ᚖbool.In}}, func(ctx context.Context, ec *executionContext, directiveObj any, n graphql.Resolver, directiveArgs map[string]any) (any, error) {
+		return ec.Directives.Probe(ctx, directiveObj, n, directiveArgs["rawArgs"].(*string), directiveArgs["asMap"].(*string), directiveArgs["it"].(*string), directiveArgs["nil"].(*string), directiveArgs["true"].(*bool), directiveArgs["on"].(*bool))
 	}, func(ec *executionContext) bool { return ec.Directives.Probe != nil })
 	t.directiveRetype.Init(t.schema, "retype", nil, func(ctx context.Context, ec *executionContext, directiveObj any, n graphql.Resolver, directiveArgs map[string]any) (any, error) {
 		return ec.Directives.Retype(ctx, directiveObj, n)

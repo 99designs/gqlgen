@@ -810,14 +810,13 @@ func Probe(
 	rawArgs *string,
 	asMap *string,
 	it *string,
-	rawArgsArg *string,
 	nilArg *string,
 	trueArg *bool,
 	on *bool,
 ) (any, error) {
 	RecordingOf(ctx).Add(
-		"directive probe obj=%s rawArgs=%s asMap=%s it=%s rawArgsArg=%s nil=%s true=%s on=%s",
-		Describe(obj), Describe(rawArgs), Describe(asMap), Describe(it), Describe(rawArgsArg),
+		"directive probe obj=%s rawArgs=%s asMap=%s it=%s nil=%s true=%s on=%s",
+		Describe(obj), Describe(rawArgs), Describe(asMap), Describe(it),
 		Describe(nilArg), Describe(trueArg), Describe(on))
 	return next(ctx)
 }

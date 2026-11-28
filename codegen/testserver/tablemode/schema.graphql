@@ -48,14 +48,13 @@ directive @order(name: String!) on ARGUMENT_DEFINITION
 # definitions have defaults, which an application below sets to null.
 directive @nulled(names: [String!]! = ["a"], data: Map! = {}) on FIELD_DEFINITION
 # @probe records the object it receives. Its arguments have the names of the variables
-# that hold the objects of directives in the code of the functions mode, of nil and true,
-# and the name that the functions mode gives the variable of rawArgs. on comes after true,
+# that hold the objects of directives in the generated code (rawArgs, asMap and it) and of
+# nil and true, which it writes for absent arguments and literals. on comes after true,
 # which its value is written as.
 directive @probe(
   rawArgs: String
   asMap: String
   it: String
-  rawArgsArg: String
   nil: String
   true: Boolean
   on: Boolean
@@ -330,7 +329,7 @@ type Query {
   nulledNonNull: String @nulled(names: null, data: null)
   bagHolder: BagHolder
   probed(
-    x: String @probe(rawArgs: "r", rawArgsArg: "ra", nil: "n", true: false, on: true)
+    x: String @probe(rawArgs: "r", nil: "n", true: false, on: true)
     input: ProbeInput
   ): String
   missingField: Int @missing

@@ -374,7 +374,7 @@ var requests = []request{
 		name:  "directive arguments with the names of the objects of directives",
 		query: `{ probed(x: "a", input: {v: "b"}) }`,
 		contains: []string{
-			`directive probe obj=map[string]interface {}{input: map[string]interface {}{v: string("b")}, x: string("a")} rawArgs=&string("r") asMap=(*string)(nil) it=(*string)(nil) rawArgsArg=&string("ra") nil=&string("n") true=&bool(false) on=&bool(true)`,
+			`directive probe obj=map[string]interface {}{input: map[string]interface {}{v: string("b")}, x: string("a")} rawArgs=&string("r") asMap=(*string)(nil) it=(*string)(nil) nil=&string("n") true=&bool(false) on=&bool(true)`,
 			`directive probe obj=map[string]interface {}{v: string("b")} rawArgs=(*string)(nil) asMap=&string("m") it=&string("i")`,
 		},
 	},

@@ -51,7 +51,7 @@ type DirectiveRoot struct {
 	Nulled          func(ctx context.Context, obj any, next graphql.Resolver, names []string, data map[string]any) (res any, err error)
 	Nullify         func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
 	Order           func(ctx context.Context, obj any, next graphql.Resolver, name string) (res any, err error)
-	Probe           func(ctx context.Context, obj any, next graphql.Resolver, rawArgs *string, asMap *string, it *string, rawArgsArg *string, nil *string, true *bool, on *bool) (res any, err error)
+	Probe           func(ctx context.Context, obj any, next graphql.Resolver, rawArgs *string, asMap *string, it *string, nil *string, true *bool, on *bool) (res any, err error)
 	Retype          func(ctx context.Context, obj any, next graphql.Resolver) (res any, err error)
 	Tagged          func(ctx context.Context, obj any, next graphql.Resolver, note *string, ratio *float64) (res any, err error)
 	Trace           func(ctx context.Context, obj any, next graphql.Resolver, label *string) (res any, err error)
@@ -1380,14 +1380,13 @@ directive @order(name: String!) on ARGUMENT_DEFINITION
 # definitions have defaults, which an application below sets to null.
 directive @nulled(names: [String!]! = ["a"], data: Map! = {}) on FIELD_DEFINITION
 # @probe records the object it receives. Its arguments have the names of the variables
-# that hold the objects of directives in the code of the functions mode, of nil and true,
-# and the name that the functions mode gives the variable of rawArgs. on comes after true,
+# that hold the objects of directives in the generated code (rawArgs, asMap and it) and of
+# nil and true, which it writes for absent arguments and literals. on comes after true,
 # which its value is written as.
 directive @probe(
   rawArgs: String
   asMap: String
   it: String
-  rawArgsArg: String
   nil: String
   true: Boolean
   on: Boolean
@@ -1662,7 +1661,7 @@ type Query {
   nulledNonNull: String @nulled(names: null, data: null)
   bagHolder: BagHolder
   probed(
-    x: String @probe(rawArgs: "r", rawArgsArg: "ra", nil: "n", true: false, on: true)
+    x: String @probe(rawArgs: "r", nil: "n", true: false, on: true)
     input: ProbeInput
   ): String
   missingField: Int @missing
@@ -2323,38 +2322,30 @@ func (ec *executionContext) dir_probe_args(ctx context.Context, rawArgs map[stri
 		return nil, err
 	}
 	args["it"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "rawArgsArg",
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "nil",
 		func(ctx context.Context, v any) (*string, error) {
 			return ec.unmarshalOString2ᚖstring(ctx, v)
 		})
 	if err != nil {
 		return nil, err
 	}
-	args["rawArgsArg"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "nil",
-		func(ctx context.Context, v any) (*string, error) {
-			return ec.unmarshalOString2ᚖstring(ctx, v)
-		})
-	if err != nil {
-		return nil, err
-	}
-	args["nil"] = arg4
-	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "true",
+	args["nil"] = arg3
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "true",
 		func(ctx context.Context, v any) (*bool, error) {
 			return ec.unmarshalOBoolean2ᚖbool(ctx, v)
 		})
 	if err != nil {
 		return nil, err
 	}
-	args["true"] = arg5
-	arg6, err := graphql.ProcessArgField(ctx, rawArgs, "on",
+	args["true"] = arg4
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "on",
 		func(ctx context.Context, v any) (*bool, error) {
 			return ec.unmarshalOBoolean2ᚖbool(ctx, v)
 		})
 	if err != nil {
 		return nil, err
 	}
-	args["on"] = arg6
+	args["on"] = arg5
 	return args, nil
 }
 
@@ -3094,22 +3085,17 @@ func (ec *executionContext) field_Query_probed_argsX(
 			var zeroVal *string
 			return zeroVal, err
 		}
-		arg3, err := ec.unmarshalOString2ᚖstring(ctx, "ra")
+		arg3, err := ec.unmarshalOString2ᚖstring(ctx, "n")
 		if err != nil {
 			var zeroVal *string
 			return zeroVal, err
 		}
-		arg4, err := ec.unmarshalOString2ᚖstring(ctx, "n")
+		arg4, err := ec.unmarshalOBoolean2ᚖbool(ctx, false)
 		if err != nil {
 			var zeroVal *string
 			return zeroVal, err
 		}
-		arg5, err := ec.unmarshalOBoolean2ᚖbool(ctx, false)
-		if err != nil {
-			var zeroVal *string
-			return zeroVal, err
-		}
-		arg6, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+		arg5, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
 		if err != nil {
 			var zeroVal *string
 			return zeroVal, err
@@ -3118,7 +3104,7 @@ func (ec *executionContext) field_Query_probed_argsX(
 			var zeroVal *string
 			return zeroVal, errors.New("directive probe is not implemented")
 		}
-		return ec.Directives.Probe(ctx, rawArgs, directive0, arg0, nil, nil, arg3, arg4, arg5, arg6)
+		return ec.Directives.Probe(ctx, rawArgs, directive0, arg0, nil, nil, arg3, arg4, arg5)
 	}
 
 	tmp, err := directive1(ctx)
@@ -9352,7 +9338,7 @@ func (ec *executionContext) unmarshalInputProbeInput(ctx context.Context, obj an
 		if ec.Directives.Probe == nil {
 			return it, graphql.ErrorOnPath(ctx, errors.New("directive probe is not implemented"))
 		}
-		return ec.Directives.Probe(ctx, asMap, directive0, nil, arg1, arg2, nil, nil, nil, nil)
+		return ec.Directives.Probe(ctx, asMap, directive0, nil, arg1, arg2, nil, nil, nil)
 	}
 
 	tmp, err := directive1(ctx)

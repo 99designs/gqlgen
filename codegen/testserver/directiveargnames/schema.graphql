@@ -1,0 +1,24 @@
+# @probe records the object it receives and its arguments. Its arguments have the names of
+# what the generated code refers to beside them: the object it passes to a directive (rawArgs,
+# asMap and it) and the values it writes for literals (true and false). on comes after true,
+# whose value is written with it.
+directive @probe(
+  rawArgs: String
+  asMap: String
+  it: String
+  true: Boolean
+  false: Boolean
+  foo_bar: String
+  on: Boolean
+  list: [String]
+) on FIELD_DEFINITION | ARGUMENT_DEFINITION | INPUT_OBJECT
+
+type Query {
+  root: String @probe(list: ["l"])
+  probed(x: String @probe(rawArgs: "r", foo_bar: "fb"), input: ProbeInput): String
+  literals(x: String @probe(true: false, false: true, on: true)): String
+}
+
+input ProbeInput @probe(asMap: "m", it: "i") {
+  v: String
+}

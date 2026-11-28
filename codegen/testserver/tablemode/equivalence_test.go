@@ -13,6 +13,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 	"github.com/vektah/gqlparser/v2"
@@ -1147,22 +1148,65 @@ func run(t *testing.T, es graphql.ExecutableSchema, req request) string {
 	}
 
 	handler, ctx := exec.DispatchOperation(ctx, opCtx)
-	var responses []*graphql.Response
-	for resp := handler(ctx); resp != nil; resp = handler(ctx) {
-		// The executor writes the events of a subscription into one buffer, which a
-		// transport sends before it asks for the next event, so the data is copied.
-		resp.Data = bytes.Clone(resp.Data)
-		responses = append(responses, resp)
-		// A request of these tests defers a few fragments at most; many more responses
-		// mean the executor does not finish.
-		require.Less(t, len(responses), 200, "the executor keeps returning responses")
-	}
+	responses := collect(t, func() *graphql.Response { return handler(ctx) }, req.query)
 	// The values this request received are changed once it is over, so that a later
 	// request that is given the same values, such as a default shared between requests,
 	// shows the change.
 	tr.Mark()
 	subscription := opCtx.Operation.Operation == ast.Subscription
 	return marshal(t, responses, subscription) + "\n" + strings.Join(tr.Lines(), "\n")
+}
+
+// collectTimeout is how long the handler of a request of these tests may take to return
+// all of its responses. One that takes longer does not finish, such as one that waits for
+// a deferred response that never comes.
+const collectTimeout = 30 * time.Second
+
+// collect returns the responses that next returns until it returns nil. It fails the test,
+// which the subtest names, such as by the seed of a random request, when next keeps
+// returning responses or does not return within collectTimeout, rather than leaving the
+// test binary to wait until go test times out. A panic of next is raised again in the
+// goroutine of the test, where runOrPanic recovers it.
+func collect(t *testing.T, next func() *graphql.Response, query string) []*graphql.Response {
+	t.Helper()
+	type result struct {
+		responses []*graphql.Response
+		tooMany   bool
+		panicked  any
+	}
+	done := make(chan result, 1)
+	go func() {
+		var r result
+		defer func() {
+			r.panicked = recover()
+			done <- r
+		}()
+		for resp := next(); resp != nil; resp = next() {
+			// The executor writes the events of a subscription into one buffer, which a
+			// transport sends before it asks for the next event, so the data is copied.
+			resp.Data = bytes.Clone(resp.Data)
+			r.responses = append(r.responses, resp)
+			// A request of these tests defers a few fragments at most; many more
+			// responses mean the executor does not finish.
+			if len(r.responses) >= 200 {
+				r.tooMany = true
+				return
+			}
+		}
+	}()
+	timer := time.NewTimer(collectTimeout)
+	defer timer.Stop()
+	select {
+	case r := <-done:
+		if r.panicked != nil {
+			panic(r.panicked)
+		}
+		require.False(t, r.tooMany, "the executor keeps returning responses\nquery: %s", query)
+		return r.responses
+	case <-timer.C:
+		t.Fatalf("the executor returns no response within %v\nquery: %s", collectTimeout, query)
+		return nil
+	}
 }
 
 // marshal returns the responses as JSON in an order that does not depend on the order in

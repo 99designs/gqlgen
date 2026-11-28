@@ -1,0 +1,13 @@
+schema:
+  - "*.graphql"
+skip_validation: true
+exec:
+  filename: generated.go
+  package: directiveargnames
+model:
+  filename: models-gen.go
+  package: directiveargnames
+resolver:
+  filename: resolver.go
+  package: directiveargnames
+  type: Resolver

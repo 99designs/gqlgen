@@ -1,0 +1,5 @@
+directive @tag(in: BInput) on FIELD_DEFINITION
+
+input AInput @retypeInput {
+  x: Int
+}

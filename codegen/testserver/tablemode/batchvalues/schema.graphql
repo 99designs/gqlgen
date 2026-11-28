@@ -1,0 +1,20 @@
+# This schema is generated once per exec mode with omit_slice_element_pointers, so that
+# User.posts is a slice of values, which the batch resolver of Post.author takes as
+# pointers.
+type Query {
+  users: [User!]!
+}
+
+type User {
+  id: ID!
+  posts: [Post!]!
+}
+
+type Post {
+  id: ID!
+  author: Author!
+}
+
+type Author {
+  id: ID!
+}

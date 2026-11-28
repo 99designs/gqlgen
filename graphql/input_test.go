@@ -219,6 +219,63 @@ func TestUnmarshalNamedInputFromContextNullInput(t *testing.T) {
 	assert.Nil(t, got["raw"])
 }
 
+// An untyped unmarshaler returns its result as any. The index stores it as it stores the
+// result of a typed unmarshaler of goType, into either shape of target.
+func TestUnmarshalNamedInputFromContextUntyped(t *testing.T) {
+	objectType := reflect.TypeFor[inputTestObject]()
+	ctx := WithInputUnmarshalerIndex(context.Background(), NewInputUnmarshalerIndex(
+		NewUntypedInputUnmarshaler(
+			"Value",
+			objectType,
+			func(ctx context.Context, obj any) (any, error) {
+				return unmarshalInputTestObject(ctx, obj)
+			},
+		),
+		NewUntypedInputUnmarshaler(
+			"Pointer",
+			reflect.PointerTo(objectType),
+			func(ctx context.Context, obj any) (any, error) {
+				return unmarshalInputTestObjectPointer(ctx, obj)
+			},
+		),
+		NewUntypedInputUnmarshaler(
+			"Nil",
+			reflect.PointerTo(objectType),
+			func(context.Context, any) (any, error) {
+				return nil, nil
+			},
+		),
+		NewUntypedInputUnmarshaler("Failing", objectType, func(context.Context, any) (any, error) {
+			return nil, errors.New("failed")
+		}),
+	))
+	raw := map[string]any{"name": "bob"}
+	want := inputTestObject{Name: "bob"}
+
+	for _, name := range []string{"Value", "Pointer"} {
+		t.Run(name, func(t *testing.T) {
+			var got inputTestObject
+			require.NoError(t, UnmarshalNamedInputFromContext(ctx, name, raw, &got))
+			assert.Equal(t, want, got)
+
+			var gotPointer *inputTestObject
+			require.NoError(t, UnmarshalNamedInputFromContext(ctx, name, raw, &gotPointer))
+			assert.Equal(t, &want, gotPointer)
+		})
+	}
+
+	t.Run("nil result", func(t *testing.T) {
+		got := inputTestObject{Name: "before"}
+		require.NoError(t, UnmarshalNamedInputFromContext(ctx, "Nil", raw, &got))
+		assert.Equal(t, inputTestObject{}, got)
+	})
+
+	t.Run("error", func(t *testing.T) {
+		var got inputTestObject
+		require.EqualError(t, UnmarshalNamedInputFromContext(ctx, "Failing", raw, &got), "failed")
+	})
+}
+
 func TestAssignUnmarshaled(t *testing.T) {
 	object := inputTestObject{Name: "bob"}
 

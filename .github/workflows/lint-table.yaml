@@ -1,0 +1,42 @@
+name: Lint (table mode)
+# The lint of lint.yaml for the files of table mode that only gqlgen built with the
+# gqlgen_table tag compiles.
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    types: [opened, synchronize]
+# When a new revision is pushed to a PR, cancel all in-progress CI runs for that
+# PR. See https://docs.github.com/en/actions/using-jobs/using-concurrency
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+env:
+  GOTOOLCHAIN: local
+  GOFLAGS: "-trimpath"
+jobs:
+  golangci-lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      GOLANGCI_LINT_VERSION: latest
+    strategy:
+      matrix:
+        go: ["1.26", "1.27"]
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: "false"
+    - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      with:
+        go-version: ${{ matrix.go }}
+    - name: golangci-lint with the gqlgen_table tag
+      uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
+      with:
+        version: ${{ env.GOLANGCI_LINT_VERSION }}
+        verify: false
+        args: --build-tags gqlgen_table

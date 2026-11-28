@@ -1,0 +1,60 @@
+# This schema is generated with the federation plugin once per exec mode, so that tests can
+# check that table mode resolves the entities exactly like the functions mode does.
+extend schema
+  @link(url: "https://specs.apollo.dev/federation/v2.3", import: ["@key", "@requires", "@external"])
+
+directive @entityResolver(multi: Boolean, requires: String) on OBJECT
+directive @goField(batch: Boolean, forceResolver: Boolean) on INPUT_FIELD_DEFINITION | FIELD_DEFINITION
+directive @upper on FIELD_DEFINITION
+
+type Query {
+  ping: String
+}
+
+# Hello has one key. Its resolver fails for the name "fail" and finds no entity for "nil".
+type Hello @key(fields: "name") {
+  name: String!
+  greeting: String! @upper
+}
+
+# World has a nested key, and a second key of another type.
+type World @key(fields: "hello { name } foo") @key(fields: "bar") {
+  foo: String!
+  bar: Int!
+  hello: Hello
+}
+
+# Planet unmarshals the field it requires onto the entity that its resolver returns.
+type Planet @key(fields: "name") {
+  name: String!
+  diameter: Int! @external
+  size: Int! @requires(fields: "diameter")
+}
+
+# MultiHello is resolved by one call for all its representations, which fails for the
+# name "fail".
+type MultiHello @key(fields: "name") @entityResolver(multi: true) {
+  name: String!
+}
+
+# Product hands the field it requires to the call for all its representations, and
+# computes tax and discount from the representation in field resolvers, discount in a
+# batch resolver.
+type Product @key(fields: "id") @entityResolver(multi: true, requires: "preloaded") {
+  id: ID!
+  category: String! @external
+  price: Int @external
+  display: String! @requires(fields: "category")
+  tax: Int @requires(fields: "price") @computedRequires
+  discount: Int @requires(fields: "price") @computedRequires @goField(batch: true)
+}
+
+# Node is an entity that is an interface.
+interface Node @key(fields: "id") {
+  id: ID!
+}
+
+type Item implements Node @key(fields: "id") {
+  id: ID!
+  label: String
+}

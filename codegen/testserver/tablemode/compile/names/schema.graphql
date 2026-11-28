@@ -1,0 +1,21 @@
+# The functions of the union User_resolve and of the interface Pair_set have the names
+# that table mode gives the functions of the object User and of the input Pair.
+type Query {
+  user: User
+  found: User_resolve
+  pair(in: Pair): Pair_set
+}
+
+type User implements Pair_set {
+  id: Int
+}
+
+union User_resolve = User
+
+interface Pair_set {
+  id: Int
+}
+
+input Pair {
+  a: Int
+}

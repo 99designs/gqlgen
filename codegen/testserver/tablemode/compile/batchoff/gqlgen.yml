@@ -1,0 +1,16 @@
+schema:
+  - schema.graphql
+skip_validation: true
+exec:
+  filename: generated.go
+  package: batchoff
+models:
+  User:
+    fields:
+      friends:
+        batch: true
+  # Gone is not in the schema, so its batch resolver is not generated.
+  Gone:
+    fields:
+      x:
+        batch: true

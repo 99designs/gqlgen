@@ -1,0 +1,7 @@
+type Query {
+  item: OmitItem
+}
+
+type OmitItem {
+  name: String
+}

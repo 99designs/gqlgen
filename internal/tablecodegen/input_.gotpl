@@ -1,0 +1,17 @@
+{{- /* input_.gotpl holds what table mode generates for the inputs as the functions mode does,
+   copied from codegen/input.gotpl. */}}
+
+{{- define "typedInputUnmarshaler" }}
+
+	// Unmarshal{{ .Name }} unmarshals raw into the {{ .Name }} input type, using the
+	// unmarshaler bound to ctx's request. Call it from a resolver to decode an input
+	// object that was not passed as a field argument.
+	//
+	// ctx must come from a gqlgen request; outside one there is no unmarshaler to use
+	// and the returned error says so.
+	func Unmarshal{{ .Name }}(ctx context.Context, raw any) ({{ if .PointersInUnmarshalInput }}*{{ end }}{{.Type | ref}}, error) {
+		var out {{ if .PointersInUnmarshalInput }}*{{ end }}{{.Type | ref}}
+		err := graphql.UnmarshalNamedInputFromContext(ctx, {{ .Name | quote }}, raw, &out)
+		return out, err
+	}
+{{- end }}

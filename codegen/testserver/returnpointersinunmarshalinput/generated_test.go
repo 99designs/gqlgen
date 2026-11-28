@@ -49,11 +49,30 @@ func TestUnmarshalInputReturnsPointer(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			ec := &executionContext{}
+			// The exported unmarshaler reaches the generated one through the index of
+			// input unmarshalers, which only a request carries, so a resolver calls it.
+			// Going through it rather than the unexported unmarshaler checks the
+			// executors that table mode generates too, which have no such function.
+			var (
+				called bool
+				got    *SearchFilters
+				gotErr error
+			)
 
-			got, err := ec.unmarshalInputSearchFilters(context.Background(), tt.obj)
+			resolvers := &Stub{}
+			resolvers.QueryResolver.Search = func(ctx context.Context, _ SearchFilters) (string, error) {
+				called = true
+				got, gotErr = UnmarshalSearchFilters(ctx, tt.obj)
+				return "ok", nil
+			}
 
-			require.NoError(t, err)
+			srv := handler.NewDefaultServer(NewExecutableSchema(Config{Resolvers: resolvers}))
+
+			var resp struct{ Search string }
+			require.NoError(t, client.New(srv).Post(`query { search(filters: {}) }`, &resp))
+
+			require.True(t, called, "the resolver never ran, so nothing was exercised")
+			require.NoError(t, gotErr)
 			require.NotNil(t, got, "the unmarshaler must never return a nil pointer")
 			assert.Equal(t, tt.want, *got)
 		})

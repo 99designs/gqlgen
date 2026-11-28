@@ -1,0 +1,18 @@
+schema:
+  - ../schema.graphql
+skip_validation: true
+exec:
+  filename: generated.go
+  package: table
+model:
+  filename: models_gen.go
+  package: table
+autobind:
+  - github.com/99designs/gqlgen/codegen/testserver/tablemode/batchglobal/model
+resolver:
+  batch: true
+models:
+  User:
+    fields:
+      posts:
+        resolver: true

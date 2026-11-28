@@ -1,0 +1,7 @@
+{{- /* Table mode resolves the fields with the functions of the objects, and keeps those of
+   the batch resolvers. */}}
+{{- range $object := .Objects }}{{- range $field := $object.Fields }}
+{{- if and $field.IsBatch (not $object.Root) }}
+{{- template "resolveBatch" (dict "Object" $object "Field" $field) }}
+{{- end }}
+{{- end }}{{- end}}

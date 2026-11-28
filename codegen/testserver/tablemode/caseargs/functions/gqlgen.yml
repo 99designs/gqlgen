@@ -1,0 +1,10 @@
+schema:
+  - ../schema.graphql
+skip_validation: true
+# The complexity function would take id twice, which does not compile.
+omit_complexity: true
+exec:
+  filename: generated.go
+  package: functions
+autobind:
+  - github.com/99designs/gqlgen/codegen/testserver/tablemode/models

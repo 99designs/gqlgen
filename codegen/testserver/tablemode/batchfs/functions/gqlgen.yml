@@ -1,0 +1,23 @@
+schema:
+  - ../*.graphql
+skip_validation: true
+exec:
+  layout: follow-schema
+  dir: .
+  package: functions
+model:
+  filename: models_gen.go
+  package: functions
+autobind:
+  - github.com/99designs/gqlgen/codegen/testserver/tablemode/batchfs/model
+models:
+  Dog:
+    fields:
+      batchProp:
+        resolver: true
+        batch: true
+  Cat:
+    fields:
+      batchProp:
+        resolver: true
+        batch: true

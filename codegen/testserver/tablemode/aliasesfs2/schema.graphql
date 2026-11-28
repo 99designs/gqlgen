@@ -1,0 +1,13 @@
+# The schema of aliasesfs2 is aliases in two files of the follow-schema layout, where the
+# file of AInput refers to the package of BInput only through the argument of @tag, which
+# the functions mode looks up before AInput and table mode does not look up there.
+directive @retypeInput on INPUT_OBJECT
+
+type Query {
+  a(in: AInput): String @tag
+  b(in: BInput): String
+}
+
+input BInput @retypeInput {
+  y: Int
+}

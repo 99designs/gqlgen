@@ -1,0 +1,6 @@
+# BadUnmarshal unmarshals itself from a string, which the functions mode does not compile.
+scalar BadUnmarshal
+
+type Query {
+  take(in: BadUnmarshal!): Int
+}

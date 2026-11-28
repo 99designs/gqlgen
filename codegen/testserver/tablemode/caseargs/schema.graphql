@@ -1,0 +1,9 @@
+# CaseArgs.f is bound to a method whose two parameters, id and ID, both take the argument
+# id. It is generated once per exec mode, as the schema of the tablemode test server.
+type Query {
+  caseArgs: CaseArgs
+}
+
+type CaseArgs {
+  f(id: ID!): String!
+}

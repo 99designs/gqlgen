@@ -1,0 +1,12 @@
+# This schema puts a directive on types of introspection, which both exec modes run around
+# the fields that return them, once per exec mode, as the schema of the tablemode test
+# server.
+directive @seen on OBJECT | FIELD_DEFINITION
+
+type Query {
+  a: String
+}
+
+extend type __Schema @seen
+
+extend type __Type @seen

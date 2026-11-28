@@ -51,6 +51,35 @@ func locationDirectives(
 	return mDirectives
 }
 
+// directiveArgVarName returns the name of the variable that the generated code unmarshals
+// the i-th argument of a directive into. The variable sits in a closure beside the object
+// that the directive receives, the next resolver, the receiver of the generated code, the
+// packages it calls and the literals it writes for the other arguments, so it is named by
+// position rather than after the argument, whose name could hide any of them.
+func directiveArgVarName(i int) string {
+	return fmt.Sprintf("arg%d", i)
+}
+
+// directiveParamNames returns the names of the parameters that the function of a directive
+// in DirectiveRoot takes for the arguments args, by argument. They follow the arguments, but
+// one that would repeat ctx, obj, next, the results res and err, or an earlier parameter gets
+// the suffix Arg until it does not.
+func directiveParamNames(args []*FieldArgument) []string {
+	taken := map[string]bool{"ctx": true, "obj": true, "next": true, "res": true, "err": true}
+	names := make([]string, len(args))
+	for i, arg := range args {
+		v := templates.ToGoPrivate(arg.Name)
+		if v != "_" {
+			for taken[v] {
+				v += "Arg"
+			}
+			taken[v] = true
+		}
+		names[i] = v
+	}
+	return names
+}
+
 func (b *builder) buildDirectives() (map[string]*Directive, error) {
 	directives := make(map[string]*Directive, len(b.Schema.Directives))
 
@@ -63,7 +92,7 @@ func (b *builder) buildDirectives() (map[string]*Directive, error) {
 		}
 
 		var args []*FieldArgument
-		for _, arg := range dir.Arguments {
+		for i, arg := range dir.Arguments {
 			tr, err := b.Binder.TypeReference(arg.Type, nil)
 			if err != nil {
 				return nil, err
@@ -72,7 +101,7 @@ func (b *builder) buildDirectives() (map[string]*Directive, error) {
 			newArg := &FieldArgument{
 				ArgumentDefinition: arg,
 				TypeReference:      tr,
-				VarName:            templates.ToGoPrivate(arg.Name),
+				VarName:            directiveArgVarName(i),
 			}
 
 			if arg.DefaultValue != nil {
@@ -189,11 +218,12 @@ func (d *Directive) Declaration() string {
 	res := d.CallName() + " func(ctx context.Context, obj any, next graphql.Resolver"
 
 	var resSb173 strings.Builder
-	for _, arg := range d.Args {
+	names := directiveParamNames(d.Args)
+	for i, arg := range d.Args {
 		fmt.Fprintf(
 			&resSb173,
 			", %s %s",
-			templates.ToGoPrivate(arg.Name),
+			names[i],
 			templates.CurrentImports.LookupType(arg.TypeReference.GO),
 		)
 	}

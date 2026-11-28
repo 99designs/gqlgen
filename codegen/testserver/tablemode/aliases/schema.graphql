@@ -1,0 +1,16 @@
+# AInput and BInput are bound to types called Input of two packages called model, whose
+# import aliases the errors of @retypeInput name. It is generated once per exec mode.
+directive @retypeInput on INPUT_OBJECT
+
+input AInput @retypeInput {
+  x: Int
+}
+
+input BInput @retypeInput {
+  y: Int
+}
+
+type Query {
+  a(in: AInput): String
+  b(in: BInput): String
+}

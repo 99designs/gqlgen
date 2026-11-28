@@ -1,0 +1,7 @@
+schema:
+  - ../schema.graphql
+skip_validation: true
+call_argument_directives_with_null: true
+exec:
+  filename: generated.go
+  package: functions

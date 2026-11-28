@@ -1,0 +1,227 @@
+{{- /* table_.gotpl defines the parts of the copies of the templates of the codegen package
+   where table mode writes otherwise than the functions mode. */}}
+
+{{- define "apiImports" }}
+{{ reserveImport "reflect" }}
+{{ reserveImport "github.com/99designs/gqlgen/graphql/tableimpl" }}
+
+// The graphql/tableimpl runtime that this code is built with must support the version of it
+// that the code was generated for. See tableimpl.SupportPackageIsVersion1.
+const _ = tableimpl.SupportPackageIsVersion1
+{{- end }}
+
+{{- /* The tables are linked against the schema they were generated from: a schema in the
+   Config only validates requests and answers introspection, as in the functions mode. */}}
+{{- define "newExecutableSchema" }}
+	return &executableSchema{
+		ExecutableSchemaState: &graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]{SchemaData: cfg.Schema, Resolvers: cfg.Resolvers, Directives: cfg.Directives, ComplexityRoot: cfg.Complexity},
+		tables:                builtTables(),
+	}
+{{- end }}
+
+{{- define "executableSchemaType" }}
+type executableSchema struct {
+	*graphql.ExecutableSchemaState[ResolverRoot, DirectiveRoot, ComplexityRoot]
+	tables *tables
+}
+{{- end }}
+
+{{- define "complexityArgs" }}
+	args, err := ec.tables.{{ .Data.TableObjectVar .Object }}.ParseArgs(ctx, ec, {{ .Field.Name | quote }}, rawArgs)
+{{- end }}
+
+{{- define "inputUnmarshalers" }}
+		return graphql.NewInputUnmarshalerIndex(ec.tables.schema.InputUnmarshalers(ec)...)
+{{- end }}
+
+{{- define "executionContextFields" }}
+	tables *tables
+{{- end }}
+
+{{- define "executionContextState" }}
+			execSchema.ExecutableSchemaState,
+{{- end }}
+
+{{- define "executionContextTables" }}
+		tables: execSchema.tables,
+{{- end }}
+
+{{- define "execInternals" }}
+
+// OpCtx returns the context of the operation being executed, through which the
+// graphql/tableimpl runtime reaches the operation. See tableimpl.Context.
+func (ec *executionContext) OpCtx() *graphql.OperationContext {
+	return ec.OperationContext
+}
+
+// AddDeferred records that n more deferred results will be sent for the operation. See
+// tableimpl.Context.
+func (ec *executionContext) AddDeferred(n int32) {
+	atomic.AddInt32(&ec.Deferred, n)
+}
+{{- if .TableLinkedSchema }}
+
+// linkedSchema loads the schema that the code is generated for, which is not the schema
+// of the sources: plugins of the generator changed it, or gqlgen added an empty query type.
+// The tables are linked to it, and requests are validated against parsedSchema, as in the
+// functions mode. It is loaded when NewExecutableSchema first builds the tables, and
+// nothing holds it once they are linked.
+func linkedSchema() *ast.Schema {
+	return gqlparser.MustLoadSchema(&ast.Source{Name: "linked_schema.graphql", Input: {{ .TableLinkedSchema | rawQuote }}})
+}
+{{- end }}
+
+// builtTables builds the tables when NewExecutableSchema is first called, for every
+// executable schema of the package: they do not depend on the Config and are only read
+// once built.
+{{- if .TableLinkedSchema }} They are linked to linkedSchema.
+{{- else }} They are linked to the schema as it is then, which code may change later
+// through Schema, while the functions mode runs the code it was generated for.
+{{- end }}
+var builtTables = sync.OnceValue(func() *tables {
+	return newTables({{ if .TableLinkedSchema }}linkedSchema(){{ else }}parsedSchema{{ end }})
+})
+{{- $chunks := .TableInitChunks }}
+
+// The entries of the tables, for the generated files that build them.
+type (
+	tableField      = tableimpl.Field[*executionContext]
+	tableArg        = tableimpl.Arg[*executionContext]
+	tableInputField = tableimpl.InputField[*executionContext]
+	tableOut        = *tableimpl.Out[*executionContext]
+	tableIn         = *tableimpl.In[*executionContext]
+)
+
+// tables holds the tables that the graphql/tableimpl runtime executes, and the marshalers
+// and unmarshalers they are built from. newTables builds them, once for the package, and
+// they are only read afterwards. What the schema says about them, the runtime reads from
+// the schema.
+type tables struct {
+	schema *tableimpl.Schema[*executionContext]
+	{{- range $i, $f := .TableFields }}
+	{{- if and $f.Section $i }}
+{{ end }}
+	{{ $f.Name }} {{ $f.Type }}
+	{{- end }}
+}
+
+{{- /* The parameter and the locals of the generated code have names that a package of the
+   Go types it refers to is unlikely to have, which they would hide. */}}
+func newTables(schemaToLink *ast.Schema) *tables {
+	t := &tables{schema: tableimpl.NewSchema[*executionContext](schemaToLink)}
+	{{- if $.Config.OmitPanicHandler }}
+	t.schema.OmitPanicHandler = true
+	{{- end }}
+	{{- if $.Config.Exec.WorkerLimit }}
+	t.schema.WorkerLimit = {{ $.Config.Exec.WorkerLimit }}
+	{{- end }}
+	{{- if $.Config.CallArgumentDirectivesWithNull }}
+	t.schema.ArgumentDirectivesWithNull = true
+	{{- end }}
+	// The marshalers only take the address of the tables they marshal, so they come
+	// first, each after the marshalers it uses.
+	{{- range $i, $_ := $chunks }}
+	t.initMarshalers{{ $i }}()
+	{{- end }}
+	{{- range $directive := .TableDirectiveDefs }}
+	t.{{ $.TableDirectiveVar $directive }}.Init(t.schema, {{ $directive.Name | quote }}, {{ $.TableDirectiveArgs $directive }}, func(ctx context.Context, ec *executionContext, directiveObj any, n graphql.Resolver, directiveArgs map[string]any) (any, error) {
+		return {{ $directive.CallPath }}({{ $.TableCallArgs $directive }})
+	}, {{ $.TableImplemented $directive }})
+	{{- end }}
+	{{- range $group := .TableInitGroups }}
+	t.init{{ $.TableObjectVar (index $group 0) | ucFirst }}()
+	{{- end }}
+	t.schema.Link()
+	return t
+}
+{{- range $i, $chunk := $chunks }}
+
+func (t *tables) initMarshalers{{ $i }}() {
+	{{- range $chunk }}
+	{{ . }}
+	{{- end }}
+}
+{{- end }}
+{{- range $u := .TablePluginCalls }}
+{{- if $u.Marshal }}
+{{- if $u.Method }}
+
+// {{ $u.Name }} is the marshaler of the functions mode that the code of a plugin calls.
+func (ec *executionContext) {{ $u.Name }}(ctx context.Context, sel ast.SelectionSet, v {{ $u.Type.GO | ref }}) graphql.Marshaler {
+	return {{ $u.Call }}(ctx, ec, sel, v)
+}
+{{- end }}
+{{- if $u.Function }}
+
+// {{ $u.Name }} is the marshaler of the functions mode that the code of a plugin calls.
+func {{ $u.Name }}(ctx context.Context, ec *executionContext, sel ast.SelectionSet, v {{ $u.Type.GO | ref }}) graphql.Marshaler {
+	return {{ $u.Call }}(ctx, ec, sel, v)
+}
+{{- end }}
+{{- else }}
+{{- if $u.Method }}
+
+// {{ $u.Name }} is the unmarshaler of the functions mode that the code of a plugin calls.
+func (ec *executionContext) {{ $u.Name }}(ctx context.Context, v any) ({{ $u.Type.GO | ref }}, error) {
+	return {{ $u.Call }}(ctx, ec, v)
+}
+{{- end }}
+{{- if $u.Function }}
+
+// {{ $u.Name }} is the unmarshaler of the functions mode that the code of a plugin calls.
+func {{ $u.Name }}(ctx context.Context, ec *executionContext, v any) ({{ $u.Type.GO | ref }}, error) {
+	return {{ $u.Call }}(ctx, ec, v)
+}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+{{- define "generatedImports" }}
+{{ reserveImport "reflect" }}
+{{ reserveImport "github.com/99designs/gqlgen/graphql/tableimpl" }}
+{{- end }}
+
+{{- define "fieldMiddlewareFunc" }}
+// FieldMiddleware applies the FIELD directives of the query to a field. The graphql/tableimpl
+// runtime calls it for every field.
+func (ec *executionContext) FieldMiddleware(ctx context.Context, obj any, next graphql.Resolver) graphql.Resolver {
+{{- end }}
+
+{{- /* The Go type of the input, which the functions mode unmarshals, so that a reference
+   bound to another model fails to compile in the same way. */}}
+{{- define "unmarshalInputCall" }}
+					res, err := tableimpl.Input{{ if .Type.PointersInUnmarshalInput }}Pointer{{ else }}Value{{ end }}[*executionContext, {{ .Data.TableGoType .Type.GQL.Name | ref }}](ctx, ec, &ec.tables.input{{ .Type.GQL.Name }}, v)
+{{- end }}
+
+{{- define "objectMarshalReturn" }}
+					{{ .Data.TableMarshalReference .Type .V }}
+{{- end }}
+
+{{- define "typeChecks" }}
+{{- with $.TableMarshalChecks }}
+
+// The Go types that marshal themselves are graphql.Marshalers, as the functions mode returns
+// them, which the package checks when it compiles.
+func _() {
+	{{- range . }}
+	{{ . }}
+	{{- end }}
+}
+{{- end }}
+{{- with $.TableUnmarshalChecks }}
+
+// The Go types that unmarshal themselves have the methods that the functions mode calls,
+// which the package checks when it compiles, with the names that the unmarshalers of the
+// functions mode have.
+func _(ec *executionContext, ctx context.Context, v any) {
+	{{- range . }}
+	{{ . }}
+	{{- end }}
+}
+{{- end }}
+{{- end }}
+
+{{- define "implementorMarshalReturn" }}
+			{{ .Data.TableMarshalImplementor .Implementor .Obj }}
+{{- end }}

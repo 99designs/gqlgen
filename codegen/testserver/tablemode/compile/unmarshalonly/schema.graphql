@@ -1,0 +1,9 @@
+# UnmarshalOnly unmarshals itself but does not marshal itself, which the functions mode does
+# not compile for an input.
+type Query {
+  take(in: UnmarshalOnly): Int
+}
+
+input UnmarshalOnly {
+  a: Int
+}

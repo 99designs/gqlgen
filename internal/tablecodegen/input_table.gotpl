@@ -1,0 +1,64 @@
+{{- range $input := .Inputs }}
+	{{- if not .HasUnmarshal }}
+	{{- if not $.Config.OmitTypedInputUnmarshalers }}
+	{{- template "typedInputUnmarshaler" . }}
+	{{- end }}
+	{{- end }}
+{{ end }}
+
+{{- define "tableInput" }}
+{{- $data := .Data }}
+{{- $input := .Input }}
+{{- $T := $input.Type | ref }}
+	t.{{ $data.TableObjectVar $input }}.Init(t.schema, tableimpl.Input[*executionContext]{Name: {{ $input.Name | quote }}, GoType: {{ $T | quote }}, Type: reflect.TypeOf((*{{ $T }})(nil)).Elem()
+	{{- if $input.PointersInUnmarshalInput }}, Pointer: true{{ end }}
+	{{- if $input.IsMap }}, IsMap: true{{ end }}
+	{{- if $data.TableSetsFields $input }}, Set: {{ $data.TableFunc $input }}{{ end }}}, []tableInputField{
+	{{- range $field := $input.Fields }}
+		{{- $entry := dict "Data" $data "Field" $field }}
+		{{- if $field.IsResolver }}
+		{ {{- template "tableInputEntry" $entry -}} , {{ $data.TableInEntry $field.TypeReference }}
+		{{- with $data.TableInputGoType $field }}, GoType: {{ . | quote }}{{ end }}, SetWith: func(ctx context.Context, ec *executionContext, inputValue, v any) error {
+				fieldValue, _ := v.({{ $field.TypeReference.GO | ref }})
+				return ec.Resolvers.{{ $data.TableInputInvocation $field }}
+			}},
+		{{- else }}
+		{ {{- template "tableInputEntry" $entry -}} , {{ $data.TableInEntry $field.TypeReference }}
+		{{- with $data.TableInputGoType $field }}, GoType: {{ . | quote }}{{ end }}},
+		{{- end }}
+	{{- end }}
+	})
+{{- end }}
+
+{{- /* tableInputSet writes the Set of an input, which stores its fields by their index in
+   the table: one function for the input rather than a closure per field, as for the
+   tableimpl.Resolve of an object. See Data.TableSetStmt. */}}
+{{- define "tableInputSet" }}
+{{- $data := .Data }}
+{{- $input := .Input }}
+{{- $T := $input.Type | ref }}
+{{- if $data.TableSetsFields $input }}
+
+func {{ $data.TableFunc $input }}(inputValue any, fieldIndex int, v any) {
+	{{- if $input.IsMap }}
+	m := *inputValue.(*map[string]any)
+	{{- else }}
+	p := inputValue.(*{{ $T }})
+	{{- end }}
+	switch fieldIndex {
+	{{- range $i, $field := $input.Fields }}
+	{{- if not $field.IsResolver }}
+	case {{ $i }}:
+		{{ $data.TableSetStmt $field }}
+	{{- end }}
+	{{- end }}
+	}
+}
+{{- end }}
+{{- end }}
+
+{{- /* tableInputEntry writes the entries of an input field that every field has: its
+   name. The runtime reads its default and directives from the schema. */}}
+{{- define "tableInputEntry" -}}
+Name: {{ .Field.Name | quote }}
+{{- end }}

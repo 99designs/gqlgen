@@ -1,0 +1,9 @@
+# The schema of aliasesfs is aliases in two files of the follow-schema layout. The file of
+# the inputs also holds Holder.b, a field with an argument that is not a resolver, which the
+# functions mode looks up the package of BInput for before AInput.
+directive @retypeInput on INPUT_OBJECT
+
+type Query {
+  holder: Holder!
+  a(in: AInput): String
+}

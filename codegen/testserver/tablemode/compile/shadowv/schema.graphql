@@ -1,0 +1,7 @@
+# Vee is bound to a type of a package called v, which the parameter v of the unmarshaler of
+# the functions mode hides in its body, which does not compile.
+scalar Vee
+
+type Query {
+  take(in: Vee!): Vee!
+}

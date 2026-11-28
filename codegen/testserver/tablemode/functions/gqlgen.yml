@@ -1,0 +1,25 @@
+schema:
+  - ../schema.graphql
+skip_validation: true
+exec:
+  filename: generated.go
+  package: functions
+autobind:
+  - github.com/99designs/gqlgen/codegen/testserver/tablemode/models
+models:
+  Money:
+    model: github.com/99designs/gqlgen/codegen/testserver/tablemode/models.Money
+  Code:
+    model: github.com/99designs/gqlgen/codegen/testserver/tablemode/models.CodeBase
+  ID:
+    model: github.com/99designs/gqlgen/graphql.ID
+  Label:
+    model: github.com/99designs/gqlgen/graphql.String
+  Fragile:
+    model: github.com/99designs/gqlgen/codegen/testserver/tablemode/models.Fragile
+  Noted:
+    model: github.com/99designs/gqlgen/graphql.String
+  Bytes:
+    model: github.com/99designs/gqlgen/codegen/testserver/tablemode/models.Bytes
+  Tag:
+    model: github.com/99designs/gqlgen/codegen/testserver/tablemode/models.Tag

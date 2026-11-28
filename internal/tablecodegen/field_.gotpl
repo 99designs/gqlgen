@@ -1,0 +1,102 @@
+{{- /* field_.gotpl holds what table mode generates for the fields as the functions mode does,
+   copied from codegen/field.gotpl: the functions of the batch resolvers, and the bodies that
+   resolve a field, which table mode puts in the functions of the objects. */}}
+
+{{- define "resolveBatch" }}
+func (ec *executionContext) resolveBatch_{{$.Object.Name}}_{{$.Field.Name}}(ctx context.Context, field graphql.CollectedField, obj {{$.Object.Reference | ref}}) (any, error) {
+	resolver := ec.Resolvers.{{ ucFirst $.Object.Name }}()
+	{{- if $.Field.BatchUsesFieldContextArgs }}
+	fc := graphql.GetFieldContext(ctx)
+	{{- end }}
+	{{/* TODO: resolveBatch_* runs per parent even when grouped; consider a single
+	dispatch per field if the execution flow can support it. */ -}}
+	if batch, ok := graphql.BatchParentsFor[{{$.Object.Reference | ref}}](ctx, {{ $.Object.Name | quote }}); ok {
+		result := batch.FieldResult(field, func() (any, error) {
+			{{- if $.Field.HasFederationRequiresArg }}
+			federationRequires, err := graphql.FederationRequiresForBatch(ctx, len(batch.Parents), batch.IndexMap)
+			if err != nil {
+				return nil, err
+			}
+			{{- end }}
+			return resolver.{{ $.Field.GoFieldName }}({{ if $.Field.HasFederationRequiresArg }}{{ $.Field.BatchCallArgs "batch.Parents" "federationRequires" }}{{ else }}{{ $.Field.BatchCallArgs "batch.Parents" "" }}{{ end }})
+		})
+		return graphql.ResolveBatchGroupResult[{{ $.Field.TypeReference.GO | ref }}](
+			ctx,
+			batch.Index,
+			len(batch.Parents),
+			result,
+			{{ printf "%s.%s" $.Object.Name $.Field.Name | quote }},
+			batch.IndexMap,
+		)
+	}
+{{- if $.Field.HasFederationRequiresArg }}
+	federationRequires, err := graphql.FederationRequiresForBatch(ctx, 1, nil)
+	if err != nil {
+		return nil, err
+	}
+	results, err := resolver.{{ $.Field.GoFieldName }}({{ $.Field.BatchCallArgs (printf "[]%s{obj}" ($.Object.Reference | ref)) "federationRequires" }})
+	{{- else }}
+	results, err := resolver.{{ $.Field.GoFieldName }}({{ $.Field.BatchCallArgs (printf "[]%s{obj}" ($.Object.Reference | ref)) "" }})
+	{{- end }}
+	return graphql.ResolveBatchSingleResult[{{ $.Field.TypeReference.GO | ref }}](
+		ctx,
+		results,
+		err,
+		{{ printf "%s.%s" $.Object.Name $.Field.Name | quote }},
+	)
+}
+{{- end }}
+
+{{ define "fieldDefinition" }}
+	{{- if and .IsBatch (not .Object.Root) }}
+		return ec.resolveBatch_{{ .Object.Name }}_{{ .Name }}(ctx, field, obj)
+	{{- else }}
+		{{- template "singleFieldDefinition" . }}
+	{{- end }}
+{{- end }}
+
+{{ define "singleFieldDefinition" }}
+	{{- if or .IsResolver .IsMethod -}}
+	{{- if gt (len .Args) 0 -}}
+	fc := graphql.GetFieldContext(ctx)
+	{{- end }}
+	{{ end }}
+	{{- if .IsResolver -}}
+		return ec.Resolvers.{{ .ShortInvocation }}
+	{{- else if .IsMap }}
+		switch v := {{.GoReceiverName}}[{{.Name|quote}}].(type) {
+		case {{if .Stream}}<-chan {{end}}{{.TypeReference.GO | ref}}:
+			return v, nil
+		case {{if .Stream}}<-chan {{end}}{{.TypeReference.Elem.GO | ref}}:
+			return &v, nil
+		case nil:
+			return ({{.TypeReference.GO | ref}})(nil), nil
+		default:
+			return nil, fmt.Errorf("unexpected type %T for field %s", v, {{ .Name | quote}})
+		}
+	{{- else if .IsMethod -}}
+		{{- if .HasHaser -}}
+		if !{{.GoReceiverName}}.{{.HaserMethodName}}() {
+			return nil, nil
+		}
+		{{ end }}
+		{{- if .VOkFunc -}}
+			v, ok := {{.GoReceiverName}}.{{.GoFieldName}}({{ .CallArgs }})
+			if !ok {
+				return nil, nil
+			}
+			return v, nil
+		{{- else if .NoErr -}}
+			return {{.GoReceiverName}}.{{.GoFieldName}}({{ .CallArgs }}), nil
+		{{- else -}}
+			return {{.GoReceiverName}}.{{.GoFieldName}}({{ .CallArgs }})
+		{{- end -}}
+	{{- else if .IsVariable -}}
+		{{- if .HasHaser -}}
+		if !{{.GoReceiverName}}.{{.HaserMethodName}}() {
+			return nil, nil
+		}
+		{{- end -}}
+		return {{.GoReceiverName}}.{{.GoFieldName}}, nil
+	{{- end }}
+	{{- end }}

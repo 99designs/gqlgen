@@ -1,0 +1,16 @@
+schema:
+  - ../schema.graphql
+skip_validation: true
+exec:
+  filename: generated.go
+  package: functions
+federation:
+  filename: federation.go
+  package: functions
+  version: 2
+model:
+  filename: models_gen.go
+  package: functions
+autobind:
+  - github.com/99designs/gqlgen/codegen/testserver/tablemode/federation/model
+call_argument_directives_with_null: true

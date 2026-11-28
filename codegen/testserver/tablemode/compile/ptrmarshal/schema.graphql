@@ -1,0 +1,7 @@
+# PtrMarshal marshals itself with a pointer receiver, which the functions mode does not
+# compile for a value of it.
+scalar PtrMarshal
+
+type Query {
+  value: PtrMarshal!
+}

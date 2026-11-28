@@ -1,0 +1,46 @@
+name: Test (table mode)
+# The tests of test.yaml that table mode needs on top of it: those of tablemode that run
+# the generator, in both exec modes. See codegen/testserver/tablemode/README.md.
+on:
+  push:
+    branches:
+    - master
+  pull_request:
+    types: [opened, synchronize]
+env:
+  GOTOOLCHAIN: local
+# When a new revision is pushed to a PR, cancel all in-progress CI runs for that
+# PR. See https://docs.github.com/en/actions/using-jobs/using-concurrency
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        go: ["1.26", "1.27"]
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: "false"
+    - uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+      with:
+        go-version: ${{ matrix.go }}
+    - run: go mod download
+    - name: Generation tests
+      shell: bash
+      run: |
+        set -euo pipefail
+        # The tests of tablemode that run the generator do not build with -race, which
+        # test.yaml uses, so it leaves them out, since the race detector only slows them
+        # down. They generate in the exec mode that the test binary is built for: without
+        # the gqlgen_table tag in the functions mode, and with it in table mode, whose
+        # generator only the tag links.
+        go test ./codegen/testserver/tablemode/
+        go test -tags gqlgen_table ./codegen/testserver/tablemode/ ./api/...

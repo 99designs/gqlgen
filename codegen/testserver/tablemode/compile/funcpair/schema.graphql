@@ -1,0 +1,6 @@
+# Date is bound to functions whose marshaler returns a graphql.WriterFunc.
+scalar Date
+
+type Query {
+  birthday(after: Date): Date
+}

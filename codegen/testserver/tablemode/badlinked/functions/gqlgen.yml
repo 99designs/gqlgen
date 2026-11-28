@@ -1,0 +1,9 @@
+schema:
+  - ../schema.graphql
+skip_validation: true
+models:
+  Tagged:
+    model: github.com/99designs/gqlgen/graphql.String
+exec:
+  filename: generated.go
+  package: functions

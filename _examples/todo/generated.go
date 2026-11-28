@@ -997,7 +997,7 @@ func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.Collec
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				role, err := ec.unmarshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋtodoᚐRole(ctx, "OWNER")
+				arg0, err := ec.unmarshalNRole2githubᚗcomᚋ99designsᚋgqlgenᚋ_examplesᚋtodoᚐRole(ctx, "OWNER")
 				if err != nil {
 					var zeroVal bool
 					return zeroVal, err
@@ -1006,7 +1006,7 @@ func (ec *executionContext) _Todo_done(ctx context.Context, field graphql.Collec
 					var zeroVal bool
 					return zeroVal, errors.New("directive hasRole is not implemented")
 				}
-				return ec.Directives.HasRole(ctx, obj, directive0, role)
+				return ec.Directives.HasRole(ctx, obj, directive0, arg0)
 			}
 
 			next = directive1

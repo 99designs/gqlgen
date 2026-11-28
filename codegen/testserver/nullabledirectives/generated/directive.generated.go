@@ -80,7 +80,7 @@ func (ec *executionContext) field_Query_directiveSingleNullableArg_argsArg1(
 	}
 
 	directive1 := func(ctx context.Context) (any, error) {
-		value, err := ec.unmarshalNString2string(ctx, "test")
+		arg0, err := ec.unmarshalNString2string(ctx, "test")
 		if err != nil {
 			var zeroVal *string
 			return zeroVal, err
@@ -89,7 +89,7 @@ func (ec *executionContext) field_Query_directiveSingleNullableArg_argsArg1(
 			var zeroVal *string
 			return zeroVal, errors.New("directive populate is not implemented")
 		}
-		return ec.Directives.Populate(ctx, rawArgs, directive0, value)
+		return ec.Directives.Populate(ctx, rawArgs, directive0, arg0)
 	}
 	directive2 := func(ctx context.Context) (any, error) {
 		if ec.Directives.Noop == nil {

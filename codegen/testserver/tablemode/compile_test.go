@@ -10,6 +10,7 @@ package tablemode_test
 
 import (
 	"fmt"
+	"go/types"
 	"os"
 	"path/filepath"
 	"strings"
@@ -306,6 +307,50 @@ func TestTableModeFollowsPluginChanges(t *testing.T) {
 			require.Empty(t, typeErrors(t, dir), "exec mode %s", execMode)
 		})
 	}
+}
+
+// filterView binds the argument of Query.search, a reference to the input Filter, to a
+// pointer to FilterView in the data of the generated code, as a plugin that rebinds a
+// reference would. FilterView is not the Go type of Filter, which the binder checks while
+// it binds the reference and the plugin skips.
+type filterView struct{}
+
+func (filterView) Name() string { return "filter-view" }
+
+func (filterView) GenerateCode(data *codegen.Data) error {
+	view, err := data.Config.NewBinder().FindTypeFromName(
+		"github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/models.FilterView")
+	if err != nil {
+		return err
+	}
+	rebind := func(ref *config.TypeReference) {
+		if ref.Definition.Name == "Filter" {
+			ref.GO = types.NewPointer(view)
+		}
+	}
+	for _, ref := range data.ReferencedTypes {
+		rebind(ref)
+	}
+	for _, f := range data.QueryRoot.Fields {
+		if f.Name == "search" {
+			rebind(f.Args[0].TypeReference)
+		}
+	}
+	return nil
+}
+
+// Table mode fails to compile, as the functions mode does, where a plugin binds a reference
+// to an input to a Go type that is neither that of the input nor a pointer to it, rather
+// than generating code whose tables drop the value or panic when they are linked.
+func TestTableModeFailsToCompilePluginChanges(t *testing.T) {
+	configPath, err := filepath.Abs(filepath.Join("compile", "plugins", "gqlgen.yml"))
+	require.NoError(t, err)
+	dir, err := generateWith(t, configPath, api.AddPlugin(filterView{}))
+	require.NoError(t, err, "exec mode %s", execMode)
+	// The unmarshaler of the argument returns the Go type of Filter as FilterView.
+	require.Contains(t, strings.Join(typeErrors(t, dir), "\n"),
+		"cannot use &res (value of type *models.Filter) as *models.FilterView value",
+		"exec mode %s", execMode)
 }
 
 // pluginCaller writes a file into the package of the executor that unmarshals and marshals

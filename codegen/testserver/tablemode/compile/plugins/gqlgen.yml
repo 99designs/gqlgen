@@ -10,3 +10,5 @@ directives:
 models:
   Raw:
     model: github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/models.RawInput
+  Filter:
+    model: github.com/99designs/gqlgen/codegen/testserver/tablemode/compile/models.Filter

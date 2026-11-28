@@ -19,9 +19,10 @@ import (
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 )
 
-// The generated code unmarshals the arguments of a directive into variables named after the
-// arguments, beside the object it passes to the directive and the values it writes for the
-// other arguments. An argument with the name of one of those hides it.
+// The generated code declares the arguments of a directive as variables beside the object
+// it passes to the directive, the next resolver, its receiver, the packages it calls and the
+// values it writes for the other arguments, and DirectiveRoot declares them as parameters
+// beside ctx, obj, next, res and err. Arguments with the names of those must not hide them.
 func TestDirectiveArgumentNames(t *testing.T) {
 	var (
 		mu    sync.Mutex
@@ -44,17 +45,22 @@ func TestDirectiveArgumentNames(t *testing.T) {
 		Directives: DirectiveRoot{
 			Probe: func(
 				ctx context.Context, obj any, next graphql.Resolver,
-				rawArgs, asMap, it *string, trueArg, falseArg *bool, fooBar *string, on *bool,
-				list []*string,
+				objArg, rawArgs, asMap, it, ctxArg, errArg, ec, nextArg, resArg, directive0,
+				errorsArg, anyArg, nilArg *string, trueArg, falseArg *bool, fooBar, fooBarArg *string,
+				on *bool, list []*string,
 			) (any, error) {
 				got := []string{"obj=" + show(obj)}
 				for _, a := range []struct {
 					name  string
 					value string
 				}{
-					{"rawArgs", deref(rawArgs)}, {"asMap", deref(asMap)}, {"it", deref(it)},
-					{"true", deref(trueArg)}, {"false", deref(falseArg)},
-					{"foo_bar", deref(fooBar)}, {"on", deref(on)},
+					{"obj", deref(objArg)}, {"rawArgs", deref(rawArgs)}, {"asMap", deref(asMap)},
+					{"it", deref(it)}, {"ctx", deref(ctxArg)}, {"err", deref(errArg)},
+					{"ec", deref(ec)}, {"next", deref(nextArg)}, {"res", deref(resArg)},
+					{"directive0", deref(directive0)}, {"errors", deref(errorsArg)},
+					{"any", deref(anyArg)}, {"nil", deref(nilArg)}, {"true", deref(trueArg)},
+					{"false", deref(falseArg)}, {"foo_bar", deref(fooBar)}, {"fooBar", deref(fooBarArg)},
+					{"on", deref(on)},
 				} {
 					if a.value != "nil" {
 						got = append(got, a.name+"="+a.value)
@@ -82,7 +88,7 @@ func TestDirectiveArgumentNames(t *testing.T) {
 		var resp struct{ Root *string }
 		require.NoError(t, c.Post(`{ root }`, &resp))
 		require.Equal(t, []string{
-			"obj=<nil> list=[l]",
+			"obj=<nil> any=a nil=n list=[l]",
 		}, calls)
 	})
 
@@ -90,31 +96,27 @@ func TestDirectiveArgumentNames(t *testing.T) {
 		calls = nil
 		var resp struct{ Probed *string }
 		require.NoError(t, c.Post(`{ probed(x: "a") }`, &resp))
-		// The variable rawArgs hides the arguments of the field, so the directive receives
-		// the value of its argument rawArgs as the object.
 		require.Equal(t, []string{
-			"obj=&r rawArgs=r foo_bar=fb",
+			"obj=map[x:a] obj=o rawArgs=r ctx=c err=e ec=ec next=nx res=rs directive0=d0 " +
+				"errors=er foo_bar=fb fooBar=fB",
 		}, calls)
 	})
 
 	t.Run("boolean literals", func(t *testing.T) {
 		calls = nil
 		var resp struct{ Literals *string }
-		err := c.Post(`{ literals(x: "a") }`, &resp)
-		// The variable true, a *bool, hides the literal that the generated code writes for
-		// the arguments false and on, so unmarshaling them fails before the directive runs.
-		require.EqualError(t, err, `[{"message":"*bool is not a bool","path":["literals","x"]}]`)
-		require.Empty(t, calls)
+		require.NoError(t, c.Post(`{ literals(x: "a") }`, &resp))
+		require.Equal(t, []string{
+			"obj=map[x:a] true=false false=true on=true",
+		}, calls)
 	})
 
 	t.Run("input object", func(t *testing.T) {
 		calls = nil
 		var resp struct{ Probed *string }
 		require.NoError(t, c.Post(`{ probed(input: {v: "b"}) }`, &resp))
-		// The variable asMap hides the fields of the input, so the directive receives the
-		// value of its argument asMap as the object.
 		require.Equal(t, []string{
-			"obj=&m asMap=m it=i",
+			"obj=map[v:b] asMap=m it=i",
 		}, calls)
 	})
 }
@@ -126,7 +128,8 @@ func deref[T any](p *T) string {
 	return fmt.Sprint(*p)
 }
 
-// show formats the object that a directive receives, following a pointer to its value.
+// show formats the object that a directive receives, following a pointer to its value, so
+// that a directive that receives an argument in place of the object shows its value.
 func show(obj any) string {
 	if v := reflect.ValueOf(obj); v.Kind() == reflect.Pointer && !v.IsNil() {
 		return "&" + fmt.Sprint(v.Elem().Interface())

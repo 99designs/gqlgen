@@ -32,7 +32,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
-	Probe func(ctx context.Context, obj any, next graphql.Resolver, rawArgs *string, asMap *string, it *string, true *bool, false *bool, fooBar *string, on *bool, list []*string) (res any, err error)
+	Probe func(ctx context.Context, obj any, next graphql.Resolver, objArg *string, rawArgs *string, asMap *string, it *string, ctxArg *string, errArg *string, ec *string, nextArg *string, resArg *string, directive0 *string, errors *string, any *string, nil *string, true *bool, false *bool, fooBar *string, fooBarArg *string, on *bool, list []*string) (res any, err error)
 }
 
 type ComplexityRoot struct {
@@ -309,70 +309,158 @@ func (ec *executionContext) childFields___Type(ctx context.Context, field graphq
 func (ec *executionContext) dir_probe_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "rawArgs",
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "obj",
 		func(ctx context.Context, v any) (*string, error) {
 			return ec.unmarshalOString2ᚖstring(ctx, v)
 		})
 	if err != nil {
 		return nil, err
 	}
-	args["rawArgs"] = arg0
-	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "asMap",
+	args["obj"] = arg0
+	arg1, err := graphql.ProcessArgField(ctx, rawArgs, "rawArgs",
 		func(ctx context.Context, v any) (*string, error) {
 			return ec.unmarshalOString2ᚖstring(ctx, v)
 		})
 	if err != nil {
 		return nil, err
 	}
-	args["asMap"] = arg1
-	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "it",
+	args["rawArgs"] = arg1
+	arg2, err := graphql.ProcessArgField(ctx, rawArgs, "asMap",
 		func(ctx context.Context, v any) (*string, error) {
 			return ec.unmarshalOString2ᚖstring(ctx, v)
 		})
 	if err != nil {
 		return nil, err
 	}
-	args["it"] = arg2
-	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "true",
+	args["asMap"] = arg2
+	arg3, err := graphql.ProcessArgField(ctx, rawArgs, "it",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["it"] = arg3
+	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "ctx",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["ctx"] = arg4
+	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "err",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["err"] = arg5
+	arg6, err := graphql.ProcessArgField(ctx, rawArgs, "ec",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["ec"] = arg6
+	arg7, err := graphql.ProcessArgField(ctx, rawArgs, "next",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["next"] = arg7
+	arg8, err := graphql.ProcessArgField(ctx, rawArgs, "res",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["res"] = arg8
+	arg9, err := graphql.ProcessArgField(ctx, rawArgs, "directive0",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["directive0"] = arg9
+	arg10, err := graphql.ProcessArgField(ctx, rawArgs, "errors",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["errors"] = arg10
+	arg11, err := graphql.ProcessArgField(ctx, rawArgs, "any",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["any"] = arg11
+	arg12, err := graphql.ProcessArgField(ctx, rawArgs, "nil",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["nil"] = arg12
+	arg13, err := graphql.ProcessArgField(ctx, rawArgs, "true",
 		func(ctx context.Context, v any) (*bool, error) {
 			return ec.unmarshalOBoolean2ᚖbool(ctx, v)
 		})
 	if err != nil {
 		return nil, err
 	}
-	args["true"] = arg3
-	arg4, err := graphql.ProcessArgField(ctx, rawArgs, "false",
+	args["true"] = arg13
+	arg14, err := graphql.ProcessArgField(ctx, rawArgs, "false",
 		func(ctx context.Context, v any) (*bool, error) {
 			return ec.unmarshalOBoolean2ᚖbool(ctx, v)
 		})
 	if err != nil {
 		return nil, err
 	}
-	args["false"] = arg4
-	arg5, err := graphql.ProcessArgField(ctx, rawArgs, "foo_bar",
+	args["false"] = arg14
+	arg15, err := graphql.ProcessArgField(ctx, rawArgs, "foo_bar",
 		func(ctx context.Context, v any) (*string, error) {
 			return ec.unmarshalOString2ᚖstring(ctx, v)
 		})
 	if err != nil {
 		return nil, err
 	}
-	args["foo_bar"] = arg5
-	arg6, err := graphql.ProcessArgField(ctx, rawArgs, "on",
+	args["foo_bar"] = arg15
+	arg16, err := graphql.ProcessArgField(ctx, rawArgs, "fooBar",
+		func(ctx context.Context, v any) (*string, error) {
+			return ec.unmarshalOString2ᚖstring(ctx, v)
+		})
+	if err != nil {
+		return nil, err
+	}
+	args["fooBar"] = arg16
+	arg17, err := graphql.ProcessArgField(ctx, rawArgs, "on",
 		func(ctx context.Context, v any) (*bool, error) {
 			return ec.unmarshalOBoolean2ᚖbool(ctx, v)
 		})
 	if err != nil {
 		return nil, err
 	}
-	args["on"] = arg6
-	arg7, err := graphql.ProcessArgField(ctx, rawArgs, "list",
+	args["on"] = arg17
+	arg18, err := graphql.ProcessArgField(ctx, rawArgs, "list",
 		func(ctx context.Context, v any) ([]*string, error) {
 			return ec.unmarshalOString2ᚕᚖstring(ctx, v)
 		})
 	if err != nil {
 		return nil, err
 	}
-	args["list"] = arg7
+	args["list"] = arg18
 	return args, nil
 }
 
@@ -422,17 +510,17 @@ func (ec *executionContext) field_Query_literals_argsX(
 	}
 
 	directive1 := func(ctx context.Context) (any, error) {
-		true, err := ec.unmarshalOBoolean2ᚖbool(ctx, false)
+		arg13, err := ec.unmarshalOBoolean2ᚖbool(ctx, false)
 		if err != nil {
 			var zeroVal *string
 			return zeroVal, err
 		}
-		false, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+		arg14, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
 		if err != nil {
 			var zeroVal *string
 			return zeroVal, err
 		}
-		on, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
+		arg17, err := ec.unmarshalOBoolean2ᚖbool(ctx, true)
 		if err != nil {
 			var zeroVal *string
 			return zeroVal, err
@@ -441,7 +529,7 @@ func (ec *executionContext) field_Query_literals_argsX(
 			var zeroVal *string
 			return zeroVal, errors.New("directive probe is not implemented")
 		}
-		return ec.Directives.Probe(ctx, rawArgs, directive0, nil, nil, nil, true, false, nil, on, nil)
+		return ec.Directives.Probe(ctx, rawArgs, directive0, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, arg13, arg14, nil, nil, arg17, nil)
 	}
 
 	tmp, err := directive1(ctx)
@@ -500,12 +588,57 @@ func (ec *executionContext) field_Query_probed_argsX(
 	}
 
 	directive1 := func(ctx context.Context) (any, error) {
-		rawArgs, err := ec.unmarshalOString2ᚖstring(ctx, "r")
+		arg0, err := ec.unmarshalOString2ᚖstring(ctx, "o")
 		if err != nil {
 			var zeroVal *string
 			return zeroVal, err
 		}
-		fooBar, err := ec.unmarshalOString2ᚖstring(ctx, "fb")
+		arg1, err := ec.unmarshalOString2ᚖstring(ctx, "r")
+		if err != nil {
+			var zeroVal *string
+			return zeroVal, err
+		}
+		arg4, err := ec.unmarshalOString2ᚖstring(ctx, "c")
+		if err != nil {
+			var zeroVal *string
+			return zeroVal, err
+		}
+		arg5, err := ec.unmarshalOString2ᚖstring(ctx, "e")
+		if err != nil {
+			var zeroVal *string
+			return zeroVal, err
+		}
+		arg6, err := ec.unmarshalOString2ᚖstring(ctx, "ec")
+		if err != nil {
+			var zeroVal *string
+			return zeroVal, err
+		}
+		arg7, err := ec.unmarshalOString2ᚖstring(ctx, "nx")
+		if err != nil {
+			var zeroVal *string
+			return zeroVal, err
+		}
+		arg8, err := ec.unmarshalOString2ᚖstring(ctx, "rs")
+		if err != nil {
+			var zeroVal *string
+			return zeroVal, err
+		}
+		arg9, err := ec.unmarshalOString2ᚖstring(ctx, "d0")
+		if err != nil {
+			var zeroVal *string
+			return zeroVal, err
+		}
+		arg10, err := ec.unmarshalOString2ᚖstring(ctx, "er")
+		if err != nil {
+			var zeroVal *string
+			return zeroVal, err
+		}
+		arg15, err := ec.unmarshalOString2ᚖstring(ctx, "fb")
+		if err != nil {
+			var zeroVal *string
+			return zeroVal, err
+		}
+		arg16, err := ec.unmarshalOString2ᚖstring(ctx, "fB")
 		if err != nil {
 			var zeroVal *string
 			return zeroVal, err
@@ -514,7 +647,7 @@ func (ec *executionContext) field_Query_probed_argsX(
 			var zeroVal *string
 			return zeroVal, errors.New("directive probe is not implemented")
 		}
-		return ec.Directives.Probe(ctx, rawArgs, directive0, rawArgs, nil, nil, nil, nil, fooBar, nil, nil)
+		return ec.Directives.Probe(ctx, rawArgs, directive0, arg0, arg1, nil, nil, arg4, arg5, arg6, arg7, arg8, arg9, arg10, nil, nil, nil, nil, arg15, arg16, nil, nil)
 	}
 
 	tmp, err := directive1(ctx)
@@ -622,7 +755,17 @@ func (ec *executionContext) _Query_root(ctx context.Context, field graphql.Colle
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				list, err := ec.unmarshalOString2ᚕᚖstring(ctx, []any{"l"})
+				arg11, err := ec.unmarshalOString2ᚖstring(ctx, "a")
+				if err != nil {
+					var zeroVal *string
+					return zeroVal, err
+				}
+				arg12, err := ec.unmarshalOString2ᚖstring(ctx, "n")
+				if err != nil {
+					var zeroVal *string
+					return zeroVal, err
+				}
+				arg18, err := ec.unmarshalOString2ᚕᚖstring(ctx, []any{"l"})
 				if err != nil {
 					var zeroVal *string
 					return zeroVal, err
@@ -631,7 +774,7 @@ func (ec *executionContext) _Query_root(ctx context.Context, field graphql.Colle
 					var zeroVal *string
 					return zeroVal, errors.New("directive probe is not implemented")
 				}
-				return ec.Directives.Probe(ctx, nil, directive0, nil, nil, nil, nil, nil, nil, nil, list)
+				return ec.Directives.Probe(ctx, nil, directive0, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, arg11, arg12, nil, nil, nil, nil, nil, arg18)
 			}
 
 			next = directive1
@@ -1917,18 +2060,18 @@ func (ec *executionContext) unmarshalInputProbeInput(ctx context.Context, obj an
 	directive0 := func(ctx context.Context) (any, error) { return it, nil }
 
 	directive1 := func(ctx context.Context) (any, error) {
-		asMap, err := ec.unmarshalOString2ᚖstring(ctx, "m")
+		arg2, err := ec.unmarshalOString2ᚖstring(ctx, "m")
 		if err != nil {
 			return it, graphql.ErrorOnPath(ctx, err)
 		}
-		it, err := ec.unmarshalOString2ᚖstring(ctx, "i")
+		arg3, err := ec.unmarshalOString2ᚖstring(ctx, "i")
 		if err != nil {
 			return it, graphql.ErrorOnPath(ctx, err)
 		}
 		if ec.Directives.Probe == nil {
 			return it, graphql.ErrorOnPath(ctx, errors.New("directive probe is not implemented"))
 		}
-		return ec.Directives.Probe(ctx, asMap, directive0, nil, asMap, it, nil, nil, nil, nil, nil)
+		return ec.Directives.Probe(ctx, asMap, directive0, nil, nil, arg2, arg3, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil, nil)
 	}
 
 	tmp, err := directive1(ctx)

@@ -1,21 +1,51 @@
 # @probe records the object it receives and its arguments. Its arguments have the names of
-# what the generated code refers to beside them: the object it passes to a directive (rawArgs,
-# asMap and it) and the values it writes for literals (true and false). on comes after true,
-# whose value is written with it.
+# what the generated code refers to beside them: the object it passes to a directive (obj,
+# rawArgs, asMap and it), the context, the error, the receiver, the next resolver and the
+# result (ctx, err, ec, next, directive0 and res), the packages and types it writes (errors
+# and any) and the values it writes for absent arguments and literals (nil, true and false).
+# foo_bar and fooBar share a Go name. on comes after true and list after any, whose values
+# are written with those.
 directive @probe(
+  obj: String
   rawArgs: String
   asMap: String
   it: String
+  ctx: String
+  err: String
+  ec: String
+  next: String
+  res: String
+  directive0: String
+  errors: String
+  any: String
+  nil: String
   true: Boolean
   false: Boolean
   foo_bar: String
+  fooBar: String
   on: Boolean
   list: [String]
 ) on FIELD_DEFINITION | ARGUMENT_DEFINITION | INPUT_OBJECT
 
 type Query {
-  root: String @probe(list: ["l"])
-  probed(x: String @probe(rawArgs: "r", foo_bar: "fb"), input: ProbeInput): String
+  root: String @probe(nil: "n", any: "a", list: ["l"])
+  probed(
+    x: String
+      @probe(
+        obj: "o"
+        rawArgs: "r"
+        ctx: "c"
+        err: "e"
+        ec: "ec"
+        next: "nx"
+        res: "rs"
+        directive0: "d0"
+        errors: "er"
+        foo_bar: "fb"
+        fooBar: "fB"
+      )
+    input: ProbeInput
+  ): String
   literals(x: String @probe(true: false, false: true, on: true)): String
 }
 

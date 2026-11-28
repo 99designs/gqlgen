@@ -797,7 +797,7 @@ func _Mutation_createUser(ctx context.Context, ec *executionContext, field graph
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				message, err := unmarshalOString2ᚖstring(ctx, ec, "Creating a user")
+				arg0, err := unmarshalOString2ᚖstring(ctx, ec, "Creating a user")
 				if err != nil {
 					var zeroVal *User
 					return zeroVal, err
@@ -806,7 +806,7 @@ func _Mutation_createUser(ctx context.Context, ec *executionContext, field graph
 					var zeroVal *User
 					return zeroVal, errors.New("directive log is not implemented")
 				}
-				return ec.Directives.Log(ctx, nil, directive0, message)
+				return ec.Directives.Log(ctx, nil, directive0, arg0)
 			}
 
 			next = directive1
@@ -859,7 +859,7 @@ func _Mutation_deleteUser(ctx context.Context, ec *executionContext, field graph
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				message, err := unmarshalOString2ᚖstring(ctx, ec, "Deleting a user")
+				arg0, err := unmarshalOString2ᚖstring(ctx, ec, "Deleting a user")
 				if err != nil {
 					var zeroVal *MutationResponse
 					return zeroVal, err
@@ -868,7 +868,7 @@ func _Mutation_deleteUser(ctx context.Context, ec *executionContext, field graph
 					var zeroVal *MutationResponse
 					return zeroVal, errors.New("directive log is not implemented")
 				}
-				return ec.Directives.Log(ctx, nil, directive0, message)
+				return ec.Directives.Log(ctx, nil, directive0, arg0)
 			}
 
 			next = directive1
@@ -967,7 +967,7 @@ func _Query_getUser(ctx context.Context, ec *executionContext, field graphql.Col
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				message, err := unmarshalOString2ᚖstring(ctx, ec, "Fetching a user")
+				arg0, err := unmarshalOString2ᚖstring(ctx, ec, "Fetching a user")
 				if err != nil {
 					var zeroVal *User
 					return zeroVal, err
@@ -976,7 +976,7 @@ func _Query_getUser(ctx context.Context, ec *executionContext, field graphql.Col
 					var zeroVal *User
 					return zeroVal, errors.New("directive log is not implemented")
 				}
-				return ec.Directives.Log(ctx, nil, directive0, message)
+				return ec.Directives.Log(ctx, nil, directive0, arg0)
 			}
 
 			next = directive1
@@ -1029,7 +1029,7 @@ func _Query_listUsers(ctx context.Context, ec *executionContext, field graphql.C
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				message, err := unmarshalOString2ᚖstring(ctx, ec, "Listing users")
+				arg0, err := unmarshalOString2ᚖstring(ctx, ec, "Listing users")
 				if err != nil {
 					var zeroVal []*User
 					return zeroVal, err
@@ -1038,7 +1038,7 @@ func _Query_listUsers(ctx context.Context, ec *executionContext, field graphql.C
 					var zeroVal []*User
 					return zeroVal, errors.New("directive log is not implemented")
 				}
-				return ec.Directives.Log(ctx, nil, directive0, message)
+				return ec.Directives.Log(ctx, nil, directive0, arg0)
 			}
 
 			next = directive1
@@ -1091,7 +1091,7 @@ func _Query_getEntity(ctx context.Context, ec *executionContext, field graphql.C
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				message, err := unmarshalOString2ᚖstring(ctx, ec, "Fetching an entity")
+				arg0, err := unmarshalOString2ᚖstring(ctx, ec, "Fetching an entity")
 				if err != nil {
 					var zeroVal Entity
 					return zeroVal, err
@@ -1100,7 +1100,7 @@ func _Query_getEntity(ctx context.Context, ec *executionContext, field graphql.C
 					var zeroVal Entity
 					return zeroVal, errors.New("directive log is not implemented")
 				}
-				return ec.Directives.Log(ctx, nil, directive0, message)
+				return ec.Directives.Log(ctx, nil, directive0, arg0)
 			}
 
 			next = directive1
@@ -1228,7 +1228,7 @@ func _Subscription_userCreated(ctx context.Context, ec *executionContext, field 
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				message, err := unmarshalOString2ᚖstring(ctx, ec, "User created subscription")
+				arg0, err := unmarshalOString2ᚖstring(ctx, ec, "User created subscription")
 				if err != nil {
 					var zeroVal *User
 					return zeroVal, err
@@ -1237,7 +1237,7 @@ func _Subscription_userCreated(ctx context.Context, ec *executionContext, field 
 					var zeroVal *User
 					return zeroVal, errors.New("directive log is not implemented")
 				}
-				return ec.Directives.Log(ctx, nil, directive0, message)
+				return ec.Directives.Log(ctx, nil, directive0, arg0)
 			}
 
 			next = directive1

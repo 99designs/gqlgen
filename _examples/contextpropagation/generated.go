@@ -446,7 +446,7 @@ func (ec *executionContext) _Query_testTodo(ctx context.Context, field graphql.C
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				value, err := ec.unmarshalNString2string(ctx, "Some value")
+				arg0, err := ec.unmarshalNString2string(ctx, "Some value")
 				if err != nil {
 					var zeroVal *Todo
 					return zeroVal, err
@@ -455,7 +455,7 @@ func (ec *executionContext) _Query_testTodo(ctx context.Context, field graphql.C
 					var zeroVal *Todo
 					return zeroVal, errors.New("directive withContext is not implemented")
 				}
-				return ec.Directives.WithContext(ctx, nil, directive0, value)
+				return ec.Directives.WithContext(ctx, nil, directive0, arg0)
 			}
 
 			next = directive1

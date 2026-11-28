@@ -161,17 +161,17 @@ func (ec *executionContext) _ObjectDirectives_text(ctx context.Context, field gr
 			directive0 := next
 
 			directive1 := func(ctx context.Context) (any, error) {
-				min, err := ec.unmarshalNInt2int(ctx, 0)
+				arg0, err := ec.unmarshalNInt2int(ctx, 0)
 				if err != nil {
 					var zeroVal string
 					return zeroVal, err
 				}
-				max, err := ec.unmarshalOInt2ᚖint(ctx, 7)
+				arg1, err := ec.unmarshalOInt2ᚖint(ctx, 7)
 				if err != nil {
 					var zeroVal string
 					return zeroVal, err
 				}
-				message, err := ec.unmarshalOString2ᚖstring(ctx, "not valid")
+				arg2, err := ec.unmarshalOString2ᚖstring(ctx, "not valid")
 				if err != nil {
 					var zeroVal string
 					return zeroVal, err
@@ -180,7 +180,7 @@ func (ec *executionContext) _ObjectDirectives_text(ctx context.Context, field gr
 					var zeroVal string
 					return zeroVal, errors.New("directive length is not implemented")
 				}
-				return ec.Directives.Length(ctx, obj, directive0, min, max, message)
+				return ec.Directives.Length(ctx, obj, directive0, arg0, arg1, arg2)
 			}
 
 			next = directive1
@@ -321,12 +321,12 @@ func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, o
 			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalNString2string(ctx, v) }
 
 			directive1 := func(ctx context.Context) (any, error) {
-				min, err := ec.unmarshalNInt2int(ctx, 1)
+				arg0, err := ec.unmarshalNInt2int(ctx, 1)
 				if err != nil {
 					var zeroVal string
 					return zeroVal, err
 				}
-				message, err := ec.unmarshalOString2ᚖstring(ctx, "not valid")
+				arg2, err := ec.unmarshalOString2ᚖstring(ctx, "not valid")
 				if err != nil {
 					var zeroVal string
 					return zeroVal, err
@@ -335,7 +335,7 @@ func (ec *executionContext) unmarshalInputInnerDirectives(ctx context.Context, o
 					var zeroVal string
 					return zeroVal, errors.New("directive length is not implemented")
 				}
-				return ec.Directives.Length(ctx, obj, directive0, min, nil, message)
+				return ec.Directives.Length(ctx, obj, directive0, arg0, nil, arg2)
 			}
 
 			tmp, err := directive1(ctx)
@@ -388,17 +388,17 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			directive0 := func(ctx context.Context) (any, error) { return ec.unmarshalNString2string(ctx, v) }
 
 			directive1 := func(ctx context.Context) (any, error) {
-				min, err := ec.unmarshalNInt2int(ctx, 0)
+				arg0, err := ec.unmarshalNInt2int(ctx, 0)
 				if err != nil {
 					var zeroVal string
 					return zeroVal, err
 				}
-				max, err := ec.unmarshalOInt2ᚖint(ctx, 7)
+				arg1, err := ec.unmarshalOInt2ᚖint(ctx, 7)
 				if err != nil {
 					var zeroVal string
 					return zeroVal, err
 				}
-				message, err := ec.unmarshalOString2ᚖstring(ctx, "not valid")
+				arg2, err := ec.unmarshalOString2ᚖstring(ctx, "not valid")
 				if err != nil {
 					var zeroVal string
 					return zeroVal, err
@@ -407,7 +407,7 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 					var zeroVal string
 					return zeroVal, errors.New("directive length is not implemented")
 				}
-				return ec.Directives.Length(ctx, obj, directive0, min, max, message)
+				return ec.Directives.Length(ctx, obj, directive0, arg0, arg1, arg2)
 			}
 
 			tmp, err := directive1(ctx)
@@ -465,12 +465,12 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 			}
 
 			directive1 := func(ctx context.Context) (any, error) {
-				min, err := ec.unmarshalNInt2int(ctx, 0)
+				arg0, err := ec.unmarshalNInt2int(ctx, 0)
 				if err != nil {
 					var zeroVal *ThirdParty
 					return zeroVal, err
 				}
-				max, err := ec.unmarshalOInt2ᚖint(ctx, 7)
+				arg1, err := ec.unmarshalOInt2ᚖint(ctx, 7)
 				if err != nil {
 					var zeroVal *ThirdParty
 					return zeroVal, err
@@ -479,7 +479,7 @@ func (ec *executionContext) unmarshalInputInputDirectives(ctx context.Context, o
 					var zeroVal *ThirdParty
 					return zeroVal, errors.New("directive length is not implemented")
 				}
-				return ec.Directives.Length(ctx, obj, directive0, min, max, nil)
+				return ec.Directives.Length(ctx, obj, directive0, arg0, arg1, nil)
 			}
 
 			tmp, err := directive1(ctx)
@@ -561,14 +561,14 @@ func (ec *executionContext) unmarshalInputInputDirectivesWithArgs(ctx context.Co
 	directive0 := func(ctx context.Context) (any, error) { return it, nil }
 
 	directive1 := func(ctx context.Context) (any, error) {
-		inputNamespace, err := ec.unmarshalNString2string(ctx, "InputDirectivesWithArgs")
+		arg0, err := ec.unmarshalNString2string(ctx, "InputDirectivesWithArgs")
 		if err != nil {
 			return it, graphql.ErrorOnPath(ctx, err)
 		}
 		if ec.Directives.Directive3WithArg == nil {
 			return it, graphql.ErrorOnPath(ctx, errors.New("directive directive3WithArg is not implemented"))
 		}
-		return ec.Directives.Directive3WithArg(ctx, asMap, directive0, inputNamespace)
+		return ec.Directives.Directive3WithArg(ctx, asMap, directive0, arg0)
 	}
 
 	tmp, err := directive1(ctx)

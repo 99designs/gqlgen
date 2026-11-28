@@ -255,6 +255,11 @@ type NestedInput struct {
 	Deeper  *NestedInput
 }
 
+// DefaultsInput is the input of the defaults schema, whose field has a Map default.
+type DefaultsInput struct {
+	Data map[string]any
+}
+
 type ResolvedInput struct {
 	Label string
 	Shout string

@@ -213,6 +213,29 @@ func (Query) EchoMap(ctx context.Context, input map[string]any) (map[string]any,
 	return res, nil
 }
 
+// EchoDefaults resolves Query.echo of the defaults schema: it answers with the inputs, whose
+// Map fields take their defaults. The recording keeps them, as the arguments of the field.
+func EchoDefaults(
+	_ context.Context,
+	input models.DefaultsInput,
+	asMap map[string]any,
+) (string, error) {
+	return "input=" + Describe(input) + " asMap=" + Describe(asMap), nil
+}
+
+// Keep implements @keep of the defaults schema: it records data and keeps it, so that the
+// recording changes it once the request is over.
+func Keep(ctx context.Context, obj any, next graphql.Resolver, data map[string]any) (any, error) {
+	RecordingOf(ctx).Add("directive keep data=%s", Describe(data))
+	RecordingOf(ctx).Keep(data)
+	return next(ctx)
+}
+
+// Pass implements @pass of the defaults schema: it passes the input on as it is.
+func Pass(ctx context.Context, _ any, next graphql.Resolver) (any, error) {
+	return next(ctx)
+}
+
 func describe(v any) string {
 	switch v := v.(type) {
 	case *string:

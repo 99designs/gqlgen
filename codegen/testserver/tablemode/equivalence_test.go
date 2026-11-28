@@ -34,6 +34,8 @@ import (
 	batchvaluestable "github.com/99designs/gqlgen/codegen/testserver/tablemode/batchvalues/table"
 	caseargsfunctions "github.com/99designs/gqlgen/codegen/testserver/tablemode/caseargs/functions"
 	caseargstable "github.com/99designs/gqlgen/codegen/testserver/tablemode/caseargs/table"
+	defaultsfunctions "github.com/99designs/gqlgen/codegen/testserver/tablemode/defaults/functions"
+	defaultstable "github.com/99designs/gqlgen/codegen/testserver/tablemode/defaults/table"
 	federationfunctions "github.com/99designs/gqlgen/codegen/testserver/tablemode/federation/functions"
 	federationtable "github.com/99designs/gqlgen/codegen/testserver/tablemode/federation/table"
 	"github.com/99designs/gqlgen/codegen/testserver/tablemode/functions"
@@ -545,6 +547,22 @@ func TestTableModeMatchesFunctionsMode(t *testing.T) {
 				require.Contains(t, want, s)
 			}
 		})
+	}
+}
+
+// TestDefaultsPerRequest sends a request twice whose input fields and directive arguments
+// take Map defaults, which the unmarshaler of Map passes on as they are. run changes the
+// values a request received once it is over, so a mode that handed every request the
+// default of the schema itself would show the change in the second request.
+func TestDefaultsPerRequest(t *testing.T) {
+	functionsSchema := defaultsfunctions.NewSchema()
+	tableSchema := defaultstable.NewSchema()
+	req := request{query: `{ echo(input: {}, asMap: {}) }`}
+	for i := range 2 {
+		want := run(t, functionsSchema, req)
+		got := run(t, tableSchema, req)
+		require.Equal(t, want, got, "request %d", i)
+		require.NotContains(t, want, "_mutated", "request %d", i)
 	}
 }
 

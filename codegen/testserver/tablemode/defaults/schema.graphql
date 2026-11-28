@@ -1,0 +1,27 @@
+# The input fields and the directive argument of this schema have Map defaults, which the
+# unmarshaler of Map passes on as they are: DefaultsInput is bound to a struct, and
+# MapDefaultsInput to a map with an INPUT_OBJECT directive, which receives the raw object
+# with the defaults filled in. TestDefaultsPerRequest changes the values that a request
+# received and requires the next request to receive the defaults unchanged. It is generated
+# once per exec mode, as the schema of the tablemode test server.
+directive @goModel(
+  model: String
+  models: [String!]
+) on OBJECT | INPUT_OBJECT | SCALAR | ENUM | INTERFACE | UNION
+
+directive @keep(data: Map! = { a: 1 }) on FIELD_DEFINITION
+directive @pass on INPUT_OBJECT
+
+scalar Map
+
+type Query {
+  echo(input: DefaultsInput!, asMap: MapDefaultsInput!): String! @keep
+}
+
+input DefaultsInput {
+  data: Map = { a: 1 }
+}
+
+input MapDefaultsInput @goModel(model: "map[string]any") @pass {
+  data: Map = { a: 1 }
+}

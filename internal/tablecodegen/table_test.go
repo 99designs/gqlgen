@@ -720,6 +720,40 @@ func TestTableChecksObject(t *testing.T) {
 	require.True(t, d.tableChecksObject("Profile", profile))
 }
 
+// A reference to an input is unmarshaled by the table of the input where its Go type is
+// that of the input or a pointer to it. A reference bound to another Go type keeps the
+// function, which fails to compile as in the functions mode, where the table would drop
+// the value.
+func TestTableUnmarshalInputGoType(t *testing.T) {
+	pkg := types.NewPackage("github.com/x/app/model", "model")
+	filter := types.NewNamed(
+		types.NewTypeName(0, pkg, "Filter", nil),
+		types.NewStruct(nil, nil),
+		nil,
+	)
+	other := types.NewNamed(types.NewTypeName(0, pkg, "Other", nil), types.NewStruct(nil, nil), nil)
+	def := &ast.Definition{Name: "Filter", Kind: ast.InputObject}
+	kind := func(goType types.Type) tableKind {
+		ref := &config.TypeReference{
+			Definition: def,
+			GQL:        ast.NamedType("Filter", nil),
+			GO:         goType,
+			Target:     filter,
+		}
+		d := newData(&codegen.Data{
+			Config:          &config.Config{},
+			Inputs:          codegen.Objects{{Definition: def, Type: filter}},
+			ReferencedTypes: map[string]*config.TypeReference{ref.GQL.String(): ref},
+		})
+		return d.tableUnmarshalKind(ref)
+	}
+
+	require.Equal(t, tableKindErased, kind(filter))
+	require.Equal(t, tableKindErased, kind(types.NewPointer(filter)))
+	require.Equal(t, tableKindFunc, kind(other))
+	require.Equal(t, tableKindFunc, kind(types.NewPointer(other)))
+}
+
 // The runtime derives the Out of the pointers to an object and of the lists of them,
 // unless a list that the tables declare refers to the Out of its elements.
 func TestTableDerived(t *testing.T) {

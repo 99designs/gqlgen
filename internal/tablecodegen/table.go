@@ -1057,7 +1057,7 @@ func (d *Data) tableUnmarshalBase(t *config.TypeReference) tableKind {
 	if !d.tableCombinable(t) || (t.IsContext && t.Unmarshaler == nil) {
 		return tableKindFunc
 	}
-	isPtr := t.IsPtr()
+	ptr, isPtr := t.GO.(*types.Pointer)
 	switch {
 	case t.IsSlice():
 		return tableKindErased
@@ -1081,7 +1081,13 @@ func (d *Data) tableUnmarshalBase(t *config.TypeReference) tableKind {
 			d.tableInfo().unmarshalsItself[t.Definition.Name] {
 			return tableKindFunc
 		}
-		if isPtr || !t.IsNilable() {
+		// The table of the input makes a value of its Go type. A reference bound to
+		// another Go type keeps the function, which fails to compile as in the functions
+		// mode, where the table would drop the value.
+		if !t.IsNilable() && types.Identical(t.GO, t.Target) {
+			return tableKindErased
+		}
+		if isPtr && types.Identical(ptr.Elem(), t.Target) {
 			return tableKindErased
 		}
 	}
